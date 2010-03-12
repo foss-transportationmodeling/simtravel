@@ -78,6 +78,7 @@ class TestBadOLSpecification(unittest.TestCase):
                           self.thresholds1)
         self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 
                           self.thresholds2)
+    def testdistributions(self):
         self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 
                           self.thresholds, distribution=self.distribution1)
         self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 

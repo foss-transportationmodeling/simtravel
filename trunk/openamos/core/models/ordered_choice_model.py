@@ -1,9 +1,11 @@
+from scipy.stats import genlogistic, norm
+from numpy import array, zeros, random, all
+
 from openamos.core.models.abstract_choice_model import AbstractChoiceModel
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.ordered_choice_model_components import OLSpecification
-from openamos.core.errors import DataError, SpecificationError
-from scipy.stats import genlogistic, norm
-from numpy import array, zeros, random, all
+from openamos.core.errors import SpecificationError
+
 
 class OrderedModel(AbstractChoiceModel):
     def __init__(self, ol_specification, data):
@@ -14,8 +16,6 @@ class OrderedModel(AbstractChoiceModel):
 
         self.thresholds = ol_specification.thresholds
         self.distribution = ol_specification.distribution
-
-        
 
     def calc_observed_utilities(self):
         return self.data.calculate_equation(self.coefficients[0])
