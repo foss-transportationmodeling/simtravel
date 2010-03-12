@@ -1,0 +1,222 @@
+import re
+from numpy import ndarray
+from openamos.core.errors import SpecificationError, ChoicesError, VariablesError, CoefficientsError, SeedError
+from openamos.core.errors import ErrorSpecificationError
+
+
+
+class Specification(object):
+    def __init__(self, choices, coefficients, seed=1):
+        self.choices = choices
+        self.coefficients = coefficients
+        self.seed = seed
+        self.check()
+        self.convert_to_lowercase()
+        self.number_choices = self.num_choices()
+
+        
+    def check(self):
+        checkVal, checkText = self.check_text_only(self.choices)
+        if not checkVal:
+            raise ChoicesError, checkText
+
+        checkVal, checkText = self.check_each_dict(self.coefficients)
+        if not checkVal:
+            raise CoefficientsError, checkText
+
+        checkVal, checkText = self.check_specification_consistency(self.choices, 
+                                                                   self.coefficients)
+
+        if not checkVal:
+            raise SpecificationError, checkText
+
+        checkVal, checkText = self.check_num_only([self.seed])
+        if not checkVal:
+            raise SeedError, checkText
+
+    def convert_to_lowercase(self):
+        self.choices = [i.lower() for i in self.choices]
+
+        coefficients_new = []
+        for j in self.coefficients:
+            new_dict = {}
+            variables = j.keys()
+            for k in variables:
+                new_dict[k.lower()] = j[k]
+            coefficients_new.append(new_dict)
+        self.coefficients = coefficients_new
+
+
+    def check_each_dict(self, list_of_dicts):
+
+        if not isinstance(list_of_dicts, list):
+            return 0, 'not a valid list of dicts for coefficients'
+
+        for i in list_of_dicts:
+            if not isinstance(i, dict):
+                return 0, 'coefficients dictionary for one of the choices specified incorrectly'
+            
+            checkVal, checkText = self.check_text_only(i.keys())
+            if not checkVal:
+                return 0, checkText
+
+            checkVal, checkText = self.check_num_only(i.values())
+            if not checkVal:
+                return 0, checkText
+
+        return 1, ''
+
+    def check_text_only(self, text_list):
+        for i in text_list:
+            checkVal, checkText = self.check_firstchar(i)
+            if checkVal == 0:
+                return 0, checkText
+
+            if type(i) is str:
+                pass
+            else:
+                return 0, 'not a valid string'
+
+            if len(i) == 0:
+                return 0, 'length of the string is zero'
+
+        return 1, ''
+
+    def check_firstchar(self, name):
+        name = str(name)
+        match = re.match('[0-9]', name)
+        if match is not None:
+            return 0, 'not a valid string'
+        else:
+            return 1, ''
+
+
+    def check_num_only(self, num_list):
+        for i in num_list:
+            if type(i) is int or type(i) is float or type(i) is long:
+                pass
+            else:
+                return 0, 'not a valid number'
+        return 1, ''
+
+    def check_specification_consistency(self, choices, coefficients):
+        if len(choices) <> len(coefficients):
+            return 0, 'the number of choices and equation specification - coefficients are inconsistent'
+
+        return 1, ''
+            
+    def num_choices(self):
+        return len(self.choices)
+
+class ErrorSpecification(object):
+    def __init__(self, variance, distribution='normal'):
+        self.variance = variance
+
+        if not isinstance(self.variance, ndarray):
+            raise ErrorSpecificationError, """the error specification is invalid, the input - variance """\
+                """must be a square matrix"""
+
+        type_variance = self.variance.dtype
+        if type_variance not in [int, float]:
+            raise ErrorSpecificationError, """the error specification is invalid, the input - variance """\
+                """entries are not all numeric"""
+
+        if self.variance.shape[0] <> self.variance.shape[1]:
+            raise ErrorSpecificationError, """the error specification is invalid, the input-variance """\
+                """must be a squre matrix"""
+
+        if not isinstance(distribution, str):
+            raise ErrorSpecificationError, """the distribution input for the ErrorSpecification """\
+                """ by default it is specified as normal distribution"""
+        
+        self.distribution = distribution.lower()
+
+        self.num_err_components = self.variance.shape[0]
+
+
+
+import unittest
+from numpy import array
+
+class TestBadErrorSpecification(unittest.TestCase):
+    def setUp(self):
+        self.variance = array([[1.1]])
+        self.variance1 = [[1.1]]
+        self.variance2 = array([['1.1']])
+        self.variance3 = array([[1., 2., 3.],[1.1, 2.1, 3.1]])
+        self.variance4 = array([[]])
+
+        self.distribution = 1
+    def testvarianceinputs(self):
+        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance1)
+        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance2)
+        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance3)
+        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance4)
+        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance, self.distribution)
+        
+
+
+class TestErrorSpecification(unittest.TestCase):
+    def setUp(self):
+        self.variance = array([[1., 2., 3.],[1.1, 2.1, 3.1], [1.2, 2.2, 3.2]])
+        
+    def testerrorcomponents(self):
+        err_spec = ErrorSpecification(self.variance)
+        self.assertEqual(self.variance.shape[0], err_spec.num_err_components)
+
+class TestBadSpecification(unittest.TestCase):
+    def setUp(self):
+        self.choices = ['SOV', 'HOV']
+        self.choices1 = ['SOV', 1]
+        self.choices2 = ['werew', '2werwr']
+
+        self.coefficients = [{'Constant':2, 'Var1':2.11}, {'Constant':1.2}]
+        self.coefficients1 = [{'Constant':'2', 'Var1':2.11}, {'Constant':1.2}]
+        self.coefficients2 = [{'1Constant':2, 'Var1':2.11}, {'Constant':1.2}]
+        self.coefficients3 = [{1:2, 'Var1':2.11}, {'Constant':1.2}]
+        self.coefficients4 = [{'Constant':2, 'Var1':2.11}]
+        
+        self.seed = 1
+        self.seed1 = '1'
+
+    
+    def testchoices(self):
+        self.assertRaises(ChoicesError, Specification, self.choices1, self.coefficients)
+
+        
+    def testchoicesfirstchar(self):
+        self.assertRaises(ChoicesError, Specification, self.choices2, self.coefficients)
+        
+    def testvariables(self):
+        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients3)
+
+    def testvariablesfirstchar(self):
+        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients2)
+
+    def testcoefficients(self):
+        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients1)
+
+    def testchoicescoefficientslength(self):
+        self.assertRaises(SpecificationError, Specification, self.choices, self.coefficients4)
+
+    def testchoiceslength(self):
+        spec = Specification(self.choices, self.coefficients)
+        num_choices = spec.number_choices
+        self.assertEqual(len(self.choices), num_choices)
+
+    def testseed(self):
+        self.assertRaises(SeedError, Specification, self.choices, self.coefficients, self.seed1)
+
+    def testlowercase(self):
+        spec = Specification(self.choices, self.coefficients)
+        choices_lower = ['sov', 'hov']
+        self.assertEqual(choices_lower, spec.choices)
+        coefficients_lower = [{'constant':2, 'var1':2.11}, {'constant':1.2}]
+        self.assertEqual(coefficients_lower, spec.coefficients)
+           
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+
