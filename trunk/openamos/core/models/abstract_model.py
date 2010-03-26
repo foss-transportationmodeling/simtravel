@@ -12,8 +12,6 @@ class Model(object):
         if not isinstance(self.data, DataArray):
             raise DataError, 'data input is not a valid DataArray object'
 
-        if not isinstance(self.specification, Specification):
-            raise SpecificationError, 'specification input is not a Specification object'
 
         self.choices = self.specification.choices
         self.coefficients = self.specification.coefficients

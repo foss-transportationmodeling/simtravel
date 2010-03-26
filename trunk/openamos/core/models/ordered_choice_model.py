@@ -9,10 +9,11 @@ from openamos.core.errors import SpecificationError
 
 class OrderedModel(AbstractChoiceModel):
     def __init__(self, ol_specification, data):
-        AbstractChoiceModel.__init__(self, ol_specification, data)
-        
         if not isinstance(ol_specification, OLSpecification):
             raise SpecificationError, 'the specification is not a valid OLSpecification object'
+
+        AbstractChoiceModel.__init__(self, ol_specification, data)
+        
 
         self.thresholds = ol_specification.thresholds
         self.distribution = ol_specification.distribution
@@ -40,10 +41,11 @@ class OrderedModel(AbstractChoiceModel):
         return probabilities
 
     def calc_chosenalternative(self):
-        probabilities = self.calc_probabilities()
+        probabilities = DataArray(self.calc_probabilities(), self.specification.choices)
         prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
         return prob_model.selected_choice()
         
+
 
 import unittest
 from openamos.core.data_array import DataArray
@@ -95,9 +97,9 @@ class TestOrderedProbitModel(unittest.TestCase):
         self.assertEqual(True, prob_diff)
 
     def testselectionlogit(self):
-        choice_act = array([[3], [3], [1], [1]])
+        choice_act = array([['veh3'], ['veh3'], ['veh1'], ['veh1']])
         choice_model = self.model.calc_chosenalternative()
-        choice_diff = all(choice_act == choice_model.data)
+        choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
 
     def testprobabilitiesprobit(self):
@@ -113,9 +115,9 @@ class TestOrderedProbitModel(unittest.TestCase):
         self.assertEqual(True, prob_diff)
 
     def testselectionlogit(self):
-        choice_act = array([[3], [2], [3], [2]])
+        choice_act = array([['veh3'], ['veh2'], ['veh3'], ['veh2']])
         choice_model = self.model1.calc_chosenalternative()
-        choice_diff = all(choice_act == choice_model.data)
+        choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
         
 if __name__ == '__main__':

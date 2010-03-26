@@ -1,10 +1,12 @@
-from numpy import ndarray, asarray, random, ma, all, zeros, ones
+from numpy import ndarray, array, random, ma, all, zeros, ones
 from openamos.core.errors import ProbabilityError
 from openamos.core.data_array import DataArray
 
 class AbstractProbabilityModel(object):
     def __init__(self, probabilities, seed=1):
-        self.probabilities = ma.array(probabilities)
+        self.probabilities = ma.array(probabilities.data)
+        #print '\nPROBABILITIES', self.probabilities
+        self.choices = probabilities.varnames
         self.seed = seed
         random.seed(self.seed)
         self.check()
@@ -15,7 +17,7 @@ class AbstractProbabilityModel(object):
 
     def check_probabilities(self):
         if not isinstance(self.probabilities, ndarray):
-            raise ProbabilityError, 'probability input is not of type array'
+            raise ProbabilityError, 'probability input is not a valid array object'
 
     def check_sum(self):
         self.num_agents = self.probabilities.shape[0]
@@ -35,6 +37,8 @@ class AbstractProbabilityModel(object):
     def selected_choice(self):
         choice = zeros(self.num_agents)
         random_numbers = self.generate_random_numbers()
+
+        print random_numbers
 
         self.prob_cumsum = self.cumprob().filled(-1)
 
@@ -57,7 +61,14 @@ class AbstractProbabilityModel(object):
             choice[indicator_less_zero_cells] = i + 1
 
         choice.shape = (self.num_agents, 1)
-        return DataArray(choice, ['choice_indicator'])
+
+        alt_text = []
+        for i in choice:
+            alt_text.append(self.choices[int(i[0])-1])
+        alt_text = array(alt_text)
+        alt_text.shape = (self.num_agents, 1)
+
+        return alt_text
 
 import unittest
 from numpy import array, zeros, dtype, float32

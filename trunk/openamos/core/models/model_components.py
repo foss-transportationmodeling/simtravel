@@ -1,9 +1,8 @@
 import re
+import copy
 from numpy import ndarray
 from openamos.core.errors import SpecificationError, ChoicesError, VariablesError, CoefficientsError, SeedError
 from openamos.core.errors import ErrorSpecificationError
-
-
 
 class Specification(object):
     def __init__(self, choices, coefficients, seed=1):
@@ -104,65 +103,13 @@ class Specification(object):
             return 0, 'the number of choices and equation specification - coefficients are inconsistent'
 
         return 1, ''
-            
+
     def num_choices(self):
-        return len(self.choices)
-
-class ErrorSpecification(object):
-    def __init__(self, variance, distribution='normal'):
-        self.variance = variance
-
-        if not isinstance(self.variance, ndarray):
-            raise ErrorSpecificationError, """the error specification is invalid, the input - variance """\
-                """must be a square matrix"""
-
-        type_variance = self.variance.dtype
-        if type_variance not in [int, float]:
-            raise ErrorSpecificationError, """the error specification is invalid, the input - variance """\
-                """entries are not all numeric"""
-
-        if self.variance.shape[0] <> self.variance.shape[1]:
-            raise ErrorSpecificationError, """the error specification is invalid, the input-variance """\
-                """must be a squre matrix"""
-
-        if not isinstance(distribution, str):
-            raise ErrorSpecificationError, """the distribution input for the ErrorSpecification """\
-                """ by default it is specified as normal distribution"""
-        
-        self.distribution = distribution.lower()
-
-        self.num_err_components = self.variance.shape[0]
-
+        return len(self.choices)            
 
 
 import unittest
 from numpy import array
-
-class TestBadErrorSpecification(unittest.TestCase):
-    def setUp(self):
-        self.variance = array([[1.1]])
-        self.variance1 = [[1.1]]
-        self.variance2 = array([['1.1']])
-        self.variance3 = array([[1., 2., 3.],[1.1, 2.1, 3.1]])
-        self.variance4 = array([[]])
-
-        self.distribution = 1
-    def testvarianceinputs(self):
-        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance1)
-        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance2)
-        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance3)
-        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance4)
-        self.assertRaises(ErrorSpecificationError, ErrorSpecification, self.variance, self.distribution)
-        
-
-
-class TestErrorSpecification(unittest.TestCase):
-    def setUp(self):
-        self.variance = array([[1., 2., 3.],[1.1, 2.1, 3.1], [1.2, 2.2, 3.2]])
-        
-    def testerrorcomponents(self):
-        err_spec = ErrorSpecification(self.variance)
-        self.assertEqual(self.variance.shape[0], err_spec.num_err_components)
 
 class TestBadSpecification(unittest.TestCase):
     def setUp(self):

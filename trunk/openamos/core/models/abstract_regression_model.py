@@ -7,6 +7,9 @@ class AbstractRegressionModel(Model):
     def __init__(self, specification, data, error_specification):
         Model.__init__(self, specification, data)
         
+        if not isinstance(self.specification, Specification):
+            raise SpecificationError, 'specification input is not a Specification object'
+
         self.error_specification = error_specification
 
         if specification.number_choices > 1:
@@ -17,10 +20,6 @@ class AbstractRegressionModel(Model):
             raise ErrorSpecificationError, """invalid error specification"""\
                 """ it should be of type ErrorSpecification"""
         
-        if self.error_specification.num_err_components > 1:
-            raise ErrorSpecificationError, """invalid error specification for regression model only"""\
-                """ one error component needs to be specified"""
-
     def calc_expected_value(self):
         return self.calculate_expected_values()
 
@@ -36,7 +35,8 @@ class AbstractRegressionModel(Model):
 
 import unittest
 from openamos.core.data_array import DataArray
-from openamos.core.models.model_components import Specification, ErrorSpecification
+from openamos.core.models.model_components import Specification
+from openamos.core.models.error_specification import ErrorSpecification
 
 
 class TestBadSpecificationRegressionModel(unittest.TestCase):
@@ -52,8 +52,8 @@ class TestBadSpecificationRegressionModel(unittest.TestCase):
 
         self.specification = Specification(choices, coefficients)
 
-        self.errorspecification = ErrorSpecification(variance)
-        self.errorspecification1 = ErrorSpecification(variance1)
+        self.errorspecification = ErrorSpecification(variance, 'normal')
+        self.errorspecification1 = ErrorSpecification(variance1, 'normal')
 
     def testtwodependentvars(self):
         self.assertRaises(SpecificationError, AbstractRegressionModel, self.specification,
@@ -73,7 +73,7 @@ class TestAbstractRegressionModel(unittest.TestCase):
 
         self.data = DataArray(data, ['Constant', 'VaR1'])
         self.specification = Specification(choice, coefficients)
-        self.errorspecification = ErrorSpecification(variance)        
+        self.errorspecification = ErrorSpecification(variance, 'normal')        
 
 
     def testvalues(self):
