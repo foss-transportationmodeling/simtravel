@@ -16,7 +16,10 @@ class DataArray(object):
 
         elif len(self.data.shape) == 2:
             self.cols = self.data.shape[-1]
-
+            
+        else:
+            self.cols = 0
+            
         self.rows = self.data.shape[0] 
             
         if self.cols <> len(varnames):
@@ -71,6 +74,46 @@ class DataArray(object):
     
     def __repr__(self):
         return repr(self.data)
+
+    def column(self, columname):
+        if not isinstance(columname, str):
+            raise DataError, 'not a valid column name'
+        try:
+            colnum = self._colnames[columname.lower()]
+            return self.data[:,colnum]
+        except KeyError, e:
+            raise DataError, 'not a recognized column name'
+
+    def setcolumn(self, columname, values, rows=None):
+        colnum = self._colnames[columname.lower()]
+        try:
+            if rows is None:
+                self.data[:,colnum] = values
+            else:
+                self.data[rows,colnum] = values
+        except ValueError, e:
+            raise DataError, e
+        
+    def scaledowncolumn(self, columname, scale):
+        if type(scale) not in [int, float]:
+            raise DataError, 'the scale values is not a valid number'
+        colnum = self._colnames[columname.lower()]
+        self.data[:,colnum] = self.data[:,colnum]/scale
+
+    def addtocolumn(self, columname, values):
+        colnum = self._colnames[columname.lower()]
+        try:
+            self.data[:,colnum] = self.data[:,colnum] + values
+        except ValueError, e:
+            raise DataError, e
+
+    def expofcolumn(self, columname):
+        colnum = self._colnames[columname.lower()]
+        try:
+            self.data[:,colnum] = exp(self.data[:,colnum])
+        except ValueError, e:
+            raise DataError, e
+
 
 import unittest
 from numpy import all
