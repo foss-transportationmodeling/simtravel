@@ -1,5 +1,5 @@
 from scipy.stats import norm
-from numpy import random
+from numpy import random, all
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
 
@@ -7,16 +7,16 @@ class LinearRegressionModel(AbstractRegressionModel):
     def __init__(self, specification, data, error_specification):
         AbstractRegressionModel.__init__(self, specification, data, error_specification)
 
-        if self.error_specification.distribution <> 'normal':
-            raise ErrorSpecificationError, """incorrect error specification distribution """\
-                """for linear regression model; supported error specification is normal distribution"""
+        if not isinstance(error_specification, LinearRegErrorSpecification):
+            raise ErrorSpecification, """incorrect error specification; it should be """\
+                """LinearRegErrroSpecification object"""        
 
         self.seed = self.specification.seed
         random.seed(self.seed)
 
     def calc_errorcomponent(self, size, mean=0, sd=1):
         return norm.rvs(loc=mean, scale=sd, 
-                        size=(self.data.rows, 1))
+                        size=size)
 
     def calc_predvalue(self):
         expected_value = self.calc_expected_value()
@@ -29,7 +29,8 @@ class LinearRegressionModel(AbstractRegressionModel):
 import unittest
 from numpy import array
 from openamos.core.data_array import DataArray
-from openamos.core.models.model_components import Specification, ErrorSpecification
+from openamos.core.models.model_components import Specification
+from openamos.core.models.error_specification import LinearRegErrorSpecification
 
 class TestLinearRegressionModel(unittest.TestCase):
     def setUp(self):
@@ -40,14 +41,21 @@ class TestLinearRegressionModel(unittest.TestCase):
 
         self.data = DataArray(data, ['Constant', 'VaR1'])
         self.specification = Specification(choice, coefficients)
-        self.errorspecification = ErrorSpecification(variance)        
+        self.errorspecification = LinearRegErrorSpecification(variance)        
 
 
     def testvalues(self):
         model = LinearRegressionModel(self.specification, self.data, self.errorspecification)
-
         pred_value = model.calc_predvalue()
-        
+
+        random.seed(1)
+        expected_act = self.data.calculate_equation(self.specification.coefficients[0])
+        expected_act.shape = (4,1)
+        pred_act = norm.rvs(loc=expected_act, scale=1, size=(4,1))
+
+        pred_diff = all(pred_value.data == pred_act)
+        self.assertEqual(True, pred_diff)
+
                         
         
 if __name__ == '__main__':
