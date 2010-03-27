@@ -1,108 +1,50 @@
-import os, sys, pickle, re
+import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-from Long_Term_Choices import *
+from model_manager.long_term_models import *
+from model_manager.fixed_activity_models import *
 
+from file_menu.newproject import *
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-      
         self.setWindowTitle("OpenAMOS-1.0")
-        self.workingWindow = QLabel()
         self.showMaximized()
         self.setMinimumSize(800,600)
-        self.workingWindow.setAlignment(Qt.AlignCenter)
-
-        #self.setCentralWidget(self.workingWindow)
-        bkground = QPixmap("./images/background.png")
         self.setWindowIcon(QIcon('images/run.png'))
-        #self.workingWindow.setPixmap(bkground)
-        #self.workingWindow.setScaledContents(True)
 
-
-
-        
+        # Defining status bar        
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
-        
-        self.centralwidget = QWidget()
-        self.centralwidget.setObjectName("centralwidget")
-        self.setCentralWidget(self.centralwidget)
-        
-
-             
-        
-        allManagerDockWidget = QDockWidget("All Manager", self.centralwidget)
-        splitter1 = QSplitter(Qt.Vertical)
-
-        allManagerDockWidget.setWidget(splitter1)
-
-        
-
-        
-        allManagerDockWidget.setObjectName("AllManagerDockWidget")
-        allManagerDockWidget.setAllowedAreas(Qt.LeftDockWidgetArea)
-        self.addDockWidget(Qt.LeftDockWidgetArea, allManagerDockWidget)
-        
-        self.model_management = QTreeWidget()
-        self.model_management.setObjectName("model_management")
-        self.model_management.headerItem().setText(0, "Model Management")
-        self.model_management.setMinimumSize(50,50)
-        #self.model_management.setGeometry(0,0,(size.width())/2,size.height()/2)
-        #self.verticalLayout.addWidget(self.model_management)
-
-        self.data_management = QTreeWidget()
-        self.data_management.setObjectName("data_management")
-        self.data_management.headerItem().setText(0, "Data Management")
-        self.data_management.setMinimumSize(50,50)
-        #self.verticalLayout.addWidget(self.data_management)
-
-        splitter1.addWidget(self.model_management)
-        splitter1.addWidget(self.data_management)        
-
-
-
-        #self.treeWidgetlefttop = QTreeWidget(self.centralwidget)
-        #self.treeWidgetlefttop.setGeometry(QRect(40, 50, 256, 192))
-        #self.treeWidgetlefttop.setObjectName("Model Management")
-        #self.treeWidgetlefttop.headerItem().setText(0, "Model Management")
-        #self.treeWidgetleftbottom = QTreeWidget(self.centralwidget)
-
-        #self.treeWidgetleftbottom.setGeometry(QRect(40, 280, 256, 192))
-        #self.treeWidgetleftbottom.setObjectName("Data Management")
-        #self.treeWidgetleftbottom.headerItem().setText(0, "Data Management")
-        
-
-        
-
-
-
-
-
-
-
-
-
-        #self.addworkingWindow(splitter2)
-        #self.setLayout(hbox)
-
-
-
         status = self.statusBar()
         status.setSizeGripEnabled(False)
         status.addPermanentWidget(self.sizeLabel)
         status.showMessage("Ready", 5000)
 
-
-
-
-
-
-
-
-
+        # Defining central widget
+        self.centralwidget = QWidget()
+        self.centralwidget.setObjectName("centralwidget")
+        self.setCentralWidget(self.centralwidget)
+        
+        # Ddfining manager widget
+        allManagerDockWidget = QDockWidget(self.centralwidget)
+        splitter1 = QSplitter(Qt.Vertical)
+        allManagerDockWidget.setWidget(splitter1)
+        allManagerDockWidget.setObjectName("AllManagerDockWidget")
+        allManagerDockWidget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, allManagerDockWidget)
+        self.model_management = QTreeWidget()
+        self.model_management.setObjectName("model_management")
+        self.model_management.headerItem().setText(0, "Model Management")
+        self.model_management.setMinimumSize(50,50)
+        self.data_management = QTreeWidget()
+        self.data_management.setObjectName("data_management")
+        self.data_management.headerItem().setText(0, "Data Management")
+        self.data_management.setMinimumSize(50,50)
+        splitter1.addWidget(self.model_management)
+        splitter1.addWidget(self.data_management)        
 
 
 # FILE MENU
@@ -138,11 +80,11 @@ class MainWindow(QMainWindow):
 
         modelsInteractiveUIAction = self.createAction("&Interactive UI", None, None, 
                                             None, "Chose a model in a visual form.")
-        componentLong_Term_ChoicesAction = self.createAction("Long Term Choices", self.Long_Term_Choices, None, 
+        componentlong_term_choicesAction = self.createAction("Long Term Choices", self.longtermmodels, None, 
                                             None, None)
-        componentFixed_Activity_Prism_GeneratorAction = self.createAction("Fixed Activity Location Choice Generator", None, None, 
+        componentfixed_activity_prism_generatorAction = self.createAction("Fixed Activity Location Choice Generator", self.fixedactivitymodels, None, 
                                             None, None)
-        componentVehicle_Ownership_ModelAction = self.createAction("Vehicle Ownership Model", None, None, 
+        componentvehicle_ownership_modelAction = self.createAction("Vehicle Ownership Model", None, None, 
                                             None, None)
         componentFixed_Activity_Prism_GeneratorAction = self.createAction("Fixed Activity Prism Generator", None, None, 
                                             None, None)
@@ -159,15 +101,13 @@ class MainWindow(QMainWindow):
         componentTime_Use_Utility_CalculatorAction = self.createAction("Time Use Utility Calculator", None, None, 
                                             None, None)
 
-        
         self.modelsComponentSubMenu = self.modelsMenu.addMenu("&Component")
         self.addActions(self.modelsMenu, (modelsInteractiveUIAction, ))
-        self.addActions(self.modelsComponentSubMenu, (componentLong_Term_ChoicesAction, componentFixed_Activity_Prism_GeneratorAction,
-                                                      componentVehicle_Ownership_ModelAction, componentFixed_Activity_Prism_GeneratorAction,
+        self.addActions(self.modelsComponentSubMenu, (componentlong_term_choicesAction, componentfixed_activity_prism_generatorAction,
+                                                      componentvehicle_ownership_modelAction, componentFixed_Activity_Prism_GeneratorAction,
                                                        componentChild_Daily_Status_and_Allocation_ModelAction, componentAdult_Daily_Status_ModelAction,
                                                       componentActivity_Skeleton_Reconciliation_SystemAction,componentActivity_Travel_Pattern_SimulatorAction,
                                                       componentActivity_Travel_Reconciliation_SystemAction,componentTime_Use_Utility_CalculatorAction))
-
 
     # Defining Data
         self.dataMenu = self.menuBar().addMenu("&Data")
@@ -177,10 +117,6 @@ class MainWindow(QMainWindow):
                                             "export", "Export data.")
         self.addActions(self.dataMenu, (dataImportAction, dataExportAction,))
 
-
-
-
-
     # Defining Display
         self.displayMenu = self.menuBar().addMenu("D&isplay")
         displayZoomInAction = self.createAction("Zoom &In",None,None,
@@ -189,23 +125,21 @@ class MainWindow(QMainWindow):
                                                "viewmag-", "Zoom out.")
         self.addActions(self.displayMenu, (displayZoomInAction,displayZoomOutAction,))
 
-
     # Defining Run
         self.runMenu = self.menuBar().addMenu("&Run")
         runSimulationAction = self.createAction("&Simulation", None, None, 
                                             "run", "Implement the model.")        
         settingPreferenceAction = self.createAction("&Preference", None, None, 
                                             "preferences", "Make a configuration.")        
-
         self.addActions(self.runMenu, (settingPreferenceAction, ))
         self.addActions(self.runMenu, (runSimulationAction, ))
+
     # Defining help        
         self.helpMenu = self.menuBar().addMenu("&Help")
         helpAboutAction = self.createAction("&About OpenAMOS", None, None, 
                                             None, "Display software information.")        
         helpDocumentationAction = self.createAction("&Documentation", None, None, 
                                             None, "Quick reference for important parameters.")        
-        
         self.addActions(self.helpMenu, (helpDocumentationAction,None,helpAboutAction,  ))
  
 # Defining toolbar
@@ -214,17 +148,6 @@ class MainWindow(QMainWindow):
         self.addActions(self.fileToolBar, (projectNewAction, projectOpenAction,
                                            projectSaveAction, displayZoomInAction,
                                            displayZoomOutAction,))
-
-        
-
-
-
-
-
-
-    def projectNew(self):
-        print "a"
-
 
 # Define Action
     def createAction(self, text, slot=None, shortcut=None, icon=None, 
@@ -254,6 +177,11 @@ class MainWindow(QMainWindow):
                 target.addAction(action)
 
 
+    def projectNew(self):
+        newwiz = Wizard()
+        newwiz.exec_()
+
+        
 
     def projectSave(self):
         if self.project:
@@ -293,67 +221,13 @@ class MainWindow(QMainWindow):
             event.ignore()
 
 
+    def longtermmodels(self):
+        self.longtermmodels = LongTermModels(self.centralwidget)
+        self.longtermmodels.show()
 
-    def Long_Term_Choices(self):
-        Long_Term_Choiceswidget = QWidget(self.centralwidget)
-        #self.setGeometry(300, 300, 600, 600)
-        Long_Term_Choiceswidget.setWindowTitle('Long_Term_Choices')
-        #screen = QDesktopWidget().screenGeometry()
-        size =  self.centralwidget.geometry()
-
-        Generate_Synthetic_Population = QPushButton('Generate Synthetic Population', Long_Term_Choiceswidget)
-        Generate_Synthetic_Population.setGeometry((size.width())/2-100, 20,200, 50)
-
-
-        line = QTextEdit('a',Long_Term_Choiceswidget)
-        line.setGeometry(QRect((size.width())/2, 70, 1, 20))
-
-        self.connect(Generate_Synthetic_Population, SIGNAL('clicked()'),
-                     qApp, SLOT('deleteLater()'))
-
-
-        
-        Labor_Force_Participation_Model = QPushButton('If worker status was not \n generated then run a Labor \n Force Participation Model to \n simulate the worker status \n individuals', Long_Term_Choiceswidget)
-        Labor_Force_Participation_Model.setGeometry((size.width())/2-100, 90, 200, 90)
-
-        line = QTextEdit('a',Long_Term_Choiceswidget)
-        line.setGeometry(QRect((size.width())/2, 180, 1, 20))
-        
-        number_of_jobs = QPushButton('For each worker identify \n the number of jobs', Long_Term_Choiceswidget)
-        number_of_jobs.setGeometry((size.width())/2-100, 200, 200, 50)
-
-        line = QTextEdit('a',Long_Term_Choiceswidget)
-        line.setGeometry(QRect((size.width())/2, 250, 1, 20))
-
-        number_of_jobs = QPushButton('Primary worker in the \nhousehold \n\nIn the absence of data \nidentified based on personal \nincome', Long_Term_Choiceswidget)
-        number_of_jobs.setGeometry((size.width())/2-100, 270, 200, 110)
-
-        line = QTextEdit('a',Long_Term_Choiceswidget)
-        line.setGeometry(QRect((size.width())/2, 380, 1, 20))
-
-        School_status  = QPushButton('School status of everyone \nincluding those individuals \nthat are workers', Long_Term_Choiceswidget)
-        School_status.setGeometry((size.width())/2-100, 400, 200, 70)
-
-        line = QTextEdit('a',Long_Term_Choiceswidget)
-        line.setGeometry(QRect((size.width())/2, 470, 1, 20))
-
-        School_status  = QPushButton('Residential Location Choice', Long_Term_Choiceswidget)
-        School_status.setGeometry((size.width())/2-100, 490, 200, 50)
-
-
-
-
-
-        Long_Term_Choiceswidget.show()
- 
-
-
-
-        #self.deleteLater()
-        #self.connect(a, SIGNAL('triggered()'), SLOT('close()'))
-
-
-
+    def fixedactivitymodels(self):
+        self.fixedactivitymodels = FixedActivityModels(self.centralwidget)
+        self.fixedactivitymodels.show()
 
 
 
@@ -364,8 +238,6 @@ def main():
     form = MainWindow()
     form.show()
     app.exec_()
-
-
 
 if __name__=="__main__":
     main()
