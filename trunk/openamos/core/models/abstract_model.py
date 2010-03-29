@@ -66,13 +66,9 @@ class TestBadInputsModel(unittest.TestCase):
         self.data2 = DataArray(array([[1, 1.1], [1, -0.25]]), ['Constant', 'Var1'])
 
         self.specification = Specification(choices, coefficients1)
-        self.specification1 = [choices, coefficients]
 
     def testdatatype(self):
         self.assertRaises(DataError, Model, self.specification, self.data)
-
-    def testspecificationtype(self):
-        self.assertRaises(SpecificationError, Model, self.specification1, self.data2)
 
     def testdataarraycolnames(self):
         self.assertRaises(DataError, Model, self.specification, self.data2)
