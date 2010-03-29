@@ -6,7 +6,7 @@ from PyQt4.QtGui import *
 
 class FixedActivityModels(QWidget):
     def __init__(self, parent=None):
-        super(FixedActivityModels,self).__init__(parent)
+        super(FixedActivityModels, self).__init__(parent)
         
         self.setWindowTitle('Fixed Activity Location Choice Generator')
         size =  parent.geometry()

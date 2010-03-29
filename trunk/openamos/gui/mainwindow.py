@@ -4,6 +4,10 @@ from PyQt4.QtGui import *
 
 from model_manager.long_term_models import *
 from model_manager.fixed_activity_models import *
+from model_manager.vehicle_ownership_models import *
+from model_manager.fixed_activity_prism_models import *
+from model_manager.activity_skeleton_reconciliation_system import *
+from model_manager.activity_travel_reconciliation_system import *
 
 from file_menu.newproject import *
 
@@ -84,19 +88,19 @@ class MainWindow(QMainWindow):
                                             None, None)
         componentfixed_activity_prism_generatorAction = self.createAction("Fixed Activity Location Choice Generator", self.fixedactivitymodels, None, 
                                             None, None)
-        componentvehicle_ownership_modelAction = self.createAction("Vehicle Ownership Model", None, None, 
+        componentvehicle_ownership_modelAction = self.createAction("Vehicle Ownership Model", self.vehicleownershipmodels, None, 
                                             None, None)
-        componentFixed_Activity_Prism_GeneratorAction = self.createAction("Fixed Activity Prism Generator", None, None, 
+        componentFixed_Activity_Prism_GeneratorAction = self.createAction("Fixed Activity Prism Generator", self.fixedactivityprismmodels, None, 
                                             None, None)
         componentChild_Daily_Status_and_Allocation_ModelAction = self.createAction("Child Daily Status and Allocation Model", None, None, 
                                             None, None)
         componentAdult_Daily_Status_ModelAction = self.createAction("Adult Daily Status Model", None, None, 
                                             None, None)
-        componentActivity_Skeleton_Reconciliation_SystemAction = self.createAction("Activity Skeleton Reconciliation System", None, None, 
+        componentActivity_Skeleton_Reconciliation_SystemAction = self.createAction("Activity Skeleton Reconciliation System", self.skeletonreconciliationsystem, None, 
                                             None, None)
         componentActivity_Travel_Pattern_SimulatorAction = self.createAction("Activity Travel Pattern Simulator", None, None, 
                                             None, None)
-        componentActivity_Travel_Reconciliation_SystemAction = self.createAction("Activity Travel Reconciliation System", None, None, 
+        componentActivity_Travel_Reconciliation_SystemAction = self.createAction("Activity Travel Reconciliation System", self.travelreconciliationsystem, None, 
                                             None, None)
         componentTime_Use_Utility_CalculatorAction = self.createAction("Time Use Utility Calculator", None, None, 
                                             None, None)
@@ -229,8 +233,23 @@ class MainWindow(QMainWindow):
         self.fixedactivitymodels = FixedActivityModels(self.centralwidget)
         self.fixedactivitymodels.show()
 
+    def vehicleownershipmodels(self):
+        self.vehicleownershipmodels = VehicleOwnershipModels(self.centralwidget)
+        self.vehicleownershipmodels.show()
+
+    def fixedactivityprismmodels(self):
+        self.fixedactivityprismmodels = FixedActivityPrismModels(self.centralwidget)
+        self.fixedactivityprismmodels.show()
+
+    def skeletonreconciliationsystem(self):
+        self.reconciliationsystem = Skeleton_Reconciliation_System(self.centralwidget)
+        self.reconciliationsystem.show()
 
 
+    def travelreconciliationsystem(self):
+        self.reconciliationsystem = Travel_Reconciliation_System(self.centralwidget)
+        self.reconciliationsystem.show()
+        
 
 def main():
     app = QApplication(sys.argv)
