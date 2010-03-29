@@ -1,15 +1,17 @@
 from numpy import ndarray, array, random, ma, all, zeros, ones
-from openamos.core.errors import ProbabilityError
+from openamos.core.errors import ProbabilityError, DataError
 from openamos.core.data_array import DataArray
 
 class AbstractProbabilityModel(object):
     def __init__(self, probabilities, seed=1):
+        if not isinstance(probabilities, DataArray):
+            raise DataError, 'probability input is not a valid DataArray object'
         self.probabilities = ma.array(probabilities.data)
-        #print '\nPROBABILITIES', self.probabilities
-        self.choices = probabilities.varnames
         self.seed = seed
         random.seed(self.seed)
         self.check()
+        self.choices = probabilities.varnames
+
 
     def check(self):
         self.check_probabilities()
@@ -69,6 +71,7 @@ class AbstractProbabilityModel(object):
         alt_text.shape = (self.num_agents, 1)
 
         return alt_text
+        #return DataArray(choice, ['selected choice']), alt_text
 
 import unittest
 from numpy import array, zeros, dtype, float32
@@ -76,11 +79,13 @@ from numpy import array, zeros, dtype, float32
 class TestBadInputAbstractProbabilityModel(unittest.TestCase):
     def setUp(self):
         self.probabilities1 = [(0.5,0.19, 0.31), (0.1, 0.2, 0.72)]
-        self.probabilities2 = array([[0.5,0.29, 0.31], [0.1, 0.2, 0.7]])
-        self.probabilities3 = array(self.probabilities1)
+        self.probabilities2 = DataArray(array([[0.5,0.29, 0.31], [0.1, 0.2, 0.7]]), 
+                                        ['ch1', 'ch2', 'ch3'])
+        self.probabilities3 = DataArray(array(self.probabilities1), 
+                                        ['ch1', 'ch2', 'ch3'])
         
     def testprobabilitylist(self):
-        self.assertRaises(ProbabilityError, AbstractProbabilityModel, self.probabilities1)
+        self.assertRaises(DataError, AbstractProbabilityModel, self.probabilities1)
 
     def testvaluessum(self):
         self.assertRaises(ProbabilityError, AbstractProbabilityModel, self.probabilities3)
@@ -88,8 +93,10 @@ class TestBadInputAbstractProbabilityModel(unittest.TestCase):
 
 class TestAbstractProbabilityModel(unittest.TestCase):
     def setUp(self):
+
         probabilities = array([[0.5,0.19, 0.31], [0.1, 0.2, 0.7]])
-        self.model = AbstractProbabilityModel(probabilities)
+        choices = ['ch1', 'ch2', 'ch3']
+        self.model = AbstractProbabilityModel(DataArray(probabilities, choices))
 
 
     def testrandomvalues(self):
@@ -113,9 +120,9 @@ class TestAbstractProbabilityModel(unittest.TestCase):
         
 
     def testchoicecolumns(self):
-        choice_array = array([[1], [3]])
+        choice_array = array([['ch1'], ['ch3']])
         choice_array_frommodel = self.model.selected_choice()
-        diff_choice = all(choice_array == choice_array_frommodel.data)
+        diff_choice = all(choice_array == choice_array_frommodel)
         self.assertEqual(True, diff_choice)
         
 
