@@ -9,6 +9,18 @@ class LongTermModels(QWidget):
         
         self.setWindowTitle('Long_Term_Choices')
         size =  parent.geometry()
+        print size
+
+#        self.hbar = QScrollBar(self)
+#        self.hbar.setGeometry(100, size.width() - 20, size.height() - 20, 20)
+#        self.hbar.setOrientation(Qt.Horizontal)
+#        self.hbar.setObjectName("horizontalScrollBar")
+        
+#        self.vbar = QScrollBar(self)
+#        self.vbar.setGeometry(size.height() - 20, 0, 20, size.width() - 20)
+#        self.vbar.setOrientation(Qt.Vertical)
+#        self.vbar.setObjectName("verticalScrollBar")
+        
         # These two global variables are used in paintevent.
         global widgetwidth, widgetheight
         widgetwidth = size.width()
@@ -47,9 +59,39 @@ class LongTermModels(QWidget):
         pen = QPen(Qt.black,2,Qt.SolidLine)
         line.setPen(pen)
         line.drawLine((widgetwidth) / 2, widgetheight / 2 - 350, (widgetwidth) / 2, widgetheight / 2 + 160)
-
         line.end()
 
+        arrow = QPainter()
+        arrow.begin(self)
+        point = QPoint()
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 320)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 100)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 + 60)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 + 160)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+
+        arrow.end()
 
 
 

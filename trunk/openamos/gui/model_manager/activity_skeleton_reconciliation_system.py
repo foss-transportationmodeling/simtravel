@@ -48,11 +48,38 @@ class Skeleton_Reconciliation_System(QWidget):
         line.setPen(pen)
         line.drawLine(widgetwidth / 2 - 200, widgetheight / 2 - 140, widgetwidth / 2 - 200, widgetheight / 2)
         line.drawLine(widgetwidth / 2 + 200, widgetheight / 2 - 140, widgetwidth / 2 + 200, widgetheight / 2 + 110)
-
-        
         line.end()
 
+        arrow = QPainter()
+        arrow.begin(self)
+        point = QPoint()
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 - 110)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
 
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 200)  
+        point.setY(widgetheight / 2 - 110)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 200)  
+        point.setY(widgetheight / 2)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+
+        point.setX(widgetwidth / 2 + 200)  
+        point.setY(widgetheight / 2 + 110)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        arrow.end()
 
 
  

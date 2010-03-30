@@ -16,6 +16,7 @@ class FixedActivityPrismModels(QWidget):
         
         daystartbutton = QPushButton('Earliest start of day \n(time one can leave home)', self)
         daystartbutton.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 370,200, 50)
+        daystartbutton.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
         dayendbutton = QPushButton("Latest end of day (time \nby which one has to be home)", self)     
@@ -70,7 +71,17 @@ class FixedActivityPrismModels(QWidget):
         tsprismverticesbutton.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
 
 
+#        self.hbar = QScrollBar(self)
+#        self.hbar.setGeometry(100, size.width() - 20, size.height() - 20, 20)
+#        self.hbar.setOrientation(Qt.Horizontal)
+#        self.hbar.setObjectName("horizontalScrollBar")
+        
+#        self.vbar = QScrollBar(self)
+#        self.vbar.setGeometry(size.height() - 20, 0, 20, size.width() - 20)
+#        self.vbar.setOrientation(Qt.Vertical)
+#        self.vbar.setObjectName("verticalScrollBar")
 
+   
     def paintEvent(self, parent = None):
         line = QPainter()
         line.begin(self)
@@ -94,6 +105,103 @@ class FixedActivityPrismModels(QWidget):
         line.drawLine(widgetwidth / 2 - 420, widgetheight / 2 + 115, widgetwidth / 2 - 315, widgetheight / 2 + 115)
         line.drawLine(widgetwidth / 2 - 420, widgetheight / 2 + 235, widgetwidth / 2 - 315, widgetheight / 2 + 235)        
         line.end()
+
+        arrow = QPainter()
+        arrow.begin(self)
+        point = QPoint()
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 290)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 210)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 315)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 315)  
+        point.setY(widgetheight / 2 - 100)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 315)  
+        point.setY(widgetheight / 2 + 130)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 315)  
+        point.setY(widgetheight / 2 + 210)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 315)  
+        point.setY(widgetheight / 2 + 290)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 105)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 - 105)  
+        point.setY(widgetheight / 2 + 290)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 105)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 105)  
+        point.setY(widgetheight / 2 - 100)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 105)  
+        point.setY(widgetheight / 2 - 20)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 105)  
+        point.setY(widgetheight / 2 + 60)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 105)  
+        point.setY(widgetheight / 2 + 290)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 315)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 315)  
+        point.setY(widgetheight / 2 + 290)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2 + 315)  
+        point.setY(widgetheight / 2 - 100)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 + 320)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+
+        arrow.end()
+
+        
 
 
 

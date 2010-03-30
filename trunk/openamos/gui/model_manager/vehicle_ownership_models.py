@@ -30,10 +30,16 @@ class VehicleOwnershipModels(QWidget):
         pen = QPen(Qt.black,2,Qt.SolidLine)
         line.setPen(pen)
         line.drawLine(widgetwidth / 2, widgetheight / 2 - 130, widgetwidth / 2, widgetheight / 2 - 100)
-
-        
         line.end()
 
+        arrow = QPainter()
+        arrow.begin(self)
+        point = QPoint()
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 - 180)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+        arrow.end()
 
 
 

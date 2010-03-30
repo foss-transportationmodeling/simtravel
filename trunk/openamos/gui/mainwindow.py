@@ -19,6 +19,21 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
 
+        # Defining central widget
+
+        self.centralwidgetscroll = QScrollArea()
+        self.centralwidget = QWidget()
+        self.centralwidget.setObjectName("centralwidget")        
+        self.setCentralWidget(self.centralwidgetscroll)
+        self.centralwidget.setFixedSize(1140, 903)
+
+        self.centralwidgetscroll.setWidget(self.centralwidget)
+        #size1 = self.centralwidgetscroll.geometry(self.centralwidget)
+        #print size1
+
+
+
+
         # Defining status bar        
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
@@ -27,10 +42,10 @@ class MainWindow(QMainWindow):
         status.addPermanentWidget(self.sizeLabel)
         status.showMessage("Ready", 5000)
 
-        # Defining central widget
-        self.centralwidget = QWidget()
-        self.centralwidget.setObjectName("centralwidget")
-        self.setCentralWidget(self.centralwidget)
+
+
+
+
         
         # Ddfining manager widget
         allManagerDockWidget = QDockWidget(self.centralwidget)
