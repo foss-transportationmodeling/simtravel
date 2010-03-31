@@ -10,6 +10,8 @@ from model_manager.activity_skeleton_reconciliation_system import *
 from model_manager.activity_travel_reconciliation_system import *
 
 from file_menu.newproject import *
+from file_menu.openproject import *
+from file_menu.saveproject import *
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -70,13 +72,13 @@ class MainWindow(QMainWindow):
 # Defining menu
     # Defining File
         self.fileMenu = self.menuBar().addMenu("&File")
-        projectNewAction = self.createAction("&New Project", self.projectNew, QKeySequence.New, 
+        projectNewAction = self.createAction("&New Project", self.projectnew, QKeySequence.New, 
                                             "projectnew", "Create a new OpenAMOS project.")
 
-        projectOpenAction = self.createAction("&Open Project", self.projectNew, QKeySequence.Open, 
+        projectOpenAction = self.createAction("&Open Project", self.projectopen, QKeySequence.Open, 
                                             "projectopen", "Open a new OpenAMOS project.")
 
-        projectSaveAction = self.createAction("&Save Project", self.projectSave, QKeySequence.Save, 
+        projectSaveAction = self.createAction("&Save Project", self.projectsave, QKeySequence.Save, 
                                               "projectsave", "Save the current OpenAMOS project.")
 
         projectSaveAsAction = self.createAction("Save Project &As...", self.projectSaveAs, "Ctrl+Shift+S",
@@ -196,15 +198,18 @@ class MainWindow(QMainWindow):
                 target.addAction(action)
 
 
-    def projectNew(self):
-        newwiz = Wizard()
+    def projectnew(self):
+        newwiz = NewProject()
+        newwiz.exec_()
+    def projectopen(self):
+        newwiz = OpenProject()
         newwiz.exec_()
 
         
 
-    def projectSave(self):
-        if self.project:
-            self.project.save()
+    def projectsave(self):
+        newwiz = SaveProject()
+        newwiz.exec_()
 
 
     def projectSaveAs(self):
