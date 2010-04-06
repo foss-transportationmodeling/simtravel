@@ -4,8 +4,8 @@ from openamos.core.models.abstract_regression_model import AbstractRegressionMod
 from openamos.core.errors import ErrorSpecificationError
 
 class LinearRegressionModel(AbstractRegressionModel):
-    def __init__(self, specification, data, error_specification):
-        AbstractRegressionModel.__init__(self, specification, data, error_specification)
+    def __init__(self, specification, error_specification):
+        AbstractRegressionModel.__init__(self, specification, error_specification)
 
         if not isinstance(error_specification, LinearRegErrorSpecification):
             raise ErrorSpecification, """incorrect error specification; it should be """\
@@ -18,10 +18,10 @@ class LinearRegressionModel(AbstractRegressionModel):
         return norm.rvs(loc=mean, scale=sd, 
                         size=size)
 
-    def calc_predvalue(self):
-        expected_value = self.calc_expected_value()
+    def calc_predvalue(self, data):
+        expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
-        pred_value = self.calc_errorcomponent(size=(self.data.rows, 1),
+        pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data, sd=variance)
         return DataArray(pred_value, self.specification.choices)
 
@@ -45,8 +45,8 @@ class TestLinearRegressionModel(unittest.TestCase):
 
 
     def testvalues(self):
-        model = LinearRegressionModel(self.specification, self.data, self.errorspecification)
-        pred_value = model.calc_predvalue()
+        model = LinearRegressionModel(self.specification, self.errorspecification)
+        pred_value = model.calc_predvalue(self.data)
 
         random.seed(1)
         expected_act = self.data.calculate_equation(self.specification.coefficients[0])
