@@ -7,23 +7,23 @@ from openamos.core.models.count_regression_model_components import CountSpecific
 from openamos.core.errors import SpecificationError
 
 class CountRegressionModel(Model):
-    def __init__(self, count_specification, data):
+    def __init__(self, count_specification):
         if not isinstance(count_specification, CountSpecification):
             raise SpecificationError, 'the specification is not a valid CountSpecification object'
 
-        Model.__init__(self, count_specification, data)
+        Model.__init__(self, count_specification)
 
         self.distribution = count_specification.distribution
 
-    def calc_expected_value(self):
-        return self.data.calculate_equation(self.coefficients[0])
+    def calc_expected_value(self, data):
+        return data.calculate_equation(self.coefficients[0])
 
-    def calc_probabilities(self):
+    def calc_probabilities(self, data):
         #TODO: what are the parameters for the negative binomial distribution
         #[shape_param] = [1,]*nbinom.numargs
-        expected_value = self.calc_expected_value()
+        expected_value = self.calc_expected_value(data)
         num_choices = self.specification.number_choices
-        probabilities = zeros((self.data.rows, num_choices))
+        probabilities = zeros((data.rows, num_choices))
         for i in range(num_choices-1):
             if self.distribution == 'poisson':
                 probabilities[:,i] = poisson.pmf(i, expected_value)
@@ -38,8 +38,8 @@ class CountRegressionModel(Model):
             pass
         return probabilities
 
-    def calc_chosenalternative(self):
-        probabilities = DataArray(self.calc_probabilities(), self.specification.choices)
+    def calc_chosenalternative(self, data):
+        probabilities = DataArray(self.calc_probabilities(data), self.specification.choices)
         prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
         return prob_model.selected_choice()
         
@@ -58,8 +58,8 @@ class TestBadInputCountRegressionModel(unittest.TestCase):
         self.specification1 = [choices, coefficients]
 
     def testspecification(self):
-        self.assertRaises(SpecificationError, CountRegressionModel, self.specification1,
-                          self.data)
+        self.assertRaises(SpecificationError, CountRegressionModel, 
+                          self.specification1)
 
 
 
@@ -71,7 +71,7 @@ class TestCountRegressionModel(unittest.TestCase):
         self.data = DataArray(data, ['CONSTANT', 'VAR1'])
         
         self.specification = CountSpecification(choices, self.coefficients)
-        self.model = CountRegressionModel(self.specification, self.data)
+        self.model = CountRegressionModel(self.specification)
         
     def testprobabilitiespoisson(self):
         prob = zeros((4,3))
@@ -80,13 +80,13 @@ class TestCountRegressionModel(unittest.TestCase):
         prob[:,1] = poisson.pmf(1, exp_value)
         prob[:,2] = 1 - poisson.cdf(1, exp_value)
 
-        prob_model = self.model.calc_probabilities()
+        prob_model = self.model.calc_probabilities(self.data)
         prob_diff = all(prob == prob_model)
         self.assertEqual(True, prob_diff)
 
     def testselectionpoisson(self):
         choice_act = array([['episodes3'], ['episodes3'], ['episodes1'], ['episodes2']])
-        choice_model = self.model.calc_chosenalternative()
+        choice_model = self.model.calc_chosenalternative(self.data)
         choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
 
