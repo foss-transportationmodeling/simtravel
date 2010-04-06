@@ -4,8 +4,8 @@ from openamos.core.models.abstract_model import Model
 from openamos.core.errors import SpecificationError, ErrorSpecificationError
 
 class AbstractRegressionModel(Model):
-    def __init__(self, specification, data, error_specification):
-        Model.__init__(self, specification, data)
+    def __init__(self, specification, error_specification):
+        Model.__init__(self, specification)
         
         if not isinstance(self.specification, Specification):
             raise SpecificationError, 'specification input is not a Specification object'
@@ -20,11 +20,11 @@ class AbstractRegressionModel(Model):
             raise ErrorSpecificationError, """invalid error specification"""\
                 """ it should be of type ErrorSpecification"""
         
-    def calc_expected_value(self):
-        return self.calculate_expected_values()
+    def calc_expected_value(self, data):
+        return self.calculate_expected_values(data)
 
-    def calc_exp_expected_value(self):
-        return self.calculate_exp_expected_values()
+    def calc_exp_expected_value(self, data):
+        return self.calculate_exp_expected_values(data)
 
     def calc_errorcomponent(self):
         raise Exception('method not implemented')
@@ -57,11 +57,11 @@ class TestBadSpecificationRegressionModel(unittest.TestCase):
 
     def testtwodependentvars(self):
         self.assertRaises(SpecificationError, AbstractRegressionModel, self.specification,
-                          self.data, self.errorspecification)
+                          self.errorspecification)
 
     def testtwoerrorcomponents(self):
         self.assertRaises(SpecificationError, AbstractRegressionModel, self.specification, 
-                          self.data, self.errorspecification1)
+                          self.errorspecification1)
 
 
 class TestAbstractRegressionModel(unittest.TestCase):
@@ -77,23 +77,25 @@ class TestAbstractRegressionModel(unittest.TestCase):
 
 
     def testvalues(self):
-        model = AbstractRegressionModel(self.specification, self.data, self.errorspecification)
+        model = AbstractRegressionModel(self.specification, self.errorspecification)
 
-        model_expected_values = model.calc_expected_value()
+        model_expected_values = model.calc_expected_value(self.data)
         expected_act = zeros((self.data.rows, 1))
         expected_act[:,0] = self.data.data[:,0] * 2 + self.data.data[:,1] * 2.11
         expected_diff = all(expected_act == model_expected_values.data)
         self.assertEqual(True, expected_diff)
 
         exp_expected_act = exp(expected_act)
-        model_exp_expected_values = model.calc_exp_expected_value()
+        model_exp_expected_values = model.calc_exp_expected_value(self.data)
         exp_expected_diff = all(exp_expected_act == model_exp_expected_values.data)
         self.assertEqual(True, exp_expected_diff)
         
                         
     def testerrorspecification(self):
+        #TODO:Write the tests for errorspecification if any in here
+        #or should they just be written in the specifica implementations
+        #e.g. stochastic-frontier, linear regression etc.
         pass
-        
 
 if __name__ == '__main__':
     unittest.main()
