@@ -6,8 +6,8 @@ from openamos.core.models.abstract_probability_model import AbstractProbabilityM
 from openamos.core.errors import DataError
 
 class NestedLogitChoiceModel(AbstractChoiceModel):
-    def __init__(self, specification, data, choiceset=None):
-        AbstractChoiceModel.__init__(self, specification, data, choiceset)
+    def __init__(self, specification):
+        AbstractChoiceModel.__init__(self, specification)
 
         if not isinstance(specification, NestedSpecification):
             raise SpecificationError, 'the specification input is not a valid NestedSpecification object'
@@ -16,29 +16,29 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
         for parent in self.specification:
             self.parent_list.append(parent)
 
-    def calc_observed_utilities(self):
+    def calc_observed_utilities(self, data):
         #Just calculating the individual branch's utility without 
         #scaling by the logsum parameters and the logsum carry overs to 
         #considering parent nodes 
-        values = self.calculate_expected_values()
+        values = self.calculate_expected_values(data)
         values.data = ma.array(values.data)
         return values
 
-    def validchoiceutilities(self):
-        valid_values = self.calc_observed_utilities()
-        for i in self.choiceset.varnames:
-            mask = self.choiceset.column(i) == 0
+    def validchoiceutilities(self, data, choiceset):
+        valid_values = self.calc_observed_utilities(data)
+        for i in choiceset.varnames:
+            mask = choiceset.column(i) == 0
             if any (mask == True):
                 child_choices = self.specification.all_child_names([i])
                 for i in child_choices + [i]:
                     valid_values.setcolumn(i, ma.masked, mask)
         return valid_values
 
-    def calc_exp_choice_utilities(self):
-        obs_values = self.validchoiceutilities()
+    def calc_exp_choice_utilities(self, data, choiceset):
+        obs_values = self.validchoiceutilities(data, choiceset)
         spec_dict = self.specification.specification
 
-        missing_choices = self.choiceset.varnames
+        missing_choices = choiceset.varnames
 
         # Iterating through parent nodes and calculating exp of utilities
         # logsum_parameter_parent --> the node which is being considered
@@ -104,10 +104,10 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
                     obs_values.expofcolumn(child_name)
         return obs_values
 
-    def calc_probabilities(self):
-        exp_expected_utilities = self.calc_exp_choice_utilities()
+    def calc_probabilities(self, data, choiceset):
+        exp_expected_utilities = self.calc_exp_choice_utilities(data, choiceset)
 
-        missing_choices = self.choiceset.varnames
+        missing_choices = choiceset.varnames
 
         spec_dict = self.specification.specification
         for parent in self.parent_list:
@@ -151,8 +151,10 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
 
         return probabilities
 
-    def calc_chosenalternative(self):
-        probabilities = self.calc_probabilities()
+    def calc_chosenalternative(self, data, choiceset=None):
+        if choiceset is None:
+            choiceset = DataArray(array([]), [])
+        probabilities = self.calc_probabilities(data, choiceset)
         prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
         return prob_model.selected_choice()
 
@@ -218,34 +220,34 @@ class TestNestedLogitChoiceModel(unittest.TestCase):
                                spec32: [spec321, spec322]}
 
         data = array([[1, 1.1], [1, -0.25], [1, 3.13], [1, -0.11]])
-        data = DataArray(data, ['Constant', 'Var1'])
+        self.data = DataArray(data, ['Constant', 'Var1'])
 
-        choiceset = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), ['sov11', 'HOV'])
-
-        nested_spec = NestedSpecification(specification_dict)
-        self.model = NestedLogitChoiceModel(nested_spec, data)
-
+        self.choiceset = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), ['sov11', 'HOV'])
 
         nested_spec = NestedSpecification(specification_dict)
-        self.model1 = NestedLogitChoiceModel(nested_spec, data, choiceset)
+        self.model = NestedLogitChoiceModel(nested_spec)
+
+
+        nested_spec = NestedSpecification(specification_dict)
+        self.model1 = NestedLogitChoiceModel(nested_spec)
 
 
     def testmodelresults(self):
-        result_model = self.model.calc_chosenalternative()
+        result_model = self.model.calc_chosenalternative(self.data)
         result_act = array([['sov11'], ['sov11'], ['bus1'], ['sov11']])
 
         result_diff = all(result_act == result_model)
         self.assertEqual(True, result_diff)
 
     def testmodelresultswithchoicesets(self):
-        result_model = self.model1.calc_chosenalternative()
+        result_model = self.model1.calc_chosenalternative(self.data, self.choiceset)
         result_act = array([['bus1'], ['light rail1'], ['bus1'], ['sov11']])
 
         result_diff = all(result_act == result_model)
         self.assertEqual(True, result_diff)
 
         
-
+    
 
 
 if __name__ == '__main__':
