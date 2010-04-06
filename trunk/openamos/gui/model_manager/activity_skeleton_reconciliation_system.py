@@ -8,40 +8,42 @@ class Skeleton_Reconciliation_System(QWidget):
         super(Skeleton_Reconciliation_System, self).__init__(parent)
         
         self.setWindowTitle('Activity Skeleton Reconciliation System')
+        self.setAutoFillBackground(True)
         size =  parent.geometry()
         # These two global variables are used in paintevent.
         global widgetwidth, widgetheight
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        skeletonrecbutton = QPushButton('Activity \nSkeleton Reconciliation', self)
-        skeletonrecbutton.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 220, 200, 80)
+        skeleton_reconciliation = QPushButton('Activity \nSkeleton Reconciliation', self)
+        skeleton_reconciliation.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 220, 200, 80)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        personconstraints1button = QPushButton("Within person constraints", self)     
-        personconstraints1button.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 110, 200, 80)
+        person_constraints_1 = QPushButton("Within person constraints", self)     
+        person_constraints_1.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 110, 200, 80)
 
         
-        adjustment1button = QPushButton('Adjustments to the activity \nskeleton based on expected \nTravel Time from previous day', self)
-        adjustment1button.setGeometry((size.width()) / 2 - 300, size.height() / 2, 200, 80)
+        adjustment_1 = QPushButton('Adjustments to the activity \nskeleton based on expected \nTravel Time from previous day', self)
+        adjustment_1.setGeometry((size.width()) / 2 - 300, size.height() / 2, 200, 80)
 
 
-        patternrecbutton = QPushButton('Activity-travel \nPattern Reconciliation', self)
-        patternrecbutton.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 220, 200, 80)
+        pattern_reconciliation = QPushButton('Activity-travel \nPattern Reconciliation', self)
+        pattern_reconciliation.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 220, 200, 80)
 
 
-        personconstraints2button = QPushButton("Within person constraints", self)     
-        personconstraints2button.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 110, 200, 80)
+        person_constraints_2 = QPushButton("Within person constraints", self)     
+        person_constraints_2.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 110, 200, 80)
 
 
-        hholdconstraints2button = QPushButton("Within household constraints", self)     
-        hholdconstraints2button.setGeometry((size.width()) / 2 + 100, size.height() / 2, 200, 80)
+        hhold_constraints = QPushButton("Within household constraints", self)     
+        hhold_constraints.setGeometry((size.width()) / 2 + 100, size.height() / 2, 200, 80)
 
 
-        adjustment2button = QPushButton('Duration adjustment \nafter arrival', self)
-        adjustment2button.setGeometry((size.width()) / 2 + 100, size.height() / 2 + 110, 200, 80)
+        adjustment_2 = QPushButton('Duration adjustment \nafter arrival', self)
+        adjustment_2.setGeometry((size.width()) / 2 + 100, size.height() / 2 + 110, 200, 80)
 
     def paintEvent(self, parent = None):
+        # Drawing line
         line = QPainter()
         line.begin(self)
         pen = QPen(Qt.black,2,Qt.SolidLine)
@@ -49,7 +51,7 @@ class Skeleton_Reconciliation_System(QWidget):
         line.drawLine(widgetwidth / 2 - 200, widgetheight / 2 - 140, widgetwidth / 2 - 200, widgetheight / 2)
         line.drawLine(widgetwidth / 2 + 200, widgetheight / 2 - 140, widgetwidth / 2 + 200, widgetheight / 2 + 110)
         line.end()
-
+        # Drawing arrow
         arrow = QPainter()
         arrow.begin(self)
         point = QPoint()

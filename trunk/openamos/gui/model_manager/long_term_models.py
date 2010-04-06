@@ -6,8 +6,8 @@ from PyQt4.QtGui import *
 class LongTermModels(QWidget):
     def __init__(self, parent=None):
         super(LongTermModels, self).__init__(parent)
-        
         self.setWindowTitle('Long_Term_Choices')
+        self.setAutoFillBackground(True)
         size =  parent.geometry()
      
         # These two global variables are used in paintevent.
@@ -43,13 +43,14 @@ class LongTermModels(QWidget):
         residential_location_choice.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
 
     def paintEvent(self, parent = None):
+        # Drawing line
         line = QPainter()
         line.begin(self)
         pen = QPen(Qt.black,2,Qt.SolidLine)
         line.setPen(pen)
         line.drawLine((widgetwidth) / 2, widgetheight / 2 - 350, (widgetwidth) / 2, widgetheight / 2 + 160)
         line.end()
-
+        # Drawing arrow
         arrow = QPainter()
         arrow.begin(self)
         point = QPoint()
