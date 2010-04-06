@@ -4,8 +4,8 @@ from openamos.core.models.abstract_regression_model import AbstractRegressionMod
 from openamos.core.errors import ErrorSpecificationError
 
 class StocFronRegressionModel(AbstractRegressionModel):
-    def __init__(self, specification, data, error_specification):
-        AbstractRegressionModel.__init__(self, specification, data, error_specification)
+    def __init__(self, specification, error_specification):
+        AbstractRegressionModel.__init__(self, specification, error_specification)
         
         if not isinstance(error_specification, StochasticRegErrorSpecification):
             raise ErrorSpecification, """incorrect error specification; it should be """\
@@ -24,12 +24,12 @@ class StocFronRegressionModel(AbstractRegressionModel):
         if vertext == 'end':
             return err_norm - err_halfnorm
 
-    def calc_predvalue(self):
-        expected_value = self.calc_expected_value()
+    def calc_predvalue(self, data):
+        expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]
         variance_halfnorm = self.error_specification.variance[1,1]
         vertex = self.error_specification.vertex
-        size = (self.data.rows, 1)
+        size = (data.rows, 1)
 
         err = self.calc_errorcomponent(variance_norm, variance_halfnorm, vertex, size)
         
@@ -57,8 +57,8 @@ class TestStocFronRegressionModel(unittest.TestCase):
 
 
     def testvalues(self):
-        model = StocFronRegressionModel(self.specification, self.data, self.errorspecification)
-        pred_value = model.calc_predvalue()
+        model = StocFronRegressionModel(self.specification, self.errorspecification)
+        pred_value = model.calc_predvalue(self.data)
 
         random.seed(1)
         expected_act = self.data.calculate_equation(self.specification.coefficients[0])
