@@ -6,26 +6,24 @@ from openamos.core.models.abstract_probability_model import AbstractProbabilityM
 from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.errors import SpecificationError
 
-
 class OrderedModel(AbstractChoiceModel):
-    def __init__(self, ol_specification, data):
+    def __init__(self, ol_specification):
         if not isinstance(ol_specification, OLSpecification):
             raise SpecificationError, 'the specification is not a valid OLSpecification object'
 
-        AbstractChoiceModel.__init__(self, ol_specification, data)
+        AbstractChoiceModel.__init__(self, ol_specification)
         
-
         self.thresholds = ol_specification.thresholds
         self.distribution = ol_specification.distribution
 
-    def calc_observed_utilities(self):
-        return self.data.calculate_equation(self.coefficients[0])
+    def calc_observed_utilities(self, data):
+        return data.calculate_equation(self.coefficients[0])
 
-    def calc_probabilities(self):
+    def calc_probabilities(self, data):
         [shape_param] = [1,]*genlogistic.numargs
-        observed_utility = self.calc_observed_utilities()
+        observed_utility = self.calc_observed_utilities(data)
         num_choices = self.specification.number_choices
-        probabilities = zeros((self.data.rows, num_choices))
+        probabilities = zeros((data.rows, num_choices))
         lower_bin = 0
         for i in range(num_choices-1):
             value = self.thresholds[i] - observed_utility
@@ -40,8 +38,8 @@ class OrderedModel(AbstractChoiceModel):
         probabilities[:,i+1] = 1 - upper_bin
         return probabilities
 
-    def calc_chosenalternative(self):
-        probabilities = DataArray(self.calc_probabilities(), self.specification.choices)
+    def calc_chosenalternative(self, data):
+        probabilities = DataArray(self.calc_probabilities(data), self.specification.choices)
         prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
         return prob_model.selected_choice()
         
@@ -63,8 +61,8 @@ class TestBadInputOrderedProbitModel(unittest.TestCase):
         self.specification1 = [choices, coefficients, thresholds]
 
     def testolspecification(self):
-        self.assertRaises(SpecificationError, OrderedModel, self.specification1,
-                          self.data)
+        self.assertRaises(SpecificationError, OrderedModel, 
+                          self.specification1)
 
 class TestOrderedProbitModel(unittest.TestCase):
     def setUp(self):
@@ -75,10 +73,10 @@ class TestOrderedProbitModel(unittest.TestCase):
                          ['CONSTANT', 'VAR1'])
         
         specification = OLSpecification(choices, self.coefficients, self.thresholds)
-        self.model = OrderedModel(specification, self.data)
+        self.model = OrderedModel(specification)
 
         specification1 = OLSpecification(choices, self.coefficients, self.thresholds, distribution='probit')
-        self.model1 = OrderedModel(specification1, self.data)
+        self.model1 = OrderedModel(specification1)
         
 
         
@@ -92,13 +90,13 @@ class TestOrderedProbitModel(unittest.TestCase):
                      genlogistic.cdf(self.thresholds[0] - obs_utility, shape_param))
         prob[:,2] = 1 - genlogistic.cdf(self.thresholds[1] - obs_utility, shape_param)
 
-        prob_model = self.model.calc_probabilities()
+        prob_model = self.model.calc_probabilities(self.data)
         prob_diff = all(prob == prob_model)
         self.assertEqual(True, prob_diff)
 
     def testselectionlogit(self):
         choice_act = array([['veh3'], ['veh3'], ['veh1'], ['veh1']])
-        choice_model = self.model.calc_chosenalternative()
+        choice_model = self.model.calc_chosenalternative(self.data)
         choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
 
@@ -110,13 +108,13 @@ class TestOrderedProbitModel(unittest.TestCase):
                      norm.cdf(self.thresholds[0] - obs_utility))
         prob[:,2] = 1 - norm.cdf(self.thresholds[1] - obs_utility)
 
-        prob_model = self.model1.calc_probabilities()
+        prob_model = self.model1.calc_probabilities(self.data)
         prob_diff = all(prob == prob_model)
         self.assertEqual(True, prob_diff)
 
-    def testselectionlogit(self):
+    def testselectionprobit(self):
         choice_act = array([['veh3'], ['veh2'], ['veh3'], ['veh2']])
-        choice_model = self.model1.calc_chosenalternative()
+        choice_model = self.model1.calc_chosenalternative(self.data)
         choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
         
