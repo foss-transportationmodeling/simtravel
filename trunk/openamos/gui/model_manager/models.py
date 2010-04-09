@@ -6,6 +6,7 @@ from activity_skeleton_reconciliation_system import *
 from activity_travel_reconciliation_system import *
 from child_daily_status_and_allocation_model import *
 from adult_daily_status_model import *
+from activity_travel_pattern_simulator import *
 
 class Models(QWidget):
     def __init__(self, parent = None):
@@ -45,3 +46,7 @@ class Models(QWidget):
     def adult_model(self):
         self.adult_model = Adult_Model(model_widget)
         self.adult_model.show()
+
+    def activity_travel_pattern_simulator(self):
+        self.activity_travel_pattern_simulator = Activity_Travel_Pattern_Simulator(model_widget)
+        self.activity_travel_pattern_simulator.show()

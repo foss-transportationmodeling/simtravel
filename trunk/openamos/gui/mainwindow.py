@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
                                             None, None)
         component_activity_skeleton_reconciliation_system_action = self.createaction("Activity Skeleton Reconciliation System", self.models.skeleton_reconciliation_system, None, 
                                             None, None)
-        component_activity_travel_pattern_simulator_action = self.createaction("Activity Travel Pattern Simulator", None, None, 
+        component_activity_travel_pattern_simulator_action = self.createaction("Activity Travel Pattern Simulator", self.models.activity_travel_pattern_simulator, None, 
                                             None, None)
         component_activity_travel_reconciliation_system_action = self.createaction("Activity Travel Reconciliation System", self.models.travel_reconciliation_system, None, 
                                             None, None)
