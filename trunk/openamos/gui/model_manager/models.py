@@ -4,6 +4,8 @@ from vehicle_ownership_models import *
 from fixed_activity_prism_models import *
 from activity_skeleton_reconciliation_system import *
 from activity_travel_reconciliation_system import *
+from child_daily_status_and_allocation_model import *
+from adult_daily_status_model import *
 
 class Models(QWidget):
     def __init__(self, parent = None):
@@ -35,3 +37,11 @@ class Models(QWidget):
     def travel_reconciliation_system(self):
         self.travel_reconciliation_system = Travel_Reconciliation_System(model_widget)
         self.travel_reconciliation_system.show()
+
+    def child_model(self):
+        self.child_model = Child_Model(model_widget)
+        self.child_model.show()
+
+    def adult_model(self):
+        self.adult_model = Adult_Model(model_widget)
+        self.adult_model.show()

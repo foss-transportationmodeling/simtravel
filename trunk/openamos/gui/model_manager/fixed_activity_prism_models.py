@@ -15,61 +15,61 @@ class FixedActivityPrismModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        day_start = QPushButton('Earliest start of day \n(time one can leave home)', self)
-        day_start.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 370,200, 50)
-        day_start.setStyleSheet("background-color: rgb(0, 255, 0)")
+        day_start_button = QPushButton('Earliest start of day \n(time one can leave home)', self)
+        day_start_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 370,200, 50)
+        day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        day_end = QPushButton("Latest end of day (time \nby which one has to be home)", self)     
-        day_end.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 290, 200, 50)
+        day_end_button = QPushButton("Latest end of day (time \nby which one has to be home)", self)     
+        day_end_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 290, 200, 50)
 
         
-        worker = QPushButton('Worker', self)
-        worker.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 180, 180, 50)
+        worker_button = QPushButton('Worker', self)
+        worker_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 180, 180, 50)
 
 
-        non_worker = QPushButton('Non-worker', self)
-        non_worker.setGeometry((size.width()) / 2 - 195, size.height() / 2 - 180, 180, 50)
+        non_worker_button = QPushButton('Non-worker', self)
+        non_worker_button.setGeometry((size.width()) / 2 - 195, size.height() / 2 - 180, 180, 50)
 
 
-        children_adults = QPushButton('Children (Status-School) \53 \nAdults (Status-School)', self)
-        children_adults.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 180, 180, 50)
+        children_adults_button = QPushButton('Children (Status-School) \53 \nAdults (Status-School)', self)
+        children_adults_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 180, 180, 50)
 
 
-        children = QPushButton('Children \n(Status \55 Pre-school)', self)
-        children.setGeometry((size.width()) / 2 + 225, size.height() / 2 - 180, 180, 50)
+        children_button = QPushButton('Children \n(Status \55 Pre-school)', self)
+        children_button.setGeometry((size.width()) / 2 + 225, size.height() / 2 - 180, 180, 50)
 
 
-        num_work_episodes = QPushButton('For each job, number of \nwork episodes \n\nSeparate models \55 first \njob, second job. Also, \nvertices for each episode \nshould be conditional on \nthe previous one to \nensure consistency', self)
-        num_work_episodes.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 100, 180, 200)
+        num_work_episodes_button = QPushButton('For each job, number of \nwork episodes \n\nSeparate models \55 first \njob, second job. Also, \nvertices for each episode \nshould be conditional on \nthe previous one to \nensure consistency', self)
+        num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 100, 180, 200)
 
 
-        work_start_1 = QPushButton('Latest arrival at work \nfor each episode', self)
-        work_start_1.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 130, 180, 50)
+        work_start_1_button = QPushButton('Latest arrival at work \nfor each episode', self)
+        work_start_1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 130, 180, 50)
 
 
-        work_end_1 = QPushButton('Earliest departure from \nwork for each episode', self)
-        work_end_1.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 210, 180, 50)
+        work_end_1_button = QPushButton('Earliest departure from \nwork for each episode', self)
+        work_end_1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 210, 180, 50)
 
 
-        num_sch_episodes = QPushButton('Number of school episodes', self)
-        num_sch_episodes.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 100, 180, 50)
+        num_sch_episodes_button = QPushButton('Number of school episodes', self)
+        num_sch_episodes_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 100, 180, 50)
 
 
-        sch_start_1 = QPushButton('Latest arrival at school', self)
-        sch_start_1.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 20, 180, 50)
+        sch_start_1_button = QPushButton('Latest arrival at school', self)
+        sch_start_1_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 20, 180, 50)
 
 
-        sch_end_1 = QPushButton('Earliest departure \nfrom school', self)
-        sch_end_1.setGeometry((size.width()) / 2 + 15, size.height() / 2 + 60, 180, 50)
+        sch_end_1_button = QPushButton('Earliest departure \nfrom school', self)
+        sch_end_1_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 + 60, 180, 50)
 
 
-        pre_sch = QPushButton('The arrival and \ndeparture time from \nPre-school are dependent \non the adult \n(worker/non-worker) that \nthe kid is assigned \nto', self)
-        pre_sch.setGeometry((size.width()) / 2 + 225, size.height() / 2 - 100, 180, 200)
+        pre_sch_button = QPushButton('The arrival and \ndeparture time from \nPre-school are dependent \non the adult \n(worker/non-worker) that \nthe kid is assigned \nto', self)
+        pre_sch_button.setGeometry((size.width()) / 2 + 225, size.height() / 2 - 100, 180, 200)
 
 
-        t_s_prism_vertices = QPushButton('Time-space prism vertices of all \nindividuals within the population', self)
-        t_s_prism_vertices.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
+        t_s_prism_vertices_button = QPushButton('Time-space prism vertices of all \nindividuals within the population', self)
+        t_s_prism_vertices_button.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
 
 
 

@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.centralwidget = QWidget()
         self.centralwidget.setObjectName("centralwidget")        
         self.setCentralWidget(self.centralwidgetscroll)
-        self.centralwidget.setFixedSize(1140, 903)
+        self.centralwidget.setFixedSize(1140, 1200)
         self.centralwidgetscroll.setWidget(self.centralwidget)
 
         # Defining status bar        
@@ -104,9 +104,9 @@ class MainWindow(QMainWindow):
                                             None, None)
         component_fixed_activity_prism_generator_action = self.createaction("Fixed Activity Prism Generator", self.models.fixed_activity_prism_models, None, 
                                             None, None)
-        component_child_daily_status_and_allocation_model_action = self.createaction("Child Daily Status and Allocation Model", None, None, 
+        component_child_daily_status_and_allocation_model_action = self.createaction("Child Daily Status and Allocation Model", self.models.child_model, None, 
                                             None, None)
-        component_adult_daily_status_model_action = self.createaction("Adult Daily Status Model", None, None, 
+        component_adult_daily_status_model_action = self.createaction("Adult Daily Status Model", self.models.adult_model, None, 
                                             None, None)
         component_activity_skeleton_reconciliation_system_action = self.createaction("Activity Skeleton Reconciliation System", self.models.skeleton_reconciliation_system, None, 
                                             None, None)
@@ -195,12 +195,12 @@ class MainWindow(QMainWindow):
 
 # Call file functions
     def projectnew(self):
-        self.projectnew = NewProject()
-        self.projectnew.exec_()
+        self.project_new = NewProject()
+        self.project_new.exec_()
 
     def projectopen(self):
-        self.projectopen = OpenProject()
-        self.projectopen.exec_()
+        self.project_open = OpenProject()
+        self.project_open.exec_()
 
     def projectsave(self):
         self.projectsave = SaveProject()

@@ -15,32 +15,32 @@ class Travel_Reconciliation_System(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        skeleton_onciliation = QPushButton('Activity \nSkeleton Reconciliation', self)
-        skeleton_onciliation.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 220, 200, 80)
+        skeleton_onciliation_button = QPushButton('Activity \nSkeleton Reconciliation', self)
+        skeleton_onciliation_button.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 220, 200, 80)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        person_constraints_1 = QPushButton("Within person constraints", self)     
-        person_constraints_1.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 110, 200, 80)
+        person_constraints_1_button = QPushButton("Within person constraints", self)     
+        person_constraints_1_button.setGeometry((size.width()) / 2 - 300, size.height() / 2 - 110, 200, 80)
 
         
-        adjustment_1 = QPushButton('Adjustments to the activity \nskeleton based on expected \nTravel Time from previous day', self)
-        adjustment_1.setGeometry((size.width()) / 2 - 300, size.height() / 2, 200, 80)
+        adjustment_1_button = QPushButton('Adjustments to the activity \nskeleton based on expected \nTravel Time from previous day', self)
+        adjustment_1_button.setGeometry((size.width()) / 2 - 300, size.height() / 2, 200, 80)
 
 
-        pattern_onciliation = QPushButton('Activity-travel \nPattern Reconciliation', self)
-        pattern_onciliation.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 220, 200, 80)
+        pattern_onciliation_button = QPushButton('Activity-travel \nPattern Reconciliation', self)
+        pattern_onciliation_button.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 220, 200, 80)
 
 
-        person_constraints_2 = QPushButton("Within person constraints", self)     
-        person_constraints_2.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 110, 200, 80)
+        person_constraints_2_button = QPushButton("Within person constraints", self)     
+        person_constraints_2_button.setGeometry((size.width()) / 2 + 100, size.height() / 2 - 110, 200, 80)
 
 
-        hhold_constraints = QPushButton("Within household constraints", self)     
-        hhold_constraints.setGeometry((size.width()) / 2 + 100, size.height() / 2, 200, 80)
+        hhold_constraints_button = QPushButton("Within household constraints", self)     
+        hhold_constraints_button.setGeometry((size.width()) / 2 + 100, size.height() / 2, 200, 80)
 
 
-        adjustment_2 = QPushButton('Duration adjustment \nafter arrival', self)
-        adjustment_2.setGeometry((size.width()) / 2 + 100, size.height() / 2 + 110, 200, 80)
+        adjustment_2_button = QPushButton('Duration adjustment \nafter arrival', self)
+        adjustment_2_button.setGeometry((size.width()) / 2 + 100, size.height() / 2 + 110, 200, 80)
 
     def paintEvent(self, parent = None):
         # Drawing line

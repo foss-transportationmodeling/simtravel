@@ -15,32 +15,32 @@ class LongTermModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        generate_synthetic_population = QPushButton('Generate Synthetic Population', self)
-        generate_synthetic_population.setGeometry((size.width())/2 - 100, size.height() / 2 - 400,200, 50)
+        generate_synthetic_population_button = QPushButton('Generate Synthetic Population', self)
+        generate_synthetic_population_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 400,200, 50)
 
-        self.connect(generate_synthetic_population, SIGNAL('clicked()'),
+        self.connect(generate_synthetic_population_button, SIGNAL('clicked()'),
                      qApp, SLOT('deleteLater()'))
 
 
         
-        labor_force_participation_model = QPushButton('If worker status was not \n generated then run a Labor \n Force Participation Model to \n simulate the worker status \n individuals', self)
-        labor_force_participation_model.setGeometry((size.width())/2 - 100, size.height() / 2 - 320, 200, 110)
+        labor_force_participation_model_button = QPushButton('If worker status was not \n generated then run a Labor \n Force Participation Model to \n simulate the worker status \n individuals', self)
+        labor_force_participation_model_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 320, 200, 110)
 
         
-        number_of_jobs = QPushButton('For each worker identify \n the number of jobs', self)
-        number_of_jobs.setGeometry((size.width())/2 - 100, size.height() / 2 - 180, 200, 50)
+        number_of_jobs_button = QPushButton('For each worker identify \n the number of jobs', self)
+        number_of_jobs_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 180, 200, 50)
 
 
-        primary_worker = QPushButton('Primary worker in the \nhousehold \n\nIn the absence of data \nidentified based on personal \nincome', self)
-        primary_worker.setGeometry((size.width())/2 - 100, size.height() / 2 - 100, 200, 130)
+        primary_worker_button = QPushButton('Primary worker in the \nhousehold \n\nIn the absence of data \nidentified based on personal \nincome', self)
+        primary_worker_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 100, 200, 130)
 
 
-        school_status  = QPushButton('School status of everyone \nincluding those individuals \nthat are workers', self)
-        school_status.setGeometry((size.width())/2 - 100, size.height() / 2 + 60, 200, 70)
+        school_status_button  = QPushButton('School status of everyone \nincluding those individuals \nthat are workers', self)
+        school_status_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 60, 200, 70)
 
 
-        residential_location_choice  = QPushButton('Residential Location Choice', self)
-        residential_location_choice.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
+        residential_location_choice_button  = QPushButton('Residential Location Choice', self)
+        residential_location_choice_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
 
     def paintEvent(self, parent = None):
         # Drawing line
