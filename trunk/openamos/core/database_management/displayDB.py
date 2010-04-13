@@ -62,7 +62,7 @@ class displayDB:
 
 		
 #creating an instance of the class.
-dispInstance = displayDB('namz', 'users', 'age', '8', 'abc')
+dispInstance = displayDB('xyz', 'users', 'age', '8', 'abc')
 #dispInstance = displayDB()
 
 
