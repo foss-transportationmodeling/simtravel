@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -16,6 +16,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
 
+        # Variable for a project; can be used to see if a project is open or not
+        self.protree = None
+        
         # Defining central widget
         self.centralwidgetscroll = QScrollArea()
         self.centralwidget = QWidget()
@@ -195,8 +198,9 @@ class MainWindow(QMainWindow):
 
 # Call file functions
     def projectnew(self):
-        self.project_new = NewProject()
-        self.project_new.exec_()
+        project_new = NewProject()
+        self.protree = project_new.configtree
+        print self.protree
 
     def projectopen(self):
         self.project_open = OpenProject()
