@@ -1,5 +1,6 @@
 from openamos.core.data_array import DataArray
-
+from openamos.core.models.model import SubModel
+from openamos.core.errors import ModelError
 
 class BasicController(object):
     def __init__(self, model_list, data):
@@ -30,21 +31,21 @@ class BasicController(object):
             
 
     def run_component(self):
-        for i in model_list:
+        for i in self.model_list:
             # Retrieving a subset of all agents (e.g., children, adults etc)
             # on which the particular model will be applied
-            data_subset = filter_data(i.data_filter)
+            data_subset = self.filter_data(i.data_filter)
 
             # this subsection of the method is run when a particular
             # model has to be run until a condition is violated
-            if run_until_condition is not None:
+            if i.run_until_condition is not None:
 
                 agents_to_simulate_ind = True
 
                 while (agents_to_simulate_ind):
                     # Retrieving the records of those agents where a certain
                     # stopping criterion is not satisfied
-                    agents_to_simulate = run_until_condition.compare(data_subset)
+                    agents_to_simulate = i.run_until_condition.compare(data_subset)
                 
                     # Generate a choiceset for the corresponding agents
                     choiceset_shape = (agents_to_simulate.shape[0], 
@@ -57,11 +58,11 @@ class BasicController(object):
                     result = i.simulate_choice(agents_to_simulate, choiceset)
 
                     # update the indicator for agents to simulate
-                    data_subset.setcolumn(dep_varname, result)
-                    result_run_var = data_subset.calculate_equation(data_filter.coefficients)
+                    data_subset.setcolumn(i.dep_varname, result)
+                    result_run_var = data_subset.calculate_equation(i.data_filter.coefficients)
                     data_subset.setcolumn(i.run_until_condition.varname, result_run_var)
 
-                    agents_to_simulate = run_until_condition.compare(data_subset)
+                    agents_to_simulate = i.run_until_condition.compare(data_subset)
                     if agents_to_simulate.shape[0] <> 0:
                         agents_to_simulate = True
                     else:
