@@ -25,3 +25,5 @@ class ProbabilityError(Exception):
 class ErrorSpecificationError(Exception):
     pass
 
+class ModelError(Exception):
+    pass
