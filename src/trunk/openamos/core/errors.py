@@ -30,4 +30,3 @@ class ModelError(Exception):
 
 # Checking to see how SVN works 
 
-# Trying to get a handle on Eclipse and Pydey
