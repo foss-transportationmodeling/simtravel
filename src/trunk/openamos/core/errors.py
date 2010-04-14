@@ -29,3 +29,5 @@ class ModelError(Exception):
     pass
 
 # Checking to see how SVN works 
+
+# Trying to get a handle on Eclipse and Pydey
