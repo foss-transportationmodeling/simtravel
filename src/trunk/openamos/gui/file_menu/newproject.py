@@ -1,7 +1,7 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from lxml import etree
-import sys, os
+import sys, os, shutil
 
 from openamos.gui.env import *
 from openamos.gui.file_menu.init_page import *
@@ -40,20 +40,14 @@ class NewProject(QWizard):
         projectname.text = str(self.page1.pronameline.text())
         
         projecthome = etree.SubElement(configroot, PROJECT_HOME)
-        projecthome.text = str(self.page1.proloccombobox.currentText())
+        projecthome.text = str(self.page1.proloccombobox.currentText())        
         
-        configfileloc = configtree.findtext(PROJECT_HOME) + os.path.sep + CONFIG_XML
+        configfileloc = projecthome.text + os.path.sep + projectname.text + '.xml'
         configfile = open(configfileloc, 'w')
         configtree.write(configfile, pretty_print=True)
         configfile.close()
         
         self.configtree = configtree
-        
-
-class NewProject1(object):
-    def __init__(self):
-        self.wizard = NewProjectWizard()
-        self.projectxml = self.wizard.run()
 
 
 def main():
