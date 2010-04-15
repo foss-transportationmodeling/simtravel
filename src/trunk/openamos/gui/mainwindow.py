@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
 
-        # Variable for a project; can be used to see if a project is open or not
+        # Variable for a project properties; can be used to see if a project is open or not
         self.protree = None
         
         # Defining central widget
@@ -64,6 +64,9 @@ class MainWindow(QMainWindow):
 
         # Call the class Models
         self.models = Models(self.centralwidget)
+        
+        #Method to disable menus and graphics based on whether a project is open or not
+        self.checkProject()
 
 
 # FILE MENU
@@ -199,12 +202,13 @@ class MainWindow(QMainWindow):
 # Call file functions
     def projectnew(self):
         project_new = NewProject()
+        project_new.exec_()
         self.protree = project_new.configtree
         print self.protree
 
     def projectopen(self):
         self.project_open = OpenProject()
-        self.project_open.exec_()
+        print self.project_open.file
 
     def projectsave(self):
         self.projectsave = SaveProject()
@@ -230,18 +234,23 @@ class MainWindow(QMainWindow):
     
     def projectClose(self):
         self.fileManager.clear()
-        self.fileManager.setEnabled(False)
-        self.enableFunctions(False)
-        self.project = None
+        self.protree = None
+        self.checkProject()
+        
 
     def projectQuit(self):
         reply = QMessageBox.question(None, 'Quit', "Are you sure to quit?",
                                      QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            self.deleteLater()
+            self.close()
+            
+    def checkProject(self):
+        if bool(self.protree):
+            self.centralwidget.setEnabled(True)
         else:
-            event.ignore()
+            self.centralwidget.setEnabled(False)
+            
 
 
         
