@@ -208,7 +208,8 @@ class MainWindow(QMainWindow):
 
     def projectopen(self):
         self.project_open = OpenProject()
-        print self.project_open.file
+        self.protree = etree.parse(self.project_open.file)
+        self.checkProject()
 
     def projectsave(self):
         self.projectsave = SaveProject()
