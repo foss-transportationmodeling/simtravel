@@ -8,7 +8,7 @@ class LinearRegressionModel(AbstractRegressionModel):
         AbstractRegressionModel.__init__(self, specification, error_specification)
 
         if not isinstance(error_specification, LinearRegErrorSpecification):
-            raise ErrorSpecification, """incorrect error specification; it should be """\
+            raise ErrorSpecificationError, """incorrect error specification; it should be """\
                 """LinearRegErrroSpecification object"""        
 
         self.seed = self.specification.seed
