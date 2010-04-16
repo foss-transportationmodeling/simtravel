@@ -40,7 +40,12 @@ class NewProject(QWizard):
         projectname.text = str(self.page1.pronameline.text())
         
         projecthome = etree.SubElement(configroot, PROJECT_HOME)
-        projecthome.text = str(self.page1.proloccombobox.currentText())        
+        projecthome.text = str(self.page1.proloccombobox.currentText())   
+        
+        dbconfig = etree.SubElement(configroot, DB_CONFIG)
+        dbconfig.set(DB_HOST, str(self.page2.hostnameline.text()))
+        dbconfig.set(DB_USER, str(self.page2.usernameline.text()))
+        dbconfig.set(DB_PASS, str(self.page2.passwdline.text())) 
         
         configfileloc = projecthome.text + os.path.sep + projectname.text + '.xml'
         configfile = open(configfileloc, 'w')
