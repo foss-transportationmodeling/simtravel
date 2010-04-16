@@ -86,6 +86,9 @@ class DataArray(object):
             raise DataError, 'not a recognized column name'
 
     def setcolumn(self, columname, values, rows=None):
+        if len(values.shape) > 1:
+            values.shape = (self.rows,)
+
         self.check_varname(columname)
         colnum = self._colnames[columname.lower()]
         try:
