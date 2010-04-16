@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
 
     def projectopen(self):
         self.project_open = OpenProject()
-        self.protree = etree.parse(self.project_open.file)
+        self.protree = etree.parse(str(self.project_open.file))
         self.checkProject()
 
     def projectsave(self):
@@ -218,8 +218,8 @@ class MainWindow(QMainWindow):
 
     def projectSaveAs(self):
         file = QFileDialog.getSaveFileName(self, QString("Save As..."), 
-                                                             "%s" %self.project.location, 
-                                                             "OpenAMOS (*.pop)")
+                                                             "%s" %self.getConfigElement(PROJECT_HOME), 
+                                                             "XML File (*.xml)")
         
         file = re.split("[/.]", file)
         filename = file[-2]
@@ -247,12 +247,17 @@ class MainWindow(QMainWindow):
             self.close()
             
     def checkProject(self):
-        if bool(self.protree):
-            self.centralwidget.setEnabled(True)
+        actpro = bool(self.protree)
+        if actpro:
+            self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.getConfigElement(PROJECT_NAME))
+        self.centralwidget.setEnabled(actpro)
+    
+    def getConfigElement(self, elt, prop='text' ):
+        element = self.protree.find(elt)
+        if prop == 'text':
+            return self.protree.findtext(elt)
         else:
-            self.centralwidget.setEnabled(False)
-            
-
+            return element.get(prop)
 
         
 
