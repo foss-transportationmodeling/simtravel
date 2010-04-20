@@ -40,8 +40,6 @@ class AbstractProbabilityModel(object):
         choice = zeros(self.num_agents)
         random_numbers = self.generate_random_numbers()
 
-        print random_numbers
-
         self.prob_cumsum = self.cumprob().filled(-1)
 
         for i in range(self.num_choices):
@@ -70,8 +68,8 @@ class AbstractProbabilityModel(object):
         alt_text = array(alt_text)
         alt_text.shape = (self.num_agents, 1)
 
-        return alt_text
-        #return DataArray(choice, ['selected choice']), alt_text
+        #return alt_text
+        return DataArray(choice, ['selected choice'])
 
 import unittest
 from numpy import array, zeros, dtype, float32
