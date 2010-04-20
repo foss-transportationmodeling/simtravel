@@ -46,7 +46,7 @@ class DataArray(object):
             raise DataError, 'variable name is not a valid string'
 
 
-    def calculate_equation(self, coefficients):
+    def calculate_equation(self, coefficients, rows=None):
         if not isinstance(coefficients, dict):
             raise DataError, 'coefficient input is invalid - should be of dictionary type'
 
@@ -64,7 +64,9 @@ class DataArray(object):
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             result += self.data[:,colnum] * coefficients[i]
-
+        
+        if rows is not None:
+            return result[rows]
         return result
     
     def exp_calculate_equation(self, coefficients):
@@ -86,8 +88,11 @@ class DataArray(object):
             raise DataError, 'not a recognized column name'
 
     def setcolumn(self, columname, values, rows=None):
+        
+        
         if len(values.shape) > 1:
-            values.shape = (self.rows,)
+            #converting the array to one dimensional
+            values.shape = (values.shape[0],)
 
         self.check_varname(columname)
         colnum = self._colnames[columname.lower()]
@@ -123,7 +128,7 @@ class DataArray(object):
             raise DataError, e
 
 
-    def columns(self, columnames):
+    def columns(self, columnames, rows=None):
         """
         the method retrieves and returns a dataarray of columnames that 
         were passed to the method. 
@@ -142,6 +147,8 @@ class DataArray(object):
             except KeyError, e:
                 raise DataError, '%s not a recognized column name' %i
 
+        if rows is not None:
+            return DataArray(self.data[rows,:][:,columnums], columnames)
         return DataArray(self.data[:,columnums], columnames)
 
     def rowsof(self, rows):
@@ -187,7 +194,7 @@ class DataArray(object):
 
 
 class DataFilter(object):
-    def __init__(self, varname, filter_string, value, coefficients):
+    def __init__(self, varname, filter_string, value, coefficients=None):
         
         if not isinstance(varname, str):
             raise DataError, """variable input has to be a valid """\
@@ -198,6 +205,8 @@ class DataFilter(object):
             raise DataError, """the data filter string has to be a valid """\
                 """ string object"""
 
+        self.filter_string = filter_string
+
         value_type = type(value)
 
         if not value_type in [int, float]:
@@ -206,7 +215,7 @@ class DataFilter(object):
         self.value = value
 
 
-        if not isinstance(coefficients, dict):
+        if not isinstance(coefficients, dict) and coefficients is not None:
             raise DataError, 'coefficient input is invalid - should be of dictionary type'
 
         self.coefficients = coefficients
@@ -230,7 +239,9 @@ class DataFilter(object):
         if self.filter_string == 'not equals':
             valid_rows = data.columns([self.varname]) <> self.value
 
-        return data.rowsof(valid_rows)            
+        #return data.rowsof(valid_rows)
+        valid_rows.shape = (valid_rows.shape[0], )
+        return valid_rows            
 
 
 import unittest
