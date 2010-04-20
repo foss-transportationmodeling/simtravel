@@ -3,6 +3,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 from model_manager.models import *
+from model_manager.model_manager_treewidget import *
 
 from file_menu.newproject import *
 from file_menu.openproject import *
@@ -50,6 +51,11 @@ class MainWindow(QMainWindow):
         self.model_management.setObjectName("model_management")
         self.model_management.headerItem().setText(0, "Model Management")
         self.model_management.setMinimumSize(50,50)
+        self.model_management.treewidget = Model_Manager_Treewidget(self.model_management)
+
+
+
+        
 
         # Defining data_management as a QTreeWidget
         self.data_management = QTreeWidget()
@@ -104,7 +110,7 @@ class MainWindow(QMainWindow):
                                             None, "Chose a model in a visual form.")
         component_long_term_choices_action = self.createaction("Long Term Choices", self.models.long_term_models, None, 
                                             None, None)
-        component_fixed_activity_prism_generator_action = self.createaction("Fixed Activity Location Choice Generator", self.models.fixed_activity_models, None, 
+        component_fixed_activity_location_choice_generator_action = self.createaction("Fixed Activity Location Choice Generator", self.models.fixed_activity_models, None, 
                                             None, None)
         component_vehicle_ownership_model_action = self.createaction("Vehicle Ownership Model", self.models.vehicle_ownership_models, None, 
                                             None, None)
@@ -125,7 +131,7 @@ class MainWindow(QMainWindow):
 
         self.modelsComponentSubMenu = self.models_menu.addMenu("&Component")
         self.addActions(self.models_menu, (models_interactive_ui_action, ))
-        self.addActions(self.modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_prism_generator_action,
+        self.addActions(self.modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_location_choice_generator_action,
                                                       component_vehicle_ownership_model_action, component_fixed_activity_prism_generator_action,
                                                        component_child_daily_status_and_allocation_model_action, component_adult_daily_status_model_action,
                                                       component_activity_skeleton_reconciliation_system_action,component_activity_travel_pattern_simulator_action,
