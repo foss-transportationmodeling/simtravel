@@ -47,28 +47,28 @@ class Child_Model(QWidget):
         assign_to_hhold_button.setGeometry((size.width()) * 4 / 5 - 150, size.height() / 2 - 280, 250, 70)
 
         travel_mode_to_school_button = QPushButton('Travel Mode to School (this \ndecision occurs in the \nActivity-travel Simulator) ', self)
-        travel_mode_to_school_button.setGeometry((size.width()) / 2 - 460, size.height() / 2 - 200, 210, 50)
+        travel_mode_to_school_button.setGeometry((size.width()) / 2 - 470, size.height() / 2 - 200, 230, 50)
 
         travel_independently_to_school_button = QPushButton('Does the child travel \nindependently to school?', self)
         travel_independently_to_school_button.setGeometry((size.width()) / 2 - 180, size.height() / 2 - 200, 160, 50)
 
         drop_off_event_button = QPushButton('Assign a drop-off event to household \n(particular adult gets selected in the \nnext step; working or non-working adult)? ', self)
-        drop_off_event_button.setGeometry((size.width()) / 2 + 50, size.height() / 2 - 150, 270, 50)
+        drop_off_event_button.setGeometry((size.width()) / 2 + 45, size.height() / 2 - 150, 280, 50)
 
         travel_mode_from_school_button = QPushButton('Travel Mode from School (this \ndecision occurs in the Activity-\ntravel Simulator) Constrained \nMode Choice Set based on TO Mode ', self)
-        travel_mode_from_school_button.setGeometry((size.width()) / 2 - 460, size.height() / 2 - 110, 210, 70)
+        travel_mode_from_school_button.setGeometry((size.width()) / 2 - 470, size.height() / 2 - 110, 230, 70)
 
         travel_independently_from_school_button = QPushButton('Does the child travel \nindependently from \nschool?', self)
         travel_independently_from_school_button.setGeometry((size.width()) / 2 - 180, size.height() / 2 - 100, 160, 50)
 
         pick_up_event_button = QPushButton('Assign a pick-up event to household \n(particular adult gets selected in the \nnext step; working or non-working adult)', self)
-        pick_up_event_button.setGeometry((size.width()) / 2 + 50, size.height() / 2 - 50, 270, 50)
+        pick_up_event_button.setGeometry((size.width()) / 2 + 45, size.height() / 2 - 50, 280, 50)
 
         generate_activity_travel_pattern_button = QPushButton('Treat the child like an adult \nand generate activity-travel \npatterns', self)
         generate_activity_travel_pattern_button.setGeometry((size.width()) / 2 - 460, size.height() / 2 + 30, 200, 50)
 
         independently_after_school_button = QPushButton('Activity pursued independently \nafter school?', self)
-        independently_after_school_button.setGeometry((size.width()) / 2 - 180, size.height() / 2 + 30, 200, 50)
+        independently_after_school_button.setGeometry((size.width()) / 2 - 190, size.height() / 2 + 30, 220, 50)
 
         after_school_activity_button = QPushButton('Is there time to \nengage in an after school \nCHILD activity?', self)
         after_school_activity_button.setGeometry((size.width()) / 2 - 180, size.height() / 2 + 110, 200, 50)
@@ -260,12 +260,12 @@ class Child_Model(QWidget):
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() + 13, point.y() - 4), QPoint(point.x() + 13,point.y() + 4))
 
-        point.setX(widgetwidth / 2 - 250)  
+        point.setX(widgetwidth / 2 - 240)  
         point.setY(widgetheight / 2 - 175)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() + 13, point.y() - 4), QPoint(point.x() + 13,point.y() + 4))
 
-        point.setX(widgetwidth / 2 - 250)  
+        point.setX(widgetwidth / 2 - 240)  
         point.setY(widgetheight / 2 - 75)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() + 13, point.y() - 4), QPoint(point.x() + 13,point.y() + 4))
@@ -313,15 +313,15 @@ class Child_Model(QWidget):
         point.setY(widgetheight / 2 + 50)
         text.drawText(point, "Yes")
 
-        point.setX(widgetwidth / 2 - 95)  
+        point.setX(widgetwidth / 2 - 100)  
         point.setY(widgetheight / 2 + 90)
         text.drawText(point, "No")
 
-        point.setX(widgetwidth / 2 - 100)  
+        point.setX(widgetwidth / 2 - 105)  
         point.setY(widgetheight / 2 + 173)
         text.drawText(point, "Yes")
 
-        point.setX(widgetwidth / 2 - 95)  
+        point.setX(widgetwidth / 2 - 100)  
         point.setY(widgetheight / 2 + 460)
         text.drawText(point, "No")
 

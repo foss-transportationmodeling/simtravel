@@ -23,40 +23,40 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         activity_pursued_1_button.setGeometry((size.width()) * 3 / 4 - 100, 200, 200, 70)
 
         assign_to_non_hhold_button = QPushButton('Activity assigned to a \nNon-household member \ncomprising Joint Activity with \nNon-household member', self)
-        assign_to_non_hhold_button.setGeometry((size.width()) * 3 / 4 + 50, 300, 200, 70)
+        assign_to_non_hhold_button.setGeometry((size.width()) * 3 / 4 + 40, 300, 220, 70)
 
         assign_to_hhold_button = QPushButton('Assign the activity to \nHousehold member comprising\nJoint Activity with \nhousehold member', self)
-        assign_to_hhold_button.setGeometry((size.width()) * 3 / 4 - 250, 300, 200, 70)
+        assign_to_hhold_button.setGeometry((size.width()) * 3 / 4 - 260, 300, 220, 70)
 
         mode_choice_model_button = QPushButton('Mode choice model for \nintra-household joint \ntrips with children', self)
-        mode_choice_model_button.setGeometry((size.width()) * 3 / 4 - 250, 400, 200, 50)
+        mode_choice_model_button.setGeometry((size.width()) * 3 / 4 - 260, 400, 220, 50)
 
 
 
        
         all_other_individuals_button = QPushButton('All other individuals', self)
-        all_other_individuals_button.setGeometry((size.width()) / 4 - 100, 120, 200, 50)
+        all_other_individuals_button.setGeometry((size.width()) / 4 - 110, 120, 220, 50)
 
         adult_individuals_button = QPushButton('Adult individuals, children \nwith independent activities \n(if children stay at home then \nthey shadow the activity-travel \npatterns of adult to whom \nthey are assigned)', self)
-        adult_individuals_button.setGeometry((size.width()) / 4 - 100, 200, 200, 100)       
+        adult_individuals_button.setGeometry((size.width()) / 4 - 110, 200, 220, 100)       
 
         travel_time_button = QPushButton('Is travel time to next \nfixed activity \74 time \navailable in the prism?', self)
-        travel_time_button.setGeometry((size.width()) / 4 - 100, 330, 200, 50)
+        travel_time_button.setGeometry((size.width()) / 4 - 110, 330, 220, 50)
 
         activity_choice_button = QPushButton('Activity Type Choice\nMode-Destination Choice; mode-\ndestination choices are limited \nby the TSP and travel time to \nnext fixed activity\nActivity Duration Choice', self)
-        activity_choice_button.setGeometry((size.width()) / 4 - 250, 410, 200, 100)
+        activity_choice_button.setGeometry((size.width()) / 4 - 260, 410, 220, 100)
 
         actual_start_time_button = QPushButton('Actual start time \nfor the activity', self)
-        actual_start_time_button.setGeometry((size.width()) / 4 - 250, 540, 200, 50)
+        actual_start_time_button.setGeometry((size.width()) / 4 - 260, 540, 220, 50)
 
         time_in_activity_button = QPushButton('Is there enough time to \nengage in the activity?', self)
-        time_in_activity_button.setGeometry((size.width()) / 4 - 250, 620, 200, 50)
+        time_in_activity_button.setGeometry((size.width()) / 4 - 260, 620, 220, 50)
 
         proceed_next_activity_button = QPushButton('Proceed to next \nfixed activity', self)
-        proceed_next_activity_button.setGeometry((size.width()) / 4 + 50, 620, 200, 50)
+        proceed_next_activity_button.setGeometry((size.width()) / 4 + 40, 620, 220, 50)
 
         mode_choice_next_activity_button = QPushButton('Mode Choice to the \nnext fixed activity', self)
-        mode_choice_next_activity_button.setGeometry((size.width()) / 4 + 50, 700, 200, 50)
+        mode_choice_next_activity_button.setGeometry((size.width()) / 4 + 40, 700, 220, 50)
 
         hov_button = QPushButton('Is the mode of \nthe trip HOV?', self)
         hov_button.setGeometry((size.width()) / 4 - 250, 790, 200, 50)
@@ -255,7 +255,7 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         point.setY(725)
         text.drawText(point, "Yes")
 
-        point.setX(widgetwidth / 4 - 7)  
+        point.setX(widgetwidth / 4 - 12)  
         point.setY(810)
         text.drawText(point, "HOV")
 
@@ -267,7 +267,7 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         point.setY(860)
         text.drawText(point, "No")
 
-        point.setX(widgetwidth / 4 + 135)  
+        point.setX(widgetwidth / 4 + 130)  
         point.setY(860)
         text.drawText(point, "No")
 
@@ -277,11 +277,11 @@ class Activity_Travel_Pattern_Simulator(QWidget):
 
         
 
-        point.setX(widgetwidth / 4 - 200)  
+        point.setX(widgetwidth / 4 - 210)  
         point.setY(890)
         text.drawText(point, "SOV \53")
 
-        point.setX(widgetwidth / 4 - 220)  
+        point.setX(widgetwidth / 4 - 230)  
         point.setY(905)
         text.drawText(point, "Other Modes")
 

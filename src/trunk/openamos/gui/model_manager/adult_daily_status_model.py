@@ -162,7 +162,7 @@ class Adult_Model(QWidget):
         point.setY(65)
         text.drawText(point, "No")
 
-        point.setX(widgetwidth / 2 - 20)  
+        point.setX(widgetwidth / 2 - 25)  
         point.setY(115)
         text.drawText(point, "Yes")
 
@@ -174,7 +174,7 @@ class Adult_Model(QWidget):
         point.setY(490)
         text.drawText(point, "Non-Worker")
 
-        point.setX(widgetwidth / 4 - 15)  
+        point.setX(widgetwidth / 4 - 20)  
         point.setY(615)
         text.drawText(point, "No")
 
