@@ -23,13 +23,8 @@ class connectDB:
 			self.engine = create_engine('postgres://postgres:1234@localhost:5432/postgres')
 			#engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
 			self.connection = self.engine.connect()
-			#print the data that the instance passes to the class			
-			print self.hostname
-			print self.username
-			print self.password
-			print self.dbname
-			print self.engine
-			print self.connection
+			print 'Connection to database successful'
+
 		except Exception, e:
 			#exception occured. print the error. exit the program		        
 			print "Error: %s" %e
@@ -50,6 +45,32 @@ class connectDB:
 			sys.exit()
 
 
+
+#unit test to test the code
+import unittest
+
+#define a class for testing
+class TestConnectDB(unittest.TestCase):
+	#only initialize objects here
+	def setUp(self):
+		self.hostname = 'localhost'
+		self.username = 'postgres'
+		self.password = '1234'
+		self.dbname = 'postgres'
+		self.engine = 'engine'
+		self.connection = 'abc'
+
+	def testDB(self):
+		#test to connect to database 
+		DBobj = connectDB(self.hostname, self.username, self.password, self.dbname, self.engine, self.connection)
+		connection = self.connection		
+	
+		#test to disconnect from the database
+		DBobj.conn_close(DBobj.connection)
+
+
+if __name__ == '__main__':
+    unittest.main()
 
 #creating an instance of the class.
 #dbInstance = connectDB('localhost', 'postgres', '1234', 'postgres', 'engine', 'conn')
