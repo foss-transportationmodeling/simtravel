@@ -18,13 +18,6 @@ class displayDB:
 		self.col_name = col_name
 		self.value = value
 
-		#print the data
-		print self.table_name
-		print self.result
-		print self.dbobj
-		print self.col_name
-		print self.value
-
 
 		try:	
 			#created an instance of the database object to connect to it		
@@ -60,9 +53,35 @@ class displayDB:
 		self.dbobj.conn_close(self.dbobj.connection)
 
 
+#unit test to test the code
+import unittest
+
+#define a class for testing
+class TestDisplayDB(unittest.TestCase):
+	#only initialize objects here
+	def setUp(self):
+		self.dbobj = 'abc'
+		self.table_name = 'users'
+		self.col_name = 'age'
+		self.value = '8'
+		self.col_name1 = ''
+		self.result = 'xzy'
+
+
+	def testDB(self):
+		#test to display rows when value is given
+		DBobj = displayDB(self.dbobj, self.table_name, self.col_name, self.value, self.result)		
+	
+		#test to display rows when value is not given
+		DBobj = displayDB(self.dbobj, self.table_name, self.col_name1, self.value, self.result)
+		
+
+if __name__ == '__main__':
+    unittest.main()
+
 		
 #creating an instance of the class.
-dispInstance = displayDB('xyz', 'users', 'age', '8', 'abc')
+#dispInstance = displayDB('namz', 'users', 'age', '8', 'abc')
 #dispInstance = displayDB()
 
 
