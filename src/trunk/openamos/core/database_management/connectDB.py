@@ -6,6 +6,7 @@ import exceptions
 import sqlalchemy
 from sqlalchemy import create_engine
 
+engine1 = None
 
 #class to connect to the database
 class connectDB:
@@ -15,15 +16,24 @@ class connectDB:
 		self.username = username
 		self.password = password
 		self.dbname = dbname
+		protocol = 'postgres'
 		
 		#use the engine to connect to the database
 		try:
 			#engine used to connect to database. 
 			#pass all the required data like hostname username password database name			
-			self.engine = create_engine('postgres://postgres:1234@localhost:5432/postgres')
-			#engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
-			self.connection = self.engine.connect()
-			print 'Connection to database successful'
+			#self.engine = create_engine('postgres://postgres:1234@localhost:5432/postgres')
+			if protocol is 'postgres':
+				connect_string = '%s://%s:%s@%s:5432/%s'%(protocol, self.username, self.password, self.hostname, self.dbname)
+				#engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
+				self.engine = create_engine(connect_string)
+				engine1 = self.engine
+				self.connection = engine1.connect()
+				print 'Connection to database successful'
+			else:
+				print 'database is not postgres'
+				sys.exit()
+
 
 		except Exception, e:
 			#exception occured. print the error. exit the program		        
