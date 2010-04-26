@@ -40,7 +40,8 @@ class DataArray(object):
         firstchar = str(varname)[0]
         match = re.match('[0-9]', firstchar)
         if match is not None:
-            raise DataError, 'variable name is not a valid string - first character is invalid'
+            raise DataError, """variable name is not a valid string - first """\
+                """character is invalid"""
         
         if type(varname) is not str:
             raise DataError, 'variable name is not a valid string'
@@ -48,7 +49,8 @@ class DataArray(object):
 
     def calculate_equation(self, coefficients, rows=None):
         if not isinstance(coefficients, dict):
-            raise DataError, 'coefficient input is invalid - should be of dictionary type'
+            raise DataError, """coefficient input is invalid - should be of """\
+                """dictionary type"""
 
         for i in coefficients.keys():
             if i.lower() not in self._colnames.keys():
@@ -216,7 +218,8 @@ class DataFilter(object):
 
 
         if not isinstance(coefficients, dict) and coefficients is not None:
-            raise DataError, 'coefficient input is invalid - should be of dictionary type'
+            raise DataError, """coefficient input is invalid - should be of """\
+                """dictionary type"""
 
         self.coefficients = coefficients
 
@@ -274,8 +277,10 @@ class TestBadInputsDataArray(unittest.TestCase):
 
     def testcoefficients(self):
         data_array = DataArray(self.data, self.varnames)
-        self.assertRaises(DataError, data_array.calculate_equation, self.coefficients1)
-        self.assertRaises(DataError, data_array.calculate_equation, self.coefficients2)
+        self.assertRaises(DataError, data_array.calculate_equation, 
+                          self.coefficients1)
+        self.assertRaises(DataError, data_array.calculate_equation, 
+                          self.coefficients2)
 
 class TestDataArray(unittest.TestCase):
     def setUp(self):
