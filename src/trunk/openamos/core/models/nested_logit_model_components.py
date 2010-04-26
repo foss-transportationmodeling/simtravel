@@ -1,16 +1,13 @@
-import re
 import copy
-from numpy import ndarray
-from openamos.core.errors import SpecificationError, ChoicesError, VariablesError, CoefficientsError, SeedError
-from openamos.core.errors import ErrorSpecificationError
+from openamos.core.errors import SpecificationError
 from openamos.core.models.model_components import Specification
 
 class NestedChoiceSpecification(Specification):
     def __init__(self, choices, coefficients, logsumparameter=None):
         Specification.__init__(self, choices, coefficients)
         if self.number_choices > 1:
-            raise SpecificationError, """not a valid inout - more than 1 equations """\
-                """ specified for the branch in the tree; only one """\
+            raise SpecificationError, """not a valid inout - more than 1 """\
+                """equations specified for the branch in the tree; only one """\
                 """ choice expected"""
         if logsumparameter is not None:
             if logsumparameter >1 or logsumparameter < 0:
@@ -47,28 +44,25 @@ class NestedSpecification(object):
                 actual_choices.append(i)
         return actual_choices
 
-
-
-        
-        
-
-
     def check(self):
         self.values = []
 
         if not isinstance(self.specification, dict):
-            raise SpecificationError, 'not a valid input - dictionary of choice tree expected'
+            raise SpecificationError, """not a valid input - dictionary """\
+                """of choice tree expected"""
         
         keys = self.specification.keys()
         for i in keys:
             for j in self.specification[i]:
                 if not isinstance(j, NestedChoiceSpecification):
-                    raise SpecificationError, """not a valid input - values for keys in the choice tree """\
-                        """specification are not a valid NestedChoiceSpecification object"""
+                    raise SpecificationError, """not a valid input - values for keys """\
+                        """in the choice tree specification are not a valid """\
+                        """NestedChoiceSpecification object"""
                 self.values.append(j)
                 
         if not ('root' in keys or 'ROOT' in keys):
-            return SpecificationError, 'not a valid input - the "root" key is missing from the keys'
+            return SpecificationError, """not a valid input - the "root" key is """\
+                """missing from the keys"""
         try:
             keys.pop(keys.index('root'))
         except:
@@ -82,17 +76,19 @@ class NestedSpecification(object):
 
         for i in keys:
             if not isinstance(i, NestedChoiceSpecification):
-                raise SpecificationError, """not a valid input - keys in the dictionary of choice """\
-                    """are not a valid NestedChoiceSpecification object"""
+                raise SpecificationError, """not a valid input - keys in the """\
+                    """dictionary of choice are not a valid """\
+                    """NestedChoiceSpecification object"""
         
             if i.logsumparameter is None:
-                raise SpecificationError, """not a valid input - the parents in the choice tree """\
-                    """do not have a valid logsum parameter"""
+                raise SpecificationError, """not a valid input - the parents in the """\
+                    """choice tree do not have a valid logsum parameter"""
 
             logsum_type = type(i.logsumparameter)
             if logsum_type not in [int, float]:
-                raise SpecificationError, """not a valid input - the parents in the choice tree """\
-                    """do not have a valid logsum parameter - int or float expected"""
+                raise SpecificationError, """not a valid input - the parents in the """\
+                    """choice tree do not have a valid logsum parameter - """\
+                    """int or float expected"""
 
         self.keys = self.specification.keys() 
 
@@ -107,9 +103,9 @@ class NestedSpecification(object):
         parent = self.parent(child)
         if not parent == 'root':
             if child.logsumparameter > parent.logsumparameter:
-                raise SpecificationError, """not a valid input - the logsum parameters are not feasible; """\
-                    """the logsum parameter for one of the children is greater than the """\
-                    """parent"""
+                raise SpecificationError, """not a valid input - the logsum """\
+                    """parameters are not feasible; the logsum parameter for one """\
+                    """of the children is greater than the parent"""
             else:
                 self.check_logsum_ofparent(parent)
 
@@ -135,13 +131,14 @@ class NestedSpecification(object):
                 names.append(i.choices[0])
         except KeyError, e:
             # not raised just warning printed
-            raise  SpecificationError, '%s key was not found in the specification dictionary' %key
+            raise  SpecificationError, """%s key was not found in the """\
+                """specification dictionary' %key
             
         return names
         
     def all_child_names(self, values):
-        #differs from child_names in that this one returns in response to columna name as
-        #opposed to a spec object key
+        #differs from child_names in that this one returns in response to 
+        # columna name as opposed to a spec object key
         #also this returns all the sub children
 
         values_iter = copy.deepcopy(values)
@@ -241,7 +238,8 @@ class TestBadNestedBranchSpecification(unittest.TestCase):
 
 
     def testtwochoices(self):
-        self.assertRaises(SpecificationError, NestedChoiceSpecification, self.choices1_bad, self.coefficients1_bad)
+        self.assertRaises(SpecificationError, NestedChoiceSpecification, 
+                          self.choices1_bad, self.coefficients1_bad)
 
     def testgrtonelogsum(self):
         self.assertRaises(SpecificationError, NestedChoiceSpecification, 
@@ -514,7 +512,8 @@ class TestNestedSpecification(unittest.TestCase):
         
 #TODO - rename get_choices_coefficients --> get_parentnodes_coefficients
 #TODO - all values to lower case where string is being passed
-#TODO - also check for absence of keys/values should exception be raised or a no value return ??
+#TODO - also check for absence of keys/values should exception be 
+# raised or a no value return ??
         
 if __name__ == '__main__':
     unittest.main()

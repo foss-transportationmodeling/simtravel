@@ -8,13 +8,14 @@ class AbstractRegressionModel(Model):
         Model.__init__(self, specification)
         
         if not isinstance(self.specification, Specification):
-            raise SpecificationError, 'specification input is not a Specification object'
+            raise SpecificationError, """specification input is not a """\
+                """valid Specification object"""
 
         self.error_specification = error_specification
 
         if specification.number_choices > 1:
-            raise SpecificationError, """invalid specification for regression model only"""\
-                """ one equation needs to be specified"""
+            raise SpecificationError, """invalid specification for regression """\
+                """ model only one equation needs to be specified"""
 
         if not isinstance(self.error_specification, ErrorSpecification):
             raise ErrorSpecificationError, """invalid error specification"""\
@@ -56,12 +57,12 @@ class TestBadSpecificationRegressionModel(unittest.TestCase):
         self.errorspecification1 = ErrorSpecification(variance1, 'normal')
 
     def testtwodependentvars(self):
-        self.assertRaises(SpecificationError, AbstractRegressionModel, self.specification,
-                          self.errorspecification)
+        self.assertRaises(SpecificationError, AbstractRegressionModel, 
+                          self.specification, self.errorspecification)
 
     def testtwoerrorcomponents(self):
-        self.assertRaises(SpecificationError, AbstractRegressionModel, self.specification, 
-                          self.errorspecification1)
+        self.assertRaises(SpecificationError, AbstractRegressionModel, 
+                          self.specification, self.errorspecification1)
 
 
 class TestAbstractRegressionModel(unittest.TestCase):
@@ -87,7 +88,8 @@ class TestAbstractRegressionModel(unittest.TestCase):
 
         exp_expected_act = exp(expected_act)
         model_exp_expected_values = model.calc_exp_expected_value(self.data)
-        exp_expected_diff = all(exp_expected_act == model_exp_expected_values.data)
+        exp_expected_diff = all(exp_expected_act == 
+                                model_exp_expected_values.data)
         self.assertEqual(True, exp_expected_diff)
         
                         

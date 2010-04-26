@@ -1,5 +1,6 @@
 from openamos.core.models.model_components import Specification
-from openamos.core.errors import SpecificationError, ChoicesError, CoefficientsError, SeedError, ThresholdsError
+from openamos.core.errors import SpecificationError, ChoicesError
+from openamos.core.errors import CoefficientsError, SeedError
 
 class CountSpecification(Specification):
     def __init__(self, choices, coefficients, seed=1, distribution=None):
@@ -14,8 +15,8 @@ class CountSpecification(Specification):
                 raise SpecificationError, """the distribution specification is not """\
                     """a valid string"""
             if self.distribution not in ['poisson', 'negativebinomial']:
-                raise SpecificationError, """the ordered model formulations supported """\
-                    """are poisson and negativebinomial specification"""
+                raise SpecificationError, """the ordered model formulations """\
+                    """ supported are poisson and negativebinomial specification"""
 
     def check(self):
         checkVal, checkText = self.check_text_only(self.choices)
@@ -39,8 +40,8 @@ class CountSpecification(Specification):
 
     def check_specification_consistency(self, choices, coefficients):
         if len(coefficients) > 1:
-            return 0, """the number of equations specified is more than 1; only one equation """\
-                """expected"""
+            return 0, """the number of equations specified is more than 1; """\
+                """only one equation expected"""
 
         return 1, ''
         
@@ -57,13 +58,14 @@ class TestBadCountSpecification(unittest.TestCase):
         self.distribution2 = 123
 
     def testcoeffecients(self):
-        self.assertRaises(SpecificationError, CountSpecification, self.choices, self.coefficients1)
+        self.assertRaises(SpecificationError, CountSpecification, 
+                          self.choices, self.coefficients1)
 
     def testdistributions(self):
-        self.assertRaises(SpecificationError, CountSpecification, self.choices, self.coefficients, 
-                          distribution=self.distribution1)
-        self.assertRaises(SpecificationError, CountSpecification, self.choices, self.coefficients, 
-                          distribution=self.distribution2)
+        self.assertRaises(SpecificationError, CountSpecification, self.choices, 
+                          self.coefficients, distribution=self.distribution1)
+        self.assertRaises(SpecificationError, CountSpecification, self.choices, 
+                          self.coefficients, distribution=self.distribution2)
 
         
         

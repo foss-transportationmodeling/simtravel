@@ -8,8 +8,8 @@ class LinearRegressionModel(AbstractRegressionModel):
         AbstractRegressionModel.__init__(self, specification, error_specification)
 
         if not isinstance(error_specification, LinearRegErrorSpecification):
-            raise ErrorSpecificationError, """incorrect error specification; it should be """\
-                """LinearRegErrroSpecification object"""        
+            raise ErrorSpecificationError, """incorrect error specification; it """\
+                """should be LinearRegErrroSpecification object"""        
 
         self.seed = self.specification.seed
         random.seed(self.seed)
@@ -49,7 +49,8 @@ class TestLinearRegressionModel(unittest.TestCase):
         pred_value = model.calc_predvalue(self.data)
 
         random.seed(1)
-        expected_act = self.data.calculate_equation(self.specification.coefficients[0])
+        expected_act = self.data.calculate_equation(
+                                                    self.specification.coefficients[0])
         expected_act.shape = (4,1)
         pred_act = norm.rvs(loc=expected_act, scale=1, size=(4,1))
 

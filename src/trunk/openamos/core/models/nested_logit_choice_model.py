@@ -10,7 +10,8 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
         AbstractChoiceModel.__init__(self, specification)
 
         if not isinstance(specification, NestedSpecification):
-            raise SpecificationError, 'the specification input is not a valid NestedSpecification object'
+            raise SpecificationError, """the specification input is not a valid """\
+                """NestedSpecification object"""
         
         self.parent_list = []
         for parent in self.specification:
@@ -42,8 +43,8 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
 
         # Iterating through parent nodes and calculating exp of utilities
         # logsum_parameter_parent --> the node which is being considered
-        # logsum_parameter_child --> the logsum parameter of the child node if it
-        #                            has sub branches
+        # logsum_parameter_child --> the logsum parameter of the child node if 
+        #                          it has sub branches
         #self.parent_list = []
         #for parent in self.specification:
         #    self.parent_list.append(parent)
@@ -55,16 +56,20 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
                 parent_name = 'root'
             else:
                 logsum_parameter_parent = parent.logsumparameter
-                all_actual_choices = self.specification.all_actual_choice_names([parent.choices[0]])
+                all_actual_choices = self.specification.all_actual_choice_names(
+                                                                                [parent.choices[0]])
                 parent_name = parent.choices[0]
 
             #If all the ACTUAL CHOICES for a particular parent are missing 
             # as specified in the CHOICESET variable then the 
             #scaled utilities are coded as missing and the branch is not considered
             # in the calculation of probabilities
-            actual_choices_missing = list(all_actual_choices.intersection(missing_choices))
-            if len(all_actual_choices) > 0 and list(all_actual_choices) == actual_choices_missing:
-                missing_child_values = obs_values.column(actual_choices_missing[0])
+            actual_choices_missing = list(all_actual_choices.intersection(
+                                                                          missing_choices))
+            if len(all_actual_choices) > 0 and (list(all_actual_choices) == 
+                                                actual_choices_missing):
+                missing_child_values = obs_values.column(
+                                                         actual_choices_missing[0])
                 rows = missing_child_values == ma.masked
                 parent_values = obs_values.column(parent_name)
                 parent_values[rows] = ma.masked
@@ -82,8 +87,8 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
                     # if sub-branch exists
 
                 # checking to see if the node has any children and accordingly
-                # calculate the logsum values and then accordingly calculate the utility
-                # and exponent of utility
+                # calculate the logsum values and then accordingly calculate the 
+                # utility and exponent of utility
                 # if the node does not have any children then scale the utilities
                 # by the logsum parameter and calculate the exponent of that
                 if sub_branch_check:
@@ -95,12 +100,14 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
                     logsum = log(logsum)
                     obs_values.addtocolumn(child_name, 
                                            logsum_parameter_child * logsum)
-                    obs_values.scaledowncolumn(child_name, logsum_parameter_parent)
+                    obs_values.scaledowncolumn(child_name, 
+                                               logsum_parameter_parent)
                     obs_values.expofcolumn(child_name)
                     
                 else:
                     # if sub-branch does not exist
-                    obs_values.scaledowncolumn(child_name, logsum_parameter_parent)
+                    obs_values.scaledowncolumn(child_name, 
+                                               logsum_parameter_parent)
                     obs_values.expofcolumn(child_name)
         return obs_values
 
@@ -125,7 +132,8 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
 
             #calculating the probability of children in a branch
             for child in child_names:
-                exp_expected_utilities.setcolumn(child, exp_expected_utilities.column(child)/util_sum)
+                exp_expected_utilities.setcolumn(child, 
+                                                 exp_expected_utilities.column(child)/util_sum)
             
             # Dummy check to ensure that within any branch the probs add to one
             prob_sum = 0
@@ -137,7 +145,8 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
             for parent in parent_names:
                 parent_column = exp_expected_utilities.column(parent)
                 choice_column = exp_expected_utilities.column(choice)
-                exp_expected_utilities.setcolumn(choice, choice_column * parent_column)
+                exp_expected_utilities.setcolumn(choice, choice_column * 
+                                                 parent_column)
 
 
         self.specification.actual_choices.sort()
@@ -155,10 +164,12 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
         if choiceset is None:
             choiceset = DataArray(array([]), [])
         probabilities = self.calc_probabilities(data, choiceset)
-        prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, 
+                                              self.specification.seed)
         return prob_model.selected_choice()
 
-#TODO - ELIMINATE PARENTS IF THE ACTUAL CHOICE IS ABSENT WHEN CALCULATING PROBABILITIES
+#TODO - ELIMINATE PARENTS IF THE ACTUAL CHOICE IS 
+# ABSENT WHEN CALCULATING PROBABILITIES
 
 
 import unittest
@@ -222,7 +233,8 @@ class TestNestedLogitChoiceModel(unittest.TestCase):
         data = array([[1, 1.1], [1, -0.25], [1, 3.13], [1, -0.11]])
         self.data = DataArray(data, ['Constant', 'Var1'])
 
-        self.choiceset = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), ['sov11', 'HOV'])
+        self.choiceset = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), 
+                                   ['sov11', 'HOV'])
 
         nested_spec = NestedSpecification(specification_dict)
         self.model = NestedLogitChoiceModel(nested_spec)
@@ -240,15 +252,12 @@ class TestNestedLogitChoiceModel(unittest.TestCase):
         self.assertEqual(True, result_diff)
 
     def testmodelresultswithchoicesets(self):
-        result_model = self.model1.calc_chosenalternative(self.data, self.choiceset)
+        result_model = self.model1.calc_chosenalternative(self.data, 
+                                                          self.choiceset)
         result_act = array([['bus1'], ['light rail1'], ['bus1'], ['sov11']])
 
         result_diff = all(result_act == result_model)
         self.assertEqual(True, result_diff)
-
-        
-    
-
 
 if __name__ == '__main__':
     unittest.main()

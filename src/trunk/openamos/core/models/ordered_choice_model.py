@@ -9,7 +9,8 @@ from openamos.core.errors import SpecificationError
 class OrderedModel(AbstractChoiceModel):
     def __init__(self, ol_specification):
         if not isinstance(ol_specification, OLSpecification):
-            raise SpecificationError, 'the specification is not a valid OLSpecification object'
+            raise SpecificationError, """the specification is not a valid """\
+                """OLSpecification object"""
 
         AbstractChoiceModel.__init__(self, ol_specification)
         
@@ -39,8 +40,10 @@ class OrderedModel(AbstractChoiceModel):
         return probabilities
 
     def calc_chosenalternative(self, data):
-        probabilities = DataArray(self.calc_probabilities(data), self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
+        probabilities = DataArray(self.calc_probabilities(data), 
+                                  self.specification.choices)
+        prob_model = AbstractProbabilityModel(probabilities, 
+                                              self.specification.seed)
         return prob_model.selected_choice()
         
 
@@ -75,7 +78,8 @@ class TestOrderedProbitModel(unittest.TestCase):
         specification = OLSpecification(choices, self.coefficients, self.thresholds)
         self.model = OrderedModel(specification)
 
-        specification1 = OLSpecification(choices, self.coefficients, self.thresholds, distribution='probit')
+        specification1 = OLSpecification(choices, self.coefficients, self.thresholds, 
+                                         distribution='probit')
         self.model1 = OrderedModel(specification1)
         
 
@@ -88,7 +92,8 @@ class TestOrderedProbitModel(unittest.TestCase):
         prob[:,0] = genlogistic.cdf(self.thresholds[0] - obs_utility, shape_param)
         prob[:,1] = (genlogistic.cdf(self.thresholds[1] - obs_utility, shape_param) - 
                      genlogistic.cdf(self.thresholds[0] - obs_utility, shape_param))
-        prob[:,2] = 1 - genlogistic.cdf(self.thresholds[1] - obs_utility, shape_param)
+        prob[:,2] = 1 - genlogistic.cdf(self.thresholds[1] - 
+                                        obs_utility, shape_param)
 
         prob_model = self.model.calc_probabilities(self.data)
         prob_diff = all(prob == prob_model)

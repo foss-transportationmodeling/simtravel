@@ -1,6 +1,5 @@
-from numpy import zeros, ndarray
+from numpy import zeros
 from scipy import exp
-from openamos.core.errors import DataError, SpecificationError
 from openamos.core.data_array import DataArray
 from openamos.core.models.model_components import Specification
 
@@ -52,9 +51,11 @@ class TestAbstractModel(unittest.TestCase):
         diff_values = all(value_array_act == expected_value_array.data)
         self.assertEqual(True, diff_values)
 
-        exp_expected_value_array = self.model.calculate_exp_expected_values(self.data)
+        exp_expected_value_array = self.model.calculate_exp_expected_values(
+                                                                                self.data)
         self.assertEqual(True, isinstance(exp_expected_value_array, DataArray))
-        self.assertEqual(self.specification.choices, exp_expected_value_array.varnames)
+        self.assertEqual(self.specification.choices, 
+                            exp_expected_value_array.varnames)
         diff_values = all(exp(value_array_act) == exp_expected_value_array.data)
         self.assertEqual(True, diff_values)
 

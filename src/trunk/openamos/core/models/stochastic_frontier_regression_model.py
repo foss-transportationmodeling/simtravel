@@ -8,20 +8,21 @@ class StocFronRegressionModel(AbstractRegressionModel):
         AbstractRegressionModel.__init__(self, specification, error_specification)
         
         if not isinstance(error_specification, StochasticRegErrorSpecification):
-            raise ErrorSpecification, """incorrect error specification; it should be """\
-                """StochasticRegErrroSpecification object"""
+            raise ErrorSpecificationError, """incorrect error specification; it """\
+                """should be StochasticRegErrroSpecification object"""
 
         self.seed = self.specification.seed
         random.seed(self.seed)
 
-    def calc_errorcomponent(self, variance_norm, variance_halfnorm, vertex, size):
+    def calc_errorcomponent(self, variance_norm, variance_halfnorm, 
+                            vertex, size):
         err_norm = norm.rvs(scale=variance_norm, size=size)
         err_halfnorm = halfnorm.rvs(scale=variance_halfnorm, size=size)
         
         if vertex == 'start':
             return err_norm + err_halfnorm
 
-        if vertext == 'end':
+        if vertex == 'end':
             return err_norm - err_halfnorm
 
     def calc_predvalue(self, data):
@@ -31,7 +32,8 @@ class StocFronRegressionModel(AbstractRegressionModel):
         vertex = self.error_specification.vertex
         size = (data.rows, 1)
 
-        err = self.calc_errorcomponent(variance_norm, variance_halfnorm, vertex, size)
+        err = self.calc_errorcomponent(variance_norm, variance_halfnorm, 
+                                       vertex, size)
         
         pred_value = expected_value.data + err
 
@@ -57,11 +59,13 @@ class TestStocFronRegressionModel(unittest.TestCase):
 
 
     def testvalues(self):
-        model = StocFronRegressionModel(self.specification, self.errorspecification)
+        model = StocFronRegressionModel(self.specification, 
+                                        self.errorspecification)
         pred_value = model.calc_predvalue(self.data)
 
         random.seed(1)
-        expected_act = self.data.calculate_equation(self.specification.coefficients[0])
+        expected_act = self.data.calculate_equation(
+                                                    self.specification.coefficients[0])
         expected_act.shape = (4,1)
         variance = self.errorspecification.variance
         pred_act = (expected_act + 

@@ -1,7 +1,6 @@
 from numpy import all, array, zeros
 from scipy import exp
 from openamos.core.models.abstract_model import Model
-from openamos.core.errors import DataError
 
 class AbstractChoiceModel(Model):
     def __init__(self, specification):
@@ -46,7 +45,8 @@ class TestAbstractChoiceModel(unittest.TestCase):
 
         exp_expected_act = exp(expected_act)
         model_exp_expected_values = model.calc_exp_choice_utilities(self.data)
-        exp_expected_diff = all(exp_expected_act == model_exp_expected_values.data)
+        exp_expected_diff = all(exp_expected_act ==
+                                     model_exp_expected_values.data)
         self.assertEqual(True, exp_expected_diff)
         
 if __name__ == '__main__':

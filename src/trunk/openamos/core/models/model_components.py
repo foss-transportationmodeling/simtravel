@@ -1,7 +1,8 @@
 import re
 import copy
 from numpy import ndarray
-from openamos.core.errors import SpecificationError, ChoicesError, VariablesError, CoefficientsError, SeedError
+from openamos.core.errors import SpecificationError, ChoicesError
+from openamos.core.errors import VariablesError, CoefficientsError, SeedError
 from openamos.core.errors import ErrorSpecificationError
 
 class Specification(object):
@@ -53,7 +54,8 @@ class Specification(object):
 
         for i in list_of_dicts:
             if not isinstance(i, dict):
-                return 0, 'coefficients dictionary for one of the choices specified incorrectly'
+                return 0, """coefficients dictionary for one of the choices """\
+                    """specified incorrectly"""
             
             checkVal, checkText = self.check_text_only(i.keys())
             if not checkVal:
@@ -100,7 +102,8 @@ class Specification(object):
 
     def check_specification_consistency(self, choices, coefficients):
         if len(choices) <> len(coefficients):
-            return 0, 'the number of choices and equation specification - coefficients are inconsistent'
+            return 0, """the number of choices and equation specification - """
+                """coefficients are inconsistent"""
 
         return 1, ''
 
@@ -128,23 +131,29 @@ class TestBadSpecification(unittest.TestCase):
 
     
     def testchoices(self):
-        self.assertRaises(ChoicesError, Specification, self.choices1, self.coefficients)
+        self.assertRaises(ChoicesError, Specification, self.choices1, 
+                          self.coefficients)
 
         
     def testchoicesfirstchar(self):
-        self.assertRaises(ChoicesError, Specification, self.choices2, self.coefficients)
+        self.assertRaises(ChoicesError, Specification, self.choices2, 
+                          self.coefficients)
         
     def testvariables(self):
-        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients3)
+        self.assertRaises(CoefficientsError, Specification, self.choices, 
+                          self.coefficients3)
 
     def testvariablesfirstchar(self):
-        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients2)
+        self.assertRaises(CoefficientsError, Specification, self.choices, 
+                          self.coefficients2)
 
     def testcoefficients(self):
-        self.assertRaises(CoefficientsError, Specification, self.choices, self.coefficients1)
+        self.assertRaises(CoefficientsError, Specification, self.choices, 
+                          self.coefficients1)
 
     def testchoicescoefficientslength(self):
-        self.assertRaises(SpecificationError, Specification, self.choices, self.coefficients4)
+        self.assertRaises(SpecificationError, Specification, self.choices, 
+                          self.coefficients4)
 
     def testchoiceslength(self):
         spec = Specification(self.choices, self.coefficients)
@@ -152,7 +161,8 @@ class TestBadSpecification(unittest.TestCase):
         self.assertEqual(len(self.choices), num_choices)
 
     def testseed(self):
-        self.assertRaises(SeedError, Specification, self.choices, self.coefficients, self.seed1)
+        self.assertRaises(SeedError, Specification, self.choices, self.coefficients, 
+                          self.seed1)
 
     def testlowercase(self):
         spec = Specification(self.choices, self.coefficients)

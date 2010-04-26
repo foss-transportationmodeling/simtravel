@@ -15,8 +15,8 @@ class OLSpecification(Specification):
                 raise SpecificationError, """the distribution specification is not """\
                     """a valid string"""
             if self.distribution not in ['logit', 'probit']:
-                raise SpecificationError, """the ordered model formulations supported """\
-                    """are probit and logit specification"""
+                raise SpecificationError, """the ordered model formulations """\
+                    """supported are probit and logit specification"""
 
     def check(self):
         checkVal, checkText = self.check_text_only(self.choices)
@@ -45,11 +45,12 @@ class OLSpecification(Specification):
 
     def check_specification_consistency(self, choices, coefficients, thresholds):
         if len(choices) - 1 <> len(thresholds):
-            return 0, 'the number of choices and the number of thresholds are inconsistent'
+            return 0, """the number of choices and the number of thresholds """\
+                """are inconsistent"""
         
         if len(coefficients) > 1:
-            return 0, """the number of equations specified is more than 1; only one equation """\
-                """expected"""
+            return 0, """the number of equations specified is more than 1; """\
+                """only one equation expected"""
 
         return 1, ''
         
@@ -70,21 +71,21 @@ class TestBadOLSpecification(unittest.TestCase):
         self.distribution2 = 123
 
     def testcoeffecients(self):
-        self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients1, 
-                          self.thresholds)
+        self.assertRaises(SpecificationError, OLSpecification, self.choices, 
+                          self.coefficients1, self.thresholds)
 
     def testthredholds(self):
-        self.assertRaises(ThresholdsError, OLSpecification, self.choices, self.coefficients, 
-                          self.thresholds1)
+        self.assertRaises(ThresholdsError, OLSpecification, self.choices, 
+                          self.coefficients, self.thresholds1)
         self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 
                           self.thresholds2)
     def testdistributions(self):
-        self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 
+        self.assertRaises(SpecificationError, OLSpecification, self.choices, 
+                          self.coefficients, 
                           self.thresholds, distribution=self.distribution1)
-        self.assertRaises(SpecificationError, OLSpecification, self.choices, self.coefficients, 
+        self.assertRaises(SpecificationError, OLSpecification, self.choices, 
+                          self.coefficients, 
                           self.thresholds, distribution=self.distribution2)
 
-        
-        
 if __name__ == '__main__':
     unittest.main()

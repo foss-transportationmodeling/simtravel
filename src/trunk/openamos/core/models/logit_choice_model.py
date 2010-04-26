@@ -8,7 +8,8 @@ from openamos.core.errors import DataError, SpecificationError
 class LogitChoiceModel(AbstractChoiceModel):
     def __init__(self, specification):
         if not isinstance(specification, Specification):
-            raise SpecificationError, 'the specification input is not a valid Specification object'
+            raise SpecificationError, """the specification input is not a valid """\
+                """Specification object"""
         AbstractChoiceModel.__init__(self, specification)
 
         
@@ -35,7 +36,8 @@ class LogitChoiceModel(AbstractChoiceModel):
         exp_expected_utilities = self.calc_exp_choice_utilities(data, choiceset)
         exp_utility_sum = exp_expected_utilities.data.cumsum(-1)
         exp_utility_sum_max = exp_utility_sum.max(-1)
-        probabilities = (exp_expected_utilities.data.transpose()/exp_utility_sum_max).transpose()
+        probabilities = (exp_expected_utilities.data.transpose()
+                         /exp_utility_sum_max).transpose()
         return probabilities
         
     def calc_chosenalternative(self, data, choiceset=None):
@@ -43,7 +45,8 @@ class LogitChoiceModel(AbstractChoiceModel):
             choiceset = DataArray(array([]), [])
         probabilities = DataArray(self.calc_probabilities(data, choiceset), 
                                   self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, 
+                                              self.specification.seed)
         return prob_model.selected_choice()
 
 import unittest
@@ -66,16 +69,19 @@ class TestLogitChoiceModel(unittest.TestCase):
         coefficients = [{'Constant':2, 'Var1':2.11}, {'Constant':1.2}]
         data = array([[1, 1.1], [1, -0.25], [1, 3.13], [1, -0.11]])
 
-        self.choiceset1 = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), ['SOV', 'HOV'])
+        self.choiceset1 = DataArray(ma.array([[0, 1], [0, 1], [1, 1], [1, 1]]), 
+                                    ['SOV', 'HOV'])
 
         self.data = DataArray(data, ['Constant','Var1'])
         self.specification = Specification(choices, coefficients)
 
-        self.utils_array_act = zeros((self.data.rows,self.specification.number_choices))
+        self.utils_array_act = zeros((self.data.rows, 
+                                      self.specification.number_choices))
         self.utils_array_act[:,0] = self.data.data[:,0]*2 + self.data.data[:,1]*2.11
         self.utils_array_act[:,1] = self.data.data[:,0]*1.2
         self.exp_utils_array_act = exp(self.utils_array_act)
-        self.prob_array_act = (self.exp_utils_array_act.transpose()/self.exp_utils_array_act.cumsum(-1)[:,-1]).transpose()
+        self.prob_array_act = (self.exp_utils_array_act.transpose()/
+                               self.exp_utils_array_act.cumsum(-1)[:,-1]).transpose()
         
         # for the selected data, and seed = 1, chosen alternatives are
         self.selected_act = array([['sov'], ['hov'], ['sov'], ['sov']])
@@ -98,10 +104,12 @@ class TestLogitChoiceModel(unittest.TestCase):
         model = LogitChoiceModel(self.specification)
         probabilities_model = model.calc_probabilities(self.data, self.choiceset1)
 
-        # Calculating actual values with mask included and then compare it against outputs from model
+        # Calculating actual values with mask included and then compare 
+        # it against outputs from model
         mask = self.choiceset1.data == 0
         self.exp_utils_array_act[mask] = ma.masked
-        self.prob_array_act = (self.exp_utils_array_act.transpose()/self.exp_utils_array_act.cumsum(-1)[:,-1]).transpose()
+        self.prob_array_act = (self.exp_utils_array_act.transpose()/
+                               self.exp_utils_array_act.cumsum(-1)[:,-1]).transpose()
         probabilities_diff = all(self.prob_array_act == probabilities_model)
         self.assertEqual(True, probabilities_diff)
 

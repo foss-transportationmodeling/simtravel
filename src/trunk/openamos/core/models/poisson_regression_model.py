@@ -1,5 +1,5 @@
 from scipy.stats import poisson, nbinom
-from numpy import array, zeros, random, all
+from numpy import array, zeros, all
 
 from openamos.core.models.abstract_model import Model
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
@@ -9,7 +9,8 @@ from openamos.core.errors import SpecificationError
 class CountRegressionModel(Model):
     def __init__(self, count_specification):
         if not isinstance(count_specification, CountSpecification):
-            raise SpecificationError, 'the specification is not a valid CountSpecification object'
+            raise SpecificationError, """the specification is not a valid """\
+                """CountSpecification object"""
 
         Model.__init__(self, count_specification)
 
@@ -39,8 +40,10 @@ class CountRegressionModel(Model):
         return probabilities
 
     def calc_chosenalternative(self, data):
-        probabilities = DataArray(self.calc_probabilities(data), self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
+        probabilities = DataArray(self.calc_probabilities(data), 
+                                  self.specification.choices)
+        prob_model = AbstractProbabilityModel(probabilities, 
+                                              self.specification.seed)
         return prob_model.selected_choice()
         
 
@@ -85,7 +88,8 @@ class TestCountRegressionModel(unittest.TestCase):
         self.assertEqual(True, prob_diff)
 
     def testselectionpoisson(self):
-        choice_act = array([['episodes3'], ['episodes3'], ['episodes1'], ['episodes2']])
+        choice_act = array([['episodes3'], ['episodes3'], ['episodes1'], 
+                            ['episodes2']])
         choice_model = self.model.calc_chosenalternative(self.data)
         choice_diff = all(choice_act == choice_model)
         self.assertEqual(True, choice_diff)
