@@ -20,7 +20,8 @@ class BasicController(object):
         #TODO: Should setup a system to generate the choicesets dynamically
         #based on certain criterion
 
-        #this choiceset creation criterion must be an attribute of the SubModel class
+        # this choiceset creation criterion must be an attribute of the 
+        # SubModel class
         from numpy import ones
         choiceset = ones(shape)
         return DataArray(choiceset, names)
@@ -35,7 +36,8 @@ class BasicController(object):
         count = 1
 
         while len(model_list_duringrun) > 0 and count <5:
-            model_list_duringrun = self.iterate_through_the_model_list(model_list_duringrun)   
+            model_list_duringrun = self.iterate_through_the_model_list(
+                                                                       model_list_duringrun)   
             count = count + 1            
         print 'ITERATIONS COMPLETED', count
         print self.data.columns(['choice1', 'choice2', 'choice3', 'choice2_ind'])
@@ -61,13 +63,15 @@ class BasicController(object):
 
             # Creating the compound filter based on above two conditions 
             data_subset_filter[~run_condition_filter] = False
-            data_subset = self.data.columns(self.data.varnames, data_subset_filter)
+            data_subset = self.data.columns(self.data.varnames, 
+                                            data_subset_filter)
 
             # Generate a choiceset for the corresponding agents
             choiceset_shape = (data_subset.rows,
                                i.model.specification.number_choices)
             choicenames = i.model.specification.choices
-            choiceset = self.create_choiceset(choiceset_shape, i.choiceset_criterion, 
+            choiceset = self.create_choiceset(choiceset_shape, 
+                                              i.choiceset_criterion, 
                                               choicenames)
             
             result = i.simulate_choice(data_subset, choiceset)
@@ -76,9 +80,11 @@ class BasicController(object):
             if i.run_until_condition is not None:
                 if data_subset.rows > 0:                    
                     model_list_forlooping.append(i)
-                result_run_var = self.data.calculate_equation(i.run_until_condition.coefficients, 
+                result_run_var = self.data.calculate_equation(
+                                                              i.run_until_condition.coefficients, 
                                                               data_subset_filter)
-                self.data.setcolumn(i.run_until_condition.varname, result_run_var, data_subset_filter)
+                self.data.setcolumn(i.run_until_condition.varname, 
+                                    result_run_var, data_subset_filter)
         return model_list_forlooping
 
         # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
@@ -112,7 +118,8 @@ class TestAbstractComponent(unittest.TestCase):
         data_[:,:4] = random.rand(5,4)
         
         data_ = DataArray(data_, 
-                                    ['Const', 'Var1', 'Var2', 'Var3', 'choice2_ind', 'choice1', 'choice2', 'choice3'])
+                                    ['Const', 'Var1', 'Var2', 'Var3', 'choice2_ind', 
+                                     'choice1', 'choice2', 'choice3'])
         
         variance = array([[1]])
         
@@ -134,21 +141,26 @@ class TestAbstractComponent(unittest.TestCase):
         model2 = LinearRegressionModel(specification2, errorspecification)
         model3 = LogitChoiceModel(specification3)
         
-        data_filter2 = DataFilter('choice2_ind', 'less than', 25, {'choice2_ind':1, 'choice2':1}) #Run Until Condition
+        data_filter2 = DataFilter('choice2_ind', 'less than', 25, 
+                                  {'choice2_ind':1, 'choice2':1}) #Run Until Condition
 
-        data_filter1 = DataFilter('Const', 'less than', 0.3) #Subset for the model condition
+        #Subset for the model condition
+        data_filter1 = DataFilter('Const', 'less than', 0.3)
 
         
         model_seq1 = SubModel(model1, 'regression', 'choice1')
-        model_seq2 = SubModel(model2, 'regression', 'choice2', data_filter=data_filter1, run_until_condition=data_filter2)
-        model_seq3 = SubModel(model3, 'choice', 'choice3', run_until_condition=data_filter2)
+        model_seq2 = SubModel(model2, 'regression', 'choice2', 
+                              data_filter=data_filter1, run_until_condition=data_filter2)
+        model_seq3 = SubModel(model3, 'choice', 'choice3', 
+                              run_until_condition=data_filter2)
         model_list = [model_seq1, model_seq2, model_seq3]
     
-        # SPECIFY SEED TO REPLICATE RESULTS, DATA FILTER AND RUN UNTIL CONDITION
+        # SPECIFY SEED TO REPLICATE RESULTS, DATA FILTER AND 
+        # RUN UNTIL CONDITION
         component = BasicController(model_list, data_)
     
         component.run()
-        #print data_
+
         
     def testvarscope(self):
         pass
