@@ -4,6 +4,13 @@ from openamos.core.models.abstract_regression_model import AbstractRegressionMod
 from openamos.core.errors import ErrorSpecificationError
 
 class StocFronRegressionModel(AbstractRegressionModel):
+    """
+    This is teh base class for stochastic frontier regression models in OpenAMOS.
+    
+    Inputs:
+    specification - Specification object
+    error_specification - StochasticRegErrorSpecification object
+    """
     def __init__(self, specification, error_specification):
         AbstractRegressionModel.__init__(self, specification, error_specification)
         
@@ -16,6 +23,17 @@ class StocFronRegressionModel(AbstractRegressionModel):
 
     def calc_errorcomponent(self, variance_norm, variance_halfnorm, 
                             vertex, size):
+        """
+        The method returns the contribution of the error component in the 
+        calculation of the predicted value for the different choices.
+        
+        Inputs:
+        variance_norm - numeric value (variance of the normal portion of error)
+        variance_halfnorm - numeric value (variance of the half normal portion of
+                                        error)
+        vertex - string (the vertext to predict -- start/end)
+        size - numeric value (number of rows)
+        """
         err_norm = norm.rvs(scale=variance_norm, size=size)
         err_halfnorm = halfnorm.rvs(scale=variance_halfnorm, size=size)
         
@@ -26,6 +44,13 @@ class StocFronRegressionModel(AbstractRegressionModel):
             return err_norm - err_halfnorm
 
     def calc_predvalue(self, data):
+        """
+        The method returns the predicted value for the different choices in the
+        specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
         expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]
         variance_halfnorm = self.error_specification.variance[1,1]

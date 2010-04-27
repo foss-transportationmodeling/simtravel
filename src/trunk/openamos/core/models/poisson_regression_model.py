@@ -7,6 +7,13 @@ from openamos.core.models.count_regression_model_components import CountSpecific
 from openamos.core.errors import SpecificationError
 
 class CountRegressionModel(Model):
+    """
+    The is the base class for count regression models in OpenAMOS. The class
+    implements both poisson and negative-binomial regression models.
+    
+    Inputs:
+    count_specification - CountSpecification object 
+    """
     def __init__(self, count_specification):
         if not isinstance(count_specification, CountSpecification):
             raise SpecificationError, """the specification is not a valid """\
@@ -17,9 +24,26 @@ class CountRegressionModel(Model):
         self.distribution = count_specification.distribution
 
     def calc_expected_value(self, data):
+        """
+        The method returns the expected values for the different choices using
+        the coefficients specified in the specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
+        
         return data.calculate_equation(self.coefficients[0])
 
     def calc_probabilities(self, data):
+        """
+        The method returns the probabilities for the different count alternatives
+        for the choice variable under consideration. Based on whether 
+        model is specified as poisson/negative-binomial, the appropriate 
+        probabilities are calculated.
+        
+        Inputs:
+        data - DataArray object
+        """
         #TODO: what are the parameters for the negative binomial distribution
         #[shape_param] = [1,]*nbinom.numargs
         expected_value = self.calc_expected_value(data)
@@ -40,6 +64,14 @@ class CountRegressionModel(Model):
         return probabilities
 
     def calc_chosenalternative(self, data):
+        """
+        The method returns the chosen alternaitve among the count choices
+        for the choice variable under consideration
+        
+        Inputs:
+        data - DataArray object
+        """
+        
         probabilities = DataArray(self.calc_probabilities(data), 
                                   self.specification.choices)
         prob_model = AbstractProbabilityModel(probabilities, 

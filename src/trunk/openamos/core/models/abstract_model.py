@@ -4,12 +4,26 @@ from openamos.core.data_array import DataArray
 from openamos.core.models.model_components import Specification
 
 class Model(object):
+    """
+    This is the base class for all the mathematical formulations
+    implemented in OpenAMOS including both regression and choice models.
+    
+    Inputs:
+    specification - Specification object
+    """
     def __init__(self, specification):
         self.specification = specification
         self.choices = self.specification.choices
         self.coefficients = self.specification.coefficients
 
     def calculate_expected_values(self, data):
+        """
+        The method returns the expected values for the different choices
+        using the coefficients in the specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
         num_choices = self.specification.number_choices
         expected_value_array = DataArray(zeros((data.rows, num_choices)), 
                                          self.choices)
@@ -21,6 +35,13 @@ class Model(object):
     
 
     def calculate_exp_expected_values(self, data):
+        """
+        The method returns the exponent of the expected values for the
+        the different choices using the coefficients in the specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
         exp_expected_values = self.calculate_expected_values(data)
         exp_expected_values.data = exp(exp_expected_values.data)
         return exp_expected_values

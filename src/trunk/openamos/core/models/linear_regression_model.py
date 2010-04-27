@@ -4,6 +4,13 @@ from openamos.core.models.abstract_regression_model import AbstractRegressionMod
 from openamos.core.errors import ErrorSpecificationError
 
 class LinearRegressionModel(AbstractRegressionModel):
+    """
+    This is the base class for linear regression model in OpenAMOS.
+    
+    Inputs:
+    specification - Specification object
+    error_specification - ErrorSpecification object
+    """
     def __init__(self, specification, error_specification):
         AbstractRegressionModel.__init__(self, specification, error_specification)
 
@@ -15,10 +22,26 @@ class LinearRegressionModel(AbstractRegressionModel):
         random.seed(self.seed)
 
     def calc_errorcomponent(self, size, mean=0, sd=1):
+        """
+        The method returns the contribution of the error in the calculation 
+        of the predicted value for the different choices.
+        
+        Inputs:
+        size - numeric value (number of rows)
+        mean - numeric value (mean)
+        sd - numeric value (standard deviation)
+        """
         return norm.rvs(loc=mean, scale=sd, 
                         size=size)
 
     def calc_predvalue(self, data):
+        """
+        The method returns the predicted value for the different choices in the 
+        specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
         expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
         pred_value = self.calc_errorcomponent(size=(data.rows, 1),

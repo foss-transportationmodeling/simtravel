@@ -5,6 +5,15 @@ from openamos.core.errors import SpecificationError, ErrorSpecificationError
 
 class AbstractRegressionModel(Model):
     def __init__(self, specification, error_specification):
+        """
+        This is the base class for all regression based mathematical formulations
+        in OpenAMOS
+        
+        Inputs:
+        specification - Specification object
+        error_specifciation - ErrorSpecification object
+        """
+        
         Model.__init__(self, specification)
         
         if not isinstance(self.specification, Specification):
@@ -22,15 +31,45 @@ class AbstractRegressionModel(Model):
                 """ it should be of type ErrorSpecification"""
         
     def calc_expected_value(self, data):
+        """
+        The method returns the expected values for the different choices using
+        the coefficients specified in the specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
+         
         return self.calculate_expected_values(data)
 
     def calc_exp_expected_value(self, data):
+        """
+        The method returns the exponent of the expected values for the
+        different choices using the coefficients specified in the specification input.
+        
+        Inputs:
+        data - DataArray object
+        """
         return self.calculate_exp_expected_values(data)
 
     def calc_errorcomponent(self):
+        """
+        The method returns the contribution of the error in the calculation 
+        of the predicted value for the different choices.
+        
+        Inputs:
+        None
+        """
         raise Exception('method not implemented')
 
     def calc_predvalue(self):
+        """
+        The method returns the predicted value for the different choices in the 
+        specification input.
+        
+        Inputs:
+        None
+        """
+        
         raise Exception('method not implemented')
 
 

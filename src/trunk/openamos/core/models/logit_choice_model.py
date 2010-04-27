@@ -1,11 +1,17 @@
-from numpy import ma, float32, dtype, ndarray, array, all, any
+from numpy import ma, array, all, any
 from scipy import exp
 from openamos.core.models.model_components import Specification
 from openamos.core.models.abstract_choice_model import AbstractChoiceModel
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
-from openamos.core.errors import DataError, SpecificationError
+from openamos.core.errors import SpecificationError
 
 class LogitChoiceModel(AbstractChoiceModel):
+    """
+    This is the base class for implementing logit choice models in OpenAMOS.
+    
+    Input:
+    specification - Specification object
+    """
     def __init__(self, specification):
         if not isinstance(specification, Specification):
             raise SpecificationError, """the specification input is not a valid """\
@@ -14,11 +20,26 @@ class LogitChoiceModel(AbstractChoiceModel):
 
         
     def calc_observed_utilities(self, data):
+        """
+        The method returns the observed portion of the utility associated with
+        the different choices.
+        
+        Inputs:
+        data - DataArray object
+        """
         values = self.calculate_expected_values(data)
         values.data = ma.array(values.data)
         return values
 
     def validchoiceutilities(self, data, choiceset):
+        """
+        The method returns the observed portion of the utility associated with
+        the ONLY the valid choices.
+        
+        Inputs:
+        data - DataArray object
+        choiceset - DataArray object
+        """
         valid_values = self.calc_observed_utilities(data)
         for i in choiceset.varnames:
             mask = choiceset.column(i) == 0
@@ -28,11 +49,27 @@ class LogitChoiceModel(AbstractChoiceModel):
 
 
     def calc_exp_choice_utilities(self, data, choiceset):
+        """
+        The method returns the exponent of the observed portion of the 
+        utility associated with the different choices.
+        
+        Inputs:
+        data - DataArray object
+        choiceset - DataArray object
+        """
         values = self.validchoiceutilities(data, choiceset)
         values.data = exp(values.data)
         return values
 
     def calc_probabilities(self, data, choiceset):
+        """
+        The method returns the selection probability associated with the 
+        the different choices.
+        
+        Inputs:
+        data - DataArray object
+        choiceset - DataArray object
+        """
         exp_expected_utilities = self.calc_exp_choice_utilities(data, choiceset)
         exp_utility_sum = exp_expected_utilities.data.cumsum(-1)
         exp_utility_sum_max = exp_utility_sum.max(-1)
@@ -41,6 +78,14 @@ class LogitChoiceModel(AbstractChoiceModel):
         return probabilities
         
     def calc_chosenalternative(self, data, choiceset=None):
+        """
+        The method returns the selected choice among the available
+        alternatives.
+        
+        Inputs:
+        data = DataArray object
+        choiceset = DataArray object
+        """
         if choiceset is None:
             choiceset = DataArray(array([]), [])
         probabilities = DataArray(self.calc_probabilities(data, choiceset), 

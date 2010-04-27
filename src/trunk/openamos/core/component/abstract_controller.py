@@ -3,6 +3,13 @@ from openamos.core.models.model import SubModel
 from openamos.core.errors import ModelError
 
 class BasicController(object):
+    """
+    This is the base class for implementing components in OpenAMOS
+    
+    Inputs:
+    model_list - list of SubModel objects
+    data - DataArray object on which the simulation needs to be carried out
+    """
     def __init__(self, model_list, data):
         for i in model_list:
             if not isinstance(i, SubModel):

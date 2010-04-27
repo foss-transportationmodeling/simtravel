@@ -1,11 +1,16 @@
 import re
-import copy
-from numpy import ndarray
 from openamos.core.errors import SpecificationError, ChoicesError
-from openamos.core.errors import VariablesError, CoefficientsError, SeedError
-from openamos.core.errors import ErrorSpecificationError
+from openamos.core.errors import CoefficientsError, SeedError
 
 class Specification(object):
+    """
+    This is the base class for specifying models and their coefficients.
+    
+    Inputs:
+    choices - list of strings
+    coefficients - list of dictionaries; dictionary is {'variable':'coefficients'}
+    seed - numeric value
+    """
     def __init__(self, choices, coefficients, seed=1):
         self.choices = choices
         self.coefficients = coefficients
@@ -102,7 +107,7 @@ class Specification(object):
 
     def check_specification_consistency(self, choices, coefficients):
         if len(choices) <> len(coefficients):
-            return 0, """the number of choices and equation specification - """
+            return 0, """the number of choices and equation specification - """\
                 """coefficients are inconsistent"""
 
         return 1, ''

@@ -2,6 +2,17 @@ from openamos.core.models.model_components import Specification
 from openamos.core.errors import SpecificationError, ChoicesError, CoefficientsError, SeedError, ThresholdsError
 
 class OLSpecification(Specification):
+    """
+    This is the base class for specifying the attributes of a ordered choice
+    model.
+    
+    Inputs:
+    choices - list of strings
+    coefficients - list of dictionaries
+    thresholds - list of threshold values
+    seed - numeric value
+    distribution - string (logit/probit)
+    """
     def __init__(self, choices, coefficients, thresholds, seed=1, distribution=None):
         self.thresholds = thresholds
         Specification.__init__(self, choices, coefficients, seed)

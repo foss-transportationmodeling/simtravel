@@ -5,6 +5,13 @@ import re
 from openamos.core.errors import DataError
 
 class DataArray(object):
+    """
+    This is the base class for data objects in OpenAMOS.
+    
+    Inputs:
+    data - ndarray object
+    varnames - list of strings (columnames)
+    """
     def __init__(self, data, varnames):
         if not isinstance(data, ndarray):
             self.data = array(data)
@@ -196,6 +203,17 @@ class DataArray(object):
 
 
 class DataFilter(object):
+    """
+    This is the base class for specifying data filtering criterion.
+    
+    Inputs:
+    varname - string
+    filter_string - string (less than, greater than, less than equals, 
+    greater than equals, equals, not equals)
+    value - numeric value (used for filtering)
+    coefficients - dictionary (used for recalculating the varname after say some
+    a certain choice process was simulated)  
+    """
     def __init__(self, varname, filter_string, value, coefficients=None):
         
         if not isinstance(varname, str):
@@ -248,7 +266,6 @@ class DataFilter(object):
 
 
 import unittest
-from numpy import all
 
 class TestBadInputsDataArray(unittest.TestCase):
     def setUp(self):

@@ -3,6 +3,16 @@ from openamos.core.errors import SpecificationError, ChoicesError
 from openamos.core.errors import CoefficientsError, SeedError
 
 class CountSpecification(Specification):
+    """
+    This is the base class for specifying the attributes for a count data
+    regression model.
+    
+    Inputs:
+    choices - a list object of strings
+    coefficients - a list of dictionaries; dictionary is a {'variable':'coefficient'}
+    seed - numeric value
+    distribution - type of distribution (poisson/negativebinomial)
+    """
     def __init__(self, choices, coefficients, seed=1, distribution=None):
         Specification.__init__(self, choices, coefficients, seed)
 

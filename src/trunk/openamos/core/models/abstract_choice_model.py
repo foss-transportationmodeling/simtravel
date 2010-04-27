@@ -3,22 +3,64 @@ from scipy import exp
 from openamos.core.models.abstract_model import Model
 
 class AbstractChoiceModel(Model):
+    """
+    This is the base class for all discrete choice based mathematical 
+    formulations in OpenAMOS.
+    
+    Inputs:
+    specification - Specification object
+    """
     def __init__(self, specification):
         Model.__init__(self, specification)
 
     def calc_observed_utilities(self, data):
+        """
+        The method returns the observed portion of the utility associated with
+        the different choices.
+        
+        Inputs:
+        data - DataArray object
+        """
         return self.calculate_expected_values(data)
 
     def validchoiceutilities(self):
+        """
+        The method returns the observed portion of the utility associated with
+        the ONLY the valid choices.
+        
+        Inputs:
+        None
+        """
         raise Exception('method not implemented')
 
     def calc_exp_choice_utilities(self, data):
+        """
+        The method returns the exponent of the observed portion of the 
+        utility associated with the different choices.
+        
+        Inputs:
+        data - DataArray object
+        """
         return self.calculate_exp_expected_values(data)
 
     def calc_probabilities(self):
+        """
+        The method returns the selection probability associated with the 
+        the different choices.
+        
+        Inputs:
+        None
+        """
         raise Exception('method not implemented')
 
     def calc_chosenalternative(self):
+        """
+        The method returns the selected choice among the available
+        alternatives.
+        
+        Inputs:
+        None
+        """
         raise Exception('method not implemented')
 
 import unittest

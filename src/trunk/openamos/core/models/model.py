@@ -4,6 +4,10 @@ from openamos.core.models.abstract_model import Model
 
 
 class SubModel(object):
+    """
+    This is the base class for specifying models in the Component
+    framework for building the OpenAMOS components.
+    """
     def __init__(self, 
                  model, 
                  model_type, 

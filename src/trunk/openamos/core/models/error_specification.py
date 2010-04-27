@@ -1,9 +1,15 @@
-import re
 from numpy import ndarray
-from openamos.core.errors import SpecificationError, ChoicesError, VariablesError, CoefficientsError, SeedError
 from openamos.core.errors import ErrorSpecificationError
 
 class ErrorSpecification(object):
+    """
+    This is the base class for specifying the attributes of the error for any
+    regression model.
+    
+    Inputs:
+    variance - array of numeric values (covariance matrix)
+    distribution - string (type of distribution)     
+    """
     def __init__(self, variance, distribution):
         self.variance = variance
 
@@ -28,6 +34,13 @@ class ErrorSpecification(object):
         self.distribution = distribution.lower()
 
 class StochasticRegErrorSpecification(ErrorSpecification):
+    """
+    This is the class for specifying the stochastic regression error component.
+    
+    Inputs:
+    variance - numeric array (covariance matrix)
+    distribution - string (type of distribution)
+    """
     def __init__(self, variance, vertex):
         ErrorSpecification.__init__(self, variance, distribution='normal_halfnormal')
         
@@ -51,6 +64,14 @@ class StochasticRegErrorSpecification(ErrorSpecification):
 
 
 class LinearRegErrorSpecification(ErrorSpecification):
+    """
+    This is the class for specifying the normal regression error component.
+    
+    Inputs:
+    variance - numeric arrray (covariance matrix)
+    distribution - string (type of distribution)
+    """
+    
     def __init__(self, variance):
         ErrorSpecification.__init__(self, variance, distribution='normal')
 

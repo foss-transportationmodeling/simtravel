@@ -3,6 +3,12 @@ from openamos.core.errors import ProbabilityError, DataError
 from openamos.core.data_array import DataArray
 
 class AbstractProbabilityModel(object):
+    """
+    This is the base class for probability models in OpenAMOS.
+    
+    Inputs:
+    probabilities - datarray object (columns give the probability for the choice)
+    """
     def __init__(self, probabilities, seed=1):
         if not isinstance(probabilities, DataArray):
             raise DataError, 'probability input is not a valid DataArray object'
@@ -14,14 +20,35 @@ class AbstractProbabilityModel(object):
 
 
     def check(self):
+        """
+        This method checks the probabilities input and raises appropriate 
+        error prompts as necessary.
+        
+        Inputs:
+        None
+        """
         self.check_probabilities()
         self.check_sum()
 
     def check_probabilities(self):
+        """
+        The method checks to make sure that the probabilities is a 
+        valid array object.
+        
+        Inputs:
+        None
+        """
         if not isinstance(self.probabilities, ndarray):
             raise ProbabilityError, 'probability input is not a valid array object'
 
     def check_sum(self):
+        """
+        The method checks to make sure that the probabilities add up to 
+        1 across choices.
+        
+        Inputs:
+        None
+        """
         self.num_agents = self.probabilities.shape[0]
         self.num_choices = self.probabilities.shape[-1]
 
@@ -32,12 +59,31 @@ class AbstractProbabilityModel(object):
                 """to one across rows"""    
 
     def generate_random_numbers(self):
+        """
+        The method generates a random array for making the choice of 
+        the alternative.
+        
+        Inputs:
+        None
+        """
         return random.random(self.num_agents)
 
     def cumprob(self):
+        """
+        The method returns the cumulative probability array.
+        
+        Inputs:
+        None
+        """
         return self.probabilities.cumsum(-1)
 
     def selected_choice(self):
+        """
+        The method returns the selected alternative for each agent.
+        
+        Inputs:
+        None
+        """
         choice = zeros(self.num_agents)
         random_numbers = self.generate_random_numbers()
 

@@ -3,6 +3,14 @@ from openamos.core.errors import SpecificationError
 from openamos.core.models.model_components import Specification
 
 class NestedChoiceSpecification(Specification):
+    """
+    This is the base class for specifying branches in a nested logit model.
+    
+    Inputs:
+    choices - list of only one choice is expected
+    coefficients - list of a single dictionary for the above choice
+    logsumparameter - numeric value 
+    """
     def __init__(self, choices, coefficients, logsumparameter=None):
         Specification.__init__(self, choices, coefficients)
         if self.number_choices > 1:
@@ -17,6 +25,16 @@ class NestedChoiceSpecification(Specification):
 
         
 class NestedSpecification(object):
+    """
+    This is the base class for specifying the attrubutes of a nested logit choice
+    model.
+    
+    Inputs:
+    specification_dict - dictionary of NestedChoiceSpecification objects (defines 
+    the structure of the choice tree)
+    seed - numeric value
+    """
+    
     def __init__(self, specification_dict, seed=1):
         self.specification = specification_dict
         self.check()
@@ -28,6 +46,11 @@ class NestedSpecification(object):
         self.seed = seed
 
     def get_choices_coefficients(self):
+        """
+        The method returns a list of choices (including branches, trunks etc.) 
+        and the corresponding list of coefficients for calculating 
+        the respective utilities.
+        """
         choices = []
         coefficients = []
         for i in self.depth_dict:
@@ -37,6 +60,9 @@ class NestedSpecification(object):
         return choices, coefficients
 
     def get_actual_choices(self):
+        """
+        The method returns a list of choices within the tree. 
+        """
         actual_choices = []
         for i in self.choices:
             child_names = self.all_child_names([i])
@@ -45,6 +71,10 @@ class NestedSpecification(object):
         return actual_choices
 
     def check(self):
+        """
+        The method checks the inputs and raises appropriate prompts as 
+        necessary.
+        """
         self.values = []
 
         if not isinstance(self.specification, dict):
@@ -100,6 +130,10 @@ class NestedSpecification(object):
 
 
     def check_logsum_ofparent(self, child):
+        """
+        The method checks to make sure that the logsum parameters in the 
+        choice tree follow the required hierarchy.
+        """
         parent = self.parent(child)
         if not parent == 'root':
             if child.logsumparameter > parent.logsumparameter:
@@ -111,12 +145,26 @@ class NestedSpecification(object):
 
 
     def parent(self, value):
+        """
+        The method returns the NestedChoiceSpecification parent 
+        corresponding to the NestedChoiceSpecification child.
+        
+        Inputs:
+        value - NestedChoiceSpecification object
+        """
         for key in self.specification.keys():
             if value in self.specification[key]:
                 return key
         raise SpecificationError, '%s s parent was not found' %value
 
     def parent_key(self, value):
+        """
+        The method returns the NestedChoiceSpecification parent
+        corresponding to the child's name.
+        
+        Inputs:
+        value - string corresponding to the child
+        """
         for key in self.specification.keys():
             for child in self.specification[key]:
                 if child.choices[0] == value:
@@ -125,6 +173,13 @@ class NestedSpecification(object):
 
 
     def child_names(self, key):
+        """
+        The method returns a list of all the children's names that are present in 
+        the corresponding NestedChoiceSpecification parent.
+        
+        Inputs:
+        key - NestedChoiceSpecification object for the parent 
+        """
         names = []
         try:
             for i in self.specification[key]:
@@ -132,11 +187,22 @@ class NestedSpecification(object):
         except KeyError, e:
             # not raised just warning printed
             raise  SpecificationError, """%s key was not found in the """\
-                """specification dictionary' %key
+                """specification dictionary""" %key
             
         return names
         
     def all_child_names(self, values):
+        """
+        The method returns a list of all children's names that are present in the 
+        corresponding parent's (given by the name of parent). 
+        
+        Also, it returns a list of all subchildren.
+        
+        Input:
+        values - list of strings corresponding to the parents for which child
+        names are sought 
+        """
+        
         #differs from child_names in that this one returns in response to 
         # columna name as opposed to a spec object key
         #also this returns all the sub children
@@ -160,6 +226,8 @@ class NestedSpecification(object):
 
 
     def all_actual_choice_names(self, values):
+        """
+        """
         all_choices = set(self.all_child_names(values))
         all_actual_choices = all_choices.intersection(self.actual_choices)
         return all_actual_choices
@@ -167,6 +235,13 @@ class NestedSpecification(object):
             
 
     def all_parent_names(self, value):
+        """
+        The method returns the list of all parent names corresponding to the
+        child's name given by value.
+        
+        Inputs:
+        value - string (name of the child)
+        """
         all_names = []
         
         while value:
@@ -180,6 +255,12 @@ class NestedSpecification(object):
         return all_names
             
     def depth(self):
+        """
+        The method returns the list of the choice tree.
+        
+        Inputs:
+        None
+        """
         depth_dict = {}
         for value in self.values:
             value1 = value

@@ -7,6 +7,13 @@ from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.errors import SpecificationError
 
 class OrderedModel(AbstractChoiceModel):
+    """
+    This is the base class for implementing ordered choice models in OpenAMOS.
+    Both ordered probit and logit models are supported.
+    
+    Inputs:
+    specification -  OLSpecification object
+    """
     def __init__(self, ol_specification):
         if not isinstance(ol_specification, OLSpecification):
             raise SpecificationError, """the specification is not a valid """\
@@ -18,9 +25,23 @@ class OrderedModel(AbstractChoiceModel):
         self.distribution = ol_specification.distribution
 
     def calc_observed_utilities(self, data):
+        """
+        The method returns the observed portion of the utility associated with
+        the different choices.
+        
+        Inputs:
+        data - DataArray object
+        """
         return data.calculate_equation(self.coefficients[0])
 
     def calc_probabilities(self, data):
+        """
+        The method returns the selection probability associated with the 
+        the different choices.
+        
+        Inputs:
+        data - DataArray object
+        """
         [shape_param] = [1,]*genlogistic.numargs
         observed_utility = self.calc_observed_utilities(data)
         num_choices = self.specification.number_choices
@@ -40,6 +61,13 @@ class OrderedModel(AbstractChoiceModel):
         return probabilities
 
     def calc_chosenalternative(self, data):
+        """
+        The method returns the selected choice among the available
+        alternatives.
+        
+        Inputs:
+        data = DataArray object
+        """
         probabilities = DataArray(self.calc_probabilities(data), 
                                   self.specification.choices)
         prob_model = AbstractProbabilityModel(probabilities, 
