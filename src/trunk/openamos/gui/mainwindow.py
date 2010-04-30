@@ -47,11 +47,11 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, all_manager_dock_widget)
 
         # Defining model_management as a QTreeWidget
-        self.model_management = QTreeWidget()
+        self.model_management = Model_Manager_Treewidget()
         self.model_management.setObjectName("model_management")
         self.model_management.headerItem().setText(0, "Model Management")
         self.model_management.setMinimumSize(50,50)
-        self.model_management.treewidget = Model_Manager_Treewidget(self.model_management)
+        self.connect(self.model_management, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.showflowchart)
 
 
 
@@ -203,6 +203,28 @@ class MainWindow(QMainWindow):
                 target.addSeparator()
             else:
                 target.addAction(action)
+
+# Show flowcharts from model management tree widget
+    def showflowchart(self,selitem,col):
+        if selitem.text(col) == 'Long Term Choices':
+            self.models.long_term_models()
+        if selitem.text(col) == 'Fixed Activity Location Choice Generator':
+            self.models.fixed_activity_models()
+        if selitem.text(col) == 'Vehicle Ownership Model':
+            self.models.vehicle_ownership_models()
+        if selitem.text(col) == 'Fixed Activity Prism Generator':
+            self.models.fixed_activity_prism_models()
+        if selitem.text(col) == 'Child Daily Status and Allocation Model':
+            self.models.child_model()
+        if selitem.text(col) == 'Adult Daily Status Model':
+            self.models.adult_model()
+        if selitem.text(col) == 'Activity Skeleton Reconciliation System':
+            self.models.skeleton_reconciliation_system()
+        if selitem.text(col) == 'Activity Travel Pattern Simulator':
+            self.models.activity_travel_pattern_simulator()
+        if selitem.text(col) == 'Activity Travel Reconciliation System':
+            self.models.travel_reconciliation_system()
+
 
 
 # Call file functions
