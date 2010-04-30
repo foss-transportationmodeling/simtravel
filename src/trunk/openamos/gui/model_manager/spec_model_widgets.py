@@ -7,6 +7,8 @@ Created on Apr 19, 2010
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+import copy
+
 from openamos.gui.misc.basic_widgets import *
 
 class AbstractModWidget(QGroupBox):
@@ -18,6 +20,13 @@ class AbstractModWidget(QGroupBox):
         self.setTitle("Specification")
         self.mainlayout = QGridLayout()
         self.setLayout(self.mainlayout)
+        
+        self.tablelist = [QString("Table1"), QString("Table2")]
+        self.varlist1 = [QString("Var1"), QString("Var2")]
+        self.varlist2 = [QString("Var3"), QString("Var4")]
+        self.coldict = {}
+        self.coldict["Table1"] = self.varlist1
+        self.coldict["Table2"] = self.varlist2
     
     def makeChoiceWidget(self,x=0,y=0):
         self.choicewidget = QWidget(self)
@@ -31,9 +40,8 @@ class AbstractModWidget(QGroupBox):
         self.choicetable.setRowCount(0)
         self.choicetable.setColumnCount(1)
         self.choicetable.setHorizontalHeaderLabels(['Alternatives'])
-        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
-        self.choicetable.setSizePolicy(sizePolicy)
-        self.choicelayout.addWidget(self.choicetable,)
+        self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.choicelayout.addWidget(self.choicetable)
         
         self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
         
@@ -49,6 +57,7 @@ class AbstractModWidget(QGroupBox):
         
         self.choicetable = QTableWidget(0,2,self)
         self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Probability'])
+        self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         self.choicelayout.addWidget(self.choicetable)
         
         self.mainlayout.addWidget(self.choicewidget,0,0,1,1)
@@ -68,16 +77,11 @@ class AbstractModWidget(QGroupBox):
         
         self.varstable = QTableWidget(0,3,self)
         self.varstable.setHorizontalHeaderLabels(['Table', 'Column', 'Coefficient'])
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
-        self.varstable.setSizePolicy(sizePolicy)
-
-
         self.varslayout.addWidget(self.varstable)
         
         self.mainlayout.addWidget(self.varswidget,x,y,1,3)
         self.mainlayout.setColumnStretch(1,3)
-        
-        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable)
+          
 
     def addVariable(self):
         self.varstable.insertRow(self.varstable.rowCount())
@@ -87,6 +91,7 @@ class AbstractModWidget(QGroupBox):
         varbox = QComboBox()
         varbox.addItems([QString("Var1"), QString("Var2")])
         self.varstable.setCellWidget(self.varstable.rowCount()-1, 1, varbox)       
+
 
     def makeOProbitChoiceWidget(self):
         self.choicewidget = QWidget(self)
@@ -106,8 +111,11 @@ class AbstractModWidget(QGroupBox):
 
     def addOPChoice(self):
         self.choicetable.insertRow(self.choicetable.rowCount())
-        self.choicetable.setItem(0,1,QTableWidgetItem(0))
+        self.choicetable.setItem(0,1,QTableWidgetItem())
         disableitem = self.choicetable.item(0, 1)
+        disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
+        disableitem.setBackgroundColor(Qt.darkGray)
+        
 
     def makeNestWidget(self):
         self.nestwidget = QWidget(self)
@@ -142,9 +150,9 @@ class NegBinModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(NegBinModWidget, self).__init__(parent) 
-        self.makeChoiceWidget()
-
+        self.makeChoiceWidget() 
         self.makeVarsWidget() 
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable)
 
 class MNLogitModWidget(AbstractModWidget):
     '''
@@ -152,8 +160,93 @@ class MNLogitModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(MNLogitModWidget, self).__init__(parent)
+        self.alternatives = []
+        self.specs = {}
         self.makeChoiceWidget() 
         self.makeVarsWidget() 
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addMNLVariable)
+        self.connect(self.varstable, SIGNAL("cellChanged (int,int)"), self.storeVarsTable)
+        self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable)
+
+    def addMNLVariable(self):
+        sellist = self.choicetable.selectedIndexes() 
+        if(len(sellist)!=1):
+            msg = "Please select ONE alternative"
+            QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok)
+        else:
+            selaltitem = self.choicetable.itemFromIndex(sellist[0])
+            if selaltitem == None:
+                msg = "Please specify the selected alternative"
+                QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok)
+            else:
+                selalt = selaltitem.text()
+                if selalt not in self.alternatives:
+                    self.alternatives.append(selalt)
+                self.varstable.insertRow(self.varstable.rowCount())
+                #self.specs[selalt] = copy.deepcopy(self.varstable)
+                
+        tablebox = QComboBox()
+        tablebox.addItems([QString("Table1"), QString("Table2")])
+        self.varstable.setCellWidget(self.varstable.rowCount()-1, 0, tablebox)
+        varbox = QComboBox()
+        varbox.addItems([QString("Var1"), QString("Var2")])
+        self.varstable.setCellWidget(self.varstable.rowCount()-1, 1, varbox) 
+    
+    def storeVarsTable(self,x,y):
+        print 'store var table'
+        sellist = self.choicetable.selectedIndexes()
+        selaltitem = self.choicetable.itemFromIndex(sellist[0])
+        selalt = selaltitem.text()
+        if selalt not in self.alternatives:
+            self.alternatives.append(selalt)
+        altspecs = []
+        i = 0
+        while i < self.varstable.rowCount():
+            var = []
+            tab = (self.varstable.cellWidget(i, 0)).currentIndex()
+            col = (self.varstable.cellWidget(i, 1)).currentIndex()
+            coeff = (self.varstable.item(i, 2)).text()
+            var.append(tab)
+            var.append(col)
+            var.append(coeff)
+            altspecs.append(var)
+            i = i + 1
+        self.specs[selalt] = altspecs
+
+
+    def showVarsTable(self,curritem,previtem):
+        print 'change var table'
+        self.varstable.clearContents()
+        if curritem != None:
+            selalt = curritem.text()
+            altspecs = self.specs[selalt]
+            self.varstable.setRowCount(len(altspecs))
+            i = 0
+            while i < self.varstable.rowCount():
+                tablebox = QComboBox()
+                tablebox.addItems(self.tablelist)
+                print altspecs[0]
+                tablebox.setCurrentIndex(altspecs[0])
+                self.varstable.setCellWidget(i,0,tablebox)
+                colbox = QComboBox()
+                colbox.addItems(self.coldict[tablebox.currentText()])
+                colbox.setCurrentIndex(altspecs[1])
+                self.varstable.setCellWidget(i,1,colbox)
+                coeffitem = QTableWidget()
+                coeffitem.setText(altspecs[2])
+                self.varstable.setItem(i,2,coeffitem)
+                i = i + 1
+        else:
+            pass
+            #self.makeVarsWidget()
+            
+        #self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addMNLVariable)
+        #self.connect(self.varstable, SIGNAL("cellChanged (int,int)"), self.storeVarsTable)
+
         
 class SFModWidget(AbstractModWidget):
     '''
@@ -162,6 +255,7 @@ class SFModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(SFModWidget, self).__init__(parent) 
         self.makeVarsWidget() 
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable)
 
 class LogRegModWidget(AbstractModWidget):
     '''
@@ -170,6 +264,7 @@ class LogRegModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(LogRegModWidget, self).__init__(parent) 
         self.makeVarsWidget() 
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable)
 
 class OProbitModWidget(AbstractModWidget):
     '''
@@ -178,7 +273,8 @@ class OProbitModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(OProbitModWidget, self).__init__(parent) 
         self.makeOProbitChoiceWidget()
-        self.makeVarsWidget()  
+        self.makeVarsWidget() 
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable) 
 
 class NLogitModWidget(AbstractModWidget):
     '''
@@ -188,4 +284,5 @@ class NLogitModWidget(AbstractModWidget):
         super(NLogitModWidget, self).__init__(parent) 
         self.makeNestWidget()
         self.makeChoiceWidget(0, 1)
-        self.makeVarsWidget(0, 2)    
+        self.makeVarsWidget(0, 2)   
+        self.connect(self.varsbutton, SIGNAL("clicked(bool)"), self.addVariable) 
