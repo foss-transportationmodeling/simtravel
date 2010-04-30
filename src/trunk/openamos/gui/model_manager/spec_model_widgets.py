@@ -31,6 +31,8 @@ class AbstractModWidget(QGroupBox):
         self.choicetable.setRowCount(0)
         self.choicetable.setColumnCount(1)
         self.choicetable.setHorizontalHeaderLabels(['Alternatives'])
+        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+        self.choicetable.setSizePolicy(sizePolicy)
         self.choicelayout.addWidget(self.choicetable,)
         
         self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
@@ -66,6 +68,10 @@ class AbstractModWidget(QGroupBox):
         
         self.varstable = QTableWidget(0,3,self)
         self.varstable.setHorizontalHeaderLabels(['Table', 'Column', 'Coefficient'])
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        self.varstable.setSizePolicy(sizePolicy)
+
+
         self.varslayout.addWidget(self.varstable)
         
         self.mainlayout.addWidget(self.varswidget,x,y,1,3)
@@ -136,7 +142,8 @@ class NegBinModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(NegBinModWidget, self).__init__(parent) 
-        self.makeChoiceWidget() 
+        self.makeChoiceWidget()
+
         self.makeVarsWidget() 
 
 class MNLogitModWidget(AbstractModWidget):
