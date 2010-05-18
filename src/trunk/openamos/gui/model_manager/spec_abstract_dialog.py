@@ -34,18 +34,24 @@ class AbtractSpecDialog(QDialog):
         modeltypegblayout.addWidget(self.modeltypecb)
         self.glayout.addWidget(self.modeltypegb,0,0)
 
+        self.tablelist = [QString("Table1"), QString("Table2")]
+        self.varlist1 = [QString("Var1"), QString("Var2")]
+        self.varlist2 = [QString("Var3"), QString("Var4")]
+        self.coldict = {}
+        self.coldict["Table1"] = self.varlist1
+        self.coldict["Table2"] = self.varlist2
+        
         self.subpopgb = QGroupBox("Sub-Population")
         subpoplayout = QGridLayout()
         self.subpopgb.setLayout(subpoplayout)
         tablelabel = QLabel("Table")
         subpoplayout.addWidget(tablelabel,0,0)
         self.subpoptab = QComboBox()
-        self.subpoptab.addItems([QString("Table 1"), QString("Table 2")])
+        self.subpoptab.addItems(self.tablelist)
         subpoplayout.addWidget(self.subpoptab,1,0)
         varlabel = QLabel("Column")  
         subpoplayout.addWidget(varlabel,0,1)          
         self.subpopvar = QComboBox()
-        self.subpopvar.addItems([QString("Var 1"), QString("Var 2")])
         subpoplayout.addWidget(self.subpopvar,1,1)
         oplabel = QLabel("Operator")  
         subpoplayout.addWidget(oplabel,0,2)          
@@ -69,8 +75,10 @@ class AbtractSpecDialog(QDialog):
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.storeSpec)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
+        self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
         
         self.changeModelWidget()
+        self.populateColumns()
     
     def changeModelWidget(self, idx=0):
         self.modwidget.setParent(None)
@@ -91,6 +99,12 @@ class AbtractSpecDialog(QDialog):
         
         self.glayout.addWidget(self.modwidget,2,0)
         self.update()
+
+    def populateColumns(self, idx=0):
+        self.subpopvar.clear()
+        seltab = str(self.subpoptab.currentText())
+        self.subpopvar.addItems(self.coldict[seltab])
+        
     
     def storeSpec(self):
         pass
