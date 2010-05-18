@@ -10,6 +10,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from psycopg2 import extensions
 import psycopg2 as dbapi2
+from sqlalchemy.sql import select
 from database_configuration import DataBaseConfiguration
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.orm import mapper
@@ -17,6 +18,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
+
 
 
 #class to define the database connectio along with other functions
@@ -41,7 +43,10 @@ class DataBaseConnection(object):
 		self.connection = connection
 		self.result = result
 		self.query = query
-		self.metadata = MetaData()
+		self.metadata = MetaData(
+			bind = self.engine
+		)
+		test_variable = ''
 
 		#create the database object here
 		db_obj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
@@ -115,15 +120,15 @@ class DataBaseConnection(object):
 		engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 		self.connection = engine.text("select datname from pg_database").execute()
 		result = self.connection
-		print 'result is %s'%result
+		#print 'result is %s'%result
 		dbs = [db[0] for db in result.fetchall()]
 		database_flag = database_config_object.database_name.lower() in dbs
 		if database_flag:
 			print 'database exists'
 			engine.dispose()
 			self.connection.close()
-			print 'engine is %s'%engine
-			print 'connection is %s'%self.connection
+			#print 'engine is %s'%engine
+			#print 'connection is %s'%self.connection
 			return 1
 		else:
 			engine.dispose()
@@ -134,7 +139,7 @@ class DataBaseConnection(object):
 
 	#this function creates a new database
 	def create_database(self, database_config_object):
-		print 'database name is %s'%database_config_object.database_name
+		#print 'database name is %s'%database_config_object.database_name
 		db_flag = self.check_if_database_exists(database_config_object)		
 		if not db_flag:
 			try:
@@ -154,7 +159,7 @@ class DataBaseConnection(object):
 		
 	def drop_database(self, database_config_object):
 	#this method wil drop the database
-		print 'database name is %s'%database_config_object.database_name
+		#print 'database name is %s'%database_config_object.database_name
 		db_flag = self.check_if_database_exists(database_config_object)		
 		if db_flag:
 			try:
@@ -171,34 +176,78 @@ class DataBaseConnection(object):
 
 
 	#create a method for mapper function
-	def define_mapping(self, col_types):
-		filter_data = { "INTEGER" : Integer,
-				"SHORT" : SmallInteger,
-				"FLOAT" : Float,
-				"DOUBLE" : Numeric,
-				"VARCHAR" : VARCHAR(255),
-				"BOOLEAN" : Boolean,
-				"TINYTEXT" : VARCHAR(255),
-				"TEXT" : Text,
-				"MEDIUMTEXT" : Text,
-				"LONGTEXT": Text,
-				"DATETIME": DateTime}
-   
-		return filter_data[type_val]
-	
+	def define_mapping(self, ctype, map_flag = True):
+		#use the mapping function to check for mapping and reverse mapping
+		#check the flag
+		if map_flag:
+			#define mapping and inverse		
+			filter_data = { "INTEGER" : Integer,
+					"SHORT" : SmallInteger,
+					"FLOAT" : Float,
+					"DOUBLE" : Numeric,
+					"VARCHAR" : VARCHAR(255),
+					"BOOLEAN" : Boolean,
+					"TINYTEXT" : VARCHAR(255),
+					"TEXT" : Text,
+					"MEDIUMTEXT" : Text,
+					"LONGTEXT": Text,
+					"DATETIME": DateTime}
+	  
+			return filter_data[ctype]
+		else:
+			#reverse mapping
+			#print "reverse mapping"
+			filter_data = {Integer: "INTEGER",
+               			       SmallInteger: "SHORT",
+			               Float: "FLOAT",
+			               Numeric: "DOUBLE",
+			               VARCHAR: "VARCHAR",
+			               Boolean: "BOOLEAN",
+			               CLOB: "MEDIUMTEXT",
+			               DateTime: "DATETIME",
+			               String: "VARCHAR"}
+	   
+			try:
+				c_type = filter_data[ctype.__class__]
+			except:
+			        if isinstance(type_class, VARCHAR):
+			            c_type = "VARCHAR"
+			        elif isinstance(type_class, CLOB):
+			            c_type = "MEDIUMTEXT"
+			        elif isinstance(type_class, Boolean):
+			            c_type = "BOOLEAN"
+			        elif isinstance(type_class, SmallInteger):
+			            c_type = "SHORT"
+			        elif isinstance(type_class, Float):
+			            c_type = "DOUBLE"
+			        elif isinstance(type_class, DateTime):
+			            c_type = "DATETIME"
+			        elif isinstance(type_class, Numeric):
+			            c_type = "DOUBLE"
+			        elif isinstance(type_class, String):
+			            c_type = "VARCHAR"
+			        if isinstance(type_class, Integer):
+			            c_type = "INTEGER"
+	   
+			return c_type
 
-	def new_conn(self, database_config_object):
+
+	#create a new connection with the database name
+        def new_connection(self, database_config_object):
 		#create a new connection to the database
 		try:
 			connect_string = '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
 			#engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
 			self.engine = create_engine(connect_string)	
 			self.connection = self.engine.connect()
-			print 'test1'
-			self.metadata.bind = self.engine
+			#self.connection = engine.text("SELECT * FROM pg_tables where schemaname = 'public'").execute()
+			#result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
+			#print 'result is %s'%result.fetchall()
+			#print 'test1'
+			#self.metadata.bind = self.engine
 			#self.metadata(bind = self.engine, schema = self.database_name)		
 			print 'new connection'
-			print 'metadata is %s'%self.metadata
+			#print 'metadata is %s'%self.metadata
 			#bind the metadata to the engine
 			#self.connection.close()
 			#if self.connection.closed:
@@ -214,23 +263,126 @@ class DataBaseConnection(object):
 
 	#check if table exists 
 	def check_if_table_exists(self, table_name, database_config_object):
-		self.new_conn(database_config_object)
-		print self.metadata.sorted_tables
-		for t in reversed(self.metadata.sorted_tables):
-			print 'table is %s'%t
+		self.new_connection(database_config_object)
+		#print 'testing %s'%test_variable
+		table_name = 'person2'
+		print table_name
+		#print 'table name is %s'%table_name
+		#result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
+		#table_array = result.fetchall() 
+		#table_array = [tb[1] for tb in result.fetchall()]
+		#print 'table array is %s'%table_array
+		#table_flag = table_name.lower() in table_array
+		#print 'result is %s'%table_flag
+		#print self.metadata.sorted_tables
+		#for t in reversed(self.metadata.sorted_tables):
+		#	print 'table is %s'%t
 		#method to be implemented. for now assume table does not exist
-		table_exists = 1
-		print table_exists
+		table_exists = self.engine.has_table(table_name = table_name)
+		#print 'test_res is %s'%test_res
+		#table_exists = 1
+		#print 'table exists is %s'%table_exists
+		#print table_exists
 		if table_exists:
+			print table_exists
 			return 1
 		else:
+			print table_exists
 			return 0
 
 
-	#create table. pass the table name and the table description
-	#def get_table_desc(self, table_name, table_desc):
+	#get the details about the columns
+	#store the columns in a list. the column name is followed by the datatype
+	def get_table_desc(self, table_name, table_desc):
 		#store the column names and
+		table_name = 'person2'
+		col_names = ["fname", "lname"]
+		col_types = ["VARCHAR", "VARCHAR"]
+		table_columns = []
+		print "new table name is %s"%table_name
+		for col, ctype in zip(col_names, col_types):		
+			#column = 'Column(%s, %s)'%(col,self.define_mapping(ctype))
+			column = Column(col, self.define_mapping(ctype))
+			table_columns.append(column)
+		print "final columns are"
+		for x in table_columns:
+			print "column is %s"%x
+		#call create table to create the new table
+		#for now create a table here
+		self.metadata = MetaData(
+			bind = self.engine
+		)
+		dbname = 'public'
+		kwargs = {'schema':self.database_name}
+		
+		new_table = Table(
+			table_name,
+			self.metadata,
+			*table_columns
+		)
+		#self.metadata.create_all(engine)
+		#table_query = new_table
+		#create table works
+		new_table.create(checkfirst = True)
+		print "new table created"
 
+		#insert table works
+		ins = new_table.insert()
+		entry1 = ins.values(fname="abc", lname="xyz")
+		entry2 = ins.values(fname="lmn", lname="pqr")
+		self.connection.execute(entry1)
+		self.connection.execute(entry2)
+		print "values inserted"
+		
+		#delete works
+		t = 'namz'
+		dele = new_table.delete(new_table.c.fname==t)
+		self.connection.execute(dele)
+		#return new_table
+
+		#drop table works
+		#found 2 ways to drop table
+		new_table.drop(bind = self.engine)
+		#table_name1 = "table123"
+		#tab_schema = "public"
+		#tab = self.metadata.tables['%s.%s'%(tab_schema, table_name1)]
+		#print "table metadata is %s"%tab
+		#tab = self.metadata.tables[table_name1]
+		#tab.drop(bind = self.engine)
+		#self.metadata.remove(tab)
+		print "table dropped"
+
+		#select all rows from the table
+		s = select([new_table])
+		res = self.connection.execute(s)
+		#rows = res.fetchall()
+		#print rows
+		print "display all rows"
+		for row in res.fetchall():
+			print row
+
+		#select all columns from the table
+		for c in new_table.c:
+			print "column name is %s"%c
+
+		#delete all rows from the table
+		dele = new_table.delete()
+		self.connection.execute(dele)
+				
+		#get table schema. inverse mapping
+		column_name = []
+		column_type = []
+		tab = self.metadata.tables[table_name]
+		for cols in tab.columns:
+			print "inv col is %s"%cols
+			column_name.append(cols.name)
+			column_type.append(self.define_mapping(cols.type, False))
+			
+		for cname, c_type in zip(column_name, column_type):
+			print "name is %s and type is %s"%(cname, c_type)
+
+
+	#return string
 	def __repr__(self):
 		return '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name,
 						self.password, self.host_name,
@@ -250,7 +402,6 @@ class TestDBConfiguration(unittest.TestCase):
 		self.host_name = 'localhost'
 		self.database_name = 'postgres'
 		self.database_config_object = None
-		self.table_name = 'abc'
 
 
 	def testDB(self):
@@ -258,13 +409,16 @@ class TestDBConfiguration(unittest.TestCase):
 		#new_DBobj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
 		new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
 		#new_obj = DataBaseConnection()
-		print 'new object is %s'%new_obj
+		#print 'new object is %s'%new_obj
 		database_config_object = self.database_config_object
 
 		#new_obj.temp_function(new_obj.database_config_object)
 		#new_obj.check_if_database_exists(new_obj.database_config_object)
 		new_obj.create_database(new_obj.database_config_object)
-		new_obj.check_if_table_exists(self.table_name, new_obj.database_config_object)
+		#print 'table is %s'%table_name
+		table_name = 'abc'
+		value = new_obj.check_if_table_exists(table_name, new_obj.database_config_object)
+		new_obj.get_table_desc(table_name, table_name)
 		#new_obj.drop_database(new_obj.database_config_object)
 		#new_obj.check_if_database_engine_exits(new_obj.database_config_object)
 
@@ -274,5 +428,8 @@ if __name__ == '__main__':
     unittest.main()
 
 
+#basic functionality working for all
 #TODO:
 #limit line length to 80 characters
+#coding stds
+#divide code into modules
