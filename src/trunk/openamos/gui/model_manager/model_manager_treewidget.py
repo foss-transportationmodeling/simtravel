@@ -354,21 +354,12 @@ class Model_Manager_Treewidget(QTreeWidget):
         time_use_utility_calculator = QTreeWidgetItem(self)
         time_use_utility_calculator.setText(0, "Time Use Utility Calculator")
 
-        self.connect(self, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.dothis)
+        self.connect(self, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.treeItemSelected)
 
-    def dothis(self,item,col):
-        if item.text(col) == 'Generate Synthetic Population':
-            main()
-        if item.text(col) == 'Labor Force Participation Model':
-            main()
-        if item.text(col) == 'Identify the number of jobs':
-            main()
-        if item.text(col) == 'Primary worker in the household':
-            main()
-        if item.text(col) == 'School status of everyone':
-            main()
+    def treeItemSelected(self,item,col):
         if item.text(col) == 'Residential Location Choice':
-            main()
+            diag = AbtractSpecDialog()
+            diag.exec_()
 
         
 
