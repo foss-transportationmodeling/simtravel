@@ -23,7 +23,7 @@ class SubModel(object):
         if self.check_string(model_type, ['regression', 'choice']):
             self.model_type = model_type.lower()
 
-        if self.check_string(dep_varname, [dep_varname]):
+        if self.check_string(dep_varname, [dep_varname.lower()]):
             self.dep_varname = dep_varname.lower()
 
         if data_filter is not None:
@@ -74,5 +74,9 @@ class SubModel(object):
         # in the next step how are values identified?
       
         return result
+    
+    def __repr__(self):
+        return 'Model Type - %s Dependent Variable - %s' \
+            %(self.model_type, self.dep_varname)
 
 
