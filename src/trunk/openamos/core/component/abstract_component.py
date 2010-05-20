@@ -2,7 +2,7 @@ from openamos.core.data_array import DataArray
 from openamos.core.models.model import SubModel
 from openamos.core.errors import ModelError
 
-class BasicController(object):
+class AbstractComponent(object):
     """
     This is the base class for implementing components in OpenAMOS
     
@@ -10,15 +10,13 @@ class BasicController(object):
     model_list - list of SubModel objects
     data - DataArray object on which the simulation needs to be carried out
     """
-    def __init__(self, model_list, data):
+    def __init__(self, model_list):
         for i in model_list:
             if not isinstance(i, SubModel):
                 raise ModelError, """all object(s) in the model_list """\
                     """must be valid SubModel objects"""
 
         self.model_list = model_list
-    #TODO: check for validity of data and choiceset TYPES
-        self.data = data
 
 
     #TODO: check for varnames in model specs and in the data
@@ -33,7 +31,11 @@ class BasicController(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self):
+    def run(self, data):
+        
+        #TODO: check for validity of data and choiceset TYPES
+        self.data = data
+        
         import copy
         # the variable keeps a running list of models that need to be run
         # this way first we run through all models once.  
@@ -164,7 +166,7 @@ class TestAbstractComponent(unittest.TestCase):
     
         # SPECIFY SEED TO REPLICATE RESULTS, DATA FILTER AND 
         # RUN UNTIL CONDITION
-        component = BasicController(model_list, data_)
+        component = AbstractComponent(model_list, data_)
     
         component.run()
 
