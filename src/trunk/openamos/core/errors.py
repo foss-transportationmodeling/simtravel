@@ -28,5 +28,8 @@ class ErrorSpecificationError(Exception):
 class ModelError(Exception):
     pass
 
+class ConfigurationError(Exception):
+    pass
+
 # Checking to see how SVN works 
 
