@@ -7,9 +7,9 @@ import sys
 import os
 import exceptions
 import sqlalchemy
+import psycopg2 as dbapi2
 from sqlalchemy import create_engine
 from psycopg2 import extensions
-import psycopg2 as dbapi2
 from sqlalchemy.sql import select
 from database_configuration import DataBaseConfiguration
 from sqlalchemy.schema import MetaData, Column, Table
@@ -21,11 +21,16 @@ from sqlalchemy.types import Integer, SmallInteger, \
 
 
 
-#class to define the database connectio along with other functions
+#class to define the database connection along with other functions
 class DataBaseConnection(object):
-	"""Database Connection class will connect to the database. It will 
-	create a database if none exists. It will also enable creating tables.
-	The class will also define methods to drop the database or tables"""
+
+	"""
+	This is the class for database connectivity and functionality.
+	The class will also perform various other functions on the database for
+	 data definition and data manipulation.
+
+	Input: Database configuration object
+	"""
 
 	def __init__(self, protocol = None, user_name = None,
 		     password = None, host_name = None, 
@@ -43,9 +48,7 @@ class DataBaseConnection(object):
 		self.connection = connection
 		self.result = result
 		self.query = query
-		self.metadata = MetaData(
-			bind = self.engine
-		)
+		self.metadata = metadata
 		test_variable = ''
 
 		#create the database object here
@@ -54,20 +57,40 @@ class DataBaseConnection(object):
 		self.database_config_object = database_config_object
 
 
-	#this is a temp function
-	#only for testing purpose. it displays the content of the database object
+	#done	
 	def temp_function(self, database_config_object):
-		print 'function for testing database object'
-		#print self.database_config_object.protocol
-		#print self.database_config_object.host_name
-		#print self.database_config_object.user_name
-		#print self.database_config_object.password
-		#print self.database_config_object.database_name
+		"""
+		This is a test function.
+		It displays the values of the database configuration object
+
+		Input:
+		Database configuration object
+		
+		Output:
+		Display the object details
+		"""
+
+		print self.database_config_object.protocol
+		print self.database_config_object.host_name
+		print self.database_config_object.user_name
+		print self.database_config_object.password
+		print self.database_config_object.database_name
 
 
-	#check if the protocol mentioned in the database object has been installed.
+	#done
 	def check_if_database_engine_exits(self, database_config_object):
-		#check the databases installed and save them in an array		
+		"""
+		This method checks if the database engine has been installed.
+		The types of databases checked are as below. The installed 
+		engines are stored in an array.
+
+		Input:
+		Protocol/database type of the database configuration object
+
+		Output:
+		Return the database engine if it exists else raises exception.
+		"""
+
 		database_engine = []
 		try:
 			import MySQLdb
@@ -93,52 +116,84 @@ class DataBaseConnection(object):
 		except:
 			pass
 
-		#now check if the protocol in the database configuration object is present in the array
+		"""After storing the installed engies, check if the protocol in
+		 the database configuration object is present in the array"""
 		db_engine = database_config_object.protocol
 		if db_engine in database_engine:
 			return db_engine
 		else:
 			raise Exception('Required database is not installed')
-	
-
-	#this function checks if there exists any database by the given name.
-	#pass the database object as a the parameter
+			sys.exit()
+			
+			
 	def check_if_database_exists(self, database_config_object):
-		#determine if database exists		
-		#returns boolean to the method 
-		#before checking database, check if the database is installed
+		"""
+		This method opens a raw connection to the postgres database 
+		and checks if the database name passed by the database 
+		configuration object already exists or not. If the database 
+		does not exists the database is created by another method.
+
+		Input:
+		Database name of the database configuration object.
+
+		Output:
+		Returns a boolean value indicating the database exists or not.
+		"""		
+		
+		"""Before checking for database check if the database engine 
+		is installed or not. If database is not installed then exit."""
 		installed_db = self.check_if_database_engine_exits(database_config_object)
 		if installed_db:
-			print 'database is installed and it is %s'%installed_db
+			print 'Database %s is installed.'%installed_db
 		else:
-			print 'database not installed'
+			print 'Database is not installed. Cannot proceed furthur.'
+			print 'Exiting the program'
+			sys.exit()
 
-		#create a connect string for the engine
+		"""Create a raw connection string for the engine
+		This part is only for postgres. for other databases different 
+		connection string will be used. for now implementing only for 
+		postgresql."""
+		#add if stmt for postgres
 		connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
 		self.engine = create_engine(connect_string)
 		engine = self.engine
 		engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+		
+		#Select all the database names and check if database exists
 		self.connection = engine.text("select datname from pg_database").execute()
 		result = self.connection
-		#print 'result is %s'%result
+
 		dbs = [db[0] for db in result.fetchall()]
 		database_flag = database_config_object.database_name.lower() in dbs
+		
+		#set a flag that indicates the existence of the database.
 		if database_flag:
-			print 'database exists'
+			print 'Database %s exists'%database_config_object.database_name
+			#dispose the engine and close the raw connection
 			engine.dispose()
 			self.connection.close()
-			#print 'engine is %s'%engine
-			#print 'connection is %s'%self.connection
 			return 1
 		else:
+			#dispose the engine and close the raw connection			
 			engine.dispose()
 			self.connection.close()
-			print 'database does not exist. create a new database'
+			print 'Database does not exist. Create a new database'
 			return 0
 
 
 	#this function creates a new database
 	def create_database(self, database_config_object):
+		"""
+		This method creates a new database by the database name passed 
+		in the database configuration object.
+
+		Input:
+
+		
+
+		"""
+
 		#print 'database name is %s'%database_config_object.database_name
 		db_flag = self.check_if_database_exists(database_config_object)		
 		if not db_flag:
@@ -210,23 +265,23 @@ class DataBaseConnection(object):
 			try:
 				c_type = filter_data[ctype.__class__]
 			except:
-			        if isinstance(type_class, VARCHAR):
+			        if isinstance(ctype, VARCHAR):
 			            c_type = "VARCHAR"
-			        elif isinstance(type_class, CLOB):
+			        elif isinstance(ctype, CLOB):
 			            c_type = "MEDIUMTEXT"
-			        elif isinstance(type_class, Boolean):
+			        elif isinstance(ctype, Boolean):
 			            c_type = "BOOLEAN"
-			        elif isinstance(type_class, SmallInteger):
+			        elif isinstance(ctype, SmallInteger):
 			            c_type = "SHORT"
-			        elif isinstance(type_class, Float):
+			        elif isinstance(ctype, Float):
 			            c_type = "DOUBLE"
-			        elif isinstance(type_class, DateTime):
+			        elif isinstance(ctype, DateTime):
 			            c_type = "DATETIME"
-			        elif isinstance(type_class, Numeric):
+			        elif isinstance(ctype, Numeric):
 			            c_type = "DOUBLE"
-			        elif isinstance(type_class, String):
+			        elif isinstance(ctype, String):
 			            c_type = "VARCHAR"
-			        if isinstance(type_class, Integer):
+			        if isinstance(ctype, Integer):
 			            c_type = "INTEGER"
 	   
 			return c_type
@@ -313,7 +368,7 @@ class DataBaseConnection(object):
 			bind = self.engine
 		)
 		dbname = 'public'
-		kwargs = {'schema':self.database_name}
+		#kwargs = {'schema':self.database_name}
 		
 		new_table = Table(
 			table_name,
@@ -335,14 +390,14 @@ class DataBaseConnection(object):
 		print "values inserted"
 		
 		#delete works
-		t = 'namz'
-		dele = new_table.delete(new_table.c.fname==t)
-		self.connection.execute(dele)
+		#t = 'namz'
+		#dele = new_table.delete(new_table.c.fname==t)
+		#self.connection.execute(dele)
 		#return new_table
 
 		#drop table works
 		#found 2 ways to drop table
-		new_table.drop(bind = self.engine)
+		#new_table.drop(bind = self.engine)
 		#table_name1 = "table123"
 		#tab_schema = "public"
 		#tab = self.metadata.tables['%s.%s'%(tab_schema, table_name1)]
@@ -358,30 +413,51 @@ class DataBaseConnection(object):
 		#rows = res.fetchall()
 		#print rows
 		print "display all rows"
+		
 		for row in res.fetchall():
 			print row
+
+		print row.fname, type(row.lname)
 
 		#select all columns from the table
 		for c in new_table.c:
 			print "column name is %s"%c
 
 		#delete all rows from the table
-		dele = new_table.delete()
-		self.connection.execute(dele)
+		#dele = new_table.delete()
+		#self.connection.execute(dele)
 				
 		#get table schema. inverse mapping
 		column_name = []
 		column_type = []
+		print self.metadata.tables.keys()
 		tab = self.metadata.tables[table_name]
+		print "tab"
+		print tab
 		for cols in tab.columns:
-			print "inv col is %s"%cols
+			#print "inv col is %s"%cols
 			column_name.append(cols.name)
-			column_type.append(self.define_mapping(cols.type, False))
+			#column_type.append(self.define_mapping(cols.type, False))
+			column_type.append(cols.type)
 			
 		for cname, c_type in zip(column_name, column_type):
 			print "name is %s and type is %s"%(cname, c_type)
 
 
+	def close_connection(self):
+		try:
+			print "closing the database connection."
+			self.connection.close()
+			self.engine = None
+			self.metadata = None
+		except:
+			print "Error %s"%e
+			print "Error while closing the database connection. Exiting the program."
+			self.engine = None
+			self.metadata = None
+			sys.exit()
+	
+		
 	#return string
 	def __repr__(self):
 		return '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name,
