@@ -58,7 +58,7 @@ class DataBaseConnection(object):
 
 
     #done	
-    def temp_function(self, database_config_object):
+    def temp_function(self):
         """
         This is a test function.
         It displays the values of the database configuration object
@@ -147,7 +147,7 @@ class DataBaseConnection(object):
         Before checking for database check if the database engine 
         is installed or not. If database is not installed then exit.
         """
-        installed_db = self.check_if_database_engine_exits(self.database_config_object)
+        installed_db = self.check_if_database_engine_exits()
         if installed_db:
             print 'Database %s is installed.'%installed_db
         else:
@@ -161,7 +161,7 @@ class DataBaseConnection(object):
         connection string will be used. for now implementing only for 
         postgresql.
         """
-        if self.database_config_object.protocol is 'postgres'
+        if self.database_config_object.protocol is 'postgres':
             connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
             self.engine = create_engine(connect_string)
             engine = self.engine
@@ -185,75 +185,75 @@ class DataBaseConnection(object):
                 #dispose the engine and close the raw connection			
                 engine.dispose()
                 self.connection.close()
-                print 'Database does not exist. Create a new database'
+                print 'Database does not exist.'
                 return 0
-        elif self.database_config_object.protocol is 'mysql'
+        elif self.database_config_object.protocol is 'mysql':
             print 'Protocol is mysql'
-        elif self.database_config_object.protocol is 'mssql'
+        elif self.database_config_object.protocol is 'mssql':
             print 'Protocol is mssql'
-        elif self.database_config_object.protocol is 'sqlite'
+        elif self.database_config_object.protocol is 'sqlite':
             print 'Protocol is sqlite'
 
             
-#this function creates a new database
-def create_database(self):
-    """
-    This method creates a new database by the database name passed 
-    in the database configuration object.
-
-    Input:
-    Database name
+    #this function creates a new database
+    def create_database(self):
+        """
+        This method creates a new database by the database name passed 
+        in the database configuration object.
     
-    Output:
-    Database created if it does not exists
-		
-    """
+        Input:
+        Database name
+        
+        Output:
+        Database created if it does not exists
+	    	
+        """
 
-    #print 'database name is %s'%self.database_config_object.database_name
-    db_flag = self.check_if_database_exists(self.database_config_object)		
-    if not db_flag:
-        try:
-            connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
-            self.engine = create_engine(connect_string)
-            engine = self.engine
-            engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            self.connection = engine.text("create database %s encoding = 'utf8'"%self.database_config_object.database_name).execute()
-            print 'new database created'
-            engine.dispose()
-            self.connection.close()
-        except:
-            raise Exception('Error while creating a new database')
-    else:
-        print 'no need to create a new database'
-			
+        #print 'database name is %s'%self.database_config_object.database_name
+        db_flag = self.check_if_database_exists()		
+        if not db_flag:
+            try:
+                connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
+                self.engine = create_engine(connect_string)
+                engine = self.engine
+                engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                self.connection = engine.text("create database %s encoding = 'utf8'"%self.database_config_object.database_name).execute()
+                print 'new database created'
+                engine.dispose()
+                self.connection.close()
+            except:
+                raise Exception('Error while creating a new database')
+        else:
+            print 'no need to create a new database'
+	    		
 		
     #done
     def drop_database(self):
-    """
-    This method is used to drop the database.
+        """
+        This method is used to drop the database.
     
-    Input:
-    Database name
+        Input:
+        Database name
     
-    Output:
-    Database dropped and boolean returned
-    """
+        Output:
+        Database dropped and boolean returned
+        """
     
-    #Before dropping the database check if the database exists or not
-    db_flag = self.check_if_database_exists(self.database_config_object)		
-    if db_flag:
-        try:
-            connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
-            self.engine = create_engine(connect_string)
-            engine = self.engine
-            engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            self.connection = engine.text("drop database %s"%self.database_config_object.database_name).execute()
-            engine.dispose()
-            self.connection.close()
-            print 'database dropped'
-        except:
-            raise Exception('Error while deleting a database')
-
+        #Before dropping the database check if the database exists or not
+        db_flag = self.check_if_database_exists()		
+        if db_flag:
+            try:
+                connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
+                self.engine = create_engine(connect_string)
+                engine = self.engine
+                engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                self.connection = engine.text("drop database %s"%self.database_config_object.database_name).execute()
+                engine.dispose()
+                self.connection.close()
+                print 'database dropped'
+            except:
+                raise Exception('Error while deleting a database')
+    
             
     #done                
     def define_mapping(self, ctype, map_flag = True):
@@ -402,9 +402,14 @@ def create_database(self):
         List of the tables in the database.
         """
 
-        result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
-        table_array = result.fetchall() 
-        return table_array
+        try:
+            result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
+            table_array = result.fetchall()
+            print 'table list is fetched'
+            return table_array
+        except:
+            print 'Error while fetching the tables from the database'
+            raise Exception
 
         
     #get all the columns in a table
@@ -516,10 +521,10 @@ def create_database(self):
         print "tab"
         print tab
         for cols in tab.columns:
-        #print "inv col is %s"%cols
-        column_name.append(cols.name)
-        #column_type.append(self.define_mapping(cols.type, False))
-        column_type.append(cols.type)
+            #print "inv col is %s"%cols
+            column_name.append(cols.name)
+            #column_type.append(self.define_mapping(cols.type, False))
+            column_type.append(cols.type)
 			
         for cname, c_type in zip(column_name, column_type):
             print "name is %s and type is %s"%(cname, c_type)
@@ -638,6 +643,10 @@ def create_database(self):
             self.connection.close()
             self.engine = None
             self.metadata = None
+            if self.connection.closed:
+                print 'Connection to database closed'
+            else:
+                print 'Connection to database not closed'
         except:
             print "Error while closing the database connection. Exiting the program."
             self.engine = None
@@ -672,24 +681,50 @@ class TestDBConfiguration(unittest.TestCase):
 
     def testDB(self):
         #test to connect to database 
-        #new_DBobj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
+        new_obj.temp_function()
+        
+        """ to create a database """
+        new_obj.create_database()
+        
+        """ to drop database """
+        #new_obj.drop_database()
+        
+        """ to create new connection """
+        new_obj.new_connection()
+        
+        """ to get list of tables """
+        tables = new_obj.get_table_list()
+        table_names = [tb[1] for tb in tables]
+        for i in table_names:
+            print 'Table is %s'%i
+        
+        """ to get the columns in a table """
+        table_name = 'person2'
+        columns = new_obj.get_column_list(table_name)
+        column_names = [col[0] for col in columns]
+        for i in column_names:
+            print 'Column is %s'%i
+        
+        """ to close the connection """
+        new_obj.close_connection()
+        
         #new_obj = DataBaseConnection()
         #print 'new object is %s'%new_obj
-        database_config_object = self.database_config_object
+        #database_config_object = self.database_config_object
 
         #new_obj.temp_function(new_obj.database_config_object)
         #new_obj.check_if_database_exists(new_obj.database_config_object)
-        new_obj.create_database(new_obj.database_config_object)
+        #new_obj.create_database(new_obj.database_config_object)
         #print 'table is %s'%table_name
-        table_name = 'abc'
-        value = new_obj.check_if_table_exists(table_name, new_obj.database_config_object)
-        new_obj.get_table_desc(table_name, table_name)
+        #table_name = 'abc'
+        #value = new_obj.check_if_table_exists(table_name, new_obj.database_config_object)
+        #new_obj.get_table_desc(table_name, table_name)
         #new_obj.drop_database(new_obj.database_config_object)
         #new_obj.check_if_database_engine_exits(new_obj.database_config_object)
 
 if __name__ == '__main__':
-unittest.main()
+    unittest.main()
 
 #basic functionality working for all
 #TODO:
