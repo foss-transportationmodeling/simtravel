@@ -404,8 +404,9 @@ class DataBaseConnection(object):
 
         try:
             result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
-            table_array = result.fetchall()
-            print 'table list is fetched'
+            table_names = result.fetchall()
+            table_array = [tb[1] for tb in table_names]
+            #print 'table list is fetched'
             return table_array
         except:
             print 'Error while fetching the tables from the database'
@@ -427,7 +428,8 @@ class DataBaseConnection(object):
         #SELECT column_name,data_type,data_length,data_precision,nullable FROM all_tab_cols where table_name ='EMP';
         self.table_name = table_name
         result = self.connection.execute("select column_name,* from information_schema.columns where table_name = '%s'"%self.table_name)
-        column_array = result.fetchall() 
+        column_names = result.fetchall() 
+        column-array = [col[0] for col in column_names]
         return column_array
 
 
@@ -695,15 +697,13 @@ class TestDBConfiguration(unittest.TestCase):
         
         """ to get list of tables """
         tables = new_obj.get_table_list()
-        table_names = [tb[1] for tb in tables]
-        for i in table_names:
+        for i in tables:
             print 'Table is %s'%i
         
         """ to get the columns in a table """
         table_name = 'person2'
         columns = new_obj.get_column_list(table_name)
-        column_names = [col[0] for col in columns]
-        for i in column_names:
+        for i in columns:
             print 'Column is %s'%i
         
         """ to close the connection """
