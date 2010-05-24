@@ -425,12 +425,16 @@ class DataBaseConnection(object):
         List of columns present in the table
         """
 
-        #SELECT column_name,data_type,data_length,data_precision,nullable FROM all_tab_cols where table_name ='EMP';
-        self.table_name = table_name
-        result = self.connection.execute("select column_name,* from information_schema.columns where table_name = '%s'"%self.table_name)
-        column_names = result.fetchall() 
-        column-array = [col[0] for col in column_names]
-        return column_array
+        try:
+            #SELECT column_name,data_type,data_length,data_precision,nullable FROM all_tab_cols where table_name ='EMP';
+            self.table_name = table_name
+            result = self.connection.execute("select column_name,* from information_schema.columns where table_name = '%s'"%self.table_name)
+            column_names = result.fetchall() 
+            column-array = [col[0] for col in column_names]
+            return column_array
+        except:
+            print 'Error while fetching the columns of the table %s'%self.table_name
+            raise Exception
 
 
     def get_table_desc(self, table_name, table_desc):
