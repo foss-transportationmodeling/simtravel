@@ -12,13 +12,18 @@ from PyQt4.QtCore import *
 from openamos.gui.env import *
 from spec_model_widgets import *
 
+from openamos.core.database_management.database_connection import *
+from openamos.core.database_management.database_configuration import *
+
 class AbtractSpecDialog(QDialog):
     '''
     classdocs
     '''
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title = ''):
         super(AbtractSpecDialog, self).__init__(parent)
+        
+        self.setWindowTitle(title)
         
         self.glayout = QGridLayout()
         self.setLayout(self.glayout)
@@ -33,13 +38,8 @@ class AbtractSpecDialog(QDialog):
                                    QString(NL_MODEL)])
         modeltypegblayout.addWidget(self.modeltypecb)
         self.glayout.addWidget(self.modeltypegb,0,0)
-
-        self.tablelist = [QString("Table1"), QString("Table2")]
-        self.varlist1 = [QString("Var1"), QString("Var2")]
-        self.varlist2 = [QString("Var3"), QString("Var4")]
-        self.coldict = {}
-        self.coldict["Table1"] = self.varlist1
-        self.coldict["Table2"] = self.varlist2
+        
+        self.populateFromDatabase()
         
         self.subpopgb = QGroupBox("Sub-Population")
         subpoplayout = QGridLayout()
@@ -107,8 +107,31 @@ class AbtractSpecDialog(QDialog):
         
     
     def storeSpec(self):
-        pass
+        if self.modeltypecb.currentText() == PROB_MODEL:
+            pass
     
+    def populateFromDatabase(self):
+        self.protocol = 'postgres'        
+        self.user_name = 'postgres'
+        self.password = 'Travel7Demand'
+        self.host_name = 'localhost'
+        self.database_name = 'simtravel'
+        self.database_config_object = None
+        
+        new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
+        new_obj.new_connection()
+        tables = new_obj.get_table_list()
+        
+        self.tablelist = []
+        self.coldict = {}
+        for table in tables:
+            self.tablelist.append(QString(table))
+            cols = new_obj.get_column_list(table)
+            varlist = []
+            for col in cols:
+                varlist.append(QString(col))
+            self.coldict[table] = varlist
+
         
 def main():
     app = QApplication(sys.argv)
