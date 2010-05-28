@@ -232,12 +232,15 @@ class MainWindow(QMainWindow):
         project_new = NewProject()
         project_new.exec_()
         self.protree = project_new.configtree
+        self.checkProject()
         print self.protree
 
     def projectopen(self):
         self.project_open = OpenProject()
-        self.protree = etree.parse(str(self.project_open.file))
-        self.checkProject()
+        print self.project_open.file
+        if self.project_open.file != '':
+            self.protree = etree.parse(str(self.project_open.file))
+            self.checkProject()
 
     def projectsave(self):
         self.projectsave = SaveProject()
