@@ -1,7 +1,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-
+from openamos.gui.env import *
 
 class FixedActivityPrismModels(QWidget):
     def __init__(self, parent=None):
@@ -15,12 +15,13 @@ class FixedActivityPrismModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        day_start_button = QPushButton('Earliest start of day \n(time one can leave home)', self)
+        #day_start_button = QPushButton('Earliest start of day \n(time one can leave home)', self)
+        day_start_button = QPushButton(COMPMODEL_DAYSTART, self)
         day_start_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 370,200, 50)
         day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        day_end_button = QPushButton("Latest end of day (time \nby which one has to be home)", self)     
+        day_end_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 290, 200, 50)
 
         

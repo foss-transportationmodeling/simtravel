@@ -1,6 +1,8 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from openamos.gui.env import *
+
 
 
 class LongTermModels(QWidget):
