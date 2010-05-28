@@ -14,12 +14,14 @@ from sqlalchemy.sql import select
 from database_configuration import DataBaseConfiguration
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.orm import mapper
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
 
 
+class Temp(object): pass
 
 #class to define the database connection along with other functions
 class DataBaseConnection(object):
@@ -36,7 +38,8 @@ class DataBaseConnection(object):
                 database_name = None, database_config_object = None, 
                 engine = None, connection = None, 
                 result = None, query = None,
-                metadata = None, table_name = None):
+                metadata = None, table_name = None,
+                session = None):
 
         self.protocol = protocol
         self.user_name = user_name
@@ -49,6 +52,7 @@ class DataBaseConnection(object):
         self.query = query
         self.metadata = metadata
         self.table_name = table_name
+        self.session = session
         test_variable = ''
 
         #create the database object here
@@ -57,7 +61,7 @@ class DataBaseConnection(object):
         self.database_config_object = database_config_object
 
 
-    #done	
+    #temp function prints the values of the database configuration object	
     def temp_function(self):
         """
         This is a test function.
@@ -77,7 +81,7 @@ class DataBaseConnection(object):
         print self.database_config_object.database_name
 	
     
-    #done
+    #checks if the database engine is installed
     def check_if_database_engine_exits(self):
         """
         This method checks if the database engine has been installed.
@@ -128,7 +132,7 @@ class DataBaseConnection(object):
             sys.exit()
 	
     
-    #done			
+    #checks if the database exists			
     def check_if_database_exists(self):
         """
         This method opens a raw connection to the postgres database 
@@ -227,7 +231,7 @@ class DataBaseConnection(object):
             print 'no need to create a new database'
 	    		
 		
-    #done
+    #drops a database
     def drop_database(self):
         """
         This method is used to drop the database.
@@ -255,7 +259,7 @@ class DataBaseConnection(object):
                 raise Exception('Error while deleting a database')
     
             
-    #done                
+    #define mapping for the columns and datatypes                
     def define_mapping(self, ctype, map_flag = True):
         """
         This method is used to map the columns in the table. This method implements
@@ -284,7 +288,7 @@ class DataBaseConnection(object):
                             "MEDIUMTEXT" : Text,
                             "LONGTEXT": Text,
                             "DATETIME": DateTime}
-	  
+           
             return filter_data[ctype]
         else:
             #reverse mapping
@@ -343,12 +347,12 @@ class DataBaseConnection(object):
             #engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
             self.engine = create_engine(connect_string)	
             self.connection = self.engine.connect()
-            #self.metadata.bind = self.engine
-            #self.metadata(bind = self.engine, schema = self.database_name)		
             print 'New connection created'
-            #print 'metadata is %s'%self.metadata
-            #bind the metadata to the engine
-            #self.connection.close()
+            self.metadata = MetaData(
+                        bind = self.engine
+                        )
+            Session = sessionmaker(bind=self.engine, autoflush=True, autocommit=True)
+            self.session = Session()                  
         except:
             print "Exiting the program since database connectivity failed"
             raise Exception
@@ -367,27 +371,13 @@ class DataBaseConnection(object):
         Return boolean indicating the table exists or not
         """
 
-        self.new_connection(self.database_config_object)
-        #self.table_name = 'person2'
         self.table_name = table_name
-        print 'table name is %s'%table_name
-        #result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
-        #table_array = result.fetchall() 
-        #table_array = [tb[1] for tb in result.fetchall()]
-        #print 'table array is %s'%table_array
-        #table_flag = table_name.lower() in table_array
-        #print 'result is %s'%table_flag
-        #print self.metadata.sorted_tables
-        #for t in reversed(self.metadata.sorted_tables):
-        #	print 'table is %s'%t
-        #method to be implemented. for now assume table does not exist
-        table_exists = self.engine.has_table(table_name = table_name)
-        if table_exists:
-            print table_exists
-            return 1
-        else:
-            print table_exists
-            return 0
+        try:
+            table_exists = self.engine.has_table(table_name = table_name)
+            return table_exists
+        except:
+            print 'Error when checking for existing tables'
+            raise Exception
 
 
     #get the list of tables from the database
@@ -406,7 +396,6 @@ class DataBaseConnection(object):
             result = self.connection.execute("SELECT * FROM pg_tables where schemaname = 'public'")
             table_names = result.fetchall()
             table_array = [tb[1] for tb in table_names]
-            #print 'table list is fetched'
             return table_array
         except:
             print 'Error while fetching the tables from the database'
@@ -425,118 +414,59 @@ class DataBaseConnection(object):
         List of columns present in the table
         """
 
-        try:
-            #SELECT column_name,data_type,data_length,data_precision,nullable FROM all_tab_cols where table_name ='EMP';
-            self.table_name = table_name
-            result = self.connection.execute("select column_name,* from information_schema.columns where table_name = '%s'"%self.table_name)
-            column_names = result.fetchall() 
-            column-array = [col[0] for col in column_names]
-            return column_array
-        except:
-            print 'Error while fetching the columns of the table %s'%self.table_name
-            raise Exception
+        self.table_name = table_name
+        #before returning the columns check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            #table exists
+            print 'Table exists in the database.'
+            column_list = []
+            temp = None
+            columns = Table(self.table_name, self.metadata, autoload=True)
+            for c in columns.c:
+                temp = str(c)
+                parts = temp.split(".")
+                column_list.append(parts[1])
+
+            return column_list
+        else:
+            print 'Table does not exists. Cannot return the column list'
 
 
-    def get_table_desc(self, table_name, table_desc):
-        #store the column names and
-        table_name = 'person2'
-        col_names = ["fname", "lname"]
-        col_types = ["VARCHAR", "VARCHAR"]
-        table_columns = []
-        print "new table name is %s"%table_name
-
-        for col, ctype in zip(col_names, col_types):		
-            #column = 'Column(%s, %s)'%(col,self.define_mapping(ctype))
-            column = Column(col, self.define_mapping(ctype))
-            table_columns.append(column)
-            print "final columns are"
-            
-        for x in table_columns:
-            print "column is %s"%x
-            #call create table to create the new table
-            #for now create a table here
-            self.metadata = MetaData(
-                        bind = self.engine
-                        )
+    #get the description of the table
+    def get_table_desc(self, columns, ctypes, keys):
+        """
+        This method is used to get the description of the table.
+        The method returns the columns with the datatypes and keys if any. It 
+        calls the mapping function to obtain the datatypes of the columns.
         
-        dbname = 'public'
-        #kwargs = {'schema':self.database_name}
-		
-        new_table = Table(
-                    table_name,
-                    self.metadata,
-                    *table_columns
-                    )
-        #self.metadata.create_all(engine)
-        #table_query = new_table
-        #create table works
-        new_table.create(checkfirst = True)
-        print "new table created"
+        Input:
+        Column names, their datatypes and keys in the form of lists.
+        All three lists have one to one mapping
+        
+        Output:
+        Returns the columns of the table in the required format.        
+        """
 
-        #insert table works
-        ins = new_table.insert()
-        entry1 = ins.values(fname="abc", lname="xyz")
-        entry2 = ins.values(fname="lmn", lname="pqr")
-        self.connection.execute(entry1)
-        self.connection.execute(entry2)
-        print "values inserted"
-		
-        #delete works
-        #t = 'namz'
-        #dele = new_table.delete(new_table.c.fname==t)
-        #self.connection.execute(dele)
-        #return new_table
+        #store the column names, datatypes and keys in local variables
+        col_names = columns
+        col_types = ctypes
+        key_types = keys
+        table_columns = []
 
-        #drop table works
-        #found 2 ways to drop table
-        #new_table.drop(bind = self.engine)
-        #table_name1 = "table123"
-        #tab_schema = "public"
-        #tab = self.metadata.tables['%s.%s'%(tab_schema, table_name1)]
-        #print "table metadata is %s"%tab
-        #tab = self.metadata.tables[table_name1]
-        #tab.drop(bind = self.engine)
-        #self.metadata.remove(tab)
-        print "table dropped"
-
-        #select all rows from the table
-        s = select([new_table])
-        res = self.connection.execute(s)
-        #rows = res.fetchall()
-        #print rows
-        print "display all rows"
-		
-        for row in res.fetchall():
-            print row
-
-        print row.fname, type(row.lname)
-
-        #select all columns from the table
-        for c in new_table.c:
-            print "column name is %s"%c
-
-        #delete all rows from the table
-        #dele = new_table.delete()
-        #self.connection.execute(dele)
-				
-        #get table schema. inverse mapping
-        column_name = []
-        column_type = []
-        print self.metadata.tables.keys()
-        tab = self.metadata.tables[table_name]
-        print "tab"
-        print tab
-        for cols in tab.columns:
-            #print "inv col is %s"%cols
-            column_name.append(cols.name)
-            #column_type.append(self.define_mapping(cols.type, False))
-            column_type.append(cols.type)
-			
-        for cname, c_type in zip(column_name, column_type):
-            print "name is %s and type is %s"%(cname, c_type)
+        for col, ctype, ktype in zip(col_names, col_types, key_types):
+            if ktype == "1":
+                column = Column(col, self.define_mapping(ctype), primary_key=True)
+            else:
+                column = Column(col, self.define_mapping(ctype))
+            table_columns.append(column)
+            
+        return table_columns
 
  
-    def create_table(self, table_name):
+    #creates a new table
+    def create_table(self, table_name, columns, ctypes, keys):
         """
         This method is used to create new table in the database.
 
@@ -546,8 +476,37 @@ class DataBaseConnection(object):
         Output:
         New table created
         """
-
-
+        
+        #before creating a new table check if that table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            print 'Table already exists in the database. No need to create a new table'
+        else:
+            #create a new table since it does not exist
+            print 'Table does not exist. Create a new table'
+            #get the description of the table
+            table_columns = self.get_table_desc(columns, ctypes, keys)
+            try:
+                new_table = Table(
+                        self.table_name,
+                        self.metadata,
+                        *table_columns
+                        )
+                #create new table                         
+                new_table.create(checkfirst = True)
+                print "Table '%s' created"%self.table_name
+                #create a mapper for the table
+                mapper(Temp, new_table)
+                #create an object for the mapper
+                self.new_user = Temp()
+                print self.new_user
+            except:
+                print 'Error while creating the table %s'%self.table_name
+                raise Exception
+            
+        
+    #insert values in the table
     def insert_into_table(self, table_name, values):
         """
         This method is used to insert new values into the table.
@@ -560,6 +519,7 @@ class DataBaseConnection(object):
         """
 
 
+    #select all rows from the table
     def select_all_fom_table(self, table_name):
         """
         This method is used to fetch all rows from the table specified.
@@ -572,6 +532,7 @@ class DataBaseConnection(object):
         """
 
 
+    #select rows based on a selection criteria
     def fetch_selected_rows(self, table_name, value):
         """
         This method is used to fetch selected rows fom the table in the database.
@@ -584,6 +545,7 @@ class DataBaseConnection(object):
         """
 
 
+    #delete rows based on a deletion criteria
     def delete_selected_rows(self, table_name, value):
         """
         This method is used to delete selected rows fom the table in the database.
@@ -596,6 +558,7 @@ class DataBaseConnection(object):
         """
 
 
+    #delete all rows i.e. empty table
     def delete_all(self, table_name):
         """
         This method is used to delete all rows from the table.
@@ -608,6 +571,7 @@ class DataBaseConnection(object):
         """
 
 
+    #drop the table
     def drop_table(self, table_name):
         """
         This method is used to drop the table from the database
@@ -618,8 +582,24 @@ class DataBaseConnection(object):
         Output:
         Table is dropped from the database
         """
+        
+        #before dropping the table check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            #table exists and hence can be dropped
+            print 'Table exists in the database.'
+            table = Table(self.table_name, self.metadata, autoload=True)
+            tab = self.metadata.tables[self.table_name]
+            print 'tab is %s'%tab
+            tab.drop(bind = self.engine)
+            print 'table dropped'
+            print tab
+        else:
+            print 'Table does not exist in the database. Cannot the drop the table'
+        
 
-
+    #obtain the reverse mapping of the columns
     def get_reverse_mapping(self, table_name):
         """
         This method is used to get the reverse mapping of a table.
@@ -645,7 +625,7 @@ class DataBaseConnection(object):
         """
 
         try:
-            print "closing the database connection."
+            print "Closing the database connection."
             self.connection.close()
             self.engine = None
             self.metadata = None
@@ -688,44 +668,56 @@ class TestDBConfiguration(unittest.TestCase):
     def testDB(self):
         #test to connect to database 
         new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
-        new_obj.temp_function()
+        #new_obj.temp_function()
         
         """ to create a database """
-        new_obj.create_database()
+        #new_obj.create_database()
         
         """ to drop database """
         #new_obj.drop_database()
         
         """ to create new connection """
         new_obj.new_connection()
-        
+      
+        """ to create a new table """
+        table_name = 'person'
+        columns = ["first_name", "last_name"]
+        ctypes = ["VARCHAR", "VARCHAR"]
+        keys = ["1","0"]
+
+        new_obj.create_table(table_name, columns, ctypes, keys)
+
+        print " "
+                        
         """ to get list of tables """
         tables = new_obj.get_table_list()
         for i in tables:
             print 'Table is %s'%i
+
+        print " "
         
         """ to get the columns in a table """
-        table_name = 'person2'
+        table_name = 'table123'
+        columns = None
         columns = new_obj.get_column_list(table_name)
-        for i in columns:
-            print 'Column is %s'%i
+        if columns <> None:
+            for i in columns:
+                print 'Column is %s'%i
+        else:
+            print 'No columns returned'                
+                
+        print " "
+        
+        """ to drop the table """
+        table_name = 'table1'
+        new_obj.drop_table(table_name)
+        
+        print " "
         
         """ to close the connection """
         new_obj.close_connection()
-        
-        #new_obj = DataBaseConnection()
-        #print 'new object is %s'%new_obj
-        #database_config_object = self.database_config_object
 
-        #new_obj.temp_function(new_obj.database_config_object)
-        #new_obj.check_if_database_exists(new_obj.database_config_object)
-        #new_obj.create_database(new_obj.database_config_object)
-        #print 'table is %s'%table_name
-        #table_name = 'abc'
-        #value = new_obj.check_if_table_exists(table_name, new_obj.database_config_object)
-        #new_obj.get_table_desc(table_name, table_name)
-        #new_obj.drop_database(new_obj.database_config_object)
-        #new_obj.check_if_database_engine_exits(new_obj.database_config_object)
+
 
 if __name__ == '__main__':
     unittest.main()
