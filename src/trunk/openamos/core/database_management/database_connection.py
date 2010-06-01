@@ -54,6 +54,7 @@ class DataBaseConnection(object):
         self.table_name = table_name
         self.session = session
         test_variable = ''
+        self.new_user = None
 
         #create the database object here
         db_obj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
@@ -228,7 +229,7 @@ class DataBaseConnection(object):
             except:
                 raise Exception('Error while creating a new database')
         else:
-            print 'no need to create a new database'
+            print 'Database exists. No need to create a new database'
 	    		
 		
     #drops a database
@@ -254,9 +255,11 @@ class DataBaseConnection(object):
                 self.connection = engine.text("drop database %s"%self.database_config_object.database_name).execute()
                 engine.dispose()
                 self.connection.close()
-                print 'database dropped'
+                print 'Database dropped'
             except:
                 raise Exception('Error while deleting a database')
+        else:
+            print 'Database does not exists. Cannot drop database.'
     
             
     #define mapping for the columns and datatypes                
@@ -497,17 +500,49 @@ class DataBaseConnection(object):
                 new_table.create(checkfirst = True)
                 print "Table '%s' created"%self.table_name
                 #create a mapper for the table
-                mapper(Temp, new_table)
+                #mapper(Temp, new_table)
                 #create an object for the mapper
-                self.new_user = Temp()
-                print self.new_user
+                #self.new_user = Temp()
+                #print self.new_user
             except:
                 print 'Error while creating the table %s'%self.table_name
                 raise Exception
             
         
+    #separate function for mapper
+    def table_mapper(self, table_name):
+        """
+        This method is used to create a mapper to the table in the database
+        
+        Input:
+        Table name
+        
+        Output:
+        Creates a table object
+        """
+        
+        #before creating the mapper check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            #table exists
+            try:
+                new_table = Table(self.table_name, self.metadata, autoload=True)
+                #create mapper
+                mapper(Temp, new_table)
+                #create an object for the mapper
+                self.new_user = Temp()
+                #print 'mapper object is %s'%self.new_user
+                #print 'session object is %s'%self.session
+            except:
+                print 'Failed to create mapper'
+                raise Exception                                
+        else:
+            print 'Table does not exist in the database. Cannot create a mapper'
+            
+    
     #insert values in the table
-    def insert_into_table(self, table_name, values):
+    def insert_into_table(self):
         """
         This method is used to insert new values into the table.
 
@@ -517,10 +552,23 @@ class DataBaseConnection(object):
         Output:
         Values inserted in to the table
         """
+        #(self, table_name, values)
+        #check for tables that are present in metadata
+        #print self.metadata.tables.keys()
+        #print self.metadata
+        print 'inside insert into method'
+        self.new_user.first_name = 'arun'
+        self.new_user.last_name = 'bapat'
+        print 'first name is %s and last name is %s'%(self.new_user.first_name, self.new_user.last_name)
+        print 'try inserting the values in the table'
+        self.session.add(self.new_user)
+        self.session.flush()
+        self.session.commit()
+        print 'test'
 
 
     #select all rows from the table
-    def select_all_fom_table(self, table_name):
+    def select_all_fom_table(self):
         """
         This method is used to fetch all rows from the table specified.
 
@@ -531,9 +579,29 @@ class DataBaseConnection(object):
         Returns all the rows in the table
         """
 
+        print 'table name is %s'%self.table_name
+        col = []
+        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        for cl in temp_table.c:
+            print cl
+            col.append(cl)
+
+        print 'chk dis %s'%col[1]
+        query = self.session.query(Temp).values(*col)
+        print 'query is %s'%query
+        
+        all_rows = []
+        for instance in query:
+            print instance
+            all_rows.append(instance)
+
+        #print 'final list'
+        #for x in all_rows:
+        #    print x
+
 
     #select rows based on a selection criteria
-    def fetch_selected_rows(self, table_name, value):
+    def fetch_selected_rows(self, table_name, column_name, value):
         """
         This method is used to fetch selected rows fom the table in the database.
 
@@ -543,6 +611,18 @@ class DataBaseConnection(object):
         Output:
         Returns the rows that satisfy the selection criteria
         """
+        
+        #print 'table name is %s'%self.table_name
+        print 'test1'
+        print 'column name is %s'%column_name
+        print 'table name is %s'%table_name
+        print 'value is %s'%value
+        #query = self.session.query(Temp).query.filter(Temp.column_name == value)
+        #print self.new_user
+        #query = self.session.query(Temp.first_name).filter(Temp.last_name=='bapat').count()
+        alldata = self.session.query(Temp).all()
+        for somedata in alldata:
+            print somedata
 
 
     #delete rows based on a deletion criteria
@@ -680,39 +760,58 @@ class TestDBConfiguration(unittest.TestCase):
         new_obj.new_connection()
       
         """ to create a new table """
-        table_name = 'person'
-        columns = ["first_name", "last_name"]
+        table_name = 'asu'
+        columns = ["grad", "undergrad"]
         ctypes = ["VARCHAR", "VARCHAR"]
         keys = ["1","0"]
 
-        new_obj.create_table(table_name, columns, ctypes, keys)
+        #new_obj.create_table(table_name, columns, ctypes, keys)
 
-        print " "
+        #print " "
                         
         """ to get list of tables """
-        tables = new_obj.get_table_list()
-        for i in tables:
-            print 'Table is %s'%i
+        #tables = new_obj.get_table_list()
+        #for i in tables:
+        #    print 'Table is %s'%i
 
-        print " "
+        #print " "
         
         """ to get the columns in a table """
-        table_name = 'table123'
-        columns = None
-        columns = new_obj.get_column_list(table_name)
-        if columns <> None:
-            for i in columns:
-                print 'Column is %s'%i
-        else:
-            print 'No columns returned'                
-                
-        print " "
+        #table_name = 'table123'
+        #columns = None
+        #columns = new_obj.get_column_list(table_name)
+        #if columns <> None:
+        #    for i in columns:
+        #        print 'Column is %s'%i
+        #else:
+        #    print 'No columns returned'                
+        #        
+        #print " "
         
         """ to drop the table """
-        table_name = 'table1'
-        new_obj.drop_table(table_name)
+        #table_name = 'table1'
+        #new_obj.drop_table(table_name)
         
-        print " "
+        #print " "
+        
+        """ to create a mapper """
+        table_name = 'person'
+        new_obj.table_mapper(table_name)
+        
+        print " " 
+                        
+        """ to insert values into the table """
+        #new_obj.insert_into_table()
+        
+        """ to select all rows from the table """
+        new_obj.select_all_fom_table()
+        
+        """ to select few rows """
+        table_name = 'person'
+        column_name = 'first_name'
+        value = 'namrata'
+        #new_obj.fetch_selected_rows(table_name, column_name, value)
+        print ' '
         
         """ to close the connection """
         new_obj.close_connection()
