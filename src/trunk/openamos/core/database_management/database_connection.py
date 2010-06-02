@@ -348,7 +348,7 @@ class DataBaseConnection(object):
         try:
             connect_string = '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
             #engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
-            self.engine = create_engine(connect_string)	
+            self.engine = create_engine(connect_string)
             self.connection = self.engine.connect()
             print 'New connection created'
             self.metadata = MetaData(
@@ -359,7 +359,7 @@ class DataBaseConnection(object):
         except:
             print "Exiting the program since database connectivity failed"
             raise Exception
-            sys.exit()
+            #sys.exit()
 		
 
     #check if table exists 
@@ -532,8 +532,8 @@ class DataBaseConnection(object):
                 mapper(Temp, new_table)
                 #create an object for the mapper
                 self.new_user = Temp()
-                #print 'mapper object is %s'%self.new_user
-                #print 'session object is %s'%self.session
+                print 'mapper object is %s'%self.new_user
+                print 'session object is %s'%self.session
             except:
                 print 'Failed to create mapper'
                 raise Exception                                
@@ -552,6 +552,7 @@ class DataBaseConnection(object):
         Output:
         Values inserted in to the table
         """
+        """
         #(self, table_name, values)
         #check for tables that are present in metadata
         #print self.metadata.tables.keys()
@@ -565,8 +566,34 @@ class DataBaseConnection(object):
         self.session.flush()
         self.session.commit()
         print 'test'
+        """
+        #testing
+        print 'testing'
+        jack = Temp()
+        jack.first_name = 'jack'
+        jack.last_name = 'bauer'
+        jack.age = '45'
+        self.session.add(jack)
+        
+        jack = Temp()
+        jack.first_name = 'tony'
+        jack.last_name = 'bauer'
+        jack.age = '51'
+        self.session.add(jack)
+        self.session.flush()
+        self.session.commit()
+        print 'jack and tony added'
+        #TODO: change the column names to dynamic, currently static
+        #can create various objects at once and use 'add_all' to add all objects
 
 
+    #trial function
+    def create(self, **kwargs):
+        user1 = Temp()
+        print 'testing the new method'
+        print 'keys are %s'%kwargs.keys()
+    
+    
     #select all rows from the table
     def select_all_fom_table(self):
         """
@@ -578,17 +605,15 @@ class DataBaseConnection(object):
         Output:
         Returns all the rows in the table
         """
-
-        print 'table name is %s'%self.table_name
+        
         col = []
         temp_table = Table(self.table_name, self.metadata, autoload=True)
         for cl in temp_table.c:
-            print cl
+            #print 'column is %s'%cl
             col.append(cl)
 
-        print 'chk dis %s'%col[1]
         query = self.session.query(Temp).values(*col)
-        print 'query is %s'%query
+        #print 'query is %s'%query
         
         all_rows = []
         for instance in query:
@@ -598,6 +623,61 @@ class DataBaseConnection(object):
         #print 'final list'
         #for x in all_rows:
         #    print x
+        #print 'session is %s'%self.session
+        #for obj in self.session:
+        #    print obj
+        """
+        col = []
+        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        for cl in temp_table.c:
+            #print 'column is %s'%cl
+            col.append(cl)
+
+        query = self.session.query(Temp).values(*col)
+        #print 'query is %s'%query
+        
+        all_rows = []
+        for instance in query:
+            print instance
+            all_rows.append(instance)
+        """
+        #call the new method
+        #self.create()
+        #test1 = Temp()
+        #print test1
+        #print 'testing complete'
+        """
+        column_name = []
+        column_type = []
+        schema = {}
+        tab = self.metadata.tables[self.table_name]
+        for xyz in tab.columns:
+            column_name.append(xyz.name)
+            column_type.append(self.define_mapping(xyz.type, False))
+            schema[str(xyz.name)] = self.define_mapping(xyz.type, False)
+            #column_type.append(xyz.type)
+        print schema    
+        kwargs = {}
+        kwargs = {schema:self.database_name}
+        print kwargs
+        for att in kwargs.keys():
+            print 'att is %s'%att
+        """
+        #print 'test2'            
+        """
+        Fetch all the rows of a table using the select query. This query 
+        returns a row proxy for each row in the table.above code returns 
+        an instance of the mapper class
+        """
+        """
+        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        s = select([temp_table])
+        res = self.connection.execute(s)
+        print "display all rows"
+        for row in res.fetchall():
+            print row
+            print type(row)
+        """            
 
 
     #select rows based on a selection criteria
@@ -626,7 +706,7 @@ class DataBaseConnection(object):
 
 
     #delete rows based on a deletion criteria
-    def delete_selected_rows(self, table_name, value):
+    def delete_selected_rows(self, value):
         """
         This method is used to delete selected rows fom the table in the database.
 
@@ -636,7 +716,19 @@ class DataBaseConnection(object):
         Output:
         Deletes the rows that satisfy the selection criteria
         """
-
+        print 'testing delete'
+        try:
+            delete_query = self.session.query(Temp).filter(Temp.last_name==value)
+            if delete_query.count() == 0:
+                print 'No rows were fetched. Cannot complete delete operation.'
+            else:                
+                for each_ins in delete_query:
+                    #print 'each is %s'%each_ins
+                    self.session.delete(each_ins)
+                print 'delete successful'                    
+        except:
+            print 'Error retrieving the information. Query failed.'
+        
 
     #delete all rows i.e. empty table
     def delete_all(self, table_name):
@@ -649,6 +741,21 @@ class DataBaseConnection(object):
         Output:
         Deletes all rows in the table
         """
+        col = []
+        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        for cl in temp_table.c:
+            #print 'column is %s'%cl
+            col.append(cl)
+
+        try:
+            query = self.session.query(Temp).values(*col)
+            #print 'query is %s'%query
+        
+            for instance in query:
+                print instance
+                self.session.delete(instance)
+        except:
+            print 'Error retrieving the information. Query failed.'
 
 
     #drop the table
@@ -802,6 +909,10 @@ class TestDBConfiguration(unittest.TestCase):
                         
         """ to insert values into the table """
         #new_obj.insert_into_table()
+        
+        """ to delete selected rows """
+        value = 'bauer'
+        new_obj.delete_selected_rows(value)
         
         """ to select all rows from the table """
         new_obj.select_all_fom_table()
