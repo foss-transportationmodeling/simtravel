@@ -459,6 +459,7 @@ class DataBaseConnection(object):
         table_columns = []
 
         for col, ctype, ktype in zip(col_names, col_types, key_types):
+            #ktype identifies if key is a primary or not
             if ktype == "1":
                 column = Column(col, self.define_mapping(ctype), primary_key=True)
             else:
@@ -527,13 +528,31 @@ class DataBaseConnection(object):
         if table_flag:
             #table exists
             try:
+                #load the table
                 new_table = Table(self.table_name, self.metadata, autoload=True)
+                
+                #get the attributes
+                #dir_before = dir(self.new_user)
+                #before_len = len(dir_before)
+
                 #create mapper
                 mapper(Temp, new_table)
-                #create an object for the mapper
-                self.new_user = Temp()
                 print 'mapper object is %s'%self.new_user
                 print 'session object is %s'%self.session
+
+                #create an object for the mapper
+                self.new_user = Temp()
+                
+                #get attributes after 
+                #dir_after = dir(self.new_user)
+                #after_len = len(dir_after)
+                #length = after_len - before_len - 1
+                #temp_len = before_len + length
+                #print 'temp len i s%s'%temp_len
+                #print 'test'
+                #print dir(self.new_user)[temp_len]
+                #print 'length is %s'%length
+
             except:
                 print 'Failed to create mapper'
                 raise Exception                                
@@ -587,13 +606,6 @@ class DataBaseConnection(object):
         #can create various objects at once and use 'add_all' to add all objects
 
 
-    #trial function
-    def create(self, **kwargs):
-        user1 = Temp()
-        print 'testing the new method'
-        print 'keys are %s'%kwargs.keys()
-    
-    
     #select all rows from the table
     def select_all_fom_table(self):
         """
@@ -606,12 +618,14 @@ class DataBaseConnection(object):
         Returns all the rows in the table
         """
         
+        #get the column list for the table
         col = []
         temp_table = Table(self.table_name, self.metadata, autoload=True)
         for cl in temp_table.c:
             #print 'column is %s'%cl
             col.append(cl)
 
+        #query the table to fetch all the records by passing the columns
         query = self.session.query(Temp).values(*col)
         #print 'query is %s'%query
         
@@ -626,44 +640,7 @@ class DataBaseConnection(object):
         #print 'session is %s'%self.session
         #for obj in self.session:
         #    print obj
-        """
-        col = []
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        for cl in temp_table.c:
-            #print 'column is %s'%cl
-            col.append(cl)
-
-        query = self.session.query(Temp).values(*col)
-        #print 'query is %s'%query
-        
-        all_rows = []
-        for instance in query:
-            print instance
-            all_rows.append(instance)
-        """
-        #call the new method
-        #self.create()
-        #test1 = Temp()
-        #print test1
-        #print 'testing complete'
-        """
-        column_name = []
-        column_type = []
-        schema = {}
-        tab = self.metadata.tables[self.table_name]
-        for xyz in tab.columns:
-            column_name.append(xyz.name)
-            column_type.append(self.define_mapping(xyz.type, False))
-            schema[str(xyz.name)] = self.define_mapping(xyz.type, False)
-            #column_type.append(xyz.type)
-        print schema    
-        kwargs = {}
-        kwargs = {schema:self.database_name}
-        print kwargs
-        for att in kwargs.keys():
-            print 'att is %s'%att
-        """
-        #print 'test2'            
+          
         """
         Fetch all the rows of a table using the select query. This query 
         returns a row proxy for each row in the table.above code returns 
@@ -692,17 +669,35 @@ class DataBaseConnection(object):
         Returns the rows that satisfy the selection criteria
         """
         
-        #print 'table name is %s'%self.table_name
-        print 'test1'
-        print 'column name is %s'%column_name
-        print 'table name is %s'%table_name
-        print 'value is %s'%value
-        #query = self.session.query(Temp).query.filter(Temp.column_name == value)
-        #print self.new_user
-        #query = self.session.query(Temp.first_name).filter(Temp.last_name=='bapat').count()
-        alldata = self.session.query(Temp).all()
-        for somedata in alldata:
-            print somedata
+        #get the column list for the table
+        col = []
+        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        for cl in temp_table.c:
+            #print 'column is %s'%cl
+            col.append(cl)
+            
+        #print 'column name is %s'%column_name
+        #print 'table name is %s'%table_name
+        #print 'value is %s\n'%value
+
+        try:
+            query = self.session.query(Temp).filter(getattr(Temp, column_name) == value).values(*col)
+            #print query
+            row_list = []
+            counter = 0
+            for each in query:
+                counter = counter + 1
+                row_list.append(each)
+            #print 'counter is %s'%counter            
+            #print 'row list is %s'%row_list
+            if counter == 0:
+                print 'No rows selected.'
+            else:
+                for each_ins in row_list:
+                    print each_ins            
+            print '\nSelect query successful'
+        except:
+            print 'Error retrieving the information. Query failed.'            
 
 
     #delete rows based on a deletion criteria
@@ -719,6 +714,7 @@ class DataBaseConnection(object):
         print 'testing delete'
         try:
             delete_query = self.session.query(Temp).filter(Temp.last_name==value)
+            #based on the count determine if any rows were selected
             if delete_query.count() == 0:
                 print 'No rows were fetched. Cannot complete delete operation.'
             else:                
@@ -741,6 +737,7 @@ class DataBaseConnection(object):
         Output:
         Deletes all rows in the table
         """
+        #fetch al rows of the table and then delete
         col = []
         temp_table = Table(self.table_name, self.metadata, autoload=True)
         for cl in temp_table.c:
@@ -912,16 +909,16 @@ class TestDBConfiguration(unittest.TestCase):
         
         """ to delete selected rows """
         value = 'bauer'
-        new_obj.delete_selected_rows(value)
+        #new_obj.delete_selected_rows(value)
         
         """ to select all rows from the table """
-        new_obj.select_all_fom_table()
+        #new_obj.select_all_fom_table()
         
         """ to select few rows """
         table_name = 'person'
-        column_name = 'first_name'
-        value = 'namrata'
-        #new_obj.fetch_selected_rows(table_name, column_name, value)
+        column_name = 'last_name'
+        value = 'bapat'
+        new_obj.fetch_selected_rows(table_name, column_name, value)
         print ' '
         
         """ to close the connection """
