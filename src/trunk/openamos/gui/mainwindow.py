@@ -9,6 +9,8 @@ from file_menu.newproject import *
 from file_menu.openproject import *
 from file_menu.saveproject import *
 
+from openamos.core.config import *
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -18,7 +20,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('images/run.png'))
 
         # Variable for a project properties; can be used to see if a project is open or not
-        self.protree = None
+        self.proconfig = None
         
         # Defining central widget
         self.centralwidgetscroll = QScrollArea()
@@ -231,14 +233,14 @@ class MainWindow(QMainWindow):
     def projectnew(self):
         project_new = NewProject()
         project_new.exec_()
-        self.protree = project_new.configtree
+        self.proconfig = ConfigObject(configtree=project_new.configtree)
         self.checkProject()
 
     def projectopen(self):
         self.project_open = OpenProject()
         print self.project_open.file
         if self.project_open.file != '':
-            self.protree = etree.parse(str(self.project_open.file))
+            self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
 
     def projectsave(self):
@@ -248,7 +250,7 @@ class MainWindow(QMainWindow):
 
     def projectSaveAs(self):
         file = QFileDialog.getSaveFileName(self, QString("Save As..."), 
-                                                             "%s" %self.getConfigElement(PROJECT_HOME), 
+                                                             "%s" %self.proconfig.getConfigElement(PROJECT_HOME), 
                                                              "XML File (*.xml)")
         
         file = re.split("[/.]", file)
@@ -265,7 +267,7 @@ class MainWindow(QMainWindow):
     
     def projectClose(self):
         self.fileManager.clear()
-        self.protree = None
+        self.proconfig = None
         self.checkProject()
         
 
@@ -277,17 +279,12 @@ class MainWindow(QMainWindow):
             self.close()
             
     def checkProject(self):
-        actpro = bool(self.protree)
+        actpro = bool(self.proconfig)
         if actpro:
-            self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.getConfigElement(PROJECT_NAME))
+            self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT_NAME))
         self.centralwidget.setEnabled(actpro)
-    
-    def getConfigElement(self, elt, prop='text' ):
-        element = self.protree.find(elt)
-        if prop == 'text':
-            return self.protree.findtext(elt)
-        else:
-            return element.get(prop)
+        self.model_management.setConfigObject(self.proconfig)
+
 
         
 

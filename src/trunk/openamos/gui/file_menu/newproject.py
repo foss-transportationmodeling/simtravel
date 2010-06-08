@@ -43,9 +43,14 @@ class NewProject(QWizard):
         projecthome.text = str(self.page1.proloccombobox.currentText())   
         
         dbconfig = etree.SubElement(configroot, DB_CONFIG)
+        dbconfig.set(DB_PROTOCOL, POSTGRES)
         dbconfig.set(DB_HOST, str(self.page2.hostnameline.text()))
         dbconfig.set(DB_USER, str(self.page2.usernameline.text()))
         dbconfig.set(DB_PASS, str(self.page2.passwdline.text())) 
+        
+        if self.page2.inputdbradio.isChecked():
+            inputdb = etree.SubElement(configroot, DB_NAME)
+            inputdb.text = str(self.page2.inputdbline.text())
         
         configfileloc = projecthome.text + os.path.sep + projectname.text + '.xml'
         configfile = open(configfileloc, 'w')

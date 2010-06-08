@@ -20,7 +20,7 @@ class AbtractSpecDialog(QDialog):
     classdocs
     '''
 
-    def __init__(self, parent=None, title = ''):
+    def __init__(self, configobject, title = '', parent=None):
         super(AbtractSpecDialog, self).__init__(parent)
         
         self.setWindowTitle(title)
@@ -39,6 +39,7 @@ class AbtractSpecDialog(QDialog):
         modeltypegblayout.addWidget(self.modeltypecb)
         self.glayout.addWidget(self.modeltypegb,0,0)
         
+        self.configobject = configobject
         self.populateFromDatabase()
         
         self.subpopgb = QGroupBox("Sub-Population")
@@ -99,6 +100,9 @@ class AbtractSpecDialog(QDialog):
         
         self.glayout.addWidget(self.modwidget,2,0)
         self.update()
+    
+    def setConfigObject(self,co):
+        self.configobject = co
 
     def populateColumns(self, idx=0):
         self.subpopvar.clear()
@@ -111,12 +115,14 @@ class AbtractSpecDialog(QDialog):
             pass
     
     def populateFromDatabase(self):
-        self.protocol = 'postgres'        
-        self.user_name = 'postgres'
-        self.password = 'Travel7Demand'
-        self.host_name = 'localhost'
-        self.database_name = 'simtravel'
+        self.protocol = self.configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
+        self.user_name = self.configobject.getConfigElement(DB_CONFIG,DB_USER)
+        self.password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
+        self.host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
+        self.database_name = self.configobject.getConfigElement(DB_NAME)
         self.database_config_object = None
+        
+        print self.protocol,self.user_name, self.password, self.host_name, self.database_name
         
         new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
         new_obj.new_connection()

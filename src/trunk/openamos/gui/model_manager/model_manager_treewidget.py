@@ -356,10 +356,13 @@ class Model_Manager_Treewidget(QTreeWidget):
 
         self.connect(self, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.treeItemSelected)
 
+    def setConfigObject(self,co):
+        self.configobject = co
+    
     def treeItemSelected(self,item,col):
         if item.text(col) == 'Residential Location Choice':
-            diag = AbtractSpecDialog()
-            diag.exec_()
+            diag = AbtractSpecDialog(self.configobject)
+        diag.exec_()
 
         
 
