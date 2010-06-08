@@ -108,23 +108,23 @@ class MainWindow(QMainWindow):
 
         models_interactive_ui_action = self.createaction("&Interactive UI", None, None, 
                                             None, "Chose a model in a visual form.")
-        component_long_term_choices_action = self.createaction("Long Term Choices", self.models.long_term_models, None, 
+        component_long_term_choices_action = self.createaction("Long Term Choices", self.models.show_long_term_models, None, 
                                             None, None)
-        component_fixed_activity_location_choice_generator_action = self.createaction("Fixed Activity Location Choice Generator", self.models.fixed_activity_models, None, 
+        component_fixed_activity_location_choice_generator_action = self.createaction("Fixed Activity Location Choice Generator", self.models.show_fixed_activity_models, None, 
                                             None, None)
-        component_vehicle_ownership_model_action = self.createaction("Vehicle Ownership Model", self.models.vehicle_ownership_models, None, 
+        component_vehicle_ownership_model_action = self.createaction("Vehicle Ownership Model", self.models.show_vehicle_ownership_models, None, 
                                             None, None)
-        component_fixed_activity_prism_generator_action = self.createaction("Fixed Activity Prism Generator", self.models.fixed_activity_prism_models, None, 
+        component_fixed_activity_prism_generator_action = self.createaction("Fixed Activity Prism Generator", self.models.show_fixed_activity_prism_models, None, 
                                             None, None)
-        component_child_daily_status_and_allocation_model_action = self.createaction("Child Daily Status and Allocation Model", self.models.child_model, None, 
+        component_child_daily_status_and_allocation_model_action = self.createaction("Child Daily Status and Allocation Model", self.models.show_child_model, None, 
                                             None, None)
-        component_adult_daily_status_model_action = self.createaction("Adult Daily Status Model", self.models.adult_model, None, 
+        component_adult_daily_status_model_action = self.createaction("Adult Daily Status Model", self.models.show_adult_model, None, 
                                             None, None)
-        component_activity_skeleton_reconciliation_system_action = self.createaction("Activity Skeleton Reconciliation System", self.models.skeleton_reconciliation_system, None, 
+        component_activity_skeleton_reconciliation_system_action = self.createaction("Activity Skeleton Reconciliation System", self.models.show_skeleton_reconciliation_system, None, 
                                             None, None)
-        component_activity_travel_pattern_simulator_action = self.createaction("Activity Travel Pattern Simulator", self.models.activity_travel_pattern_simulator, None, 
+        component_activity_travel_pattern_simulator_action = self.createaction("Activity Travel Pattern Simulator", self.models.show_activity_travel_pattern_simulator, None, 
                                             None, None)
-        component_activity_travel_reconciliation_system_action = self.createaction("Activity Travel Reconciliation System", self.models.travel_reconciliation_system, None, 
+        component_activity_travel_reconciliation_system_action = self.createaction("Activity Travel Reconciliation System", self.models.show_travel_reconciliation_system, None, 
                                             None, None)
         component_time_use_utility_calculator_action = self.createaction("Time Use Utility Calculator", None, None, 
                                             None, None)
@@ -207,23 +207,23 @@ class MainWindow(QMainWindow):
 # Show flowcharts from model management tree widget
     def showflowchart(self,selitem,col):
         if selitem.text(col) == 'Long Term Choices':
-            self.models.long_term_models()
+            self.models.show_long_term_models()
         if selitem.text(col) == 'Fixed Activity Location Choice Generator':
-            self.models.fixed_activity_models()
+            self.models.show_fixed_activity_models()
         if selitem.text(col) == 'Vehicle Ownership Model':
-            self.models.vehicle_ownership_models()
+            self.models.show_vehicle_ownership_models()
         if selitem.text(col) == 'Fixed Activity Prism Generator':
-            self.models.fixed_activity_prism_models()
+            self.models.show_fixed_activity_prism_models()
         if selitem.text(col) == 'Child Daily Status and Allocation Model':
-            self.models.child_model()
+            self.models.show_child_model()
         if selitem.text(col) == 'Adult Daily Status Model':
-            self.models.adult_model()
+            self.models.show_adult_model()
         if selitem.text(col) == 'Activity Skeleton Reconciliation System':
-            self.models.skeleton_reconciliation_system()
+            self.models.show_skeleton_reconciliation_system()
         if selitem.text(col) == 'Activity Travel Pattern Simulator':
-            self.models.activity_travel_pattern_simulator()
+            self.models.show_activity_travel_pattern_simulator()
         if selitem.text(col) == 'Activity Travel Reconciliation System':
-            self.models.travel_reconciliation_system()
+            self.models.show_travel_reconciliation_system()
 
 
 
@@ -233,7 +233,6 @@ class MainWindow(QMainWindow):
         project_new.exec_()
         self.protree = project_new.configtree
         self.checkProject()
-        print self.protree
 
     def projectopen(self):
         self.project_open = OpenProject()
