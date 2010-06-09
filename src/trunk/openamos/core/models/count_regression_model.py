@@ -63,7 +63,7 @@ class CountRegressionModel(Model):
             pass
         return probabilities
 
-    def calc_chosenalternative(self, data):
+    def calc_chosenalternative(self, data, choiceset=None):
         """
         The method returns the chosen alternaitve among the count choices
         for the choice variable under consideration
