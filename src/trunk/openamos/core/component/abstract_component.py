@@ -49,13 +49,14 @@ class AbstractComponent(object):
                                                                        model_list_duringrun)   
             count = count + 1            
         print 'ITERATIONS COMPLETED', count
-        print self.data.columns(['choice1', 'choice2', 'choice3', 'choice2_ind'])
+        #print self.data.columns(['choice1', 'choice2', 'choice3', 'choice2_ind'])
 
     
     def iterate_through_the_model_list(self, model_list_duringrun):
         model_list_forlooping = []
-    
+        
         for i in model_list_duringrun:
+            print i.dep_varname
             # Creating the subset filter
             if i.data_filter is not None:
                 data_subset_filter = i.data_filter.compare(self.data)
@@ -166,9 +167,9 @@ class TestAbstractComponent(unittest.TestCase):
     
         # SPECIFY SEED TO REPLICATE RESULTS, DATA FILTER AND 
         # RUN UNTIL CONDITION
-        component = AbstractComponent(model_list, data_)
+        component = AbstractComponent(model_list)
     
-        component.run()
+        component.run(data_)
 
         
     def testvarscope(self):
