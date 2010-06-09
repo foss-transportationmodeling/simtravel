@@ -183,6 +183,7 @@ class ConfigParser(object):
         model_type = 'choice'
         dep_varname = variable
         
+        
         model = CountRegressionModel(specification)
         
         model_object = SubModel(model, model_type, dep_varname)
@@ -206,19 +207,44 @@ class ConfigParser(object):
     
 
 if __name__ == '__main__':
+    from numpy import zeros, random
+    from openamos.core.data_array import DataArray
     fileloc = '/home/karthik/simtravel/test/config.xml' 
     conf_parser = ConfigParser(fileLoc=fileloc)
     component_list = conf_parser.parse()
     
     colnames = ['one', 'age', 'parttime', 'telcomm', 'empserv', 'commtime', 'popres',
                 'numchild', 'numdrv', 'respb', 'autoworkmode',
-                'daystart', 'dayend', '']
+                'daystart', 'dayend', 'numjobs', 'workstart1', 'workend1', 
+                'workstart2', 'workend2', 'schstart1', 'schend1', 
+                'schstart2', 'schend2', 'preschstart', 'preschend']
     
+    cols = len(colnames)
+    cols_dep = 13
     
+    import time
+    
+    ti = time.time()
+    
+    rows = 1000000
+    
+    rand_input = random.random_integers(1, 4, (rows,cols - cols_dep))
+    
+    data = zeros((rows, cols))
+
+    data[:,:cols-cols_dep] = rand_input
+    data = DataArray(data, colnames)
     
     
     for i in component_list:
-        print i
+        i.run(data)
+    print i.data.data[:10]
+    
+    print 'TIME ELAPSED USING ARRAY FORMAT', time.time()-ti
+    
+    ti = time.time()
+    
+    
     
     
     
