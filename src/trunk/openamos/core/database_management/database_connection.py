@@ -7,7 +7,9 @@ import sys
 import os
 import exceptions
 import sqlalchemy
+import sqlite3
 import psycopg2 as dbapi2
+import sqlalchemy.schema
 from sqlalchemy import create_engine
 from psycopg2 import extensions
 from sqlalchemy.sql import select
@@ -15,6 +17,8 @@ from database_configuration import DataBaseConfiguration
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.orm import mapper
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import class_mapper
+from sqlalchemy import schema, types
 from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
@@ -75,11 +79,11 @@ class DataBaseConnection(object):
         Display the object details
         """
 
-        print self.database_config_object.protocol
-        print self.database_config_object.host_name
-        print self.database_config_object.user_name
-        print self.database_config_object.password
-        print self.database_config_object.database_name
+        print 'protocol is %s'%self.database_config_object.protocol
+        print 'host name is %s'%self.database_config_object.host_name
+        print 'user name is %s'%self.database_config_object.user_name
+        print 'password is %s'%self.database_config_object.password
+        print 'database name is %s'%self.database_config_object.database_name
 	
     
     #checks if the database engine is installed
@@ -198,8 +202,19 @@ class DataBaseConnection(object):
             print 'Protocol is mssql'
         elif self.database_config_object.protocol is 'sqlite':
             print 'Protocol is sqlite'
+            dbname = self.database_config_object.database_name
+            #give the entire file path for the database.
+            try:
+                if os.path.isfile(dbname):
+                    print 'Database %s exists'%self.database_config_object.database_name
+                    return 1
+                else:
+                    print 'Database does not exist.'
+                    return 0
+            except:
+                raise Exception('Error while checking for the database')
 
-            
+       
     #this function creates a new database
     def create_database(self):
         """
@@ -217,17 +232,48 @@ class DataBaseConnection(object):
         #print 'database name is %s'%self.database_config_object.database_name
         db_flag = self.check_if_database_exists()		
         if not db_flag:
-            try:
-                connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
-                self.engine = create_engine(connect_string)
-                engine = self.engine
-                engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-                self.connection = engine.text("create database %s encoding = 'utf8'"%self.database_config_object.database_name).execute()
-                print 'new database created'
-                engine.dispose()
-                self.connection.close()
-            except:
-                raise Exception('Error while creating a new database')
+        #since the database does not exist we create a new database.
+        #before creating the new database check the protocol.
+            if self.database_config_object.protocol is 'postgres':
+                try:
+                    connect_string = '%s://%s:%s@%s:5432'%(self.protocol, self.user_name, self.password, self.host_name)
+                    self.engine = create_engine(connect_string)
+                    engine = self.engine
+                    engine.raw_connection().set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                    self.connection = engine.text("create database %s encoding = 'utf8'"%self.database_config_object.database_name).execute()
+                    print 'new database created'
+                    engine.dispose()
+                    self.connection.close()
+                except:
+                    raise Exception('Error while creating a new database')
+            elif self.database_config_object.protocol is 'mysql':
+                print 'Protocol is mysql'
+            elif self.database_config_object.protocol is 'mssql':
+                print 'Protocol is mssql'
+            elif self.database_config_object.protocol is 'sqlite':
+                print 'Protocol is sqlite'
+                try:
+                    db_path = self.database_config_object.database_name
+                    """
+                    self.connection = sqlite3.connect(db_path)
+                    db_cursor = self.connection.cursor()
+                    db_cursor.execute('CREATE TABLE TEST (a INTEGER);')
+                    except sqlite3.OperationalError, msg:
+                    print msg
+                    """    
+                    print 'db_path is %s'%db_path
+                    connect_string = '%s:///%s'%s(self.protocol, db_path)
+                    print 'connect_string is %s'%connect_string
+                    engine = self.engine
+                    print 'test2'
+                    engine = create_engine(connect_string)
+                    print 'test3'
+                    self.connection = engine.connect()
+                    print 'New database created.'
+                    engine.dispose()
+                    self.connection.close()
+                except:
+                    raise Exception('Error while creating a new database')
         else:
             print 'Database exists. No need to create a new database'
 	    		
@@ -356,9 +402,10 @@ class DataBaseConnection(object):
                         )
             Session = sessionmaker(bind=self.engine, autoflush=True, autocommit=True)
             self.session = Session()                  
-        except:
+        except Exception, e:
             print "Exiting the program since database connectivity failed"
-            raise Exception
+            #raise Exception e
+            print e
             #sys.exit()
 		
 
@@ -530,19 +577,17 @@ class DataBaseConnection(object):
             try:
                 #load the table
                 new_table = Table(self.table_name, self.metadata, autoload=True)
-                
                 #get the attributes
                 #dir_before = dir(self.new_user)
                 #before_len = len(dir_before)
-
+                print 'table name is %s'%self.table_name
                 #create mapper
                 mapper(Temp, new_table)
-                print 'mapper object is %s'%self.new_user
                 print 'session object is %s'%self.session
 
                 #create an object for the mapper
                 self.new_user = Temp()
-                
+                print 'mapper object is %s'%self.new_user
                 #get attributes after 
                 #dir_after = dir(self.new_user)
                 #after_len = len(dir_after)
@@ -554,7 +599,7 @@ class DataBaseConnection(object):
                 #print 'length is %s'%length
 
             except:
-                print 'Failed to create mapper'
+                #print 'Failed to create mapper'
                 raise Exception                                
         else:
             print 'Table does not exist in the database. Cannot create a mapper'
@@ -672,6 +717,7 @@ class DataBaseConnection(object):
         #get the column list for the table
         col = []
         temp_table = Table(self.table_name, self.metadata, autoload=True)
+        print 'table object is %s'%temp_table.__table__.columns
         for cl in temp_table.c:
             #print 'column is %s'%cl
             col.append(cl)
@@ -679,7 +725,11 @@ class DataBaseConnection(object):
         #print 'column name is %s'%column_name
         #print 'table name is %s'%table_name
         #print 'value is %s\n'%value
-
+        print 'trial'
+        list1 = self.new_user.__class__.__dict__.items()
+        for i in list1:
+            print i
+        print ' '
         try:
             query = self.session.query(Temp).filter(getattr(Temp, column_name) == value).values(*col)
             #print query
@@ -795,6 +845,98 @@ class DataBaseConnection(object):
         Returns the column names and the datatypes
         """
 
+    #select and print the join
+    def select_join(self, table1_list, table2_list):
+        """
+        This method is used to select the join of tables and display them.
+        
+        Input:
+        Database configuration object, table names, columns and values.
+        
+        Output:
+        Dsiplays the rows based on the join and the selection criterion.
+        """
+        #for now send no args
+        #currently the code works for 2 tables
+        #list1 = ['person', 'first_name', 'last_name']
+        #list2 = ['office','role', 'years']
+        list1 = table1_list
+        list2 = table2_list
+        #initialize the variables
+        final_list = []
+        table_list = []
+        table1 = None
+        table2 = None
+        ctr = 0
+        #separate the column names and table names and append them to lists
+        for w in list1:
+            if ctr == 0:
+                table1 = w
+                table_list.append(w)
+                ctr = ctr +1
+            else:
+                final_list.append(w)
+        ctr = 0
+        for x in list2:
+            if ctr == 0:
+                table2 = x
+                table_list.append(x)
+                ctr = ctr +1
+            else:        
+                final_list.append(x)
+        """
+        print 'columns are'
+        for y in final_list:
+            print y
+        print 'tables are'
+        for z in table_list:
+            print z
+        """
+        #use string manipulation to create the select query
+        len1 = len(final_list)
+        len2 = len(table_list)
+        ctr = 0
+        sql_string = "select "
+        for i in final_list:
+            if int(ctr) < (int(len1)-1):
+                sql_string = sql_string + str(i) + ', '
+                ctr = ctr + 1
+            else:
+                sql_string = sql_string + str(i) + ' '
+        sql_string = sql_string + 'from '
+        #print sql_string
+        
+        ctr = 0
+        for i in table_list:
+            if int(ctr) < (int(len2)-1):
+                sql_string = sql_string + str(i) + ', '
+                ctr = ctr + 1
+            else:
+                sql_string = sql_string + str(i) + ' '
+        sql_string = sql_string + 'where person.role_id = office.role_id'
+        print sql_string
+        for_key = None
+        try:
+            temp_table1 = Table(table1, self.metadata, autoload=True)
+            temp_table2 = Table(table2, self.metadata, autoload=True)
+            """
+            keys1 = temp_table1.foreign_keys
+            keys2 = temp_table2.foreign_keys
+            if keys1 <> None:
+                for i in keys1:
+                    print 'keys1 %s'%i
+            elif keys2 <> None:
+                for j in keys2:
+                    print 'keys2 %s'%j
+            """
+            result = self.connection.execute(sql_string)
+            rows = result.fetchall()
+            for each_row in rows:
+                print each_row
+        except Exception, e:
+            print e
+            print 'Error retrieving the information. Query failed.'            
+        
 
     #close the connection            
     def close_connection(self):
@@ -916,10 +1058,15 @@ class TestDBConfiguration(unittest.TestCase):
         
         """ to select few rows """
         table_name = 'person'
-        column_name = 'last_name'
-        value = 'bapat'
-        new_obj.fetch_selected_rows(table_name, column_name, value)
+        column_name = 'first_name'
+        value = 'seema'
+        #new_obj.fetch_selected_rows(table_name, column_name, value)
         print ' '
+        
+        """ to print the join """
+        table1_list = ['person', 'first_name', 'last_name']
+        table2_list = ['office','role', 'years']
+        new_obj.select_join(table1_list, table2_list)
         
         """ to close the connection """
         new_obj.close_connection()
