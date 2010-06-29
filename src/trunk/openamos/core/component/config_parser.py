@@ -37,6 +37,7 @@ class ConfigParser(object):
         #TODO: check for file or object (should be instance of etree)
         # Storing data ??
         # Linearizing data for calculating activity-travel choice attributes??
+        # filter_conditons, run_until conditions
 
         if configObject is None and fileLoc is None:
             raise ConfigurationError, """The configuration input is not valid; a """\
@@ -192,7 +193,37 @@ class ConfigParser(object):
         
 
     def create_multinomial_logit_object(self, model_element):
-        pass
+        # dependent variable
+        variable = model_element.get('name')
+
+        # alternatives
+        alternativeIterator = model_element.getiterator('Alternative')
+        choice = []
+        for i in alternativeIterator:
+            alternative = i.get('id')
+            choice.append(alternative)
+
+        # Creating the coefficients input for the multinomial logit model
+        coefficients_list = []
+        coefficients = {}
+        if model_type == 'alternative specific':
+            for i in alternativeIterator:
+                variableIterator = i.getiterator('Variable')
+                for j in variableIterator:
+                    varname = j.get('var')
+                    coeff = j.get('coeff')
+                    coefficients[varname] = float(coeff)
+                coefficients_list.append(coefficients)
+                    
+        # logit specification object
+        specification = Specification(choice, coefficients)
+
+        model = LogitChoiceModel(specification)
+            
+        model_type = 'choice'
+        dep_varname = variable
+
+        model_object = SubModel(model, model_type, dep_varname)
     
     def create_nested_logit_object(self, model_element):
         pass
