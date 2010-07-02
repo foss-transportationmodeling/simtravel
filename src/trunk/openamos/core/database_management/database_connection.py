@@ -25,8 +25,6 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 
 
-class Temp(object): pass
-
 #class to define the database connection along with other functions
 class DataBaseConnection(object):
     """
@@ -64,6 +62,7 @@ class DataBaseConnection(object):
         db_obj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         database_config_object = db_obj
         self.database_config_object = database_config_object
+        #print 'this is the init function of the database connection class'
 
 
     #temp function prints the values of the database configuration object	
@@ -83,7 +82,7 @@ class DataBaseConnection(object):
         print 'host name is %s'%self.database_config_object.host_name
         print 'user name is %s'%self.database_config_object.user_name
         print 'password is %s'%self.database_config_object.password
-        print 'database name is %s'%self.database_config_object.database_name
+        print 'database name is %s\n'%self.database_config_object.database_name
 	
     
     #checks if the database engine is installed
@@ -396,7 +395,7 @@ class DataBaseConnection(object):
             #engine = create_engine('postgres://$self.username:$self.password@$self.hostname:5432/$self.dbname')
             self.engine = create_engine(connect_string)
             self.connection = self.engine.connect()
-            print 'New connection created'
+            print 'New connection created.\n'
             self.metadata = MetaData(
                         bind = self.engine
                         )
@@ -556,254 +555,6 @@ class DataBaseConnection(object):
                 print 'Error while creating the table %s'%self.table_name
                 raise Exception
             
-        
-    #separate function for mapper
-    def table_mapper(self, table_name):
-        """
-        This method is used to create a mapper to the table in the database
-        
-        Input:
-        Table name
-        
-        Output:
-        Creates a table object
-        """
-        
-        #before creating the mapper check if the table exists
-        self.table_name = table_name
-        table_flag = self.check_if_table_exists(table_name)
-        if table_flag:
-            #table exists
-            try:
-                #load the table
-                new_table = Table(self.table_name, self.metadata, autoload=True)
-                #get the attributes
-                #dir_before = dir(self.new_user)
-                #before_len = len(dir_before)
-                print 'table name is %s'%self.table_name
-                #create mapper
-                mapper(Temp, new_table)
-                print 'session object is %s'%self.session
-
-                #create an object for the mapper
-                self.new_user = Temp()
-                print 'mapper object is %s'%self.new_user
-                #get attributes after 
-                #dir_after = dir(self.new_user)
-                #after_len = len(dir_after)
-                #length = after_len - before_len - 1
-                #temp_len = before_len + length
-                #print 'temp len i s%s'%temp_len
-                #print 'test'
-                #print dir(self.new_user)[temp_len]
-                #print 'length is %s'%length
-
-            except:
-                #print 'Failed to create mapper'
-                raise Exception                                
-        else:
-            print 'Table does not exist in the database. Cannot create a mapper'
-            
-    
-    #insert values in the table
-    def insert_into_table(self):
-        """
-        This method is used to insert new values into the table.
-
-        Input:
-        Database configuration object, table name and values
-
-        Output:
-        Values inserted in to the table
-        """
-        """
-        #(self, table_name, values)
-        #check for tables that are present in metadata
-        #print self.metadata.tables.keys()
-        #print self.metadata
-        print 'inside insert into method'
-        self.new_user.first_name = 'arun'
-        self.new_user.last_name = 'bapat'
-        print 'first name is %s and last name is %s'%(self.new_user.first_name, self.new_user.last_name)
-        print 'try inserting the values in the table'
-        self.session.add(self.new_user)
-        self.session.flush()
-        self.session.commit()
-        print 'test'
-        """
-        #testing
-        print 'testing'
-        jack = Temp()
-        jack.first_name = 'jack'
-        jack.last_name = 'bauer'
-        jack.age = '45'
-        self.session.add(jack)
-        
-        jack = Temp()
-        jack.first_name = 'tony'
-        jack.last_name = 'bauer'
-        jack.age = '51'
-        self.session.add(jack)
-        self.session.flush()
-        self.session.commit()
-        print 'jack and tony added'
-        #TODO: change the column names to dynamic, currently static
-        #can create various objects at once and use 'add_all' to add all objects
-
-
-    #select all rows from the table
-    def select_all_fom_table(self):
-        """
-        This method is used to fetch all rows from the table specified.
-
-        Input:
-        Database configuration object and table name
-
-        Output:
-        Returns all the rows in the table
-        """
-        
-        #get the column list for the table
-        col = []
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        for cl in temp_table.c:
-            #print 'column is %s'%cl
-            col.append(cl)
-
-        #query the table to fetch all the records by passing the columns
-        query = self.session.query(Temp).values(*col)
-        #print 'query is %s'%query
-        
-        all_rows = []
-        for instance in query:
-            print instance
-            all_rows.append(instance)
-
-        #print 'final list'
-        #for x in all_rows:
-        #    print x
-        #print 'session is %s'%self.session
-        #for obj in self.session:
-        #    print obj
-          
-        """
-        Fetch all the rows of a table using the select query. This query 
-        returns a row proxy for each row in the table.above code returns 
-        an instance of the mapper class
-        """
-        """
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        s = select([temp_table])
-        res = self.connection.execute(s)
-        print "display all rows"
-        for row in res.fetchall():
-            print row
-            print type(row)
-        """            
-
-
-    #select rows based on a selection criteria
-    def fetch_selected_rows(self, table_name, column_name, value):
-        """
-        This method is used to fetch selected rows fom the table in the database.
-
-        Input:
-        Database configuration object, table name and selection criteria
-
-        Output:
-        Returns the rows that satisfy the selection criteria
-        """
-        
-        #get the column list for the table
-        col = []
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        print 'table object is %s'%temp_table.__table__.columns
-        for cl in temp_table.c:
-            #print 'column is %s'%cl
-            col.append(cl)
-            
-        #print 'column name is %s'%column_name
-        #print 'table name is %s'%table_name
-        #print 'value is %s\n'%value
-        print 'trial'
-        list1 = self.new_user.__class__.__dict__.items()
-        for i in list1:
-            print i
-        print ' '
-        try:
-            query = self.session.query(Temp).filter(getattr(Temp, column_name) == value).values(*col)
-            #print query
-            row_list = []
-            counter = 0
-            for each in query:
-                counter = counter + 1
-                row_list.append(each)
-            #print 'counter is %s'%counter            
-            #print 'row list is %s'%row_list
-            if counter == 0:
-                print 'No rows selected.'
-            else:
-                for each_ins in row_list:
-                    print each_ins            
-            print '\nSelect query successful'
-        except:
-            print 'Error retrieving the information. Query failed.'            
-
-
-    #delete rows based on a deletion criteria
-    def delete_selected_rows(self, value):
-        """
-        This method is used to delete selected rows fom the table in the database.
-
-        Input:
-        Database configuration object, table name and selection criteria
-
-        Output:
-        Deletes the rows that satisfy the selection criteria
-        """
-        print 'testing delete'
-        try:
-            delete_query = self.session.query(Temp).filter(Temp.last_name==value)
-            #based on the count determine if any rows were selected
-            if delete_query.count() == 0:
-                print 'No rows were fetched. Cannot complete delete operation.'
-            else:                
-                for each_ins in delete_query:
-                    #print 'each is %s'%each_ins
-                    self.session.delete(each_ins)
-                print 'delete successful'                    
-        except:
-            print 'Error retrieving the information. Query failed.'
-        
-
-    #delete all rows i.e. empty table
-    def delete_all(self, table_name):
-        """
-        This method is used to delete all rows from the table.
-
-        Input:
-        Database configuration object, table name
-
-        Output:
-        Deletes all rows in the table
-        """
-        #fetch al rows of the table and then delete
-        col = []
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        for cl in temp_table.c:
-            #print 'column is %s'%cl
-            col.append(cl)
-
-        try:
-            query = self.session.query(Temp).values(*col)
-            #print 'query is %s'%query
-        
-            for instance in query:
-                print instance
-                self.session.delete(instance)
-        except:
-            print 'Error retrieving the information. Query failed.'
-
 
     #drop the table
     def drop_table(self, table_name):
@@ -832,112 +583,7 @@ class DataBaseConnection(object):
         else:
             print 'Table does not exist in the database. Cannot the drop the table'
         
-
-    #obtain the reverse mapping of the columns
-    def get_reverse_mapping(self, table_name):
-        """
-        This method is used to get the reverse mapping of a table.
-
-        Input:
-        Database configuration object and table name.
-
-        Output:
-        Returns the column names and the datatypes
-        """
-
-    #select and print the join
-    def select_join(self, table1_list, table2_list):
-        """
-        This method is used to select the join of tables and display them.
-        
-        Input:
-        Database configuration object, table names, columns and values.
-        
-        Output:
-        Dsiplays the rows based on the join and the selection criterion.
-        """
-        #for now send no args
-        #currently the code works for 2 tables
-        #list1 = ['person', 'first_name', 'last_name']
-        #list2 = ['office','role', 'years']
-        list1 = table1_list
-        list2 = table2_list
-        #initialize the variables
-        final_list = []
-        table_list = []
-        table1 = None
-        table2 = None
-        ctr = 0
-        #separate the column names and table names and append them to lists
-        for w in list1:
-            if ctr == 0:
-                table1 = w
-                table_list.append(w)
-                ctr = ctr +1
-            else:
-                final_list.append(w)
-        ctr = 0
-        for x in list2:
-            if ctr == 0:
-                table2 = x
-                table_list.append(x)
-                ctr = ctr +1
-            else:        
-                final_list.append(x)
-        """
-        print 'columns are'
-        for y in final_list:
-            print y
-        print 'tables are'
-        for z in table_list:
-            print z
-        """
-        #use string manipulation to create the select query
-        len1 = len(final_list)
-        len2 = len(table_list)
-        ctr = 0
-        sql_string = "select "
-        for i in final_list:
-            if int(ctr) < (int(len1)-1):
-                sql_string = sql_string + str(i) + ', '
-                ctr = ctr + 1
-            else:
-                sql_string = sql_string + str(i) + ' '
-        sql_string = sql_string + 'from '
-        #print sql_string
-        
-        ctr = 0
-        for i in table_list:
-            if int(ctr) < (int(len2)-1):
-                sql_string = sql_string + str(i) + ', '
-                ctr = ctr + 1
-            else:
-                sql_string = sql_string + str(i) + ' '
-        sql_string = sql_string + 'where person.role_id = office.role_id'
-        print sql_string
-        for_key = None
-        try:
-            temp_table1 = Table(table1, self.metadata, autoload=True)
-            temp_table2 = Table(table2, self.metadata, autoload=True)
-            """
-            keys1 = temp_table1.foreign_keys
-            keys2 = temp_table2.foreign_keys
-            if keys1 <> None:
-                for i in keys1:
-                    print 'keys1 %s'%i
-            elif keys2 <> None:
-                for j in keys2:
-                    print 'keys2 %s'%j
-            """
-            result = self.connection.execute(sql_string)
-            rows = result.fetchall()
-            for each_row in rows:
-                print each_row
-        except Exception, e:
-            print e
-            print 'Error retrieving the information. Query failed.'            
-        
-
+    
     #close the connection            
     def close_connection(self):
         """
@@ -956,9 +602,9 @@ class DataBaseConnection(object):
             self.engine = None
             self.metadata = None
             if self.connection.closed:
-                print 'Connection to database closed'
+                print 'Connection to database closed.\n'
             else:
-                print 'Connection to database not closed'
+                print 'Connection to database not closed.\n'
         except:
             print "Error while closing the database connection. Exiting the program."
             self.engine = None
@@ -974,6 +620,7 @@ class DataBaseConnection(object):
         return '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name,
                                         self.password, self.host_name,
                                         self.database_name)
+
 
 
 #unit test to test the code
@@ -994,7 +641,7 @@ class TestDBConfiguration(unittest.TestCase):
     def testDB(self):
         #test to connect to database 
         new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
-        #new_obj.temp_function()
+        new_obj.temp_function()
         
         """ to create a database """
         #new_obj.create_database()
@@ -1004,10 +651,11 @@ class TestDBConfiguration(unittest.TestCase):
         
         """ to create new connection """
         new_obj.new_connection()
+        #print ' '
       
         """ to create a new table """
-        table_name = 'asu'
-        columns = ["grad", "undergrad"]
+        table_name = 'namrata'
+        columns = ["abc", "def"]
         ctypes = ["VARCHAR", "VARCHAR"]
         keys = ["1","0"]
 
@@ -1031,21 +679,15 @@ class TestDBConfiguration(unittest.TestCase):
         #        print 'Column is %s'%i
         #else:
         #    print 'No columns returned'                
-        #        
+                
         #print " "
         
         """ to drop the table """
-        #table_name = 'table1'
+        table_name = 'namrata'
         #new_obj.drop_table(table_name)
         
         #print " "
         
-        """ to create a mapper """
-        table_name = 'person'
-        new_obj.table_mapper(table_name)
-        
-        print " " 
-                        
         """ to insert values into the table """
         #new_obj.insert_into_table()
         
@@ -1061,13 +703,13 @@ class TestDBConfiguration(unittest.TestCase):
         column_name = 'first_name'
         value = 'seema'
         #new_obj.fetch_selected_rows(table_name, column_name, value)
-        print ' '
+        #print ' '
         
         """ to print the join """
         table1_list = ['person', 'first_name', 'last_name']
         table2_list = ['office','role', 'years']
-        new_obj.select_join(table1_list, table2_list)
-        
+        #new_obj.select_join(table1_list, table2_list)
+  
         """ to close the connection """
         new_obj.close_connection()
 
