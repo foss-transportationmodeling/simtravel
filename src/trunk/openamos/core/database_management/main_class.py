@@ -296,8 +296,9 @@ class MainClass(object):
 
 
     #select and print the join
-    def select_join(self, table1_list, table2_list, column_name):
+    def select_join(self, temp_dict, column_name):
         """
+        self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
         
         Input:
@@ -305,6 +306,7 @@ class MainClass(object):
         
         Output:
         Dsiplays the rows based on the join and the selection criterion.
+        """
         """
         #for now send no args
         #currently the code works for 2 tables
@@ -352,12 +354,21 @@ class MainClass(object):
         for a in class_list:
             print a
 
+        """
+        #initialize the variables
+        final_list = []
+        table_list = []
+        class_list = []
+        col_name = column_name
+        final_list = temp_dict.values()
+        table_list = temp_dict.keys()      
         
         #use string manipulation to create the select query
         len1 = len(final_list)
         len2 = len(table_list)
         ctr = 0
         sql_string = "select "
+        condition_str = 'where '
         for i in final_list:
             if int(ctr) < (int(len1)-1):
                 sql_string = sql_string + str(i) + ', '
@@ -365,17 +376,26 @@ class MainClass(object):
             else:
                 sql_string = sql_string + str(i) + ' '
         sql_string = sql_string + 'from '
-        #print sql_string
         
         ctr = 0
         for i in table_list:
             if int(ctr) < (int(len2)-1):
-                sql_string = sql_string + str(i) + ', '
+                sql_string = sql_string + str(i.lower()) + ', '
                 ctr = ctr + 1
             else:
-                sql_string = sql_string + str(i) + ' '
+                sql_string = sql_string + str(i.lower()) + ' '
+
+        if len2 == 2:
+            condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + table_list[1].lower() + '.' + col_name
+        else:
+            ctr = 0
+            for i in table_list:
+                if int(ctr) < (int(len2)-1):
+                    condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name + ' and '
+                    ctr = ctr + 1
+                else:
+                    condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
         
-        condition_str = 'where ' + table1 + '.' + col_name + ' = ' + table2 + '.' + col_name
         sql_string = sql_string + condition_str
         print sql_string
         print ' '
@@ -399,10 +419,11 @@ class MainClass(object):
             rows = result.fetchall()
             for each_row in rows:
                 print each_row
+            print ' '
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'            
-           
+                 
 
     ########## methods for select query end ##########
 
@@ -539,8 +560,11 @@ class TestMainClass(unittest.TestCase):
         column_name = 'role_id'
         table1_list = ['Person', 'first_name', 'last_name']
         table2_list = ['Office','role', 'years']
-        newobject.select_join(table1_list, table2_list, column_name)
-
+        temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
+        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Name':'firstname, lastname', 'School':'roll_no, teacher'}
+        #newobject.select_join(table1_list, table2_list, column_name)
+        newobject.select_join(temp_dict, column_name)
+        
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
 
