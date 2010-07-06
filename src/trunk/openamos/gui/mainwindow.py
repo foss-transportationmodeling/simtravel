@@ -238,14 +238,14 @@ class MainWindow(QMainWindow):
 
     def projectopen(self):
         self.project_open = OpenProject()
-        print self.project_open.file
+        #print self.project_open.file
         if self.project_open.file != '':
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
 
     def projectsave(self):
-        self.projectsave = SaveProject()
-        self.projectsave.exec_()
+        self.proconfig.write()
+
 
 
     def projectSaveAs(self):
@@ -266,7 +266,6 @@ class MainWindow(QMainWindow):
 
     
     def projectClose(self):
-        self.fileManager.clear()
         self.proconfig = None
         self.checkProject()
         
@@ -276,6 +275,7 @@ class MainWindow(QMainWindow):
                                      QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            self.proconfig.write()
             self.close()
             
     def checkProject(self):
