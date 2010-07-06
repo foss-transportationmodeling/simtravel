@@ -53,9 +53,9 @@ class NewProject(QWizard):
             inputdb.text = str(self.page2.inputdbline.text())
         
         configfileloc = projecthome.text + os.path.sep + projectname.text + '.xml'
-        configfile = open(configfileloc, 'w')
-        configtree.write(configfile, pretty_print=True)
-        configfile.close()
+        #configfile = open(configfileloc, 'w')
+        configtree.write(configfileloc, pretty_print=True)
+        #configfile.close()
         
         self.configtree = configtree
 
