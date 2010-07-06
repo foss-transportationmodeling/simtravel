@@ -27,31 +27,31 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 
 
-class Vehicle(object): pass
+class VEHICLE(object): pass
 
-class Links(object): pass
+class LINKS(object): pass
 
-class Link_OD(object): pass
+class LINK_OD(object): pass
 
-class Schedule(object): pass
+class SCHEDULE(object): pass
 
 class TSP(object): pass
 
-class Destination_Opportunities(object): pass
+class DESTINATION_OPPORTUNITIES(object): pass
 
-class Household(object): pass
+class HOUSEHOLD(object): pass
 
 class PERSON(object): pass
 
-class Person_Schedule(object): pass
+class PERSON_SCHEDULE(object): pass
 
-class Trip(object): pass
+class TRIP(object): pass
 
-class Person_Trip(object): pass
+class PERSON_TRIP(object): pass
 
 class OFFICE(object): pass
  
-class Temp(object): pass
+class TEMP(object): pass
 
 class MainClass(object):
     
@@ -146,22 +146,22 @@ class MainClass(object):
         #print 'map all the classes'
         """
         #for class Vechile
-        class_name = 'Vehicle'
+        class_name = 'VEHICLE'
         table_name = 'vehicle'
         self.vehicle = self.table_mapper(class_name, table_name)
                 
         #for class Links
-        class_name = 'Links'
+        class_name = 'LINKS'
         table_name = 'links'
         self.links = self.table_mapper(class_name, table_name)
 
         #for class Link_OD
-        class_name = 'Link_OD'
+        class_name = 'LINK_OD'
         table_name = 'link_od'
         self.link_od = self.table_mapper(class_name, table_name)
         
         #for class Schedule
-        class_name = 'Schedule'
+        class_name = 'SCHEDULE'
         table_name = 'schedule'
         self.schedule = self.table_mapper(class_name, table_name)
         
@@ -171,27 +171,27 @@ class MainClass(object):
         self.tsp = self.table_mapper(class_name, table_name)
         
         #for class Destination_Opportunities
-        class_name = 'Destination_Opportunities'
+        class_name = 'DESTINATION_OPPORTUNITIES'
         table_name = 'destination_opportunities'
         self.destination_opportunities = self.table_mapper(class_name, table_name)
         
         #for class Household
-        class_name = 'Household'
+        class_name = 'HOUSEHOLD'
         table_name = 'household'
         self.household = self.table_mapper(class_name, table_name)
 
         #for class Person_Schedule
-        class_name = 'Person_Schedule'
+        class_name = 'PERSON_SCHEDULE'
         table_name = 'person_schedule'
         self.person_schedule = self.table_mapper(class_name, table_name)
 
         #for class Trip
-        class_name = 'Trip'
+        class_name = 'TRIP'
         table_name = 'trip'
         self.trip = self.table_mapper(class_name, table_name)
         
         #for class Person_Trip
-        class_name = 'Person_Trip'
+        class_name = 'PERSON_TRIP'
         table_name = 'person_trip'
         self.person_trip = self.table_mapper(class_name, table_name)
         """
