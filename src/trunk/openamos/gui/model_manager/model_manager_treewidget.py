@@ -2,6 +2,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from models import *
 from spec_abstract_dialog import *
+from openamos.gui.env import *
 
 
 
@@ -75,25 +76,25 @@ class Model_Manager_Treewidget(QTreeWidget):
 # Define Fixed Activity Prism Models       
 
         fixed_activity_prism_models = QTreeWidgetItem(self)
-        fixed_activity_prism_models.setText(0, "Fixed Activity Prism Generator")
+        fixed_activity_prism_models.setText(0, COMP_FIXEDACTPRISM)
 
         earliest_start_day = QTreeWidgetItem(fixed_activity_prism_models)
-        earliest_start_day.setText(0, "Earliest start of day")
+        earliest_start_day.setText(0, COMPMODEL_DAYSTART)
 
         latest_end_day = QTreeWidgetItem(fixed_activity_prism_models)
-        latest_end_day.setText(0, "Latest end of day")
+        latest_end_day.setText(0, COMPMODEL_DAYEND)
 
         worker = QTreeWidgetItem(fixed_activity_prism_models)
         worker.setText(0, "Worker")
 
-        number_school_episodes = QTreeWidgetItem(worker)
-        number_school_episodes.setText(0, "Number of school episodes")
+        number_work_episodes = QTreeWidgetItem(worker)
+        number_work_episodes.setText(0, COMPMODEL_NUMWRKEPISODES)
 
         latest_arrival_work= QTreeWidgetItem(worker)
-        latest_arrival_work.setText(0, "Latest arrival at work")
+        latest_arrival_work.setText(0, COMPMODEL_WORKSTART1)
 
         earliest_departure_work = QTreeWidgetItem(worker)
-        earliest_departure_work.setText(0, "Earliest departure from work")
+        earliest_departure_work.setText(0, COMPMODEL_WORKEND1)
 
         nonworker = QTreeWidgetItem(fixed_activity_prism_models)
         nonworker.setText(0, "Non-worker")
@@ -104,15 +105,15 @@ class Model_Manager_Treewidget(QTreeWidget):
 
 
         number_school_episodes = QTreeWidgetItem(children_adults)
-        number_school_episodes.setText(0, "Number of school episodes")
+        number_school_episodes.setText(0, COMPMODEL_NUMSCHEPISODES)
 
 
         latest_arrival_school = QTreeWidgetItem(children_adults)
-        latest_arrival_school.setText(0, "Latest arrival at school")
+        latest_arrival_school.setText(0, COMPMODEL_SCHSTART1)
 
 
         earliest_departure_school = QTreeWidgetItem(children_adults)
-        earliest_departure_school.setText(0, "Earliest departure from school")
+        earliest_departure_school.setText(0, COMPMODEL_SCHEND1)
 
 
         children_2 = QTreeWidgetItem(fixed_activity_prism_models)
@@ -360,9 +361,41 @@ class Model_Manager_Treewidget(QTreeWidget):
         self.configobject = co
     
     def treeItemSelected(self,item,col):
-        if item.text(col) == 'Residential Location Choice':
-            diag = AbtractSpecDialog(self.configobject)
-        diag.exec_()
+        diagtitle = None
+        diag = None
+        modelkey = None
+        if item.text(col) == COMPMODEL_RESLOC:
+            diagtitle = COMPMODEL_RESLOC
+            modelkey = MODELKEY_RESLOC
+        elif item.text(col) == COMPMODEL_DAYSTART:
+            diagtitle = COMPMODEL_DAYSTART
+            modelkey = MODELKEY_DAYSTART
+        elif item.text(col) == COMPMODEL_DAYEND:
+            diagtitle = COMPMODEL_DAYEND
+            modelkey = MODELKEY_DAYEND
+        elif item.text(col) == COMPMODEL_NUMWRKEPISODES:
+            diagtitle = COMPMODEL_NUMWRKEPISODES
+            modelkey = MODELKEY_NUMWRKEPISODES
+        elif item.text(col) == COMPMODEL_WORKSTART1:
+            diagtitle = COMPMODEL_WORKSTART1
+            modelkey = MODELKEY_WORKSTART1
+        elif item.text(col) == COMPMODEL_WORKEND1:
+            diagtitle = COMPMODEL_WORKEND1
+            modelkey = MODELKEY_WORKEND1
+        elif item.text(col) == COMPMODEL_NUMSCHEPISODES:
+            diagtitle = COMPMODEL_NUMSCHEPISODES
+            modelkey = MODELKEY_NUMSCHEPISODES
+        elif item.text(col) == COMPMODEL_SCHSTART1:
+            diagtitle = COMPMODEL_SCHSTART1
+            modelkey = MODELKEY_SCHSTART1
+        elif item.text(col) == COMPMODEL_SCHEND1:
+            diagtitle = COMPMODEL_SCHEND1
+            modelkey = MODELKEY_SCHEND1
+            
+        
+        if diagtitle != None:
+            diag = AbtractSpecDialog(self.configobject,modelkey,diagtitle)
+            diag.exec_()
 
         
 

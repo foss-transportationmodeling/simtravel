@@ -10,6 +10,7 @@ from PyQt4.QtCore import *
 import copy
 
 from openamos.gui.misc.basic_widgets import *
+from openamos.gui.env import *
 
 class AbstractModWidget(QGroupBox):
     '''
@@ -132,7 +133,7 @@ class AbstractModWidget(QGroupBox):
     def delVariable(self):
         self.varstable.removeRow(self.varstable.currentRow())
 
-    def makeOProbitChoiceWidget(self):
+    def makeOrdChoiceWidget(self):
         self.choicewidget = QWidget(self)
         self.choicelayout = QVBoxLayout()
         self.choicewidget.setLayout(self.choicelayout)
@@ -146,9 +147,9 @@ class AbstractModWidget(QGroupBox):
         
         self.mainlayout.addWidget(self.choicewidget,0,0,1,1)
         
-        self.connect(self.choicebutton, SIGNAL("clicked(bool)"), self.addOPChoice)  
+        self.connect(self.choicebutton, SIGNAL("clicked(bool)"), self.addOrdChoice)  
 
-    def addOPChoice(self):
+    def addOrdChoice(self):
         self.choicetable.insertRow(self.choicetable.rowCount())
         self.choicetable.setItem(0,1,QTableWidgetItem())
         disableitem = self.choicetable.item(0, 1)
@@ -174,6 +175,53 @@ class AbstractModWidget(QGroupBox):
 
     def addNest(self):
         self.nesttable.insertRow(self.nesttable.rowCount())
+    
+    def makeSFVarianceWidget(self):
+        self.variancevwidget = QWidget(self)
+        self.varianceuwidget = QWidget(self)
+        self.variancevlayout = QHBoxLayout()
+        self.varianceulayout = QHBoxLayout()
+        self.variancevwidget.setLayout(self.variancevlayout)
+        self.varianceuwidget.setLayout(self.varianceulayout)
+        
+        self.variancevlabel = QLabel('Variance (v) - Normal')
+        self.varianceulabel = QLabel('Variance (u) - Half Normal')
+        self.variancevlayout.addWidget(self.variancevlabel)
+        self.varianceulayout.addWidget(self.varianceulabel)
+        
+        self.variancevline = LineEdit()
+        self.variancevline.setFixedWidth(100)
+        self.varianceuline = LineEdit()
+        self.varianceuline.setFixedWidth(100)
+        self.variancevlayout.addWidget(self.variancevline)
+        self.varianceulayout.addWidget(self.varianceuline)
+        
+        self.mainlayout.addWidget(self.variancevwidget,0,0,1,1,Qt.AlignLeft)
+        self.mainlayout.addWidget(self.varianceuwidget,0,1,1,1,Qt.AlignLeft)
+
+    def makeCountTypeWidget(self):
+        self.poiradio = QRadioButton(POI_MODEL)
+        self.nbradio = QRadioButton(NEGBIN_MODEL)
+        self.nbradio.setChecked(True)
+        buttonlayout = QHBoxLayout()
+        buttonlayout.addWidget(self.poiradio)
+        buttonlayout.addWidget(self.nbradio)
+        self.counttypewidget = QWidget(self)
+        self.counttypewidget.setLayout(buttonlayout)
+        
+        self.odwidget = QWidget(self)
+        odlayout = QHBoxLayout()
+        self.odwidget.setLayout(odlayout)
+        self.odlabel = QLabel("Overdispersion")
+        odlayout.addWidget(self.odlabel)
+        self.odline = LineEdit()
+        self.odline.setFixedWidth(100) 
+        odlayout.addWidget(self.odline)
+               
+        self.mainlayout.addWidget(self.counttypewidget,0,0,1,1,Qt.AlignLeft)
+        self.mainlayout.addWidget(self.odwidget,0,1,1,1,Qt.AlignLeft)
+        
+        self.connect(self.nbradio, SIGNAL("toggled(bool)"), self.ctypeAction)
 
 class ProbModWidget(AbstractModWidget):
     '''
@@ -183,15 +231,32 @@ class ProbModWidget(AbstractModWidget):
         super(ProbModWidget, self).__init__(parent)
         self.makeProbChoiceWidget()
 
-class NegBinModWidget(AbstractModWidget):
+class CountModWidget(AbstractModWidget):
     '''
     classdocs
     '''
     def __init__(self, parent = None):
-        super(NegBinModWidget, self).__init__(parent) 
-        self.makeChoiceWidget() 
-        self.makeVarsWidget() 
+        super(CountModWidget, self).__init__(parent) 
+        self.makeCountTypeWidget()
+        self.makeChoiceWidget(1,0) 
+        self.makeVarsWidget(1,1) 
+         
+    def ctypeAction(self, checked):
+        if checked:
+            self.odline.setEnabled(True) 
+        else:
+            self.odline.setEnabled(False)
+        self.emit(SIGNAL("completeChanged()"))  
         
+class SFModWidget(AbstractModWidget):
+    '''
+    classdocs
+    '''
+    def __init__(self, parent = None):
+        super(SFModWidget, self).__init__(parent) 
+        self.makeSFVarianceWidget()
+        self.makeVarsWidget(1,0)  
+    
 
 class MNLogitModWidget(AbstractModWidget):
     '''
@@ -273,13 +338,6 @@ class MNLogitModWidget(AbstractModWidget):
             pass
 
         
-class SFModWidget(AbstractModWidget):
-    '''
-    classdocs
-    '''
-    def __init__(self, parent = None):
-        super(SFModWidget, self).__init__(parent) 
-        self.makeVarsWidget() 
 
 class LogRegModWidget(AbstractModWidget):
     '''
@@ -289,13 +347,13 @@ class LogRegModWidget(AbstractModWidget):
         super(LogRegModWidget, self).__init__(parent) 
         self.makeVarsWidget() 
 
-class OProbitModWidget(AbstractModWidget):
+class OrderedModWidget(AbstractModWidget):
     '''
     classdocs
     '''
     def __init__(self, parent = None):
-        super(OProbitModWidget, self).__init__(parent) 
-        self.makeOProbitChoiceWidget()
+        super(OrderedModWidget, self).__init__(parent) 
+        self.makeOrdChoiceWidget()
         self.makeVarsWidget() 
 
 class NLogitModWidget(AbstractModWidget):

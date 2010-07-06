@@ -9,6 +9,8 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+from lxml import etree
+
 from openamos.gui.env import *
 from spec_model_widgets import *
 
@@ -20,7 +22,7 @@ class AbtractSpecDialog(QDialog):
     classdocs
     '''
 
-    def __init__(self, configobject, title = '', parent=None):
+    def __init__(self, configobject, key, title = '', parent=None):
         super(AbtractSpecDialog, self).__init__(parent)
         
         self.setWindowTitle(title)
@@ -32,14 +34,15 @@ class AbtractSpecDialog(QDialog):
         modeltypegblayout = QVBoxLayout()
         self.modeltypegb.setLayout(modeltypegblayout)
         self.modeltypecb = QComboBox()
-        self.modeltypecb.addItems([QString(PROB_MODEL), QString(NEGBIN_MODEL),
+        self.modeltypecb.addItems([QString(PROB_MODEL), QString(COUNT_MODEL),
                                    QString(SF_MODEL), QString(LOGREG_MODEL),
-                                   QString(MNL_MODEL), QString(OP_MODEL),
+                                   QString(MNL_MODEL), QString(ORD_MODEL),
                                    QString(NL_MODEL)])
         modeltypegblayout.addWidget(self.modeltypecb)
         self.glayout.addWidget(self.modeltypegb,0,0)
         
         self.configobject = configobject
+        self.modelkey = key
         self.populateFromDatabase()
         
         self.subpopgb = QGroupBox("Sub-Population")
@@ -73,36 +76,120 @@ class AbtractSpecDialog(QDialog):
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.glayout.addWidget(self.dialogButtonBox,3,0)
         
-        self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.storeSpec)
-        self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
         self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
+        self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.storeSpec)
+        self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         
+        self.loadFromConfigObject()
+
+    
+    def loadFromConfigObject(self):
+        modelspecified = self.configobject.modelSpecInConfig(self.modelkey)
+        if modelspecified is not None:
+            form = modelspecified.get(FORMULATION)
+            if form == MODELFORM_REG:
+                type = modelspecified.get(MODELTYPE)
+                if type == SF_MODEL:
+                    modtxt = SF_MODEL
+                elif type == LOGREG_MODEL:
+                    modtxt = LOGREG_MODEL
+            elif form == MODELFORM_CNT:
+                modtxt = MODELFORM_CNT
+                type = modelspecified.get(MODELTYPE)
+            elif form == MODELFORM_ORD:
+                modtxt = ORD_MODEL
+            elif form == MODELFORM_MNL:
+                modtxt = MNL_MODEL
+            elif form == MODELFORM_NL:
+                modtxt = NL_MODEL
+                            
+            ind = self.modeltypecb.findText(modtxt)
+            self.modeltypecb.setCurrentIndex(ind)
+            
         self.changeModelWidget()
         self.populateColumns()
+        
+        if modelspecified is not None:
+            self.populateFilterWidget(modelspecified)
+            self.populateVarsWidget(modelspecified)
+            if self.modeltypecb.currentText() == SF_MODEL:
+                for varianceelt in modelspecified.getiterator(VARIANCE):
+                    if MODELTYPE in varianceelt.keys():
+                        self.modwidget.varianceuline.setText(varianceelt.get(VALUE))
+                    else:
+                        self.modwidget.variancevline.setText(varianceelt.get(VALUE)) 
+            if self.modeltypecb.currentText() == COUNT_MODEL:
+                self.populateAltsWidget(modelspecified)
+                if type == NEGBIN_MODEL:
+                    varianceelt = modelspecified.find(VARIANCE)
+                    self.modwidget.odline.setText(varianceelt.get(VALUE))
+                else:
+                    self.modwidget.poiradio.setChecked(True)
+            
+    def populateFilterWidget(self,modelelt):
+        for filt in modelelt.getiterator(FILTER):
+            ind = self.subpoptab.findText(filt.get(TABLE))
+            self.subpoptab.setCurrentIndex(ind)
+            ind = self.subpopvar.findText(filt.get(COLUMN))
+            self.subpopvar.setCurrentIndex(ind)
+            ind = self.subpopop.findText(filt.get(COND))
+            self.subpopop.setCurrentIndex(ind)                
+            self.subpopval.setText(filt.get(VALUE))
+    
+    def populateVarsWidget(self,modelelt):
+        for varelt in modelelt.getiterator(VARIABLE):
+            varstable = self.modwidget.varstable
+            varstable.insertRow(varstable.rowCount())
+            
+            tableitem = QTableWidgetItem()
+            tableitem.setText(varelt.get(TABLE))
+            tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
+            varstable.setItem(varstable.rowCount()-1, 0, tableitem)
+
+            varitem = QTableWidgetItem()
+            varitem.setText(varelt.get(COLUMN))
+            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+            varstable.setItem(varstable.rowCount()-1, 1, varitem)
+
+            coeffitem = QTableWidgetItem()
+            coeffitem.setText(varelt.get(COEFF))
+            varstable.setItem(varstable.rowCount()-1, 2, coeffitem)
+
+    def populateAltsWidget(self,modelelt):
+        for altelt in modelelt.getiterator(ALTERNATIVE):
+            altstable = self.modwidget.choicetable
+            altstable.insertRow(altstable.rowCount())
+            
+            altitem = QTableWidgetItem()
+            altitem.setText(altelt.get(ID))
+            altstable.setItem(altstable.rowCount()-1, 0, altitem)
+
     
     def changeModelWidget(self, idx=0):
+        self.subpoptab.setCurrentIndex(0)
+        self.subpopop.setCurrentIndex(0)
+        self.subpopval.clear()  
+          
         self.modwidget.setParent(None)
         if self.modeltypecb.currentText() == PROB_MODEL:
             self.modwidget = ProbModWidget(self)
-        elif self.modeltypecb.currentText() == NEGBIN_MODEL:
-            self.modwidget = NegBinModWidget(self)
+        elif self.modeltypecb.currentText() == COUNT_MODEL:
+            self.modwidget = CountModWidget(self)
         elif self.modeltypecb.currentText() == MNL_MODEL:
             self.modwidget = MNLogitModWidget(self)
         elif self.modeltypecb.currentText() == SF_MODEL:
             self.modwidget = SFModWidget(self)
         elif self.modeltypecb.currentText() == LOGREG_MODEL:
             self.modwidget = LogRegModWidget(self)
-        elif self.modeltypecb.currentText() == OP_MODEL:
-            self.modwidget = OProbitModWidget(self)
+        elif self.modeltypecb.currentText() == ORD_MODEL:
+            self.modwidget = OrderedModWidget(self)
         elif self.modeltypecb.currentText() == NL_MODEL:
             self.modwidget = NLogitModWidget(self)
         
         self.glayout.addWidget(self.modwidget,2,0)
         self.update()
-    
-    def setConfigObject(self,co):
-        self.configobject = co
+
 
     def populateColumns(self, idx=0):
         self.subpopvar.clear()
@@ -111,8 +198,95 @@ class AbtractSpecDialog(QDialog):
         
     
     def storeSpec(self):
-        if self.modeltypecb.currentText() == PROB_MODEL:
+        modelkey = self.modelkey
+
+        modelelt = None
+
+        if self.modeltypecb.currentText() == SF_MODEL:
+            modelform = MODELFORM_REG
+            otherattr = None
+            if modelkey == MODELKEY_DAYSTART:
+                otherattr = VERTEX,START
+            if modelkey == MODELKEY_DAYEND:
+                otherattr = VERTEX,END
+            modelelt = self.createModelElement(modelkey,modelform,SF_MODEL,otherattr)
+            self.addDepVarToElt(modelelt, TABLE_PER, modelkey)
+            self.addFiltToElt(modelelt)
+            variancevelt = etree.SubElement(modelelt, VARIANCE)
+            variancevelt.set(VALUE,str(self.modwidget.variancevline.text()))
+            varianceuelt = etree.SubElement(modelelt, VARIANCE)
+            varianceuelt.set(VALUE,str(self.modwidget.varianceuline.text()))
+            varianceuelt.set(MODELTYPE,'Half Normal')
+            self.addVariables(modelelt)
+            
+        elif self.modeltypecb.currentText() == COUNT_MODEL:
+            modelform = MODELFORM_CNT
+            type = ""
+            if self.modwidget.nbradio.isChecked():
+                type = NEGBIN_MODEL
+            else:
+                type = POI_MODEL
+            modelelt = self.createModelElement(modelkey,modelform,type)
+            self.addDepVarToElt(modelelt, TABLE_PER, modelkey)
+            self.addFiltToElt(modelelt)
+            if type == NEGBIN_MODEL:
+                varianceelt = etree.SubElement(modelelt, VARIANCE)
+                varianceelt.set(VALUE,str(self.modwidget.odline.text()))
+                varianceelt.set(MODELTYPE,'Overdispersion') 
+            self.addAlternatives(modelelt)
+            self.addVariables(modelelt) 
+                                  
+        elif self.modeltypecb.currentText() == LOGREG_MODEL:
             pass
+
+        
+        self.configobject.addModelElement(modelelt)
+        
+        QDialog.accept(self)
+
+    
+    def createModelElement(self,name,formulation,type,otherattr=None):
+        elt = etree.Element(MODEL)
+        elt.set(NAME,name)
+        elt.set(FORMULATION,formulation)
+        elt.set(MODELTYPE,type)
+        if otherattr != None:
+            elt.set(otherattr[0],otherattr[1])
+        return elt
+
+    def addDepVarToElt(self,elt,tab,col):
+        depvarelt = etree.SubElement(elt,DEPVARIABLE)
+        depvarelt.set(TABLE,tab)
+        depvarelt.set(COLUMN,col.lower())
+    
+    def addFiltToElt(self,elt):
+        if (str(self.subpopval.text()) != ''):
+            filterelt = etree.SubElement(elt,FILTER)
+            filterelt.set(TABLE,str(self.subpoptab.currentText()))
+            filterelt.set(COLUMN,str(self.subpopvar.currentText()))
+            filterelt.set(COND,str(self.subpopop.currentText()))
+            filterelt.set(VALUE,str(self.subpopval.text()))
+
+    def addAlternatives(self,elt):
+        numrows = self.modwidget.choicetable.rowCount()
+        for i in range(numrows):
+            altname = (self.modwidget.choicetable.item(i,0)).text()
+            altelt = etree.SubElement(elt,ALTERNATIVE)
+            altelt.set(ID,str(altname))
+
+    def addVariables(self,elt):
+        numrows = self.modwidget.varstable.rowCount()
+        for i in range(numrows):
+            tablename = (self.modwidget.varstable.item(i,0)).text()
+            colname = (self.modwidget.varstable.item(i,1)).text()
+            coeff = (self.modwidget.varstable.item(i,2)).text()
+            self.addVariabletoElt(elt,tablename,colname,coeff)
+        
+    def addVariabletoElt(self,elt,tablename,colname,coeff):
+        variableelt = etree.SubElement(elt, VARIABLE)
+        variableelt.set(TABLE,str(tablename))
+        variableelt.set(COLUMN,str(colname))
+        variableelt.set(COEFF,str(coeff))
     
     def populateFromDatabase(self):
         self.protocol = self.configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
@@ -139,7 +313,8 @@ class AbtractSpecDialog(QDialog):
         
 def main():
     app = QApplication(sys.argv)
-    diag = AbtractSpecDialog()
+    config = None
+    diag = AbtractSpecDialog(config)
     diag.show()
     app.exec_()
 
