@@ -41,7 +41,7 @@ class Destination_Opportunities(object): pass
 
 class Household(object): pass
 
-class Person(object): pass
+class PERSON(object): pass
 
 class Person_Schedule(object): pass
 
@@ -49,7 +49,7 @@ class Trip(object): pass
 
 class Person_Trip(object): pass
 
-class Office(object): pass
+class OFFICE(object): pass
  
 class Temp(object): pass
 
@@ -112,6 +112,7 @@ class MainClass(object):
                 new_table = Table(self.table_name, self.dbcon_obj.metadata, autoload=True)
                 
                 #create mapper
+                class_name = class_name.upper()                
                 mapper(eval(class_name), new_table)
 
                 #create an object for the mapper
@@ -195,12 +196,12 @@ class MainClass(object):
         self.person_trip = self.table_mapper(class_name, table_name)
         """
         #for class Office
-        class_name = 'Office'
+        class_name = 'OFFICE'
         table_name = 'office'
         self.office = self.table_mapper(class_name, table_name)
             
         #for class Person
-        class_name = 'Person'
+        class_name = 'PERSON'
         table_name = 'person'
         self.person = self.table_mapper(class_name, table_name)
 
@@ -399,8 +400,20 @@ class MainClass(object):
         sql_string = sql_string + condition_str
         print sql_string
         print ' '
+        cols_list = []
+        tabs_list = []
+
+        #convert all the table names to upper case
+        for each in table_list:
+            tabs_list.append(each.upper())
         
-        #for_key = None
+        #separate all the columns from the lists
+        for i in final_list:
+            temp = str(i)
+            parts = temp.split(", ")
+            for j in parts:
+                cols_list.append(j)
+
         try:
             """
             temp_table1 = Table(table1, self.metadata, autoload=True)
@@ -414,11 +427,26 @@ class MainClass(object):
             elif keys2 <> None:
                 for j in keys2:
                     print 'keys2 %s'%j
-            """
+            
             result = self.dbcon_obj.connection.execute(sql_string)
             rows = result.fetchall()
             for each_row in rows:
                 print each_row
+            """
+            temp_var1 = None
+            temp_var2 = None
+            temp_var1 = str(tabs_list[0]) +  '.' + col_name
+            temp_var2 = str(tabs_list[1]) +  '.' + col_name
+            ###
+            #query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
+            #filter(eval(tabs_list[0]).role_id==eval(tabs_list[1]).role_id).values(*cols_list)
+            query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
+            filter(eval(temp_var1)==eval(temp_var2)).values(*cols_list)
+            all_rows = []
+            for instance in query:
+                print instance
+                all_rows.append(instance)
+            
             print ' '
         except Exception, e:
             print e
@@ -558,11 +586,10 @@ class TestMainClass(unittest.TestCase):
 
         """ to print the join """
         column_name = 'role_id'
-        table1_list = ['Person', 'first_name', 'last_name']
-        table2_list = ['Office','role', 'years']
+        table1_list = ['person', 'first_name', 'last_name']
+        table2_list = ['office','role', 'years']
         temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
-        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Name':'firstname, lastname', 'School':'roll_no, teacher'}
-        #newobject.select_join(table1_list, table2_list, column_name)
+        #temp_dict = {'Person':'first_name, last_name', 'Office':'role', 'Name':'firstname, lastname'}
         newobject.select_join(temp_dict, column_name)
         
         """ close the connection to the database """
