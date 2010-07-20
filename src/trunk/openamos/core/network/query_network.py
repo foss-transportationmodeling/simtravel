@@ -25,9 +25,9 @@ class Graph(object):
 
         """
         #for test data with 12 links
-        skims_t_res = 1
-        analy_t_res = 60
-        analysis_period = 0.5
+        #skims_t_res = 1
+        #analy_t_res = 60
+        #analysis_period = 0.5
 
         self.dist_g_ind = dist
         if self.dist_g_ind is not None:
@@ -39,31 +39,34 @@ class Graph(object):
         self.analy_t_res = analy_t_res
         self.num_analy_intervals = analysis_period * 60 * 60/self.analy_t_res
 
-        print self.num_skim_intervals
-        print self.num_analy_intervals
+        print 'Number of skim intervals', self.num_skim_intervals
+        print 'Number of analysis intervals', self.num_analy_intervals
 
-        self.read_data()
-        
-        print self.data.shape
 
-        self.tts = self.process_data()
-        self.arc_index = self.create_arc_index()
         
-        print self.arc_index.keys(), 'KEYSSSSSSSSSSSSSSSSSS'
-        
-        self.arrival_time(1, 2, 5)
+        #print self.data.shape
 
-        g = self.build_graph()
+        #self.tts = self.process_data()
+        #self.arc_index = self.create_arc_index()
+        
+        #print self.arc_index.keys(), 'KEYSSSSSSSSSSSSSSSSSS'
+        
+        #self.arrival_time(1, 2, 5)
+
+        #g = self.build_graph()
         #self.build_tree_from_source_at_time(g, 1, 5, 7)
         #self.build_tree_to_dest_at_time(g, 9, 25, 22)
 
-        self.build_prism_between_nodes(g, 1, 9, 2, 8)
+        #self.build_prism_between_nodes(g, 1, 9, 2, 8)
 
-    def read_data(self):
+    def read_data(self, location):
         # Layout -- Link, Dir, ANode, BNode, Avg_Time_for all intervals, Length 
+        # currently reads data from a flat file
+        # add functionality to read from a database table if necessary
+
         self.data = []
         if not len(self.data) > 0:
-            for line in open('dummy_data12n.csv', 'r'):
+            for line in open(location, 'r'):
                 fields = line.strip().split(',')
                 fields = [float(i) for i in fields]
                 self.data.append(fields)
@@ -72,18 +75,28 @@ class Graph(object):
 
     def process_data(self):
         #Travel Time Matrix
-        tts = self.data[:,4:]
+        tts = self.data[:,4:-1]
         # Average Values
         tts_avg = tts.mean(axis=-1)
         mask = ma.getmaskarray(tts)
-
         # Assigning missing with average value across other intervals
         for i in range(self.num_skim_intervals):
             tts[mask[:,i],i] = tts_avg[mask[:,i]]
-        
         # Converting into discrete time intervals
         tts = ceil(tts/self.analy_t_res)
-        return tts
+        #return tts
+        self.tts = tts
+
+
+        """
+        f = open('links_processed.csv', 'w')
+        for i in self.tts:
+            for j in i:
+                f.write('%s,'%j)
+            f.write('\n')
+        """
+
+        
 
         
     def create_arc_index(self):
@@ -92,51 +105,59 @@ class Graph(object):
         for i in self.data[:,2:4]:
             arc_index[(int(i[0]), int(i[1]))] = count
             count = count + 1
-        return arc_index
+
+        self.arc_index = arc_index
 
     def arrival_time(self, i, j, t):
+        """
+        t is reported in analysis units default - 6 seconds
+        """
+
         if t > self.num_analy_intervals:
             return 99999999
-        print '\t\tcalculating arrival time for nodes %s, %s, in time interval %s ' %(i, j, t)
+        print '\n\t\tcalculating arrival time for nodes %s, %s, in discrete interval %s ' %(i, j, t)
         if i == j:
             return t
         row = self.arc_index[(i, j)]
         #skim_int = ceil((t+1)*self.analy_t_res/(self.skims_t_res*60))        
-        skim_int = ceil((t)*self.analy_t_res/(self.skims_t_res*60))        
+        skim_int = ceil(t*self.analy_t_res/(self.skims_t_res*60.))        
 
         print '\t\tSKIMMING INTERVAL', skim_int
         #ttaken = self.tts[row, skim_int-1]
         #a_ij = t+1 + self.tts[row, skim_int-1]
         a_ij = t + self.tts[row, skim_int-1]
 
-        print "\t\ttravel time is - ", self.tts[row, skim_int-1]
-        print "\t\tarrival time is - ", a_ij
+        print "\t\ttravel time is - %s discrete units"  %self.tts[row, skim_int-1]
+        print "\t\tarrival time is - %s discrete units" %a_ij
         return a_ij
         #print ('leaves in interval %d, leaves %d and time taken is %d and arrives %d at %d'
         #       %(t+1, i, ttaken, j, a_ij))        
 
     def departure_time(self, i, j, t):
+        """
+        t is repored in analysis units default - 6 seconds
+        """
         if i == j:
             return t
         
-        print '\t\tcalculating earliest departure time for nodes - ', i, j
+        print '\n\t\tcalculating earliest departure time for nodes - ', i, j
         
         earliest_dep_time = False
         st_time = t
 
         while not earliest_dep_time:
             st_time = st_time - 1
+            if st_time <1:
+                return -1
             row = self.arc_index[(i, j)]
-            skim_int = ceil((st_time)*self.analy_t_res/(self.skims_t_res*60))
+            skim_int = ceil((st_time)*self.analy_t_res/(self.skims_t_res*60.))
             tts = self.tts[row, skim_int-1]
-            print '\t\tSKIMMING INTERVAL', skim_int
-            print '\t\tstart time', st_time
-            print '\t\ttravel time', tts
-
-            
 
             if tts + st_time <= t:
                 earliest_dep_time = True
+                print '\t\tSKIMMING INTERVAL', skim_int
+                print '\t\tstart time', st_time
+                print '\t\ttravel time', tts
                 print '\t\treturning earliest departure time', st_time
                 return st_time
             else:
@@ -157,7 +178,7 @@ class Graph(object):
         print 'Graph was successfully created'
         print '\tThe number of nodes - %s' %(g.number_of_nodes())
         print '\tThe number of edges - %s' %(g.number_of_edges())            
-        print g.edges()
+        #print g.edges()
         return g
             
     
@@ -441,11 +462,38 @@ class Graph(object):
 if __name__ == "__main__":
     import time
     g = Graph()
-    
     ti = time.time()
-    for i in g.graph_time.nodes()[:5]:
-        print 'Node - ', i
-        dist, path = g.shortest_path_tree(i, cutoff=600)
-        print 'number of paths within 10 minutes - ', len(path)
+    g.read_data('Links_tt_24hrs.csv')
+    g.process_data()
+    g.create_arc_index()
+    net_graph = g.build_graph()
+    print 'Time to build the graph - %s' %(time.time()-ti)
 
-    print 'time taken - %.4f' %(time.time()-ti)
+    ti = time.time()
+    #self.build_prism_between_nodes(net_graph, 1, 9, 2, 8)
+    print '\nTesting Arrival Time'
+    g.arrival_time(3002, 11965, 1)
+    g.arrival_time(3002, 11965, 151)
+    g.arrival_time(3002, 11965, 301)
+    g.arrival_time(3002, 11965, 451)
+
+    print '\nTesting Departure Time'
+    g.departure_time(3002, 11965, 1)
+    g.departure_time(3002, 11965, 151)
+    g.departure_time(3002, 11965, 301)
+    g.departure_time(3002, 11965, 451)
+    print 'Time to query possible destinations - %s' %(time.time()-ti)
+
+
+    ti = time.time()
+    g.build_tree_from_source_at_time(net_graph, 3002, 301)
+    print 'Time to skim along the network - %s' %(time.time()-ti)
+    
+
+    #ti = time.time()
+    #for i in g.graph_time.nodes()[:5]:
+    #    print 'Node - ', i
+    #    dist, path = g.shortest_path_tree(i, cutoff=600)
+    #    print 'number of paths within 10 minutes - ', len(path)
+
+    #print 'time taken - %.4f' %(time.time()-ti)
