@@ -62,7 +62,6 @@ class DataBaseConnection(object):
         db_obj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         database_config_object = db_obj
         self.database_config_object = database_config_object
-        #print 'this is the init function of the database connection class'
 
 
     #temp function prints the values of the database configuration object	
@@ -389,6 +388,8 @@ class DataBaseConnection(object):
         New connection created
         """
         
+        #before connecting to the database check if the database exists
+        
         #create a connection and try to establish a session with the database
         try:
             connect_string = '%s://%s:%s@%s:5432/%s'%(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
@@ -546,11 +547,7 @@ class DataBaseConnection(object):
                 #create new table                         
                 new_table.create(checkfirst = True)
                 print "Table '%s' created"%self.table_name
-                #create a mapper for the table
-                #mapper(Temp, new_table)
-                #create an object for the mapper
-                #self.new_user = Temp()
-                #print self.new_user
+
             except:
                 print 'Error while creating the table %s'%self.table_name
                 raise Exception
