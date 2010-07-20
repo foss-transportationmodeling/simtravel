@@ -27,7 +27,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 
 
-class VEHICLE(object): pass
+class VECHICLE(object): pass
 
 class LINKS(object): pass
 
@@ -52,6 +52,8 @@ class PERSON_TRIP(object): pass
 class OFFICE(object): pass
  
 class TEMP(object): pass
+
+class SCHOOL(object): pass
 
 class MainClass(object):
     
@@ -146,7 +148,7 @@ class MainClass(object):
         #print 'map all the classes'
         """
         #for class Vechile
-        class_name = 'VEHICLE'
+        class_name = 'VECHICLE'
         table_name = 'vehicle'
         self.vehicle = self.table_mapper(class_name, table_name)
                 
@@ -194,7 +196,7 @@ class MainClass(object):
         class_name = 'PERSON_TRIP'
         table_name = 'person_trip'
         self.person_trip = self.table_mapper(class_name, table_name)
-        """
+        
         #for class Office
         class_name = 'OFFICE'
         table_name = 'office'
@@ -204,6 +206,11 @@ class MainClass(object):
         class_name = 'PERSON'
         table_name = 'person'
         self.person = self.table_mapper(class_name, table_name)
+        """
+        #for class School
+        class_name = 'SCHOOL'
+        table_name = 'school'
+        self.school = self.table_mapper(class_name, table_name)
 
     ########## methods for mapping end ##########
 
@@ -222,7 +229,7 @@ class MainClass(object):
         """
         
         #get the column list for the table
-        new_class_name = class_name
+        new_class_name = class_name.upper()
         new_table_name = new_class_name.lower()
         
         col = []
@@ -233,27 +240,13 @@ class MainClass(object):
 
         #query the table to fetch all the records by passing the columns
         query = self.dbcon_obj.session.query(eval(new_class_name)).values(*col)
-        
+
         all_rows = []
         for instance in query:
             print instance
             all_rows.append(instance)
 
-        print ' '
-        """
-        Fetch all the rows of a table using the select query. This query 
-        returns a row proxy for each row in the table.above code returns 
-        an instance of the mapper class
-        """
-        """
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
-        s = select([temp_table])
-        res = self.connection.execute(s)
-        print "display all rows"
-        for row in res.fetchall():
-            print row
-            print type(row)
-        """            
+        print ' '           
 
 
     #select rows based on a selection criteria
@@ -269,7 +262,7 @@ class MainClass(object):
         """
         
         #get the column list for the table
-        new_class_name = class_name
+        new_class_name = class_name.upper()
         new_table_name = new_class_name.lower()
         
         col = []
@@ -297,7 +290,7 @@ class MainClass(object):
 
 
     #select and print the join
-    def select_join(self, temp_dict, column_name):
+    def select_join(self, temp_dict, column_name, chk_col, value):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -306,56 +299,9 @@ class MainClass(object):
         Database configuration object, table names, columns and values.
         
         Output:
-        Dsiplays the rows based on the join and the selection criterion.
+        Displays the rows based on the join and the selection criterion.
         """
-        """
-        #for now send no args
-        #currently the code works for 2 tables
-        col_name = column_name
-        list1 = table1_list
-        list2 = table2_list
 
-        #initialize the variables
-        final_list = []
-        table_list = []
-        class_list = []
-        class1 = None
-        class2 = None
-        table1 = None
-        table2 = None
-        ctr = 0
-        #separate the column names and table names and append them to lists
-        for w in list1:
-            if ctr == 0:
-                class1 = w
-                table1 = w.lower()
-                class_list.append(w)
-                table_list.append(w.lower())
-                ctr = ctr +1
-            else:
-                final_list.append(w)
-        ctr = 0
-        for x in list2:
-            if ctr == 0:
-                class2 = x
-                table2 = x.lower()
-                class_list.append(x)
-                table_list.append(x.lower())
-                ctr = ctr +1
-            else:        
-                final_list.append(x)
-
-        print '\ncolumns are'
-        for y in final_list:
-            print y
-        print '\ntables are'
-        for z in table_list:
-            print z
-        print '\nclasses are'
-        for a in class_list:
-            print a
-
-        """
         #initialize the variables
         final_list = []
         table_list = []
@@ -397,7 +343,15 @@ class MainClass(object):
                 else:
                     condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
         
-        sql_string = sql_string + condition_str
+        #put a condition to check for value
+        if value == None:
+            sql_string = sql_string + condition_str
+        else:
+            sql_string = sql_string + condition_str
+            chk_value = ' and '
+            condition_str = chk_value + table_list[0].lower() + '.' + chk_col + ' = ' + value
+            sql_string = sql_string + condition_str
+            
         print sql_string
         print ' '
         cols_list = []
@@ -415,35 +369,30 @@ class MainClass(object):
                 cols_list.append(j)
 
         try:
-            """
-            temp_table1 = Table(table1, self.metadata, autoload=True)
-            temp_table2 = Table(table2, self.metadata, autoload=True)
-
-            keys1 = temp_table1.foreign_keys
-            keys2 = temp_table2.foreign_keys
-            if keys1 <> None:
-                for i in keys1:
-                    print 'keys1 %s'%i
-            elif keys2 <> None:
-                for j in keys2:
-                    print 'keys2 %s'%j
-            
-            result = self.dbcon_obj.connection.execute(sql_string)
-            rows = result.fetchall()
-            for each_row in rows:
-                print each_row
-            """
             temp_var1 = None
             temp_var2 = None
             temp_var1 = str(tabs_list[0]) +  '.' + col_name
             temp_var2 = str(tabs_list[1]) +  '.' + col_name
-            ###
+            if value <> None:
+                temp_var3 = str(tabs_list[0]) + '.' + chk_col
+
             #query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
-            #filter(eval(tabs_list[0]).role_id==eval(tabs_list[1]).role_id).values(*cols_list)
-            query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
-            filter(eval(temp_var1)==eval(temp_var2)).values(*cols_list)
+            #filter(eval(temp_var1)==eval(temp_var2)).filter(eval(temp_var3)==eval(value)).values(*cols_list)
+
+            sample_str = ''
+            ctr = 0
+            for i in tabs_list:
+                if ctr==0:
+                    sample_str = i
+                    ctr = ctr + 1
+                else:
+                    sample_str = sample_str + ', ' + i
+                query = self.dbcon_obj.session.query((sample_str))
+
+            result = query.from_statement(sql_string).values(*cols_list)
+
             all_rows = []
-            for instance in query:
+            for instance in result:
                 print instance
                 all_rows.append(instance)
             
@@ -458,7 +407,7 @@ class MainClass(object):
     ########## methods for delete query ##########
     
     #delete rows based on a deletion criteria
-    def delete_selected_rows(self, value):
+    def delete_selected_rows(self, class_name, col_name, value):
         """
         This method is used to delete selected rows fom the table in the database.
 
@@ -469,22 +418,32 @@ class MainClass(object):
         Deletes the rows that satisfy the selection criteria
         """
         print 'testing delete'
+        new_class_name = class_name.upper()
+        new_table_name = new_class_name.lower()
+        
+        col = []
+        temp_table = Table(new_table_name, self.dbcon_obj.metadata, autoload=True)
+        #print 'table object is %s'%temp_table
+        for cl in temp_table.c:
+            col.append(cl)
+
         try:
-            delete_query = self.session.query(Temp).filter(Temp.last_name==value)
+            delete_query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), col_name) == value)
             #based on the count determine if any rows were selected
             if delete_query.count() == 0:
                 print 'No rows were fetched. Cannot complete delete operation.'
             else:                
                 for each_ins in delete_query:
                     #print 'each is %s'%each_ins
-                    self.session.delete(each_ins)
+                    self.dbcon_obj.session.delete(each_ins)
                 print 'delete successful'                    
-        except:
+        except Exception, e:
+            print e
             print 'Error retrieving the information. Query failed.'
         
 
     #delete all rows i.e. empty table
-    def delete_all(self, table_name):
+    def delete_all(self, class_name):
         """
         This method is used to delete all rows from the table.
 
@@ -494,21 +453,30 @@ class MainClass(object):
         Output:
         Deletes all rows in the table
         """
+
+        new_class_name = class_name.upper()
+        new_table_name = new_class_name.lower()
+        #print 'table name is %s and class name is %s'%(new_class_name, new_table_name)
+        
         #fetch al rows of the table and then delete
         col = []
-        temp_table = Table(self.table_name, self.metadata, autoload=True)
+        temp_table = Table(new_table_name, self.dbcon_obj.metadata, autoload=True)
         for cl in temp_table.c:
             #print 'column is %s'%cl
             col.append(cl)
 
         try:
-            query = self.session.query(Temp).values(*col)
-            #print 'query is %s'%query
-        
-            for instance in query:
-                print instance
-                self.session.delete(instance)
-        except:
+            query = self.dbcon_obj.session.query(eval(new_class_name))
+            print 'query is %s'%query
+            if query.count() == 0:
+                print 'No rows fectched. Cannot complete delete operation'
+            else:
+                for instance in query:
+                    #print instance
+                    self.dbcon_obj.session.delete(instance)
+                print 'Delete all records successful.'
+        except Exception, e:
+            print e
             print 'Error retrieving the information. Query failed.'
 
     ########## methods for delete query end ##########
@@ -548,7 +516,7 @@ class MainClass(object):
         #can create various objects at once and use 'add_all' to add all objects
 
     ########## methods for insert query end ##########
-    
+
 
 #unit test to test the code
 import unittest
@@ -575,8 +543,8 @@ class TestMainClass(unittest.TestCase):
         newobject.create_mapper_for_all_classes()
         
         """ to select all rows from the table """
-        class_name = 'Person'
-        #newobject.select_all_fom_table(class_name)
+        class_name = 'School'
+        newobject.select_all_fom_table(class_name)
 
         """ to select few rows """
         class_name = 'Office'
@@ -589,8 +557,23 @@ class TestMainClass(unittest.TestCase):
         table1_list = ['person', 'first_name', 'last_name']
         table2_list = ['office','role', 'years']
         temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
-        #temp_dict = {'Person':'first_name, last_name', 'Office':'role', 'Name':'firstname, lastname'}
-        newobject.select_join(temp_dict, column_name)
+        new_col = 'role_id'
+        value = '1'
+        #newobject.select_join(temp_dict, column_name, new_col, value)
+        
+        """ delete all records """
+        class_name = 'School'
+        #newobject.delete_all(class_name)
+
+        """ delete selected rows """
+        class_name = 'School'
+        col_name = 'teacher'
+        value = 'ab'
+        #newobject.delete_selected_rows(class_name, col_name, value)
+        
+        """ to select all rows from the table """
+        class_name = 'School'
+        #newobject.select_all_fom_table(class_name)
         
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
