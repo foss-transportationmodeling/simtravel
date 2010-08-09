@@ -27,7 +27,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 
 
-class VEHICLE(object): pass
+class VECHICLE(object): pass
 
 class LINKS(object): pass
 
@@ -39,9 +39,9 @@ class TSP(object): pass
 
 class DESTINATION_OPPORTUNITIES(object): pass
 
-class HOUSEHOLDS(object): pass
+class HOUSEHOLD(object): pass
 
-class PERSONS(object): pass
+class PERSON(object): pass
 
 class PERSON_SCHEDULE(object): pass
 
@@ -82,10 +82,7 @@ class MainClass(object):
         self.session = session
         self.class_name = class_name
         self.database_config_object = database_config_object
-        dbcon_obj = DataBaseConnection(self.protocol, self.user_name, 
-                                       self.password, self.host_name, 
-                                       self.database_name, 
-                                       self.database_config_object)
+        dbcon_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
         self.dbcon_obj = dbcon_obj
         print self.dbcon_obj
     
@@ -180,23 +177,16 @@ class MainClass(object):
         table_name = 'destination_opportunities'
         self.destination_opportunities = self.table_mapper(class_name, table_name)
         
-	"""
         #for class Household
-        class_name = 'HOUSEHOLDS'
-        table_name = 'households'
+        class_name = 'HOUSEHOLD'
+        table_name = 'household'
         self.household = self.table_mapper(class_name, table_name)
 
-	#for class Person
-        class_name = 'PERSONS'
-        table_name = 'persons'
-        self.person = self.table_mapper(class_name, table_name)
-	
-	"""
         #for class Person_Schedule
         class_name = 'PERSON_SCHEDULE'
         table_name = 'person_schedule'
         self.person_schedule = self.table_mapper(class_name, table_name)
-	
+
         #for class Trip
         class_name = 'TRIP'
         table_name = 'trip'
@@ -212,19 +202,22 @@ class MainClass(object):
         table_name = 'office'
         self.office = self.table_mapper(class_name, table_name)
             
-        
+        #for class Person
+        class_name = 'PERSON'
+        table_name = 'person'
+        self.person = self.table_mapper(class_name, table_name)
+        """
         #for class School
         class_name = 'SCHOOL'
         table_name = 'school'
         self.school = self.table_mapper(class_name, table_name)
-	"""
+
     ########## methods for mapping end ##########
 
     ########## methods for select query ##########
     
     #select all rows from the table
-
-    def select_all_from_table(self, class_name):
+    def select_all_fom_table(self, class_name):
         """
         This method is used to fetch all rows from the table specified.
 
@@ -242,13 +235,18 @@ class MainClass(object):
         col = []
         temp_table = Table(new_table_name, self.dbcon_obj.metadata, autoload=True)
         for cl in temp_table.c:
+            #print 'column is %s'%cl
             col.append(cl)
 
-        print 'COLUMNS', col
         #query the table to fetch all the records by passing the columns
         query = self.dbcon_obj.session.query(eval(new_class_name)).values(*col)
 
-        return query, col
+        all_rows = []
+        for instance in query:
+            print instance
+            all_rows.append(instance)
+
+        print ' '           
 
 
     #select rows based on a selection criteria
@@ -274,11 +272,19 @@ class MainClass(object):
             col.append(cl)
 
         try:
-            print 'getting attribute', getattr((eval(new_class_name)), column_name)
-            query = self.dbcon_obj.session.query(eval(new_class_name))\
-                .filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
+            query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
+            row_list = []
+            counter = 0
+            for each in query:
+                counter = counter + 1
+                row_list.append(each)
+
+            if counter == 0:
+                print 'No rows selected.\n'
+            else:
+                for each_ins in row_list:
+                    print each_ins            
             print 'Select query successful.\n'
-            return query, col
         except:
             print 'Error retrieving the information. Query failed.\n'
 
@@ -304,6 +310,12 @@ class MainClass(object):
         final_list = temp_dict.values()
         table_list = temp_dict.keys()      
         
+        #check first if the select query is for single table or multiple tables
+        if len(table_list) > 1:
+            print 'multiple tables'
+        else:
+            print 'single table'
+
         #use string manipulation to create the select query
         len1 = len(final_list)
         len2 = len(table_list)
@@ -363,6 +375,7 @@ class MainClass(object):
                 cols_list.append(j)
 
         try:
+            """
             temp_var1 = None
             temp_var2 = None
             temp_var1 = str(tabs_list[0]) +  '.' + col_name
@@ -372,7 +385,7 @@ class MainClass(object):
 
             #query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
             #filter(eval(temp_var1)==eval(temp_var2)).filter(eval(temp_var3)==eval(value)).values(*cols_list)
-
+            """
             sample_str = ''
             ctr = 0
             for i in tabs_list:
@@ -383,19 +396,14 @@ class MainClass(object):
                     sample_str = sample_str + ', ' + i
                 query = self.dbcon_obj.session.query((sample_str))
 
-            print sql_string
             result = query.from_statement(sql_string).values(*cols_list)
             
-            """
             all_rows = []
             for instance in result:
                 print instance
                 all_rows.append(instance)
             
             print ' '
-            """
-            print 'query successful'
-            return result, cols_list
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'            
@@ -527,17 +535,13 @@ class TestMainClass(unittest.TestCase):
         self.protocol = 'postgres'		
         self.user_name = 'postgres'
         self.password = '1234'
-        self.host_name = '10.206.111.198'
+        self.host_name = 'localhost'
         self.database_name = 'postgres'
         self.database_config_object = None
         self.dbcon_obj = None
     
     def testMainClass(self):
-        newobject = MainClass(self.protocol, self.user_name, 
-                              self.password, self.host_name, 
-                              self.database_name, 
-                              self.database_config_object, 
-                              self.dbcon_obj)
+        newobject = MainClass(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object, self.dbcon_obj)
 
         """ create a connection to the database """
         newobject.dbcon_obj.new_connection()
@@ -547,11 +551,7 @@ class TestMainClass(unittest.TestCase):
         
         """ to select all rows from the table """
         class_name = 'School'
-<<<<<<< .mine
         #newobject.select_all_fom_table(class_name)
-=======
-        newobject.select_all_from_table(class_name)
->>>>>>> .r157
 
         """ to select few rows """
         class_name = 'Office'
@@ -564,7 +564,8 @@ class TestMainClass(unittest.TestCase):
         table1_list = ['person', 'first_name', 'last_name']
         table2_list = ['office','role', 'years']
         #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Asu':'grad, undergrad'}
-        temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
+        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
+        temp_dict = {'Person':'first_name, last_name'}
         new_col = 'role_id'
         value = '1'
         chk_table = 'person'
