@@ -60,7 +60,7 @@ class OrderedModel(AbstractChoiceModel):
         probabilities[:,i+1] = 1 - upper_bin
         return probabilities
 
-    def calc_chosenalternative(self, data):
+    def calc_chosenalternative(self, data, choiceset=None):
         """
         The method returns the selected choice among the available
         alternatives.
