@@ -10,15 +10,20 @@ class AbstractComponent(object):
     model_list - list of SubModel objects
     data - DataArray object on which the simulation needs to be carried out
     """
-    def __init__(self, model_list):
+    def __init__(self, component_name, model_list, variable_list):
         for i in model_list:
             if not isinstance(i, SubModel):
                 raise ModelError, """all object(s) in the model_list """\
                     """must be valid SubModel objects"""
-
+        self.component_name = component_name
+        print '----->>>>>>', self.component_name
+        for i in model_list:
+            print '----->>>>>\t', i.dep_varname
         self.model_list = model_list
 
+	self.variable_list = variable_list
 
+    #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
     def create_choiceset(self, shape, criterion, names):
@@ -45,10 +50,12 @@ class AbstractComponent(object):
         count = 1
 
         while len(model_list_duringrun) > 0 and count <5:
+            print 'ITERATION - ', count
+            print model_list_duringrun
             model_list_duringrun = self.iterate_through_the_model_list(
-                                                                       model_list_duringrun)   
+                model_list_duringrun)   
             count = count + 1            
-        print 'ITERATIONS COMPLETED', count
+
         #print self.data.columns(['choice1', 'choice2', 'choice3', 'choice2_ind'])
 
     
