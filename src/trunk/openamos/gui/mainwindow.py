@@ -18,6 +18,7 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
+        
 
         # Variable for a project properties; can be used to see if a project is open or not
         self.proconfig = None
