@@ -36,8 +36,8 @@ class AbtractSpecDialog(QDialog):
         self.modeltypecb = QComboBox()
         self.modeltypecb.addItems([QString(PROB_MODEL), QString(COUNT_MODEL),
                                    QString(SF_MODEL), QString(LOGREG_MODEL),
-                                   QString(MNL_MODEL), QString(ORD_MODEL),
-                                   QString(NL_MODEL)])
+                                   QString(GC_MNL_MODEL), QString(MNL_MODEL),
+                                   QString(ORD_MODEL),QString(NL_MODEL)])
         modeltypegblayout.addWidget(self.modeltypecb)
         self.glayout.addWidget(self.modeltypegb,0,0)
         
@@ -99,8 +99,13 @@ class AbtractSpecDialog(QDialog):
                 type = modelspecified.get(MODELTYPE)
             elif form == MODELFORM_ORD:
                 modtxt = ORD_MODEL
+                type = modelspecified.get(MODELTYPE)
             elif form == MODELFORM_MNL:
-                modtxt = MNL_MODEL
+                type = modelspecified.get(MODELTYPE)
+                if type == ALTSPEC:
+                    modtxt = MNL_MODEL
+                else:
+                    modtxt = GC_MNL_MODEL
             elif form == MODELFORM_NL:
                 modtxt = NL_MODEL
                             
@@ -112,20 +117,73 @@ class AbtractSpecDialog(QDialog):
         
         if modelspecified is not None:
             self.populateFilterWidget(modelspecified)
-            self.populateVarsWidget(modelspecified)
+            
             if self.modeltypecb.currentText() == SF_MODEL:
+                self.populateVarsWidget(modelspecified)
                 for varianceelt in modelspecified.getiterator(VARIANCE):
                     if MODELTYPE in varianceelt.keys():
                         self.modwidget.varianceuline.setText(varianceelt.get(VALUE))
                     else:
                         self.modwidget.variancevline.setText(varianceelt.get(VALUE)) 
             if self.modeltypecb.currentText() == COUNT_MODEL:
+                self.populateVarsWidget(modelspecified)
                 self.populateAltsWidget(modelspecified)
                 if type == NEGBIN_MODEL:
                     varianceelt = modelspecified.find(VARIANCE)
                     self.modwidget.odline.setText(varianceelt.get(VALUE))
                 else:
                     self.modwidget.poiradio.setChecked(True)
+            if self.modeltypecb.currentText() == ORD_MODEL:
+                self.populateVarsWidget(modelspecified)
+                self.populateOrdAltsWidget(modelspecified)
+                if type == PROBIT:
+                    self.modwidget.probradio.setChecked(True)
+            if self.modeltypecb.currentText() == GC_MNL_MODEL:
+                self.populateVarsWidget(modelspecified)
+                self.populateAltsWidget(modelspecified)
+            if self.modeltypecb.currentText() == MNL_MODEL:
+                self.populateAltsWidget(modelspecified)
+                self.modwidget.specs = {}
+                for altelt in modelspecified.getiterator(ALTERNATIVE):
+                    altspecs = []
+                    for varelt in altelt.getiterator(VARIABLE):
+                        varspec = []
+                        varspec.append(varelt.get(TABLE))
+                        varspec.append(varelt.get(COLUMN))
+                        varspec.append(varelt.get(COEFF))
+                        altspecs.append(varspec)
+                    self.modwidget.specs[altelt.get(ID)] = altspecs
+            if self.modeltypecb.currentText() == NL_MODEL:
+                self.modwidget.specs = {}
+                for altelt in modelspecified.getiterator(ALTERNATIVE):
+                    altstable = self.modwidget.choicetable
+                    altstable.insertRow(altstable.rowCount())
+            
+                    altitem = QTableWidgetItem()
+                    alt = altelt.get(ID)
+                    altbranch = altelt.get(BRANCH)
+                    if altbranch != 'root':
+                        alt = (altbranch.split('/',1))[1] + '/' + alt
+                    altitem.setText(alt)
+                    altstable.setItem(altstable.rowCount()-1, 0, altitem)
+                    
+                    altspecs = []
+                    for varelt in altelt.getiterator(VARIABLE):
+                        varspec = []
+                        varspec.append(varelt.get(TABLE))
+                        varspec.append(varelt.get(COLUMN))
+                        varspec.append(varelt.get(COEFF))
+                        altspecs.append(varspec)
+                    self.modwidget.specs[alt] = altspecs
+                for neselt in modelspecified.getiterator(BRANCH):
+                    nestable = self.modwidget.nesttable
+                    nestable.insertRow(nestable.rowCount())
+                    nesname = QTableWidgetItem()
+                    nesname.setText(neselt.get(NAME))
+                    nestable.setItem(nestable.rowCount()-1, 0, nesname) 
+                    nescoeff = QTableWidgetItem()
+                    nescoeff.setText(neselt.get(COEFF))
+                    nestable.setItem(nestable.rowCount()-1, 1, nescoeff)                   
             
     def populateFilterWidget(self,modelelt):
         for filt in modelelt.getiterator(FILTER):
@@ -165,6 +223,26 @@ class AbtractSpecDialog(QDialog):
             altitem.setText(altelt.get(ID))
             altstable.setItem(altstable.rowCount()-1, 0, altitem)
 
+    def populateOrdAltsWidget(self,modelelt):
+        i = 0
+        for altelt in modelelt.getiterator(ALTERNATIVE):
+            altstable = self.modwidget.choicetable
+            altstable.insertRow(altstable.rowCount())
+            
+            altitem = QTableWidgetItem()
+            altitem.setText(altelt.get(ID))
+            altstable.setItem(altstable.rowCount()-1, 0, altitem)
+            if i > 0:
+                thitem = QTableWidgetItem()
+                thitem.setText(altelt.get(THRESHOLD))
+                altstable.setItem(altstable.rowCount()-1, 1, thitem)
+            else:
+                altstable.setItem(0,1,QTableWidgetItem())
+                disableitem = altstable.item(0, 1)
+                disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
+                disableitem.setBackgroundColor(Qt.darkGray)
+            i = i+1
+            
     
     def changeModelWidget(self, idx=0):
         self.subpoptab.setCurrentIndex(0)
@@ -178,6 +256,8 @@ class AbtractSpecDialog(QDialog):
             self.modwidget = CountModWidget(self)
         elif self.modeltypecb.currentText() == MNL_MODEL:
             self.modwidget = MNLogitModWidget(self)
+        elif self.modeltypecb.currentText() == GC_MNL_MODEL:
+            self.modwidget = GCMNLogitModWidget(self)
         elif self.modeltypecb.currentText() == SF_MODEL:
             self.modwidget = SFModWidget(self)
         elif self.modeltypecb.currentText() == LOGREG_MODEL:
@@ -198,51 +278,147 @@ class AbtractSpecDialog(QDialog):
         
     
     def storeSpec(self):
-        modelkey = self.modelkey
-
-        modelelt = None
-
-        if self.modeltypecb.currentText() == SF_MODEL:
-            modelform = MODELFORM_REG
-            otherattr = None
-            if modelkey == MODELKEY_DAYSTART:
-                otherattr = VERTEX,START
-            if modelkey == MODELKEY_DAYEND:
-                otherattr = VERTEX,END
-            modelelt = self.createModelElement(modelkey,modelform,SF_MODEL,otherattr)
-            self.addDepVarToElt(modelelt, TABLE_PER, modelkey)
-            self.addFiltToElt(modelelt)
-            variancevelt = etree.SubElement(modelelt, VARIANCE)
-            variancevelt.set(VALUE,str(self.modwidget.variancevline.text()))
-            varianceuelt = etree.SubElement(modelelt, VARIANCE)
-            varianceuelt.set(VALUE,str(self.modwidget.varianceuline.text()))
-            varianceuelt.set(MODELTYPE,'Half Normal')
-            self.addVariables(modelelt)
+        if self.checkInputs():
+            modelkey = self.modelkey
+    
+            modelelt = None
+    
+            if self.modeltypecb.currentText() == SF_MODEL:
+                modelform = MODELFORM_REG
+                otherattr = None
+                if modelkey == MODELKEY_DAYSTART:
+                    otherattr = VERTEX,START
+                if modelkey == MODELKEY_DAYEND:
+                    otherattr = VERTEX,END
+                modelelt = self.createModelElement(modelkey,modelform,SF_MODEL,otherattr)
+                self.addDepVarToElt(modelelt, modelkey)
+                self.addFiltToElt(modelelt)
+                variancevelt = etree.SubElement(modelelt, VARIANCE)
+                variancevelt.set(VALUE,str(self.modwidget.variancevline.text()))
+                varianceuelt = etree.SubElement(modelelt, VARIANCE)
+                varianceuelt.set(VALUE,str(self.modwidget.varianceuline.text()))
+                varianceuelt.set(MODELTYPE,'Half Normal')
+                self.addVariables(modelelt)
+                
+            elif self.modeltypecb.currentText() == COUNT_MODEL:
+                modelform = MODELFORM_CNT
+                type = ""
+                if self.modwidget.nbradio.isChecked():
+                    type = NEGBIN_MODEL
+                else:
+                    type = POI_MODEL
+                modelelt = self.createModelElement(modelkey,modelform,type)
+                self.addDepVarToElt(modelelt, modelkey)
+                self.addFiltToElt(modelelt)
+                if type == NEGBIN_MODEL:
+                    varianceelt = etree.SubElement(modelelt, VARIANCE)
+                    varianceelt.set(VALUE,str(self.modwidget.odline.text()))
+                    varianceelt.set(MODELTYPE,'Overdispersion') 
+                self.addAlternatives(modelelt)
+                self.addVariables(modelelt) 
+    
+            elif self.modeltypecb.currentText() == ORD_MODEL:
+                modelform = MODELFORM_ORD
+                type = ""
+                if self.modwidget.logradio.isChecked():
+                    type = LOGIT
+                else:
+                    type = PROBIT
+                modelelt = self.createModelElement(modelkey,modelform,type)
+                self.addDepVarToElt(modelelt,modelkey)
+                self.addFiltToElt(modelelt)
+                #Add ordered choice alternatives with thresholds
+                numrows = self.modwidget.choicetable.rowCount()
+                for i in range(numrows):
+                    altname = (self.modwidget.choicetable.item(i,0)).text()
+                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
+                    altelt.set(ID,str(altname))
+                    if i > 0:
+                        threshval = (self.modwidget.choicetable.item(i,1)).text()
+                        altelt.set(THRESHOLD,str(threshval))
+                
+                self.addVariables(modelelt) 
+    
+            elif self.modeltypecb.currentText() == GC_MNL_MODEL:
+                modelform = MODELFORM_MNL
+                modelelt = self.createModelElement(modelkey,modelform,'')
+                self.addDepVarToElt(modelelt,modelkey)
+                self.addFiltToElt(modelelt)
+                
+                self.addAlternatives(modelelt)
+                self.addVariables(modelelt)
             
-        elif self.modeltypecb.currentText() == COUNT_MODEL:
-            modelform = MODELFORM_CNT
-            type = ""
-            if self.modwidget.nbradio.isChecked():
-                type = NEGBIN_MODEL
-            else:
-                type = POI_MODEL
-            modelelt = self.createModelElement(modelkey,modelform,type)
-            self.addDepVarToElt(modelelt, TABLE_PER, modelkey)
-            self.addFiltToElt(modelelt)
-            if type == NEGBIN_MODEL:
-                varianceelt = etree.SubElement(modelelt, VARIANCE)
-                varianceelt.set(VALUE,str(self.modwidget.odline.text()))
-                varianceelt.set(MODELTYPE,'Overdispersion') 
-            self.addAlternatives(modelelt)
-            self.addVariables(modelelt) 
-                                  
-        elif self.modeltypecb.currentText() == LOGREG_MODEL:
-            pass
-
-        
-        self.configobject.addModelElement(modelelt)
-        
-        QDialog.accept(self)
+            elif self.modeltypecb.currentText() == MNL_MODEL:
+                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
+                modelform = MODELFORM_MNL
+                type = ALTSPEC
+                modelelt = self.createModelElement(modelkey,modelform,type)
+                self.addDepVarToElt(modelelt,modelkey)
+                self.addFiltToElt(modelelt)
+                
+                numrows = self.modwidget.choicetable.rowCount()
+                specs = self.modwidget.specs
+                for i in range(numrows):
+                    altname = str((self.modwidget.choicetable.item(i,0)).text())
+                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
+                    altelt.set(ID,altname)
+                    altspecs = specs[altname]
+                    numvars = len(altspecs)
+                    for i in range(numvars):
+                        specrow = altspecs[i]
+                        self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
+                    modelelt.append(altelt)   
+                
+            
+            elif self.modeltypecb.currentText() == NL_MODEL:
+                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
+                modelform = MODELFORM_NL
+                modelelt = self.createModelElement(modelkey,modelform,'')
+                self.addDepVarToElt(modelelt,modelkey)
+                self.addFiltToElt(modelelt)
+                
+                numrows = self.modwidget.choicetable.rowCount()
+                specs = self.modwidget.specs
+                for i in range(numrows):
+                    altname = str((self.modwidget.choicetable.item(i,0)).text())
+                    altdet = altname.rsplit('/',1)
+                    l = len(altdet)
+                    if l==1:
+                        altid = altdet[0]
+                        altbr = 'root'
+                    if l>1:
+                        altid = altdet[1]
+                        altbr = 'root/' + altdet[0]
+                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
+                    altelt.set(ID,altid)
+                    altelt.set(BRANCH,altbr)
+                    altspecs = specs[altname]
+                    numvars = len(altspecs)
+                    for i in range(numvars):
+                        specrow = altspecs[i]
+                        self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
+                    modelelt.append(altelt)  
+                numnests = self.modwidget.nesttable.rowCount()
+                for i in range(numnests):
+                    nestname = str((self.modwidget.nesttable.item(i,0)).text())
+                    nestiv = str((self.modwidget.nesttable.item(i,1)).text())
+                    neselt = etree.SubElement(modelelt,BRANCH)
+                    neselt.set(NAME,nestname)
+                    neselt.set(COEFF,nestiv)
+                    modelelt.append(neselt)
+                                      
+            elif self.modeltypecb.currentText() == LOGREG_MODEL:
+                pass
+    
+            
+            self.configobject.addModelElement(modelelt)
+            
+            QDialog.accept(self)
+        else:
+            msg = self.modwidget.errmsg
+            QMessageBox.information(self, "Warning",
+                                msg,
+                                QMessageBox.Ok)            
 
     
     def createModelElement(self,name,formulation,type,otherattr=None):
@@ -254,8 +430,12 @@ class AbtractSpecDialog(QDialog):
             elt.set(otherattr[0],otherattr[1])
         return elt
 
-    def addDepVarToElt(self,elt,tab,col):
+    def addDepVarToElt(self,elt,col):
         depvarelt = etree.SubElement(elt,DEPVARIABLE)
+        if col in PERSON_TABLE_MODELS:
+            tab = TABLE_PER
+        elif col in HH_TABLE_MODELS:
+            tab = TABLE_HH
         depvarelt.set(TABLE,tab)
         depvarelt.set(COLUMN,col.lower())
     
@@ -309,6 +489,12 @@ class AbtractSpecDialog(QDialog):
             for col in cols:
                 varlist.append(QString(col))
             self.coldict[table] = varlist
+    
+    def checkInputs(self):
+        res = False
+        if self.modwidget.checkInputs():
+            res = True
+        return res
 
         
 def main():

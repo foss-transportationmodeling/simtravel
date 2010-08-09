@@ -30,16 +30,22 @@ COLUMN = 'var'
 COND = 'condition'
 COEFF = 'coeff'
 ID = 'id'
+THRESHOLD = 'threshold'
+ALTSPEC = 'Alternative Specific'
+BRANCH = 'Branch'
 
 PROB_MODEL = 'Probability Distribution'
 COUNT_MODEL = 'Count'
 MNL_MODEL = 'Multinomial Logit'
-ORD_MODEL = 'Ordered'
+GC_MNL_MODEL = 'Multinomial Logit (Generic Choices)'
+ORD_MODEL = 'Ordered Choice'
 NL_MODEL = 'Nested Logit'
 SF_MODEL = 'Stochastic Frontier'
 LOGREG_MODEL = 'Logistic Regression'
 NEGBIN_MODEL = 'Negative Binomial'
 POI_MODEL = 'Poisson'
+LOGIT = 'Logit'
+PROBIT = 'Probit'
 
 MODELFORM_REG = 'Regression'
 MODELFORM_ORD = 'Ordered'
@@ -163,4 +169,15 @@ COMPMODELMAP[COMPKEY_FIXEDACTPRISM] = [MODELKEY_DAYSTART,MODELKEY_DAYEND,MODELKE
                                        MODELKEY_WORKSTART1,MODELKEY_WORKEND1,MODELKEY_WORKSTART2,MODELKEY_WORKEND2,
                                        MODELKEY_NUMSCHEPISODES,MODELKEY_SCHSTART1,MODELKEY_SCHEND1,MODELKEY_SCHSTART2,
                                        MODELKEY_SCHEND2]
+
+PERSON_TABLE_MODELS = [MODELKEY_DAYSTART,MODELKEY_DAYEND,MODELKEY_NUMWRKEPISODES,
+                                       MODELKEY_WORKSTART1,MODELKEY_WORKEND1,MODELKEY_WORKSTART2,MODELKEY_WORKEND2,
+                                       MODELKEY_NUMSCHEPISODES,MODELKEY_SCHSTART1,MODELKEY_SCHEND1,MODELKEY_SCHSTART2,
+                                       MODELKEY_SCHEND2]
+
+HH_TABLE_MODELS = [MODELKEY_NUMVEHS]
+
+
+
+
 

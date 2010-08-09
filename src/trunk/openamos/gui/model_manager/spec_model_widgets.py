@@ -133,7 +133,7 @@ class AbstractModWidget(QGroupBox):
     def delVariable(self):
         self.varstable.removeRow(self.varstable.currentRow())
 
-    def makeOrdChoiceWidget(self):
+    def makeOrdChoiceWidget(self,x=0,y=0):
         self.choicewidget = QWidget(self)
         self.choicelayout = QVBoxLayout()
         self.choicewidget.setLayout(self.choicelayout)
@@ -145,7 +145,7 @@ class AbstractModWidget(QGroupBox):
         self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Threshold'])
         self.choicelayout.addWidget(self.choicetable)
         
-        self.mainlayout.addWidget(self.choicewidget,0,0,1,1)
+        self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
         
         self.connect(self.choicebutton, SIGNAL("clicked(bool)"), self.addOrdChoice)  
 
@@ -223,6 +223,23 @@ class AbstractModWidget(QGroupBox):
         
         self.connect(self.nbradio, SIGNAL("toggled(bool)"), self.ctypeAction)
 
+    def makeOrdTypeWidget(self):
+        self.logradio = QRadioButton(LOGIT)
+        self.probradio = QRadioButton(PROBIT)
+        self.logradio.setChecked(True)
+        buttonlayout = QHBoxLayout()
+        buttonlayout.addWidget(self.logradio)
+        buttonlayout.addWidget(self.probradio)
+        self.ordtypewidget = QWidget(self)
+        self.ordtypewidget.setLayout(buttonlayout)
+               
+        self.mainlayout.addWidget(self.ordtypewidget,0,0,1,1,Qt.AlignLeft)
+    
+    def genChecks(self):
+        res = True
+        return res
+        
+
 class ProbModWidget(AbstractModWidget):
     '''
     classdocs
@@ -230,6 +247,11 @@ class ProbModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(ProbModWidget, self).__init__(parent)
         self.makeProbChoiceWidget()
+    
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
 
 class CountModWidget(AbstractModWidget):
     '''
@@ -247,6 +269,26 @@ class CountModWidget(AbstractModWidget):
         else:
             self.odline.setEnabled(False)
         self.emit(SIGNAL("completeChanged()"))  
+
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
+
+class OrderedModWidget(AbstractModWidget):
+    '''
+    classdocs
+    '''
+    def __init__(self, parent = None):
+        super(OrderedModWidget, self).__init__(parent) 
+        self.makeOrdTypeWidget()
+        self.makeOrdChoiceWidget(1,0)
+        self.makeVarsWidget(1,1) 
+
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
         
 class SFModWidget(AbstractModWidget):
     '''
@@ -256,7 +298,11 @@ class SFModWidget(AbstractModWidget):
         super(SFModWidget, self).__init__(parent) 
         self.makeSFVarianceWidget()
         self.makeVarsWidget(1,0)  
-    
+
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res    
 
 class MNLogitModWidget(AbstractModWidget):
     '''
@@ -291,25 +337,6 @@ class MNLogitModWidget(AbstractModWidget):
                 if selalt not in self.alternatives:
                     self.alternatives.append(selalt)
                 super(MNLogitModWidget,self).addVariable()
-    
-    def storeVarsTable(self,storeitem):
-        print 'store var table'
-        if storeitem != None:
-            selalt = storeitem.text()
-            altspecs = []
-            i = 0
-            while i < self.varstable.rowCount():
-                if self.varstable.item(i, 2) != None:
-                    var = []
-                    tab = (self.varstable.item(i, 0)).text()
-                    col = (self.varstable.item(i, 1)).text()
-                    coeff = (self.varstable.item(i, 2)).text()
-                    var.append(tab)
-                    var.append(col)
-                    var.append(coeff)
-                    altspecs.append(var)
-                i = i + 1
-            self.specs[selalt] = altspecs
 
     def showVarsTable(self,curritem,previtem):
         self.storeVarsTable(previtem)
@@ -317,7 +344,7 @@ class MNLogitModWidget(AbstractModWidget):
         self.varstable.clearContents()
         self.varstable.setRowCount(0)
         if curritem != None:
-            selalt = curritem.text()
+            selalt = str(curritem.text())
             self.curralt = selalt
             altspecs = self.specs[selalt]
             self.varstable.setRowCount(len(altspecs))
@@ -335,9 +362,46 @@ class MNLogitModWidget(AbstractModWidget):
                 self.varstable.setItem(i,2,coeffitem)
                 i = i + 1
         else:
-            pass
+            pass    
 
+    def storeVarsTable(self,storeitem):
+        print 'store var table'
+        if storeitem != None:
+            selalt = str(storeitem.text())
+            altspecs = []
+            i = 0
+            while i < self.varstable.rowCount():
+                if self.varstable.item(i, 2) != None:
+                    var = []
+                    tab = (self.varstable.item(i, 0)).text()
+                    col = (self.varstable.item(i, 1)).text()
+                    coeff = (self.varstable.item(i, 2)).text()
+                    var.append(tab)
+                    var.append(col)
+                    var.append(coeff)
+                    altspecs.append(var)
+                i = i + 1
+            self.specs[selalt] = altspecs
+
+
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
+
+class GCMNLogitModWidget(AbstractModWidget):
+    '''
+    classdocs
+    '''
+    def __init__(self, parent = None):
+        super(GCMNLogitModWidget, self).__init__(parent) 
+        self.makeChoiceWidget()
+        self.makeVarsWidget() 
         
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
 
 class LogRegModWidget(AbstractModWidget):
     '''
@@ -347,14 +411,10 @@ class LogRegModWidget(AbstractModWidget):
         super(LogRegModWidget, self).__init__(parent) 
         self.makeVarsWidget() 
 
-class OrderedModWidget(AbstractModWidget):
-    '''
-    classdocs
-    '''
-    def __init__(self, parent = None):
-        super(OrderedModWidget, self).__init__(parent) 
-        self.makeOrdChoiceWidget()
-        self.makeVarsWidget() 
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        return res
 
 class NLogitModWidget(AbstractModWidget):
     '''
@@ -362,6 +422,121 @@ class NLogitModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(NLogitModWidget, self).__init__(parent) 
+        self.alternatives = []
+        self.specs = {}
+        self.curralt = None
         self.makeNestWidget()
         self.makeChoiceWidget(0, 1)
-        self.makeVarsWidget(0, 2)   
+        self.makeVarsWidget(0, 2) 
+        self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable)  
+
+    def addVariable(self):
+        sellist = self.choicetable.selectedIndexes() 
+        if(len(sellist)!=1):
+            msg = "Please select ONE alternative"
+            QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok)
+        else:
+            selaltitem = self.choicetable.itemFromIndex(sellist[0])
+            if selaltitem == None:
+                msg = "Please specify the selected alternative"
+                QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok)
+            else:
+                selalt = selaltitem.text()
+                if selalt not in self.alternatives:
+                    self.alternatives.append(selalt)
+                super(NLogitModWidget,self).addVariable()
+
+    def showVarsTable(self,curritem,previtem):
+        self.storeVarsTable(previtem)
+        print 'change var table'
+        self.varstable.clearContents()
+        self.varstable.setRowCount(0)
+        if curritem != None:
+            selalt = str(curritem.text())
+            self.curralt = selalt
+            altspecs = self.specs[selalt]
+            self.varstable.setRowCount(len(altspecs))
+            i = 0
+            while i < self.varstable.rowCount():
+                altspecrow = altspecs[i]
+                tableitem = QTableWidgetItem()
+                tableitem.setText(altspecrow[0])
+                self.varstable.setItem(i,0,tableitem)
+                varitem = QTableWidgetItem()
+                varitem.setText(altspecrow[1])
+                self.varstable.setItem(i,1,varitem)
+                coeffitem = QTableWidgetItem()
+                coeffitem.setText(altspecrow[2])
+                self.varstable.setItem(i,2,coeffitem)
+                i = i + 1
+        else:
+            pass    
+
+    def storeVarsTable(self,storeitem):
+        print 'store var table'
+        if storeitem != None:
+            selalt = str(storeitem.text())
+            altspecs = []
+            i = 0
+            while i < self.varstable.rowCount():
+                if self.varstable.item(i, 2) != None:
+                    var = []
+                    tab = (self.varstable.item(i, 0)).text()
+                    col = (self.varstable.item(i, 1)).text()
+                    coeff = (self.varstable.item(i, 2)).text()
+                    var.append(tab)
+                    var.append(col)
+                    var.append(coeff)
+                    altspecs.append(var)
+                i = i + 1
+            self.specs[selalt] = altspecs
+
+
+    def checkInputs(self):
+        res = True
+        res = res and self.genChecks()
+        
+        ivnests = []
+        cnests = []
+        i = 0
+        while i < self.nesttable.rowCount():
+            ivnests.append(str((self.nesttable.item(i, 0)).text()))
+            i = i + 1         
+        print ivnests
+        i = 0
+        while i < self.choicetable.rowCount():
+            ch = (self.choicetable.item(i, 0)).text()
+            chdet = ch.split('/')
+            if len(chdet)>1:
+                for j in range(len(chdet)-1):
+                    cnests.append(str(chdet[j]))
+            i = i + 1
+        print cnests
+        
+        if len(cnests) == 0:
+            self.errmsg = 'The choices do not have a nested structure\n'
+            return False   
+                
+        badn = []
+        for cn in cnests:
+            if cn not in ivnests:
+                badn.append(cn)
+        if len(badn) > 0:
+            self.errmsg = 'Please specify the IV parameters for the following nests:\n' + str(badn) + '\n'
+            return False
+
+        badn = []
+        for ivn in ivnests:
+            if ivn not in cnests:
+                badn.append(ivn)
+        if len(badn) > 0:
+            self.errmsg = 'Please specify the following nests in the alternatives table:\n' + str(badn) + '\n'
+            return False
+
+        return res    
+    
+    
