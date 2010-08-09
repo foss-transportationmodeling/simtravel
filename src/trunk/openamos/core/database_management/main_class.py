@@ -284,7 +284,7 @@ class MainClass(object):
 
 
     #select and print the join
-    def select_join(self, temp_dict, column_name, chk_col, value):
+    def select_join(self, temp_dict, column_name, chk_table, chk_col=None, value=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -343,7 +343,7 @@ class MainClass(object):
         else:
             sql_string = sql_string + condition_str
             chk_value = ' and '
-            condition_str = chk_value + table_list[0].lower() + '.' + chk_col + ' = ' + value
+            condition_str = chk_value + chk_table.lower() + '.' + chk_col + ' = ' + value
             sql_string = sql_string + condition_str
             
         print sql_string
@@ -385,7 +385,7 @@ class MainClass(object):
 
             print sql_string
             result = query.from_statement(sql_string).values(*cols_list)
-
+            
             """
             all_rows = []
             for instance in result:
@@ -547,7 +547,11 @@ class TestMainClass(unittest.TestCase):
         
         """ to select all rows from the table """
         class_name = 'School'
+<<<<<<< .mine
+        #newobject.select_all_fom_table(class_name)
+=======
         newobject.select_all_from_table(class_name)
+>>>>>>> .r157
 
         """ to select few rows """
         class_name = 'Office'
@@ -559,10 +563,13 @@ class TestMainClass(unittest.TestCase):
         column_name = 'role_id'
         table1_list = ['person', 'first_name', 'last_name']
         table2_list = ['office','role', 'years']
+        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Asu':'grad, undergrad'}
         temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
         new_col = 'role_id'
         value = '1'
-        #newobject.select_join(temp_dict, column_name, new_col, value)
+        chk_table = 'person'
+        newobject.select_join(temp_dict, column_name, chk_table, new_col, value)
+        #newobject.select_join(temp_dict, column_name, chk_table)
         
         """ delete all records """
         class_name = 'School'
