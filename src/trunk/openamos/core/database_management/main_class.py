@@ -206,12 +206,12 @@ class MainClass(object):
         class_name = 'PERSON'
         table_name = 'person'
         self.person = self.table_mapper(class_name, table_name)
-        
+        """
         #for class School
         class_name = 'SCHOOL'
         table_name = 'school'
         self.school = self.table_mapper(class_name, table_name)
-        """
+
     ########## methods for mapping end ##########
 
 
@@ -275,7 +275,6 @@ class MainClass(object):
 
         try:
             query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
-            """
             row_list = []
             counter = 0
             for each in query:
@@ -287,10 +286,8 @@ class MainClass(object):
             else:
                 for each_ins in row_list:
                     print each_ins            
-            """
             print 'Select query successful.\n'
-
-            return query, col
+            return query, col            
         except:
             print 'Error retrieving the information. Query failed.\n'
 
@@ -316,6 +313,11 @@ class MainClass(object):
         final_col_list = temp_dict.values()
         table_list = temp_dict.keys()      
         
+        if chk_table.lower() in [each.lower() for each in table_list]:
+            print 'table %s is present in the table list'%chk_table
+        else:
+            print 'table %s is not present in the table list'%chk_table
+            return None
         for j in temp_dict.keys():
             for i in temp_dict[j]:
                 new_str = j.lower() + '.' + i.lower()
@@ -415,7 +417,6 @@ class MainClass(object):
             """
             sample_str = ''
             ctr = 0
-            
             for i in tabs_list:
                 if ctr==0:
                     sample_str = i
@@ -427,19 +428,16 @@ class MainClass(object):
                 
             print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
 
-            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-
             result = query.from_statement(sql_string).values(*cols_list)
                         
-            """
+            
             all_rows = []
             for instance in result:
                 print instance
                 all_rows.append(instance)
-            """
-            print 'Query Successful '
-            return result, cols_list
+            print ' '
             
+            print 'Query Successful '
             return result, cols_list
         except Exception, e:
             print e
@@ -600,9 +598,9 @@ class TestMainClass(unittest.TestCase):
         column_name = 'role_id'
         new_col = 'role_id'
         value = '1'
-        chk_table = 'person'
-        temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
-        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
+        chk_table = 'Person'
+        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
+        temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
         #temp_dict = {'Person':['first_name', 'last_name']}
 
         newobject.select_join(temp_dict, column_name, chk_table, new_col, value)
