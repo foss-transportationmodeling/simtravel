@@ -214,6 +214,7 @@ class MainClass(object):
         """
     ########## methods for mapping end ##########
 
+
     ########## methods for select query ##########
     
     #select all rows from the table
@@ -288,7 +289,11 @@ class MainClass(object):
                     print each_ins            
             """
             print 'Select query successful.\n'
+<<<<<<< .mine
+            return query, col            
+=======
             return query, col
+>>>>>>> .r161
         except:
             print 'Error retrieving the information. Query failed.\n'
 
@@ -311,9 +316,16 @@ class MainClass(object):
         table_list = []
         class_list = []
         col_name = column_name
-        final_list = temp_dict.values()
+        final_col_list = temp_dict.values()
         table_list = temp_dict.keys()      
         
+        for j in temp_dict.keys():
+            for i in temp_dict[j]:
+                new_str = j.lower() + '.' + i.lower()
+                #print 'new_str is %s'%new_str
+                final_list.append(new_str)
+
+       
         #check first if the select query is for single table or multiple tables
         if len(table_list) > 1:
             print 'multiple tables'
@@ -377,7 +389,7 @@ class MainClass(object):
                 condition_str = chk_value + chk_table.lower() + '.' + chk_col + ' = ' + value
                 sql_string = sql_string + condition_str
         
-        print ' '
+
         cols_list = []
         tabs_list = []
 
@@ -386,13 +398,11 @@ class MainClass(object):
             tabs_list.append(each.upper())
         
         #separate all the columns from the lists
-        for i in final_list:
-            temp = str(i)
-            parts = temp.split(", ")
-            for j in parts:
-                cols_list.append(j)
+        new_keys = temp_dict.keys()
+        for i in new_keys:
+            cols_list = cols_list + temp_dict[i]
         
-        print sql_string
+        print '\n', sql_string
         
         try:
             """
@@ -416,10 +426,14 @@ class MainClass(object):
                 else:
                     sample_str = sample_str + ', ' + i
                 query = self.dbcon_obj.session.query((sample_str))
+                
+                
+            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
 
             print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 
             result = query.from_statement(sql_string).values(*cols_list)
+                        
             """
             all_rows = []
             for instance in result:
@@ -587,17 +601,16 @@ class TestMainClass(unittest.TestCase):
 
         """ to print the join """
         column_name = 'role_id'
-        table1_list = ['person', 'first_name', 'last_name']
-        table2_list = ['office','role', 'years']
-        temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Asu':'grad, undergrad'}
-        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
-        #temp_dict = {'Person':'first_name, last_name'}
         new_col = 'role_id'
         value = '1'
         chk_table = 'person'
+        temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
+        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
+        #temp_dict = {'Person':['first_name', 'last_name']}
+
         newobject.select_join(temp_dict, column_name, chk_table, new_col, value)
         #newobject.select_join(temp_dict, column_name, chk_table)
-        
+
         """ delete all records """
         class_name = 'School'
         #newobject.delete_all(class_name)
