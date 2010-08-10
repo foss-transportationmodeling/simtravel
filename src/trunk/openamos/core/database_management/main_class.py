@@ -442,7 +442,7 @@ class MainClass(object):
             """
             print 'Query Successful '
             return result, cols_list
-            """
+            
             return result, cols_list
         except Exception, e:
             print e
