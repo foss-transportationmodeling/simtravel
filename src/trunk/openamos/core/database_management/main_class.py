@@ -128,7 +128,7 @@ class MainClass(object):
                 print e
                 #raise Exception                                
         else:
-            print 'Table does not exist in the database. Cannot create a mapper'
+            print 'Table - %s does not exist in the database. Cannot create a mapper' %(table_name)
             return None
 
 
@@ -206,12 +206,12 @@ class MainClass(object):
         class_name = 'PERSON'
         table_name = 'person'
         self.person = self.table_mapper(class_name, table_name)
-        """
+        
         #for class School
         class_name = 'SCHOOL'
         table_name = 'school'
         self.school = self.table_mapper(class_name, table_name)
-
+        """
     ########## methods for mapping end ##########
 
     ########## methods for select query ##########
@@ -274,6 +274,7 @@ class MainClass(object):
 
         try:
             query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
+            """
             row_list = []
             counter = 0
             for each in query:
@@ -285,7 +286,9 @@ class MainClass(object):
             else:
                 for each_ins in row_list:
                     print each_ins            
+            """
             print 'Select query successful.\n'
+            return query, col
         except:
             print 'Error retrieving the information. Query failed.\n'
 
@@ -405,6 +408,7 @@ class MainClass(object):
             """
             sample_str = ''
             ctr = 0
+            
             for i in tabs_list:
                 if ctr==0:
                     sample_str = i
@@ -413,13 +417,17 @@ class MainClass(object):
                     sample_str = sample_str + ', ' + i
                 query = self.dbcon_obj.session.query((sample_str))
 
+            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+
             result = query.from_statement(sql_string).values(*cols_list)
             """
             all_rows = []
             for instance in result:
                 print instance
                 all_rows.append(instance)
-            print ' '
+            """
+            print 'Query Successful '
+            return result, cols_list
             """
             return result, cols_list
         except Exception, e:

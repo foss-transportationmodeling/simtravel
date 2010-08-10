@@ -481,7 +481,8 @@ class DataBaseConnection(object):
 
             return column_list
         else:
-            print 'Table does not exists. Cannot return the column list'
+            
+            print 'Table - %s does not exists. Cannot return the column list' %(table_name)
 
 
     #get the description of the table
@@ -535,7 +536,7 @@ class DataBaseConnection(object):
             print 'Table already exists in the database. No need to create a new table'
         else:
             #create a new table since it does not exist
-            print 'Table does not exist. Create a new table'
+            print 'Table - %s does not exist. Create a new table' %(table_name)
             #get the description of the table
             table_columns = self.get_table_desc(columns, ctypes, keys)
             try:
@@ -578,7 +579,7 @@ class DataBaseConnection(object):
             print 'table dropped'
             print tab
         else:
-            print 'Table does not exist in the database. Cannot the drop the table'
+            print 'Table - %s does not exist in the database. Cannot the drop the table' %(table_name)
         
     
     #close the connection            
