@@ -246,7 +246,8 @@ class MainClass(object):
             print instance
             all_rows.append(instance)
 
-        print ' '           
+        print ' '
+        return query, col
 
 
     #select rows based on a selection criteria
@@ -329,7 +330,7 @@ class MainClass(object):
             else:
                 sql_string = sql_string + str(i) + ' '
         sql_string = sql_string + 'from '
-        
+
         ctr = 0
         for i in table_list:
             if int(ctr) < (int(len2)-1):
@@ -337,28 +338,42 @@ class MainClass(object):
                 ctr = ctr + 1
             else:
                 sql_string = sql_string + str(i.lower()) + ' '
+               
 
-        if len2 == 2:
+        if len2 == 1:
+            condition_str = condition_str
+        elif len2 == 2:
             condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + table_list[1].lower() + '.' + col_name
         else:
             ctr = 0
             for i in table_list:
-                if int(ctr) < (int(len2)-1):
+                if int(ctr) == 0:
+                    #do nothing
+                    #condition_str = condition_str
+                    ctr = ctr + 1
+                elif int(ctr) < (int(len2)-1):
                     condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name + ' and '
                     ctr = ctr + 1
                 else:
                     condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
         
+
         #put a condition to check for value
         if value == None:
-            sql_string = sql_string + condition_str
+            if int(len2) == 1:
+                sql_string = sql_string
+            else:
+                sql_string = sql_string + condition_str
         else:
             sql_string = sql_string + condition_str
             chk_value = ' and '
-            condition_str = chk_value + chk_table.lower() + '.' + chk_col + ' = ' + value
-            sql_string = sql_string + condition_str
-            
-        print sql_string
+            if len2 == 1:
+                condition_str = chk_table.lower() + '.' + chk_col + ' = ' + value
+                sql_string = sql_string + condition_str
+            else:
+                condition_str = chk_value + chk_table.lower() + '.' + chk_col + ' = ' + value
+                sql_string = sql_string + condition_str
+        
         print ' '
         cols_list = []
         tabs_list = []
@@ -373,7 +388,9 @@ class MainClass(object):
             parts = temp.split(", ")
             for j in parts:
                 cols_list.append(j)
-
+        
+        print sql_string
+        
         try:
             """
             temp_var1 = None
@@ -397,13 +414,14 @@ class MainClass(object):
                 query = self.dbcon_obj.session.query((sample_str))
 
             result = query.from_statement(sql_string).values(*cols_list)
-            
+            """
             all_rows = []
             for instance in result:
                 print instance
                 all_rows.append(instance)
-            
             print ' '
+            """
+            return result, cols_list
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'            
@@ -563,9 +581,9 @@ class TestMainClass(unittest.TestCase):
         column_name = 'role_id'
         table1_list = ['person', 'first_name', 'last_name']
         table2_list = ['office','role', 'years']
-        #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Asu':'grad, undergrad'}
+        temp_dict = {'Person':'first_name, last_name', 'Office':'role, years', 'Asu':'grad, undergrad'}
         #temp_dict = {'Person':'first_name, last_name', 'Office':'role, years'}
-        temp_dict = {'Person':'first_name, last_name'}
+        #temp_dict = {'Person':'first_name, last_name'}
         new_col = 'role_id'
         value = '1'
         chk_table = 'person'
