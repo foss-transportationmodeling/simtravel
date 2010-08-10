@@ -289,11 +289,8 @@ class MainClass(object):
                     print each_ins            
             """
             print 'Select query successful.\n'
-<<<<<<< .mine
-            return query, col            
-=======
+
             return query, col
->>>>>>> .r161
         except:
             print 'Error retrieving the information. Query failed.\n'
 
