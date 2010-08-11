@@ -427,10 +427,8 @@ class MainClass(object):
                 query = self.dbcon_obj.session.query((sample_str))
                 
                 
-            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
-
             result = query.from_statement(sql_string).values(*cols_list)
-                        
+            """
             
             all_rows = []
             for instance in result:
@@ -439,6 +437,8 @@ class MainClass(object):
             print ' '
             
             print 'Query Successful '
+            """
+
             return result, cols_list
         except Exception, e:
             print e
