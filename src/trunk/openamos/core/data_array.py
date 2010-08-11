@@ -1,4 +1,4 @@
-from numpy import ndarray, array, zeros
+from numpy import ndarray, array, zeros, ones
 from scipy import exp
 import re
 
@@ -26,7 +26,7 @@ class DataArray(object):
             
         else:
             self.cols = 0
-            
+
         self.rows = self.data.shape[0] 
             
         if self.cols <> len(varnames):
@@ -78,6 +78,30 @@ class DataArray(object):
             return result[rows]
         return result
     
+    def calculate_product(self, coefficients, rows=None):
+        if not isinstance(coefficients, dict):
+            raise DataError, """coefficient input is invalid - should be of """\
+                """dictionary type"""
+
+        for i in coefficients.keys():
+            if i.lower() not in self._colnames.keys():
+                raise DataError, 'coefficient refers to a column not in the dataset'
+
+        for i in coefficients.values():
+            try:
+                float(i)
+            except ValueError, e:
+                raise DataError, 'enter valid values for coefficients'
+
+        result = ones((self.rows,))
+        for i in coefficients.keys():
+            colnum = self._colnames[i.lower()]
+            result = self.data[:,colnum] ** coefficients[i]
+        
+        if rows is not None:
+            return result[rows]
+        return result        
+
     def exp_calculate_equation(self, coefficients):
         result = self.calculate_equation(coefficients)
         return exp(result)
