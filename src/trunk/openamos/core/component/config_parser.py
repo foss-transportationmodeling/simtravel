@@ -6,6 +6,7 @@
 '''
 
 import copy
+import re
 from lxml import etree
 from numpy import array
 from openamos.core.component.abstract_controller import BasicController
@@ -17,6 +18,7 @@ from openamos.core.models.logit_choice_model import LogitChoiceModel
 from openamos.core.models.ordered_choice_model import OrderedModel
 from openamos.core.models.probability_distribution_model import ProbabilityModel
 from openamos.core.models.nested_logit_choice_model import NestedLogitChoiceModel
+from openamos.core.models.interaction_model import InteractionModel
 
 from openamos.core.models.model_components import Specification
 from openamos.core.models.count_regression_model_components import CountSpecification
@@ -28,42 +30,33 @@ from openamos.core.models.error_specification import StochasticRegErrorSpecifica
 from openamos.core.models.model import SubModel
 from openamos.core.component.abstract_component import AbstractComponent
 
+from openamos.core.database_management.database_configuration import DataBaseConfiguration
+
 from openamos.core.errors import ConfigurationError 
 
-class ModelConfigParser(object):
+class ConfigParser(object):
     """
-	The class defines the parser for translating the model configuration
-	file into python objects for execution.  
-	"""
+    The class defines the parser for translating the model configuration
+    file into python objects for execution.  
+    """
 
-    def __init__(self, configObject=None, fileLoc=None, component=None):
+    def __init__(self, configObject, component=None):
+        """
+        The configObject should be an etree.ElementBase object, component is the
+        keyword for the component until which componentList is desired. The component
+        entry will be updated further to pick and choose components to run.
+        """
+        #TODO: filter_conditons, run_until conditions
+
         
-        #TODO: check for file or object (should be instance of etree)
-        # Storing data ??
-        # Linearizing data for calculating activity-travel choice attributes??
-        # filter_conditons, run_until conditions
-
-        if configObject is None and fileLoc is None:
-            raise ConfigurationError, """The configuration input is not valid; a """\
-                """location of the XML configuration file or a valid etree """\
-                """object must be passed"""
-
-        if not isinstance(configObject, etree.ElementBase) and configObject is not None:
+        if not isinstance(configObject, etree._ElementTree):
             raise ConfigurationError, """The configuration input is not a valid """\
-                """etree.Element object""" 
+                """etree.ElementBase object""" 
                 
-        configObject = etree.parse(fileLoc)
-        try:
-            configObject = etree.parse(fileLoc)
-        except:
-            raise ConfigurationError, """The path for configuration file was """\
-                """invalid"""
-                 
         self.configObject = configObject
-        
         self.componentName = component
 
-    def parse(self):
+    def parse_models(self):
         self.iterator = self.configObject.getiterator("Component")
         componentList = []
         
@@ -74,45 +67,62 @@ class ModelConfigParser(object):
                 return componentList
 
         return componentList
+
+    def parse_databaseAttributes(self):
+        dbConfig_element = self.configObject.find('DBConfig')
+        protocol = dbConfig_element.get('dbprotocol')
+        host = dbConfig_element.get('dbhost')
+        dbname = dbConfig_element.get('dbname')
+        username = dbConfig_element.get('dbusername')
+        password = dbConfig_element.get('dbpassword')
+
+        dbConfigObject = DataBaseConfiguration(protocol,
+                                               username,
+                                               password,
+                                               host,
+                                               dbname)
+        return dbConfigObject
+        
+    
                 
     def create_component(self, component_element):
         comp_name = component_element.get('name')
         modelsIterator = component_element.getiterator("Model")
-        model_list = []
-        component_variable_list = []
+        self.model_list = []
+        self.component_variable_list = []
         for i in modelsIterator:
-            model, variable_list = self.create_model_object(i)
-            component_variable_list = (component_variable_list 
-                                       + variable_list)
-            model_list.append(model)
-        print component_variable_list
-        component_variable_list = list(set(component_variable_list))
-        print component_variable_list
-        component = AbstractComponent(comp_name, model_list, component_variable_list)
+            self.create_model_object(i)
+            #component_variable_list = (component_variable_list 
+            #                           + variable_list)
+            #model_list.append(model)
+        #print self.component_variable_list
+        self.component_variable_list = list(set(self.component_variable_list))
+        #print self.component_variable_list
+        component = AbstractComponent(comp_name, self.model_list, self.component_variable_list)
         return component
         
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
         
-        print model_formulation
+        #print model_formulation
         
         if model_formulation == 'Regression':
-            return self.create_regression_object(model_element)
+            self.create_regression_object(model_element)
             
         if model_formulation == 'Count':
-            return self.create_count_object(model_element)
+            self.create_count_object(model_element)
         
         if model_formulation == 'Multinomial Logit':
-            return self.create_multinomial_logit_object(model_element)
+            self.create_multinomial_logit_object(model_element)
     
         if model_formulation == 'Nested Logit':
-            return self.create_nested_logit_object(model_element)
+            self.create_nested_logit_object(model_element)
 
         if model_formulation == 'Ordered':
-            return self.create_ordered_choice_object(model_element)
+            self.create_ordered_choice_object(model_element)
 
         if model_formulation == 'Probability Distribution':
-            return self.create_probability_object(model_element)
+            self.create_probability_object(model_element)
 
 
     def create_regression_object(self, model_element):
@@ -167,7 +177,10 @@ class ModelConfigParser(object):
         model_type = 'regression'
         model_object = SubModel(model, model_type, dep_varname)
         
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
+
 
     def create_count_object(self, model_element):
         #model type
@@ -203,7 +216,9 @@ class ModelConfigParser(object):
         model = CountRegressionModel(specification)
         model_object = SubModel(model, model_type, dep_varname)
         
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
         
 
     def create_multinomial_logit_object(self, model_element):
@@ -234,7 +249,7 @@ class ModelConfigParser(object):
             coefficients_list = coefficients_list*len(choice)
             variable_list = variable_list + vars_list
 
-        print dep_varname
+        #print dep_varname
 
         # logit specification object
         specification = Specification(choice, coefficients_list)
@@ -243,7 +258,10 @@ class ModelConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname) #Model Object
     
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
+
 
     def create_nested_logit_object(self, model_element):
         #variable list required for running the model
@@ -342,26 +360,32 @@ class ModelConfigParser(object):
 
         for i in spec_dict:
             if i <> 'root':
-                print i.choices
-                print i.logsumparameter
+                #print i.choices
+                #print i.logsumparameter
+                pass
             else:
-                print i
+                #print i
+                pass
             for j in spec_dict[i]:
-                print j.choices
+                #print j.choices
+                pass
                 
                     
-        print nest_struct
-        print alts
-        print spec_build_ind
+        #print nest_struct
+        #print alts
+        #print spec_build_ind
         
-        print '-----', spec_dict
+        #print '-----', spec_dict
         
         specification = NestedSpecification(spec_dict)
         model = NestedLogitChoiceModel(specification)
         model_type = 'choice'
         model_object = SubModel(model, model_type, dep_varname)
 
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
+
         
     def create_spec(self, name):
         choices = name
@@ -399,10 +423,11 @@ class ModelConfigParser(object):
         variable_list = vars_list
             
 
-        print dep_varname, model_type
+        #print dep_varname, model_type
                     
         # logit specification object
         if model_type == 'Logit':
+            #print coefficients_list
             specification = OLSpecification(choice, coefficients_list, threshold_list,
                                             distribution=model_type.lower())
         else:
@@ -414,7 +439,9 @@ class ModelConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname) #Model Object
     
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
 
     
     def create_probability_object(self, model_element):
@@ -436,8 +463,8 @@ class ModelConfigParser(object):
             coefficients_list.append(coeff_dict)
             variable_list = variable_list + vars_list
 
-        print coefficients_list
-        print dep_varname
+        #print coefficients_list
+        #print dep_varname
 
         # logit specification object
         specification = Specification(choice, coefficients_list)
@@ -446,7 +473,10 @@ class ModelConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname) #Model Object
     
-        return model_object, variable_list
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
+
     
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
@@ -455,59 +485,119 @@ class ModelConfigParser(object):
         variableIterator = element.getiterator('Variable')
         vars_list = []
         coeff_dict = {}
+
         for i in variableIterator:
-            vars_list.append(self.return_table_var(i))
-            varname = i.get('var')
-            coeff = i.get('coeff')
-            coeff_dict[varname] = float(coeff)
+            dep_varname = self.check_for_interaction_terms(i)
+            if dep_varname is not None:
+                #print '\t\tINTERACTION TERM'
+                coeff = i.get('coeff')
+                #print coeff
+                coeff_dict[dep_varname] = float(coeff)
+            else:
+                vars_list.append(self.return_table_var(i))
+                varname = i.get('var')
+                coeff = i.get('coeff')
+                coeff_dict[varname] = float(coeff)
         return coeff_dict, vars_list
 
+    def check_for_interaction_terms(self, var_element):
+        variable_list = []
+        coeff_dict = {}
+        dep_varname = ''
+
+        if var_element.get('interaction') is not None:
+            var_element.get('interaction')
+            varnames = re.split('[,]', var_element.get('var'))
+            #print varnames
+            tablenames = re.split('[,]', var_element.get('table'))
+            #print tablenames
+            for i in range(len(varnames)):
+                variable_list.append((tablenames[i], varnames[i]))
+                dep_varname = dep_varname + varnames[i].title()
+                coeff_dict[varnames[i]] = 1
+            choice = [dep_varname]
+            coefficients_list = [coeff_dict]
+            # specification object
+            #print coefficients_list
+            specification = Specification(choice, coefficients_list)
+            
+            model = InteractionModel(specification) 
+            model_type = 'regression'                   #Type of Model 
+            model_object = SubModel(model, model_type, dep_varname) #Model Object
+            
+            #return model_object, variable_list
+            #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
+
+            self.model_list.append(model_object)
+            self.component_variable_list = self.component_variable_list + variable_list            
+            return dep_varname
+
+        else:
+            return None
+
+    def return_filter_condition(self):
+        pass
+
+    def return_run_until_condition(self):
+        pass
+        
+                            
+
 if __name__ == '__main__':
+    import time
     """
     from numpy import zeros, random
     from openamos.core.data_array import DataArray
     fileloc = '/home/kkonduri/simtravel/test/config.xml' 
-    conf_parser = ModelConfigParser(fileLoc=fileloc)
-    component_list = conf_parser.parse()
+    configObject = etree.parse(fileloc)
+    conf_parser = ConfigParser(configObject)
+    component_list = conf_parser.parse_models()
     
     colnames = ['one', 'age', 'parttime', 'telcomm', 'empserv', 'commtime', 'popres',
-                'numchild', 'numdrv', 'respb', 'autoworkmode',
+                'numchild', 'numdrv', 'respb', 'autoworkmode', 'gender', 'numadlts',
+                'numadltsgender',
                 'daystart', 'dayend', 'numjobs', 'workstart1', 'workend1', 
                 'workstat', 'workloc', 'numadlts', 'timeend', 
                 'numvehs', 'schdailystatus', 'actdestination', 'actduration']
     
     cols = len(colnames)
-    cols_dep = 13
+    cols_dep = 14
     
     ti = time.time()
     
-    rows = 1000
-    
-    rand_input = random.random_integers(1, 4, (rows,cols - cols_dep))
-    
-    data = zeros((rows, cols))
+    proc_time = []
+    for i in range(4):
+        rows = 10**(i)
+        print 'RUN WITH - %d records' %(rows)
 
-    data[:,:cols-cols_dep] = rand_input
-    data = DataArray(data, colnames)
+        ti = time.time()
+        rand_input = random.random_integers(1, 4, (rows,cols - cols_dep))
     
+        data = zeros((rows, cols))
+
+        data[:,:cols-cols_dep] = rand_input
+        data = DataArray(data, colnames)
     
-    for i in component_list:
-	print 'VARIABLE LIST FOR COMPONENT'
-	print i.variable_list
-        i.run(data)
-    #print i.data.data[:10]
+        #print data.data[0,:]
+
+
+        for i in component_list:
+            print '\tCOMPONENT NAME - ', i.component_name
+            #print '\t\tVARIABLE LIST FOR COMPONENT - ',i.variable_list
+            i.run(data)
+        #print i.data.data[:10]
+        diff = time.time()-ti
+        proc_time.append(diff)
+        print '\tTIME ELAPSED USING ARRAY FORMAT - %.2f' %(diff)
     
-    print 'TIME ELAPSED USING ARRAY FORMAT', time.time()-ti
-    
-    ti = time.time()
+
     """
 
     from openamos.core.database_management.database_configuration import DataBaseConfiguration
     from openamos.core.database_management.database_connection import DataBaseConnection
     from openamos.core.database_management.main_class import MainClass
-    import time
     
-
+    ti = time.time()
     # Changes in the configuration file - add protocol, 
     # convert string parameters to lower case when parsing, variable names
 
@@ -517,8 +607,9 @@ if __name__ == '__main__':
     host_name = '10.206.111.198'
     database_name = 'postgres'
 
-    newobject = MainClass(protocol, user_name, password, 
-                          host_name, database_name)
+    dbconfig = DataBaseConfiguration(protocol, user_name, password, 
+                                     host_name, database_name)
+    newobject = MainClass(dbconfig)
 
     # setup a connection
     newobject.dbcon_obj.new_connection()
@@ -530,15 +621,14 @@ if __name__ == '__main__':
     hhld_class_name = 'households'
     pers_class_name = 'persons'
 
-    #query_gen, cols = newobject.select_all_from_table(class_name)
-    #query_gen, cols = newobject.fetch_selected_rows(pers_class_name, 'employ', '1')
-    temp_dict = {'households':'household_id, adults, hometaz', 'persons':'employ, workstaz'}
-    query_gen, cols = newobject.select_join(temp_dict, 'household_id', 'employ', '1')
+    query_gen, cols = newobject.select_all_from_table(hhld_class_name)
+    query_gen, cols = newobject.fetch_selected_rows(pers_class_name, 'employ', '1')
+    #temp_dict = {'households':'household_id, adults, homestaz', 'persons':'employ, workstaz'}
+    temp_dict = {'households':['household_id', 'adults', 'homestaz'], 
+                 'persons':['employ', 'workstaz']}
     
-
-    print cols
-
-
+    query_gen, cols = newobject.select_join(temp_dict, 'household_id', pers_class_name, 'employ', '1')
+    
     ti = time.time()
     c = 0
     for i in query_gen:
@@ -549,10 +639,10 @@ if __name__ == '__main__':
         
     print 'records read', c
     
+    """
     
 
 
-    """
     # create a mapper object
     newobject.create_mapper_for_all_classes()
 
@@ -576,15 +666,15 @@ if __name__ == '__main__':
     # deleting records
     class_name = 'School'
     newobject.delete_all(class_name)
-    
+
     
 
 
-    """
+
     # close a connection
     newobject.dbcon_obj.close_connection()
 
-    
+    """
 
     
     
