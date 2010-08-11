@@ -16,9 +16,9 @@ class AbstractComponent(object):
                 raise ModelError, """all object(s) in the model_list """\
                     """must be valid SubModel objects"""
         self.component_name = component_name
-        print '----->>>>>>', self.component_name
-        for i in model_list:
-            print '----->>>>>\t', i.dep_varname
+        #print '----->>>>>>', self.component_name
+        #for i in model_list:
+            #print '----->>>>>\t', i.dep_varname
         self.model_list = model_list
 
 	self.variable_list = variable_list
@@ -63,7 +63,7 @@ class AbstractComponent(object):
         model_list_forlooping = []
         
         for i in model_list_duringrun:
-            print i.dep_varname
+            #print i.dep_varname
             # Creating the subset filter
             if i.data_filter is not None:
                 data_subset_filter = i.data_filter.compare(self.data)
@@ -134,9 +134,13 @@ class TestAbstractComponent(unittest.TestCase):
         random.seed(1)
         data_[:,:4] = random.rand(5,4)
         
-        data_ = DataArray(data_, 
-                                    ['Const', 'Var1', 'Var2', 'Var3', 'choice2_ind', 
-                                     'choice1', 'choice2', 'choice3'])
+        data_ = DataArray(data_, ['Const', 'Var1', 'Var2', 'Var3', 'choice2_ind', 
+                                  'choice1', 'choice2', 'choice3'])
+
+        var_list = [('table1', 'Var1'),
+                    ('table1', 'Var2'),
+                    ('table1', 'Var3'),
+                    ('table1', 'Const')]
         
         variance = array([[1]])
         
@@ -174,9 +178,10 @@ class TestAbstractComponent(unittest.TestCase):
     
         # SPECIFY SEED TO REPLICATE RESULTS, DATA FILTER AND 
         # RUN UNTIL CONDITION
-        component = AbstractComponent(model_list)
+        component = AbstractComponent('DummyComponent', model_list, var_list)
     
         component.run(data_)
+        print component.data.data
 
         
     def testvarscope(self):
