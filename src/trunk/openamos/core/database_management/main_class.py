@@ -10,12 +10,8 @@ import sqlalchemy
 import sqlite3
 import psycopg2 as dbapi2
 import sqlalchemy.schema
-from database_configuration import DataBaseConfiguration
-from database_connection import DataBaseConnection
-from sqlalchemy import create_engine
 from psycopg2 import extensions
 from sqlalchemy.sql import select
-from database_configuration import DataBaseConfiguration
 from sqlalchemy.schema import MetaData, Column, Table
 from sqlalchemy.orm import mapper
 from sqlalchemy.orm import sessionmaker
@@ -25,6 +21,12 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
+
+from database_configuration import DataBaseConfiguration
+from database_connection import DataBaseConnection
+from database_configuration import DataBaseConfiguration
+
+from openamos.core.errors import DatabaseConfigurationError
 
 
 class VECHICLE(object): pass
@@ -39,9 +41,9 @@ class TSP(object): pass
 
 class DESTINATION_OPPORTUNITIES(object): pass
 
-class HOUSEHOLD(object): pass
+class HOUSEHOLDS(object): pass
 
-class PERSON(object): pass
+class PERSONS(object): pass
 
 class PERSON_SCHEDULE(object): pass
 
@@ -59,19 +61,19 @@ class MainClass(object):
     
     ########## initialization ##########
     #initialize the class 
-    def __init__(self, protocol = None, user_name = None,
-                password = None, host_name = None, 
-                database_name = None, engine = None, 
-                connection = None, result = None, 
-                query = None, metadata = None, 
-                table_name = None, session = None,
-                class_name = None):
-       
-        self.protocol = protocol
-        self.user_name = user_name
-        self.password = password
-        self.host_name = host_name
-        self.database_name = database_name
+    def __init__(self, dbconfig):
+
+        if not isinstance(dbconfig, DataBaseConfiguration):
+            raise DatabaseConfigurationError, """The dbconfig input is not a valid """\
+                """DataBaseConfiguration object."""
+
+        self.protocol = dbconfig.protocol
+        self.user_name = dbconfig.user_name
+        self.password = dbconfig.password
+        self.host_name = dbconfig.host_name
+        self.database_name = dbconfig.database_name
+        self.database_config_object = dbconfig
+        """
         self.engine = None
         self.connection = None
         self.result = None
@@ -81,8 +83,8 @@ class MainClass(object):
         self.session = None
         self.class_name = None
         self.database_config_object = None
-        dbcon_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
-        self.dbcon_obj = dbcon_obj
+        """
+        self.dbcon_obj = DataBaseConnection(dbconfig)
         print self.dbcon_obj
     
     ########## initialization ends ##########
@@ -176,11 +178,6 @@ class MainClass(object):
         table_name = 'destination_opportunities'
         self.destination_opportunities = self.table_mapper(class_name, table_name)
         
-        #for class Household
-        class_name = 'HOUSEHOLD'
-        table_name = 'household'
-        self.household = self.table_mapper(class_name, table_name)
-
         #for class Person_Schedule
         class_name = 'PERSON_SCHEDULE'
         table_name = 'person_schedule'
@@ -200,12 +197,18 @@ class MainClass(object):
         class_name = 'OFFICE'
         table_name = 'office'
         self.office = self.table_mapper(class_name, table_name)
-            
-        #for class Person
-        class_name = 'PERSON'
-        table_name = 'person'
-        self.person = self.table_mapper(class_name, table_name)
         """
+
+        #for class Household
+        class_name = 'HOUSEHOLDS'
+        table_name = 'households'
+        self.household = self.table_mapper(class_name, table_name)
+
+        #for class Person
+        class_name = 'PERSONS'
+        table_name = 'persons'
+        self.person = self.table_mapper(class_name, table_name)
+        
         #for class School
         class_name = 'SCHOOL'
         table_name = 'school'
@@ -217,7 +220,7 @@ class MainClass(object):
     ########## methods for select query ##########
     
     #select all rows from the table
-    def select_all_fom_table(self, class_name):
+    def select_all_from_table(self, class_name):
         """
         This method is used to fetch all rows from the table specified.
 
@@ -240,13 +243,14 @@ class MainClass(object):
 
         #query the table to fetch all the records by passing the columns
         query = self.dbcon_obj.session.query(eval(new_class_name)).values(*col)
-
+        """
         all_rows = []
         for instance in query:
             print instance
             all_rows.append(instance)
 
         print ' '
+        """
         return query, col
 
 
@@ -273,19 +277,22 @@ class MainClass(object):
             col.append(cl)
 
         try:
-            query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
+            query = self.dbcon_obj.session.query(eval(new_class_name))\
+                .filter(getattr((eval(new_class_name)), column_name) == value).values(*col)
+            """
             row_list = []
             counter = 0
             for each in query:
                 counter = counter + 1
                 row_list.append(each)
-
+                
             if counter == 0:
                 print 'No rows selected.\n'
             else:
                 for each_ins in row_list:
                     print each_ins            
             print 'Select query successful.\n'
+            """
             return query, col            
         except:
             print 'Error retrieving the information. Query failed.\n'
@@ -358,7 +365,8 @@ class MainClass(object):
         if len2 == 1:
             condition_str = condition_str
         elif len2 == 2:
-            condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + table_list[1].lower() + '.' + col_name
+            condition_str = condition_str + table_list[0].lower() +\
+                '.' + col_name + ' = ' + table_list[1].lower() + '.' + col_name
         else:
             ctr = 0
             for i in table_list:
@@ -367,10 +375,12 @@ class MainClass(object):
                     #condition_str = condition_str
                     ctr = ctr + 1
                 elif int(ctr) < (int(len2)-1):
-                    condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name + ' and '
+                    condition_str = condition_str + table_list[0].lower() +\
+                        '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name + ' and '
                     ctr = ctr + 1
                 else:
-                    condition_str = condition_str + table_list[0].lower() + '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
+                    condition_str = condition_str + table_list[0].lower() +\
+                        '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
         
 
         #put a condition to check for value
@@ -471,7 +481,8 @@ class MainClass(object):
             col.append(cl)
 
         try:
-            delete_query = self.dbcon_obj.session.query(eval(new_class_name)).filter(getattr((eval(new_class_name)), col_name) == value)
+            delete_query = self.dbcon_obj.session.query(eval(new_class_name))\
+                .filter(getattr((eval(new_class_name)), col_name) == value)
             #based on the count determine if any rows were selected
             if delete_query.count() == 0:
                 print 'No rows were fetched. Cannot complete delete operation.'

@@ -35,19 +35,16 @@ class DataBaseConnection(object):
     Input: Database configuration object
     """
 
-    def __init__(self, protocol = None, user_name = None,
-                password = None, host_name = None, 
-                database_name = None, database_config_object = None, 
-                engine = None, connection = None, 
-                result = None, query = None,
-                metadata = None, table_name = None,
-                session = None):
+    def __init__(self, dbconfig):
 
-        self.protocol = protocol
-        self.user_name = user_name
-        self.password = password
-        self.host_name = host_name
-        self.database_name = database_name
+        self.protocol = dbconfig.protocol
+        self.user_name = dbconfig.user_name
+        self.password = dbconfig.password
+        self.host_name = dbconfig.host_name
+        self.database_name = dbconfig.database_name
+        self.database_config_object = dbconfig
+
+        """
         self.engine = engine
         self.connection = connection
         self.result = result
@@ -62,6 +59,7 @@ class DataBaseConnection(object):
         db_obj = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         database_config_object = db_obj
         self.database_config_object = database_config_object
+        """
 
 
     #temp function prints the values of the database configuration object	
