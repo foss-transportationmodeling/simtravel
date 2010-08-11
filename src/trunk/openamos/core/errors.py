@@ -31,5 +31,8 @@ class ModelError(Exception):
 class ConfigurationError(Exception):
     pass
 
+class DatabaseConfigurationError(Exception):
+    pass
+
 # Checking to see how SVN works 
 
