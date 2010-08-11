@@ -61,8 +61,7 @@ class MainClass(object):
     #initialize the class 
     def __init__(self, protocol = None, user_name = None,
                 password = None, host_name = None, 
-                database_name = None, database_config_object = None, 
-                dbcon_obj = None, engine = None, 
+                database_name = None, engine = None, 
                 connection = None, result = None, 
                 query = None, metadata = None, 
                 table_name = None, session = None,
@@ -73,15 +72,15 @@ class MainClass(object):
         self.password = password
         self.host_name = host_name
         self.database_name = database_name
-        self.engine = engine
-        self.connection = connection
-        self.result = result
-        self.query = query
-        self.metadata = metadata
-        self.table_name = table_name
-        self.session = session
-        self.class_name = class_name
-        self.database_config_object = database_config_object
+        self.engine = None
+        self.connection = None
+        self.result = None
+        self.query = None
+        self.metadata = None
+        self.table_name = None
+        self.session = None
+        self.class_name = None
+        self.database_config_object = None
         dbcon_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
         self.dbcon_obj = dbcon_obj
         print self.dbcon_obj
@@ -313,23 +312,25 @@ class MainClass(object):
         final_col_list = temp_dict.values()
         table_list = temp_dict.keys()      
         
+        #check if the table exists. If not return none
         if chk_table.lower() in [each.lower() for each in table_list]:
             print 'table %s is present in the table list'%chk_table
         else:
             print 'table %s is not present in the table list'%chk_table
             return None
-        for j in temp_dict.keys():
-            for i in temp_dict[j]:
-                new_str = j.lower() + '.' + i.lower()
-                #print 'new_str is %s'%new_str
-                final_list.append(new_str)
-
-       
-        #check first if the select query is for single table or multiple tables
-        if len(table_list) > 1:
-            print 'multiple tables'
-        else:
-            print 'single table'
+            
+        #check for the columns passed in the dictionary
+        for i in temp_dict.keys():
+            clist = self.dbcon_obj.get_column_list(i.lower())
+            list1 = temp_dict[i]
+            chk_list = len(list(set(list1) & set(clist)))
+            if chk_list == len(list1):
+                for j in temp_dict[i]:
+                    new_str = i.lower() + '.' + j.lower()
+                    final_list.append(new_str)                    
+            else:
+                print 'Column(s) passed in the dictionary do not exist in the table'
+                return None
 
         #use string manipulation to create the select query
         len1 = len(final_list)
@@ -572,12 +573,11 @@ class TestMainClass(unittest.TestCase):
         self.password = '1234'
         self.host_name = 'localhost'
         self.database_name = 'postgres'
-        self.database_config_object = None
-        self.dbcon_obj = None
+
     
     def testMainClass(self):
-        newobject = MainClass(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object, self.dbcon_obj)
-
+        newobject = MainClass(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+        #newobject = MainClass(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object, self.dbcon_obj)
         """ create a connection to the database """
         newobject.dbcon_obj.new_connection()
         
@@ -600,12 +600,12 @@ class TestMainClass(unittest.TestCase):
         value = '1'
         chk_table = 'Person'
         #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
-        temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
-        #temp_dict = {'Person':['first_name', 'last_name']}
+        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
+        temp_dict = {'Person':['first_name', 'last_name']}
 
         newobject.select_join(temp_dict, column_name, chk_table, new_col, value)
         #newobject.select_join(temp_dict, column_name, chk_table)
-
+        
         """ delete all records """
         class_name = 'School'
         #newobject.delete_all(class_name)
