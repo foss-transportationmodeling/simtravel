@@ -14,7 +14,9 @@ class SubModel(object):
                  dep_varname,
                  data_filter=None,
                  run_until_condition=None,
-                 choiceset_criterion=None):
+                 choiceset_criterion=None,
+                 table=None,
+                 key=None):
 
         if not isinstance(model, Model):
             raise ModelError, 'the model input is not a valid Model object'
