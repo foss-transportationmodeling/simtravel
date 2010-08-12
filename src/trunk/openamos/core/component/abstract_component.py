@@ -63,7 +63,7 @@ class AbstractComponent(object):
         model_list_forlooping = []
         
         for i in model_list_duringrun:
-            #print i.dep_varname
+            print '\tRunning Model - ', i.dep_varname
             # Creating the subset filter
             if i.data_filter is not None:
                 data_subset_filter = i.data_filter.compare(self.data)
@@ -97,11 +97,17 @@ class AbstractComponent(object):
             if i.run_until_condition is not None:
                 if data_subset.rows > 0:                    
                     model_list_forlooping.append(i)
-                result_run_var = self.data.calculate_equation(
-                                                              i.run_until_condition.coefficients, 
+                # Indiciator variable updating no longer happens in the ABSTRACT COMPONENT
+                # Instead they are specified as simple regression models with the appropriate
+                # specifications
+                """
+                print i.run_until_condition.coefficients, '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
+                result_run_var = self.data.calculate_equation(i.run_until_condition.coefficients, 
                                                               data_subset_filter)
                 self.data.setcolumn(i.run_until_condition.varname, 
                                     result_run_var, data_subset_filter)
+                """
+            print '\t Result for above model', self.data.data
         return model_list_forlooping
 
         # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
