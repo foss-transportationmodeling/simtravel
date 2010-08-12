@@ -299,7 +299,7 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, temp_dict, column_name, chk_table, chk_col=None, value=None):
+    def select_join(self, temp_dict, column_name, chk_table=None, chk_col=None, value=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -320,17 +320,19 @@ class QueryBrowser(object):
         table_list = temp_dict.keys()      
         
         #check if the table exists. If not return none
-        if chk_table.lower() in [each.lower() for each in table_list]:
-            print 'table %s is present in the table list'%chk_table
-        else:
-            print 'table %s is not present in the table list'%chk_table
-            return None
+        if chk_table is not None:
+            if chk_table.lower() in [each.lower() for each in table_list]:
+                print 'table %s is present in the table list'%chk_table
+            else:
+                print 'table %s is not present in the table list'%chk_table
+                return None
             
         #check for the columns passed in the dictionary
         for i in temp_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
             list1 = temp_dict[i]
             chk_list = len(list(set(list1) & set(clist)))
+
             if chk_list == len(list1):
                 for j in temp_dict[i]:
                     new_str = i.lower() + '.' + j.lower()
@@ -411,8 +413,6 @@ class QueryBrowser(object):
         new_keys = temp_dict.keys()
         for i in new_keys:
             cols_list = cols_list + temp_dict[i]
-        
-        print '\n', sql_string
         
         try:
             """
