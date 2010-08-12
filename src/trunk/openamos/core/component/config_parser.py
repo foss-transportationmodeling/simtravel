@@ -19,19 +19,19 @@ from openamos.core.models.ordered_choice_model import OrderedModel
 from openamos.core.models.probability_distribution_model import ProbabilityModel
 from openamos.core.models.nested_logit_choice_model import NestedLogitChoiceModel
 from openamos.core.models.interaction_model import InteractionModel
-
 from openamos.core.models.model_components import Specification
 from openamos.core.models.count_regression_model_components import CountSpecification
 from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.models.nested_logit_model_components import NestedChoiceSpecification, NestedSpecification
 from openamos.core.models.error_specification import LinearRegErrorSpecification
 from openamos.core.models.error_specification import StochasticRegErrorSpecification
-
 from openamos.core.models.model import SubModel
+
 from openamos.core.component.abstract_component import AbstractComponent
 
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
 
+from openamos.core.data_array import DataArray, DataFilter
 from openamos.core.errors import ConfigurationError 
 
 class ConfigParser(object):
@@ -134,7 +134,7 @@ class ConfigParser(object):
 
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         choice = [dep_varname]
 
@@ -174,8 +174,12 @@ class ConfigParser(object):
             errorSpec = StochasticRegErrorSpecification(variance, vertex)
             model = StocFronRegressionModel(specification, errorSpec)                 
 
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
         model_type = 'regression'
-        model_object = SubModel(model, model_type, dep_varname)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, 
+                                dep_table, dep_keys)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -191,7 +195,8 @@ class ConfigParser(object):
         
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
 
         #Creating the coefficients input for the regression model
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
@@ -212,9 +217,13 @@ class ConfigParser(object):
         # specification object
         specification = CountSpecification(choice, coefficients)
         
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
         model_type = 'choice'
         model = CountRegressionModel(specification)
-        model_object = SubModel(model, model_type, dep_varname)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
+                                dep_table, dep_keys)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -230,7 +239,7 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -254,10 +263,14 @@ class ConfigParser(object):
         # logit specification object
         specification = Specification(choice, coefficients_list)
 
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+    
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname) #Model Object
-    
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
+                                dep_table, dep_keys)#Model Object
+
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
@@ -269,7 +282,7 @@ class ConfigParser(object):
 
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         #Specification dict
         spec_build_ind = {}
@@ -378,9 +391,15 @@ class ConfigParser(object):
         #print '-----', spec_dict
         
         specification = NestedSpecification(spec_dict)
+
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
         model = NestedLogitChoiceModel(specification)
         model_type = 'choice'
-        model_object = SubModel(model, model_type, dep_varname)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
+                                dep_table, dep_keys)
+
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -405,7 +424,7 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -433,11 +452,14 @@ class ConfigParser(object):
         else:
             specification = OLSpecification(choice, coefficients_list, threshold_list,
                                             distribution=model_type.lower())
-            
+
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)            
 
         model = OrderedModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
+                                dep_table, dep_keys) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -450,7 +472,7 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname = depvariable_element.get('var')
+        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -469,13 +491,52 @@ class ConfigParser(object):
         # logit specification object
         specification = Specification(choice, coefficients_list)
 
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
         model = ProbabilityModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
+                                dep_table, dep_keys) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
+
+    def check_for_interaction_terms(self, var_element):
+        variable_list = []
+        coeff_dict = {}
+        dep_varname = ''
+
+        if var_element.get('interaction') is not None:
+            var_element.get('interaction')
+            varnames = re.split('[,]', var_element.get('var'))
+            #print varnames
+            tablenames = re.split('[,]', var_element.get('table'))
+            #print tablenames
+            for i in range(len(varnames)):
+                variable_list.append((tablenames[i], varnames[i]))
+                dep_varname = dep_varname + varnames[i].title()
+                coeff_dict[varnames[i]] = 1
+            choice = [dep_varname]
+            coefficients_list = [coeff_dict]
+            # specification object
+            #print coefficients_list
+            specification = Specification(choice, coefficients_list)
+
+            model = InteractionModel(specification) 
+            model_type = 'regression'                   #Type of Model 
+            model_object = SubModel(model, model_type, dep_varname) #Model Object
+            
+            #return model_object, variable_list
+            #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
+
+            self.model_list.append(model_object)
+            self.component_variable_list = self.component_variable_list + variable_list            
+            return dep_varname
+
+        else:
+            return None
 
     
     def return_table_var(self, var_element):
@@ -500,54 +561,70 @@ class ConfigParser(object):
                 coeff_dict[varname] = float(coeff)
         return coeff_dict, vars_list
 
-    def check_for_interaction_terms(self, var_element):
-        variable_list = []
-        coeff_dict = {}
-        dep_varname = ''
 
-        if var_element.get('interaction') is not None:
-            var_element.get('interaction')
-            varnames = re.split('[,]', var_element.get('var'))
-            #print varnames
-            tablenames = re.split('[,]', var_element.get('table'))
-            #print tablenames
-            for i in range(len(varnames)):
-                variable_list.append((tablenames[i], varnames[i]))
-                dep_varname = dep_varname + varnames[i].title()
-                coeff_dict[varnames[i]] = 1
-            choice = [dep_varname]
-            coefficients_list = [coeff_dict]
-            # specification object
-            #print coefficients_list
-            specification = Specification(choice, coefficients_list)
-            
-            model = InteractionModel(specification) 
-            model_type = 'regression'                   #Type of Model 
-            model_object = SubModel(model, model_type, dep_varname) #Model Object
-            
-            #return model_object, variable_list
-            #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
-
-            self.model_list.append(model_object)
-            self.component_variable_list = self.component_variable_list + variable_list            
-            return dep_varname
-
-        else:
+    def return_filter_condition(self, model_element):
+        filter_element = model_element.find('Filter')
+        
+        if filter_element is None:
             return None
 
-    def return_filter_condition(self):
-        pass
+        tablename = filter_element.get('table')
+        varname = filter_element.get('var')
+        variable_list = [(tablename, varname)]
+        
+        filterCondition = filter_element.get('condition')
+        filterValue = float(filter_element.get('value'))
 
-    def return_run_until_condition(self):
-        pass
+        dataFilter = DataFilter(varname, filterCondition, filterValue)
+
+        self.component_variable_list = self.component_variable_list + variable_list
+        
+        #print 'FILTERCONDITION - ', filterCondition
+
+        return dataFilter
+
+    def return_run_until_condition(self, model_element):
+        run_until_element = model_element.find('RunUntilCondition')
+        
+        if run_until_element is None:
+            return None
+        
+        tablename_ind = run_until_element.get('table')
+        varname_ind = run_until_element.get('var')
+        variable_list_ind = [(tablename_ind, varname_ind)]
+
+        runUntilCondition = run_until_element.get('condition')
+
+        tablename_val = run_until_element.get('table')
+        varname_val = run_until_element.get('var')
+        variable_list_val = [(tablename_val, varname_val)]
+
+        self.component_variable_list = self.component_variable_list +\
+            variable_list_ind + variable_list_val
+
+        #print 'RUNUNTILCONDITION - ', runUntilCondition
+
+        runUntilFilter = DataFilter(varname_ind, runUntilCondition, varname_val)
+        return runUntilFilter
+
+    def return_dep_var_attribs(self, depvariable_element):
+        """
+        Returns the variable name, table name, keys.
+        """
+        varname = depvariable_element.get('var')
+        tablename = depvariable_element.get('table')
+        keys = depvariable_element.get('key')
+        if keys is not None:
+            keys = re.split('[,]', depvariable_element.get('key'))
+        print varname, tablename, keys
+        return varname, tablename, keys
         
                             
 
 if __name__ == '__main__':
     import time
-    """
+    
     from numpy import zeros, random
-    from openamos.core.data_array import DataArray
     fileloc = '/home/kkonduri/simtravel/test/config.xml' 
     configObject = etree.parse(fileloc)
     conf_parser = ConfigParser(configObject)
@@ -555,13 +632,13 @@ if __name__ == '__main__':
     
     colnames = ['one', 'age', 'parttime', 'telcomm', 'empserv', 'commtime', 'popres',
                 'numchild', 'numdrv', 'respb', 'autoworkmode', 'gender', 'numadlts',
-                'numadltsgender',
+                'numadltsgender', 'schstat',
                 'daystart', 'dayend', 'numjobs', 'workstart1', 'workend1', 
                 'workstat', 'workloc', 'numadlts', 'timeend', 
                 'numvehs', 'schdailystatus', 'actdestination', 'actduration']
     
     cols = len(colnames)
-    cols_dep = 14
+    cols_dep = 15
     
     ti = time.time()
     
@@ -595,7 +672,7 @@ if __name__ == '__main__':
 
     from openamos.core.database_management.database_configuration import DataBaseConfiguration
     from openamos.core.database_management.database_connection import DataBaseConnection
-    from openamos.core.database_management.main_class import MainClass
+    from openamos.core.database_management.query_browser import QueryBrowser
     
     ti = time.time()
     # Changes in the configuration file - add protocol, 
@@ -609,7 +686,7 @@ if __name__ == '__main__':
 
     dbconfig = DataBaseConfiguration(protocol, user_name, password, 
                                      host_name, database_name)
-    newobject = MainClass(dbconfig)
+    newobject = QueryBrowser(dbconfig)
 
     # setup a connection
     newobject.dbcon_obj.new_connection()
@@ -639,7 +716,7 @@ if __name__ == '__main__':
         
     print 'records read', c
     
-    """
+    
     
 
 
