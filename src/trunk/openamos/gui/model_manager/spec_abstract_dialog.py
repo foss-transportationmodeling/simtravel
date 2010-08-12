@@ -474,9 +474,9 @@ class AbtractSpecDialog(QDialog):
         self.password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
         self.host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
         self.database_name = self.configobject.getConfigElement(DB_NAME)
-        self.database_config_object = None
+        self.database_config_object = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         
-        new_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name, self.database_config_object)
+        new_obj = DataBaseConnection(self.database_config_object)
         new_obj.new_connection()
         tables = new_obj.get_table_list()
         
