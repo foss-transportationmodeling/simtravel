@@ -414,6 +414,9 @@ class QueryBrowser(object):
         for i in new_keys:
             cols_list = cols_list + temp_dict[i]
         
+        print sql_string
+
+
         try:
             """
             temp_var1 = None
@@ -426,6 +429,7 @@ class QueryBrowser(object):
             #query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
             #filter(eval(temp_var1)==eval(temp_var2)).filter(eval(temp_var3)==eval(value)).values(*cols_list)
             """
+
             sample_str = ''
             ctr = 0
             for i in tabs_list:
