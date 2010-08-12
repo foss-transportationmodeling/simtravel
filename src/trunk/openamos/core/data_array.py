@@ -238,7 +238,7 @@ class DataFilter(object):
     coefficients - dictionary (used for recalculating the varname after say some
     a certain choice process was simulated)  
     """
-    def __init__(self, varname, filter_string, value, coefficients=None):
+    def __init__(self, varname, filter_string, value):
         
         if not isinstance(varname, str):
             raise DataError, """variable input has to be a valid """\
@@ -253,19 +253,18 @@ class DataFilter(object):
 
         value_type = type(value)
 
-        if not value_type in [int, float]:
-            raise DataError, """the value has to be a valid numeric object; """\
-                """only 'float' and 'int' objects are accepted"""
-        self.value = value
-
-
-        if not isinstance(coefficients, dict) and coefficients is not None:
-            raise DataError, """coefficient input is invalid - should be of """\
-                """dictionary type"""
-
-        self.coefficients = coefficients
+        if value_type in [int, float, str]:
+            self.value = value
+        else:
+            raise DataError, """the value has to be a valid numeric object or ; """\
+                """ a valid column name string object """\
+                """only 'float', 'int', 'str' objects are accepted checking to see """\
+                """if a column was specified instead for the value to check against. """
 
     def compare(self, data):
+        if type(self.value) == str:
+            self.value = data.columns([self.value]).data
+            
         if self.filter_string == 'less than':
             valid_rows = data.columns([self.varname]) < self.value
             
@@ -284,7 +283,6 @@ class DataFilter(object):
         if self.filter_string == 'not equals':
             valid_rows = data.columns([self.varname]) <> self.value
 
-        #return data.rowsof(valid_rows)
         valid_rows.shape = (valid_rows.shape[0], )
         return valid_rows            
 
