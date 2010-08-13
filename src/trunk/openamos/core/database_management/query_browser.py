@@ -299,7 +299,7 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, temp_dict, column_name, chk_table=None, chk_col=None, value=None):
+    def select_join(self, temp_dict, column_name, tab_name, chk_table=None, chk_col=None, value=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -327,6 +327,14 @@ class QueryBrowser(object):
                 print 'table %s is not present in the table list'%chk_table
                 return None
             
+        #similarly check if the table in the list exists
+        num_tab = len(list(set(table_list) & set(tab_name)))
+        if num_tab <= len(table_list):
+            print 'tables exist'
+        else:
+            print 'tables do not exists'
+            return None
+            
         #check for the columns passed in the dictionary
         for i in temp_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
@@ -346,7 +354,7 @@ class QueryBrowser(object):
         len2 = len(table_list)
         ctr = 0
         sql_string = "select "
-        condition_str = 'where '
+        condition_str = ' '
         for i in final_list:
             if int(ctr) < (int(len1)-1):
                 sql_string = sql_string + str(i) + ', '
@@ -354,7 +362,7 @@ class QueryBrowser(object):
             else:
                 sql_string = sql_string + str(i) + ' '
         sql_string = sql_string + 'from '
-
+        """
         ctr = 0
         for i in table_list:
             if int(ctr) < (int(len2)-1):
@@ -362,8 +370,16 @@ class QueryBrowser(object):
                 ctr = ctr + 1
             else:
                 sql_string = sql_string + str(i.lower()) + ' '
+        """       
+        #for left join hardcoded
+        sql_string = sql_string + '(' + tab_name[0].lower() + ' left join ' + tab_name[1].lower() + ' on ' + \
+                    tab_name[0].lower() + '.' + col_name[0] + ' = ' + tab_name[1].lower() + '.' + col_name[0] + ')'
+        
+        sql_string = sql_string + ' left join ' + tab_name[2].lower() + ' on ' + tab_name[1].lower() + '.' + \
+                    col_name[0] + ' = ' + tab_name[2].lower() + '.' + col_name[0]
                
-
+        print '\n 1', sql_string
+        """
         if len2 == 1:
             condition_str = condition_str
         elif len2 == 2:
@@ -383,14 +399,14 @@ class QueryBrowser(object):
                 else:
                     condition_str = condition_str + table_list[0].lower() +\
                         '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
-        
-
+        """
         #put a condition to check for value
         if value == None:
             if int(len2) == 1:
                 sql_string = sql_string
             else:
                 sql_string = sql_string + condition_str
+                
         else:
             sql_string = sql_string + condition_str
             chk_value = ' and '
