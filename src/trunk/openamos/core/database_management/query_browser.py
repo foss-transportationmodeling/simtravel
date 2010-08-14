@@ -299,7 +299,7 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, db_dict, column_names, table_names, max_dict):
+    def select_join(self, db_dict, column_names, table_names, max_dict=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -491,8 +491,16 @@ class QueryBrowser(object):
             cols_list = cols_list + db_dict[i]
         #print 'cols_list is %s'%cols_list
         
-        #print '\n', sql_string
-        
+        print sql_string
+
+	#sql_string = """select households.urb, households.numchild, households.inclt35k, """\
+        #    """households.ownhome, households.one, households.drvrcnt, vehicles_r.vehtype, """\
+        #    """vehicles_r.vehid, households.houseid, households_r.numvehs from (households """\
+        #    """left join households_r on households.houseid = households_r.houseid) left """\
+        #    """join vehicles_r on (households.houseid = vehicles_r.houseid  and """\
+        #    """vehicles_r.vehid = (select max(vehicles_r.vehid) from vehicles_r group by vehicles_r.houseid));"""
+
+
         try:
             sample_str = ''
             ctr = 0
@@ -503,6 +511,7 @@ class QueryBrowser(object):
                 else:
                     sample_str = sample_str + ', ' + i
                 query = self.dbcon_obj.session.query((sample_str))
+
             #print 'sample_str is %s'%sample_str                
                 
             print '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
@@ -540,6 +549,7 @@ class QueryBrowser(object):
         """
         print 'testing delete'
         new_class_name = class_name.upper()
+        
         new_table_name = new_class_name.lower()
         
         col = []
@@ -549,8 +559,9 @@ class QueryBrowser(object):
             col.append(cl)
 
         try:
-            delete_query = self.dbcon_obj.session.query(eval(new_class_name))\
-                .filter(getattr((eval(new_class_name)), col_name) == value)
+            self.dbcon_obj.session.query(eval(new_class_name))\
+                .filter(getattr((eval(new_class_name)), col_name) == value).delete()
+            """
             #based on the count determine if any rows were selected
             if delete_query.count() == 0:
                 print 'No rows were fetched. Cannot complete delete operation.'
@@ -558,10 +569,11 @@ class QueryBrowser(object):
                 for each_ins in delete_query:
                     #print 'each is %s'%each_ins
                     self.dbcon_obj.session.delete(each_ins)
-                print 'delete successful'                    
+            """
+            print 'Selected rows delete successful.'                    
         except Exception, e:
             print e
-            print 'Error retrieving the information. Query failed.'
+            print 'Selected rows delete failed.'
         
 
     #delete all rows i.e. empty table
@@ -577,6 +589,7 @@ class QueryBrowser(object):
         """
 
         new_class_name = class_name.upper()
+
         new_table_name = new_class_name.lower()
         #print 'table name is %s and class name is %s'%(new_class_name, new_table_name)
         
@@ -588,7 +601,8 @@ class QueryBrowser(object):
             col.append(cl)
 
         try:
-            query = self.dbcon_obj.session.query(eval(new_class_name))
+            self.dbcon_obj.session.query(eval(new_class_name)).delete()
+            """
             print 'query is %s'%query
             if query.count() == 0:
                 print 'No rows fectched. Cannot complete delete operation'
@@ -596,10 +610,11 @@ class QueryBrowser(object):
                 for instance in query:
                     #print instance
                     self.dbcon_obj.session.delete(instance)
-                print 'Delete all records successful.'
+            """
+            print 'Delete all records successful.'
         except Exception, e:
             print e
-            print 'Error retrieving the information. Query failed.'
+            print 'Delete all records failed.'
 
     ########## methods for delete query end ##########
 
@@ -607,7 +622,7 @@ class QueryBrowser(object):
     ########## methods for insert query ##########
     
     #insert values in the table
-    def insert_into_table(self):
+    def insert_into_table(self, colnames, data):
         """
         This method is used to insert new values into the table.
 
@@ -617,6 +632,8 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
+
+        data_dicts = [{}]
 
         #testing
         print 'testing'
