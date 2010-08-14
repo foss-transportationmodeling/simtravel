@@ -310,6 +310,15 @@ class QueryBrowser(object):
         Output:
         Displays the rows based on the join and the selection criterion.
         """
+        
+        db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
+                   'vehicles_r': ['vehtype', 'vehid'], 
+                   'households_r': ['numvehs']}
+        columns_names = ['houseid']
+        table_names = ['households', 'households_r', 'vehicles_r']
+        max_dict = {'vehicles_r':['vehid']}
+        
+
 
         #initialize the variables
         final_list = []
@@ -354,7 +363,8 @@ class QueryBrowser(object):
         max_table = max_dict.keys()
         for each in max_dict.values():
             max_column = each[0]
-            max_flag = each[1]
+            if max_dict is not None:
+                max_flag = 1
                 
         #use string manipulation to create the select query
         len1 = len(final_list)
