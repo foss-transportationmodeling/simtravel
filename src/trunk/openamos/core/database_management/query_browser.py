@@ -426,7 +426,7 @@ class QueryBrowser(object):
                         count = count + 1
             #first check the max flag
             if max_flag:
-                print 'max flag set'
+                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
             else:
                 print 'max flag not set'
             print '\n********** 2 tables **********'
@@ -446,11 +446,10 @@ class QueryBrowser(object):
                         if len(column_names) == 1:
                             sql_string = sql_string + table_names[counter].lower() + '.' + column_names[0] + ' = ' + \
                                         table_names[counter+1].lower() + '.' + column_names[0] + ')'
-                            if max_flag:
-                                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
+                            if i == max_table[0]:
+                                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str
                         else:
                             for each in column_names:
-                                print each
                                 if int(count) < int(len(column_names)-1):
                                     sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
                                                 table_names[counter+1].lower() + '.' + each + ' and '
@@ -461,14 +460,16 @@ class QueryBrowser(object):
                                     count = count + 1
                         if i == max_table[0]:
                             sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                        counter = counter + 1
-                        tab_ctr = tab_ctr + 1
+                    counter = counter + 1
+                    tab_ctr = tab_ctr + 1
+                    if i == max_table[0]:
+                        sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
                 else:
                     if int(counter) < int(len(table_names)-1):
                         sql_string = sql_string + left_join_str + table_names[counter+1].lower() + ' on '
                         count = 0
                         if len(column_names) == 1:
-                            sql_string = sql_string + table_names[counter].lower() + '.' + column_names[0] + ' = ' + \
+                            sql_string = sql_string + table_names[counter-1].lower() + '.' + column_names[0] + ' = ' + \
                                         table_names[counter+1].lower() + '.' + column_names[0]
                         else:
                             for each in column_names:
@@ -482,8 +483,10 @@ class QueryBrowser(object):
                                     count = count + 1
                         if i == max_table[0]:
                             sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                        counter = counter + 1
-                        tab_ctr = tab_ctr + 1
+                    if i == max_table[0]:
+                        sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
+                    counter = counter + 1
+                    tab_ctr = tab_ctr + 1
                     
         print '\n*****************************************'
         print sql_string            
