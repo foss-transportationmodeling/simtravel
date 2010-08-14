@@ -299,7 +299,7 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, temp_dict, column_name, tab_name, chk_table=None, chk_col=None, value=None):
+    def select_join(self, db_dict, column_names, table_names, max_dict):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -315,45 +315,55 @@ class QueryBrowser(object):
         final_list = []
         table_list = []
         class_list = []
-        col_name = column_name
-        final_col_list = temp_dict.values()
-        table_list = temp_dict.keys()      
+        #col_name = column_name
+        final_col_list = db_dict.values()
+        table_list = db_dict.keys()      
         
+        """
         #check if the table exists. If not return none
-        if chk_table is not None:
-            if chk_table.lower() in [each.lower() for each in table_list]:
-                print 'table %s is present in the table list'%chk_table
-            else:
-                print 'table %s is not present in the table list'%chk_table
-                return None
-            
-        #similarly check if the table in the list exists
-        num_tab = len(list(set(table_list) & set(tab_name)))
-        if num_tab <= len(table_list):
-            print 'tables exist'
+        if chk_table.lower() in [each.lower() for each in table_list]:
+            print 'table %s is present in the table list'%chk_table
         else:
-            print 'tables do not exists'
+            print 'table %s is not present in the table list'%chk_table
             return None
-            
+        """
+        
+        #similarly check if the table in the list exists
+        num_tab = len(list(set(table_list) & set(table_names)))
+        if num_tab <= len(table_list):
+            print 'Tables exist'
+        else:
+            print 'Tables do not exists'
+            return None
+        
         #check for the columns passed in the dictionary
-        for i in temp_dict.keys():
+        for i in db_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
-            list1 = temp_dict[i]
+            list1 = db_dict[i]
             chk_list = len(list(set(list1) & set(clist)))
-
             if chk_list == len(list1):
-                for j in temp_dict[i]:
+                for j in db_dict[i]:
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
             else:
                 print 'Column(s) passed in the dictionary do not exist in the table'
                 return None
-
+        #print 'final_list is %s'%final_list
+        
+        #check the max flag
+        max_table = max_dict.keys()
+        for each in max_dict.values():
+            max_column = each[0]
+            max_flag = each[1]
+                
         #use string manipulation to create the select query
         len1 = len(final_list)
         len2 = len(table_list)
         ctr = 0
-        sql_string = "select "
+        sql_string = 'select '
+        left_join_str = ' left join '
+        where_str = ' where '
+        and_str = ' and '
         condition_str = ' '
         for i in final_list:
             if int(ctr) < (int(len1)-1):
@@ -362,90 +372,128 @@ class QueryBrowser(object):
             else:
                 sql_string = sql_string + str(i) + ' '
         sql_string = sql_string + 'from '
-        """
+        #print '\ntill generating columns', sql_string
+
+        #generate the code for max separately
+        print 'code for max flag set'
         ctr = 0
-        for i in table_list:
-            if int(ctr) < (int(len2)-1):
-                sql_string = sql_string + str(i.lower()) + ', '
-                ctr = ctr + 1
-            else:
-                sql_string = sql_string + str(i.lower()) + ' '
-        """       
-        #for left join hardcoded
-        sql_string = sql_string + '(' + tab_name[0].lower() + ' left join ' + tab_name[1].lower() + ' on ' + \
-                    tab_name[0].lower() + '.' + col_name[0] + ' = ' + tab_name[1].lower() + '.' + col_name[0] + ')'
-        
-        sql_string = sql_string + ' left join ' + tab_name[2].lower() + ' on ' + tab_name[1].lower() + '.' + \
-                    col_name[0] + ' = ' + tab_name[2].lower() + '.' + col_name[0]
-               
-        print '\n 1', sql_string
-        """
-        if len2 == 1:
-            condition_str = condition_str
-        elif len2 == 2:
-            condition_str = condition_str + table_list[0].lower() +\
-                '.' + col_name + ' = ' + table_list[1].lower() + '.' + col_name
-        else:
-            ctr = 0
-            for i in table_list:
-                if int(ctr) == 0:
-                    #do nothing
-                    #condition_str = condition_str
-                    ctr = ctr + 1
-                elif int(ctr) < (int(len2)-1):
-                    condition_str = condition_str + table_list[0].lower() +\
-                        '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name + ' and '
+        if max_flag:
+            #print 'max flag is set'
+            max_str = '(select max('
+            temp_str = ''
+            max_str = max_str + max_table[0].lower() + '.' + max_column + ') from ' + max_table[0].lower() + ' group by '
+            for each in column_names:
+                if int(ctr) < int(len(column_names)-1):
+                    temp_str = temp_str + max_table[0].lower() + '.' + each + ', '
                     ctr = ctr + 1
                 else:
-                    condition_str = condition_str + table_list[0].lower() +\
-                        '.' + col_name + ' = ' + str(i.lower()) + '.' + col_name
-        """
-        #put a condition to check for value
-        if value == None:
-            if int(len2) == 1:
-                sql_string = sql_string
-            else:
-                sql_string = sql_string + condition_str
-                
-        else:
-            sql_string = sql_string + condition_str
-            chk_value = ' and '
-            if len2 == 1:
-                condition_str = chk_table.lower() + '.' + chk_col + ' = ' + value
-                sql_string = sql_string + condition_str
-            else:
-                condition_str = chk_value + chk_table.lower() + '.' + chk_col + ' = ' + value
-                sql_string = sql_string + condition_str
+                    temp_str = temp_str + max_table[0].lower() + '.' + each
+            max_str = max_str + temp_str + ')'
+        print '\n', max_str
         
-
+        #left join code begins
+        #check for the number of tables and proceed
+        if len(table_list) == 1:
+            #only one table exists. simple select query
+            sql_string = sql_string + table_list[0].lower()
+            print '\n********** 1 table **********'
+            print sql_string
+            print '********** 1 table **********\n'
+        elif len(table_list) == 2:
+            #for two tables
+            sql_string = sql_string + table_names[0].lower() + left_join_str + table_names[1].lower() + ' on '
+            #run a loop for the matching columns
+            count = 0
+            if len(column_names) == 1:
+                sql_string = sql_string + table_names[0].lower() + '.' + column_names[0] + ' = ' + table_names[1].lower() + '.' + column_names[0]
+            else:
+                for each in column_names:
+                    if int(count) < int(len(column_names)-1):
+                        sql_string = sql_string + table_names[0].lower() + '.' + each + ' = ' + table_names[1].lower() + '.' + each + ' and '
+                        count  = count + 1
+                    else:
+                        sql_string = sql_string + table_names[0].lower() + '.' + each + ' = ' + table_names[1].lower() + '.' + each
+                        count = count + 1
+            #first check the max flag
+            if max_flag:
+                print 'max flag set'
+            else:
+                print 'max flag not set'
+            print '\n********** 2 tables **********'
+            print sql_string
+            print '********** 2 tables **********\n'
+        else:
+            #for more than 2 tables
+            tab_ctr = 1
+            counter = 0
+            for i in table_names:
+                #parse till end of the table list. code will be inside this loop
+                if (tab_ctr%2) == 1:
+                    if int(counter)<int(len(table_names)-1):
+                        #first pass
+                        sql_string = sql_string + ' (' + table_names[counter].lower() + left_join_str + table_names[counter+1].lower() + ' on '
+                        count = 0
+                        if len(column_names) == 1:
+                            sql_string = sql_string + table_names[counter].lower() + '.' + column_names[0] + ' = ' + \
+                                        table_names[counter+1].lower() + '.' + column_names[0] + ')'
+                            if max_flag:
+                                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
+                        else:
+                            for each in column_names:
+                                print each
+                                if int(count) < int(len(column_names)-1):
+                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
+                                                table_names[counter+1].lower() + '.' + each + ' and '
+                                    count  = count + 1
+                                else:
+                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
+                                                table_names[counter+1].lower() + '.' + each + ')'
+                                    count = count + 1
+                        if i == max_table[0]:
+                            sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
+                        counter = counter + 1
+                        tab_ctr = tab_ctr + 1
+                else:
+                    if int(counter) < int(len(table_names)-1):
+                        sql_string = sql_string + left_join_str + table_names[counter+1].lower() + ' on '
+                        count = 0
+                        if len(column_names) == 1:
+                            sql_string = sql_string + table_names[counter].lower() + '.' + column_names[0] + ' = ' + \
+                                        table_names[counter+1].lower() + '.' + column_names[0]
+                        else:
+                            for each in column_names:
+                                if int(count) < int(len(column_names)-1):
+                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
+                                                table_names[counter+1].lower() + '.' + each + ' and '
+                                    count  = count + 1
+                                else:
+                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
+                                                table_names[counter+1].lower() + '.' + each
+                                    count = count + 1
+                        if i == max_table[0]:
+                            sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
+                        counter = counter + 1
+                        tab_ctr = tab_ctr + 1
+                    
+        print '\n*****************************************'
+        print sql_string            
         cols_list = []
         tabs_list = []
 
         #convert all the table names to upper case
         for each in table_list:
             tabs_list.append(each.upper())
+        #print 'tabs_list is %s'%tabs_list
         
         #separate all the columns from the lists
-        new_keys = temp_dict.keys()
+        new_keys = db_dict.keys()
         for i in new_keys:
-            cols_list = cols_list + temp_dict[i]
+            cols_list = cols_list + db_dict[i]
+        #print 'cols_list is %s'%cols_list
         
-        print sql_string
-
-
+        #print '\n', sql_string
+        
         try:
-            """
-            temp_var1 = None
-            temp_var2 = None
-            temp_var1 = str(tabs_list[0]) +  '.' + col_name
-            temp_var2 = str(tabs_list[1]) +  '.' + col_name
-            if value <> None:
-                temp_var3 = str(tabs_list[0]) + '.' + chk_col
-
-            #query = self.dbcon_obj.session.query(eval(tabs_list[0]), eval(tabs_list[1])).\
-            #filter(eval(temp_var1)==eval(temp_var2)).filter(eval(temp_var3)==eval(value)).values(*cols_list)
-            """
-
             sample_str = ''
             ctr = 0
             for i in tabs_list:
@@ -455,24 +503,24 @@ class QueryBrowser(object):
                 else:
                     sample_str = sample_str + ', ' + i
                 query = self.dbcon_obj.session.query((sample_str))
+            #print 'sample_str is %s'%sample_str                
                 
-                
+            print '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
+
             result = query.from_statement(sql_string).values(*cols_list)
-            """
+                        
             
-            all_rows = []
-            for instance in result:
-                print instance
-                all_rows.append(instance)
-            print ' '
+            #all_rows = []
+            #for instance in result:
+            #    print instance
+            #    all_rows.append(instance)
+            #print ' '
             
             print 'Query Successful '
-            """
-
             return result, cols_list
         except Exception, e:
             print e
-            print 'Error retrieving the information. Query failed.'            
+            print 'Error retrieving the information. Query failed.'
                  
 
     ########## methods for select query end ##########
@@ -626,15 +674,17 @@ class TestMainClass(unittest.TestCase):
         #newobject.fetch_selected_rows(class_name, column_name, value)
 
         """ to print the join """
-        column_name = 'role_id'
+        column_names = ['role_id']
+        table_names = ['Office', 'Person']
         new_col = 'role_id'
         value = '1'
         chk_table = 'Person'
-        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
-        #temp_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years']}
-        temp_dict = {'Person':['first_name', 'last_name']}
+        db_dict = {'Person':['first_name', 'last_name'], 'Office':['role', 'years'], 'Asu':['grad', 'undergrad']}
+        max_dict = {'Person':['salary', '1']}
+        #db_dict = {'Person':['first_name', 'last_name', 'salary'], 'Office':['role', 'years']}
+        #db_dict = {'Person':['first_name', 'last_name']}
 
-        newobject.select_join(temp_dict, column_name, chk_table, new_col, value)
+        newobject.select_join(db_dict, column_names, table_names, max_dict)
         #newobject.select_join(temp_dict, column_name, chk_table)
         
         """ delete all records """
