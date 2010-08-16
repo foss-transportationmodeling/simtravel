@@ -1,10 +1,10 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-
+from spec_abstract_dialog import *
 from openamos.gui.env import *
 
 class FixedActivityPrismModels(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, co=None):
         super(FixedActivityPrismModels,self).__init__(parent)
         
         self.setWindowTitle('Fixed Activity Prism Models')
@@ -20,9 +20,11 @@ class FixedActivityPrismModels(QWidget):
         day_start_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 370,200, 50)
         day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
+        self.connect(day_start_button, SIGNAL('clicked()'), self.day_start)
         
         day_end_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 290, 200, 50)
+        self.connect(day_end_button, SIGNAL('clicked()'), self.day_end)
 
         
         worker_button = QPushButton('Worker', self)
@@ -43,26 +45,32 @@ class FixedActivityPrismModels(QWidget):
 
         num_work_episodes_button = QPushButton('For each job, number of \nwork episodes \n\nSeparate models \55 first \njob, second job. Also, \nvertices for each episode \nshould be conditional on \nthe previous one to \nensure consistency', self)
         num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 100, 180, 200)
+        self.connect(num_work_episodes_button, SIGNAL('clicked()'), self.num_work)
 
 
         work_start_1_button = QPushButton('Latest arrival at work \nfor each episode', self)
         work_start_1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 130, 180, 50)
+        self.connect(work_start_1_button, SIGNAL('clicked()'), self.work_start1)
 
 
         work_end_1_button = QPushButton('Earliest departure from \nwork for each episode', self)
         work_end_1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 + 210, 180, 50)
+        self.connect(work_end_1_button, SIGNAL('clicked()'), self.work_end1)
 
 
         num_sch_episodes_button = QPushButton('Number of school episodes', self)
         num_sch_episodes_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 100, 180, 50)
+        self.connect(num_sch_episodes_button, SIGNAL('clicked()'), self.school_num)
 
 
         sch_start_1_button = QPushButton('Latest arrival at school', self)
         sch_start_1_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 - 20, 180, 50)
+        self.connect(sch_start_1_button, SIGNAL('clicked()'), self.school_start1)
 
 
         sch_end_1_button = QPushButton('Earliest departure \nfrom school', self)
         sch_end_1_button.setGeometry((size.width()) / 2 + 15, size.height() / 2 + 60, 180, 50)
+        self.connect(sch_end_1_button, SIGNAL('clicked()'), self.school_end1)
 
 
         pre_sch_button = QPushButton('The arrival and \ndeparture time from \nPre-school are dependent \non the adult \n(worker/non-worker) that \nthe kid is assigned \nto', self)
@@ -71,8 +79,73 @@ class FixedActivityPrismModels(QWidget):
 
         t_s_prism_vertices_button = QPushButton('Time-space prism vertices of all \nindividuals within the population', self)
         t_s_prism_vertices_button.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
+        
+        self.configob = co
 
-
+        
+    def day_start(self):
+        diagtitle = COMPMODEL_DAYSTART
+        modelkey = MODELKEY_DAYSTART
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def day_end(self):
+        diagtitle = COMPMODEL_DAYEND
+        modelkey = MODELKEY_DAYEND
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def num_work(self):
+        diagtitle = COMPMODEL_NUMWRKEPISODES
+        modelkey = MODELKEY_NUMWRKEPISODES
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def work_start1(self):
+        diagtitle = COMPMODEL_WORKSTART1
+        modelkey = MODELKEY_WORKSTART1
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def work_end1(self):
+        diagtitle = COMPMODEL_WORKEND1
+        modelkey = MODELKEY_WORKEND1
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def school_num(self):
+        diagtitle = COMPMODEL_NUMSCHEPISODES
+        modelkey = MODELKEY_NUMSCHEPISODES
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def school_start1(self):
+        diagtitle = COMPMODEL_SCHSTART1
+        modelkey = MODELKEY_SCHSTART1
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def school_end1(self):
+        diagtitle = COMPMODEL_SCHEND1
+        modelkey = MODELKEY_SCHEND1
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
 
 
    
