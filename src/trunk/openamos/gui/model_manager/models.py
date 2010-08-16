@@ -28,7 +28,7 @@ class Models(QWidget):
         self.vehicle_ownership_models.show()
 
     def show_fixed_activity_prism_models(self):
-        self.fixed_activity_prism_models = FixedActivityPrismModels(model_widget)
+        self.fixed_activity_prism_models = FixedActivityPrismModels(model_widget, self.configobject)
         self.fixed_activity_prism_models.show()
 
     def show_skeleton_reconciliation_system(self):
@@ -50,3 +50,6 @@ class Models(QWidget):
     def show_activity_travel_pattern_simulator(self):
         self.activity_travel_pattern_simulator = Activity_Travel_Pattern_Simulator(model_widget)
         self.activity_travel_pattern_simulator.show()
+        
+    def setConfigObject(self,co):
+        self.configobject = co
