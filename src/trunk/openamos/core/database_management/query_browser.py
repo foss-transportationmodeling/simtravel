@@ -633,9 +633,8 @@ class QueryBrowser(object):
 
 
     ########## methods for insert query ##########
-    
     #insert values in the table
-    def insert_into_table(self, colnames, data):
+    def insert_into_table(self, arr, col_list, class_name):
         """
         This method is used to insert new values into the table.
 
@@ -645,27 +644,85 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
-
-        data_dicts = [{}]
-
-        #testing
-        print 'testing'
-        jack = Temp()
-        jack.first_name = 'jack'
-        jack.last_name = 'bauer'
-        jack.age = '45'
-        self.session.add(jack)
+        #method 1
+        """
+        arr_len = arr.shape[0]        
+        curr_time = time.time()
+        final_dictionary = {}
+        temp_list = '('
         
-        jack = Temp()
-        jack.first_name = 'tony'
-        jack.last_name = 'bauer'
-        jack.age = '51'
-        self.session.add(jack)
-        self.session.flush()
-        self.session.commit()
-        print 'jack and tony added'
-        #TODO: change the column names to dynamic, currently static
-        #can create various objects at once and use 'add_all' to add all objects
+        print 'time before processing %s'%time.time()
+        arr_count = 0
+        for i in arr:
+            temp_str = ''
+            key_count = 0
+            #parse till length of array
+            for j in col_list:
+                temp_var = i[key_count]
+                if key_count < (len(col_list)-1):
+                    temp_str = temp_str + "{'" + j + "'" + ":" + "'" + str(temp_var) + "'" + ','
+                    key_count = key_count + 1
+                else:
+                    temp_str = temp_str + "'" + j + "'" + ":" + "'" + str(temp_var) + "'}"
+                    key_count = key_count + 1
+            if arr_count < (arr.shape[0]-1):
+                temp_list = temp_list + temp_str + ', '
+                arr_count = arr_count + 1
+            else:
+                temp_list = temp_list + temp_str
+                arr_count = arr_count + 1
+        temp_list = temp_list + ')'
+        print 'time  after processing %s \n'%time.time()
+        
+        print 'time before insert stmt %s'%time.time()
+        try:
+            tab_name = Table(class_name.lower(), self.dbcon_obj.metadata, autoload=True)
+            i = tab_name.insert()
+            i.execute(eval(temp_list))
+        except Exception, e:
+            print 'Error while inserting data in the table'
+            print e
+        print 'time  after insert stmt %s\n'%time.time()
+        """
+        #method 2
+        #make a string of the columns
+        col_str = ''
+        col_count = 0
+        for i in col_list:
+            if col_count < (len(col_list)-1):
+                col_str = col_str + i + ', '
+                col_count = col_count + 1
+            else:
+                col_str = col_str + i
+        
+        print 'time before processing %s'%time.time()
+        #make a string of the array values
+        arr_str = ''
+        arr_count = 0
+        for each in arr:
+            val_count = 0
+            temp_str = '('
+            for j in col_list:
+                if val_count < (len(col_list)-1):
+                    temp_str = temp_str + str(each[val_count]) + ', '
+                    val_count = val_count + 1
+                else:
+                    temp_str = temp_str + str(each[val_count]) + ')'
+            if arr_count < (arr.shape[0]-1):
+                arr_str = arr_str + temp_str + ', '
+                arr_count = arr_count + 1
+            else:
+                arr_str = arr_str + temp_str
+        print 'time  after processing %s\n'%time.time()
+        
+        print 'time before insert stmt %s'%time.time()
+        try:
+            insert_stmt = "insert into %s (%s) values %s"%(class_name.lower(), col_str, arr_str)
+            result = self.dbcon_obj.connection.execute(insert_stmt)
+        except Exception, e:
+            print 'Error while inserting data in the table'
+            print e
+        print 'time  after insert stmt %s\n'%time.time()
 
     ########## methods for insert query end ##########
 
@@ -730,6 +787,13 @@ class TestMainClass(unittest.TestCase):
         """ to select all rows from the table """
         class_name = 'School'
         #newobject.select_all_fom_table(class_name)
+        
+        """ to insert rows """
+        class_name = 'Person2'
+        arr = na.arange(1000000).reshape(500000,2)
+        col_list = ['age', 'id']
+        #print arr
+        newobject.insert_into_table(arr, col_list, class_name)        
         
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
