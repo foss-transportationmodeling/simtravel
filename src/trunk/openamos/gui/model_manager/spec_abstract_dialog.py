@@ -68,6 +68,10 @@ class AbtractSpecDialog(QDialog):
         subpoplayout.addWidget(vallabel,0,3)          
         self.subpopval = LineEdit()
         subpoplayout.addWidget(self.subpopval,1,3)
+        subpoplayout.setColumnStretch(0,1)
+        subpoplayout.setColumnStretch(1,1)
+        subpoplayout.setColumnStretch(2,1)
+        subpoplayout.setColumnStretch(3,1)
         self.glayout.addWidget(self.subpopgb,1,0)
         
         self.modwidget = QWidget()
@@ -82,6 +86,7 @@ class AbtractSpecDialog(QDialog):
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         
         self.loadFromConfigObject()
+
 
     
     def loadFromConfigObject(self):
