@@ -234,8 +234,10 @@ class MainWindow(QMainWindow):
     def projectnew(self):
         project_new = NewProject()
         project_new.exec_()
-        self.proconfig = ConfigObject(configtree=project_new.configtree)
-        self.checkProject()
+        if project_new.configtree != None:
+            self.proconfig = ConfigObject(configtree=project_new.configtree)
+            self.checkProject()
+            
 
     def projectopen(self):
         self.project_open = OpenProject()
