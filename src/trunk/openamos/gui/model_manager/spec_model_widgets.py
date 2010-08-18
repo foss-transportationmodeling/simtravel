@@ -39,9 +39,12 @@ class AbstractModWidget(QGroupBox):
         self.choicetable = QTableWidget(0,2,self)
         self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Probability'])
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.choicetable.horizontalHeader().setResizeMode(0,1)
+        self.choicetable.horizontalHeader().setResizeMode(1,1)
+        
         #self.choicetable.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.choicelayout.addWidget(self.choicetable)
-        
+    
         self.mainlayout.addWidget(self.choicewidget,0,0,1,1)
         
         self.connect(self.choiceaddbutton, SIGNAL("clicked(bool)"), self.addChoice) 
@@ -74,6 +77,7 @@ class AbstractModWidget(QGroupBox):
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         self.choicetable.setSizePolicy(sizePolicy)
+        self.choicetable.horizontalHeader().setResizeMode(0,1)
         self.choicelayout.addWidget(self.choicetable)
         
         self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
@@ -94,6 +98,7 @@ class AbstractModWidget(QGroupBox):
         self.tableswidget.setSelectionMode(QAbstractItemView.SingleSelection)
         parentdialog = self.parent()
         self.tableswidget.addItems(parentdialog.tablelist)
+        self.tableswidget.setMaximumWidth(180)
         self.varslayout.addWidget(self.tableswidget,1,0)
         
         varslabel = QLabel('Columns')
@@ -101,6 +106,7 @@ class AbstractModWidget(QGroupBox):
         
         self.colswidget = QListWidget()
         self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.colswidget.setMaximumWidth(180)
         self.varslayout.addWidget(self.colswidget,1,1)        
         
         self.varsbutton = QPushButton('>>')
@@ -122,6 +128,9 @@ class AbstractModWidget(QGroupBox):
         self.varstable.setSelectionBehavior(QAbstractItemView.SelectRows)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
         self.varstable.setSizePolicy(sizePolicy)
+        self.varstable.horizontalHeader().setResizeMode(0,1)
+        self.varstable.horizontalHeader().setResizeMode(1,1)
+        self.varstable.horizontalHeader().setResizeMode(2,1)
         self.varslayout.addWidget(self.varstable,1,3)
         
         self.mainlayout.addWidget(self.varswidget,x,y,1,10)
@@ -177,6 +186,8 @@ class AbstractModWidget(QGroupBox):
         
         self.choicetable = QTableWidget(0,2,self)
         self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Threshold'])
+        self.choicetable.horizontalHeader().setResizeMode(0,1)
+        self.choicetable.horizontalHeader().setResizeMode(1,1)
         self.choicelayout.addWidget(self.choicetable)
         
         self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
@@ -216,6 +227,8 @@ class AbstractModWidget(QGroupBox):
         
         self.nesttable = QTableWidget(0,2,self)
         self.nesttable.setHorizontalHeaderLabels(['Nest', 'IV Parameter'])
+        self.nesttable.horizontalHeader().setResizeMode(0,1)
+        self.nesttable.horizontalHeader().setResizeMode(1,1)
         self.nestlayout.addWidget(self.nesttable)
         
         self.mainlayout.addWidget(self.nestwidget,0,0,1,1)
