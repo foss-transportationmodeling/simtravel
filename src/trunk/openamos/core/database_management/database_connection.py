@@ -468,7 +468,7 @@ class DataBaseConnection(object):
         table_flag = self.check_if_table_exists(table_name)
         if table_flag:
             #table exists
-            print 'Table exists in the database.'
+            #print 'Table - %s exists in the database.' %(table_name)
             column_list = []
             temp = None
             columns = Table(self.table_name, self.metadata, autoload=True)
