@@ -311,12 +311,12 @@ class QueryBrowser(object):
         Displays the rows based on the join and the selection criterion.
         """
         
-        db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
-                   'vehicles_r': ['vehtype', 'vehid'], 
-                   'households_r': ['numvehs']}
-        columns_names = ['houseid']
-        table_names = ['households', 'households_r', 'vehicles_r']
-        max_dict = {'vehicles_r':['vehid']}
+        #db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
+        #           'vehicles_r': ['vehtype', 'vehid'], 
+        #           'households_r': ['numvehs']}
+        #columns_names = ['houseid']
+        #table_names = ['households', 'households_r', 'vehicles_r']
+        #max_dict = {'vehicles_r':['vehid']}
         
 
 
@@ -340,9 +340,10 @@ class QueryBrowser(object):
         #similarly check if the table in the list exists
         num_tab = len(list(set(table_list) & set(table_names)))
         if num_tab <= len(table_list):
-            print 'Tables exist'
+            #print 'Tables exist'
+            pass
         else:
-            print 'Tables do not exists'
+            #print 'Tables do not exists'
             return None
         
         #check for the columns passed in the dictionary
@@ -385,7 +386,7 @@ class QueryBrowser(object):
         #print '\ntill generating columns', sql_string
 
         #generate the code for max separately
-        print 'code for max flag set'
+        #print 'code for max flag set'
         ctr = 0
         if max_flag:
             #print 'max flag is set'
@@ -399,7 +400,7 @@ class QueryBrowser(object):
                 else:
                     temp_str = temp_str + max_table[0].lower() + '.' + each
             max_str = max_str + temp_str + ')'
-        print '\n', max_str
+        #print '\n', max_str
         
         #left join code begins
         #check for the number of tables and proceed
@@ -488,8 +489,8 @@ class QueryBrowser(object):
                     counter = counter + 1
                     tab_ctr = tab_ctr + 1
                     
-        print '\n*****************************************'
-        print sql_string            
+
+ 
         cols_list = []
         tabs_list = []
 
@@ -504,7 +505,8 @@ class QueryBrowser(object):
             cols_list = cols_list + db_dict[i]
         #print 'cols_list is %s'%cols_list
         
-        print sql_string
+        #print 'Running query ...'
+        #print sql_string
 
 	#sql_string = """select households.urb, households.numchild, households.inclt35k, """\
         #    """households.ownhome, households.one, households.drvrcnt, vehicles_r.vehtype, """\
@@ -527,8 +529,6 @@ class QueryBrowser(object):
 
             #print 'sample_str is %s'%sample_str                
                 
-            print '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'                
-
             result = query.from_statement(sql_string).values(*cols_list)
                         
             
@@ -538,7 +538,7 @@ class QueryBrowser(object):
             #    all_rows.append(instance)
             #print ' '
             
-            print 'Query Successful '
+            #print 'Query Successful '
             return result, cols_list
         except Exception, e:
             print e
@@ -697,8 +697,11 @@ class QueryBrowser(object):
         
         print 'time before processing %s'%time.time()
         #make a string of the array values
-        arr_str = ''
-        arr_count = 0
+
+        arr_str = [tuple(each) for each in arr]
+        arr_str = str(arr_str)[1:-1]
+        
+        """
         for each in arr:
             val_count = 0
             temp_str = '('
@@ -713,6 +716,7 @@ class QueryBrowser(object):
                 arr_count = arr_count + 1
             else:
                 arr_str = arr_str + temp_str
+        """
         print 'time  after processing %s\n'%time.time()
         
         print 'time before insert stmt %s'%time.time()
