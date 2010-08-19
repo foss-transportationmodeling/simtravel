@@ -14,7 +14,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 # Define long term models
         
         long_term_models = QTreeWidgetItem(self)
-        long_term_models.setText(0, "Long Term Choices")
+        long_term_models.setText(0, COMP_LONGTERM)          #"Long Term Choices")
 
 
         generate_synthetic_population = QTreeWidgetItem(long_term_models)
@@ -39,25 +39,25 @@ class Model_Manager_Treewidget(QTreeWidget):
 # Define fixed activity location choice generator
         
         fixed_activity_models = QTreeWidgetItem(self)
-        fixed_activity_models.setText(0, "Fixed Activity Location Choice Generator")
+        fixed_activity_models.setText(0, COMP_FIXEDACTLOCATION)     #"Fixed Activity Location Choice Generator")
 
         workers = QTreeWidgetItem(fixed_activity_models)
         workers.setText(0, "Workers")
 
         work_location = QTreeWidgetItem(workers)
-        work_location.setText(0, "Identify a primary work location")
+        work_location.setText(0, COMPMODEL_WORKLOC)                 #"Identify a primary work location")
 
         children_adult = QTreeWidgetItem(fixed_activity_models)
         children_adult.setText(0, "Children + Adult")
 
         school_location_choice = QTreeWidgetItem(children_adult)
-        school_location_choice.setText(0, "School location choice")
+        school_location_choice.setText(0, COMPMODEL_SCHLOC1)        #"School location choice")
 
         children_1 = QTreeWidgetItem(fixed_activity_models)
         children_1.setText(0, "Children")
 
         preschool_location_choice = QTreeWidgetItem(children_1)
-        preschool_location_choice.setText(0, "Preschool location choice")
+        preschool_location_choice.setText(0, COMPMODEL_PRESCHLOC)   #"Preschool location choice"
         
         fixed_activity_locations = QTreeWidgetItem(fixed_activity_models)
         fixed_activity_locations.setText(0, "Fixed activity locations")
@@ -65,13 +65,13 @@ class Model_Manager_Treewidget(QTreeWidget):
 # Define Vehicle Ownership Model
 
         vehicle_ownership_models = QTreeWidgetItem(self)
-        vehicle_ownership_models.setText(0, "Vehicle Ownership Model")
+        vehicle_ownership_models.setText(0, COMP_VEHOWN)            #"Vehicle Ownership Model")
 
         count_vehicles = QTreeWidgetItem(vehicle_ownership_models)
-        count_vehicles.setText(0, "Count of Vehicles")
+        count_vehicles.setText(0, COMPMODEL_NUMVEHS)                #"Count of Vehicles")
 
         Vehicle_body_fuel_type  = QTreeWidgetItem(vehicle_ownership_models)
-        Vehicle_body_fuel_type.setText(0, "Vehicle body/fuel type")
+        Vehicle_body_fuel_type.setText(0, COMPMODEL_NUMTYPES )      #"Vehicle body/fuel type")
 
 # Define Fixed Activity Prism Models       
 
@@ -131,76 +131,76 @@ class Model_Manager_Treewidget(QTreeWidget):
         child_model.setText(0, "Child Daily Status and Allocation Model")
 
         children_3 = QTreeWidgetItem(child_model)
-        children_3.setText(0, "Children (0-17 years old)")
+        children_3.setText(0, COMPMODEL_CSCHILD017)                 #"Children (0-17 years old)")
 
         children_school_1 = QTreeWidgetItem(child_model)
-        children_school_1.setText(0, "Children (Status \55 School)")
+        children_school_1.setText(0, COMPMODEL_CSCHILDSCH1)         #"Children (Status \55 School)")
 
         children_preschool_1 = QTreeWidgetItem(child_model)
-        children_preschool_1.setText(0, "Children (Status \55 Pre-school)")
+        children_preschool_1.setText(0, COMPMODEL_CSCHILDPRE1)      #"Children (Status \55 Pre-school)")
 
         children_stay_home = QTreeWidgetItem(child_model)
-        children_stay_home.setText(0, "Children (Status \55 Stay home)")
+        children_stay_home.setText(0, COMPMODEL_CSCHILDSTA)         #"Children (Status \55 Stay home)")
 
         school_preschool = QTreeWidgetItem(child_model)
-        school_preschool.setText(0, "Is the child going to School or Pre-school today?")
+        school_preschool.setText(0, COMPMODEL_CSSCHPRE)             #"Is the child going to School or Pre-school today?")
 
         engage_activities_independently = QTreeWidgetItem(child_model)
-        engage_activities_independently.setText(0, "Can the child engage in activities independently?")
+        engage_activities_independently.setText(0, COMPMODEL_CSINDCHILD)    #"Can the child engage in activities independently?")
  
         engage_activities_like_adults = QTreeWidgetItem(child_model)
-        engage_activities_like_adults.setText(0, "Child can engage in activities independently like adults")
+        engage_activities_like_adults.setText(0, COMPMODEL_CSCHILDIND)  #"Child can engage in activities independently like adults")
 
         assign_child_household = QTreeWidgetItem(child_model)
-        assign_child_household.setText(0, "Assign the child to household")
+        assign_child_household.setText(0, COMPMODEL_CSASSIGN)       #"Assign the child to household")
 
         children_school_2 = QTreeWidgetItem(child_model)
-        children_school_2.setText(0, "Children (Status \55 School)")
+        children_school_2.setText(0, COMPMODEL_CSCHILDSCH2)         #"Children (Status \55 School)")
 
         children_preschool_2 = QTreeWidgetItem(child_model)
-        children_preschool_2.setText(0, "Children (Status \55 Pre-school)")
+        children_preschool_2.setText(0, COMPMODEL_CSCHILDPRE2)      #"Children (Status \55 Pre-school)")
 
         travel_independently_to_school = QTreeWidgetItem(child_model)
-        travel_independently_to_school.setText(0, "Does the child travel independently to school?")
+        travel_independently_to_school.setText(0, COMPMODEL_CSINSCHTO)  #"Does the child travel independently to school?")
 
         travel_mode_to_School = QTreeWidgetItem(child_model)
-        travel_mode_to_School.setText(0, "Travel Mode to School")
+        travel_mode_to_School.setText(0, COMPMODEL_CSMODETOSCH)     #"Travel Mode to School")
 
         assign_drop_off_event = QTreeWidgetItem(child_model)
-        assign_drop_off_event.setText(0, "Assign a drop-off event to household")
+        assign_drop_off_event.setText(0, COMPMODEL_CSDROPOFF)       #"Assign a drop-off event to household")
 
         travel_independently_from_school = QTreeWidgetItem(child_model)
-        travel_independently_from_school.setText(0, "Does the child travel independently from school?")
+        travel_independently_from_school.setText(0, COMPMODEL_CSINSCHFROM)  #"Does the child travel independently from school?")
 
         travel_mode_from_School = QTreeWidgetItem(child_model)
-        travel_mode_from_School.setText(0, "Travel Mode from School")
+        travel_mode_from_School.setText(0, COMPMODEL_CSMODEFROMSCH)         #"Travel Mode from School")
 
         assign_pick_up_event = QTreeWidgetItem(child_model)
-        assign_pick_up_event.setText(0, "Assign a pick-up event to household")
+        assign_pick_up_event.setText(0, COMPMODEL_CSPICKUP)                 #"Assign a pick-up event to household")
 
         activity_pursued_independently = QTreeWidgetItem(child_model)
-        activity_pursued_independently.setText(0, "Activity pursued independently after school?")
+        activity_pursued_independently.setText(0, COMPMODEL_CSINAFTER)      #"Activity pursued independently after school?")
 
         treat_child_like_adult = QTreeWidgetItem(child_model)
-        treat_child_like_adult.setText(0, "Treat the child like an adult and generate activity-travel patterns")
+        treat_child_like_adult.setText(0, COMPMODEL_CSTREAT)                #"Treat the child like an adult and generate activity-travel patterns")
 
         after_school_activity = QTreeWidgetItem(child_model)
-        after_school_activity.setText(0, "Is there time to engage in an after school CHILD activity?")
+        after_school_activity.setText(0, COMPMODEL_CSISTHERE)               #"Is there time to engage in an after school CHILD activity?")
 
         choice = QTreeWidgetItem(child_model)
-        choice.setText(0, "Activity Type\Choice Destination Choice\Activity Duration Choice")
+        choice.setText(0, COMPMODEL_CSACTTYPE)                              #"Activity Type\Choice Destination Choice\Activity Duration Choice")
 
         activity_with_adult = QTreeWidgetItem(child_model)
-        activity_with_adult.setText(0, "Flag the child as a dependent and the child engages in activity with an adult")
+        activity_with_adult.setText(0, COMPMODEL_CSWORKSTAT)                #"Flag the child as a dependent and the child engages in activity with an adult")
 
         more_activity = QTreeWidgetItem(child_model)
-        more_activity.setText(0, "More activities")
+        more_activity.setText(0, COMPMODEL_CSMOREACT)                       #"More activities")
 
         return_home = QTreeWidgetItem(child_model)
-        return_home.setText(0, "Return Home")
+        return_home.setText(0, COMPMODEL_CSRETURNH)                         #"Return Home")
 
         to_adult = QTreeWidgetItem(child_model)
-        to_adult.setText(0, "Move to Adult Daily Status")
+        to_adult.setText(0, COMPMODEL_CSMOVEADULT)                          #"Move to Adult Daily Status")
 
         
 # Define Adult Daily Status Model
@@ -391,6 +391,131 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_SCHEND1:
             diagtitle = COMPMODEL_SCHEND1
             modelkey = MODELKEY_SCHEND1
+        elif item.text(col) == COMPMODEL_PRESCHLOC:
+            diagtitle = COMPMODEL_PRESCHLOC
+            modelkey = MODELKEY_PRESCHLOC
+        elif item.text(col) == COMPMODEL_SCHLOC1:
+            diagtitle = COMPMODEL_SCHLOC1
+            modelkey = MODELKEY_SCHLOC1
+        elif item.text(col) == COMPMODEL_WORKLOC:
+            diagtitle = COMPMODEL_WORKLOC
+            modelkey = MODELKEY_WORKLOC
+        elif item.text(col) == COMPMODEL_NUMVEHS:
+            diagtitle = COMPMODEL_NUMVEHS
+            modelkey = MODELKEY_NUMVEHS
+        elif item.text(col) == COMPMODEL_NUMTYPES:
+            diagtitle = COMPMODEL_NUMTYPES
+            modelkey = MODELKEY_NUMVEHTYPES
+            
+        elif item.text(col) == COMPMODEL_CSCHILD017:
+            diagtitle = COMPMODEL_CSCHILD017
+            modelkey = MODELKEY_CSCHILD017
+        elif item.text(col) == COMPMODEL_CSCHILDSCH1:
+            diagtitle = COMPMODEL_CSCHILDSCH1
+            modelkey = MODELKEY_CSCHILDSCH1
+        elif item.text(col) == COMPMODEL_CSCHILDPRE1:
+            diagtitle = COMPMODEL_CSCHILDPRE1
+            modelkey = MODELKEY_CSCHILDPRE1
+        elif item.text(col) == COMPMODEL_CSCHILDSTA:
+            diagtitle = COMPMODEL_CSCHILDSTA
+            modelkey = MODELKEY_CSCHILDSTA
+        elif item.text(col) == COMPMODEL_CSSCHPRE:
+            diagtitle = COMPMODEL_CSSCHPRE
+            modelkey = MODELKEY_CSSCHPRE
+        elif item.text(col) == COMPMODEL_CSINDCHILD:
+            diagtitle = COMPMODEL_CSINDCHILD
+            modelkey = MODELKEY_CSINDCHILD
+        elif item.text(col) == COMPMODEL_CSCHILDIND:
+            diagtitle = COMPMODEL_CSCHILDIND
+            modelkey = MODELKEY_CSCHILDIND
+        elif item.text(col) == COMPMODEL_CSASSIGN:
+            diagtitle = COMPMODEL_CSASSIGN
+            modelkey = MODELKEY_CSASSIGN
+        elif item.text(col) == COMPMODEL_CSCHILDSCH2:
+            diagtitle = COMPMODEL_CSCHILDSCH2
+            modelkey = MODELKEY_CSCHILDSCH2
+        elif item.text(col) == COMPMODEL_CSCHILDPRE2:
+            diagtitle = COMPMODEL_CSCHILDPRE2
+            modelkey = MODELKEY_CSCHILDPRE2
+        elif item.text(col) == COMPMODEL_CSINSCHTO:
+            diagtitle = COMPMODEL_CSINSCHTO
+            modelkey = MODELKEY_CSINSCHTO
+        elif item.text(col) == COMPMODEL_CSMODETOSCH:
+            diagtitle = COMPMODEL_CSMODETOSCH
+            modelkey = MODELKEY_CSMODETOSCH
+        elif item.text(col) == COMPMODEL_CSDROPOFF:
+            diagtitle = COMPMODEL_CSDROPOFF
+            modelkey = MODELKEY_CSDROPOFF
+        elif item.text(col) == COMPMODEL_CSINSCHFROM:
+            diagtitle = COMPMODEL_CSINSCHFROM
+            modelkey = MODELKEY_CSINSCHFROM
+        elif item.text(col) == COMPMODEL_CSMODEFROMSCH:
+            diagtitle = COMPMODEL_CSMODEFROMSCH
+            modelkey = MODELKEY_CSMODEFROMSCH
+        elif item.text(col) == COMPMODEL_CSPICKUP:
+            diagtitle = COMPMODEL_CSPICKUP
+            modelkey = MODELKEY_CSPICKUP
+        elif item.text(col) == COMPMODEL_CSINAFTER:
+            diagtitle = COMPMODEL_CSINAFTER
+            modelkey = MODELKEY_CSINAFTER
+        elif item.text(col) == COMPMODEL_CSTREAT:
+            diagtitle = COMPMODEL_CSTREAT
+            modelkey = MODELKEY_CSTREAT
+        elif item.text(col) == COMPMODEL_CSISTHERE:
+            diagtitle = COMPMODEL_CSISTHERE
+            modelkey = MODELKEY_CSISTHERE
+        elif item.text(col) == COMPMODEL_CSACTTYPE:
+            diagtitle = COMPMODEL_CSACTTYPE
+            modelkey = MODELKEY_CSACTTYPE
+        elif item.text(col) == COMPMODEL_CSWORKSTAT:
+            diagtitle = COMPMODEL_CSWORKSTAT
+            modelkey = MODELKEY_CSWORKSTAT
+        elif item.text(col) == COMPMODEL_CSMOREACT:
+            diagtitle = COMPMODEL_CSMOREACT
+            modelkey = MODELKEY_CSMOREACT
+        elif item.text(col) == COMPMODEL_CSRETURNH:
+            diagtitle = COMPMODEL_CSRETURNH
+            modelkey = MODELKEY_CSRETURNH
+        elif item.text(col) == COMPMODEL_CSMOVEADULT:
+            diagtitle = COMPMODEL_CSMOVEADULT
+            modelkey = MODELKEY_CSMOVEADULT
+        elif item.text(col) == COMPMODEL_ASISDEPEND:
+            diagtitle = COMPMODEL_ASISDEPEND
+            modelkey = MODELKEY_ASISDEPEND
+        elif item.text(col) == COMPMODEL_ASHOUSEWORKER:
+            diagtitle = COMPMODEL_ASHOUSEWORKER
+            modelkey = MODELKEY_ASHOUSEWORKER
+        elif item.text(col) == COMPMODEL_ASDEPENDWORKER:
+            diagtitle = COMPMODEL_ASDEPENDWORKER
+            modelkey = MODELKEY_ASDEPENDWORKER
+        elif item.text(col) == COMPMODEL_ASADULTHOME:
+            diagtitle = COMPMODEL_ASADULTHOME
+            modelkey = MODELKEY_ASADULTHOME
+        elif item.text(col) == COMPMODEL_ASONENWORKER:
+            diagtitle = COMPMODEL_ASONENWORKER
+            modelkey = MODELKEY_ASONENWORKER
+        elif item.text(col) == COMPMODEL_ASDEPENDNONWORK:
+            diagtitle = COMPMODEL_ASDEPENDNONWORK
+            modelkey = MODELKEY_ASDEPENDNONWORK
+        elif item.text(col) == COMPMODEL_ASASSIGNHOUSE:
+            diagtitle = COMPMODEL_ASASSIGNHOUSE
+            modelkey = MODELKEY_ASASSIGNHOUSE
+        elif item.text(col) == COMPMODEL_ASISWORKER:
+            diagtitle = COMPMODEL_ASISWORKER
+            modelkey = MODELKEY_ASISWORKER
+        elif item.text(col) == COMPMODEL_ASEMPLOYWORK:
+            diagtitle = COMPMODEL_ASEMPLOYWORK
+            modelkey = MODELKEY_ASEMPLOYWORK
+        elif item.text(col) == COMPMODEL_ASWORKHOME:
+            diagtitle = COMPMODEL_ASWORKHOME
+            modelkey = MODELKEY_ASWORKHOME
+        elif item.text(col) == COMPMODEL_ASGOTOWORK:
+            diagtitle = COMPMODEL_ASGOTOWORK
+            modelkey = MODELKEY_ASGOTOWORK
+        elif item.text(col) == COMPMODEL_ASNWORKEPISO:
+            diagtitle = COMPMODEL_ASNWORKEPISO
+            modelkey = MODELKEY_ASNWORKEPISO
+
             
         
         if diagtitle != None:
