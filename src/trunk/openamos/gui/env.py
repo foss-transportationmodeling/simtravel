@@ -159,6 +159,38 @@ COMPMODEL_ASEMPLOYWORK = 'Is an employed adult going to work today?'
 COMPMODEL_ASWORKHOME = 'Work from home'
 COMPMODEL_ASGOTOWORK = 'Go to Work'
 COMPMODEL_ASNWORKEPISO = 'No Work Episodes'
+#Activity Skeleton Reconciliation System      
+COMPMODEL_ASRECONCIL = 'Activity Skeleton Reconciliation'
+COMPMODEL_ASCONST = 'Within person constraints'     
+COMPMODEL_ASADJUST = 'Adjustments to the activity skeleton based on expected Travel Time from previous day'
+#Activity Travel Pattern Simulator
+COMPMODEL_SMSLICE = 'Within a time slice'
+#Children with after school dependent activities
+COMPMODEL_SMACTIVEPURSUE = 'Can activity be pursued jointly with a Household member?'
+COMPMODEL_SMACTIVEASSIGNED = 'Activity assigned to a Non-household member comprising Joint Activity with Non-household member'
+COMPMODEL_SMASSIGNACTIVE = 'Assign the activity to Household member comprising Joint Activity with household member'
+COMPMODEL_SMCHOICECHILD = 'Mode choice model for intra-household joint trips with children'
+#All other individuals
+COMPMODEL_SMINDIVIDUAL = 'Adult individuals, children with independent activities'
+COMPMODEL_SMTRIPTIME = 'Is travel time to next fixed activity \74 time available in the prism?'
+COMPMODEL_SMTCHOICE = 'Activity Type Choice; Mode-Destination Choice'
+COMPMODEL_SMSTARTTIME = 'Actual start time for the activity'
+COMPMODEL_SMENOUGHTIME = 'Is there enough time to engage in the activity?'
+COMPMODEL_SMPROCEED = 'Proceed to next fixed activity'
+COMPMODEL_SMMCHOICE = 'Mode Choice to the next fixed activity'
+COMPMODEL_SMISHOV = 'Is the mode of the trip HOV?'
+COMPMODEL_SMACTIVEPURSED = 'Can activity be pursued jointly with Household members?'
+COMPMODEL_SMJOINACTIVE = 'For each available household member, check to see if he/she will join the activity?'
+COMPMODEL_SMACTIVENON = 'Joint Activity with Non-household member'
+COMPMODEL_SMACTIVEHOUSE = 'Joint Activity with household member'
+COMPMODEL_SMSOVHOV = 'If mode is SOV or HOV Driver identify vehicle'
+COMPMODEL_SMPATTERN = 'Activity-travel patterns for all individuals within the time-slice'
+#Activity Travel Reconciliation System
+COMPMODEL_ATRECONCIL = 'Activity-travel Pattern Reconciliation'
+COMPMODEL_ATPERCONST = 'Within person constraints'
+COMPMODEL_ATHOUCONST = 'Within household constraints'
+COMPMODEL_ATADJUST = 'Duration adjustment after arrival'
+
 
 
 MODELKEY_WORKSTAT = 'WorkStat'
@@ -239,6 +271,37 @@ MODELKEY_ASEMPLOYWORK = 'EmployedToworkToday'
 MODELKEY_ASWORKHOME = 'WorkfromHome'
 MODELKEY_ASGOTOWORK = 'GoWork'
 MODELKEY_ASNWORKEPISO = 'NoWorkEpisodes'
+#Activity Skeleton Reconciliation System      
+MODELKEY_ASRECONCIL = 'ActiveSkeletonReconcil'
+MODELKEY_ASCONST = 'PersonConstraint'     
+MODELKEY_ASADJUST = 'AdjustActiveSkeleton'
+#Activity Travel Pattern Simulator
+MODELKEY_SMSLICE = 'TimeSlice'
+#Children with after school dependent activities
+MODELKEY_SMACTIVEPURSUE = 'CanActivePursued'
+MODELKEY_SMACTIVEASSIGNED = 'ActiveAssignedNon-household'
+MODELKEY_SMASSIGNACTIVE = 'AssignAcivityHousehold'
+MODELKEY_SMCHOICECHILD = 'ModeChoiceChild'
+#All other individuals
+MODELKEY_SMINDIVIDUAL = 'IndividualsActive'
+MODELKEY_SMTRIPTIME = 'TravelTimeNextActivity'
+MODELKEY_SMTCHOICE = 'ModeDestinationChoice'
+MODELKEY_SMSTARTTIME = 'ActualStartTime'
+MODELKEY_SMENOUGHTIME = 'EnoughTimetoEngage'
+MODELKEY_SMPROCEED = 'ProceedNextActive'
+MODELKEY_SMMCHOICE = 'ModeChoiceNext'
+MODELKEY_SMISHOV = 'IsHOV'
+MODELKEY_SMACTIVEPURSED = 'ActivePursued?'
+MODELKEY_SMJOINACTIVE = 'HouseJoinActivity'
+MODELKEY_SMACTIVENON = 'JointActiveNon-house'
+MODELKEY_SMACTIVEHOUSE = 'JointActiveHouse'
+MODELKEY_SMSOVHOV = 'SOVorHOVehicle'
+MODELKEY_SMPATTERN = 'ActiveTravelPattern'
+#Activity Travel Reconciliation System
+MODELKEY_ATRECONCIL = 'ActiveTravelReconcil'
+MODELKEY_ATPERCONST = 'PersonConstraint'
+MODELKEY_ATHOUCONST = 'HouseConstraint'
+MODELKEY_ATADJUST = 'DurationAdjust'
 
 
 
