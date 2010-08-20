@@ -652,6 +652,10 @@ class QueryBrowser(object):
         Values inserted in to the table
         """
         #method 4
+        #before inserting data delete the index
+        index_cols = self.delete_index(class_name.lower())
+        print index_cols
+        
         print 'time before processing %s'%time.time()
         #make a string of the columns
         col_str = ''
@@ -677,7 +681,10 @@ class QueryBrowser(object):
             print 'Error while inserting data in the table'
             print e
         print 'time  after insert stmt %s\n'%time.time()
-
+        
+        #after insert create new index
+        self.create_index(class_name.lower(), index_cols)
+        
     ########## methods for insert query end ##########
     
     ########## methods for creating and deleting index##########
@@ -695,29 +702,37 @@ class QueryBrowser(object):
             else:
                 columns = columns + i
         index_stmt = 'create index %s on %s (%s)'%(index_name, class_name.lower(), columns)
-        print 'time before the index %s\n'%time.time()
         try:
             self.result = self.dbcon_obj.connection.execute(index_stmt)
+            print 'Index %s created'%index_name
         except Exception, e:
             print 'Error while creating an index'
             print e
-        print 'time  after the index %s\n'%time.time()
-        
+
+            
     #delete an index
     def delete_index(self, class_name):
         index_stmt = ''
-        columns = ''
+        columns = []
         count = 0
         index_name = class_name.lower() + '_index'
         index_stmt = 'drop index %s'%(index_name)
         print 'delete index'
-        print 'time before the index %s\n'%time.time()
         try:
+            new_table = Table(self.class_name.lower(), self.dbcon_obj.metadata, autoload=True)
+            pk = new_table.indexes
+            parts = str(pk).split("'")
+            count = 1
+            for i in parts:
+                if count%2 == 0:
+                    columns.append(i)
+                count = count + 1
             self.result = self.dbcon_obj.connection.execute(index_stmt)
+            print 'Index %s deleted'%index_name
+            return columns
         except Exception, e:
             print 'Error while creating an index'
             print e
-        print 'time  after the index %s\n'%time.time()
         
     ########## methods for creating and deleting index##########
     
@@ -793,11 +808,11 @@ class TestMainClass(unittest.TestCase):
         """ create an index """
         class_name = 'Person2'
         col_list = ['id', 'age']
-        newobject.create_index(class_name, col_list)
+        #newobject.create_index(class_name, col_list)
         
         """ delete an index """
         class_name = 'Person2'
-        newobject.delete_index(class_name)
+        #newobject.delete_index(class_name)
         
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
