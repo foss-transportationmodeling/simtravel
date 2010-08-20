@@ -361,11 +361,18 @@ class QueryBrowser(object):
         #print 'final_list is %s'%final_list
         
         #check the max flag
-        max_table = max_dict.keys()
-        for each in max_dict.values():
-            max_column = each[0]
-            if max_dict is not None:
-                max_flag = 1
+        
+        if max_dict is not None:
+            max_flag = 1
+            max_table = max_dict.keys()
+            max_column = max_dict.values()[0][0]
+            print max_column, max_table
+            raw_input()
+            #for each in max_dict.values():
+            #    max_column = each[0]
+        else:
+            max_flag = 0
+
                 
         #use string manipulation to create the select query
         len1 = len(final_list)
@@ -686,6 +693,7 @@ class QueryBrowser(object):
         """
         #method 2
         #make a string of the columns
+        """
         col_str = ''
         col_count = 0
         for i in col_list:
@@ -694,9 +702,12 @@ class QueryBrowser(object):
                 col_count = col_count + 1
             else:
                 col_str = col_str + i
-        
+        """
         print 'time before processing %s'%time.time()
         #make a string of the array values
+        
+        col_str = [tuple(col) for col in col_list]
+        col_str = str(col_str)[1:-1]
 
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
