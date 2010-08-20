@@ -651,49 +651,9 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
-        #method 1
-        """
-        arr_len = arr.shape[0]        
-        curr_time = time.time()
-        final_dictionary = {}
-        temp_list = '('
-        
+        #method 4
         print 'time before processing %s'%time.time()
-        arr_count = 0
-        for i in arr:
-            temp_str = ''
-            key_count = 0
-            #parse till length of array
-            for j in col_list:
-                temp_var = i[key_count]
-                if key_count < (len(col_list)-1):
-                    temp_str = temp_str + "{'" + j + "'" + ":" + "'" + str(temp_var) + "'" + ','
-                    key_count = key_count + 1
-                else:
-                    temp_str = temp_str + "'" + j + "'" + ":" + "'" + str(temp_var) + "'}"
-                    key_count = key_count + 1
-            if arr_count < (arr.shape[0]-1):
-                temp_list = temp_list + temp_str + ', '
-                arr_count = arr_count + 1
-            else:
-                temp_list = temp_list + temp_str
-                arr_count = arr_count + 1
-        temp_list = temp_list + ')'
-        print 'time  after processing %s \n'%time.time()
-        
-        print 'time before insert stmt %s'%time.time()
-        try:
-            tab_name = Table(class_name.lower(), self.dbcon_obj.metadata, autoload=True)
-            i = tab_name.insert()
-            i.execute(eval(temp_list))
-        except Exception, e:
-            print 'Error while inserting data in the table'
-            print e
-        print 'time  after insert stmt %s\n'%time.time()
-        """
-        #method 2
         #make a string of the columns
-        """
         col_str = ''
         col_count = 0
         for i in col_list:
@@ -702,37 +662,16 @@ class QueryBrowser(object):
                 col_count = col_count + 1
             else:
                 col_str = col_str + i
-        """
-        print 'time before processing %s'%time.time()
-        #make a string of the array values
         
-        col_str = [tuple(col) for col in col_list]
-        col_str = str(col_str)[1:-1]
-
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
-        
-        """
-        for each in arr:
-            val_count = 0
-            temp_str = '('
-            for j in col_list:
-                if val_count < (len(col_list)-1):
-                    temp_str = temp_str + str(each[val_count]) + ', '
-                    val_count = val_count + 1
-                else:
-                    temp_str = temp_str + str(each[val_count]) + ')'
-            if arr_count < (arr.shape[0]-1):
-                arr_str = arr_str + temp_str + ', '
-                arr_count = arr_count + 1
-            else:
-                arr_str = arr_str + temp_str
-        """
+        #print arr_str
         print 'time  after processing %s\n'%time.time()
         
         print 'time before insert stmt %s'%time.time()
         try:
             insert_stmt = "insert into %s (%s) values %s"%(class_name.lower(), col_str, arr_str)
+            #print insert_stmt
             result = self.dbcon_obj.connection.execute(insert_stmt)
         except Exception, e:
             print 'Error while inserting data in the table'
@@ -740,7 +679,48 @@ class QueryBrowser(object):
         print 'time  after insert stmt %s\n'%time.time()
 
     ########## methods for insert query end ##########
-
+    
+    ########## methods for creating and deleting index##########
+    #create an index
+    def create_index(self, class_name, col_list):
+        index_stmt = ''
+        columns = ''
+        count = 0
+        index_name = class_name.lower() + '_index'
+        print 'create index'
+        for i in col_list:
+            if count < (len(col_list)-1):
+                columns = columns + i + ', '
+                count = count + 1
+            else:
+                columns = columns + i
+        index_stmt = 'create index %s on %s (%s)'%(index_name, class_name.lower(), columns)
+        print 'time before the index %s\n'%time.time()
+        try:
+            self.result = self.dbcon_obj.connection.execute(index_stmt)
+        except Exception, e:
+            print 'Error while creating an index'
+            print e
+        print 'time  after the index %s\n'%time.time()
+        
+    #delete an index
+    def delete_index(self, class_name):
+        index_stmt = ''
+        columns = ''
+        count = 0
+        index_name = class_name.lower() + '_index'
+        index_stmt = 'drop index %s'%(index_name)
+        print 'delete index'
+        print 'time before the index %s\n'%time.time()
+        try:
+            self.result = self.dbcon_obj.connection.execute(index_stmt)
+        except Exception, e:
+            print 'Error while creating an index'
+            print e
+        print 'time  after the index %s\n'%time.time()
+        
+    ########## methods for creating and deleting index##########
+    
 
 #unit test to test the code
 import unittest
@@ -809,6 +789,15 @@ class TestMainClass(unittest.TestCase):
         col_list = ['age', 'id']
         #print arr
         newobject.insert_into_table(arr, col_list, class_name)        
+        
+        """ create an index """
+        class_name = 'Person2'
+        col_list = ['id', 'age']
+        newobject.create_index(class_name, col_list)
+        
+        """ delete an index """
+        class_name = 'Person2'
+        newobject.delete_index(class_name)
         
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
