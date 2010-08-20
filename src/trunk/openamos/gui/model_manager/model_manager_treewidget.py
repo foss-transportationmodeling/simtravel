@@ -209,7 +209,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         adult_model.setText(0, "Adult Daily Status Model")
 
         children_assigned = QTreeWidgetItem(adult_model)
-        children_assigned.setText(0, "Is a dependent child/children assigned to household including stay home and chauffeuring activities?")
+        children_assigned.setText(0, COMPMODEL_ASISDEPEND)      #"Is a dependent child/children assigned to household including stay home and chauffeuring activities?")
 
         children_stay_home = QTreeWidgetItem(adult_model)
         children_stay_home.setText(0, "Child/Children with staying home activities")
@@ -218,37 +218,37 @@ class Model_Manager_Treewidget(QTreeWidget):
         children_chauffeuring.setText(0, "Child/Children with chauffeuring activities")
 
         all_working_adult = QTreeWidgetItem(children_stay_home)
-        all_working_adult.setText(0, "Households with all working adults")
+        all_working_adult.setText(0, COMPMODEL_ASHOUSEWORKER)     #"Households with all working adults")
 
         assign_children_1 = QTreeWidgetItem(children_stay_home)
         assign_children_1.setText(0, "Assign all dependent children to a working adult")
 
         adult_work = QTreeWidgetItem(children_stay_home)
-        adult_work.setText(0, "This adult works from home")
+        adult_work.setText(0, COMPMODEL_ASADULTHOME)        #"This adult works from home")
 
         nonworking_adult = QTreeWidgetItem(children_stay_home)
-        nonworking_adult.setText(0, "Households with at least one non-working adult")
+        nonworking_adult.setText(0, COMPMODEL_ASONENWORKER)    #"Households with at least one non-working adult")
 
         assign_children_2 = QTreeWidgetItem(children_stay_home)
-        assign_children_2.setText(0, "Assign all dependent children to one non-working adult")
+        assign_children_2.setText(0, COMPMODEL_ASDEPENDNONWORK) #"Assign all dependent children to one non-working adult")
 
         assign_children_3 = QTreeWidgetItem(children_chauffeuring)
-        assign_children_3.setText(0, "Assign each dependent child to a household adult subject to the fixed activity schedule of the adult")
+        assign_children_3.setText(0, COMPMODEL_ASASSIGNHOUSE)   #"Assign each dependent child to a household adult subject to the fixed activity schedule of the adult")
 
         check_adult = QTreeWidgetItem(adult_model)
-        check_adult.setText(0, "For all other adults, check to see if the adult is worker?")
+        check_adult.setText(0, COMPMODEL_ASISWORKER)            #"For all other adults, check to see if the adult is worker?")
 
         work_today = QTreeWidgetItem(adult_model)
-        work_today.setText(0, "Is an employed adult going to work today?")
+        work_today.setText(0, COMPMODEL_ASEMPLOYWORK)           #"Is an employed adult going to work today?")
 
         work_from_home = QTreeWidgetItem(adult_model)
-        work_from_home.setText(0, "Work from home")
+        work_from_home.setText(0, COMPMODEL_ASWORKHOME)         #"Work from home")
 
         go_to_work = QTreeWidgetItem(adult_model)
-        go_to_work.setText(0, "Go to Work")
+        go_to_work.setText(0, COMPMODEL_ASGOTOWORK)             #"Go to Work")
 
         no_work_episodes = QTreeWidgetItem(adult_model)
-        no_work_episodes.setText(0, "No Work Episodes")
+        no_work_episodes.setText(0, COMPMODEL_ASNWORKEPISO)     #"No Work Episodes")
 
 
 # Define Activity Skeleton Reconciliation System        
@@ -257,13 +257,13 @@ class Model_Manager_Treewidget(QTreeWidget):
         skeleton_reconciliation_system.setText(0, "Activity Skeleton Reconciliation System")
         
         skeleton_reconciliation = QTreeWidgetItem(skeleton_reconciliation_system)
-        skeleton_reconciliation.setText(0, "Activity Skeleton Reconciliation")
+        skeleton_reconciliation.setText(0, COMPMODEL_ASRECONCIL)    #"Activity Skeleton Reconciliation")
         
         person_constraints_1 = QTreeWidgetItem(skeleton_reconciliation_system)
-        person_constraints_1.setText(0, "Within person constraints")
+        person_constraints_1.setText(0, COMPMODEL_ASCONST)          #"Within person constraints")
         
         adjustment_1 = QTreeWidgetItem(skeleton_reconciliation_system)
-        adjustment_1.setText(0, "Adjustments to the activity skeleton based on expected Travel Time from previous day")
+        adjustment_1.setText(0, COMPMODEL_ASADJUST )                #"Adjustments to the activity skeleton based on expected Travel Time from previous day")
         
 
         
@@ -272,83 +272,83 @@ class Model_Manager_Treewidget(QTreeWidget):
         activity_travel_pattern_simulator.setText(0, "Activity Travel Pattern Simulator")
         
         time_slice = QTreeWidgetItem(activity_travel_pattern_simulator)
-        time_slice.setText(0, "Within a time slice")
+        time_slice.setText(0, COMPMODEL_SMSLICE)                    #"Within a time slice")
         
         children_with_activity = QTreeWidgetItem(activity_travel_pattern_simulator)
         children_with_activity.setText(0, "Children with after school dependent activities")
 
         activity_pursued_1 = QTreeWidgetItem(children_with_activity)
-        activity_pursued_1.setText(0, "Can activity be pursued jointly with a Household member?")
+        activity_pursued_1.setText(0, COMPMODEL_SMACTIVEPURSUE)     #"Can activity be pursued jointly with a Household member?")
         
         assign_to_non_hhold = QTreeWidgetItem(children_with_activity)
-        assign_to_non_hhold.setText(0, "Activity assigned to a Non-household member comprising Joint Activity with Non-household member")
+        assign_to_non_hhold.setText(0, COMPMODEL_SMACTIVEASSIGNED)  #"Activity assigned to a Non-household member comprising Joint Activity with Non-household member")
         
         assign_to_hhold = QTreeWidgetItem(children_with_activity)
-        assign_to_hhold.setText(0, "Assign the activity to Household member comprising Joint Activity with household member")
+        assign_to_hhold.setText(0, COMPMODEL_SMASSIGNACTIVE)        #"Assign the activity to Household member comprising Joint Activity with household member")
         
         mode_choice_model = QTreeWidgetItem(children_with_activity)
-        mode_choice_model.setText(0, "Mode choice model for intra-household joint trips with children")
+        mode_choice_model.setText(0, COMPMODEL_SMCHOICECHILD)       #"Mode choice model for intra-household joint trips with children")
         
         all_other_individuals = QTreeWidgetItem(activity_travel_pattern_simulator)
         all_other_individuals.setText(0, "All other individuals")
         
         adult_individuals = QTreeWidgetItem(all_other_individuals)
-        adult_individuals.setText(0, "Adult individuals, children with independent activities")
+        adult_individuals.setText(0, COMPMODEL_SMINDIVIDUAL)        #"Adult individuals, children with independent activities")
         
         travel_time = QTreeWidgetItem(all_other_individuals)
-        travel_time.setText(0, "Is travel time to next fixed activity \74 time available in the prism?")
+        travel_time.setText(0, COMPMODEL_SMTRIPTIME)                #"Is travel time to next fixed activity \74 time available in the prism?")
         
         activity_choice = QTreeWidgetItem(all_other_individuals)
-        activity_choice.setText(0, "Activity Type Choice; Mode-Destination Choice")
+        activity_choice.setText(0, COMPMODEL_SMTCHOICE)             #"Activity Type Choice; Mode-Destination Choice")
         
         actual_start_time = QTreeWidgetItem(all_other_individuals)
-        actual_start_time.setText(0, "Actual start time for the activity")
+        actual_start_time.setText(0, COMPMODEL_SMSTARTTIME)         #"Actual start time for the activity")
         
         time_in_activity = QTreeWidgetItem(all_other_individuals)
-        time_in_activity.setText(0, "Is there enough time to engage in the activity?")
+        time_in_activity.setText(0, COMPMODEL_SMENOUGHTIME)         #"Is there enough time to engage in the activity?")
         
         proceed_next_activity = QTreeWidgetItem(all_other_individuals)
-        proceed_next_activity.setText(0, "Proceed to next fixed activity")
+        proceed_next_activity.setText(0, COMPMODEL_SMPROCEED)       #"Proceed to next fixed activity")
         
         mode_choice_next_activity = QTreeWidgetItem(all_other_individuals)
-        mode_choice_next_activity.setText(0, "Mode Choice to the next fixed activity")
+        mode_choice_next_activity.setText(0, COMPMODEL_SMMCHOICE)   #"Mode Choice to the next fixed activity")
         
         hov = QTreeWidgetItem(all_other_individuals)
-        hov.setText(0, "Is the mode of the trip HOV?")
+        hov.setText(0, COMPMODEL_SMISHOV)                           #"Is the mode of the trip HOV?")
         
         activity_pursued_2 = QTreeWidgetItem(all_other_individuals)
-        activity_pursued_2.setText(0, "Can activity be pursued jointly with Household members?")
+        activity_pursued_2.setText(0, COMPMODEL_SMACTIVEPURSED)     #"Can activity be pursued jointly with Household members?")
         
         check_if_join_activity = QTreeWidgetItem(all_other_individuals)
-        check_if_join_activity.setText(0, "For each available household member, check to see if he/she will join the activity?")
+        check_if_join_activity.setText(0, COMPMODEL_SMJOINACTIVE)   #"For each available household member, check to see if he/she will join the activity?")
         
         activity_non_hhold = QTreeWidgetItem(all_other_individuals)
-        activity_non_hhold.setText(0, "Joint Activity with Non-household member")
+        activity_non_hhold.setText(0, COMPMODEL_SMACTIVENON)        #"Joint Activity with Non-household member")
         
         activity_hhold = QTreeWidgetItem(all_other_individuals)
-        activity_hhold.setText(0, "Joint Activity with household member")
+        activity_hhold.setText(0, COMPMODEL_SMACTIVEHOUSE)          #"Joint Activity with household member")
         
         sov_hov = QTreeWidgetItem(activity_travel_pattern_simulator)
-        sov_hov.setText(0, "If mode is SOV or HOV Driver identify vehicle")
+        sov_hov.setText(0, COMPMODEL_SMSOVHOV)                      #"If mode is SOV or HOV Driver identify vehicle")
         
         activity_travel_pattern = QTreeWidgetItem(activity_travel_pattern_simulator)
-        activity_travel_pattern.setText(0, "Activity-travel patterns for all individuals within the time-slice")
+        activity_travel_pattern.setText(0, COMPMODEL_SMPATTERN)     #"Activity-travel patterns for all individuals within the time-slice")
         
 # Define Activity Travel Reconciliation System
         travel_reconciliation_system = QTreeWidgetItem(self)
         travel_reconciliation_system.setText(0, "Activity Travel Reconciliation System")
 
         pattern_reconciliation = QTreeWidgetItem(travel_reconciliation_system)
-        pattern_reconciliation.setText(0, "Activity-travel Pattern Reconciliation")
+        pattern_reconciliation.setText(0, COMPMODEL_ATRECONCIL)             #"Activity-travel Pattern Reconciliation")
         
         person_constraints_2 = QTreeWidgetItem(travel_reconciliation_system)
-        person_constraints_2.setText(0, "Within person constraints")
+        person_constraints_2.setText(0, COMPMODEL_ATPERCONST)               #"Within person constraints")
         
         hhold_constraints = QTreeWidgetItem(travel_reconciliation_system)
-        hhold_constraints.setText(0, "Within household constraints")
+        hhold_constraints.setText(0, COMPMODEL_ATHOUCONST)                  #"Within household constraints")
         
         adjustment_2 = QTreeWidgetItem(travel_reconciliation_system)
-        adjustment_2.setText(0, "Duration adjustment after arrival")
+        adjustment_2.setText(0, COMPMODEL_ATADJUST)                         #"Duration adjustment after arrival")
 
         
 
@@ -515,6 +515,84 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_ASNWORKEPISO:
             diagtitle = COMPMODEL_ASNWORKEPISO
             modelkey = MODELKEY_ASNWORKEPISO
+        elif item.text(col) == COMPMODEL_ASRECONCIL:
+            diagtitle = COMPMODEL_ASRECONCIL
+            modelkey = MODELKEY_ASRECONCIL
+        elif item.text(col) == COMPMODEL_ASCONST:
+            diagtitle = COMPMODEL_ASCONST
+            modelkey = MODELKEY_ASCONST
+        elif item.text(col) == COMPMODEL_ASADJUST:
+            diagtitle = COMPMODEL_ASADJUST
+            modelkey = MODELKEY_ASADJUST
+        elif item.text(col) == COMPMODEL_SMSLICE:
+            diagtitle = COMPMODEL_SMSLICE
+            modelkey = MODELKEY_SMSLICE
+        elif item.text(col) == COMPMODEL_SMACTIVEPURSUE:
+            diagtitle = COMPMODEL_SMACTIVEPURSUE
+            modelkey = MODELKEY_SMACTIVEPURSUE
+        elif item.text(col) == COMPMODEL_SMACTIVEASSIGNED:
+            diagtitle = COMPMODEL_SMACTIVEASSIGNED
+            modelkey = MODELKEY_SMACTIVEASSIGNED
+        elif item.text(col) == COMPMODEL_SMASSIGNACTIVE:
+            diagtitle = COMPMODEL_SMASSIGNACTIVE
+            modelkey = MODELKEY_SMASSIGNACTIVE
+        elif item.text(col) == COMPMODEL_SMCHOICECHILD:
+            diagtitle = COMPMODEL_SMCHOICECHILD
+            modelkey = MODELKEY_SMCHOICECHILD
+        elif item.text(col) == COMPMODEL_SMINDIVIDUAL:
+            diagtitle = COMPMODEL_SMINDIVIDUAL
+            modelkey = MODELKEY_SMINDIVIDUAL
+        elif item.text(col) == COMPMODEL_SMTRIPTIME:
+            diagtitle = COMPMODEL_SMTRIPTIME
+            modelkey = MODELKEY_SMTRIPTIME
+        elif item.text(col) == COMPMODEL_SMTCHOICE:
+            diagtitle = COMPMODEL_SMTCHOICE
+            modelkey = MODELKEY_SMTCHOICE
+        elif item.text(col) == COMPMODEL_SMSTARTTIME:
+            diagtitle = COMPMODEL_SMSTARTTIME
+            modelkey = MODELKEY_SMSTARTTIME
+        elif item.text(col) == COMPMODEL_SMENOUGHTIME:
+            diagtitle = COMPMODEL_SMENOUGHTIME
+            modelkey = MODELKEY_SMENOUGHTIME
+        elif item.text(col) == COMPMODEL_SMPROCEED:
+            diagtitle = COMPMODEL_SMPROCEED
+            modelkey = MODELKEY_SMPROCEED
+        elif item.text(col) == COMPMODEL_SMMCHOICE:
+            diagtitle = COMPMODEL_SMMCHOICE
+            modelkey = MODELKEY_SMMCHOICE
+        elif item.text(col) == COMPMODEL_SMISHOV:
+            diagtitle = COMPMODEL_SMISHOV
+            modelkey = MODELKEY_SMISHOV
+        elif item.text(col) == COMPMODEL_SMACTIVEPURSED:
+            diagtitle = COMPMODEL_SMACTIVEPURSED
+            modelkey = MODELKEY_SMACTIVEPURSED
+        elif item.text(col) == COMPMODEL_SMJOINACTIVE:
+            diagtitle = COMPMODEL_SMJOINACTIVE
+            modelkey = MODELKEY_SMJOINACTIVE
+        elif item.text(col) == COMPMODEL_SMACTIVENON:
+            diagtitle = COMPMODEL_SMACTIVENON
+            modelkey = MODELKEY_SMACTIVENON
+        elif item.text(col) == COMPMODEL_SMACTIVEHOUSE:
+            diagtitle = COMPMODEL_SMACTIVEHOUSE
+            modelkey = MODELKEY_SMACTIVEHOUSE
+        elif item.text(col) == COMPMODEL_SMSOVHOV:
+            diagtitle = COMPMODEL_SMSOVHOV
+            modelkey = MODELKEY_SMSOVHOV
+        elif item.text(col) == COMPMODEL_SMPATTERN:
+            diagtitle = COMPMODEL_SMPATTERN
+            modelkey = MODELKEY_SMPATTERN      
+        elif item.text(col) == COMPMODEL_ATRECONCIL:
+            diagtitle = COMPMODEL_ATRECONCIL
+            modelkey = MODELKEY_ATRECONCIL
+        elif item.text(col) == COMPMODEL_ATPERCONST:
+            diagtitle = COMPMODEL_ATPERCONST
+            modelkey = MODELKEY_ATPERCONST
+        elif item.text(col) == COMPMODEL_ATHOUCONST:
+            diagtitle = COMPMODEL_ATHOUCONST
+            modelkey = MODELKEY_ATHOUCONST
+        elif item.text(col) == COMPMODEL_ATADJUST:
+            diagtitle = COMPMODEL_ATADJUST
+            modelkey = MODELKEY_ATADJUST
 
             
         
