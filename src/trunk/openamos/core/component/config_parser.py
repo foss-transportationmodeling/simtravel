@@ -31,6 +31,7 @@ from openamos.core.component.abstract_component import AbstractComponent
 
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
 
+from openamos.core.project_configuration import ProjectConfiguration
 from openamos.core.data_array import DataArray, DataFilter
 from openamos.core.errors import ConfigurationError 
 
@@ -68,6 +69,26 @@ class ConfigParser(object):
 
         return componentList
 
+    def parse_projectAttributes(self):
+        projectElement = self.configObject.find('Project')
+        projectName = projectElement.get('name')
+        projectLocation = projectElement.get('location')
+        projectSeed = projectElement.get('seed')
+        if projectSeed is None:
+            projectSeed = 0
+        else:
+            projectSeed = int(projectSeed)
+        projectSubsample = projectElement.get('subsample')
+        if projectSubsample is not None:
+            projectSubsample = int(projectSubsample)
+
+        projectConfigObject = ProjectConfiguration(projectName,
+                                                   projectLocation,
+                                                   projectSeed,
+                                                   projectSubsample)
+            
+        return projectConfigObject
+
     def parse_databaseAttributes(self):
         dbConfig_element = self.configObject.find('DBConfig')
         protocol = dbConfig_element.get('dbprotocol')
@@ -83,10 +104,25 @@ class ConfigParser(object):
                                                dbname)
         return dbConfigObject
         
+    def parse_tableHierarchy(self):
+        dbTables_element = self.configObject.find('DBTables')
+        tableIterator = dbTables_element.getiterator("Table")
+        tableOrderDict = {}
+        for table_element in tableIterator:
+            tableName = table_element.get("table")
+            tableKeys = table_element.get("key")
+            tableKeys = re.split('[,]', tableKeys)
+            tableOrder = int(table_element.get("order"))
+            tableOrderDict[tableOrder] = [tableName, tableKeys]
+        
+        return tableOrderDict
+
     
                 
+                
     def create_component(self, component_element):
-        comp_name = component_element.get('name')
+        comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
+        
         modelsIterator = component_element.getiterator("Model")
         self.model_list = []
         self.component_variable_list = []
@@ -97,8 +133,10 @@ class ConfigParser(object):
             #model_list.append(model)
         #print self.component_variable_list
         self.component_variable_list = list(set(self.component_variable_list))
-        #print self.component_variable_list
-        component = AbstractComponent(comp_name, self.model_list, self.component_variable_list)
+        component = AbstractComponent(comp_name, self.model_list, 
+                                      self.component_variable_list, 
+                                      comp_table,
+                                      comp_keys)
         return component
         
     def create_model_object(self, model_element):
@@ -113,7 +151,10 @@ class ConfigParser(object):
             self.create_count_object(model_element)
         
         if model_formulation == 'Multinomial Logit':
-            self.create_multinomial_logit_object(model_element)
+            if model_element.find('AlternativeSet') is None:
+                self.create_multinomial_logit_object(model_element)
+            else:
+                self.create_multinomial_logit_object_generic_locs(model_element)
     
         if model_formulation == 'Nested Logit':
             self.create_nested_logit_object(model_element)
@@ -134,13 +175,14 @@ class ConfigParser(object):
 
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')
 
         choice = [dep_varname]
 
         # Creating the coefficients input for the regression model
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
-        coefficients = [coeff_dict] 
+        coefficients = coeff_dict 
 
         variable_list = variable_list + vars_list
 
@@ -178,8 +220,7 @@ class ConfigParser(object):
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model_type = 'regression'
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, 
-                                dep_table, dep_keys)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -195,35 +236,45 @@ class ConfigParser(object):
         
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
 
         #Creating the coefficients input for the regression model
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
-        coefficients = [coeff_dict]
+        coefficients = coeff_dict
 
         variable_list = variable_list + vars_list
 
         # dependent variable
         variable = model_element.get('name')
         
-        # alternatives        
+        # alternatives and values-categorues lookup
         alternativeIterator = model_element.getiterator('Alternative')
         choice = []
+        values = []
         for i in alternativeIterator:
             alternative = i.get('id')
             choice.append(alternative)
+            value = i.get('value')
+            if value is not None:
+                values.append(float(value))
+            print alternative, value
+
+        if len(values) == 0:
+            values = None
 
         # specification object
         specification = CountSpecification(choice, coefficients)
         
+        # filters
         dataFilter = self.return_filter_condition(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
+
         model_type = 'choice'
         model = CountRegressionModel(specification)
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
-                                dep_table, dep_keys)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -231,6 +282,10 @@ class ConfigParser(object):
         
 
     def create_multinomial_logit_object(self, model_element):
+        """
+        Accomodates both generic and alternative specific where the
+        alternatives are spelled out
+        """
         #model type
         model_type = model_element.get('type')
 
@@ -239,24 +294,34 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #print dep_varname, "inside, regiular"
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
         choice = []
         coefficients_list = []
+        values = []
         for i in alternativeIterator:
             alternative = i.get('id')
             choice.append(alternative)
+            value = i.get('value')
+            if value is not None:
+                values.append(float(value))
             if model_type == 'Alternative Specific':
                 coeff_dict, vars_list = self.return_coeff_vars(i)
-                coefficients_list.append(coeff_dict)
+                coefficients_list = coefficients_list + coeff_dict
                 variable_list = variable_list + vars_list
         if model_type <> 'Alternative Specific':
             coeff_dict, vars_list = self.return_coeff_vars(model_element)
-            coefficients_list.append(coeff_dict)
+            coefficients_list = coefficients_list + coeff_dict
             coefficients_list = coefficients_list*len(choice)
             variable_list = variable_list + vars_list
+        
+        if len(values) == 0:
+            values = None
 
         #print dep_varname
 
@@ -268,8 +333,57 @@ class ConfigParser(object):
     
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
-                                dep_table, dep_keys)#Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)#Model Object
+
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list
+
+
+    def create_multinomial_logit_object_generic_locs(self, model_element):
+        """
+        Accomodates alternative specific where the
+        alternatives are not spelled out. Like for location choices
+        """
+        #model type
+        model_type = model_element.get('type')
+
+        #variable_list_required for running the model
+        variable_list = []
+
+        # dependent variable
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #print dep_varname, 'other one'
+        # alternatives
+        altSetElement = model_element.find('AlternativeSet')
+        alternativeSet = int(altSetElement.get('count'))
+        choice = []
+        coefficients_list = []
+        values = []
+        for i in range(alternativeSet):
+            alternative = dep_varname + str(i+1)
+            choice.append(alternative)
+            value = i + 1
+            values.append(float(value))
+            
+        coeff_list, vars_list = self.return_coeff_vars(model_element, alternativeSet)
+        #print vars_list, 'VARIABLES LISTTTTTTTT'
+        #print coeff_list, 'COEFFICIENTS LISTTTTTTT'
+
+        #print dep_varname
+
+        # logit specification object
+        specification = Specification(choice, coeff_list)
+
+        dataFilter = self.return_filter_condition(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+    
+        model = LogitChoiceModel(specification) 
+        model_type = 'choice'                   #Type of Model 
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -282,7 +396,8 @@ class ConfigParser(object):
 
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')        
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         #Specification dict
         spec_build_ind = {}
@@ -292,12 +407,16 @@ class ConfigParser(object):
         nest_struct = {}
         spec_dict = {}
         alts = []
+        values = []
         alternativeIterator = model_element.getiterator('Alternative')
         for i in alternativeIterator:
             name = i.get('id')
+            value = i.get('value')
+            if value is not None:
+                values.append(float(value))
             coeff_dict, vars_list = self.return_coeff_vars(i)
             variable_list = variable_list + vars_list
-            spec = NestedChoiceSpecification([name], [coeff_dict])
+            spec = NestedChoiceSpecification([name], coeff_dict)
             spec_build_ind[name] = spec
 
             branch = i.get('branch')
@@ -333,6 +452,8 @@ class ConfigParser(object):
                 except:
                     nest_struct[parents[-1]] = [name]
                 
+        if len(values) == 0:
+            values = None
 
         for i in nest_struct:
             if i not in alts:
@@ -397,8 +518,7 @@ class ConfigParser(object):
 
         model = NestedLogitChoiceModel(specification)
         model_type = 'choice'
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
-                                dep_table, dep_keys)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)
 
 
         #return model_object, variable_list
@@ -424,23 +544,30 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
         choice = []
+        values = []
         coefficients_list = []
         threshold_list = []
         for i in alternativeIterator:
             alternative = i.get('id')
             choice.append(alternative)
+            value = i.get('value')
+            if value is not None:
+                values.append(float(value))
             threshold = i.get('threshold')
             if threshold is not None:
                 threshold_list.append(float(threshold))
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
-        coefficients_list.append(coeff_dict)
+        coefficients_list = coefficients_list + coeff_dict
         variable_list = vars_list
-            
+        
+        if len(values) == 0:
+            values = None
 
         #print dep_varname, model_type
                     
@@ -458,12 +585,14 @@ class ConfigParser(object):
 
         model = OrderedModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
-                                dep_table, dep_keys) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
+        #print self.component_variable_list
+        #print 'HERE IS OREDERED LOGIT'
+        #raw_input()
 
     
     def create_probability_object(self, model_element):
@@ -472,19 +601,25 @@ class ConfigParser(object):
 
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
-        dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+        dep_varname = depvariable_element.get('var')
+        #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
         choice = []
+        values = []
         coefficients_list = []
         for i in alternativeIterator:
             alternative = i.get('id')
             choice.append(alternative)
+            value = i.get('value')
+            if value is not None:
+                values.append(float(value))
             coeff_dict, vars_list = self.return_coeff_vars(i)
-            coefficients_list.append(coeff_dict)
+            coefficients_list = coefficients_list + coeff_dict
             variable_list = variable_list + vars_list
-
+        if len(values) == 0:
+            values = None
         #print coefficients_list
         #print dep_varname
 
@@ -496,44 +631,83 @@ class ConfigParser(object):
 
         model = ProbabilityModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter,
-                                dep_table, dep_keys) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def check_for_interaction_terms(self, var_element):
+    def check_for_interaction_terms(self, var_element, alternativeSet):
         variable_list = []
         coeff_dict = {}
         dep_varname = ''
 
         if var_element.get('interaction') is not None:
-            var_element.get('interaction')
+            rep_var = var_element.get('repeat')
+            if rep_var is not None:
+                rep_var_list = re.split('[,]', rep_var)
+                
+            #var_element.get('interaction')
             varnames = re.split('[,]', var_element.get('var'))
             #print varnames
             tablenames = re.split('[,]', var_element.get('table'))
             #print tablenames
+            
+            rep_var_table_list = []
+            for i in rep_var_list:
+                #find and remove the repeate variable from varnames
+                var_ind = varnames.index(i)
+                varnames.pop(var_ind)
+
+                #find the tablenames for the ones that are to be repeated
+                rep_var_table_list.append(tablenames.pop(var_ind))
+
             for i in range(len(varnames)):
                 variable_list.append((tablenames[i], varnames[i]))
                 dep_varname = dep_varname + varnames[i].title()
                 coeff_dict[varnames[i]] = 1
-            choice = [dep_varname]
-            coefficients_list = [coeff_dict]
-            # specification object
+
+            if alternativeSet is None:
+                choice = [dep_varname]
+                coefficients_list = [coeff_dict]
+                # specification object
             #print coefficients_list
-            specification = Specification(choice, coefficients_list)
+                specification = Specification(choice, coefficients_list)
+                
+                model = InteractionModel(specification) 
+                model_type = 'regression'                   #Type of Model 
+                model_object = SubModel(model, model_type, dep_varname) #Model Object
+                dep_var = dep_varname
+            else:
+                dep_var = []
+                dep_rep_varname = copy.deepcopy(dep_varname)
+                for j in range(alternativeSet):
+                    dep_varname = dep_rep_varname
+                    
+                    coeffs_rep = copy.deepcopy(coeff_dict)
 
-            model = InteractionModel(specification) 
-            model_type = 'regression'                   #Type of Model 
-            model_object = SubModel(model, model_type, dep_varname) #Model Object
-            
+                    for k in range(len(rep_var_list)):
+                        variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
+                        dep_varname = dep_varname + rep_var_list[k]
+                        coeffs_rep[rep_var_list[k]+str(j+1)] = 1
+                        
+                    dep_varname = dep_varname + str(j+1)
+                    choice = [dep_varname]
+                    coefficients_list = [coeffs_rep]
+                    specification = Specification(choice, coefficients_list)
+                    
+                    model = InteractionModel(specification)
+                    model_type = 'regression'
+                    model_object = SubModel(model, model_type, dep_varname)
+                    
+                    dep_var.append(dep_varname)
+            #print dep_var
             #return model_object, variable_list
-            #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
+                    #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
 
-            self.model_list.append(model_object)
-            self.component_variable_list = self.component_variable_list + variable_list            
-            return dep_varname
+                    self.model_list.append(model_object)
+                    self.component_variable_list = self.component_variable_list + variable_list            
+            return dep_var
 
         else:
             return None
@@ -542,24 +716,41 @@ class ConfigParser(object):
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
         
-    def return_coeff_vars(self, element):
+    def return_coeff_vars(self, element, alternativeSet=None):
         variableIterator = element.getiterator('Variable')
         vars_list = []
-        coeff_dict = {}
+        coeff_ret = []
+
 
         for i in variableIterator:
-            dep_varname = self.check_for_interaction_terms(i)
-            if dep_varname is not None:
-                #print '\t\tINTERACTION TERM'
-                coeff = i.get('coeff')
-                #print coeff
-                coeff_dict[dep_varname] = float(coeff)
+            dep_var = self.check_for_interaction_terms(i, alternativeSet)
+            if dep_var is not None:
+                #print '\t\tINTERACTION TERM', dep_var
+                for j in dep_var:
+                    coeff_dict = {}
+                    coeff = i.get('coeff')
+                    #print coeff
+                    #coeff_dict[j] = float(coeff)
+                    if len(coeff_ret) < len(dep_var):
+                        coeff_dict[j] = float(coeff)
+                        coeff_ret.append(coeff_dict)
+                    else:
+                        coeff_ret[dep_var.index(j)][j] = float(coeff)
+                #print coeff_ret, 'new repeated INTERACTION TERMSSSSSSSSSSSSSSSSSSSSSSSSS'
             else:
+                #print 'NOT AN INTERACTION TERM'
+                coeff_dict = {}
                 vars_list.append(self.return_table_var(i))
                 varname = i.get('var')
                 coeff = i.get('coeff')
-                coeff_dict[varname] = float(coeff)
-        return coeff_dict, vars_list
+                if len(coeff_ret) < 1:
+                    coeff_dict[varname] = float(coeff)
+                    coeff_ret.append(coeff_dict)
+                else:
+                    coeff_ret[0][varname] = float(coeff)
+                #print coeff_ret
+        #print vars_list, 'sent back', coeff_ret
+        return coeff_ret, vars_list
 
 
     def return_filter_condition(self, model_element):
@@ -595,8 +786,8 @@ class ConfigParser(object):
 
         runUntilCondition = run_until_element.get('condition')
 
-        tablename_val = run_until_element.get('table')
-        varname_val = run_until_element.get('var')
+        tablename_val = run_until_element.get('valuetable')
+        varname_val = run_until_element.get('valuevar')
         variable_list_val = [(tablename_val, varname_val)]
 
         self.component_variable_list = self.component_variable_list +\
@@ -607,23 +798,28 @@ class ConfigParser(object):
         runUntilFilter = DataFilter(varname_ind, runUntilCondition, varname_val)
         return runUntilFilter
 
-    def return_dep_var_attribs(self, depvariable_element):
+    def return_component_attribs(self, component_element):
         """
-        Returns the variable name, table name, keys.
+        Returns the variable name, table name, keys for the component.
         """
-        varname = depvariable_element.get('var')
-        tablename = depvariable_element.get('table')
-        keys = depvariable_element.get('key')
-        if keys is not None:
-            keys = re.split('[,]', depvariable_element.get('key'))
-        print varname, tablename, keys
-        return varname, tablename, keys
+        name = component_element.get('name')
+        tablename = component_element.get('table')
+        prim_keys = component_element.get('key')
+        if prim_keys is not None:
+            prim_keys = re.split('[,]', prim_keys)
+        index_keys = component_element.get('count_key')
+        if index_keys is not None:
+            index_keys = re.split('[,]', index_keys)
+
+        
+        #print varname, tablename, [prim_keys, index_keys]
+        return name, tablename, [prim_keys, index_keys]
         
                             
 
 if __name__ == '__main__':
     import time
-    
+    """
     from numpy import zeros, random
     fileloc = '/home/kkonduri/simtravel/test/config.xml' 
     configObject = etree.parse(fileloc)
@@ -707,6 +903,10 @@ if __name__ == '__main__':
     query_gen, cols = newobject.select_join(temp_dict, 'household_id', pers_class_name, 'employ', '1')
     
     ti = time.time()
+    
+    print type(query_gen)
+
+    """
     c = 0
     for i in query_gen:
         c = c + 1

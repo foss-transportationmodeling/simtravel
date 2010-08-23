@@ -5,6 +5,7 @@
 #include all the import 
 import sys
 import os
+import time
 import exceptions
 import sqlalchemy
 import sqlite3
@@ -56,6 +57,11 @@ class OFFICE(object): pass
 class TEMP(object): pass
 
 class SCHOOL(object): pass
+
+# Run time tables empty class objects
+class HOUSEHOLDS_R(object):pass
+
+class VEHICLES_R(object):pass
 
 class QueryBrowser(object):
     
@@ -214,6 +220,15 @@ class QueryBrowser(object):
         table_name = 'school'
         self.school = self.table_mapper(class_name, table_name)
 
+        # RUNTIME TABLES FOLLOW HERE
+        class_name = 'HOUSEHOLDS_R'
+        table_name = 'households_r'
+        self.household = self.table_mapper(class_name, table_name)
+
+        class_name = 'VEHICLES_R'
+        table_name = 'vehicles_r'
+        self.household = self.table_mapper(class_name, table_name)        
+
     ########## methods for mapping end ##########
 
 
@@ -299,7 +314,7 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, db_dict, column_names, table_names, max_dict=None):
+    def select_join(self, db_dict, column_names, table_names, max_dict=None, subsample=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -318,8 +333,6 @@ class QueryBrowser(object):
         #table_names = ['households', 'households_r', 'vehicles_r']
         #max_dict = {'vehicles_r':['vehid']}
         
-
-
         #initialize the variables
         final_list = []
         table_list = []
@@ -360,20 +373,103 @@ class QueryBrowser(object):
                 return None
         #print 'final_list is %s'%final_list
         
+
+                
+        #print 'FINAL LIST', final_list
+        #print 'TABLE LIST', table_list
+
+        # Generating the left join statements
+        mainTable = table_list[0]
+        joinStrList = []
+        for table in table_list[1:]:
+            joinCondition = ''
+            for col in column_names:
+                joinCondition = (joinCondition 
+                                 + ' %s.%s=%s.%s ' %(mainTable, col, 
+                                                     table, col) 
+                                 + 'and')
+                
+            joinCondition = joinCondition[:-3]
+            joinStr = ' left join %s on (%s)' %(table, joinCondition)
+            joinStrList.append(joinStr)
+
+        #print joinStrList
+
         #check the max flag
         
         if max_dict is not None:
             max_flag = 1
             max_table = max_dict.keys()
             max_column = max_dict.values()[0][0]
-            print max_column, max_table
-            raw_input()
+            #print max_column, max_table
             #for each in max_dict.values():
             #    max_column = each[0]
         else:
             max_flag = 0
 
-                
+        # Index of the table containing the max dict var
+        # as it stands only querying for one count variable is 
+        # provided
+        #print max_dict
+        if max_dict is not None:
+            maxTable = max_dict.keys()[0]
+            maxColumn = max_dict.values()[0][0]
+            index = table_list.index(maxTable)
+            #print 'INDEX--->', index
+        
+            #remove the count column from the col list
+            countVarStr = '%s.%s' %(maxTable, maxColumn)
+            final_list.remove(countVarStr)
+            final_list.append('temp.%s'%maxColumn)
+
+            #print 'NEW FINAL LIST -->', final_list
+
+            # left join for the count variable
+            joinStr = ''
+
+
+            #grouping string
+            grpStr = ''
+            joinCondition=''
+            for i in column_names:
+                grpStr = grpStr + '%s,' %(i)
+                joinCondition = (joinCondition 
+                                 + ' temp.%s=%s.%s ' %(col, 
+                                                       mainTable, col) 
+                                 + 'and')
+            grpStr = grpStr[:-1]
+            joinCondition = joinCondition[:-3]
+            
+        #combine left join along with the count variable/max condition
+            mJoinStr = joinStrList.pop(index-1)
+            mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
+                                          'and %s.%s=temp.%s)' 
+                                          %(maxTable, maxColumn, maxColumn))
+            
+            joinStrList.append(""" left join (select %s, max(%s) as %s from """
+                               """%s group by %s) as temp on (%s) """ %(grpStr, maxColumn, 
+                                                                        maxColumn,maxTable, grpStr,
+                                                                        joinCondition)
+                               + mJoinStrIncMaxConditionVar)
+            #print 'LEFT JOIN MAX COL LIST--->', joinStrList
+
+        # Generating the col list
+        colStr = ''
+        for i in final_list:
+            colStr = colStr + '%s,' %(i)
+        colStr = colStr[:-1]
+        
+        # Build the SQL string
+        allJoinStr = ''
+        for i in joinStrList:
+            allJoinStr = allJoinStr + '%s' %i
+            
+        sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
+        print 'SQL STRING', sql_string
+            
+
+        """
+
         #use string manipulation to create the select query
         len1 = len(final_list)
         len2 = len(table_list)
@@ -414,9 +510,9 @@ class QueryBrowser(object):
         if len(table_list) == 1:
             #only one table exists. simple select query
             sql_string = sql_string + table_list[0].lower()
-            print '\n********** 1 table **********'
-            print sql_string
-            print '********** 1 table **********\n'
+            #print '\n********** 1 table **********'
+            print '\t', sql_string
+            #print '********** 1 table **********\n'
         elif len(table_list) == 2:
             #for two tables
             sql_string = sql_string + table_names[0].lower() + left_join_str + table_names[1].lower() + ' on '
@@ -436,10 +532,10 @@ class QueryBrowser(object):
             if max_flag:
                 sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
             else:
-                print 'max flag not set'
-            print '\n********** 2 tables **********'
-            print sql_string
-            print '********** 2 tables **********\n'
+                print '\tmax flag not set'
+            #print '\n********** 2 tables **********'
+            print '\t', sql_string
+            #print '********** 2 tables **********\n'
         else:
             #for more than 2 tables
             tab_ctr = 1
@@ -496,7 +592,7 @@ class QueryBrowser(object):
                     counter = counter + 1
                     tab_ctr = tab_ctr + 1
                     
-
+        """
  
         cols_list = []
         tabs_list = []
@@ -515,14 +611,13 @@ class QueryBrowser(object):
         #print 'Running query ...'
         #print sql_string
 
-	#sql_string = """select households.urb, households.numchild, households.inclt35k, """\
-        #    """households.ownhome, households.one, households.drvrcnt, vehicles_r.vehtype, """\
-        #    """vehicles_r.vehid, households.houseid, households_r.numvehs from (households """\
-        #    """left join households_r on households.houseid = households_r.houseid) left """\
-        #    """join vehicles_r on (households.houseid = vehicles_r.houseid  and """\
-        #    """vehicles_r.vehid = (select max(vehicles_r.vehid) from vehicles_r group by vehicles_r.houseid));"""
+        # The following query works
 
-
+        #select households.urb,households.numchild,households.inclt35k,households.ownhome,households.one,
+        #households.drvrcnt,households.houseid,vehicles_r.vehtype,d.vehid,households_r.numvehs from households  
+        #left join households_r on ( households.houseid=households_r.houseid ) left join (select houseid, 
+        #max(vehid) as vehid from vehicles_r group by houseid) as d on (d.houseid = households.houseid) 
+        #left join vehicles_r on (vehicles_r.houseid=vehicles_r.houseid and d.vehid = vehicles_r.vehid);
         try:
             sample_str = ''
             ctr = 0
@@ -590,7 +685,7 @@ class QueryBrowser(object):
                     #print 'each is %s'%each_ins
                     self.dbcon_obj.session.delete(each_ins)
             """
-            print 'Selected rows delete successful.'                    
+            #print 'Selected rows delete successful.'                    
         except Exception, e:
             print e
             print 'Selected rows delete failed.'
@@ -631,17 +726,17 @@ class QueryBrowser(object):
                     #print instance
                     self.dbcon_obj.session.delete(instance)
             """
-            print 'Delete all records successful.'
+            #print '\t    Delete all records successful.'
         except Exception, e:
             print e
-            print 'Delete all records failed.'
+            print '\t    Delete all records failed.'
 
     ########## methods for delete query end ##########
 
 
     ########## methods for insert query ##########
     #insert values in the table
-    def insert_into_table(self, arr, col_list, class_name):
+    def insert_into_table(self, arr, col_list, class_name, keyCols):
         """
         This method is used to insert new values into the table.
 
@@ -651,12 +746,11 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
+	
         #method 4
         #before inserting data delete the index
         index_cols = self.delete_index(class_name.lower())
-        print index_cols
         
-        print 'time before processing %s'%time.time()
         #make a string of the columns
         col_str = ''
         col_count = 0
@@ -666,24 +760,24 @@ class QueryBrowser(object):
                 col_count = col_count + 1
             else:
                 col_str = col_str + i
-        
-        arr_str = [tuple(each) for each in arr]
-        arr_str = str(arr_str)[1:-1]
+        """
+	col_str = str(col_list)[1:-1]
+        """
+        arr_str = str(arr)[1:-1]
         #print arr_str
-        print 'time  after processing %s\n'%time.time()
         
-        print 'time before insert stmt %s'%time.time()
+        t = time.time()
         try:
             insert_stmt = "insert into %s (%s) values %s"%(class_name.lower(), col_str, arr_str)
             #print insert_stmt
             result = self.dbcon_obj.connection.execute(insert_stmt)
         except Exception, e:
-            print 'Error while inserting data in the table'
+            print '\t    Error while inserting data in the table'
             print e
-        print 'time  after insert stmt %s\n'%time.time()
+        print '\t    Time  after insert stmt %.4f\n'%(time.time()-t)
         
         #after insert create new index
-        self.create_index(class_name.lower(), index_cols)
+        self.create_index(class_name.lower(), keyCols)
         
     ########## methods for insert query end ##########
     
@@ -694,7 +788,6 @@ class QueryBrowser(object):
         columns = ''
         count = 0
         index_name = class_name.lower() + '_index'
-        print 'create index'
         for i in col_list:
             if count < (len(col_list)-1):
                 columns = columns + i + ', '
@@ -704,9 +797,9 @@ class QueryBrowser(object):
         index_stmt = 'create index %s on %s (%s)'%(index_name, class_name.lower(), columns)
         try:
             self.result = self.dbcon_obj.connection.execute(index_stmt)
-            print 'Index %s created'%index_name
+            #print '\t    Index %s created'%index_name
         except Exception, e:
-            print 'Error while creating an index'
+            print '\t    Error while creating an index'
             print e
 
             
@@ -717,7 +810,6 @@ class QueryBrowser(object):
         count = 0
         index_name = class_name.lower() + '_index'
         index_stmt = 'drop index %s'%(index_name)
-        print 'delete index'
         try:
             new_table = Table(self.class_name.lower(), self.dbcon_obj.metadata, autoload=True)
             pk = new_table.indexes
@@ -728,10 +820,10 @@ class QueryBrowser(object):
                     columns.append(i)
                 count = count + 1
             self.result = self.dbcon_obj.connection.execute(index_stmt)
-            print 'Index %s deleted'%index_name
+            #print '\t    Index %s deleted'%index_name
             return columns
         except Exception, e:
-            print 'Error while creating an index'
+            print '\t    Error while creating an index'
             print e
         
     ########## methods for creating and deleting index##########

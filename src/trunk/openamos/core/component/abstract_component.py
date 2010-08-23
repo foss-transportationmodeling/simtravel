@@ -1,3 +1,6 @@
+import copy
+import time
+
 from openamos.core.data_array import DataArray
 from openamos.core.models.model import SubModel
 from openamos.core.errors import ModelError
@@ -10,7 +13,24 @@ class AbstractComponent(object):
     model_list - list of SubModel objects
     data - DataArray object on which the simulation needs to be carried out
     """
-    def __init__(self, component_name, model_list, variable_list):
+    def __init__(self, component_name, 
+                 model_list, variable_list,
+                 table,
+                 key):
+
+        # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
+        # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
+        # SIMULATION MANAGER??
+        
+        # TODO: WHAT OTHER ADDITIONAL DATA IS NEEDED?
+
+        # TODO: HOW TO DEAL WITH CONSTRAINTS?
+
+        # TODO: CHOICESET GENERATION?
+
+        # TODO: SEED
+
+
         for i in model_list:
             if not isinstance(i, SubModel):
                 raise ModelError, """all object(s) in the model_list """\
@@ -22,6 +42,8 @@ class AbstractComponent(object):
         self.model_list = model_list
 
 	self.variable_list = variable_list
+        self.table = table
+        self.key = key
 
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
@@ -36,11 +58,12 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data):
-        
+    def run(self, data, db, seed):
+        self.seed = seed
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
-        
+        self.db = db
+
         import copy
         # the variable keeps a running list of models that need to be run
         # this way first we run through all models once.  
@@ -49,27 +72,73 @@ class AbstractComponent(object):
         model_list_duringrun = copy.deepcopy(self.model_list)
         count = 1
 
-        while len(model_list_duringrun) > 0 and count <5:
-            print 'ITERATION - ', count
-            print model_list_duringrun
-            model_list_duringrun = self.iterate_through_the_model_list(
+        prim_key = self.key[0]
+        count_key = self.key[1]
+
+        table = self.table
+
+
+        while len(model_list_duringrun) > 0:
+            t = time.time()
+        
+            model_st = copy.deepcopy(model_list_duringrun)
+            print '\n\tIteration - ', count
+            #print model_list_duringrun
+            model_list_duringrun, data_filter = self.iterate_through_the_model_list(
                 model_list_duringrun)   
-            count = count + 1            
+            count = count + 1
+            cols_to_write = [] + prim_key
+            for model in model_st:
+                dep_varname = model.dep_varname
 
-        #print self.data.columns(['choice1', 'choice2', 'choice3', 'choice2_ind'])
+                if prim_key is None and index_key is None:
+                    continue
+                
+                # Creating column list for caching
+                cols_to_write.append(dep_varname)
+            print "\t-- Iteration - %d took %.4f --" %(count-1, time.time()-t)
+            print "\t    Writing for to %s: records - %s" %(table, sum(data_filter))
 
-    
+            if count_key is not None and count_key not in cols_to_write:
+                cols_to_write = cols_to_write + count_key
+
+            print '\t    Columns - ', cols_to_write
+            data_to_write = data.columns(cols_to_write)
+            
+            t = time.time()
+            # writing to the hdf5 cache
+            cacheTableRef = db.returnTableReference(table)
+            cacheTableRow = cacheTableRef.row
+            
+            for i in data_to_write.data[data_filter,:]:
+                for j in xrange(len(cols_to_write)):
+                    cacheTableRow[cols_to_write[j]] = i[j]
+                cacheTableRow.append()
+            cacheTableRef.flush()
+            print """\t    Writing to hdf5 cache format (appending one record at a time) """\
+                """%.4f""" %(time.time()-t)
+            
+
+            """
+            for k in range(100):
+            for i in data_to_write.data[data_filter,:]:
+            for j in xrange(len(cols_to_write)):
+            cacheTableRow[cols_to_write[j]] = i[j]
+            cacheTableRow.append()
+            cacheTableRef.flush()
+            """
     def iterate_through_the_model_list(self, model_list_duringrun):
         model_list_forlooping = []
         
         for i in model_list_duringrun:
-            print '\tRunning Model - ', i.dep_varname
+            print '\t    Running Model - ', i.dep_varname
+
             # Creating the subset filter
             if i.data_filter is not None:
                 data_subset_filter = i.data_filter.compare(self.data)
             else:
                 data_subset_filter = array([True]*self.data.rows)
-
+            #print '\t RUN UNTIL CONDITION FILTER'
             # The run condition filter to loop over records for which a certain
             # condition is not satisfied
             if i.run_until_condition is not None:
@@ -77,12 +146,14 @@ class AbstractComponent(object):
                 run_condition_filter = i.run_until_condition.compare(self.data)
             else:
                 run_condition_filter = array([True]*self.data.rows) 
+            #print '\t ', run_condition_filter
 
             # Creating the compound filter based on above two conditions 
             data_subset_filter[~run_condition_filter] = False
             data_subset = self.data.columns(self.data.varnames, 
                                             data_subset_filter)
-
+            #print '\t DATA SUBSET FILTER'
+            #print '\t ', data_subset_filter
             # Generate a choiceset for the corresponding agents
             choiceset_shape = (data_subset.rows,
                                i.model.specification.number_choices)
@@ -91,7 +162,7 @@ class AbstractComponent(object):
                                               i.choiceset_criterion, 
                                               choicenames)
             
-            result = i.simulate_choice(data_subset, choiceset)
+            result = i.simulate_choice(data_subset, choiceset, seed=self.seed)
             self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 
             if i.run_until_condition is not None:
@@ -107,8 +178,14 @@ class AbstractComponent(object):
                 self.data.setcolumn(i.run_until_condition.varname, 
                                     result_run_var, data_subset_filter)
                 """
-            print '\t Result for above model', self.data.data
-        return model_list_forlooping
+            if i.dep_varname == "vehid":
+                print '\t\tResult for above model(s)'
+                #print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])
+                #print self.data.columns(['houseid', 'vehid', 'numvehs', 'vehtype']).data[data_subset_filter]
+                print '\t\tNUmber of rows retrieved', sum(data_subset_filter)
+        print '\t-- Iteration Complete --'
+        #raw_input()
+        return model_list_forlooping, data_subset_filter
 
         # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
         # ARE BEING SIMULATED IN BOTH CASES WHERE MODELS RUN IN A LOOP

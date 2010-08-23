@@ -15,8 +15,9 @@ class SubModel(object):
                  data_filter=None,
                  run_until_condition=None,
                  choiceset_criterion=None,
-                 table=None,
-                 key=None):
+                 #table=None,
+                 #key=None,
+                 values=None):
 
         if not isinstance(model, Model):
             raise ModelError, 'the model input is not a valid Model object'
@@ -33,16 +34,28 @@ class SubModel(object):
                 raise ModelError, 'the model input is not a valid DataFilter object'
         self.data_filter = data_filter
         
-        
         if run_until_condition is not None:
             if not isinstance(run_until_condition, DataFilter):
                 raise ModelError, """the model input - run_until_cindition is not """\
                     """a valid DataFilter object"""
         self.run_until_condition = run_until_condition 
         
-
-        #ADD CODE TO CHECK CHOICESET_CRITERION
+        #TODO: Checks for table and key need to be included
+        #self.table = table
+        #self.key = key
+        #TODO: ADD CODE TO CHECK CHOICESET_CRITERION
         self.choiceset_criterion = choiceset_criterion
+
+        if values is not None:
+            if not isinstance(values, list):
+                raise ModelError, """the category-value lookup is not a valid"""\
+                    """python list object"""
+            if len(model.choices) <> len(values):
+                raise ModelError, """the number of alternatives and the number of """\
+                    """values are not consistent. They both should be of the same """\
+                    """size."""
+        self.values = values
+        #print model.choices, values
 
     def check_string(self, value, valid_values):
         if not isinstance(value, str):
@@ -55,12 +68,19 @@ class SubModel(object):
     
         return True
     
-    def simulate_choice(self, data, choiceset):
+    def simulate_choice(self, data, choiceset, seed=0):
         if self.model_type == 'regression':
-            result = self.model.calc_predvalue(data)
+            result = self.model.calc_predvalue(data, seed=seed)
 
         if self.model_type == 'choice':
-            result = self.model.calc_chosenalternative(data, choiceset)
+            result = self.model.calc_chosenalternative(data, choiceset, seed=seed)
+            if self.values is not None:
+                for i in range(len(self.values)):
+                    rows = result == i+1
+                    result.data[rows] = self.values[i]
+                    
+                    
+            
 
         # In case of regression model, an DataArray object is returned
         # the column contains the values predicted for the dependent 

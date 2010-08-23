@@ -1,4 +1,5 @@
 import copy
+import time
 from lxml import etree
 from numpy import array, ma
 
@@ -38,7 +39,8 @@ class ComponentManager(object):
 
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
-
+        self.projectConfigObject = self.configParser.parse_projectAttributes()
+        
 
     def establish_databaseConnection(self):
         dbConfigObject = self.configParser.parse_databaseAttributes()
@@ -70,42 +72,94 @@ class ComponentManager(object):
         
     def run_components(self, db):
         componentList = self.configParser.parse_models()
+        seed = self.projectConfigObject.seed
+        
+        subsample = self.projectConfigObject.subsample
+        
         
         for i in componentList:
+            t = time.time()
             print '\nRunning Component - %s' %(i.component_name)
-            for j in i.model_list:
-                print '\tModel - ', j.dep_varname
-                
+
+            # Prepare variable list/objects for retrieving the corresponding records for processing
             variableList = i.variable_list
             #print '\tVariable List - ', len(variableList)
-            vars_inc_dep = self.prepare_vars(variableList, i)
-            data = self.prepare_data(vars_inc_dep)        
-            print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])                                                
-            print data.columns(['houseid', 'vehid', 'numvehs', 'vehtype'])
-            i.run(data, db)
+            vars_inc_dep, prim_keys, count_keys = self.prepare_vars(variableList, i)
 
-        print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])                                                        
-        print data.columns(['houseid', 'vehid', 'numvehs', 'vehtype'])
+            tableName = i.table
 
+            # clean the run time tables
+            #delete the delete statement; this was done to clean the tables during testing
+            self.queryBrowser.delete_all(tableName)            
+
+            # Prepare Data
+            data = self.prepare_data(vars_inc_dep, count_keys=count_keys, subsample=subsample)        
+        
+            #if i.component_name == 'VehicleAttributeModels':
+            #    print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])                                                
+            #    print data.columns(['houseid', 'vehid', 'numvehs', 'vehtype'])
+            
+            # Run the component
+            i.run(data, db, seed)
+            
+            # Write the data to the database from the hdf5 results cache
+            if i.key[1] is not None:
+                keyCols = i.key[0] + i.key[1]
+            else:
+                keyCols = i.key[0]
+            self.reflectToDatabase(db, tableName, keyCols)
+
+            print '-- Finished simulating model --'
+            print '-- Time taken to complete - %.4f' %(time.time()-t)
             
 
+    def reflectToDatabase(self, db, tableName, keyCols=[]):
+        """
+        This will reflect changes for the particular component to the database
+        So that future queries can fetch appropriate run-time columns as well
+        because the output is currently cached on the hard drive
+        """
+
+        #self.queryBrowser.inser_into_table(data.data
+        table = db.returnTableReference(tableName)
+        
+        resIterator = table.iterrows()
+        t = time.time()
+        resArr = [row[:] for row in resIterator]
+        print """\tCreating the array object (iterating through the hdf5 results) """\
+            """to insert into tbale - %.4f""" %(time.time()-t)
+        colsToWrite = table.colnames
+
+        #print resArr
+        self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols)
+        
     def prepare_vars(self, variableList, component):
         #print variableList
         indep_columnDict = self.prepare_vars_independent(variableList)
-        print '\tIndependent Column Dictionary - '#, indep_columnDict
+        #print '\tIndependent Column Dictionary - ', indep_columnDict
 
         dep_columnDict = {}
         prim_keys = {}
-        index_keys = {}
+        count_keys = {}
+
+
+        depVarTable = component.table
+
+        if component.key[0] is not None:
+            prim_keys[depVarTable] = component.key[0]
+        if component.key[1] is not None:
+            count_keys[depVarTable] = component.key[1]
+        
 
         for model in component.model_list:
             depVarName = model.dep_varname
-            depVarTable = model.table
+            #depVarTable = model.table
             if depVarTable in dep_columnDict:
                 dep_columnDict[depVarTable].append(depVarName)
             else:
                 dep_columnDict[depVarTable] = [depVarName]
         
+            """
             if model.key is not None:
                 prim = model.key[0]
 
@@ -121,22 +175,22 @@ class ComponentManager(object):
                         index_keys[depVarTable] = index
                     else:
                         index_keys[depVarTable] = index_keys[depVarTable] + index
-                        
-        print '\tDependent Column Dictionary - '#, dep_columnDict
-        print '\tPrimary Keys - '#, prim_keys
-        print '\tIndex Keys - '#, index_keys
+             """         
+        #print '\tDependent Column Dictionary - ', dep_columnDict
+        #print '\tPrimary Keys - ', prim_keys
+        #print '\tIndex Keys - ', count_keys
        
         columnDict = self.update_dictionary(indep_columnDict, dep_columnDict)
-        prim_keysNoDuplicates = self.return_keys_toinclude(prim_keys)
+        #prim_keysNoDuplicates = self.return_keys_toinclude(prim_keys)
         #print '\tPrimary Keys - ', prim_keysNoDuplicates
-        columnDict = self.update_dictionary(columnDict, prim_keysNoDuplicates)
-        index_keysNoDuplicates = self.return_keys_toinclude(index_keys)
+        columnDict = self.update_dictionary(columnDict, prim_keys)
+        #count_keysNoDuplicates = self.return_keys_toinclude(count_keys)
         #print '\tIndex Keys - ', index_keysNoDuplicates
-        columnDict = self.update_dictionary(columnDict, index_keysNoDuplicates)
+        columnDict = self.update_dictionary(columnDict, count_keys)
 
         
         #print '\tCombined Column Dictionary - ', columnDict
-        return columnDict
+        return columnDict, prim_keys, count_keys
         
 
     def prepare_vars_independent(self, variableList):
@@ -171,7 +225,7 @@ class ComponentManager(object):
         keysNoDuplicates = {}
         for i in keys:
             if prim_keys_ind and i.find('_r') > -1:                
-                print 'primary keys and _r (result) table found'
+                #print 'primary keys and _r (result) table found'
                 continue
             if len(set(keys[i]) & set(keysList)) == 0:
                 keysNoDuplicates[i] = keys[i]
@@ -180,34 +234,94 @@ class ComponentManager(object):
         return keysNoDuplicates
             
             
-    def prepare_data(self, columnDict):
-        print columnDict
-        maxDict = {'vehicles_r':['vehid']}
-        query_gen, cols = self.queryBrowser.select_join(columnDict, 
-                                                        ['houseid'], 
-                                                        ['households', 'households_r', 'vehicles_r'],
-                                                        maxDict)
+    def prepare_data(self, columnDict, count_keys=None, subsample=None):
+        # get hierarchy of the tables
+        tableOrderDict = self.configParser.parse_tableHierarchy()
+        orderKeys = tableOrderDict.keys()
+        orderKeys.sort()
+        
+        tableNamesOrderDict = {}
+        tableNamesKeyDict = {}
+        for i in orderKeys:
+            tableNamesOrderDict[tableOrderDict[i][0]] = i
+            tableNamesKeyDict[tableOrderDict[i][0]] = tableOrderDict[i][1]
 
+        # table order
+        tableNamesForComponent = columnDict.keys()
+        found = []
+        for i in tableNamesForComponent:
+            if i in tableNamesOrderDict:
+                tableNamesForComponent.remove(i)
+                found.insert(tableNamesOrderDict[i], i)
+
+        #inserting back the ones that have a hierarchy defined
+        tableNamesForComponent = found + tableNamesForComponent
+
+        #print '\ttableNamesforComponent - ', tableNamesForComponent
+
+        # replacing with the right keys for the main agents so that zeros are not
+        # returned by the query statement
+        for i in found:
+            key = tableNamesKeyDict[i] 
+            for table in columnDict:
+                intersectKeyCols = set(key) & set(columnDict[table])
+                if len(intersectKeyCols) > 0:
+                    columnDict[table] = list(set(columnDict[table]) - intersectKeyCols)
+                    
+                    if i in columnDict:
+                        columnDict[i] = columnDict[i] + list(intersectKeyCols)
+                    else:
+                        columnDict[i] = intersectKeyCols
+
+        # matching keys
+        for i in found:
+            if i in columnDict:
+                matchingKey = tableNamesKeyDict[i]
+                break
+
+        #print '\tMATCHING KEY - ', matchingKey
+        # count dictionary or max dictionary
+        if len(count_keys) == 0:
+            max_dict = None
+        else:
+            max_dict = count_keys
+
+        #maxDict = {'vehicles_r':['vehid']}
+        t = time.time()
+        query_gen, cols = self.queryBrowser.select_join(columnDict, 
+                                                        matchingKey, 
+                                                        tableNamesForComponent, max_dict, 
+                                                        subsample)
+        print '\tQuery for records was processed in %.4f' %(time.time()-t)
+        #maxDict)
+        t = time.time()
+        
         data = []
-        c = 1
+        """
+        c = 0
         for i in query_gen:
             #print i
             c = c + 1
-            if c > 10:
-                #break
-                pass
+            if c > 50000:
+                break
+            #pass
             data.append(i)
         #data = array(data)
         #print data
         #data.dtype=int
         #print data
+        """
+
+        data = [i for i in query_gen]
         #print 'THE MASK'
+        print '\tLooping through results took - %.4f' %(time.time()-t)
         mask = ma.masked_values(data, None).mask
         data = array(data)
         data[mask] = 0
         data = DataArray(data, cols)
         
         print '\tNumber of records fetched - ', data.data.shape
+        print '\tRecords were processed after query in %.4f' %(time.time()-t)
         return data
     
 
@@ -237,7 +351,7 @@ class ComponentManager(object):
 
 
 if __name__ == '__main__':
-    fileloc = '/home/kkonduri/simtravel/test/VehOwn.xml'
+    fileloc = '/home/kkonduri/simtravel/test/vehown/config.xml'
     componentManager = ComponentManager(fileLoc = fileloc)
     componentManager.establish_databaseConnection()
     db = componentManager.establish_cacheDatabase()
