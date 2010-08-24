@@ -1,6 +1,6 @@
 from openamos.core.models.model_components import Specification
 from openamos.core.errors import SpecificationError, ChoicesError
-from openamos.core.errors import CoefficientsError, SeedError
+from openamos.core.errors import CoefficientsError
 
 class CountSpecification(Specification):
     """
@@ -10,11 +10,10 @@ class CountSpecification(Specification):
     Inputs:
     choices - a list object of strings
     coefficients - a list of dictionaries; dictionary is a {'variable':'coefficient'}
-    seed - numeric value
     distribution - type of distribution (poisson/negativebinomial)
     """
-    def __init__(self, choices, coefficients, seed=1, distribution=None):
-        Specification.__init__(self, choices, coefficients, seed)
+    def __init__(self, choices, coefficients, distribution=None):
+        Specification.__init__(self, choices, coefficients)
 
         if distribution is None:
             self.distribution = 'poisson'
@@ -42,11 +41,6 @@ class CountSpecification(Specification):
 
         if not checkVal:
             raise SpecificationError, checkText
-
-        checkVal, checkText = self.check_num_only([self.seed])
-        if not checkVal:
-            raise SeedError, checkText
-        
 
     def check_specification_consistency(self, choices, coefficients):
         if len(coefficients) > 1:

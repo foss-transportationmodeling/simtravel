@@ -198,7 +198,7 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
 
         return probabilities
 
-    def calc_chosenalternative(self, data, choiceset=None):
+    def calc_chosenalternative(self, data, choiceset=None, seed=1):
         """
         The method returns the selected choice among the available
         alternatives.
@@ -210,8 +210,7 @@ class NestedLogitChoiceModel(AbstractChoiceModel):
         if choiceset is None:
             choiceset = DataArray(array([]), [])
         probabilities = self.calc_probabilities(data, choiceset)
-        prob_model = AbstractProbabilityModel(probabilities, 
-                                              self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, seed)
         return prob_model.selected_choice()
 
 #TODO - ELIMINATE PARENTS IF THE ACTUAL CHOICE IS 

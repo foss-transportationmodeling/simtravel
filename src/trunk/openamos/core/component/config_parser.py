@@ -73,18 +73,12 @@ class ConfigParser(object):
         projectElement = self.configObject.find('Project')
         projectName = projectElement.get('name')
         projectLocation = projectElement.get('location')
-        projectSeed = projectElement.get('seed')
-        if projectSeed is None:
-            projectSeed = 0
-        else:
-            projectSeed = int(projectSeed)
         projectSubsample = projectElement.get('subsample')
         if projectSubsample is not None:
             projectSubsample = int(projectSubsample)
 
         projectConfigObject = ProjectConfiguration(projectName,
                                                    projectLocation,
-                                                   projectSeed,
                                                    projectSubsample)
             
         return projectConfigObject
@@ -166,9 +160,17 @@ class ConfigParser(object):
             self.create_probability_object(model_element)
 
 
+    def process_seed(self, model_element):
+        seed = model_element.get('seed')
+        if seed is not None:
+            return int(seed)
+        else:
+            return 1
+
     def create_regression_object(self, model_element):
         #model type
         model_type = model_element.get('type')
+        seed = self.process_seed(model_element)
 
         #variable list required for running the model
         variable_list = []
@@ -220,7 +222,7 @@ class ConfigParser(object):
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model_type = 'regression'
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, seed=seed)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -230,7 +232,7 @@ class ConfigParser(object):
     def create_count_object(self, model_element):
         #model type
         model_type = model_element.get('type')
-
+        seed = self.process_seed(model_element)
         #variable list required for running the model
         variable_list = []
         
@@ -274,7 +276,8 @@ class ConfigParser(object):
 
         model_type = 'choice'
         model = CountRegressionModel(specification)
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, 
+                                values=values, seed=seed)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -288,7 +291,7 @@ class ConfigParser(object):
         """
         #model type
         model_type = model_element.get('type')
-
+        seed = self.process_seed(model_element)
         #variable_list_required for running the model
         variable_list = []
 
@@ -333,7 +336,8 @@ class ConfigParser(object):
     
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)#Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, values=values, seed=seed)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -347,7 +351,7 @@ class ConfigParser(object):
         """
         #model type
         model_type = model_element.get('type')
-
+        seed = self.process_seed(model_element)
         #variable_list_required for running the model
         variable_list = []
 
@@ -383,7 +387,8 @@ class ConfigParser(object):
     
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)#Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, values=values, seed=seed)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -393,7 +398,7 @@ class ConfigParser(object):
     def create_nested_logit_object(self, model_element):
         #variable list required for running the model
         variable_list = []
-
+        seed = self.process_seed(model_element)
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')        
@@ -518,7 +523,8 @@ class ConfigParser(object):
 
         model = NestedLogitChoiceModel(specification)
         model_type = 'choice'
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, values=values, seed=seed)
 
 
         #return model_object, variable_list
@@ -538,7 +544,7 @@ class ConfigParser(object):
     def create_ordered_choice_object(self, model_element):
         #model type
         model_type = model_element.get('type')
-
+        seed = self.process_seed(model_element)        
         #variable_list_required for running the model
         variable_list = []
 
@@ -585,7 +591,8 @@ class ConfigParser(object):
 
         model = OrderedModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, values=values, seed=seed) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -598,7 +605,7 @@ class ConfigParser(object):
     def create_probability_object(self, model_element):
         #variable_list_required for running the model
         variable_list = []
-
+        seed = self.process_seed(model_element)
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -631,7 +638,8 @@ class ConfigParser(object):
 
         model = ProbabilityModel(specification) 
         model_type = 'choice'                   #Type of Model 
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, values=values) #Model Object
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, values=values, seed=seed) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)

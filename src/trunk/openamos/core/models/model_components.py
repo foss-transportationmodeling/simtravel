@@ -1,6 +1,5 @@
 import re
 from openamos.core.errors import SpecificationError, ChoicesError
-from openamos.core.errors import CoefficientsError, SeedError
 
 class Specification(object):
     """
@@ -9,12 +8,10 @@ class Specification(object):
     Inputs:
     choices - list of strings
     coefficients - list of dictionaries; dictionary is {'variable':'coefficients'}
-    seed - numeric value
     """
-    def __init__(self, choices, coefficients, seed=1):
+    def __init__(self, choices, coefficients):
         self.choices = choices
         self.coefficients = coefficients
-        self.seed = seed
         self.check()
         self.convert_to_lowercase()
         self.number_choices = self.num_choices()
@@ -35,9 +32,6 @@ class Specification(object):
         if not checkVal:
             raise SpecificationError, checkText
 
-        checkVal, checkText = self.check_num_only([self.seed])
-        if not checkVal:
-            raise SeedError, checkText
 
     def convert_to_lowercase(self):
         self.choices = [i.lower() for i in self.choices]
@@ -131,10 +125,6 @@ class TestBadSpecification(unittest.TestCase):
         self.coefficients3 = [{1:2, 'Var1':2.11}, {'Constant':1.2}]
         self.coefficients4 = [{'Constant':2, 'Var1':2.11}]
         
-        self.seed = 1
-        self.seed1 = '1'
-
-    
     def testchoices(self):
         self.assertRaises(ChoicesError, Specification, self.choices1, 
                           self.coefficients)
@@ -164,10 +154,6 @@ class TestBadSpecification(unittest.TestCase):
         spec = Specification(self.choices, self.coefficients)
         num_choices = spec.number_choices
         self.assertEqual(len(self.choices), num_choices)
-
-    def testseed(self):
-        self.assertRaises(SeedError, Specification, self.choices, self.coefficients, 
-                          self.seed1)
 
     def testlowercase(self):
         spec = Specification(self.choices, self.coefficients)

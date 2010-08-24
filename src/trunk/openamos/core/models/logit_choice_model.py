@@ -77,7 +77,7 @@ class LogitChoiceModel(AbstractChoiceModel):
                          /exp_utility_sum_max).transpose()
         return probabilities
         
-    def calc_chosenalternative(self, data, choiceset=None):
+    def calc_chosenalternative(self, data, choiceset=None, seed=1):
         """
         The method returns the selected choice among the available
         alternatives.
@@ -90,8 +90,7 @@ class LogitChoiceModel(AbstractChoiceModel):
             choiceset = DataArray(array([]), [])
         probabilities = DataArray(self.calc_probabilities(data, choiceset), 
                                   self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, 
-                                              self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, seed)
         return prob_model.selected_choice()
 
 import unittest

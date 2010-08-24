@@ -1,5 +1,5 @@
 from openamos.core.models.model_components import Specification
-from openamos.core.errors import SpecificationError, ChoicesError, CoefficientsError, SeedError, ThresholdsError
+from openamos.core.errors import SpecificationError, ChoicesError, CoefficientsError, ThresholdsError
 
 class OLSpecification(Specification):
     """
@@ -10,12 +10,11 @@ class OLSpecification(Specification):
     choices - list of strings
     coefficients - list of dictionaries
     thresholds - list of threshold values
-    seed - numeric value
     distribution - string (logit/probit)
     """
-    def __init__(self, choices, coefficients, thresholds, seed=1, distribution=None):
+    def __init__(self, choices, coefficients, thresholds, distribution=None):
         self.thresholds = thresholds
-        Specification.__init__(self, choices, coefficients, seed)
+        Specification.__init__(self, choices, coefficients)
 
         if distribution is None:
             self.distribution = 'logit'
@@ -45,9 +44,6 @@ class OLSpecification(Specification):
         if not checkVal:
             raise SpecificationError, checkText
 
-        checkVal, checkText = self.check_num_only([self.seed])
-        if not checkVal:
-            raise SeedError, checkText
         
         checkVal, checkText = self.check_num_only(self.thresholds)
         if not checkVal:

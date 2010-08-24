@@ -32,10 +32,9 @@ class NestedSpecification(object):
     Inputs:
     specification_dict - dictionary of NestedChoiceSpecification objects (defines 
     the structure of the choice tree)
-    seed - numeric value
     """
     
-    def __init__(self, specification_dict, seed=1):
+    def __init__(self, specification_dict):
         self.specification = specification_dict
         self.check()
         self.depth_dict = self.depth()
@@ -43,7 +42,6 @@ class NestedSpecification(object):
         self.current_depth = max(self.depth_dict.values())
         self.number_choices = self.num_choices()
         self.actual_choices = self.get_actual_choices()
-        self.seed = seed
 
     def get_choices_coefficients(self):
         """

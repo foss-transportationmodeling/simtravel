@@ -60,7 +60,7 @@ class OrderedModel(AbstractChoiceModel):
         probabilities[:,i+1] = 1 - upper_bin
         return probabilities
 
-    def calc_chosenalternative(self, data, choiceset=None):
+    def calc_chosenalternative(self, data, choiceset=None, seed=1):
         """
         The method returns the selected choice among the available
         alternatives.
@@ -70,8 +70,7 @@ class OrderedModel(AbstractChoiceModel):
         """
         probabilities = DataArray(self.calc_probabilities(data), 
                                   self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, 
-                                              self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, seed)
         return prob_model.selected_choice()
         
 

@@ -58,8 +58,7 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data, db, seed):
-        self.seed = seed
+    def run(self, data, db):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
         self.db = db
@@ -70,7 +69,7 @@ class AbstractComponent(object):
         # In the next iteration, only those models are executed
         # as indicated by the run_until_condition
         model_list_duringrun = copy.deepcopy(self.model_list)
-        count = 1
+        iteration = 0
 
         prim_key = self.key[0]
         count_key = self.key[1]
@@ -82,11 +81,11 @@ class AbstractComponent(object):
             t = time.time()
         
             model_st = copy.deepcopy(model_list_duringrun)
-            print '\n\tIteration - ', count
+            iteration += 1
+            print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
-                model_list_duringrun)   
-            count = count + 1
+                model_list_duringrun, iteration)   
             cols_to_write = [] + prim_key
             for model in model_st:
                 dep_varname = model.dep_varname
@@ -96,7 +95,7 @@ class AbstractComponent(object):
                 
                 # Creating column list for caching
                 cols_to_write.append(dep_varname)
-            print "\t-- Iteration - %d took %.4f --" %(count-1, time.time()-t)
+            print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
             print "\t    Writing for to %s: records - %s" %(table, sum(data_filter))
 
             if count_key is not None and count_key not in cols_to_write:
@@ -127,7 +126,7 @@ class AbstractComponent(object):
             cacheTableRow.append()
             cacheTableRef.flush()
             """
-    def iterate_through_the_model_list(self, model_list_duringrun):
+    def iterate_through_the_model_list(self, model_list_duringrun, iteration):
         model_list_forlooping = []
         
         for i in model_list_duringrun:
@@ -161,8 +160,7 @@ class AbstractComponent(object):
             choiceset = self.create_choiceset(choiceset_shape, 
                                               i.choiceset_criterion, 
                                               choicenames)
-            
-            result = i.simulate_choice(data_subset, choiceset, seed=self.seed)
+            result = i.simulate_choice(data_subset, choiceset, iteration)
             self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 
             if i.run_until_condition is not None:

@@ -8,13 +8,15 @@ class AbstractProbabilityModel(object):
     
     Inputs:
     probabilities - datarray object (columns give the probability for the choice)
+    seed - numeric value
     """
     def __init__(self, probabilities, seed=1):
         if not isinstance(probabilities, DataArray):
             raise DataError, 'probability input is not a valid DataArray object'
+
+        random.seed(seed)
+
         self.probabilities = ma.array(probabilities.data)
-        self.seed = seed
-        random.seed(self.seed)
         self.check()
         self.choices = probabilities.varnames
 

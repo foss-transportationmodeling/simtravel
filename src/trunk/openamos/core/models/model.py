@@ -1,6 +1,10 @@
 from openamos.core.errors import ModelError
 from openamos.core.data_array import DataFilter
 from openamos.core.models.abstract_model import Model
+from openamos.core.errors import CoefficientsError, SeedError
+
+from numpy import random
+
 
 
 class SubModel(object):
@@ -17,7 +21,8 @@ class SubModel(object):
                  choiceset_criterion=None,
                  #table=None,
                  #key=None,
-                 values=None):
+                 values=None, 
+                 seed=1):
 
         if not isinstance(model, Model):
             raise ModelError, 'the model input is not a valid Model object'
@@ -45,6 +50,10 @@ class SubModel(object):
         #self.key = key
         #TODO: ADD CODE TO CHECK CHOICESET_CRITERION
         self.choiceset_criterion = choiceset_criterion
+        if type(seed) not in [int, float, long]:
+            raise SeedError, """the seed input is not a valid number - only """\
+                """floats, integers, and long number types are allowed"""
+        self.seed = seed
 
         if values is not None:
             if not isinstance(values, list):
@@ -68,12 +77,15 @@ class SubModel(object):
     
         return True
     
-    def simulate_choice(self, data, choiceset, seed=0):
+    def simulate_choice(self, data, choiceset, iteration):
+        # Setting the seed
+        seed = self.seed + iteration
+
         if self.model_type == 'regression':
-            result = self.model.calc_predvalue(data, seed=seed)
+            result = self.model.calc_predvalue(data, seed)
 
         if self.model_type == 'choice':
-            result = self.model.calc_chosenalternative(data, choiceset, seed=seed)
+            result = self.model.calc_chosenalternative(data, choiceset, seed)
             if self.values is not None:
                 for i in range(len(self.values)):
                     rows = result == i+1

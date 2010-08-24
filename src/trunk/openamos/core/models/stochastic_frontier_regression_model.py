@@ -18,9 +18,6 @@ class StocFronRegressionModel(AbstractRegressionModel):
             raise ErrorSpecificationError, """incorrect error specification; it """\
                 """should be StochasticRegErrroSpecification object"""
 
-        self.seed = self.specification.seed
-        random.seed(self.seed)
-
     def calc_errorcomponent(self, variance_norm, variance_halfnorm, 
                             vertex, size):
         """
@@ -43,7 +40,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
         if vertex == 'end':
             return err_norm - err_halfnorm
 
-    def calc_predvalue(self, data):
+    def calc_predvalue(self, data, seed=1):
         """
         The method returns the predicted value for the different choices in the
         specification input.
@@ -51,6 +48,8 @@ class StocFronRegressionModel(AbstractRegressionModel):
         Inputs:
         data - DataArray object
         """
+        random.seed(seed)
+
         expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]
         variance_halfnorm = self.error_specification.variance[1,1]
@@ -88,7 +87,6 @@ class TestStocFronRegressionModel(unittest.TestCase):
                                         self.errorspecification)
         pred_value = model.calc_predvalue(self.data)
 
-        random.seed(1)
         expected_act = self.data.calculate_equation(
                                                     self.specification.coefficients[0])
         expected_act.shape = (4,1)

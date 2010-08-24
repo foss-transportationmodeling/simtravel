@@ -72,7 +72,6 @@ class ComponentManager(object):
         
     def run_components(self, db):
         componentList = self.configParser.parse_models()
-        seed = self.projectConfigObject.seed
         
         subsample = self.projectConfigObject.subsample
         
@@ -100,7 +99,7 @@ class ComponentManager(object):
             #    print data.columns(['houseid', 'vehid', 'numvehs', 'vehtype'])
             
             # Run the component
-            i.run(data, db, seed)
+            i.run(data, db)
             
             # Write the data to the database from the hdf5 results cache
             if i.key[1] is not None:
