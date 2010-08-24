@@ -14,26 +14,26 @@ class Model_Manager_Treewidget(QTreeWidget):
 # Define long term models
         
         long_term_models = QTreeWidgetItem(self)
-        long_term_models.setText(0, COMP_LONGTERM)          #"Long Term Choices")
+        long_term_models.setText(0, COMP_LONGTERM)                          #"Long Term Choices")
 
 
         generate_synthetic_population = QTreeWidgetItem(long_term_models)
-        generate_synthetic_population.setText(0, "Generate Synthetic Population")
+        generate_synthetic_population.setText(0, COMPMODEL_SYNTHPOP)        #"Generate Synthetic Population")
 
         labor_force_participation_model = QTreeWidgetItem(long_term_models)
-        labor_force_participation_model.setText(0, "Labor Force Participation Model")
+        labor_force_participation_model.setText(0, COMPMODEL_WORKSTAT)      #"Labor Force Participation Model")
 
         number_of_jobs = QTreeWidgetItem(long_term_models)
-        number_of_jobs.setText(0, "Identify the number of jobs")
+        number_of_jobs.setText(0, COMPMODEL_NUMJOBS)                        #"Identify the number of jobs")
 
         primary_worker = QTreeWidgetItem(long_term_models)
-        primary_worker.setText(0, "Primary worker in the household")
+        primary_worker.setText(0, COMPMODEL_PRIMWORK)                       #"Primary worker in the household")
 
         school_status = QTreeWidgetItem(long_term_models)
-        school_status.setText(0, "School status of everyone")
+        school_status.setText(0, COMPMODEL_SCHSTAT)                         #"School status of everyone")
 
         residential_location_choice = QTreeWidgetItem(long_term_models)
-        residential_location_choice.setText(0, "Residential Location Choice")
+        residential_location_choice.setText(0, COMPMODEL_RESLOC)            #"Residential Location Choice")
 
 
 # Define fixed activity location choice generator
@@ -367,6 +367,21 @@ class Model_Manager_Treewidget(QTreeWidget):
         if item.text(col) == COMPMODEL_RESLOC:
             diagtitle = COMPMODEL_RESLOC
             modelkey = MODELKEY_RESLOC
+        elif item.text(col) == COMPMODEL_SYNTHPOP:
+            diagtitle = COMPMODEL_SYNTHPOP
+            modelkey = MODELKEY_SYNTHPOP
+        elif item.text(col) == COMPMODEL_WORKSTAT:
+            diagtitle = COMPMODEL_WORKSTAT
+            modelkey = MODELKEY_WORKSTAT
+        elif item.text(col) == COMPMODEL_NUMJOBS:
+            diagtitle = COMPMODEL_NUMJOBS
+            modelkey = MODELKEY_NUMJOBS
+        elif item.text(col) == COMPMODEL_PRIMWORK:
+            diagtitle = COMPMODEL_PRIMWORK
+            modelkey = MODELKEY_PRIMWORK
+        elif item.text(col) == COMPMODEL_SCHSTAT:
+            diagtitle = COMPMODEL_SCHSTAT
+            modelkey = MODELKEY_SCHSTAT
         elif item.text(col) == COMPMODEL_DAYSTART:
             diagtitle = COMPMODEL_DAYSTART
             modelkey = MODELKEY_DAYSTART
