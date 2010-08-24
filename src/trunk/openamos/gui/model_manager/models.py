@@ -16,15 +16,15 @@ class Models(QWidget):
         model_widget = parent
         
     def show_long_term_models(self):
-        self.long_term_models = LongTermModels(model_widget)
+        self.long_term_models = LongTermModels(model_widget, self.configobject)
         self.long_term_models.show()
 
     def show_fixed_activity_models(self):
-        self.fixed_activity_models = FixedActivityModels(model_widget)
+        self.fixed_activity_models = FixedActivityModels(model_widget, self.configobject)
         self.fixed_activity_models.show()
 
     def show_vehicle_ownership_models(self):
-        self.vehicle_ownership_models = VehicleOwnershipModels(model_widget)
+        self.vehicle_ownership_models = VehicleOwnershipModels(model_widget, self.configobject)
         self.vehicle_ownership_models.show()
 
     def show_fixed_activity_prism_models(self):
