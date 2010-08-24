@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
     def showflowchart(self,selitem,col):
         if selitem.text(col) == 'Long Term Choices':
             self.models.show_long_term_models()
-        if selitem.text(col) == 'Fixed Activity Location Choice Generator':
+        if selitem.text(col) == 'Fixed Activity Location Choices': #Fixed Activity Location Choice Generator':
             self.models.show_fixed_activity_models()
         if selitem.text(col) == 'Vehicle Ownership Model':
             self.models.show_vehicle_ownership_models()
