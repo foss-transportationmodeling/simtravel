@@ -1,11 +1,13 @@
 # -*- coding: cp936 -*-
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from spec_abstract_dialog import *
+from openamos.gui.env import *
 
 
 
 class VehicleOwnershipModels(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, co=None):
         super(VehicleOwnershipModels, self).__init__(parent)
         
         self.setWindowTitle('Vehicle Ownership Model')
@@ -18,11 +20,31 @@ class VehicleOwnershipModels(QWidget):
         
         num_vehs_button = QPushButton('Count of Vehicles \nOwned by The household', self)
         num_vehs_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 180,200, 50)
+        self.connect(num_vehs_button, SIGNAL('clicked()'), self.num_vehs)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
         veh_types_button = QPushButton("Vehicle body/fuel type \nfor each household vehicle \n\nIf the data permits also \nthe age of the vehicle \n\nBody types \55 Use the \ncategories from MOVES to \nenable emission estimation \n\nFuel types \55 Gasoline, Others", self)     
         veh_types_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 100, 200, 200)
-
+        self.connect(veh_types_button, SIGNAL('clicked()'), self.veh_types)
+        
+        self.configob = co
+        
+        
+        
+    def num_vehs(self):
+        diagtitle = COMPMODEL_NUMVEHS
+        modelkey = MODELKEY_NUMVEHS
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def veh_types(self):
+        diagtitle = COMPMODEL_NUMTYPES
+        modelkey = MODELKEY_NUMVEHTYPES
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
         
 
     def paintEvent(self, parent = None):
