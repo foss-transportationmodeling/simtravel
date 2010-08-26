@@ -63,6 +63,10 @@ class HOUSEHOLDS_R(object):pass
 
 class VEHICLES_R(object):pass
 
+class TSP_R(object):pass
+
+class TRAVEL_SKIMS(object):pass
+
 class QueryBrowser(object):
     
     ########## initialization ##########
@@ -174,11 +178,6 @@ class QueryBrowser(object):
         table_name = 'schedule'
         self.schedule = self.table_mapper(class_name, table_name)
         
-        #for class TSP
-        class_name = 'TSP'
-        table_name = 'tsp'
-        self.tsp = self.table_mapper(class_name, table_name)
-        
         #for class Destination_Opportunities
         class_name = 'DESTINATION_OPPORTUNITIES'
         table_name = 'destination_opportunities'
@@ -203,31 +202,45 @@ class QueryBrowser(object):
         class_name = 'OFFICE'
         table_name = 'office'
         self.office = self.table_mapper(class_name, table_name)
-        """
 
-        #for class Household
-        class_name = 'HOUSEHOLDS'
-        table_name = 'households'
-        self.household = self.table_mapper(class_name, table_name)
-
-        #for class Person
-        class_name = 'PERSONS'
-        table_name = 'persons'
-        self.person = self.table_mapper(class_name, table_name)
-        
         #for class School
         class_name = 'SCHOOL'
         table_name = 'school'
         self.school = self.table_mapper(class_name, table_name)
 
+
+        """
+
+        #for travel skims
+        class_name = 'TRAVEL_SKIMS'
+        table_name = 'travel_skims'
+        self.table_mapper(class_name, table_name)
+
+        #for class Household
+        class_name = 'HOUSEHOLDS'
+        table_name = 'households'
+        self.table_mapper(class_name, table_name)
+
+        #for class Person
+        class_name = 'PERSONS'
+        table_name = 'persons'
+        self.table_mapper(class_name, table_name)
+        
         # RUNTIME TABLES FOLLOW HERE
         class_name = 'HOUSEHOLDS_R'
         table_name = 'households_r'
-        self.household = self.table_mapper(class_name, table_name)
+        self.table_mapper(class_name, table_name)
 
         class_name = 'VEHICLES_R'
         table_name = 'vehicles_r'
-        self.household = self.table_mapper(class_name, table_name)        
+        self.table_mapper(class_name, table_name)        
+
+        #for class TSP
+        class_name = 'TSP_R'
+        table_name = 'tsp_r'
+        self.table_mapper(class_name, table_name)
+        
+
 
     ########## methods for mapping end ##########
 
@@ -379,11 +392,15 @@ class QueryBrowser(object):
         #print 'TABLE LIST', table_list
 
         # Generating the left join statements
-        mainTable = table_list[0]
+        mainTable = table_names[0]
+        print 'mainTable ----> ', mainTable
+
         joinStrList = []
-        for table in table_list[1:]:
+        for table in table_list:
+            if table == mainTable:
+                continue
             joinCondition = ''
-            for col in column_names:
+            for col in column_names[table]:
                 joinCondition = (joinCondition 
                                  + ' %s.%s=%s.%s ' %(mainTable, col, 
                                                      table, col) 
@@ -393,7 +410,7 @@ class QueryBrowser(object):
             joinStr = ' left join %s on (%s)' %(table, joinCondition)
             joinStrList.append(joinStr)
 
-        #print joinStrList
+        print 'JOIN STRING LIST', joinStrList
 
         #check the max flag
         
@@ -431,7 +448,7 @@ class QueryBrowser(object):
             #grouping string
             grpStr = ''
             joinCondition=''
-            for i in column_names:
+            for i in column_names[maxTable]:
                 grpStr = grpStr + '%s,' %(i)
                 joinCondition = (joinCondition 
                                  + ' temp.%s=%s.%s ' %(col, 
