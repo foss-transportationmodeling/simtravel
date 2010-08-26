@@ -32,23 +32,23 @@ class Models(QWidget):
         self.fixed_activity_prism_models.show()
 
     def show_skeleton_reconciliation_system(self):
-        self.skeleton_reconciliation_system = Skeleton_Reconciliation_System(model_widget)
+        self.skeleton_reconciliation_system = Skeleton_Reconciliation_System(model_widget, self.configobject)
         self.skeleton_reconciliation_system.show()
 
     def show_travel_reconciliation_system(self):
-        self.travel_reconciliation_system = Travel_Reconciliation_System(model_widget)
+        self.travel_reconciliation_system = Travel_Reconciliation_System(model_widget, self.configobject)
         self.travel_reconciliation_system.show()
 
     def show_child_model(self):
-        self.child_model = Child_Model(model_widget)
+        self.child_model = Child_Model(model_widget, self.configobject)
         self.child_model.show()
 
     def show_adult_model(self):
-        self.adult_model = Adult_Model(model_widget)
+        self.adult_model = Adult_Model(model_widget, self.configobject)
         self.adult_model.show()
 
     def show_activity_travel_pattern_simulator(self):
-        self.activity_travel_pattern_simulator = Activity_Travel_Pattern_Simulator(model_widget)
+        self.activity_travel_pattern_simulator = Activity_Travel_Pattern_Simulator(model_widget, self.configobject)
         self.activity_travel_pattern_simulator.show()
         
     def setConfigObject(self,co):
