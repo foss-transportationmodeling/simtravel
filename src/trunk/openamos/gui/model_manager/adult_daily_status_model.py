@@ -1,8 +1,10 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from spec_abstract_dialog import *
+from openamos.gui.env import *
 
 class Adult_Model(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, co=None):
         super(Adult_Model, self).__init__(parent)
         self.setWindowTitle('Adult Daily Status Model')
         self.setAutoFillBackground(True)
@@ -15,6 +17,7 @@ class Adult_Model(QWidget):
         
         children_assigned_button = QPushButton('Is a dependent child/children assigned \nto household including stay home and \nchauffeuring activities?', self)
         children_assigned_button.setGeometry((size.width()) / 2 - 150, 40, 300, 60)
+        self.connect(children_assigned_button, SIGNAL('clicked()'), self.children_assigned)
 
         children_stay_home_button = QPushButton('Child/Children with staying \nhome activities', self)
         children_stay_home_button.setGeometry((size.width()) / 2 - 100, 140, 200, 50)
@@ -24,36 +27,139 @@ class Adult_Model(QWidget):
        
         nonworking_adult_button = QPushButton('Households with at least \none non-working adult', self)
         nonworking_adult_button.setGeometry((size.width()) / 2 - 100, 220, 200, 50)
+        self.connect(nonworking_adult_button, SIGNAL('clicked()'), self.nonworking_adult)
        
         all_working_adult_button = QPushButton('Households with all \nworking adults', self)
         all_working_adult_button.setGeometry((size.width()) / 4 - 100, 220, 200, 50)
+        self.connect(all_working_adult_button, SIGNAL('clicked()'), self.all_working_adult)
 
         assign_children_3_button = QPushButton('Assign each dependent child \nto a household adult subject \nto the fixed activity \nschedule of the adult', self)
         assign_children_3_button.setGeometry((size.width()) * 3 / 4 - 100, 220, 200, 80)
+        self.connect(assign_children_3_button, SIGNAL('clicked()'), self.assign_children_3)
 
         assign_children_1_button = QPushButton('Assign all dependent \nchildren to a working adult', self)
         assign_children_1_button.setGeometry((size.width()) / 4 - 100, 300, 200, 50)
+        self.connect(assign_children_1_button, SIGNAL('clicked()'), self.assign_children_1)
 
         assign_children_2_button = QPushButton('Assign all dependent \nchildren to one \nnon-working adult', self)
         assign_children_2_button.setGeometry((size.width()) / 2 - 100, 300, 200, 50)
+        self.connect(assign_children_2_button, SIGNAL('clicked()'), self.assign_children_2)
 
         adult_work_button = QPushButton('This adult works from home', self)
         adult_work_button.setGeometry((size.width()) / 4 - 100, 380, 200, 50)
+        self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
 
         check_adult_button = QPushButton('For all other adults, \ncheck to see if the \nadult is worker?', self)
         check_adult_button.setGeometry((size.width()) / 2 - 100, 470, 200, 50)
+        self.connect(check_adult_button, SIGNAL('clicked()'), self.check_adult)
 
         work_today_button = QPushButton('Is an employed adult \ngoing to work today?', self)
         work_today_button.setGeometry((size.width()) / 4 - 100, 550, 200, 50)
+        self.connect(work_today_button, SIGNAL('clicked()'), self.work_today)
 
         work_from_home_button = QPushButton('Work from home', self)
         work_from_home_button.setGeometry((size.width()) / 4 - 100, 630, 200, 50)
+        self.connect(work_from_home_button, SIGNAL('clicked()'), self.work_from_home)
 
         go_to_work_button = QPushButton('Go to Work', self)
         go_to_work_button.setGeometry((size.width()) / 2 - 100, 630, 200, 50)
+        self.connect(go_to_work_button, SIGNAL('clicked()'), self.go_to_work)
 
         no_work_episodes_button = QPushButton('No Work Episodes', self)
         no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
+        self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
+        
+        self.configob = co
+        
+        
+    def children_assigned(self):
+        diagtitle = COMPMODEL_ASISDEPEND
+        modelkey = MODELKEY_ASISDEPEND
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def nonworking_adult(self):
+        diagtitle = COMPMODEL_ASONENWORKER
+        modelkey = MODELKEY_ASONENWORKER
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def all_working_adult(self):
+        diagtitle = COMPMODEL_ASHOUSEWORKER
+        modelkey = MODELKEY_ASHOUSEWORKER
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def assign_children_3(self):
+        diagtitle = COMPMODEL_ASASSIGNHOUSE
+        modelkey = MODELKEY_ASASSIGNHOUSE
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def assign_children_1(self):
+        diagtitle = COMPMODEL_ASDEPENDWORKER
+        modelkey = MODELKEY_ASDEPENDWORKER
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def assign_children_2(self):
+        diagtitle = COMPMODEL_ASDEPENDNONWORK
+        modelkey = MODELKEY_ASDEPENDNONWORK
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def adult_work(self):
+        diagtitle = COMPMODEL_ASADULTHOME
+        modelkey = MODELKEY_ASADULTHOME
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def check_adult(self):
+        diagtitle = COMPMODEL_ASISWORKER
+        modelkey = MODELKEY_ASISWORKER
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def work_today(self):
+        diagtitle = COMPMODEL_ASEMPLOYWORK
+        modelkey = MODELKEY_ASEMPLOYWORK
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def work_from_home(self):
+        diagtitle = COMPMODEL_WORKATHOME
+        modelkey = MODELKEY_WORKATHOME
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def go_to_work(self):
+        diagtitle = COMPMODEL_ASGOTOWORK
+        modelkey = MODELKEY_ASGOTOWORK
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    
+    def no_work_episodes(self):
+        diagtitle = COMPMODEL_ASNWORKEPISO
+        modelkey = MODELKEY_ASNWORKEPISO
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
 
 
 
