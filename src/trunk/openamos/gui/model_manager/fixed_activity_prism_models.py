@@ -33,6 +33,7 @@ class FixedActivityPrismModels(QWidget):
 
         non_worker_button = QPushButton('Non-worker', self)
         non_worker_button.setGeometry((size.width()) / 2 - 195, size.height() / 2 - 180, 180, 50)
+        #self.connect(non_worker_button, SIGNAL('clicked()'), self.non_worker)
 
 
         children_adults_button = QPushButton('Children (Status-School) \53 \nAdults (Status-School)', self)
@@ -75,10 +76,12 @@ class FixedActivityPrismModels(QWidget):
 
         pre_sch_button = QPushButton('The arrival and \ndeparture time from \nPre-school are dependent \non the adult \n(worker/non-worker) that \nthe kid is assigned \nto', self)
         pre_sch_button.setGeometry((size.width()) / 2 + 225, size.height() / 2 - 100, 180, 200)
+        self.connect(pre_sch_button, SIGNAL('clicked()'), self.pre_sch)
 
 
         t_s_prism_vertices_button = QPushButton('Time-space prism vertices of all \nindividuals within the population', self)
         t_s_prism_vertices_button.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
+        self.connect(t_s_prism_vertices_button, SIGNAL('clicked()'), self.t_s_prism_vertices)
         
         self.configob = co
 
@@ -142,6 +145,30 @@ class FixedActivityPrismModels(QWidget):
     def school_end1(self):
         diagtitle = COMPMODEL_SCHEND1
         modelkey = MODELKEY_SCHEND1
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def non_worker(self):
+        diagtitle = COMPMODEL_NONWORKER
+        modelkey = MODELKEY_NONWORKER
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def pre_sch(self):
+        diagtitle = COMPMODEL_ARRIVALDEPARTPRESCH
+        modelkey = MODELKEY_ARRIVALDEPARTPRESCH
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        
+    def t_s_prism_vertices(self):
+        diagtitle = COMPMODEL_TIMESPACE
+        modelkey = MODELKEY_TIMESPACE
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
