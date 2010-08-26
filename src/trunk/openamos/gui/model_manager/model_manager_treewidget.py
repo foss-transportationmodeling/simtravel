@@ -97,7 +97,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         earliest_departure_work.setText(0, COMPMODEL_WORKEND1)
 
         nonworker = QTreeWidgetItem(fixed_activity_prism_models)
-        nonworker.setText(0, "Non-worker")
+        nonworker.setText(0, COMPMODEL_NONWORKER)
 
 
         children_adults = QTreeWidgetItem(fixed_activity_prism_models)
@@ -120,10 +120,10 @@ class Model_Manager_Treewidget(QTreeWidget):
         children_2.setText(0, "Children")
 
         arrival_departure_time_preschool = QTreeWidgetItem(children_2)
-        arrival_departure_time_preschool.setText(0, "The arrival and departure time from Pre-school")
+        arrival_departure_time_preschool.setText(0, COMPMODEL_ARRIVALDEPARTPRESCH)  #"The arrival and departure time from Pre-school")
 
         time_space_prism_vertices = QTreeWidgetItem(fixed_activity_prism_models)
-        time_space_prism_vertices.setText(0, "Time-space prism vertices")
+        time_space_prism_vertices.setText(0, COMPMODEL_TIMESPACE)                   #"Time-space prism vertices")
 
 # Define Child Daily Status and Allocation Model
 
@@ -134,10 +134,10 @@ class Model_Manager_Treewidget(QTreeWidget):
         children_3.setText(0, COMPMODEL_CSCHILD017)                 #"Children (0-17 years old)")
 
         children_school_1 = QTreeWidgetItem(child_model)
-        children_school_1.setText(0, COMPMODEL_CSCHILDSCH1)         #"Children (Status \55 School)")
+        children_school_1.setText(0, COMPMODEL_SCHDAILYSTATUS1)         #"Children (Status \55 School)")
 
         children_preschool_1 = QTreeWidgetItem(child_model)
-        children_preschool_1.setText(0, COMPMODEL_CSCHILDPRE1)      #"Children (Status \55 Pre-school)")
+        children_preschool_1.setText(0, COMPMODEL_PRESCHDAILYSTATUS1)      #"Children (Status \55 Pre-school)")
 
         children_stay_home = QTreeWidgetItem(child_model)
         children_stay_home.setText(0, COMPMODEL_CSCHILDSTA)         #"Children (Status \55 Stay home)")
@@ -155,13 +155,13 @@ class Model_Manager_Treewidget(QTreeWidget):
         assign_child_household.setText(0, COMPMODEL_CSASSIGN)       #"Assign the child to household")
 
         children_school_2 = QTreeWidgetItem(child_model)
-        children_school_2.setText(0, COMPMODEL_CSCHILDSCH2)         #"Children (Status \55 School)")
+        children_school_2.setText(0, COMPMODEL_SCHDAILYSTATUS2)         #"Children (Status \55 School)")
 
         children_preschool_2 = QTreeWidgetItem(child_model)
-        children_preschool_2.setText(0, COMPMODEL_CSCHILDPRE2)      #"Children (Status \55 Pre-school)")
+        children_preschool_2.setText(0, COMPMODEL_PRESCHDAILYSTATUS2)      #"Children (Status \55 Pre-school)")
 
         travel_independently_to_school = QTreeWidgetItem(child_model)
-        travel_independently_to_school.setText(0, COMPMODEL_CSINSCHTO)  #"Does the child travel independently to school?")
+        travel_independently_to_school.setText(0, COMPMODEL_SCHDAILYINDEPENDENCE)  #"Does the child travel independently to school?")
 
         travel_mode_to_School = QTreeWidgetItem(child_model)
         travel_mode_to_School.setText(0, COMPMODEL_CSMODETOSCH)     #"Travel Mode to School")
@@ -170,7 +170,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         assign_drop_off_event.setText(0, COMPMODEL_CSDROPOFF)       #"Assign a drop-off event to household")
 
         travel_independently_from_school = QTreeWidgetItem(child_model)
-        travel_independently_from_school.setText(0, COMPMODEL_CSINSCHFROM)  #"Does the child travel independently from school?")
+        travel_independently_from_school.setText(0, COMPMODEL_AFTSCHDAILYINDEPENDENCE)  #"Does the child travel independently from school?")
 
         travel_mode_from_School = QTreeWidgetItem(child_model)
         travel_mode_from_School.setText(0, COMPMODEL_CSMODEFROMSCH)         #"Travel Mode from School")
@@ -179,7 +179,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         assign_pick_up_event.setText(0, COMPMODEL_CSPICKUP)                 #"Assign a pick-up event to household")
 
         activity_pursued_independently = QTreeWidgetItem(child_model)
-        activity_pursued_independently.setText(0, COMPMODEL_CSINAFTER)      #"Activity pursued independently after school?")
+        activity_pursued_independently.setText(0, COMPMODEL_AFTSCHACTSTATUS)      #"Activity pursued independently after school?")
 
         treat_child_like_adult = QTreeWidgetItem(child_model)
         treat_child_like_adult.setText(0, COMPMODEL_CSTREAT)                #"Treat the child like an adult and generate activity-travel patterns")
@@ -242,7 +242,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         work_today.setText(0, COMPMODEL_ASEMPLOYWORK)           #"Is an employed adult going to work today?")
 
         work_from_home = QTreeWidgetItem(adult_model)
-        work_from_home.setText(0, COMPMODEL_ASWORKHOME)         #"Work from home")
+        work_from_home.setText(0, COMPMODEL_WORKATHOME)         #"Work from home")
 
         go_to_work = QTreeWidgetItem(adult_model)
         go_to_work.setText(0, COMPMODEL_ASGOTOWORK)             #"Go to Work")
@@ -287,7 +287,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         assign_to_hhold.setText(0, COMPMODEL_SMASSIGNACTIVE)        #"Assign the activity to Household member comprising Joint Activity with household member")
         
         mode_choice_model = QTreeWidgetItem(children_with_activity)
-        mode_choice_model.setText(0, COMPMODEL_SMCHOICECHILD)       #"Mode choice model for intra-household joint trips with children")
+        mode_choice_model.setText(0, COMPMODEL_AFTSCHACTIVITYMODE)       #"Mode choice model for intra-household joint trips with children")
         
         all_other_individuals = QTreeWidgetItem(activity_travel_pattern_simulator)
         all_other_individuals.setText(0, "All other individuals")
@@ -299,19 +299,19 @@ class Model_Manager_Treewidget(QTreeWidget):
         travel_time.setText(0, COMPMODEL_SMTRIPTIME)                #"Is travel time to next fixed activity \74 time available in the prism?")
         
         activity_choice = QTreeWidgetItem(all_other_individuals)
-        activity_choice.setText(0, COMPMODEL_SMTCHOICE)             #"Activity Type Choice; Mode-Destination Choice")
+        activity_choice.setText(0, COMPMODEL_ACTIVITYTYPE)             #"Activity Type Choice; Mode-Destination Choice")
         
         actual_start_time = QTreeWidgetItem(all_other_individuals)
         actual_start_time.setText(0, COMPMODEL_SMSTARTTIME)         #"Actual start time for the activity")
         
         time_in_activity = QTreeWidgetItem(all_other_individuals)
-        time_in_activity.setText(0, COMPMODEL_SMENOUGHTIME)         #"Is there enough time to engage in the activity?")
+        time_in_activity.setText(0, COMPMODEL_ACTIVITYDURATION)         #"Is there enough time to engage in the activity?")
         
         proceed_next_activity = QTreeWidgetItem(all_other_individuals)
         proceed_next_activity.setText(0, COMPMODEL_SMPROCEED)       #"Proceed to next fixed activity")
         
         mode_choice_next_activity = QTreeWidgetItem(all_other_individuals)
-        mode_choice_next_activity.setText(0, COMPMODEL_SMMCHOICE)   #"Mode Choice to the next fixed activity")
+        mode_choice_next_activity.setText(0, COMPMODEL_FIXEDACTIVITYMODE)   #"Mode Choice to the next fixed activity")
         
         hov = QTreeWidgetItem(all_other_individuals)
         hov.setText(0, COMPMODEL_SMISHOV)                           #"Is the mode of the trip HOV?")
@@ -320,7 +320,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         activity_pursued_2.setText(0, COMPMODEL_SMACTIVEPURSED)     #"Can activity be pursued jointly with Household members?")
         
         check_if_join_activity = QTreeWidgetItem(all_other_individuals)
-        check_if_join_activity.setText(0, COMPMODEL_SMJOINACTIVE)   #"For each available household member, check to see if he/she will join the activity?")
+        check_if_join_activity.setText(0, COMPMODEL_JOINTACTIVITY)   #"For each available household member, check to see if he/she will join the activity?")
         
         activity_non_hhold = QTreeWidgetItem(all_other_individuals)
         activity_non_hhold.setText(0, COMPMODEL_SMACTIVENON)        #"Joint Activity with Non-household member")
@@ -329,7 +329,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         activity_hhold.setText(0, COMPMODEL_SMACTIVEHOUSE)          #"Joint Activity with household member")
         
         sov_hov = QTreeWidgetItem(activity_travel_pattern_simulator)
-        sov_hov.setText(0, COMPMODEL_SMSOVHOV)                      #"If mode is SOV or HOV Driver identify vehicle")
+        sov_hov.setText(0, COMPMODEL_TRIPVEHICLE)                      #"If mode is SOV or HOV Driver identify vehicle")
         
         activity_travel_pattern = QTreeWidgetItem(activity_travel_pattern_simulator)
         activity_travel_pattern.setText(0, COMPMODEL_SMPATTERN)     #"Activity-travel patterns for all individuals within the time-slice")
@@ -421,16 +421,25 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_NUMTYPES:
             diagtitle = COMPMODEL_NUMTYPES
             modelkey = MODELKEY_NUMVEHTYPES
+#        elif item.text(col) == COMPMODEL_NONWORKER:
+#            diagtitle = COMPMODEL_NONWORKER
+#            modelkey = MODELKEY_NONWORKER
+        elif item.text(col) == COMPMODEL_ARRIVALDEPARTPRESCH:
+            diagtitle = COMPMODEL_ARRIVALDEPARTPRESCH
+            modelkey = MODELKEY_ARRIVALDEPARTPRESCH
+        elif item.text(col) == COMPMODEL_TIMESPACE:
+            diagtitle = COMPMODEL_TIMESPACE
+            modelkey = MODELKEY_TIMESPACE
             
         elif item.text(col) == COMPMODEL_CSCHILD017:
             diagtitle = COMPMODEL_CSCHILD017
             modelkey = MODELKEY_CSCHILD017
-        elif item.text(col) == COMPMODEL_CSCHILDSCH1:
-            diagtitle = COMPMODEL_CSCHILDSCH1
-            modelkey = MODELKEY_CSCHILDSCH1
-        elif item.text(col) == COMPMODEL_CSCHILDPRE1:
-            diagtitle = COMPMODEL_CSCHILDPRE1
-            modelkey = MODELKEY_CSCHILDPRE1
+        elif item.text(col) == COMPMODEL_SCHDAILYSTATUS1:
+            diagtitle = COMPMODEL_SCHDAILYSTATUS1
+            modelkey = MODELKEY_SCHDAILYSTATUS1
+        elif item.text(col) == COMPMODEL_PRESCHDAILYSTATUS1:
+            diagtitle = COMPMODEL_PRESCHDAILYSTATUS1
+            modelkey = MODELKEY_PRESCHDAILYSTATUS1
         elif item.text(col) == COMPMODEL_CSCHILDSTA:
             diagtitle = COMPMODEL_CSCHILDSTA
             modelkey = MODELKEY_CSCHILDSTA
@@ -446,33 +455,33 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_CSASSIGN:
             diagtitle = COMPMODEL_CSASSIGN
             modelkey = MODELKEY_CSASSIGN
-        elif item.text(col) == COMPMODEL_CSCHILDSCH2:
-            diagtitle = COMPMODEL_CSCHILDSCH2
-            modelkey = MODELKEY_CSCHILDSCH2
-        elif item.text(col) == COMPMODEL_CSCHILDPRE2:
-            diagtitle = COMPMODEL_CSCHILDPRE2
-            modelkey = MODELKEY_CSCHILDPRE2
-        elif item.text(col) == COMPMODEL_CSINSCHTO:
-            diagtitle = COMPMODEL_CSINSCHTO
-            modelkey = MODELKEY_CSINSCHTO
+        elif item.text(col) == COMPMODEL_SCHDAILYSTATUS2:
+            diagtitle = COMPMODEL_SCHDAILYSTATUS2
+            modelkey = MODELKEY_SCHDAILYSTATUS2
+        elif item.text(col) == COMPMODEL_PRESCHDAILYSTATUS2:
+            diagtitle = COMPMODEL_PRESCHDAILYSTATUS2
+            modelkey = MODELKEY_PRESCHDAILYSTATUS2
+        elif item.text(col) == COMPMODEL_SCHDAILYINDEPENDENCE:
+            diagtitle = COMPMODEL_SCHDAILYINDEPENDENCE
+            modelkey = MODELKEY_SCHDAILYINDEPENDENCE
         elif item.text(col) == COMPMODEL_CSMODETOSCH:
             diagtitle = COMPMODEL_CSMODETOSCH
             modelkey = MODELKEY_CSMODETOSCH
         elif item.text(col) == COMPMODEL_CSDROPOFF:
             diagtitle = COMPMODEL_CSDROPOFF
             modelkey = MODELKEY_CSDROPOFF
-        elif item.text(col) == COMPMODEL_CSINSCHFROM:
-            diagtitle = COMPMODEL_CSINSCHFROM
-            modelkey = MODELKEY_CSINSCHFROM
+        elif item.text(col) == COMPMODEL_AFTSCHDAILYINDEPENDENCE:
+            diagtitle = COMPMODEL_AFTSCHDAILYINDEPENDENCE
+            modelkey = MODELKEY_AFTSCHDAILYINDEPENDENCE
         elif item.text(col) == COMPMODEL_CSMODEFROMSCH:
             diagtitle = COMPMODEL_CSMODEFROMSCH
             modelkey = MODELKEY_CSMODEFROMSCH
         elif item.text(col) == COMPMODEL_CSPICKUP:
             diagtitle = COMPMODEL_CSPICKUP
             modelkey = MODELKEY_CSPICKUP
-        elif item.text(col) == COMPMODEL_CSINAFTER:
-            diagtitle = COMPMODEL_CSINAFTER
-            modelkey = MODELKEY_CSINAFTER
+        elif item.text(col) == COMPMODEL_AFTSCHACTSTATUS:
+            diagtitle = COMPMODEL_AFTSCHACTSTATUS
+            modelkey = MODELKEY_AFTSCHACTSTATUS
         elif item.text(col) == COMPMODEL_CSTREAT:
             diagtitle = COMPMODEL_CSTREAT
             modelkey = MODELKEY_CSTREAT
@@ -521,9 +530,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_ASEMPLOYWORK:
             diagtitle = COMPMODEL_ASEMPLOYWORK
             modelkey = MODELKEY_ASEMPLOYWORK
-        elif item.text(col) == COMPMODEL_ASWORKHOME:
-            diagtitle = COMPMODEL_ASWORKHOME
-            modelkey = MODELKEY_ASWORKHOME
+        elif item.text(col) == COMPMODEL_WORKATHOME:
+            diagtitle = COMPMODEL_WORKATHOME
+            modelkey = MODELKEY_WORKATHOME
         elif item.text(col) == COMPMODEL_ASGOTOWORK:
             diagtitle = COMPMODEL_ASGOTOWORK
             modelkey = MODELKEY_ASGOTOWORK
@@ -551,48 +560,48 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_SMASSIGNACTIVE:
             diagtitle = COMPMODEL_SMASSIGNACTIVE
             modelkey = MODELKEY_SMASSIGNACTIVE
-        elif item.text(col) == COMPMODEL_SMCHOICECHILD:
-            diagtitle = COMPMODEL_SMCHOICECHILD
-            modelkey = MODELKEY_SMCHOICECHILD
+        elif item.text(col) == COMPMODEL_AFTSCHACTIVITYMODE:
+            diagtitle = COMPMODEL_AFTSCHACTIVITYMODE
+            modelkey = MODELKEY_AFTSCHACTIVITYMODE
         elif item.text(col) == COMPMODEL_SMINDIVIDUAL:
             diagtitle = COMPMODEL_SMINDIVIDUAL
             modelkey = MODELKEY_SMINDIVIDUAL
         elif item.text(col) == COMPMODEL_SMTRIPTIME:
             diagtitle = COMPMODEL_SMTRIPTIME
             modelkey = MODELKEY_SMTRIPTIME
-        elif item.text(col) == COMPMODEL_SMTCHOICE:
-            diagtitle = COMPMODEL_SMTCHOICE
-            modelkey = MODELKEY_SMTCHOICE
+        elif item.text(col) == COMPMODEL_ACTIVITYTYPE:
+            diagtitle = COMPMODEL_ACTIVITYTYPE
+            modelkey = MODELKEY_ACTIVITYTYPE
         elif item.text(col) == COMPMODEL_SMSTARTTIME:
             diagtitle = COMPMODEL_SMSTARTTIME
             modelkey = MODELKEY_SMSTARTTIME
-        elif item.text(col) == COMPMODEL_SMENOUGHTIME:
-            diagtitle = COMPMODEL_SMENOUGHTIME
-            modelkey = MODELKEY_SMENOUGHTIME
+        elif item.text(col) == COMPMODEL_ACTIVITYDURATION:
+            diagtitle = COMPMODEL_ACTIVITYDURATION
+            modelkey = MODELKEY_ACTIVITYDURATION
         elif item.text(col) == COMPMODEL_SMPROCEED:
             diagtitle = COMPMODEL_SMPROCEED
             modelkey = MODELKEY_SMPROCEED
-        elif item.text(col) == COMPMODEL_SMMCHOICE:
-            diagtitle = COMPMODEL_SMMCHOICE
-            modelkey = MODELKEY_SMMCHOICE
+        elif item.text(col) == COMPMODEL_FIXEDACTIVITYMODE:
+            diagtitle = COMPMODEL_FIXEDACTIVITYMODE
+            modelkey = MODELKEY_FIXEDACTIVITYMODE
         elif item.text(col) == COMPMODEL_SMISHOV:
             diagtitle = COMPMODEL_SMISHOV
             modelkey = MODELKEY_SMISHOV
         elif item.text(col) == COMPMODEL_SMACTIVEPURSED:
             diagtitle = COMPMODEL_SMACTIVEPURSED
             modelkey = MODELKEY_SMACTIVEPURSED
-        elif item.text(col) == COMPMODEL_SMJOINACTIVE:
-            diagtitle = COMPMODEL_SMJOINACTIVE
-            modelkey = MODELKEY_SMJOINACTIVE
+        elif item.text(col) == COMPMODEL_JOINTACTIVITY:
+            diagtitle = COMPMODEL_JOINTACTIVITY
+            modelkey = MODELKEY_JOINTACTIVITY
         elif item.text(col) == COMPMODEL_SMACTIVENON:
             diagtitle = COMPMODEL_SMACTIVENON
             modelkey = MODELKEY_SMACTIVENON
         elif item.text(col) == COMPMODEL_SMACTIVEHOUSE:
             diagtitle = COMPMODEL_SMACTIVEHOUSE
             modelkey = MODELKEY_SMACTIVEHOUSE
-        elif item.text(col) == COMPMODEL_SMSOVHOV:
-            diagtitle = COMPMODEL_SMSOVHOV
-            modelkey = MODELKEY_SMSOVHOV
+        elif item.text(col) == COMPMODEL_TRIPVEHICLE:
+            diagtitle = COMPMODEL_TRIPVEHICLE
+            modelkey = MODELKEY_TRIPVEHICLE
         elif item.text(col) == COMPMODEL_SMPATTERN:
             diagtitle = COMPMODEL_SMPATTERN
             modelkey = MODELKEY_SMPATTERN      
