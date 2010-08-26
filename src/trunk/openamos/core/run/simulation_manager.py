@@ -50,20 +50,6 @@ class ComponentManager(object):
         print 'Database Connection Established'
 
         
-        """
-        Example Query:
-        hhld_class_name = 'households'
-        query_gen, cols = queryBrowser.select_all_from_table(hhld_class_name)
-        
-        c = 0
-        for i in query_gen:
-            c = c + 1
-            if c > 10:
-                break
-            print i.houseid
-        print dir(i)
-        """
-
     def establish_cacheDatabase(self):
         db = DB('w')
         db.create()
@@ -180,14 +166,9 @@ class ComponentManager(object):
         #print '\tIndex Keys - ', count_keys
        
         columnDict = self.update_dictionary(indep_columnDict, dep_columnDict)
-        #prim_keysNoDuplicates = self.return_keys_toinclude(prim_keys)
-        #print '\tPrimary Keys - ', prim_keysNoDuplicates
         columnDict = self.update_dictionary(columnDict, prim_keys)
-        #count_keysNoDuplicates = self.return_keys_toinclude(count_keys)
-        #print '\tIndex Keys - ', index_keysNoDuplicates
         columnDict = self.update_dictionary(columnDict, count_keys)
 
-        
         #print '\tCombined Column Dictionary - ', columnDict
         return columnDict, prim_keys, count_keys
         
@@ -195,6 +176,7 @@ class ComponentManager(object):
     def prepare_vars_independent(self, variableList):
         # Here we append attributes for all columns that appear on the RHS in the 
         # equations for the different models
+        print variableList
 
         indepColDict = {}
         for i in variableList:
@@ -235,33 +217,47 @@ class ComponentManager(object):
             
     def prepare_data(self, columnDict, count_keys=None, subsample=None):
         # get hierarchy of the tables
-        tableOrderDict = self.configParser.parse_tableHierarchy()
+        tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+        print 'TABLE ORDER DICT', tableOrderDict
+        print 'TABLE NAMES KEY DICT', tableNamesKeyDict
+
         orderKeys = tableOrderDict.keys()
         orderKeys.sort()
         
         tableNamesOrderDict = {}
-        tableNamesKeyDict = {}
+        #tableNamesKeyDict = {}
         for i in orderKeys:
             tableNamesOrderDict[tableOrderDict[i][0]] = i
-            tableNamesKeyDict[tableOrderDict[i][0]] = tableOrderDict[i][1]
+            #tableNamesKeyDict[tableOrderDict[i][0]] = tableOrderDict[i][1]
 
+        print 'TABLE NAMES ORDER', tableNamesOrderDict
         # table order
         tableNamesForComponent = columnDict.keys()
-        found = []
-        for i in tableNamesForComponent:
-            if i in tableNamesOrderDict:
-                tableNamesForComponent.remove(i)
-                found.insert(tableNamesOrderDict[i], i)
+        print 'TABLE NAMES FOR COMPONENT', tableNamesForComponent
 
+        found = []
+        for i in list(set(tableNamesForComponent) & set(tableNamesOrderDict.keys())):
+            order = tableNamesOrderDict[i]
+            minOrder = min(tableNamesOrderDict.values())
+            found.insert(order-minOrder, i)
+            tableNamesForComponent.remove(i)
+
+        print 'COMPONENT TABLES AFTER', tableNamesForComponent
+        print 'HIERARCHY TABLES FOUND - ', found
         #inserting back the ones that have a hierarchy defined
         tableNamesForComponent = found + tableNamesForComponent
 
         #print '\ttableNamesforComponent - ', tableNamesForComponent
 
         # replacing with the right keys for the main agents so that zeros are not
-        # returned by the query statement
+        # returned by the query statement especially for the variables defining the
+        # agent id's
+        print 'BEFORE FIXING INDEX KEYS', columnDict
+        
+        found.reverse() # so that the tables higher in the hierarchy are fixed last; lowest to highest now
+
         for i in found:
-            key = tableNamesKeyDict[i] 
+            key = tableNamesKeyDict[i][0] 
             for table in columnDict:
                 intersectKeyCols = set(key) & set(columnDict[table])
                 if len(intersectKeyCols) > 0:
@@ -271,12 +267,29 @@ class ComponentManager(object):
                         columnDict[i] = columnDict[i] + list(intersectKeyCols)
                     else:
                         columnDict[i] = intersectKeyCols
+        print 'AFTER FIXING INDEX KEYS', columnDict
+
+        found.reverse() # reversing back the heirarchy to go from highest to lowest
 
         # matching keys
-        for i in found:
-            if i in columnDict:
-                matchingKey = tableNamesKeyDict[i]
-                break
+        matchingKey = {}
+        mainTable = found[0]
+        print 'mainTable', mainTable
+        mainTableKeys = tableNamesKeyDict[mainTable][0]
+
+        for i in columnDict.keys():
+            if i == mainTable:
+                continue
+            else:
+                matchTableKeys = tableNamesKeyDict[i][0]
+            matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
+        print 'MATCHING KEY DICTIONARY', matchingKey
+        raw_input()
+
+        #for i in found:
+        #    if i in columnDict:
+        #        matchingKey = tableNamesKeyDict[i][0]
+        #        break
 
         #print '\tMATCHING KEY - ', matchingKey
         # count dictionary or max dictionary
@@ -285,35 +298,29 @@ class ComponentManager(object):
         else:
             max_dict = count_keys
 
+        print 'COLUMN DICTIONARY', columnDict
+        print 'TABLE HIERARCHY', tableNamesForComponent
+        print 'MATCHING COLUMN', matchingKey
         #maxDict = {'vehicles_r':['vehid']}
         t = time.time()
         query_gen, cols = self.queryBrowser.select_join(columnDict, 
                                                         matchingKey, 
-                                                        tableNamesForComponent, max_dict, 
+                                                        tableNamesForComponent, 
+                                                        max_dict, 
                                                         subsample)
         print '\tQuery for records was processed in %.4f' %(time.time()-t)
         #maxDict)
-        t = time.time()
-        
-        data = []
-        """
-        c = 0
-        for i in query_gen:
-            #print i
-            c = c + 1
-            if c > 50000:
-                break
-            #pass
-            data.append(i)
-        #data = array(data)
-        #print data
-        #data.dtype=int
-        #print data
-        """
 
-        data = [i for i in query_gen]
-        #print 'THE MASK'
-        print '\tLooping through results took - %.4f' %(time.time()-t)
+        #t = time.time()
+        #data = []
+        #for i in query_gen:
+        #    data.append(i)
+        #print '\tRegular looping through results took - %.4f' %(time.time()-t), len(data)
+
+        t = time.time()
+        data = [i[:] for i in query_gen]
+        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
+
         mask = ma.masked_values(data, None).mask
         data = array(data)
         data[mask] = 0

@@ -16,7 +16,8 @@ class AbstractComponent(object):
     def __init__(self, component_name, 
                  model_list, variable_list,
                  table,
-                 key):
+                 key,
+                 locationProcessing=False):
 
         # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
         # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
@@ -89,12 +90,9 @@ class AbstractComponent(object):
             cols_to_write = [] + prim_key
             for model in model_st:
                 dep_varname = model.dep_varname
-
-                if prim_key is None and index_key is None:
-                    continue
-                
                 # Creating column list for caching
-                cols_to_write.append(dep_varname)
+                if dep_varname not in cols_to_write:
+                    cols_to_write.append(dep_varname)
             print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
             print "\t    Writing for to %s: records - %s" %(table, sum(data_filter))
 

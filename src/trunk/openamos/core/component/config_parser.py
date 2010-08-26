@@ -102,14 +102,23 @@ class ConfigParser(object):
         dbTables_element = self.configObject.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
+        tableNamesKeyDict = {}
         for table_element in tableIterator:
             tableName = table_element.get("table")
             tableKeys = table_element.get("key")
             tableKeys = re.split('[,]', tableKeys)
-            tableOrder = int(table_element.get("order"))
-            tableOrderDict[tableOrder] = [tableName, tableKeys]
-        
-        return tableOrderDict
+            countKeys = table_element.get("count_key")
+            if countKeys is not None:
+                countKeys = re.split('[,]', countKeys)
+            else:
+                countKeys = []
+
+            tableOrder = table_element.get("order")
+            if tableOrder is not None:
+                tableOrder = int(tableOrder)
+                tableOrderDict[tableOrder] = [tableName, tableKeys]
+            tableNamesKeyDict[tableName] = [tableKeys, countKeys]
+        return tableOrderDict, tableNamesKeyDict
 
     
                 
@@ -194,6 +203,9 @@ class ConfigParser(object):
         # Reading the vertex
         vertex = model_element.get('vertex')
 
+        # Reading the threshold for the stochastic frontier
+        threshold = model_element.get('threshold')
+        
         # Creating the variance matrix
         model_type = model_element.get('type')
         
@@ -215,8 +227,13 @@ class ConfigParser(object):
                     half_norm_variance = float(i.get('value'))
                     
             variance = array([[norm_variance, 0],[0, half_norm_variance]])
-            errorSpec = StochasticRegErrorSpecification(variance, vertex)
+            if threshold == None:
+                threshold = 0
+            else:
+                threshold = float(threshold)
+            errorSpec = StochasticRegErrorSpecification(variance, vertex, threshold)
             model = StocFronRegressionModel(specification, errorSpec)                 
+            
 
         dataFilter = self.return_filter_condition(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)

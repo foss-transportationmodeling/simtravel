@@ -1,14 +1,20 @@
 import tables as t
 
 class Vehicles_R(t.IsDescription):
-    houseid = t.Int32Col(shape=())
-    vehid = t.Int16Col(shape=())
-    vehtype = t.Int16Col(shape=())
+    houseid = t.Int32Col()
+    vehid = t.Int16Col()
+    vehtype = t.Int16Col()
 
 
 class Households_R(t.IsDescription):
-    houseid = t.Int32Col(shape=())
-    numvehs = t.Int16Col(shape=())
+    houseid = t.Int32Col()
+    numvehs = t.Int16Col()
+
+class Tsp_R(t.IsDescription):
+    houseid = t.Int32Col()
+    personid = t.Int16Col()
+    daystart = t.Float32Col()
+    dayend = t.Float32Col()
 	
 
 class DB(object):
@@ -37,9 +43,13 @@ class DB(object):
 
         vehicles_r_grp = self.fileh.createGroup(root, "vehicles_r_grp")
         households_r_grp = self.fileh.createGroup(root, "households_r_grp")
+        tsp_r_grp = self.fileh.createGroup(root, "tsp_r_grp")
+
 
         vehicles_r = self.fileh.createTable(vehicles_r_grp, "vehicles_r", Vehicles_R)
         households_r = self.fileh.createTable(households_r_grp, "households_r", Households_R)
+        tsp_r = self.fileh.createTable(tsp_r_grp, "tsp_r", Tsp_R)
+
         
     def returnTableReference(self, tableName):
         tableName = tableName.lower()

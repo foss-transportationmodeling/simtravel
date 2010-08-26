@@ -31,14 +31,14 @@ class StocFronRegressionModel(AbstractRegressionModel):
         vertex - string (the vertext to predict -- start/end)
         size - numeric value (number of rows)
         """
-        err_norm = norm.rvs(scale=variance_norm, size=size)
-        err_halfnorm = halfnorm.rvs(scale=variance_halfnorm, size=size)
+        err_norm = norm.rvs(scale=variance_norm**0.5, size=size)
+        err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
         
         if vertex == 'start':
-            return err_norm + err_halfnorm
+            return err_norm
 
         if vertex == 'end':
-            return err_norm - err_halfnorm
+            return err_norm
 
     def calc_predvalue(self, data, seed=1):
         """
@@ -54,12 +54,31 @@ class StocFronRegressionModel(AbstractRegressionModel):
         variance_norm = self.error_specification.variance[0,0]
         variance_halfnorm = self.error_specification.variance[1,1]
         vertex = self.error_specification.vertex
+        threshold = self.error_specification.threshold
         size = (data.rows, 1)
 
         err = self.calc_errorcomponent(variance_norm, variance_halfnorm, 
                                        vertex, size)
         
         pred_value = expected_value.data + err
+
+        if vertex == 'start':
+            predValue_lessThresholdInd = pred_value < threshold
+            print '\t\tPred value is less than START threshold for - %d cases ' \
+                % sum(predValue_lessThresholdInd)[0]
+            pred_value[predValue_lessThresholdInd] = threshold
+
+
+        if vertex == 'end':
+            predValue_moreThresholdInd = pred_value > threshold
+            print '\t\tPred value is greater than END threshold for - %d cases ' \
+                % sum(predValue_moreThresholdInd)[0]
+            pred_value[predValue_moreThresholdInd] = threshold
+
+        sum_ = sum((pred_value) < 0)
+        if sum_ > 0:
+            print '\t\t -- SUM LESS THAN ZERO --', sum_
+
 
         return DataArray(pred_value, self.specification.choices)
 
