@@ -36,8 +36,8 @@ class AbstractModWidget(QGroupBox):
         choicebuttonlayout.addWidget(self.choicedelbutton)
         self.choicelayout.addWidget(self.choicebuttonwidget)
         
-        self.choicetable = QTableWidget(0,2,self)
-        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Probability'])
+        self.choicetable = QTableWidget(0,3,self)
+        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value', 'Probability'])
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         self.choicetable.horizontalHeader().setResizeMode(0,1)
         self.choicetable.horizontalHeader().setResizeMode(1,1)
@@ -72,8 +72,8 @@ class AbstractModWidget(QGroupBox):
         
         self.choicetable = QTableWidget(self)
         self.choicetable.setRowCount(0)
-        self.choicetable.setColumnCount(1)
-        self.choicetable.setHorizontalHeaderLabels(['Alternatives'])
+        self.choicetable.setColumnCount(2)
+        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value'])
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         self.choicetable.setSizePolicy(sizePolicy)
@@ -170,47 +170,6 @@ class AbstractModWidget(QGroupBox):
     def delVariable(self):
         self.varstable.removeRow(self.varstable.currentRow())
 
-    def makeOrdChoiceWidget(self,x=0,y=0):
-        self.choicewidget = QWidget(self)
-        self.choicelayout = QVBoxLayout()
-        self.choicewidget.setLayout(self.choicelayout)
-        
-        self.choicebuttonwidget = QWidget(self)
-        choicebuttonlayout = QHBoxLayout()
-        self.choicebuttonwidget.setLayout(choicebuttonlayout)
-        self.choiceaddbutton = QPushButton('Add Alternative')
-        choicebuttonlayout.addWidget(self.choiceaddbutton)
-        self.choicedelbutton = QPushButton('Delete Alternative')
-        choicebuttonlayout.addWidget(self.choicedelbutton)
-        self.choicelayout.addWidget(self.choicebuttonwidget)
-        
-        self.choicetable = QTableWidget(0,2,self)
-        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Threshold'])
-        self.choicetable.horizontalHeader().setResizeMode(0,1)
-        self.choicetable.horizontalHeader().setResizeMode(1,1)
-        self.choicelayout.addWidget(self.choicetable)
-        
-        self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
-        
-        self.connect(self.choiceaddbutton, SIGNAL("clicked(bool)"), self.addOrdChoice) 
-        self.connect(self.choicedelbutton, SIGNAL("clicked(bool)"), self.delOrdChoice) 
-
-    def addOrdChoice(self):
-        self.choicetable.insertRow(self.choicetable.rowCount())
-        self.choicetable.setItem(0,1,QTableWidgetItem())
-        disableitem = self.choicetable.item(0, 1)
-        disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
-        disableitem.setBackgroundColor(Qt.darkGray)
-
-    def delOrdChoice(self):
-        self.choicetable.removeRow(self.choicetable.currentRow())
-        self.choicetable.setItem(0,1,QTableWidgetItem())
-        disableitem = self.choicetable.item(0, 1)
-        if disableitem != None:
-            disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
-            disableitem.setBackgroundColor(Qt.darkGray)
-        
-
     def makeNestWidget(self):
         self.nestwidget = QWidget(self)
         self.nestlayout = QVBoxLayout()
@@ -265,42 +224,7 @@ class AbstractModWidget(QGroupBox):
         self.mainlayout.addWidget(self.variancevwidget,0,0,1,1,Qt.AlignLeft)
         self.mainlayout.addWidget(self.varianceuwidget,0,1,1,1,Qt.AlignLeft)
 
-    def makeCountTypeWidget(self):
-        self.poiradio = QRadioButton(POI_MODEL)
-        self.nbradio = QRadioButton(NEGBIN_MODEL)
-        self.nbradio.setChecked(True)
-        buttonlayout = QHBoxLayout()
-        buttonlayout.addWidget(self.poiradio)
-        buttonlayout.addWidget(self.nbradio)
-        self.counttypewidget = QWidget(self)
-        self.counttypewidget.setLayout(buttonlayout)
-        
-        self.odwidget = QWidget(self)
-        odlayout = QHBoxLayout()
-        self.odwidget.setLayout(odlayout)
-        self.odlabel = QLabel("Overdispersion")
-        odlayout.addWidget(self.odlabel)
-        self.odline = LineEdit()
-        self.odline.setFixedWidth(100) 
-        odlayout.addWidget(self.odline)
-               
-        self.mainlayout.addWidget(self.counttypewidget,0,0,1,1,Qt.AlignLeft)
-        self.mainlayout.addWidget(self.odwidget,0,1,1,1,Qt.AlignLeft)
-        
-        self.connect(self.nbradio, SIGNAL("toggled(bool)"), self.ctypeAction)
-
-    def makeOrdTypeWidget(self):
-        self.logradio = QRadioButton(LOGIT)
-        self.probradio = QRadioButton(PROBIT)
-        self.logradio.setChecked(True)
-        buttonlayout = QHBoxLayout()
-        buttonlayout.addWidget(self.logradio)
-        buttonlayout.addWidget(self.probradio)
-        self.ordtypewidget = QWidget(self)
-        self.ordtypewidget.setLayout(buttonlayout)
-               
-        self.mainlayout.addWidget(self.ordtypewidget,0,0,1,1,Qt.AlignLeft)
-    
+   
     def makeIntVar(self):
         selectedrows = []
         for modindex in self.varstable.selectedIndexes():
@@ -368,6 +292,30 @@ class CountModWidget(AbstractModWidget):
         self.makeCountTypeWidget()
         self.makeChoiceWidget(1,0) 
         self.makeVarsWidget(1,1) 
+
+    def makeCountTypeWidget(self):
+        self.poiradio = QRadioButton(POI_MODEL)
+        self.nbradio = QRadioButton(NEGBIN_MODEL)
+        self.nbradio.setChecked(True)
+        buttonlayout = QHBoxLayout()
+        buttonlayout.addWidget(self.poiradio)
+        buttonlayout.addWidget(self.nbradio)
+        self.counttypewidget = QWidget(self)
+        self.counttypewidget.setLayout(buttonlayout)
+        
+        self.odwidget = QWidget(self)
+        odlayout = QHBoxLayout()
+        self.odwidget.setLayout(odlayout)
+        self.odlabel = QLabel("Overdispersion")
+        odlayout.addWidget(self.odlabel)
+        self.odline = LineEdit()
+        self.odline.setFixedWidth(100) 
+        odlayout.addWidget(self.odline)
+               
+        self.mainlayout.addWidget(self.counttypewidget,0,0,1,1,Qt.AlignLeft)
+        self.mainlayout.addWidget(self.odwidget,0,1,1,1,Qt.AlignLeft)
+        
+        self.connect(self.nbradio, SIGNAL("toggled(bool)"), self.ctypeAction)
          
     def ctypeAction(self, checked):
         if checked:
@@ -390,6 +338,56 @@ class OrderedModWidget(AbstractModWidget):
         self.makeOrdTypeWidget()
         self.makeOrdChoiceWidget(1,0)
         self.makeVarsWidget(1,1) 
+
+    def makeOrdTypeWidget(self):
+        self.logradio = QRadioButton(LOGIT)
+        self.probradio = QRadioButton(PROBIT)
+        self.logradio.setChecked(True)
+        buttonlayout = QHBoxLayout()
+        buttonlayout.addWidget(self.logradio)
+        buttonlayout.addWidget(self.probradio)
+        self.ordtypewidget = QWidget(self)
+        self.ordtypewidget.setLayout(buttonlayout)
+               
+        self.mainlayout.addWidget(self.ordtypewidget,0,0,1,1,Qt.AlignLeft)
+
+    def makeOrdChoiceWidget(self,x=0,y=0):
+        self.choicewidget = QWidget(self)
+        self.choicelayout = QVBoxLayout()
+        self.choicewidget.setLayout(self.choicelayout)
+        
+        self.choicebuttonwidget = QWidget(self)
+        choicebuttonlayout = QHBoxLayout()
+        self.choicebuttonwidget.setLayout(choicebuttonlayout)
+        self.choiceaddbutton = QPushButton('Add Alternative')
+        choicebuttonlayout.addWidget(self.choiceaddbutton)
+        self.choicedelbutton = QPushButton('Delete Alternative')
+        choicebuttonlayout.addWidget(self.choicedelbutton)
+        self.choicelayout.addWidget(self.choicebuttonwidget)
+        
+        self.choicetable = QTableWidget(0,3,self)
+        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value', 'Threshold'])
+        self.choicelayout.addWidget(self.choicetable)
+        
+        self.mainlayout.addWidget(self.choicewidget,x,y,1,1)
+        
+        self.connect(self.choiceaddbutton, SIGNAL("clicked(bool)"), self.addOrdChoice) 
+        self.connect(self.choicedelbutton, SIGNAL("clicked(bool)"), self.delOrdChoice) 
+
+    def addOrdChoice(self):
+        self.choicetable.insertRow(self.choicetable.rowCount())
+        self.choicetable.setItem(0,2,QTableWidgetItem())
+        disableitem = self.choicetable.item(0, 2)
+        disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
+        disableitem.setBackgroundColor(Qt.darkGray)
+
+    def delOrdChoice(self):
+        self.choicetable.removeRow(self.choicetable.currentRow())
+        self.choicetable.setItem(0,2,QTableWidgetItem())
+        disableitem = self.choicetable.item(0, 2)
+        if disableitem != None:
+            disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
+            disableitem.setBackgroundColor(Qt.darkGray)
 
     def checkInputs(self):
         res = True
@@ -501,7 +499,7 @@ class GCMNLogitModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(GCMNLogitModWidget, self).__init__(parent) 
-        self.makeChoiceWidget()
+        #self.makeChoiceWidget()
         self.makeVarsWidget() 
         
     def checkInputs(self):
