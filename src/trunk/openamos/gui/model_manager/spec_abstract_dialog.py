@@ -350,7 +350,7 @@ class AbtractSpecDialog(QDialog):
                 self.addDepVarToElt(modelelt,modelkey)
                 self.addFiltToElt(modelelt)
                 
-                self.addAlternatives(modelelt)
+                #self.addAlternatives(modelelt)
                 self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == MNL_MODEL:
