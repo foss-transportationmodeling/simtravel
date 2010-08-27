@@ -420,7 +420,7 @@ class Model_Manager_Treewidget(QTreeWidget):
             modelkey = MODELKEY_NUMVEHS
         elif item.text(col) == COMPMODEL_NUMTYPES:
             diagtitle = COMPMODEL_NUMTYPES
-            modelkey = MODELKEY_NUMVEHTYPES
+            modelkey = MODELKEY_VEHTYPES
 #        elif item.text(col) == COMPMODEL_NONWORKER:
 #            diagtitle = COMPMODEL_NONWORKER
 #            modelkey = MODELKEY_NONWORKER
