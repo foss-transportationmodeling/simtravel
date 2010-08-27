@@ -41,7 +41,7 @@ class VehicleOwnershipModels(QWidget):
     
     def veh_types(self):
         diagtitle = COMPMODEL_NUMTYPES
-        modelkey = MODELKEY_NUMVEHTYPES
+        modelkey = MODELKEY_VEHTYPES
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
