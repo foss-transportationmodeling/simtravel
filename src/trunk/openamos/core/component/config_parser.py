@@ -189,6 +189,8 @@ class ConfigParser(object):
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
         dep_varname = depvariable_element.get('var')
 
+        print dep_varname, '----variable Name -----'
+
         choice = [dep_varname]
 
         # Creating the coefficients input for the regression model
@@ -197,6 +199,7 @@ class ConfigParser(object):
 
         variable_list = variable_list + vars_list
 
+        print choice, coefficients
         # specification object
         specification = Specification(choice, coefficients)
 
@@ -662,81 +665,6 @@ class ConfigParser(object):
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def check_for_interaction_terms(self, var_element, alternativeSet):
-        variable_list = []
-        coeff_dict = {}
-        dep_varname = ''
-
-        if var_element.get('interaction') is not None:
-            rep_var = var_element.get('repeat')
-            if rep_var is not None:
-                rep_var_list = re.split('[,]', rep_var)
-                
-            #var_element.get('interaction')
-            varnames = re.split('[,]', var_element.get('var'))
-            #print varnames
-            tablenames = re.split('[,]', var_element.get('table'))
-            #print tablenames
-            
-            rep_var_table_list = []
-            for i in rep_var_list:
-                #find and remove the repeate variable from varnames
-                var_ind = varnames.index(i)
-                varnames.pop(var_ind)
-
-                #find the tablenames for the ones that are to be repeated
-                rep_var_table_list.append(tablenames.pop(var_ind))
-
-            for i in range(len(varnames)):
-                variable_list.append((tablenames[i], varnames[i]))
-                dep_varname = dep_varname + varnames[i].title()
-                coeff_dict[varnames[i]] = 1
-
-            if alternativeSet is None:
-                choice = [dep_varname]
-                coefficients_list = [coeff_dict]
-                # specification object
-            #print coefficients_list
-                specification = Specification(choice, coefficients_list)
-                
-                model = InteractionModel(specification) 
-                model_type = 'regression'                   #Type of Model 
-                model_object = SubModel(model, model_type, dep_varname) #Model Object
-                dep_var = dep_varname
-            else:
-                dep_var = []
-                dep_rep_varname = copy.deepcopy(dep_varname)
-                for j in range(alternativeSet):
-                    dep_varname = dep_rep_varname
-                    
-                    coeffs_rep = copy.deepcopy(coeff_dict)
-
-                    for k in range(len(rep_var_list)):
-                        variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
-                        dep_varname = dep_varname + rep_var_list[k]
-                        coeffs_rep[rep_var_list[k]+str(j+1)] = 1
-                        
-                    dep_varname = dep_varname + str(j+1)
-                    choice = [dep_varname]
-                    coefficients_list = [coeffs_rep]
-                    specification = Specification(choice, coefficients_list)
-                    
-                    model = InteractionModel(specification)
-                    model_type = 'regression'
-                    model_object = SubModel(model, model_type, dep_varname)
-                    
-                    dep_var.append(dep_varname)
-            #print dep_var
-            #return model_object, variable_list
-                    #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
-
-                    self.model_list.append(model_object)
-                    self.component_variable_list = self.component_variable_list + variable_list            
-            return dep_var
-
-        else:
-            return None
-
     
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
@@ -745,6 +673,8 @@ class ConfigParser(object):
         variableIterator = element.getiterator('Variable')
         vars_list = []
         coeff_ret = []
+
+        
 
 
         for i in variableIterator:
@@ -777,6 +707,86 @@ class ConfigParser(object):
         #print vars_list, 'sent back', coeff_ret
         return coeff_ret, vars_list
 
+    def check_for_interaction_terms(self, var_element, alternativeSet):
+        variable_list = []
+        coeff_dict = {}
+        dep_varname = ''
+
+        if var_element.get('interaction') is not None:
+            rep_var = var_element.get('repeat')
+            if rep_var is not None:
+                rep_var_list = re.split('[,]', rep_var)
+            else:
+                rep_var_list = []
+                
+            #var_element.get('interaction')
+            varnames = re.split('[,]', var_element.get('var'))
+            #print varnames
+            tablenames = re.split('[,]', var_element.get('table'))
+            #print tablenames
+            
+            rep_var_table_list = []
+            for i in rep_var_list:
+                #find and remove the repeate variable from varnames
+                var_ind = varnames.index(i)
+                varnames.pop(var_ind)
+
+                #find the tablenames for the ones that are to be repeated
+                rep_var_table_list.append(tablenames.pop(var_ind))
+
+            for i in range(len(varnames)):
+                variable_list.append((tablenames[i], varnames[i]))
+                dep_varname = dep_varname + varnames[i].title()
+                coeff_dict[varnames[i]] = 1
+
+
+            if alternativeSet is None:
+                choice = [dep_varname]
+                coefficients_list = [coeff_dict]
+                # specification object
+                specification = Specification(choice, coefficients_list)
+                
+                model = InteractionModel(specification) 
+                model_type = 'regression'                   #Type of Model 
+                model_object = SubModel(model, model_type, dep_varname) #Model Object
+                dep_var = [dep_varname]
+            else:
+                dep_var = []
+                dep_rep_varname = copy.deepcopy(dep_varname)
+                for j in range(alternativeSet):
+                    dep_varname = dep_rep_varname
+                    
+                    coeffs_rep = copy.deepcopy(coeff_dict)
+
+                    for k in range(len(rep_var_list)):
+                        variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
+                        dep_varname = dep_varname + rep_var_list[k]
+                        coeffs_rep[rep_var_list[k]+str(j+1)] = 1
+                        
+                    dep_varname = dep_varname + str(j+1)
+                    choice = [dep_varname]
+                    coefficients_list = [coeffs_rep]
+                    specification = Specification(choice, coefficients_list)
+                    
+                    model = InteractionModel(specification)
+                    model_type = 'regression'
+                    model_object = SubModel(model, model_type, dep_varname)
+                    
+                    dep_var.append(dep_varname)
+            #print dep_var
+            #return model_object, variable_list
+                    #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
+
+                    self.model_list.append(model_object)
+                    self.component_variable_list = self.component_variable_list + variable_list            
+
+            return dep_var
+
+        else:
+            return None
+
+    def return_spatial_query(self, model_element):
+        pass
 
     def return_filter_condition(self, model_element):
         filter_element = model_element.find('Filter')
