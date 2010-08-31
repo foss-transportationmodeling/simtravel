@@ -61,6 +61,14 @@ class ComponentManager(object):
         
         subsample = self.projectConfigObject.subsample
         
+        for i in componentList:
+            tableName = i.table
+            print '\nFor component - %s deleting corresponding table - %s' %(i.component_name, tableName)
+            # clean the run time tables
+            #delete the delete statement; this was done to clean the tables during testing
+            self.queryBrowser.delete_all(tableName)            
+            
+
         
         for i in componentList:
             t = time.time()
@@ -73,17 +81,12 @@ class ComponentManager(object):
 
             tableName = i.table
 
-            # clean the run time tables
-            #delete the delete statement; this was done to clean the tables during testing
-            self.queryBrowser.delete_all(tableName)            
-
             # Prepare Data
             data = self.prepare_data(vars_inc_dep, count_keys=count_keys, subsample=subsample)        
         
-            #if i.component_name == 'VehicleAttributeModels':
-            #    print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])                                                
-            #    print data.columns(['houseid', 'vehid', 'numvehs', 'vehtype'])
-            
+            if i.component_name == 'MorningVertex' or i.component_name == 'EveningVertex':
+                print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
+
             # Run the component
             i.run(data, db)
             
@@ -102,7 +105,9 @@ class ComponentManager(object):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
-        because the output is currently cached on the hard drive
+        because the output is currently cached on the hard drive and the queries
+        are using tables in the database which only contain the input tables 
+        and hence the need to reflect the run-time caches to the database
         """
 
         #self.queryBrowser.inser_into_table(data.data
@@ -116,7 +121,14 @@ class ComponentManager(object):
         colsToWrite = table.colnames
 
         #print resArr
+        # TODO: delete rows from the local cache
+        # In the current implementation, the rows are deleted before every update so that replication is not  done
+        # in actual implementation, the local cache should be wiped clean so as to avoid the latency of 
+        # inserting old rows and creating indices for them
+        
+        self.queryBrowser.delete_all(tableName)            
         self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols)
+
         
     def prepare_vars(self, variableList, component):
         #print variableList
@@ -324,8 +336,8 @@ class ComponentManager(object):
         mask = ma.masked_values(data, None).mask
         data = array(data)
         data[mask] = 0
-        data = DataArray(data, cols)
-        
+        data = DataArray(data[:5,:], cols)
+
         print '\tNumber of records fetched - ', data.data.shape
         print '\tRecords were processed after query in %.4f' %(time.time()-t)
         return data
@@ -339,6 +351,7 @@ class ComponentManager(object):
         to generating the choices, one has to also retrieve the travel skims corresponding
         to the N random location choices.
         """
+        
         pass
 
 
