@@ -65,6 +65,8 @@ class VEHICLES_R(object):pass
 
 class TSP_R(object):pass
 
+class SCHEDULE_R(object):pass
+
 class TRAVEL_SKIMS(object):pass
 
 class QueryBrowser(object):
@@ -173,10 +175,6 @@ class QueryBrowser(object):
         table_name = 'link_od'
         self.link_od = self.table_mapper(class_name, table_name)
         
-        #for class Schedule
-        class_name = 'SCHEDULE'
-        table_name = 'schedule'
-        self.schedule = self.table_mapper(class_name, table_name)
         
         #for class Destination_Opportunities
         class_name = 'DESTINATION_OPPORTUNITIES'
@@ -240,6 +238,10 @@ class QueryBrowser(object):
         table_name = 'tsp_r'
         self.table_mapper(class_name, table_name)
         
+        #for class Schedule
+        class_name = 'SCHEDULE_R'
+        table_name = 'schedule_r'
+        self.table_mapper(class_name, table_name)
 
 
     ########## methods for mapping end ##########
@@ -376,12 +378,16 @@ class QueryBrowser(object):
         for i in db_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
             list1 = db_dict[i]
+            #print 'table--', i
+            #print 'clist', clist
+            #print 'list1', list1
             chk_list = len(list(set(list1) & set(clist)))
             if chk_list == len(list1):
                 for j in db_dict[i]:
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
             else:
+                #print i
                 print 'Column(s) passed in the dictionary do not exist in the table'
                 return None
         #print 'final_list is %s'%final_list
@@ -448,11 +454,14 @@ class QueryBrowser(object):
             #grouping string
             grpStr = ''
             joinCondition=''
+
+            print 'column_names of max TABLE ----->', column_names
             for i in column_names[maxTable]:
+                print 'createing join string for column name - ', i
                 grpStr = grpStr + '%s,' %(i)
                 joinCondition = (joinCondition 
-                                 + ' temp.%s=%s.%s ' %(col, 
-                                                       mainTable, col) 
+                                 + ' temp.%s=%s.%s ' %(i, 
+                                                       mainTable, i) 
                                  + 'and')
             grpStr = grpStr[:-1]
             joinCondition = joinCondition[:-3]
@@ -837,7 +846,7 @@ class QueryBrowser(object):
                     columns.append(i)
                 count = count + 1
             self.result = self.dbcon_obj.connection.execute(index_stmt)
-            #print '\t    Index %s deleted'%index_name
+            print '\t    Index %s deleted'%index_name
             return columns
         except Exception, e:
             print '\t    Error while creating an index'
