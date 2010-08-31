@@ -64,7 +64,6 @@ class AbstractComponent(object):
         self.data = data
         self.db = db
 
-        import copy
         # the variable keeps a running list of models that need to be run
         # this way first we run through all models once.  
         # In the next iteration, only those models are executed
@@ -75,7 +74,7 @@ class AbstractComponent(object):
         prim_key = self.key[0]
         count_key = self.key[1]
 
-        table = self.table
+        #table = self.table
 
 
         while len(model_list_duringrun) > 0:
@@ -94,28 +93,13 @@ class AbstractComponent(object):
                 if dep_varname not in cols_to_write:
                     cols_to_write.append(dep_varname)
             print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
-            print "\t    Writing for to %s: records - %s" %(table, sum(data_filter))
+            print "\t    Writing for to %s: records - %s" %(self.table, sum(data_filter))
 
             if count_key is not None and count_key not in cols_to_write:
                 cols_to_write = cols_to_write + count_key
-
-            print '\t    Columns - ', cols_to_write
-            data_to_write = data.columns(cols_to_write)
             
-            t = time.time()
-            # writing to the hdf5 cache
-            cacheTableRef = db.returnTableReference(table)
-            cacheTableRow = cacheTableRef.row
-            
-            for i in data_to_write.data[data_filter,:]:
-                for j in xrange(len(cols_to_write)):
-                    cacheTableRow[cols_to_write[j]] = i[j]
-                cacheTableRow.append()
-            cacheTableRef.flush()
-            print """\t    Writing to hdf5 cache format (appending one record at a time) """\
-                """%.4f""" %(time.time()-t)
-            
-
+            self.write_data_to_cache(db, cols_to_write, data_filter)
+                
             """
             for k in range(100):
             for i in data_to_write.data[data_filter,:]:
@@ -124,6 +108,23 @@ class AbstractComponent(object):
             cacheTableRow.append()
             cacheTableRef.flush()
             """
+    def write_data_to_cache(self, db, cols_to_write, data_filter):
+        print '\t    Columns - ', cols_to_write
+        data_to_write = self.data.columns(cols_to_write)
+        
+        t = time.time()
+            # writing to the hdf5 cache
+        cacheTableRef = db.returnTableReference(self.table)
+        cacheTableRow = cacheTableRef.row
+        
+        for i in data_to_write.data[data_filter,:]:
+            for j in xrange(len(cols_to_write)):
+                cacheTableRow[cols_to_write[j]] = i[j]
+            cacheTableRow.append()
+        cacheTableRef.flush()
+        print """\t    Writing to hdf5 cache format (appending one record at a time) """\
+            """%.4f""" %(time.time()-t)
+            
     def iterate_through_the_model_list(self, model_list_duringrun, iteration):
         model_list_forlooping = []
         
@@ -174,11 +175,9 @@ class AbstractComponent(object):
                 self.data.setcolumn(i.run_until_condition.varname, 
                                     result_run_var, data_subset_filter)
                 """
-            if i.dep_varname == "vehid":
-                print '\t\tResult for above model(s)'
-                #print '\t',(['houseid', 'vehid', 'numvehs', 'vehtype'])
-                #print self.data.columns(['houseid', 'vehid', 'numvehs', 'vehtype']).data[data_subset_filter]
-                print '\t\tNUmber of rows retrieved', sum(data_subset_filter)
+            else:
+                data_subset_filter = array([True]*self.data.rows)
+            
         print '\t-- Iteration Complete --'
         #raw_input()
         return model_list_forlooping, data_subset_filter
