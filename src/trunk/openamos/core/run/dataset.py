@@ -16,10 +16,19 @@ class Tsp_R(t.IsDescription):
     daystart = t.Float32Col()
     dayend = t.Float32Col()
 	
+class Schedule_R(t.IsDescription):
+    houseid = t.Int32Col()
+    personid = t.Int16Col()
+    scheduleid = t.Int16Col()
+    activitytype = t.Int16Col()
+    locationid = t.Int16Col()
+    starttime = t.Float32Col()
+    endtime = t.Float32Col()
 
 class DB(object):
     def __init__(self, mode):
         pass
+
     """
         self.groupDict = {'households_r':'households',
                           'vehicles_r':'households',
@@ -44,11 +53,14 @@ class DB(object):
         vehicles_r_grp = self.fileh.createGroup(root, "vehicles_r_grp")
         households_r_grp = self.fileh.createGroup(root, "households_r_grp")
         tsp_r_grp = self.fileh.createGroup(root, "tsp_r_grp")
+        schedule_r_grp = self.fileh.createGroup(root, "schedule_r_grp")
 
 
         vehicles_r = self.fileh.createTable(vehicles_r_grp, "vehicles_r", Vehicles_R)
         households_r = self.fileh.createTable(households_r_grp, "households_r", Households_R)
         tsp_r = self.fileh.createTable(tsp_r_grp, "tsp_r", Tsp_R)
+        schedule_r = self.fileh.createTable(schedule_r_grp, "schedule_r", Schedule_R)
+
 
         
     def returnTableReference(self, tableName):
