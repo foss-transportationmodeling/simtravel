@@ -64,7 +64,6 @@ class StocFronRegressionModel(AbstractRegressionModel):
 
         if vertex == 'start':
             predValue_lessThresholdInd = pred_value < threshold
-            print predValue_lessThresholdInd            
             print '\t\tPred value is less than START threshold for - %d cases ' \
                 % sum(predValue_lessThresholdInd)
             pred_value[predValue_lessThresholdInd] = threshold
@@ -72,7 +71,6 @@ class StocFronRegressionModel(AbstractRegressionModel):
 
         if vertex == 'end':
             predValue_moreThresholdInd = pred_value > threshold
-            print predValue_moreThresholdInd
             print '\t\tPred value is greater than END threshold for - %d cases ' \
                 % sum(predValue_moreThresholdInd)
             pred_value[predValue_moreThresholdInd] = threshold
