@@ -53,11 +53,11 @@ class AbtractSpecDialog(QDialog):
         self.subpoptab = QComboBox()
         self.subpoptab.addItems(self.tablelist)
         subpoplayout.addWidget(self.subpoptab,1,0)
-        varlabel = QLabel("Column")  
-        subpoplayout.addWidget(varlabel,0,1)          
+        varlabel = QLabel("Column")
+        subpoplayout.addWidget(varlabel,0,1)
         self.subpopvar = QComboBox()
         subpoplayout.addWidget(self.subpopvar,1,1)
-        oplabel = QLabel("Operator")  
+        oplabel = QLabel("Operator")
         subpoplayout.addWidget(oplabel,0,2)          
         self.subpopop = QComboBox()
         self.subpopop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
@@ -73,7 +73,7 @@ class AbtractSpecDialog(QDialog):
         subpoplayout.setColumnStretch(2,1)
         subpoplayout.setColumnStretch(3,1)
         self.glayout.addWidget(self.subpopgb,1,0)
-        
+
         self.modwidget = QWidget()
         self.glayout.addWidget(self.modwidget,2,0)
         
@@ -413,17 +413,21 @@ class AbtractSpecDialog(QDialog):
                     modelelt.append(neselt)
                                       
             elif self.modeltypecb.currentText() == LOGREG_MODEL:
-                pass
+                modelform = MODELFORM_REG
+                modelelt = self.createModelElement(modelkey,modelform,'')
+                self.addDepVarToElt(modelelt,modelkey)
+                self.addFiltToElt(modelelt)
+                self.addVariables(modelelt)
+                #pass
     
             
             self.configobject.addModelElement(modelelt)
             
             QDialog.accept(self)
-        else:
-            msg = self.modwidget.errmsg
-            QMessageBox.information(self, "Warning",
-                                msg,
-                                QMessageBox.Ok)            
+        #else:
+            #msg = self.modwidget.errmsg
+            #QMessageBox.information(self, "Warning", msg, QMessageBox.Ok)
+            #QMessageBox.warning(self, "Warning", "The value must be numeric, or greater than or equal to zero in the Sub-Population.")            
 
     
     def createModelElement(self,name,formulation,type,otherattr=None):
@@ -494,14 +498,187 @@ class AbtractSpecDialog(QDialog):
             for col in cols:
                 varlist.append(QString(col))
             self.coldict[table] = varlist
+            
+    def checkFloat(self,num):
+        res = False
+        try:
+            temp = float(num)
+            res = True
+        except:
+            res = False
+        
+        return res
+    
+    
+    def checkInput_table1(self):
+        numrows = self.modwidget.choicetable.rowCount()
+        for i in range(numrows):
+            coeff = unicode((self.modwidget.choicetable.item(i,1)).text())
+            
+            if not self.checkFloat(coeff):
+                QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
+                return False
+            else:
+                if float(coeff) < 0.0:
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
+                    return False
+                
+        return True
+    
+    
+    def checkInput_table2(self):
+        numrows = self.modwidget.varstable.rowCount()
+        for i in range(numrows):
+            coeff = unicode((self.modwidget.varstable.item(i,2)).text())
+            
+            if not self.checkFloat(coeff):
+                QMessageBox.warning(self, "Warning", "Coefficient must be numeric.")
+                return False
+            else:
+                if float(coeff) < 0.0:
+                    QMessageBox.warning(self, "Warning", "Coefficient must be greater than or equal to zero.")
+                    return False
+                
+        return True
+    
     
     def checkInputs(self):
-        res = False
-        if self.modwidget.checkInputs():
-            res = True
-        return res
-
         
+        res = True
+        temp = unicode(self.subpopval.text())
+        if not self.checkFloat(temp):
+            QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
+            return False
+        else:
+            if float(temp) < 0.0:
+                QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
+                return False
+
+                
+        if self.modeltypecb.currentText() == PROB_MODEL:
+            numrows = self.modwidget.choicetable.rowCount()
+            for i in range(numrows):
+                colname = unicode((self.modwidget.choicetable.item(i,1)).text())
+                coeff = unicode((self.modwidget.choicetable.item(i,2)).text())
+                
+                if not self.checkFloat(colname):
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
+                    return False
+                else:
+                    if float(colname) < 0.0:
+                        QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
+                        return False
+                
+                if self.checkFloat(coeff):
+                    coeff1 = float(coeff)
+                    if coeff1 < 0.0 or coeff1 > 1.0:
+                        QMessageBox.warning(self, "Warning", "Probability must be between 0.0 and 1.0.")
+                        return False
+                else:
+                    QMessageBox.warning(self, "Warning", "Probability must be numeric.")
+                    return False
+                                   
+        elif self.modeltypecb.currentText() == COUNT_MODEL:
+            
+            dispersion = unicode(self.modwidget.odline.text())
+            if not self.checkFloat(dispersion):
+                QMessageBox.warning(self, "Warning", "Overdispersion must be numeric.")
+                return False
+            else:
+                if float(dispersion) < 0.0:
+                    QMessageBox.warning(self, "Warning", "Overdispersion must be greater than or equal to zero.")
+                    return False
+            
+            if not self.checkInput_table1():
+                return False
+            
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == SF_MODEL:
+            
+            variancev = unicode(self.modwidget.variancevline.text())
+            if not self.checkFloat(variancev):
+                QMessageBox.warning(self, "Warning", "Variance (v) - Normal must be numeric.")
+                return False
+            else:
+                if float(variancev) < 0.0:
+                    QMessageBox.warning(self, "Warning", "Variance (v) - Normal must be greater than or equal to zero.")
+                    return False
+                
+            varianceu = unicode(self.modwidget.varianceuline.text())
+            if not self.checkFloat(varianceu):
+                QMessageBox.warning(self, "Warning", "Variance (u) - Half Normal must be numeric.")
+                return False
+            else:
+                if float(varianceu) < 0.0:
+                    QMessageBox.warning(self, "Warning", "Variance (u) - Half Normal must be greater than or equal to zero.")
+                    return False
+                
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == GC_MNL_MODEL:
+            
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == MNL_MODEL:
+            
+            if not self.checkInput_table1():
+                return False
+            
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == ORD_MODEL:
+            
+            numrows = self.modwidget.choicetable.rowCount()
+            for i in range(numrows):
+                value = unicode((self.modwidget.choicetable.item(i,1)).text())
+                thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
+                
+                if not self.checkFloat(value):
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
+                    return False
+                else:
+                    if float(value) < 0.0:
+                        QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
+                        return False
+                
+                if self.checkFloat(thresh):
+                    if float(thresh) < 0.0:
+                        QMessageBox.warning(self, "Warning", "Threshold must be greater than 0.0.")
+                        return False
+                else:
+                    QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
+                    return False
+                
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == NL_MODEL:
+            
+            if not self.checkInput_table1():
+                return False
+            
+            if not self.checkInput_table2():
+                return False
+            
+        elif self.modeltypecb.currentText() == LOGREG_MODEL:
+            
+            if not self.checkInput_table2():
+                return False           
+        
+        
+        return res
+#        res = False
+#        if self.modwidget.checkInputs():
+#            res = True
+#        return res
+    
+
+
 def main():
     app = QApplication(sys.argv)
     config = None
