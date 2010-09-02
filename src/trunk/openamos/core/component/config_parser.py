@@ -189,7 +189,7 @@ class ConfigParser(object):
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
         dep_varname = depvariable_element.get('var')
 
-        print dep_varname, '----variable Name -----'
+        #print dep_varname, '----variable Name -----'
 
         choice = [dep_varname]
 
@@ -199,7 +199,7 @@ class ConfigParser(object):
 
         variable_list = variable_list + vars_list
 
-        print choice, coefficients
+        #print choice, coefficients
         # specification object
         specification = Specification(choice, coefficients)
 
@@ -673,9 +673,6 @@ class ConfigParser(object):
         variableIterator = element.getiterator('Variable')
         vars_list = []
         coeff_ret = []
-
-        
-
 
         for i in variableIterator:
             dep_var = self.check_for_interaction_terms(i, alternativeSet)
