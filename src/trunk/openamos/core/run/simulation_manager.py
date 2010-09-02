@@ -1,7 +1,7 @@
 import copy
 import time
 from lxml import etree
-from numpy import array, ma
+from numpy import array, ma, ones, zeros, random, vstack
 
 from openamos.core.component.config_parser import ConfigParser
 from openamos.core.database_management.query_browser import QueryBrowser
@@ -50,13 +50,18 @@ class ComponentManager(object):
         print 'Database Connection Established'
 
         
-    def establish_cacheDatabase(self):
-        db = DB('w')
-        db.create()
-        return db
+    def establish_cacheDatabase(self, fileLoc, mode='w'):
+        self.db = DB(fileLoc, mode)
+        if mode == 'w':
+            self.db.create()
+            # placeholders for creating the hdf5 tables 
+            # only the network data is read and processed for faster 
+            # queries
+            self.db.createTableFromDatabase('travel_skims', self.queryBrowser)
         
         
-    def run_components(self, db):
+    def run_components(self):
+        t_c = time.time()
         componentList = self.configParser.parse_models()
         
         subsample = self.projectConfigObject.subsample
@@ -84,24 +89,24 @@ class ComponentManager(object):
             # Prepare Data
             data = self.prepare_data(vars_inc_dep, count_keys=count_keys, subsample=subsample)        
         
-            if i.component_name == 'MorningVertex' or i.component_name == 'EveningVertex':
-                print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
+            #if i.component_name == 'MorningVertex' or i.component_name == 'EveningVertex':
+            #    print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
 
             # Run the component
-            i.run(data, db)
+            i.run(data, self.db)
             
             # Write the data to the database from the hdf5 results cache
             if i.key[1] is not None:
                 keyCols = i.key[0] + i.key[1]
             else:
                 keyCols = i.key[0]
-            self.reflectToDatabase(db, tableName, keyCols)
+            self.reflectToDatabase(tableName, keyCols)
 
             print '-- Finished simulating model --'
             print '-- Time taken to complete - %.4f' %(time.time()-t)
-            
+        print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f' %(time.time()-t_c)
 
-    def reflectToDatabase(self, db, tableName, keyCols=[]):
+    def reflectToDatabase(self, tableName, keyCols=[]):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
@@ -111,12 +116,20 @@ class ComponentManager(object):
         """
 
         #self.queryBrowser.inser_into_table(data.data
-        table = db.returnTableReference(tableName)
+        table = self.db.returnTableReference(tableName)
         
-        resIterator = table.iterrows()
+        
+        #resIterator = table.iterrows()
+        #t = time.time()
+        #resArr = [row[:] for row in resIterator]
+        #print """\tCreating the array object (iterating through the hdf5 results) """\
+        #    """to insert into tbale - %.4f""" %(time.time()-t)
+        #print type(resArr)
+        
         t = time.time()
-        resArr = [row[:] for row in resIterator]
-        print """\tCreating the array object (iterating through the hdf5 results) """\
+
+        resArr = list(table[:])
+        print """\tCreating the array object (WITHOUR iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
 
@@ -188,7 +201,7 @@ class ComponentManager(object):
     def prepare_vars_independent(self, variableList):
         # Here we append attributes for all columns that appear on the RHS in the 
         # equations for the different models
-        print variableList
+        #print variableList
 
         indepColDict = {}
         for i in variableList:
@@ -230,8 +243,8 @@ class ComponentManager(object):
     def prepare_data(self, columnDict, count_keys=None, subsample=None):
         # get hierarchy of the tables
         tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
-        print 'TABLE ORDER DICT', tableOrderDict
-        print 'TABLE NAMES KEY DICT', tableNamesKeyDict
+        #print 'TABLE ORDER DICT', tableOrderDict
+        #print 'TABLE NAMES KEY DICT', tableNamesKeyDict
 
         orderKeys = tableOrderDict.keys()
         orderKeys.sort()
@@ -242,10 +255,10 @@ class ComponentManager(object):
             tableNamesOrderDict[tableOrderDict[i][0]] = i
             #tableNamesKeyDict[tableOrderDict[i][0]] = tableOrderDict[i][1]
 
-        print 'TABLE NAMES ORDER', tableNamesOrderDict
+        #print 'TABLE NAMES ORDER', tableNamesOrderDict
         # table order
         tableNamesForComponent = columnDict.keys()
-        print 'TABLE NAMES FOR COMPONENT', tableNamesForComponent
+        #print 'TABLE NAMES FOR COMPONENT', tableNamesForComponent
 
         found = []
         for i in list(set(tableNamesForComponent) & set(tableNamesOrderDict.keys())):
@@ -254,8 +267,8 @@ class ComponentManager(object):
             found.insert(order-minOrder, i)
             tableNamesForComponent.remove(i)
 
-        print 'COMPONENT TABLES AFTER', tableNamesForComponent
-        print 'HIERARCHY TABLES FOUND - ', found
+        #print 'COMPONENT TABLES AFTER', tableNamesForComponent
+        #print 'HIERARCHY TABLES FOUND - ', found
         #inserting back the ones that have a hierarchy defined
         tableNamesForComponent = found + tableNamesForComponent
 
@@ -264,7 +277,7 @@ class ComponentManager(object):
         # replacing with the right keys for the main agents so that zeros are not
         # returned by the query statement especially for the variables defining the
         # agent id's
-        print 'BEFORE FIXING INDEX KEYS', columnDict
+        #print 'BEFORE FIXING INDEX KEYS', columnDict
         
         found.reverse() # so that the tables higher in the hierarchy are fixed last; lowest to highest now
 
@@ -279,14 +292,14 @@ class ComponentManager(object):
                         columnDict[i] = columnDict[i] + list(intersectKeyCols)
                     else:
                         columnDict[i] = intersectKeyCols
-        print 'AFTER FIXING INDEX KEYS', columnDict
+        #print 'AFTER FIXING INDEX KEYS', columnDict
 
         found.reverse() # reversing back the heirarchy to go from highest to lowest
 
         # matching keys
         matchingKey = {}
         mainTable = found[0]
-        print 'mainTable', mainTable
+        #print 'mainTable', mainTable
         mainTableKeys = tableNamesKeyDict[mainTable][0]
 
         for i in columnDict.keys():
@@ -295,8 +308,8 @@ class ComponentManager(object):
             else:
                 matchTableKeys = tableNamesKeyDict[i][0]
             matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
-        print 'MATCHING KEY DICTIONARY', matchingKey
-        raw_input()
+        #print 'MATCHING KEY DICTIONARY', matchingKey
+        #raw_input()
 
         #for i in found:
         #    if i in columnDict:
@@ -310,9 +323,9 @@ class ComponentManager(object):
         else:
             max_dict = count_keys
 
-        print 'COLUMN DICTIONARY', columnDict
-        print 'TABLE HIERARCHY', tableNamesForComponent
-        print 'MATCHING COLUMN', matchingKey
+        #print 'COLUMN DICTIONARY', columnDict
+        #print 'TABLE HIERARCHY', tableNamesForComponent
+        #print 'MATCHING COLUMN', matchingKey
         #maxDict = {'vehicles_r':['vehid']}
         t = time.time()
         query_gen, cols = self.queryBrowser.select_join(columnDict, 
@@ -321,27 +334,54 @@ class ComponentManager(object):
                                                         max_dict, 
                                                         subsample)
         print '\tQuery for records was processed in %.4f' %(time.time()-t)
-        #maxDict)
 
-        #t = time.time()
-        #data = []
-        #for i in query_gen:
-        #    data.append(i)
-        #print '\tRegular looping through results took - %.4f' %(time.time()-t), len(data)
 
         t = time.time()
+        
         data = [i[:] for i in query_gen]
-        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
 
+        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
+        
+        
         mask = ma.masked_values(data, None).mask
         data = array(data)
         data[mask] = 0
-        data = DataArray(data[:5,:], cols)
+        
+        data = DataArray(array(data), cols)
 
         print '\tNumber of records fetched - ', data.data.shape
         print '\tRecords were processed after query in %.4f' %(time.time()-t)
         return data
     
+
+
+    def read_data_store_in_hdf5(self):
+        t = time.time()
+        query_gen, cols = self.queryBrowser.select_all_from_table('travel_skims')
+        print 'time to retrieve records %.4f' %(time.time()-t)
+
+        t = time.time()
+        
+        # Create travelskims table in hdf5
+        tableName = 'travelskims_r'
+        table = self.db.returnTableReference(tableName) 
+
+        tableRow = table.row
+
+        originCol = cols.index('origin')
+        destinationCol = cols.index('destination')
+        ttCol = cols.index('tt')
+
+        for i in query_gen:
+            tableRow['origin'] = i[originCol]
+            tableRow['destination'] = i[destinationCol]
+            tableRow['tt'] = i[ttCol]
+            tableRow.append()
+        table.flush()
+
+        # Create households and persons table in hdf5
+        print 'time to write to hdf5 format %.4f' %(time.time()-t)
+        
 
     def process_data_for_locs(self):
         """
@@ -351,9 +391,62 @@ class ComponentManager(object):
         to generating the choices, one has to also retrieve the travel skims corresponding
         to the N random location choices.
         """
-        
-        pass
 
+        
+        # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
+        t = time.time()
+
+        tableName = 'travelskims_r'
+        table = self.db.returnTableReference(tableName)
+
+        origin = table.col('origin')
+        destination = table.col('destination')
+        tt = table.col('tt')
+
+        ttMatrix = zeros((max(origin)+1, max(destination)+1))
+
+        ttMatrix[origin, destination] = tt
+
+        originQ = 110
+        destinationQ = 1745
+        timeWindow = 45
+
+        randint = random.randint
+        
+        destMatrix = zeros((10000, max(destination) + 1))
+
+
+        #print ttToDest.shape, ttFromDest.shape
+        for i in range(4000):
+            originQ = randint(101, 2095)
+            destinationQ = randint(101, 2095)
+            timeWindow = randint(15, 60)
+            ttToDest = ttMatrix[originQ,:]
+            ttFromDest = ttMatrix[:,destinationQ]
+            dest = ttToDest + ttFromDest < 45
+            #destMatrix[i, dest] = 1
+
+        print 'time taken - %.4f' %(time.time()-t)
+
+        print 'travel skims read'
+        raw_input()
+        """
+        print cols
+        queryData = array([i[:] for i in query_gen])
+
+        mask = array == None
+        mask = ma.masked_values(queryData, None).mask
+        queryData = array(queryData)
+        queryData[mask] = 0
+        data = DataArray(queryData, cols)
+        from numpy import where
+        t = time.time()
+        print 'start'
+        
+        print sum(data.columns(['origin']).data == 101), sum(data.columns(['destination']).data == 1994)
+        print 'end', time.time()-t
+        raw_input()
+        """
 
 # Storing data ??                                                                                                             
 # Linearizing data for calculating activity-travel choice attributes??                                                        
@@ -370,9 +463,13 @@ class ComponentManager(object):
 
 
 if __name__ == '__main__':
-    fileloc = '/home/kkonduri/simtravel/test/vehown/config.xml'
-    componentManager = ComponentManager(fileLoc = fileloc)
+    fileloc = '/home/kkonduri/simtravel/test/vehown'
+    componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
     componentManager.establish_databaseConnection()
-    db = componentManager.establish_cacheDatabase()
-    componentManager.run_components(db)
+    componentManager.establish_cacheDatabase(fileloc, 'w')
+    componentManager.run_components()
+    #componentManager.read_data_store_in_hdf5(db)
+    #componentManager.process_data_for_locs()
+    
+    
 
