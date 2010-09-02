@@ -268,11 +268,11 @@ class QueryBrowser(object):
         col = []
         temp_table = Table(new_table_name, self.dbcon_obj.metadata, autoload=True)
         for cl in temp_table.c:
-            #print 'column is %s'%cl
             col.append(cl)
 
         #query the table to fetch all the records by passing the columns
         query = self.dbcon_obj.session.query(eval(new_class_name)).values(*col)
+        cols_list = [str(cl.name) for cl in col]
         """
         all_rows = []
         for instance in query:
@@ -281,7 +281,7 @@ class QueryBrowser(object):
 
         print ' '
         """
-        return query, col
+        return query, cols_list
 
 
     #select rows based on a selection criteria
@@ -399,7 +399,7 @@ class QueryBrowser(object):
 
         # Generating the left join statements
         mainTable = table_names[0]
-        print 'mainTable ----> ', mainTable
+        #print 'mainTable ----> ', mainTable
 
         joinStrList = []
         for table in table_list:
@@ -416,7 +416,7 @@ class QueryBrowser(object):
             joinStr = ' left join %s on (%s)' %(table, joinCondition)
             joinStrList.append(joinStr)
 
-        print 'JOIN STRING LIST', joinStrList
+        #print 'JOIN STRING LIST', joinStrList
 
         #check the max flag
         
@@ -455,9 +455,9 @@ class QueryBrowser(object):
             grpStr = ''
             joinCondition=''
 
-            print 'column_names of max TABLE ----->', column_names
+            #print 'column_names of max TABLE ----->', column_names
             for i in column_names[maxTable]:
-                print 'createing join string for column name - ', i
+                #print 'createing join string for column name - ', i
                 grpStr = grpStr + '%s,' %(i)
                 joinCondition = (joinCondition 
                                  + ' temp.%s=%s.%s ' %(i, 
@@ -799,7 +799,7 @@ class QueryBrowser(object):
             result = self.dbcon_obj.connection.execute(insert_stmt)
         except Exception, e:
             print '\t    Error while inserting data in the table'
-            print e
+            print e.message
         print '\t    Time  after insert stmt %.4f\n'%(time.time()-t)
         
         #after insert create new index
