@@ -76,7 +76,7 @@ class AbstractComponent(object):
 
         #table = self.table
 
-
+        nRowsProcessed = 0
         while len(model_list_duringrun) > 0:
             t = time.time()
         
@@ -99,15 +99,10 @@ class AbstractComponent(object):
                 cols_to_write = cols_to_write + count_key
             
             self.write_data_to_cache(db, cols_to_write, data_filter)
-                
-            """
-            for k in range(100):
-            for i in data_to_write.data[data_filter,:]:
-            for j in xrange(len(cols_to_write)):
-            cacheTableRow[cols_to_write[j]] = i[j]
-            cacheTableRow.append()
-            cacheTableRef.flush()
-            """
+
+            nRowsProcessed += sum(data_filter)
+        return nRowsProcessed
+
     def write_data_to_cache(self, db, cols_to_write, data_filter):
         print '\t    Columns - ', cols_to_write
         data_to_write = self.data.columns(cols_to_write)
