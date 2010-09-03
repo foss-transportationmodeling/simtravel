@@ -11,6 +11,7 @@ import sqlalchemy
 import sqlite3
 import psycopg2 as dbapi2
 import sqlalchemy.schema
+from numpy import ma, array
 from psycopg2 import extensions
 from sqlalchemy.sql import select
 from sqlalchemy.schema import MetaData, Column, Table
@@ -28,7 +29,7 @@ from database_connection import DataBaseConnection
 from database_configuration import DataBaseConfiguration
 
 from openamos.core.errors import DatabaseConfigurationError
-
+from openamos.core.data_array import DataArray
 
 class VECHICLE(object): pass
 
@@ -493,133 +494,6 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
         print 'SQL STRING', sql_string
             
-
-        """
-
-        #use string manipulation to create the select query
-        len1 = len(final_list)
-        len2 = len(table_list)
-        ctr = 0
-        sql_string = 'select '
-        left_join_str = ' left join '
-        where_str = ' where '
-        and_str = ' and '
-        condition_str = ' '
-        for i in final_list:
-            if int(ctr) < (int(len1)-1):
-                sql_string = sql_string + str(i) + ', '
-                ctr = ctr + 1
-            else:
-                sql_string = sql_string + str(i) + ' '
-        sql_string = sql_string + 'from '
-        #print '\ntill generating columns', sql_string
-
-        #generate the code for max separately
-        #print 'code for max flag set'
-        ctr = 0
-        if max_flag:
-            #print 'max flag is set'
-            max_str = '(select max('
-            temp_str = ''
-            max_str = max_str + max_table[0].lower() + '.' + max_column + ') from ' + max_table[0].lower() + ' group by '
-            for each in column_names:
-                if int(ctr) < int(len(column_names)-1):
-                    temp_str = temp_str + max_table[0].lower() + '.' + each + ', '
-                    ctr = ctr + 1
-                else:
-                    temp_str = temp_str + max_table[0].lower() + '.' + each
-            max_str = max_str + temp_str + ')'
-        #print '\n', max_str
-        
-        #left join code begins
-        #check for the number of tables and proceed
-        if len(table_list) == 1:
-            #only one table exists. simple select query
-            sql_string = sql_string + table_list[0].lower()
-            #print '\n********** 1 table **********'
-            print '\t', sql_string
-            #print '********** 1 table **********\n'
-        elif len(table_list) == 2:
-            #for two tables
-            sql_string = sql_string + table_names[0].lower() + left_join_str + table_names[1].lower() + ' on '
-            #run a loop for the matching columns
-            count = 0
-            if len(column_names) == 1:
-                sql_string = sql_string + table_names[0].lower() + '.' + column_names[0] + ' = ' + table_names[1].lower() + '.' + column_names[0]
-            else:
-                for each in column_names:
-                    if int(count) < int(len(column_names)-1):
-                        sql_string = sql_string + table_names[0].lower() + '.' + each + ' = ' + table_names[1].lower() + '.' + each + ' and '
-                        count  = count + 1
-                    else:
-                        sql_string = sql_string + table_names[0].lower() + '.' + each + ' = ' + table_names[1].lower() + '.' + each
-                        count = count + 1
-            #first check the max flag
-            if max_flag:
-                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-            else:
-                print '\tmax flag not set'
-            #print '\n********** 2 tables **********'
-            print '\t', sql_string
-            #print '********** 2 tables **********\n'
-        else:
-            #for more than 2 tables
-            tab_ctr = 1
-            counter = 0
-            for i in table_names:
-                #parse till end of the table list. code will be inside this loop
-                if (tab_ctr%2) == 1:
-                    if int(counter)<int(len(table_names)-1):
-                        #first pass
-                        sql_string = sql_string + ' (' + table_names[counter].lower() + left_join_str + table_names[counter+1].lower() + ' on '
-                        count = 0
-                        if len(column_names) == 1:
-                            sql_string = sql_string + table_names[counter].lower() + '.' + column_names[0] + ' = ' + \
-                                        table_names[counter+1].lower() + '.' + column_names[0] + ')'
-                            if i == max_table[0]:
-                                sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str
-                        else:
-                            for each in column_names:
-                                if int(count) < int(len(column_names)-1):
-                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
-                                                table_names[counter+1].lower() + '.' + each + ' and '
-                                    count  = count + 1
-                                else:
-                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
-                                                table_names[counter+1].lower() + '.' + each + ')'
-                                    count = count + 1
-                        if i == max_table[0]:
-                            sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                    counter = counter + 1
-                    tab_ctr = tab_ctr + 1
-                    if i == max_table[0]:
-                        sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                else:
-                    if int(counter) < int(len(table_names)-1):
-                        sql_string = sql_string + left_join_str + table_names[counter+1].lower() + ' on '
-                        count = 0
-                        if len(column_names) == 1:
-                            sql_string = sql_string + table_names[counter-1].lower() + '.' + column_names[0] + ' = ' + \
-                                        table_names[counter+1].lower() + '.' + column_names[0]
-                        else:
-                            for each in column_names:
-                                if int(count) < int(len(column_names)-1):
-                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
-                                                table_names[counter+1].lower() + '.' + each + ' and '
-                                    count  = count + 1
-                                else:
-                                    sql_string = sql_string + table_names[counter].lower() + '.' + each + ' = ' + \
-                                                table_names[counter+1].lower() + '.' + each
-                                    count = count + 1
-                        if i == max_table[0]:
-                            sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                    if i == max_table[0]:
-                        sql_string = sql_string + ' and ' + max_table[0].lower() + '.' + max_column + ' = ' + max_str + ' '
-                    counter = counter + 1
-                    tab_ctr = tab_ctr + 1
-                    
-        """
- 
         cols_list = []
         tabs_list = []
 
@@ -634,16 +508,6 @@ class QueryBrowser(object):
             cols_list = cols_list + db_dict[i]
         #print 'cols_list is %s'%cols_list
         
-        #print 'Running query ...'
-        #print sql_string
-
-        # The following query works
-
-        #select households.urb,households.numchild,households.inclt35k,households.ownhome,households.one,
-        #households.drvrcnt,households.houseid,vehicles_r.vehtype,d.vehid,households_r.numvehs from households  
-        #left join households_r on ( households.houseid=households_r.houseid ) left join (select houseid, 
-        #max(vehid) as vehid from vehicles_r group by houseid) as d on (d.houseid = households.houseid) 
-        #left join vehicles_r on (vehicles_r.houseid=vehicles_r.houseid and d.vehid = vehicles_r.vehid);
         try:
             sample_str = ''
             ctr = 0
@@ -659,15 +523,11 @@ class QueryBrowser(object):
                 
             result = query.from_statement(sql_string).values(*cols_list)
                         
-            
-            #all_rows = []
-            #for instance in result:
-            #    print instance
-            #    all_rows.append(instance)
-            #print ' '
-            
-            #print 'Query Successful '
-            return result, cols_list
+            resultArray = self.createResultArray(result)
+
+            # Returns the query as a DataArray object
+            data = DataArray(resultArray, cols_list)
+            return data
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'
@@ -677,6 +537,30 @@ class QueryBrowser(object):
 
     ########## methods for delete query ##########
     
+    def createResultArray(self, result, fillValue=0):
+        t = time.time()
+
+        # Create list of records
+        data = [i[:] for i in result]
+        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
+
+        # Converting the none values returned into a zero value
+        # using the ma library in numpy
+        # - retrieve mask for None
+        # - then assign the fillValue to those columns
+        mask = ma.masked_values(data, None).mask
+        data = array(data)
+        data[mask] = fillValue
+
+        # Convert it back to a regular array to enable all the other processing
+        data = array(data)
+        print '\tSize of the data set that was retrieved - ', data.shape
+        print '\tRecords were processed after query in %.4f' %(time.time()-t)
+
+        return data
+
+
+
     #delete rows based on a deletion criteria
     def delete_selected_rows(self, class_name, col_name, value):
         """
@@ -714,7 +598,7 @@ class QueryBrowser(object):
             #print 'Selected rows delete successful.'                    
         except Exception, e:
             print e
-            print 'Selected rows delete failed.'
+            print 'Selected rows delete failed'
         
 
     #delete all rows i.e. empty table
@@ -762,12 +646,14 @@ class QueryBrowser(object):
 
     ########## methods for insert query ##########
     #insert values in the table
-    def insert_into_table(self, arr, col_list, class_name, keyCols):
+    def insert_into_table(self, arr, col_list, class_name, keyCols, chunkSize=100000):
         """
         This method is used to insert new values into the table.
 
         Input:
         Database configuration object, table name and values
+        chunkSize = number of rows to be written at once; to avoid memory issues
+        arr = is a list of tuples extracted from the hdf5 format
 
         Output:
         Values inserted in to the table
@@ -786,13 +672,35 @@ class QueryBrowser(object):
                 col_count = col_count + 1
             else:
                 col_str = col_str + i
-        """
-	col_str = str(col_list)[1:-1]
-        """
+
+
+        # Breaking it into chunks for insert
+        first = 0
+        lastRow = len(arr)
+        nChunks = int(lastRow/chunkSize)
+
+        t = time.time()
+
+        for i in range(nChunks):
+            #print 'rows - ', i*chunkSize, (i+1)*chunkSize
+            last = (i+1)*chunkSize
+            arrSub = arr[i*chunkSize:last]
+            self.insert_nrows(class_name, arrSub, col_str)
+
+        #print 'rows - ', last, lastRow
+        arrSub = arr[last:lastRow]
+        self.insert_nrows(class_name, arrSub, col_str)
+
+        #after insert create new index
+        self.create_index(class_name.lower(), keyCols)
+        print """\t    Time  after inserting all using chunks of size """\
+            """%s - %.4f\n"""%(chunkSize, time.time()-t)
+
+
+    def insert_nrows(self, class_name, arr, col_str):
         arr_str = str(arr)[1:-1]
         #print arr_str
-        
-        t = time.time()
+
         try:
             insert_stmt = "insert into %s (%s) values %s"%(class_name.lower(), col_str, arr_str)
             #print insert_stmt
@@ -800,10 +708,14 @@ class QueryBrowser(object):
         except Exception, e:
             print '\t    Error while inserting data in the table'
             print e.message
-        print '\t    Time  after insert stmt %.4f\n'%(time.time()-t)
+
         
-        #after insert create new index
-        self.create_index(class_name.lower(), keyCols)
+
+            
+        
+
+        
+        
         
     ########## methods for insert query end ##########
     
