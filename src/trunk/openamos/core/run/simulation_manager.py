@@ -93,20 +93,20 @@ class ComponentManager(object):
             #    print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
 
             # Run the component
-            i.run(data, self.db)
+            nRowsProcessed = i.run(data, self.db)
             
             # Write the data to the database from the hdf5 results cache
             if i.key[1] is not None:
                 keyCols = i.key[0] + i.key[1]
             else:
                 keyCols = i.key[0]
-            self.reflectToDatabase(tableName, keyCols)
+            self.reflectToDatabase(tableName, keyCols, nRowsProcessed)
 
             print '-- Finished simulating model --'
             print '-- Time taken to complete - %.4f' %(time.time()-t)
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f' %(time.time()-t_c)
 
-    def reflectToDatabase(self, tableName, keyCols=[]):
+    def reflectToDatabase(self, tableName, keyCols=[], nRowsProcessed=0):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
@@ -128,7 +128,8 @@ class ComponentManager(object):
         
         t = time.time()
 
-        resArr = list(table[:])
+        print 'WRITING ROWS ------> ', nRowsProcessed
+        resArr = list(table[-nRowsProcessed:])
         print """\tCreating the array object (WITHOUR iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
@@ -139,8 +140,8 @@ class ComponentManager(object):
         # in actual implementation, the local cache should be wiped clean so as to avoid the latency of 
         # inserting old rows and creating indices for them
         
-        self.queryBrowser.delete_all(tableName)            
-        self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols)
+        #self.queryBrowser.delete_all(tableName)            
+        self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
 
         
     def prepare_vars(self, variableList, component):
@@ -328,26 +329,12 @@ class ComponentManager(object):
         #print 'MATCHING COLUMN', matchingKey
         #maxDict = {'vehicles_r':['vehid']}
         t = time.time()
-        query_gen, cols = self.queryBrowser.select_join(columnDict, 
+        data = self.queryBrowser.select_join(columnDict, 
                                                         matchingKey, 
                                                         tableNamesForComponent, 
                                                         max_dict, 
                                                         subsample)
         print '\tQuery for records was processed in %.4f' %(time.time()-t)
-
-
-        t = time.time()
-        
-        data = [i[:] for i in query_gen]
-
-        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
-        
-        
-        mask = ma.masked_values(data, None).mask
-        data = array(data)
-        data[mask] = 0
-        
-        data = DataArray(array(data), cols)
 
         print '\tNumber of records fetched - ', data.data.shape
         print '\tRecords were processed after query in %.4f' %(time.time()-t)
