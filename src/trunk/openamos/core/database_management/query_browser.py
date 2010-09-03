@@ -675,7 +675,7 @@ class QueryBrowser(object):
 
 
         # Breaking it into chunks for insert
-        first = 0
+        last = 0
         lastRow = len(arr)
         nChunks = int(lastRow/chunkSize)
 
