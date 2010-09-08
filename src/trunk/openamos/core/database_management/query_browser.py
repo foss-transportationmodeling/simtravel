@@ -341,7 +341,7 @@ class QueryBrowser(object):
         Output:
         Displays the rows based on the join and the selection criterion.
         """
-        
+        self.dbcon_obj.new_sessionInstance()        
         #db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
         #           'vehicles_r': ['vehtype', 'vehid'], 
         #           'households_r': ['numvehs']}
@@ -375,6 +375,8 @@ class QueryBrowser(object):
             #print 'Tables do not exists'
             return None
         
+        print db_dict
+
         #check for the columns passed in the dictionary
         for i in db_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
@@ -527,6 +529,9 @@ class QueryBrowser(object):
 
             # Returns the query as a DataArray object
             data = DataArray(resultArray, cols_list)
+
+            self.dbcon_obj.close_sessionInstance()        
+        
             return data
         except Exception, e:
             print e
@@ -572,6 +577,7 @@ class QueryBrowser(object):
         Output:
         Deletes the rows that satisfy the selection criteria
         """
+
         print 'testing delete'
         new_class_name = class_name.upper()
         
@@ -612,7 +618,7 @@ class QueryBrowser(object):
         Output:
         Deletes all rows in the table
         """
-
+        self.dbcon_obj.new_sessionInstance()        
         new_class_name = class_name.upper()
 
         new_table_name = new_class_name.lower()
@@ -637,6 +643,7 @@ class QueryBrowser(object):
                     self.dbcon_obj.session.delete(instance)
             """
             #print '\t    Delete all records successful.'
+            self.dbcon_obj.close_sessionInstance()        
         except Exception, e:
             print e
             print '\t    Delete all records failed.'
@@ -658,7 +665,8 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
-	
+        self.dbcon_obj.new_sessionInstance()        
+    
         #method 4
         #before inserting data delete the index
         index_cols = self.delete_index(class_name.lower())
@@ -695,7 +703,7 @@ class QueryBrowser(object):
         self.create_index(class_name.lower(), keyCols)
         print """\t    Time  after inserting all using chunks of size """\
             """%s - %.4f\n"""%(chunkSize, time.time()-t)
-
+        self.dbcon_obj.close_sessionInstance()        
 
     def insert_nrows(self, class_name, arr, col_str):
         arr_str = str(arr)[1:-1]

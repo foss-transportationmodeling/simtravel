@@ -398,14 +398,20 @@ class DataBaseConnection(object):
             self.metadata = MetaData(
                         bind = self.engine
                         )
-            Session = sessionmaker(bind=self.engine, autoflush=True, autocommit=True)
-            self.session = Session()                  
+            self.sessionInstance = sessionmaker(bind=self.engine, autoflush=True, autocommit=True)
+            #self.session = Session()
         except Exception, e:
             print "Exiting the program since database connectivity failed"
             #raise Exception e
             print e
             #sys.exit()
 		
+
+    def new_sessionInstance(self):
+        self.session = self.sessionInstance()
+
+    def close_sessionInstance(self):
+        self.session.close()
 
     #check if table exists 
     def check_if_table_exists(self, table_name):
