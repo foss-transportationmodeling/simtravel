@@ -8,6 +8,7 @@ from openamos.core.database_management.query_browser import QueryBrowser
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
 from openamos.core.run.dataset import DB
+from multiprocessing import Process
 
 class ComponentManager(object):
     """
@@ -49,6 +50,9 @@ class ComponentManager(object):
         self.queryBrowser.create_mapper_for_all_classes()
         print 'Database Connection Established'
 
+
+    def close_databaseConnection(self):
+        pass
         
     def establish_cacheDatabase(self, fileLoc, mode='w'):
         self.db = DB(fileLoc, mode)
@@ -57,7 +61,7 @@ class ComponentManager(object):
             # placeholders for creating the hdf5 tables 
             # only the network data is read and processed for faster 
             # queries
-            self.db.createTableFromDatabase('travel_skims', self.queryBrowser)
+            #self.db.createTableFromDatabase('travel_skims', self.queryBrowser)
         
         
     def run_components(self):
@@ -67,15 +71,19 @@ class ComponentManager(object):
         subsample = self.projectConfigObject.subsample
         
         for i in componentList:
+            #self.queryBrowser.dbcon_obj.new_sessionInstance()
             tableName = i.table
             print '\nFor component - %s deleting corresponding table - %s' %(i.component_name, tableName)
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
             self.queryBrowser.delete_all(tableName)            
-            
+        #self.queryBrowser.dbcon_obj.close_sessionInstance()            
 
         
         for i in componentList:
+            # Create New Instance of the Session
+            #self.queryBrowser.dbcon_obj.new_sessionInstance()
+
             t = time.time()
             print '\nRunning Component - %s' %(i.component_name)
 
@@ -104,6 +112,8 @@ class ComponentManager(object):
 
             print '-- Finished simulating model --'
             print '-- Time taken to complete - %.4f' %(time.time()-t)
+            # Create New Instance of the Session
+            #self.queryBrowser.dbcon_obj.close_sessionInstance()
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f' %(time.time()-t_c)
 
     def reflectToDatabase(self, tableName, keyCols=[], nRowsProcessed=0):
@@ -328,20 +338,15 @@ class ComponentManager(object):
         #print 'TABLE HIERARCHY', tableNamesForComponent
         #print 'MATCHING COLUMN', matchingKey
         #maxDict = {'vehicles_r':['vehid']}
-        t = time.time()
         data = self.queryBrowser.select_join(columnDict, 
                                                         matchingKey, 
                                                         tableNamesForComponent, 
                                                         max_dict, 
                                                         subsample)
-        print '\tQuery for records was processed in %.4f' %(time.time()-t)
-
-        print '\tNumber of records fetched - ', data.data.shape
-        print '\tRecords were processed after query in %.4f' %(time.time()-t)
         return data
     
 
-
+    """
     def read_data_store_in_hdf5(self):
         t = time.time()
         query_gen, cols = self.queryBrowser.select_all_from_table('travel_skims')
@@ -350,7 +355,7 @@ class ComponentManager(object):
         t = time.time()
         
         # Create travelskims table in hdf5
-        tableName = 'travelskims_r'
+        tableName = 'travel_skims'
         table = self.db.returnTableReference(tableName) 
 
         tableRow = table.row
@@ -368,7 +373,7 @@ class ComponentManager(object):
 
         # Create households and persons table in hdf5
         print 'time to write to hdf5 format %.4f' %(time.time()-t)
-        
+    """ 
 
     def process_data_for_locs(self):
         """
@@ -383,7 +388,7 @@ class ComponentManager(object):
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
         t = time.time()
 
-        tableName = 'travelskims_r'
+        tableName = 'travel_skims'
         table = self.db.returnTableReference(tableName)
 
         origin = table.col('origin')
@@ -455,8 +460,9 @@ if __name__ == '__main__':
     componentManager.establish_databaseConnection()
     componentManager.establish_cacheDatabase(fileloc, 'w')
     componentManager.run_components()
-    #componentManager.read_data_store_in_hdf5(db)
+    #componentManager.read_data_store_in_hdf5()
     #componentManager.process_data_for_locs()
+    raw_input()
     
     
 
