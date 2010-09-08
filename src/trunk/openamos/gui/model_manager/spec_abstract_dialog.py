@@ -45,7 +45,9 @@ class AbtractSpecDialog(QDialog):
         self.modelkey = key
         self.populateFromDatabase()
         
+        
         self.subpopgb = QGroupBox("Sub-Population")
+        self.subpopgb.setCheckable(True)
         subpoplayout = QGridLayout()
         self.subpopgb.setLayout(subpoplayout)
         tablelabel = QLabel("Table")
@@ -513,8 +515,12 @@ class AbtractSpecDialog(QDialog):
     def checkInput_table1(self):
         numrows = self.modwidget.choicetable.rowCount()
         for i in range(numrows):
-            coeff = unicode((self.modwidget.choicetable.item(i,1)).text())
             
+            if self.modwidget.choicetable.item(i,1) == None:
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be entered as a number.")
+                    return False
+                
+            coeff = unicode((self.modwidget.choicetable.item(i,1)).text())
             if not self.checkFloat(coeff):
                 QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
                 return False
@@ -529,8 +535,12 @@ class AbtractSpecDialog(QDialog):
     def checkInput_table2(self):
         numrows = self.modwidget.varstable.rowCount()
         for i in range(numrows):
-            coeff = unicode((self.modwidget.varstable.item(i,2)).text())
             
+            if self.modwidget.varstable.item(i,2) == None:
+                    QMessageBox.warning(self, "Warning", "Coefficient must be entered as a number greater than or equal to zero.")
+                    return False
+                
+            coeff = unicode((self.modwidget.varstable.item(i,2)).text())
             if not self.checkFloat(coeff):
                 QMessageBox.warning(self, "Warning", "Coefficient must be numeric.")
                 return False
@@ -545,22 +555,27 @@ class AbtractSpecDialog(QDialog):
     def checkInputs(self):
         
         res = True
-        temp = unicode(self.subpopval.text())
-        if not self.checkFloat(temp):
-            QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
-            return False
-        else:
-            if float(temp) < 0.0:
-                QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
+        
+        if self.subpopgb.isChecked():
+            subvalue = unicode(self.subpopval.text())
+            if not self.checkFloat(subvalue):
+                QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
                 return False
+            else:
+                if float(subvalue) < 0.0:
+                    QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
+                    return False
 
                 
         if self.modeltypecb.currentText() == PROB_MODEL:
             numrows = self.modwidget.choicetable.rowCount()
             for i in range(numrows):
-                colname = unicode((self.modwidget.choicetable.item(i,1)).text())
-                coeff = unicode((self.modwidget.choicetable.item(i,2)).text())
                 
+                if self.modwidget.choicetable.item(i,1) == None:
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be entered as a number.")
+                    return False
+                    
+                colname = unicode((self.modwidget.choicetable.item(i,1)).text())
                 if not self.checkFloat(colname):
                     QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
                     return False
@@ -569,6 +584,11 @@ class AbtractSpecDialog(QDialog):
                         QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
                         return False
                 
+                if self.modwidget.choicetable.item(i,2) == None:
+                    QMessageBox.warning(self, "Warning", "Probability must be entered between 0.0 and 1.0.")
+                    return False
+                
+                coeff = unicode((self.modwidget.choicetable.item(i,2)).text())
                 if self.checkFloat(coeff):
                     coeff1 = float(coeff)
                     if coeff1 < 0.0 or coeff1 > 1.0:
@@ -635,9 +655,12 @@ class AbtractSpecDialog(QDialog):
             
             numrows = self.modwidget.choicetable.rowCount()
             for i in range(numrows):
-                value = unicode((self.modwidget.choicetable.item(i,1)).text())
-                thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
                 
+                if self.modwidget.choicetable.item(i,1) == None:
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be entered as a number.")
+                    return False
+                
+                value = unicode((self.modwidget.choicetable.item(i,1)).text())
                 if not self.checkFloat(value):
                     QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
                     return False
@@ -646,6 +669,11 @@ class AbtractSpecDialog(QDialog):
                         QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
                         return False
                 
+                if self.modwidget.choicetable.item(i,2) == None:
+                    QMessageBox.warning(self, "Warning", "Threshold must be entered as a number greater than 0.0.")
+                    return False
+                
+                thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
                 if self.checkFloat(thresh):
                     if float(thresh) < 0.0:
                         QMessageBox.warning(self, "Warning", "Threshold must be greater than 0.0.")
@@ -676,6 +704,7 @@ class AbtractSpecDialog(QDialog):
 #        if self.modwidget.checkInputs():
 #            res = True
 #        return res
+
     
 
 
