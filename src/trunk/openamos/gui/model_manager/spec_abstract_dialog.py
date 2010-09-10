@@ -230,6 +230,10 @@ class AbtractSpecDialog(QDialog):
             altitem.setText(altelt.get(ID))
             altstable.setItem(altstable.rowCount()-1, 0, altitem)
 
+            altvalue = QTableWidgetItem()
+            altvalue.setText(altelt.get(VALUE))
+            altstable.setItem(altstable.rowCount()-1, 1, altvalue)
+
     def populateOrdAltsWidget(self,modelelt):
         i = 0
         for altelt in modelelt.getiterator(ALTERNATIVE):
@@ -462,8 +466,10 @@ class AbtractSpecDialog(QDialog):
         numrows = self.modwidget.choicetable.rowCount()
         for i in range(numrows):
             altname = (self.modwidget.choicetable.item(i,0)).text()
+            altvalue = (self.modwidget.choicetable.item(i,1)).text()
             altelt = etree.SubElement(elt,ALTERNATIVE)
             altelt.set(ID,str(altname))
+            altelt.set(VALUE,str(altvalue))
 
     def addVariables(self,elt):
         numrows = self.modwidget.varstable.rowCount()
@@ -601,13 +607,14 @@ class AbtractSpecDialog(QDialog):
         elif self.modeltypecb.currentText() == COUNT_MODEL:
             
             dispersion = unicode(self.modwidget.odline.text())
-            if not self.checkFloat(dispersion):
-                QMessageBox.warning(self, "Warning", "Overdispersion must be numeric.")
-                return False
-            else:
-                if float(dispersion) < 0.0:
-                    QMessageBox.warning(self, "Warning", "Overdispersion must be greater than or equal to zero.")
+            if self.modwidget.odline.isEnabled():
+                if not self.checkFloat(dispersion):
+                    QMessageBox.warning(self, "Warning", "Overdispersion must be numeric.")
                     return False
+                else:
+                    if float(dispersion) < 0.0:
+                        QMessageBox.warning(self, "Warning", "Overdispersion must be greater than or equal to zero.")
+                        return False
             
             if not self.checkInput_table1():
                 return False
@@ -673,14 +680,16 @@ class AbtractSpecDialog(QDialog):
                     QMessageBox.warning(self, "Warning", "Threshold must be entered as a number greater than 0.0.")
                     return False
                 
-                thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
-                if self.checkFloat(thresh):
-                    if float(thresh) < 0.0:
-                        QMessageBox.warning(self, "Warning", "Threshold must be greater than 0.0.")
-                        return False
-                else:
-                    QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
-                    return False
+                if i > 0:
+                    thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
+                    if self.checkFloat(thresh):
+                        if float(thresh) < 0.0:
+                            QMessageBox.warning(self, "Warning", "Threshold must be greater than 0.0.")
+                            return False
+                        else:
+                            QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
+                            return False
+                            
                 
             if not self.checkInput_table2():
                 return False
