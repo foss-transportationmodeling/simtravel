@@ -59,15 +59,15 @@ class Adult_Model(QWidget):
 
         work_from_home_button = QPushButton('Work from home', self)
         work_from_home_button.setGeometry((size.width()) / 4 - 100, 630, 200, 50)
-        self.connect(work_from_home_button, SIGNAL('clicked()'), self.work_from_home)
+        #self.connect(work_from_home_button, SIGNAL('clicked()'), self.work_from_home)
 
         go_to_work_button = QPushButton('Go to Work', self)
         go_to_work_button.setGeometry((size.width()) / 2 - 100, 630, 200, 50)
-        self.connect(go_to_work_button, SIGNAL('clicked()'), self.go_to_work)
+        #self.connect(go_to_work_button, SIGNAL('clicked()'), self.go_to_work)
 
         no_work_episodes_button = QPushButton('No Work Episodes', self)
         no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
-        self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
+        #self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
         
         self.configob = co
         
@@ -139,27 +139,27 @@ class Adult_Model(QWidget):
         diag.exec_()
         
     
-    def work_from_home(self):
-        diagtitle = COMPMODEL_WORKATHOME
-        modelkey = MODELKEY_WORKATHOME
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    def go_to_work(self):
-        diagtitle = COMPMODEL_ASGOTOWORK
-        modelkey = MODELKEY_ASGOTOWORK
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    
-    def no_work_episodes(self):
-        diagtitle = COMPMODEL_ASNWORKEPISO
-        modelkey = MODELKEY_ASNWORKEPISO
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def work_from_home(self):
+#        diagtitle = COMPMODEL_WORKATHOME
+#        modelkey = MODELKEY_WORKATHOME
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
+#        
+#    def go_to_work(self):
+#        diagtitle = COMPMODEL_ASGOTOWORK
+#        modelkey = MODELKEY_ASGOTOWORK
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
+#        
+#    
+#    def no_work_episodes(self):
+#        diagtitle = COMPMODEL_ASNWORKEPISO
+#        modelkey = MODELKEY_ASNWORKEPISO
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
 
 
 
