@@ -19,7 +19,7 @@ class LongTermModels(QWidget):
         
         generate_synthetic_population_button = QPushButton('Generate Synthetic \nPopulation', self)
         generate_synthetic_population_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 400,200, 50)
-        self.connect(generate_synthetic_population_button, SIGNAL('clicked()'), self.synthetic_population)
+        #self.connect(generate_synthetic_population_button, SIGNAL('clicked()'), self.synthetic_population)
 #        self.connect(generate_synthetic_population_button, SIGNAL('clicked()'),
 #                     qApp, SLOT('deleteLater()'))
 
@@ -46,17 +46,17 @@ class LongTermModels(QWidget):
 
         residential_location_choice_button  = QPushButton('Residential Location Choice', self)
         residential_location_choice_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
-        self.connect(residential_location_choice_button, SIGNAL('clicked()'), self.residential_location)
+        #self.connect(residential_location_choice_button, SIGNAL('clicked()'), self.residential_location)
         
         self.configob = co
         
         
-    def synthetic_population(self):
-        diagtitle = COMPMODEL_SYNTHPOP
-        modelkey = MODELKEY_SYNTHPOP
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def synthetic_population(self):
+#        diagtitle = COMPMODEL_SYNTHPOP
+#        modelkey = MODELKEY_SYNTHPOP
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
         
     def labor_force(self):
@@ -91,12 +91,12 @@ class LongTermModels(QWidget):
         diag.exec_()
         
         
-    def residential_location(self):
-        diagtitle = COMPMODEL_RESLOC
-        modelkey = MODELKEY_RESLOC
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def residential_location(self):
+#        diagtitle = COMPMODEL_RESLOC
+#        modelkey = MODELKEY_RESLOC
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
 
     def paintEvent(self, parent = None):
