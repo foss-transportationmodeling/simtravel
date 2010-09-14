@@ -17,7 +17,7 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         
         time_slice_button = QPushButton('Within a time slice', self)
         time_slice_button.setGeometry(size.width() / 2 - 100, 40, 200, 50)
-        self.connect(time_slice_button, SIGNAL('clicked()'), self.time_slice)
+        #self.connect(time_slice_button, SIGNAL('clicked()'), self.time_slice)
 
         children_button = QPushButton('Children with after school \ndependent activities', self)
         children_button.setGeometry((size.width()) * 3 / 4 - 100, 120, 200, 50)
@@ -63,7 +63,7 @@ class Activity_Travel_Pattern_Simulator(QWidget):
 
         proceed_next_activity_button = QPushButton('Proceed to next \nfixed activity', self)
         proceed_next_activity_button.setGeometry((size.width()) / 4 + 40, 620, 220, 50)
-        self.connect(proceed_next_activity_button, SIGNAL('clicked()'), self.proceed_next_activity)
+        #self.connect(proceed_next_activity_button, SIGNAL('clicked()'), self.proceed_next_activity)
 
         mode_choice_next_activity_button = QPushButton('Mode Choice to the \nnext fixed activity', self)
         mode_choice_next_activity_button.setGeometry((size.width()) / 4 + 40, 700, 220, 50)
@@ -83,11 +83,11 @@ class Activity_Travel_Pattern_Simulator(QWidget):
 
         activity_non_hhold_button = QPushButton('Joint Activity with \nNon-household member', self)
         activity_non_hhold_button.setGeometry((size.width()) / 4 + 50, 880, 200, 50)
-        self.connect(activity_non_hhold_button, SIGNAL('clicked()'), self.activity_non_hhold)
+        #self.connect(activity_non_hhold_button, SIGNAL('clicked()'), self.activity_non_hhold)
 
         activity_hhold_button = QPushButton('Joint Activity with \nhousehold member', self)
         activity_hhold_button.setGeometry((size.width()) / 4 + 350, 880, 200, 50)
-        self.connect(activity_hhold_button, SIGNAL('clicked()'), self.activity_hhold)
+        #self.connect(activity_hhold_button, SIGNAL('clicked()'), self.activity_hhold)
 
         sov_hov_button = QPushButton('If mode is SOV or HOV Driver identify \nvehicle (for only trips where household \nmember is the driver) ', self)
         sov_hov_button.setGeometry((size.width()) / 2 - 150, 990, 300, 50)
@@ -95,17 +95,17 @@ class Activity_Travel_Pattern_Simulator(QWidget):
 
         activity_travel_pattern_button = QPushButton('Activity-travel patterns for \nall individuals within the time-slice', self)
         activity_travel_pattern_button.setGeometry((size.width()) / 2 - 150, 1070, 300, 50)
-        self.connect(activity_travel_pattern_button, SIGNAL('clicked()'), self.activity_travel_pattern)
+        #self.connect(activity_travel_pattern_button, SIGNAL('clicked()'), self.activity_travel_pattern)
         
         self.configob = co
         
         
-    def time_slice(self):
-        diagtitle = COMPMODEL_SMSLICE
-        modelkey = MODELKEY_SMSLICE
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def time_slice(self):
+#        diagtitle = COMPMODEL_SMSLICE
+#        modelkey = MODELKEY_SMSLICE
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     def activity_pursued_1(self):
         diagtitle = COMPMODEL_SMACTIVEPURSUE
@@ -170,12 +170,12 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    def proceed_next_activity(self):
-        diagtitle = COMPMODEL_SMPROCEED
-        modelkey = MODELKEY_SMPROCEED
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def proceed_next_activity(self):
+#        diagtitle = COMPMODEL_SMPROCEED
+#        modelkey = MODELKEY_SMPROCEED
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     def mode_choice_next_activity(self):
         diagtitle = COMPMODEL_FIXEDACTIVITYMODE
@@ -205,19 +205,19 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    def activity_non_hhold(self):
-        diagtitle = COMPMODEL_SMACTIVENON
-        modelkey = MODELKEY_SMACTIVENON
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    def activity_hhold(self):
-        diagtitle = COMPMODEL_SMACTIVEHOUSE
-        modelkey = MODELKEY_SMACTIVEHOUSE
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def activity_non_hhold(self):
+#        diagtitle = COMPMODEL_SMACTIVENON
+#        modelkey = MODELKEY_SMACTIVENON
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
+#        
+#    def activity_hhold(self):
+#        diagtitle = COMPMODEL_SMACTIVEHOUSE
+#        modelkey = MODELKEY_SMACTIVEHOUSE
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     def sov_hov(self):
         diagtitle = COMPMODEL_TRIPVEHICLE
@@ -226,12 +226,12 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    def activity_travel_pattern(self):
-        diagtitle = COMPMODEL_SMPATTERN
-        modelkey = MODELKEY_SMPATTERN
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def activity_travel_pattern(self):
+#        diagtitle = COMPMODEL_SMPATTERN
+#        modelkey = MODELKEY_SMPATTERN
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
         
 
