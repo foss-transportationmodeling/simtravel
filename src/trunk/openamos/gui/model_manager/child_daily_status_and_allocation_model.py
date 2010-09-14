@@ -52,7 +52,7 @@ class Child_Model(QWidget):
 
         in_activity_independently_button = QPushButton('Child can engage \nin activities \nindependently like \nadults', self)
         in_activity_independently_button.setGeometry((size.width()) * 3 / 5 - 100, size.height() / 2 - 280, 150, 70)
-        self.connect(in_activity_independently_button, SIGNAL('clicked()'), self.in_activity_independently)
+        #self.connect(in_activity_independently_button, SIGNAL('clicked()'), self.in_activity_independently)
 
         assign_to_hhold_button = QPushButton('Assign the child to household \n(particular adult gets selected \nin the next step; working or \nnon-working adult)', self)
         assign_to_hhold_button.setGeometry((size.width()) * 4 / 5 - 150, size.height() / 2 - 280, 250, 70)
@@ -84,7 +84,7 @@ class Child_Model(QWidget):
 
         generate_activity_travel_pattern_button = QPushButton('Treat the child like an adult \nand generate activity-travel \npatterns', self)
         generate_activity_travel_pattern_button.setGeometry((size.width()) / 2 - 460, size.height() / 2 + 30, 200, 50)
-        self.connect(generate_activity_travel_pattern_button, SIGNAL('clicked()'), self.generate_activity_travel_pattern)
+        #self.connect(generate_activity_travel_pattern_button, SIGNAL('clicked()'), self.generate_activity_travel_pattern)
 
         independently_after_school_button = QPushButton('Activity pursued independently \nafter school?', self)
         independently_after_school_button.setGeometry((size.width()) / 2 - 190, size.height() / 2 + 30, 220, 50)
@@ -108,11 +108,11 @@ class Child_Model(QWidget):
 
         return_home_button = QPushButton('Return Home', self)
         return_home_button.setGeometry((size.width()) / 2 - 180, size.height() / 2 + 480, 200, 50)
-        self.connect(return_home_button, SIGNAL('clicked()'), self.return_home)
+        #self.connect(return_home_button, SIGNAL('clicked()'), self.return_home)
 
         to_adult_button = QPushButton('Move to Adult Daily Status', self)
         to_adult_button.setGeometry((size.width()) / 2 + 180, size.height() / 2 + 535, 200, 50)
-        self.connect(to_adult_button, SIGNAL('clicked()'), self.to_adult)
+        #self.connect(to_adult_button, SIGNAL('clicked()'), self.to_adult)
         
         self.configob = co
         
@@ -176,12 +176,12 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    def in_activity_independently(self):
-        diagtitle = COMPMODEL_CSCHILDIND
-        modelkey = MODELKEY_CSCHILDIND
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def in_activity_independently(self):
+#        diagtitle = COMPMODEL_CSCHILDIND
+#        modelkey = MODELKEY_CSCHILDIND
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     
     def assign_to_hhold(self):
@@ -236,12 +236,12 @@ class Child_Model(QWidget):
         diag.exec_()
         
     
-    def generate_activity_travel_pattern(self):
-        diagtitle = COMPMODEL_CSTREAT
-        modelkey = MODELKEY_CSTREAT
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def generate_activity_travel_pattern(self):
+#        diagtitle = COMPMODEL_CSTREAT
+#        modelkey = MODELKEY_CSTREAT
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     def independently_after_school(self):
         diagtitle = COMPMODEL_AFTSCHACTSTATUS
@@ -280,20 +280,20 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    def return_home(self):
-        diagtitle = COMPMODEL_CSRETURNH
-        modelkey = MODELKEY_CSRETURNH
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def return_home(self):
+#        diagtitle = COMPMODEL_CSRETURNH
+#        modelkey = MODELKEY_CSRETURNH
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
     
-    def to_adult(self):
-        diagtitle = COMPMODEL_CSMOVEADULT
-        modelkey = MODELKEY_CSMOVEADULT
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def to_adult(self):
+#        diagtitle = COMPMODEL_CSMOVEADULT
+#        modelkey = MODELKEY_CSMOVEADULT
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
         
         
