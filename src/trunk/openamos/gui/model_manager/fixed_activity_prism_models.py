@@ -81,7 +81,7 @@ class FixedActivityPrismModels(QWidget):
 
         t_s_prism_vertices_button = QPushButton('Time-space prism vertices of all \nindividuals within the population', self)
         t_s_prism_vertices_button.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
-        self.connect(t_s_prism_vertices_button, SIGNAL('clicked()'), self.t_s_prism_vertices)
+        #self.connect(t_s_prism_vertices_button, SIGNAL('clicked()'), self.t_s_prism_vertices)
         
         self.configob = co
 
@@ -150,12 +150,12 @@ class FixedActivityPrismModels(QWidget):
         diag.exec_()
         
         
-    def non_worker(self):
-        diagtitle = COMPMODEL_NONWORKER
-        modelkey = MODELKEY_NONWORKER
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def non_worker(self):
+#        diagtitle = COMPMODEL_NONWORKER
+#        modelkey = MODELKEY_NONWORKER
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
         
     def pre_sch(self):
@@ -166,12 +166,12 @@ class FixedActivityPrismModels(QWidget):
         diag.exec_()
         
         
-    def t_s_prism_vertices(self):
-        diagtitle = COMPMODEL_TIMESPACE
-        modelkey = MODELKEY_TIMESPACE
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+#    def t_s_prism_vertices(self):
+#        diagtitle = COMPMODEL_TIMESPACE
+#        modelkey = MODELKEY_TIMESPACE
+#        
+#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+#        diag.exec_()
         
 
 
