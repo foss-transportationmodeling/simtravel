@@ -364,13 +364,13 @@ class Model_Manager_Treewidget(QTreeWidget):
         diagtitle = None
         diag = None
         modelkey = None
-        if item.text(col) == COMPMODEL_RESLOC:
-            diagtitle = COMPMODEL_RESLOC
-            modelkey = MODELKEY_RESLOC
-        elif item.text(col) == COMPMODEL_SYNTHPOP:
-            diagtitle = COMPMODEL_SYNTHPOP
-            modelkey = MODELKEY_SYNTHPOP
-        elif item.text(col) == COMPMODEL_WORKSTAT:
+#        if item.text(col) == COMPMODEL_RESLOC:
+#            diagtitle = COMPMODEL_RESLOC
+#            modelkey = MODELKEY_RESLOC
+#        if item.text(col) == COMPMODEL_SYNTHPOP:
+#            diagtitle = COMPMODEL_SYNTHPOP
+#            modelkey = MODELKEY_SYNTHPOP
+        if item.text(col) == COMPMODEL_WORKSTAT:
             diagtitle = COMPMODEL_WORKSTAT
             modelkey = MODELKEY_WORKSTAT
         elif item.text(col) == COMPMODEL_NUMJOBS:
@@ -427,9 +427,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_ARRIVALDEPARTPRESCH:
             diagtitle = COMPMODEL_ARRIVALDEPARTPRESCH
             modelkey = MODELKEY_ARRIVALDEPARTPRESCH
-        elif item.text(col) == COMPMODEL_TIMESPACE:
-            diagtitle = COMPMODEL_TIMESPACE
-            modelkey = MODELKEY_TIMESPACE
+#        elif item.text(col) == COMPMODEL_TIMESPACE:
+#            diagtitle = COMPMODEL_TIMESPACE
+#            modelkey = MODELKEY_TIMESPACE
             
         elif item.text(col) == COMPMODEL_CSCHILD017:
             diagtitle = COMPMODEL_CSCHILD017
@@ -449,9 +449,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_CSINDCHILD:
             diagtitle = COMPMODEL_CSINDCHILD
             modelkey = MODELKEY_CSINDCHILD
-        elif item.text(col) == COMPMODEL_CSCHILDIND:
-            diagtitle = COMPMODEL_CSCHILDIND
-            modelkey = MODELKEY_CSCHILDIND
+#        elif item.text(col) == COMPMODEL_CSCHILDIND:
+#            diagtitle = COMPMODEL_CSCHILDIND
+#            modelkey = MODELKEY_CSCHILDIND
         elif item.text(col) == COMPMODEL_CSASSIGN:
             diagtitle = COMPMODEL_CSASSIGN
             modelkey = MODELKEY_CSASSIGN
@@ -482,9 +482,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_AFTSCHACTSTATUS:
             diagtitle = COMPMODEL_AFTSCHACTSTATUS
             modelkey = MODELKEY_AFTSCHACTSTATUS
-        elif item.text(col) == COMPMODEL_CSTREAT:
-            diagtitle = COMPMODEL_CSTREAT
-            modelkey = MODELKEY_CSTREAT
+#        elif item.text(col) == COMPMODEL_CSTREAT:
+#            diagtitle = COMPMODEL_CSTREAT
+#            modelkey = MODELKEY_CSTREAT
         elif item.text(col) == COMPMODEL_CSISTHERE:
             diagtitle = COMPMODEL_CSISTHERE
             modelkey = MODELKEY_CSISTHERE
@@ -497,12 +497,12 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_CSMOREACT:
             diagtitle = COMPMODEL_CSMOREACT
             modelkey = MODELKEY_CSMOREACT
-        elif item.text(col) == COMPMODEL_CSRETURNH:
-            diagtitle = COMPMODEL_CSRETURNH
-            modelkey = MODELKEY_CSRETURNH
-        elif item.text(col) == COMPMODEL_CSMOVEADULT:
-            diagtitle = COMPMODEL_CSMOVEADULT
-            modelkey = MODELKEY_CSMOVEADULT
+#        elif item.text(col) == COMPMODEL_CSRETURNH:
+#            diagtitle = COMPMODEL_CSRETURNH
+#            modelkey = MODELKEY_CSRETURNH
+#        elif item.text(col) == COMPMODEL_CSMOVEADULT:
+#            diagtitle = COMPMODEL_CSMOVEADULT
+#            modelkey = MODELKEY_CSMOVEADULT
         elif item.text(col) == COMPMODEL_ASISDEPEND:
             diagtitle = COMPMODEL_ASISDEPEND
             modelkey = MODELKEY_ASISDEPEND
@@ -530,27 +530,27 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_ASEMPLOYWORK:
             diagtitle = COMPMODEL_ASEMPLOYWORK
             modelkey = MODELKEY_ASEMPLOYWORK
-        elif item.text(col) == COMPMODEL_WORKATHOME:
-            diagtitle = COMPMODEL_WORKATHOME
-            modelkey = MODELKEY_WORKATHOME
-        elif item.text(col) == COMPMODEL_ASGOTOWORK:
-            diagtitle = COMPMODEL_ASGOTOWORK
-            modelkey = MODELKEY_ASGOTOWORK
-        elif item.text(col) == COMPMODEL_ASNWORKEPISO:
-            diagtitle = COMPMODEL_ASNWORKEPISO
-            modelkey = MODELKEY_ASNWORKEPISO
-        elif item.text(col) == COMPMODEL_ASRECONCIL:
-            diagtitle = COMPMODEL_ASRECONCIL
-            modelkey = MODELKEY_ASRECONCIL
-        elif item.text(col) == COMPMODEL_ASCONST:
-            diagtitle = COMPMODEL_ASCONST
-            modelkey = MODELKEY_ASCONST
-        elif item.text(col) == COMPMODEL_ASADJUST:
-            diagtitle = COMPMODEL_ASADJUST
-            modelkey = MODELKEY_ASADJUST
-        elif item.text(col) == COMPMODEL_SMSLICE:
-            diagtitle = COMPMODEL_SMSLICE
-            modelkey = MODELKEY_SMSLICE
+#        elif item.text(col) == COMPMODEL_WORKATHOME:
+#            diagtitle = COMPMODEL_WORKATHOME
+#            modelkey = MODELKEY_WORKATHOME
+#        elif item.text(col) == COMPMODEL_ASGOTOWORK:
+#            diagtitle = COMPMODEL_ASGOTOWORK
+#            modelkey = MODELKEY_ASGOTOWORK
+#        elif item.text(col) == COMPMODEL_ASNWORKEPISO:
+#            diagtitle = COMPMODEL_ASNWORKEPISO
+#            modelkey = MODELKEY_ASNWORKEPISO
+#        elif item.text(col) == COMPMODEL_ASRECONCIL:
+#            diagtitle = COMPMODEL_ASRECONCIL
+#            modelkey = MODELKEY_ASRECONCIL
+#        elif item.text(col) == COMPMODEL_ASCONST:
+#            diagtitle = COMPMODEL_ASCONST
+#            modelkey = MODELKEY_ASCONST
+#        elif item.text(col) == COMPMODEL_ASADJUST:
+#            diagtitle = COMPMODEL_ASADJUST
+#            modelkey = MODELKEY_ASADJUST
+#        elif item.text(col) == COMPMODEL_SMSLICE:
+#            diagtitle = COMPMODEL_SMSLICE
+#            modelkey = MODELKEY_SMSLICE
         elif item.text(col) == COMPMODEL_SMACTIVEPURSUE:
             diagtitle = COMPMODEL_SMACTIVEPURSUE
             modelkey = MODELKEY_SMACTIVEPURSUE
@@ -578,9 +578,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_ACTIVITYDURATION:
             diagtitle = COMPMODEL_ACTIVITYDURATION
             modelkey = MODELKEY_ACTIVITYDURATION
-        elif item.text(col) == COMPMODEL_SMPROCEED:
-            diagtitle = COMPMODEL_SMPROCEED
-            modelkey = MODELKEY_SMPROCEED
+#        elif item.text(col) == COMPMODEL_SMPROCEED:
+#            diagtitle = COMPMODEL_SMPROCEED
+#            modelkey = MODELKEY_SMPROCEED
         elif item.text(col) == COMPMODEL_FIXEDACTIVITYMODE:
             diagtitle = COMPMODEL_FIXEDACTIVITYMODE
             modelkey = MODELKEY_FIXEDACTIVITYMODE
@@ -593,30 +593,30 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_JOINTACTIVITY:
             diagtitle = COMPMODEL_JOINTACTIVITY
             modelkey = MODELKEY_JOINTACTIVITY
-        elif item.text(col) == COMPMODEL_SMACTIVENON:
-            diagtitle = COMPMODEL_SMACTIVENON
-            modelkey = MODELKEY_SMACTIVENON
-        elif item.text(col) == COMPMODEL_SMACTIVEHOUSE:
-            diagtitle = COMPMODEL_SMACTIVEHOUSE
-            modelkey = MODELKEY_SMACTIVEHOUSE
+#        elif item.text(col) == COMPMODEL_SMACTIVENON:
+#            diagtitle = COMPMODEL_SMACTIVENON
+#            modelkey = MODELKEY_SMACTIVENON
+#        elif item.text(col) == COMPMODEL_SMACTIVEHOUSE:
+#            diagtitle = COMPMODEL_SMACTIVEHOUSE
+#            modelkey = MODELKEY_SMACTIVEHOUSE
         elif item.text(col) == COMPMODEL_TRIPVEHICLE:
             diagtitle = COMPMODEL_TRIPVEHICLE
             modelkey = MODELKEY_TRIPVEHICLE
-        elif item.text(col) == COMPMODEL_SMPATTERN:
-            diagtitle = COMPMODEL_SMPATTERN
-            modelkey = MODELKEY_SMPATTERN      
-        elif item.text(col) == COMPMODEL_ATRECONCIL:
-            diagtitle = COMPMODEL_ATRECONCIL
-            modelkey = MODELKEY_ATRECONCIL
-        elif item.text(col) == COMPMODEL_ATPERCONST:
-            diagtitle = COMPMODEL_ATPERCONST
-            modelkey = MODELKEY_ATPERCONST
-        elif item.text(col) == COMPMODEL_ATHOUCONST:
-            diagtitle = COMPMODEL_ATHOUCONST
-            modelkey = MODELKEY_ATHOUCONST
-        elif item.text(col) == COMPMODEL_ATADJUST:
-            diagtitle = COMPMODEL_ATADJUST
-            modelkey = MODELKEY_ATADJUST
+#        elif item.text(col) == COMPMODEL_SMPATTERN:
+#            diagtitle = COMPMODEL_SMPATTERN
+#            modelkey = MODELKEY_SMPATTERN      
+#        elif item.text(col) == COMPMODEL_ATRECONCIL:
+#            diagtitle = COMPMODEL_ATRECONCIL
+#            modelkey = MODELKEY_ATRECONCIL
+#        elif item.text(col) == COMPMODEL_ATPERCONST:
+#            diagtitle = COMPMODEL_ATPERCONST
+#            modelkey = MODELKEY_ATPERCONST
+#        elif item.text(col) == COMPMODEL_ATHOUCONST:
+#            diagtitle = COMPMODEL_ATHOUCONST
+#            modelkey = MODELKEY_ATHOUCONST
+#        elif item.text(col) == COMPMODEL_ATADJUST:
+#            diagtitle = COMPMODEL_ATADJUST
+#            modelkey = MODELKEY_ATADJUST
 
             
         
