@@ -455,12 +455,13 @@ class AbtractSpecDialog(QDialog):
         depvarelt.set(COLUMN,col.lower())
     
     def addFiltToElt(self,elt):
-        if (str(self.subpopval.text()) != ''):
-            filterelt = etree.SubElement(elt,FILTER)
-            filterelt.set(TABLE,str(self.subpoptab.currentText()))
-            filterelt.set(COLUMN,str(self.subpopvar.currentText()))
-            filterelt.set(COND,str(self.subpopop.currentText()))
-            filterelt.set(VALUE,str(self.subpopval.text()))
+        if self.subpopgb.isChecked():
+            if (str(self.subpopval.text()) != ''):
+                filterelt = etree.SubElement(elt,FILTER)
+                filterelt.set(TABLE,str(self.subpoptab.currentText()))
+                filterelt.set(COLUMN,str(self.subpopvar.currentText()))
+                filterelt.set(COND,str(self.subpopop.currentText()))
+                filterelt.set(VALUE,str(self.subpopval.text()))
 
     def addAlternatives(self,elt):
         numrows = self.modwidget.choicetable.rowCount()
