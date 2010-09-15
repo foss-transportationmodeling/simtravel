@@ -8,6 +8,8 @@ from model_manager.model_manager_treewidget import *
 from file_menu.newproject import *
 from file_menu.openproject import *
 from file_menu.saveproject import *
+from file_menu.databaseconfig import *
+
 
 from openamos.core.config import *
 
@@ -146,7 +148,9 @@ class MainWindow(QMainWindow):
                                             "import", "Import data.")
         data_export_action = self.createaction("Export data", None, None,
                                             "export", "Export data.")
-        self.addActions(self.data_menu, (data_import_action, data_export_action,))
+        data_dataconfig_action = self.createaction("Database Configuration", self.databaseconfiguration, None,
+                                                 None, "Database Configuration", False, True)
+        self.addActions(self.data_menu, (data_import_action, data_export_action,data_dataconfig_action,))
 
     # Defining Display
         self.display_menu = self.menuBar().addMenu("D&isplay")
@@ -237,6 +241,7 @@ class MainWindow(QMainWindow):
         if project_new.configtree != None:
             self.proconfig = ConfigObject(configtree=project_new.configtree)
             self.checkProject()
+            self.data_menu.actions()[2].setEnabled(True)
             
 
     def projectopen(self):
@@ -245,8 +250,12 @@ class MainWindow(QMainWindow):
         if self.project_open.file != '':
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
+            self.data_menu.actions()[2].setEnabled(True)
+            
 
     def projectsave(self):
+        print self.proconfig.getConfigElement(DB_CONFIG,DB_HOST)
+        print self.proconfig.getConfigElement(DB_CONFIG,DB_USER)
         self.proconfig.write()
 
 
@@ -271,6 +280,7 @@ class MainWindow(QMainWindow):
     def projectClose(self):
         self.proconfig = None
         self.checkProject()
+        self.data_menu.actions()[2].setDisabled(True)
         
 
     def projectQuit(self):
@@ -288,6 +298,12 @@ class MainWindow(QMainWindow):
         self.centralwidget.setEnabled(actpro)
         self.model_management.setConfigObject(self.proconfig)
         self.models.setConfigObject(self.proconfig)
+        
+    def databaseconfiguration(self):
+        if self.proconfig <> None:
+            project_database = DatabaseConfig(self.proconfig)
+            project_database.exec_()
+        
 
 
         
