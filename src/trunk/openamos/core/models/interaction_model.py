@@ -25,7 +25,7 @@ class InteractionModel(Model):
         return expected_value_array
         
 
-    def calc_predvalue(self, data):
+    def calc_predvalue(self, data, seed=1):
         """
         The method returns evaluates the product for the 
         different choices using the coefficients in the specification

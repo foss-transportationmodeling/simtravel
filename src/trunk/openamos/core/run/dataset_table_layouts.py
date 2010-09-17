@@ -34,6 +34,11 @@ class Travel_Skims(t.IsDescription):
     tt = t.Float32Col()
 
 
+class Persons_R(t.IsDescription):
+    houseid = t.Int32Col()
+    personid = t.Int32Col()
+    wtt = t.Float32Col()
+
 
 class Vehicles_R(t.IsDescription):
     houseid = t.Int32Col()

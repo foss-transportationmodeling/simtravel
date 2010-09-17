@@ -3,6 +3,7 @@ import time
 
 from openamos.core.data_array import DataArray
 from openamos.core.models.model import SubModel
+from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.errors import ModelError
 
 class AbstractComponent(object):
@@ -17,7 +18,7 @@ class AbstractComponent(object):
                  model_list, variable_list,
                  table,
                  key,
-                 locationProcessing=False):
+                 spatialConst_list=None):
 
         # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
         # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
@@ -45,6 +46,7 @@ class AbstractComponent(object):
 	self.variable_list = variable_list
         self.table = table
         self.key = key
+        self.spatialConst_list = spatialConst_list
 
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
@@ -89,8 +91,9 @@ class AbstractComponent(object):
             cols_to_write = [] + prim_key
             for model in model_st:
                 dep_varname = model.dep_varname
+                dep_varModel = model.model
                 # Creating column list for caching
-                if dep_varname not in cols_to_write:
+                if dep_varname not in cols_to_write and not isinstance(dep_varModel, InteractionModel):
                     cols_to_write.append(dep_varname)
             print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
             print "\t    Writing for to %s: records - %s" %(self.table, sum(data_filter))
@@ -151,6 +154,8 @@ class AbstractComponent(object):
             choiceset_shape = (data_subset.rows,
                                i.model.specification.number_choices)
             choicenames = i.model.specification.choices
+            #print '-----', choicenames, '--------'
+            #print i
             choiceset = self.create_choiceset(choiceset_shape, 
                                               i.choiceset_criterion, 
                                               choicenames)
@@ -170,10 +175,10 @@ class AbstractComponent(object):
                 self.data.setcolumn(i.run_until_condition.varname, 
                                     result_run_var, data_subset_filter)
                 """
-            else:
-                data_subset_filter = array([True]*self.data.rows)
+            #else:
+            #    data_subset_filter = array([True]*self.data.rows)
             
-        print '\t-- Iteration Complete --'
+        print '\t-- Iteration Complete --', sum(data_subset_filter)
         #raw_input()
         return model_list_forlooping, data_subset_filter
 

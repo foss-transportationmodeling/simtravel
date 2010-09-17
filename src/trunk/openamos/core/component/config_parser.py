@@ -29,6 +29,8 @@ from openamos.core.models.model import SubModel
 
 from openamos.core.component.abstract_component import AbstractComponent
 
+from openamos.core.spatial_analysis.spatial_query_components import SpatioTemporalConstraint, PrismConstraints
+
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
 
 from openamos.core.project_configuration import ProjectConfiguration
@@ -126,6 +128,15 @@ class ConfigParser(object):
     def create_component(self, component_element):
         comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
         
+        spatialConstIterator = component_element.getiterator("SpatialConstraints")
+        spatialConst_list = []
+        for i in spatialConstIterator:
+            spatialConst = self.return_spatial_query(i)
+            spatialConst_list.append(spatialConst)
+
+        if spatialConst_list == []:
+            spatialConst_list = None
+
         modelsIterator = component_element.getiterator("Model")
         self.model_list = []
         self.component_variable_list = []
@@ -139,7 +150,8 @@ class ConfigParser(object):
         component = AbstractComponent(comp_name, self.model_list, 
                                       self.component_variable_list, 
                                       comp_table,
-                                      comp_keys)
+                                      comp_keys,
+                                      spatialConst_list)
         return component
         
     def create_model_object(self, model_element):
@@ -281,7 +293,7 @@ class ConfigParser(object):
             value = i.get('value')
             if value is not None:
                 values.append(float(value))
-            print alternative, value
+            #print alternative, value
 
         if len(values) == 0:
             values = None
@@ -309,9 +321,12 @@ class ConfigParser(object):
         Accomodates both generic and alternative specific where the
         alternatives are spelled out
         """
+        #print 'INSIDE LOGIT MODEL NOTTTT FOR LOCATIONS'
+
         #model type
         model_type = model_element.get('type')
         seed = self.process_seed(model_element)
+
         #variable_list_required for running the model
         variable_list = []
 
@@ -369,9 +384,13 @@ class ConfigParser(object):
         Accomodates alternative specific where the
         alternatives are not spelled out. Like for location choices
         """
+
+        #print 'INSIDE LOGIT MODEL FOR LOCATIONS'
+
         #model type
         model_type = model_element.get('type')
         seed = self.process_seed(model_element)
+
         #variable_list_required for running the model
         variable_list = []
 
@@ -384,14 +403,17 @@ class ConfigParser(object):
         # alternatives
         altSetElement = model_element.find('AlternativeSet')
         alternativeSet = int(altSetElement.get('count'))
+        #print 'alternativeSet --->', alternativeSet
         choice = []
         coefficients_list = []
         values = []
+        
         for i in range(alternativeSet):
             alternative = dep_varname + str(i+1)
             choice.append(alternative)
             value = i + 1
             values.append(float(value))
+            #variable_list.append(('temp', alternative))
             
         coeff_list, vars_list = self.return_coeff_vars(model_element, alternativeSet)
         #print vars_list, 'VARIABLES LISTTTTTTTT'
@@ -709,18 +731,22 @@ class ConfigParser(object):
         coeff_dict = {}
         dep_varname = ''
 
+        #print 'alternativeSet', alternativeSet
+
         if var_element.get('interaction') is not None:
             rep_var = var_element.get('repeat')
             if rep_var is not None:
                 rep_var_list = re.split('[,]', rep_var)
             else:
                 rep_var_list = []
+        
+            #print 'REPEAT VARIABLE LIST -->', rep_var_list
                 
             #var_element.get('interaction')
             varnames = re.split('[,]', var_element.get('var'))
-            #print varnames
+            #print 'varnames', varnames
             tablenames = re.split('[,]', var_element.get('table'))
-            #print tablenames
+            #print 'tablenames', tablenames
             
             rep_var_table_list = []
             for i in rep_var_list:
@@ -730,12 +756,13 @@ class ConfigParser(object):
 
                 #find the tablenames for the ones that are to be repeated
                 rep_var_table_list.append(tablenames.pop(var_ind))
+            #print 'REPEAT TABLE LIST', rep_var_table_list
 
             for i in range(len(varnames)):
                 variable_list.append((tablenames[i], varnames[i]))
                 dep_varname = dep_varname + varnames[i].title()
                 coeff_dict[varnames[i]] = 1
-
+            #print 'VARIABLE LIST', variable_list
 
             if alternativeSet is None:
                 choice = [dep_varname]
@@ -756,7 +783,8 @@ class ConfigParser(object):
                     coeffs_rep = copy.deepcopy(coeff_dict)
 
                     for k in range(len(rep_var_list)):
-                        variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
+                        #variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
+                        variable_list.append(('temp', rep_var_list[k]+str(j+1)))
                         dep_varname = dep_varname + rep_var_list[k]
                         coeffs_rep[rep_var_list[k]+str(j+1)] = 1
                         
@@ -782,8 +810,79 @@ class ConfigParser(object):
         else:
             return None
 
-    def return_spatial_query(self, model_element):
-        pass
+    def return_spatial_query(self, spatial_query_element):
+        
+        # Parsing attributes of the spatial query
+        table = spatial_query_element.get('table')
+        skimField = spatial_query_element.get('skim_var')
+        originField = spatial_query_element.get('origin_var')
+        destinationField = spatial_query_element.get('destination_var')
+        sampleField = spatial_query_element.get('sample_var')
+        
+        countChoices = spatial_query_element.get('count')
+        if countChoices is not None:
+            countChoices = int(countChoices)
+        thresholdTimeConstraint = spatial_query_element.get('threshold')
+        seed = spatial_query_element.get('seed')
+        if seed is not None:
+            seed = int(seed)
+        else:
+            seed = 1
+
+        if thresholdTimeConstraint is not None:
+            thresholdTimeConstraint = int(thresholdTimeConstraint)
+
+
+
+        activity_element = spatial_query_element.get('ActivityFilter')
+        if activity_element is not None:
+            activityTypeFilter = self.return_activity_type_condition(activity_element)
+        else:
+            activityTypeFilter = None
+
+        startConstraint_element = spatial_query_element.find('Start')
+        startConstraint = self.return_spatio_temporal_constraint(startConstraint_element)
+
+        endConstraint_element = spatial_query_element.find('End')
+        endConstraint = self.return_spatio_temporal_constraint(endConstraint_element)
+
+        prismConstraint = PrismConstraints(table, skimField, originField, destinationField, 
+                                           startConstraint, endConstraint, 
+                                           sampleField, countChoices, activityTypeFilter, 
+                                           thresholdTimeConstraint, seed)
+        return prismConstraint
+
+    def return_spatio_temporal_constraint(self, constraint_element):
+        table = constraint_element.get('table')
+        location_field = constraint_element.get('location_var')
+        time_field = constraint_element.get('time_var')
+
+        constraint = SpatioTemporalConstraint(table, location_field, time_field)
+        return constraint
+    
+
+    def return_activity_type_condition(self, model_element):
+        # Varies from the filter condition in that no variables
+        # are added to the variable list for the component
+
+        filter_element = model_element.find('Filter')
+        
+        if filter_element is None:
+            return None
+
+        tablename = filter_element.get('table')
+        varname = filter_element.get('var')
+        variable_list = [(tablename, varname)]
+        
+        filterCondition = filter_element.get('condition')
+        filterValue = float(filter_element.get('value'))
+
+        dataFilter = DataFilter(varname, filterCondition, filterValue)
+
+        return dataFilter
+
+
+    
 
     def return_filter_condition(self, model_element):
         filter_element = model_element.find('Filter')

@@ -1,6 +1,7 @@
 import tables as t
 import time
 
+from numpy import zeros, unique
 from openamos.core.run.dataset_table_layouts import *
 
 class DB(object):
@@ -37,6 +38,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "households_r", Households_R)
         self.fileh.createTable(output_grp, "tsp_r", Tsp_R)
         self.fileh.createTable(output_grp, "schedule_r", Schedule_R)
+        self.fileh.createTable(output_grp, "persons_r", Persons_R)
         #Input Tables - Creatign the table
         self.fileh.createTable(input_grp, "travel_skims", Travel_Skims)
         self.fileh.createTable(input_grp, "households", Households)
@@ -58,17 +60,18 @@ class DB(object):
 
     def createTableFromDatabase(self, tableName, queryBrowser):
         t = time.time()
-        query_gen, cols = queryBrowser.select_all_from_table(tableName)
+        data = queryBrowser.select_all_from_table(tableName)
         print 'Time taken to retrieve records %.4f' %(time.time()-t)
 
-        tableRef = self.returnTableReference(tableName)
+        cols = data.varnames
+        colIndices = range(data.cols)
         
+        tableRef = self.returnTableReference(tableName)
         tableRow = tableRef.row
 
-        indices = range(len(cols))
 
-        for i in query_gen:
-            for j in indices:
+        for i in data.data:
+            for j in colIndices:
                 if i[j] is not None:
                     tableRow[cols[j]] = i[j]
             tableRow.append()
@@ -76,14 +79,26 @@ class DB(object):
         print 'Time taken to write to hdf5 format %.4f' %(time.time()-t)
         
 
-    def createNetowrkArray(self, tableName):
-        tableRef = self.returnTableReference(tableName)
-
-        tableRow = tableRef.row
-
-
     def close(self):
         fileh.close()
+
+    def returnTableAsMatrix(self, tableName, originColName, destinationColName, skimColName, fillValue=9999):
+        tableRef = self.returnTableReference(tableName)
+        
+        origin = tableRef.col(originColName)
+        destination = tableRef.col(destinationColName)
+        skims = tableRef.col(skimColName)
+
+        # Initialize matrix
+        skimsMatrix = zeros((max(origin)+1, max(destination)+1))
+        skimsMatrix.fill(fillValue)
+
+        # Populate matrix
+        skimsMatrix[origin, destination] = skims
+
+        return skimsMatrix, unique(origin)
+
+
     
 if __name__ == '__main__':
     db = DB('w')

@@ -1,4 +1,4 @@
-from numpy import ndarray, array, random, ma, all, zeros, ones
+from numpy import ndarray, array, random, ma, zeros, ones
 from openamos.core.errors import ProbabilityError, DataError
 from openamos.core.data_array import DataArray
 
@@ -53,10 +53,14 @@ class AbstractProbabilityModel(object):
         """
         self.num_agents = self.probabilities.shape[0]
         self.num_choices = self.probabilities.shape[-1]
-
-        cumsum_across_rows = self.probabilities.cumsum(-1)[:,-1]
+        #print 'OLD CUM SUM'
+        #cumsum_across_rows = self.probabilities.cumsum(-1)[:,-1]
+        #print cumsum_across_rows
+        #print 'NEW CUM SUM'
+        cumsum_across_rows = self.probabilities.sum(-1)
+        #print cumsum_across_rows
         diff_from_unity = abs(cumsum_across_rows - 1)
-        if not all(diff_from_unity < 1e-6):
+        if not ma.all(diff_from_unity < 1e-6):
             raise ProbabilityError, """probability values do not add up """ \
                 """to one across rows"""    
 

@@ -110,7 +110,7 @@ class SubModel(object):
         return result
     
     def __repr__(self):
-        return 'Model Type - %s Dependent Variable - %s' \
+        return 'Model Type - %s; Dependent Variable - %s' \
             %(self.model_type, self.dep_varname)
 
 

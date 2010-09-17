@@ -34,5 +34,11 @@ class ConfigurationError(Exception):
 class DatabaseConfigurationError(Exception):
     pass
 
+class SpatioTemporalConstraintError(Exception):
+    pass
+
+class PrismConstraintError(Exception):
+    pass
+
 # Checking to see how SVN works 
 

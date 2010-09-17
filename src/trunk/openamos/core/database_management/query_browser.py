@@ -60,6 +60,8 @@ class TEMP(object): pass
 class SCHOOL(object): pass
 
 # Run time tables empty class objects
+class PERSONS_R(object): pass
+
 class HOUSEHOLDS_R(object):pass
 
 class VEHICLES_R(object):pass
@@ -226,6 +228,10 @@ class QueryBrowser(object):
         self.table_mapper(class_name, table_name)
         
         # RUNTIME TABLES FOLLOW HERE
+        class_name = 'PERSONS_R'
+        table_name = 'persons_r'
+        self.table_mapper(class_name, table_name)
+
         class_name = 'HOUSEHOLDS_R'
         table_name = 'households_r'
         self.table_mapper(class_name, table_name)
@@ -261,7 +267,7 @@ class QueryBrowser(object):
         Output:
         Returns all the rows in the table
         """
-        
+        self.dbcon_obj.new_sessionInstance()                
         #get the column list for the table
         new_class_name = class_name.upper()
         new_table_name = new_class_name.lower()
@@ -282,7 +288,16 @@ class QueryBrowser(object):
 
         print ' '
         """
-        return query, cols_list
+        #print 'sample_str is %s'%sample_str                
+        
+        resultArray = self.createResultArray(query)
+            
+        # Returns the query as a DataArray object
+        data = DataArray(resultArray, cols_list)
+
+        self.dbcon_obj.close_sessionInstance()        
+
+        return data
 
 
     #select rows based on a selection criteria
@@ -330,7 +345,8 @@ class QueryBrowser(object):
 
 
     #select and print the join
-    def select_join(self, db_dict, column_names, table_names, max_dict=None, subsample=None):
+    def select_join(self, db_dict, column_names, table_names, max_dict=None, 
+                    spatialConst_list=None, analysisInterval=None, subsample=None):
         """
         self, table1_list, table2_list, column_name
         This method is used to select the join of tables and display them.
@@ -349,10 +365,18 @@ class QueryBrowser(object):
         #table_names = ['households', 'households_r', 'vehicles_r']
         #max_dict = {'vehicles_r':['vehid']}
         
+        # Prism Query or or just a Travel Time Query with Vertices
+        # ADD APPROPRIATE JOIN/?INNER JOINS
+
+
+        print 'db_dict', db_dict
+
         #initialize the variables
         final_list = []
         table_list = []
         class_list = []
+        cols_list = []
+        tabs_list = []
         #col_name = column_name
         final_col_list = db_dict.values()
         table_list = db_dict.keys()      
@@ -375,8 +399,6 @@ class QueryBrowser(object):
             #print 'Tables do not exists'
             return None
         
-        print db_dict
-
         #check for the columns passed in the dictionary
         for i in db_dict.keys():
             clist = self.dbcon_obj.get_column_list(i.lower())
@@ -482,6 +504,139 @@ class QueryBrowser(object):
                                + mJoinStrIncMaxConditionVar)
             #print 'LEFT JOIN MAX COL LIST--->', joinStrList
 
+        # Spatial TSP identification
+        if spatialConst_list is not None:
+            for i in spatialConst_list:
+                if i.countChoices is not None:
+                    # substring for the inner join
+                    stTable = i.startConstraint.table
+                    #stLocationField = 'st_' + i.startConstraint.locationField
+                    stLocationCol = 'stl.%s' %i.startConstraint.locationField
+                    #stTimeField = 'st_'+ i.startConstraint.timeField
+                    stTimeCol = 'st.%s' %i.startConstraint.timeField
+
+                    enTable = i.endConstraint.table
+                    #enLocationField = 'en_' + i.endConstraint.locationField
+                    enLocationCol = 'enl.%s' %i.endConstraint.locationField
+                    #enTimeField = 'en_' + i.endConstraint.timeField                    
+                    enTimeCol = 'en.%s' %i.endConstraint.timeField
+
+                    timeCols = [stTimeCol, enTimeCol]
+
+                    table_list.append(stTable)
+                    
+
+                    # left join for end location
+                    
+                    # time cols are part of sptime
+                    timeColsNewNames = []
+                    for j in timeCols:
+                        timeColsNewNames.append(j.replace('.', '_'))
+                        
+                    timeColsStr = ''
+                    for j in range(len(timeCols)):
+                        # minimum of the time cols gives the first prism
+                        timeColsStr += 'min(%s) %s,' %(timeCols[j], timeColsNewNames[j])
+
+                    timeColsStr = timeColsStr[:-1]
+
+                    spGrpNewNameStr = ''
+                    spGrpStr = ''
+                    for j in column_names[stTable]:
+                        spGrpNewNameStr += 'st.%s %s,' %(j, j)
+                        spGrpStr += 'st.%s,' %(j)
+                    spGrpNewNameStr = spGrpNewNameStr[:-1]
+                    spGrpStr = spGrpStr[:-1]
+
+                    spInnerJoinCondition = ''
+                    for j in column_names[stTable]:
+                        spInnerJoinCondition += ' %s.%s = %s.%s and' %('st', j, 'en', j)
+                    spInnerJoinCondition = spInnerJoinCondition[:-3]
+                        
+                    spJoinCondition = ''
+                    for j in column_names[stTable]:
+                        spJoinCondition += ' %s.%s = %s.%s and' %('sptime', j, mainTable, j)
+                    spJoinCondition = spJoinCondition[:-3]
+
+                    # Left join condition for prism start location
+                    stLocJoinCondition = ''
+                    stLocCondCols = column_names[stTable] 
+                    for j in stLocCondCols:
+                        stLocJoinCondition += ' %s.%s = %s.%s and' %('stl', j, mainTable, j)
+                    stLocJoinCondition += ' sptime.st_%s = %s.%s' %(i.startConstraint.timeField,
+                                                               'stl', i.startConstraint.timeField)
+
+                    final_list.append('stl.%s as st_%s' %(i.startConstraint.locationField,
+                                                          i.startConstraint.locationField))
+                    cols_list.append('st_%s' %i.startConstraint.locationField)
+                    #stLocJoinCondition = stLocJoinCondition[:-3]
+
+                    # Left join condition for prism end location
+                    enLocJoinCondition = ''
+                    enLocCondCols = column_names[stTable] 
+                    for j in enLocCondCols:
+                        enLocJoinCondition += ' %s.%s = %s.%s and' %('enl', j, mainTable, j)
+                    enLocJoinCondition += ' sptime.en_%s = %s.%s' %(i.endConstraint.timeField,
+                                                               'enl', i.endConstraint.timeField)
+                    final_list.append('enl.%s as en_%s' %(i.endConstraint.locationField, 
+                                                       i.endConstraint.locationField))
+                    cols_list.append('en_%s' %i.endConstraint.locationField)
+                    #enLocJoinCondition = enLocJoinCondition[:-3]
+
+                    
+                    # TSP consistency check
+                    # nextepisode_starttime > lastepisode_endtime
+                    #consistencyStr = '%s < %s' %(stTimeCol, endTimeCol)
+                    
+
+                    analysisPeriodStr = ('%s=%s and %s>%s' 
+                                         %(stTimeCol, analysisInterval,
+                                           enTimeCol, analysisInterval))
+
+                    spatialJoinStr = (""" join (select %s, %s """\
+                                          """from %s as %s """\
+                                          """inner join %s as %s """\
+                                          """on ( %s and %s) group by"""\
+                                          """ %s) """\
+                                          """as sptime on (%s)"""
+                                      % (spGrpNewNameStr, timeColsStr, 
+                                         stTable, 'st', 
+                                         enTable, 'en',
+                                         spInnerJoinCondition, analysisPeriodStr,
+                                         spGrpStr,
+                                         spJoinCondition))
+                    #print 'SPATIAL JOIN'
+                    #print spatialJoinStr
+                    # left join for start location
+
+                    stLocJoinStr = (""" left join %s %s on """\
+                                        """(%s) """ 
+                                    %(stTable, 'stl', stLocJoinCondition))
+
+
+                    enLocJoinStr = (""" left join %s %s on """\
+                                        """(%s) """ 
+                                    %(enTable, 'enl', enLocJoinCondition))
+
+
+                    joinStrList.append(spatialJoinStr)
+                    joinStrList.append(stLocJoinStr)
+                    joinStrList.append(enLocJoinStr)
+                    
+                    cols_list += timeColsNewNames
+                    
+
+                    for i in timeColsNewNames:
+                        final_list.append('sptime.%s' %(i))
+                    # Only one time-space prism can be retrieved within a component
+                    # there cannot be two TSP's in the same component
+                    break
+                                         
+                                         
+                                         
+                    
+                    
+                    
         # Generating the col list
         colStr = ''
         for i in final_list:
@@ -493,11 +648,11 @@ class QueryBrowser(object):
         for i in joinStrList:
             allJoinStr = allJoinStr + '%s' %i
             
+
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
         print 'SQL STRING', sql_string
             
-        cols_list = []
-        tabs_list = []
+
 
         #convert all the table names to upper case
         for each in table_list:
@@ -553,12 +708,13 @@ class QueryBrowser(object):
         # using the ma library in numpy
         # - retrieve mask for None
         # - then assign the fillValue to those columns
-        mask = ma.masked_values(data, None).mask
         data = array(data)
-        data[mask] = fillValue
+        mask = ma.masked_equal(data, None).mask
 
+        if mask.any():
+            data[mask] = fillValue
+        
         # Convert it back to a regular array to enable all the other processing
-        data = array(data)
         print '\tSize of the data set that was retrieved - ', data.shape
         print '\tRecords were processed after query in %.4f' %(time.time()-t)
 
@@ -665,7 +821,7 @@ class QueryBrowser(object):
         Output:
         Values inserted in to the table
         """
-        self.dbcon_obj.new_sessionInstance()        
+
     
         #method 4
         #before inserting data delete the index
@@ -703,9 +859,10 @@ class QueryBrowser(object):
         self.create_index(class_name.lower(), keyCols)
         print """\t    Time  after inserting all using chunks of size """\
             """%s - %.4f\n"""%(chunkSize, time.time()-t)
-        self.dbcon_obj.close_sessionInstance()        
+
 
     def insert_nrows(self, class_name, arr, col_str):
+        self.dbcon_obj.new_sessionInstance()        
         arr_str = str(arr)[1:-1]
         #print arr_str
 
@@ -713,23 +870,19 @@ class QueryBrowser(object):
             insert_stmt = "insert into %s (%s) values %s"%(class_name.lower(), col_str, arr_str)
             #print insert_stmt
             result = self.dbcon_obj.connection.execute(insert_stmt)
+            self.dbcon_obj.close_sessionInstance()        
         except Exception, e:
             print '\t    Error while inserting data in the table'
             print e.message
-
+        self.dbcon_obj.close_sessionInstance()        
         
 
-            
-        
-
-        
-        
-        
     ########## methods for insert query end ##########
     
     ########## methods for creating and deleting index##########
     #create an index
     def create_index(self, class_name, col_list):
+        self.dbcon_obj.new_sessionInstance()        
         index_stmt = ''
         columns = ''
         count = 0
@@ -744,6 +897,7 @@ class QueryBrowser(object):
         try:
             self.result = self.dbcon_obj.connection.execute(index_stmt)
             #print '\t    Index %s created'%index_name
+            self.dbcon_obj.close_sessionInstance()        
         except Exception, e:
             print '\t    Error while creating an index'
             print e
@@ -751,6 +905,7 @@ class QueryBrowser(object):
             
     #delete an index
     def delete_index(self, class_name):
+        self.dbcon_obj.new_sessionInstance()        
         index_stmt = ''
         columns = []
         count = 0
@@ -767,6 +922,7 @@ class QueryBrowser(object):
                 count = count + 1
             self.result = self.dbcon_obj.connection.execute(index_stmt)
             print '\t    Index %s deleted'%index_name
+            self.dbcon_obj.close_sessionInstance()        
             return columns
         except Exception, e:
             print '\t    Error while creating an index'
