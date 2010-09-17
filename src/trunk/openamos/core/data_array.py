@@ -1,4 +1,4 @@
-from numpy import ndarray, array, zeros, ones
+from numpy import ndarray, array, zeros, ones, hstack
 from scipy import exp
 import re
 
@@ -50,6 +50,7 @@ class DataArray(object):
             raise DataError, """variable name is not a valid string - first """\
                 """character is invalid"""
         
+        #print type(varname) ,"<----"
         if type(varname) is not str:
             raise DataError, 'variable name is not a valid string'
 
@@ -122,11 +123,14 @@ class DataArray(object):
 
     def setcolumn(self, columname, values, rows=None):
         
+        try:
+            if len(values.shape) > 1:
+                #converting the array to one dimensional
+                values.shape = (values.shape[0],)
+        except AttributeError, e:
+            print "AttributeError:%s; Assigning scalar to the column" %e
+            
         
-        if len(values.shape) > 1:
-            #converting the array to one dimensional
-            values.shape = (values.shape[0],)
-
         self.check_varname(columname)
         colnum = self._colnames[columname.lower()]
         try:
@@ -136,6 +140,17 @@ class DataArray(object):
                 self.data[rows,colnum] = values
         except ValueError, e:
             raise DataError, e
+
+    def insertcolumn(self, columnnameList, values):
+        if self.rows <> values.shape[0]:
+            raise DataError, """the number of rows in the dataset and the values """\
+                """column are not the same"""
+
+        self.data = hstack((self.data, values))
+        for i in columnnameList:
+            self.check_varname(i)
+            self.varnames.append(i.lower())
+            self._colnames[i.lower()] = len(self.varnames) - 1
         
     def scaledowncolumn(self, columname, scale):
         self.check_varname(columname)
