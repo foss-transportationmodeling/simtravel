@@ -83,6 +83,9 @@ class FixedActivityPrismModels(QWidget):
         t_s_prism_vertices_button.setGeometry((size.width()) / 2 - 150, size.height() / 2 + 320, 300, 50)
         #self.connect(t_s_prism_vertices_button, SIGNAL('clicked()'), self.t_s_prism_vertices)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
 
         
