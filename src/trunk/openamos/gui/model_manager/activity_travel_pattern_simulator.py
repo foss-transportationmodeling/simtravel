@@ -97,6 +97,9 @@ class Activity_Travel_Pattern_Simulator(QWidget):
         activity_travel_pattern_button.setGeometry((size.width()) / 2 - 150, 1070, 300, 50)
         #self.connect(activity_travel_pattern_button, SIGNAL('clicked()'), self.activity_travel_pattern)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
         
         
