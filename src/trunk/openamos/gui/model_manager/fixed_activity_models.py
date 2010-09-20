@@ -18,6 +18,7 @@ class FixedActivityModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
+        
         workers_button = QPushButton('Workers', self)
         workers_button.setGeometry((size.width()) / 4 - 100, size.height() / 2 - 280,200, 50)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
@@ -47,6 +48,9 @@ class FixedActivityModels(QWidget):
 
         activity_loc_button = QPushButton('Fixed activity locations for all individuals within the population', self)
         activity_loc_button.setGeometry((size.width()) / 4 - 100, size.height() / 2 + 230, (size.width()) / 2 + 200, 50)
+        
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
         
         self.configob = co
         
