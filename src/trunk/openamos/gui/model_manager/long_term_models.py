@@ -17,6 +17,7 @@ class LongTermModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
+        
         generate_synthetic_population_button = QPushButton('Generate Synthetic \nPopulation', self)
         generate_synthetic_population_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 400,200, 50)
         #self.connect(generate_synthetic_population_button, SIGNAL('clicked()'), self.synthetic_population)
@@ -47,6 +48,9 @@ class LongTermModels(QWidget):
         residential_location_choice_button  = QPushButton('Residential Location Choice', self)
         residential_location_choice_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
         #self.connect(residential_location_choice_button, SIGNAL('clicked()'), self.residential_location)
+        
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
         
         self.configob = co
         
