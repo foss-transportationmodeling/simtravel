@@ -69,6 +69,9 @@ class Adult_Model(QWidget):
         no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
         #self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
         
         
@@ -287,9 +290,10 @@ class Adult_Model(QWidget):
         point.setX(widgetwidth / 2 - 110)  
         point.setY(570)
         text.drawText(point, "Yes")
+        
+        text.end()
 
-
-        text.begin(self)
+        #text.begin(self)
 
         
 
