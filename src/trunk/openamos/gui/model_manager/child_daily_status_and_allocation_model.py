@@ -114,6 +114,9 @@ class Child_Model(QWidget):
         to_adult_button.setGeometry((size.width()) / 2 + 180, size.height() / 2 + 535, 200, 50)
         #self.connect(to_adult_button, SIGNAL('clicked()'), self.to_adult)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
         
         
