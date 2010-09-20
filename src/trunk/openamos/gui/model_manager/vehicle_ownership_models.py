@@ -27,6 +27,9 @@ class VehicleOwnershipModels(QWidget):
         veh_types_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 100, 200, 200)
         self.connect(veh_types_button, SIGNAL('clicked()'), self.veh_types)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
         
         
