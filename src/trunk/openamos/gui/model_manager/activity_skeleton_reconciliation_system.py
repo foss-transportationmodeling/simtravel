@@ -51,6 +51,9 @@ class Skeleton_Reconciliation_System(QWidget):
         adjustment_2_button.setGeometry((size.width()) / 2 + 100, size.height() / 2 + 110, 200, 80)
         #self.connect(adjustment_2_button, SIGNAL('clicked()'), self.adjustment_2)
         
+        Dummy  = QPushButton('', self)
+        Dummy.setGeometry(0, size.height() - 4, 1140, 2)
+        
         self.configob = co
         
         
