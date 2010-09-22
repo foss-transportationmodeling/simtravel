@@ -33,6 +33,11 @@ class StocFronRegressionModel(AbstractRegressionModel):
         """
         random.seed(seed=seed)
         err_norm = norm.rvs(scale=variance_norm**0.5, size=size)
+        f = open('test_res', a)
+        f.write('stochastic')x
+        f.write(str(list(err_norm[:3,:])))
+        f.write('\n')
+        f.close()
         random.seed(seed=seed)
         err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
         

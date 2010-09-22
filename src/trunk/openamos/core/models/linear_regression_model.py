@@ -29,8 +29,15 @@ class LinearRegressionModel(AbstractRegressionModel):
         sd - numeric value (standard deviation)
         """
         random.seed(seed=seed)
-        return norm.rvs(loc=mean, scale=sd, 
+        err_norm = norm.rvs(loc=mean, scale=sd, 
                         size=size)
+        f = open('test_res', a)
+        f.write('stochastic')x
+        f.write(str(list(err_norm[:3,:])))
+        f.write('\n')
+        f.close()
+
+        return err_norm
 
     def calc_predvalue(self, data, seed=1):
         """
