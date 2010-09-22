@@ -3,10 +3,6 @@ from openamos.core.data_array import DataFilter
 from openamos.core.models.abstract_model import Model
 from openamos.core.errors import CoefficientsError, SeedError
 
-from numpy import random
-
-
-
 class SubModel(object):
     """
     This is the base class for specifying models in the Component

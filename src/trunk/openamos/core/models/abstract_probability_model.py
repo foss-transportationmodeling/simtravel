@@ -14,7 +14,9 @@ class AbstractProbabilityModel(object):
         if not isinstance(probabilities, DataArray):
             raise DataError, 'probability input is not a valid DataArray object'
 
-        random.seed(seed)
+        if seed == None:
+            raise Exception, "probability"
+        random.seed(seed=seed)
 
         self.probabilities = ma.array(probabilities.data)
         self.check()

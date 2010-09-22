@@ -1,9 +1,5 @@
-#from numpy import random
-
 from scipy.stats import norm
-#from scipy import random
 from numpy import random, all
-#xfrom numpy import all
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
 
@@ -32,7 +28,6 @@ class LinearRegressionModel(AbstractRegressionModel):
         mean - numeric value (mean)
         sd - numeric value (standard deviation)
         """
-        #random.seed(seed)
         random.seed(seed=seed)
         return norm.rvs(loc=mean, scale=sd, 
                         size=size)
@@ -45,7 +40,7 @@ class LinearRegressionModel(AbstractRegressionModel):
         Inputs:
         data - DataArray object
         """
-        if seed is None:
+        if seed == None:
             raise Exception, "linear"
 
 

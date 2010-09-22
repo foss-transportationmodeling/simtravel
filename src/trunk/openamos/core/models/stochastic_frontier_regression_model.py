@@ -1,5 +1,4 @@
 from scipy.stats import norm, halfnorm
-#from scipy import random
 from numpy import random
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
@@ -34,7 +33,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
         """
         random.seed(seed=seed)
         err_norm = norm.rvs(scale=variance_norm**0.5, size=size)
-        #random.seed(seed)
+        random.seed(seed=seed)
         err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
         
         if vertex == 'start':
@@ -51,9 +50,8 @@ class StocFronRegressionModel(AbstractRegressionModel):
         Inputs:
         data - DataArray object
         """
-        if seed is None:
+        if seed == None:
             raise Exception, "linear"
-        #random.seed(seed)
 
         expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]

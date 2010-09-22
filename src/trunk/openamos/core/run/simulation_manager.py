@@ -1,7 +1,7 @@
 import copy
 import time
 from lxml import etree
-from numpy import array, ma, ones, zeros, random, vstack, where
+from numpy import array, ma, ones, zeros, vstack, where
 
 from openamos.core.component.config_parser import ConfigParser
 from openamos.core.database_management.query_browser import QueryBrowser
