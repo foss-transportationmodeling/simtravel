@@ -1,7 +1,9 @@
-from numpy import random
+#from numpy import random
 
 from scipy.stats import norm
-from numpy import random, all
+from scipy import random
+#from numpy import random, all
+from numpy import all
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
 
@@ -20,7 +22,7 @@ class LinearRegressionModel(AbstractRegressionModel):
             raise ErrorSpecificationError, """incorrect error specification; it """\
                 """should be LinearRegErrroSpecification object"""        
 
-    def calc_errorcomponent(self, size, mean=0, sd=1):
+    def calc_errorcomponent(self, size, mean=0, sd=1, seed=1):
         """
         The method returns the contribution of the error in the calculation 
         of the predicted value for the different choices.
@@ -30,6 +32,8 @@ class LinearRegressionModel(AbstractRegressionModel):
         mean - numeric value (mean)
         sd - numeric value (standard deviation)
         """
+        #random.seed(seed)
+        random.RandomState(seed=seed)
         return norm.rvs(loc=mean, scale=sd, 
                         size=size)
 
@@ -41,12 +45,15 @@ class LinearRegressionModel(AbstractRegressionModel):
         Inputs:
         data - DataArray object
         """
-        random.seed(seed)
+        if seed is None:
+            raise Exception, "linear"
+
 
         expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
         pred_value = self.calc_errorcomponent(size=(data.rows, 1),
-                                              mean=expected_value.data, sd=variance)
+                                              mean=expected_value.data, 
+                                              sd=variance, seed=seed)
         return DataArray(pred_value, self.specification.choices)
 
     

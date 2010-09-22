@@ -161,6 +161,7 @@ class AbstractComponent(object):
                                               choicenames)
             result = i.simulate_choice(data_subset, choiceset, iteration)
             self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+            #print result.data
 
             if i.run_until_condition is not None:
                 if data_subset.rows > 0:                    

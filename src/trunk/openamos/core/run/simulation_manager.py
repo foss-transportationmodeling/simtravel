@@ -127,6 +127,15 @@ class ComponentManager(object):
             # Run the component
             nRowsProcessed = i.run(data, self.db)
             
+            if i.component_name == 'AfterSchoolActivities':
+                f = open('test_res', 'a')
+                f.write('%s,rows - %s\n' %(i.component_name, nRowsProcessed))
+                f.close()
+
+
+
+
+
             # Write the data to the database from the hdf5 results cache
             if i.key[1] is not None:
                 keyCols = i.key[0] + i.key[1]
@@ -168,6 +177,10 @@ class ComponentManager(object):
         print """\tCreating the array object (WITHOUR iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
+
+        if nRowsProcessed > 5 and nRowsProcessed < 11:
+            print table[-nRowsProcessed:]
+            raw_input()
 
         #print resArr
         # TODO: delete rows from the local cache
@@ -505,20 +518,38 @@ class ComponentManager(object):
         timeAvailable = destinationTimeColVals - originTimeColVals
 
         destLocSetInd = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
-        
 
         for zone in uniqueIDs:
             destZone = zone * ones((data.rows, 1), dtype=int)
             timeToDest = skimsMatrix[originLocColVals, destZone]
             timeFromDest = skimsMatrix[destZone, destinationLocColVals]
 
-            destLocSetInd[where(timeToDest + timeFromDest < timeAvailable), zone] = 1
+            #print 'TIME TO DEST', zone, min(timeToDest), max(timeToDest)
+            #print 'TIME FROM DEST', zone, min(timeFromDest), max(timeFromDest)
 
+            rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
+            destLocSetInd[rowsLessThan, zone] = 1
+            """
+            if zone == 1154:
+                print where(timeToDest + timeFromDest < timeAvailable)
+                print (timeToDest + timeFromDest < timeAvailable)[:,0]
+                print originLocColVals[:,0]
+                print 'TIME AVAILABLE'
+                print timeAvailable[:,0]
+                print 'TOTAL TRAVEL TIME'
+                print timeFromDest[:,0] + timeToDest[:,0]
+                print 'TIMDE TO DESTINATION'
+                print timeToDest[:,0]
+                print 'TIME FROM DESTINATION'
+                print timeFromDest[:,0]
+                print '1154 Column Zero Row', destLocSetInd[:,1154]
+            """
         destLocSetInd = ma.masked_equal(destLocSetInd, 0)
 
         print 'ORIGIN LOCS', originLocColVals[:5, 0]
         print 'DESTINATION LOCS', destinationLocColVals[:5, 0]
         print 'TIME AVAILABLE', timeAvailable[:5, 0]
+        print destLocSetInd[0,1154], skimsMatrix[357,1154]
         
         #destLocSetIndSum = destLocSetInd.sum(-1)
         
@@ -560,10 +591,11 @@ class ComponentManager(object):
 
             vals = skimsMatrix[originLocColVals, sampleLocColVals]
             skimLocColName = '%s%s' %(spatialconst.skimField, i+1)
-            print skimLocColName
+            #print skimLocColName
             data.setcolumn(skimLocColName, vals)
-        print data.columns(sampleVarDict['temp'] + [originLocColName])        
-        print data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])                
+        #print data.columns(sampleVarDict['temp'] + [originLocColName])
+        #tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
+        #print tt> 9000 
         print 'TT SKIMS ASSIGNED'
 
             
@@ -593,6 +625,8 @@ class ComponentManager(object):
             #print 'NUMBER OF DESTINATIONS'
             #print destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
+            #print probLocSet.shape, 'PROBABILITY SHAPE'
+            #raw_input()
 
             probDataArray = DataArray(probLocSet, zoneLabels)
 
@@ -617,7 +651,7 @@ class ComponentManager(object):
             colIndices = actualLocIds.astype(int)
             #print res.data.shape
             destLocSetInd[rowIndices, colIndices] = 0
-
+        print data.varnames
 
     def check_sampled_choices(self, data, sampledVarNames):
         for i in range(len(sampledVarNames)):
@@ -633,7 +667,7 @@ class ComponentManager(object):
                     #print columnJ[:,0]
                     #raw_input()
                     print 'CHOICES ARE REPEATED'
-                    raw_input()
+                    #raw_input()
                     return True
 
         print 'CHOICES ARE NOT REPEATED'
@@ -717,11 +751,20 @@ class ComponentManager(object):
 if __name__ == '__main__':
     fileloc = '/home/kkonduri/simtravel/test/vehown'
     #componentManager = ComponentManager(fileLoc = "%s/config_spatialqueries.xml" %fileloc)
+    f = open('test_res','w')
+    f.close()
     componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
     componentManager.establish_databaseConnection()
     componentManager.establish_cacheDatabase(fileloc, 'w')
-    componentManager.run_components()
+
+    for i in range(10):
+        f = open('test_res', 'a')
+        f.write('iteration - %s\n' %(i+1))
+        f.close()
+        componentManager.run_components()
     raw_input()
     
+    componentManager.db.close()
+
     
 

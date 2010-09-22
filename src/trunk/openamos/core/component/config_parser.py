@@ -134,18 +134,24 @@ class ConfigParser(object):
             spatialConst = self.return_spatial_query(i)
             spatialConst_list.append(spatialConst)
 
-        if spatialConst_list == []:
-            spatialConst_list = None
 
         modelsIterator = component_element.getiterator("Model")
         self.model_list = []
         self.component_variable_list = []
         for i in modelsIterator:
             self.create_model_object(i)
+            self.create_linear_object_for_locations(i, spatialConst_list)
             #component_variable_list = (component_variable_list 
             #                           + variable_list)
             #model_list.append(model)
         #print self.component_variable_list
+
+
+        if spatialConst_list == []:
+            spatialConst_list = None
+
+
+
         self.component_variable_list = list(set(self.component_variable_list))
         component = AbstractComponent(comp_name, self.model_list, 
                                       self.component_variable_list, 
@@ -435,6 +441,40 @@ class ConfigParser(object):
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
+
+    def create_linear_object_for_locations(self, model_element, spatialConst_list):
+
+        seed = self.process_seed(model_element)
+        altSetElement = model_element.find('AlternativeSet')        
+        if altSetElement is None or spatialConst_list is None: 
+            return 
+
+        for i in spatialConst_list:
+            if i.countChoices is not None:
+                depvariable_element = model_element.find('DependentVariable')
+                dep_varname = depvariable_element.get('var')
+                
+                countChoices = i.countChoices
+                destinationField = i.destinationField
+
+                dataFilter = self.return_filter_condition(model_element)
+                runUntilFilter = self.return_run_until_condition(model_element)
+
+                choice = [dep_varname]
+                variance = array([[0.0]])
+                errorSpec = LinearRegErrorSpecification(variance)         
+
+                for i in range(countChoices):
+                    coefficients = [{'%s%s'%(destinationField, i+1):1}]
+                    specification = Specification(choice, coefficients)                
+                    
+                    model = LinearRegressionModel(specification, errorSpec)
+
+                    model_type = 'regression'
+                    model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                            runUntilFilter, seed=seed)
+
+                    self.model_list.append(model_object)
 
 
     def create_nested_logit_object(self, model_element):

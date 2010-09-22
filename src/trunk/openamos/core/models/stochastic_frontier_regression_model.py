@@ -1,5 +1,6 @@
 from scipy.stats import norm, halfnorm
-from numpy import random
+from scipy import random
+#from numpy import random
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
 
@@ -19,7 +20,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
                 """should be StochasticRegErrroSpecification object"""
 
     def calc_errorcomponent(self, variance_norm, variance_halfnorm, 
-                            vertex, size):
+                            vertex, size, seed):
         """
         The method returns the contribution of the error component in the 
         calculation of the predicted value for the different choices.
@@ -31,7 +32,9 @@ class StocFronRegressionModel(AbstractRegressionModel):
         vertex - string (the vertext to predict -- start/end)
         size - numeric value (number of rows)
         """
+        random.RandomState(seed=seed)
         err_norm = norm.rvs(scale=variance_norm**0.5, size=size)
+        #random.seed(seed)
         err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
         
         if vertex == 'start':
@@ -48,7 +51,9 @@ class StocFronRegressionModel(AbstractRegressionModel):
         Inputs:
         data - DataArray object
         """
-        random.seed(seed)
+        if seed is None:
+            raise Exception, "linear"
+        #random.seed(seed)
 
         expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]
@@ -58,7 +63,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
         size = (data.rows, 1)
 
         err = self.calc_errorcomponent(variance_norm, variance_halfnorm, 
-                                       vertex, size)
+                                       vertex, size, seed)
         
         pred_value = expected_value.data + err
 

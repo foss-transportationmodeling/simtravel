@@ -79,8 +79,10 @@ class SubModel(object):
     
     def simulate_choice(self, data, choiceset, iteration):
         # Setting the seed
+        #f = open('test', 'a')
         seed = self.seed + iteration
-
+        #f.write('%s,%s\n' %(iteration, seed))
+        #f.close()
         if self.model_type == 'regression':
             result = self.model.calc_predvalue(data, seed)
 

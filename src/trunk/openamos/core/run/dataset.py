@@ -1,7 +1,7 @@
 import tables as t
 import time
 
-from numpy import zeros, unique
+from numpy import ones, unique
 from openamos.core.run.dataset_table_layouts import *
 
 class DB(object):
@@ -44,6 +44,9 @@ class DB(object):
         self.fileh.createTable(input_grp, "households", Households)
         self.fileh.createTable(input_grp, "persons", Persons)
 
+
+    def close(self):
+        self.fileh.close()
         
     def returnGroup(self, tableName):
         if tableName[-2:] == "_r":
@@ -79,9 +82,6 @@ class DB(object):
         print 'Time taken to write to hdf5 format %.4f' %(time.time()-t)
         
 
-    def close(self):
-        fileh.close()
-
     def returnTableAsMatrix(self, tableName, originColName, destinationColName, skimColName, fillValue=9999):
         tableRef = self.returnTableReference(tableName)
         
@@ -90,8 +90,8 @@ class DB(object):
         skims = tableRef.col(skimColName)
 
         # Initialize matrix
-        skimsMatrix = zeros((max(origin)+1, max(destination)+1))
-        skimsMatrix.fill(fillValue)
+        skimsMatrix = ones((max(origin)+1, max(destination)+1)) * fillValue
+        #skimsMatrix.fill(fillValue)
 
         # Populate matrix
         skimsMatrix[origin, destination] = skims
