@@ -97,7 +97,7 @@ class DataArray(object):
         result = ones((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
-            result = self.data[:,colnum] ** coefficients[i]
+            result = result * self.data[:,colnum] * coefficients[i]
         
         if rows is not None:
             return result[rows]

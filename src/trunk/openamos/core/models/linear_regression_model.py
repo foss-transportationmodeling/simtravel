@@ -1,6 +1,7 @@
 from scipy.stats import norm
 from numpy import random, all
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
+from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 from openamos.core.errors import ErrorSpecificationError
 
 class LinearRegressionModel(AbstractRegressionModel):
@@ -28,15 +29,8 @@ class LinearRegressionModel(AbstractRegressionModel):
         mean - numeric value (mean)
         sd - numeric value (standard deviation)
         """
-        random.seed(seed=seed)
-        err_norm = norm.rvs(loc=mean, scale=sd, 
-                        size=size)
-        f = open('test_res', a)
-        f.write('stochastic')x
-        f.write(str(list(err_norm[:3,:])))
-        f.write('\n')
-        f.close()
-
+        dist = RandomDistribution(seed=seed)
+        err_norm = dist.return_normal_variables(location=mean, scale=sd, size=size)
         return err_norm
 
     def calc_predvalue(self, data, seed=1):

@@ -1,6 +1,7 @@
 from numpy import ndarray, array, random, ma, zeros, ones
 from openamos.core.errors import ProbabilityError, DataError
 from openamos.core.data_array import DataArray
+from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 
 class AbstractProbabilityModel(object):
     """
@@ -16,7 +17,7 @@ class AbstractProbabilityModel(object):
 
         if seed == None:
             raise Exception, "probability"
-        random.seed(seed=seed)
+        self.seed = seed
 
         self.probabilities = ma.array(probabilities.data)
         self.check()
@@ -74,7 +75,17 @@ class AbstractProbabilityModel(object):
         Inputs:
         None
         """
-        return random.random(self.num_agents)
+        #random.seed(seed=self.seed)
+        #err = random.random((3,1))
+        #f = open('test_res', 'a')
+        #f.write('probability - %s' %self.seed)
+        #f.write(str(list(err[:3,:])))
+        #f.write('\n')
+        #f.close()
+        
+        dist = RandomDistribution(self.seed)
+        rand_numbers = dist.return_random_variables(self.num_agents)
+        return rand_numbers
 
     def cumprob(self):
         """

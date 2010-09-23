@@ -128,6 +128,9 @@ class AbstractComponent(object):
         
         for i in model_list_duringrun:
             print '\t    Running Model - ', i.dep_varname
+            #f = open('test_res', 'a')
+            #f.write('%s,' %i.dep_varname)
+            #f.close()
 
             # Creating the subset filter
             if i.data_filter is not None:

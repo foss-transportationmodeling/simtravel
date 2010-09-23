@@ -34,8 +34,10 @@ class InteractionModel(Model):
         Inputs:
         data - DataArray object
         """
-
+        #raw_input()
         expected_value = self.calculate_expected_values(data)
+        #print data.columns(['tt1'])
+        #print expected_value
         return DataArray(expected_value.data, self.specification.choices)
 
 

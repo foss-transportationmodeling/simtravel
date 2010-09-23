@@ -1,7 +1,8 @@
-from scipy.stats import norm, halfnorm
+from scipy.stats import norm
 from numpy import random
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.errors import ErrorSpecificationError
+from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 
 class StocFronRegressionModel(AbstractRegressionModel):
     """
@@ -30,17 +31,30 @@ class StocFronRegressionModel(AbstractRegressionModel):
                                         error)
         vertex - string (the vertext to predict -- start/end)
         size - numeric value (number of rows)
-        """
+
         random.seed(seed=seed)
-        err_norm = norm.rvs(scale=variance_norm**0.5, size=size)
+        err_norm = norm.rvs(loc=0, scale=variance_norm**0.5, size=size)
+        err = norm.rvs(size=size)
+        f = open('test_res', 'a')
+        f.write('stochastic - %s\n' %seed)
+        f.write(str(list(err[:3,:])))
+        f.write('\n')
+        f.close()
+        #raw_input()
         f = open('test_res', a)
         f.write('stochastic')x
         f.write(str(list(err_norm[:3,:])))
         f.write('\n')
         f.close()
         random.seed(seed=seed)
-        err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
-        
+        #err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
+
+        """
+        dist = RandomDistribution(seed=seed)
+        #randState = RandomState(seed)
+        #dist = randState.normal(loc=0, scale=variance_norm**0.5, size=size, seed
+        err_norm = dist.return_normal_variables(location=0, scale=variance_norm**0.5, size=size)
+
         if vertex == 'start':
             return err_norm
 

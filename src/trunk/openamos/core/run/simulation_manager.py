@@ -100,7 +100,7 @@ class ComponentManager(object):
             #Spatial Constraints list
             spatialConst_list = i.spatialConst_list
 
-            print '\nVARS BEFORE REMOVING TEMP', vars_dict
+            #print '\nVARS BEFORE REMOVING TEMP', vars_dict
             # Exclude the temp variables
             if 'temp' in vars_dict:
                 temp_tableEntries = vars_dict.pop('temp')
@@ -108,7 +108,7 @@ class ComponentManager(object):
 
                 depvars_dict = self.update_dictionary(depvars_dict, temp_dict)
 
-                print 'VARS AFTER REMOVING TEMP', vars_dict
+                #print 'VARS AFTER REMOVING TEMP', vars_dict
                 print type(temp_tableEntries)
 
 
@@ -172,15 +172,11 @@ class ComponentManager(object):
         
         t = time.time()
 
-        print 'WRITING ROWS ------> ', nRowsProcessed
+        print '\tNumber of rows processed in this iteration - ', nRowsProcessed
         resArr = list(table[-nRowsProcessed:])
-        print """\tCreating the array object (WITHOUR iterating through the hdf5 results) """\
+        print """\tCreating the array object (WITHOUT iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
-
-        if nRowsProcessed > 5 and nRowsProcessed < 11:
-            print table[-nRowsProcessed:]
-            raw_input()
 
         #print resArr
         # TODO: delete rows from the local cache
@@ -193,7 +189,7 @@ class ComponentManager(object):
 
         
     def prepare_vars(self, variableList, component):
-        print variableList
+        #print variableList
         indep_columnDict = self.prepare_vars_independent(variableList)
         #print '\tIndependent Column Dictionary - ', indep_columnDict
 
@@ -242,8 +238,8 @@ class ComponentManager(object):
         if len(tempdep_columnDict['temp']) > 0:
             dep_columnDict = self.update_dictionary(dep_columnDict, tempdep_columnDict)
 
-        print '\tIndependent Column Dictionary - ', indep_columnDict
-        print '\tDependent Column Dictionary - ', dep_columnDict
+        #print '\tIndependent Column Dictionary - ', indep_columnDict
+        #print '\tDependent Column Dictionary - ', dep_columnDict
         return indep_columnDict, dep_columnDict, prim_keys, count_keys
         
 
@@ -303,14 +299,14 @@ class ComponentManager(object):
         else:
             columnDict[anchor.table] = anchor_cols
 
-        print columnDict
+        #print columnDict
         #raw_input()
         return columnDict
 
     def prepare_data(self, indepVarDict, depVarDict, count_keys=None, spatialConst_list=None, subsample=None):
         # get hierarchy of the tables
 
-        print indepVarDict
+        #print indepVarDict
 
         # PROCESSING TO INCLUDE THE APPROPRIATE SPATIAL QUERY ANCHORS
         if spatialConst_list is not None:
@@ -455,12 +451,14 @@ class ComponentManager(object):
     
 
     def append_cols_for_dependent_variables(self, data, depVarDict):
-        print 'INSERTING FOLLOWING DEPENDENT COLS', depVarDict
+        #print 'INSERTING FOLLOWING DEPENDENT COLS', depVarDict
 
         numRows = data.rows
         tempValsArr = zeros((numRows,1))
         for i in depVarDict:
-            for j in depVarDict[i]:
+            colsInTable = depVarDict[i]
+            colsInTable.sort()
+            for j in colsInTable:
                 data.insertcolumn([j], tempValsArr)
 
     def process_data_for_locs(self, data, spatialConst_list):
@@ -486,10 +484,10 @@ class ComponentManager(object):
                                                                      destinationColName,
                                                                      skimColName)
                 if i.countChoices is not None: 
-                    print 'NEED TO SAMPLE LOCATION CHOICES'
+                    print '\n\tNeed to sample location choices for the following model'
                     self.sample_location_choices(data, skimsMatrix, uniqueIDs, i)
                 else:
-                    print 'NEED TO EXTRACT SKIMS'
+                    print '\n\tNeed to extract skims'
                     self.extract_skims(data, skimsMatrix, i)
 
         #raw_input()
@@ -529,27 +527,13 @@ class ComponentManager(object):
 
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
             destLocSetInd[rowsLessThan, zone] = 1
-            """
-            if zone == 1154:
-                print where(timeToDest + timeFromDest < timeAvailable)
-                print (timeToDest + timeFromDest < timeAvailable)[:,0]
-                print originLocColVals[:,0]
-                print 'TIME AVAILABLE'
-                print timeAvailable[:,0]
-                print 'TOTAL TRAVEL TIME'
-                print timeFromDest[:,0] + timeToDest[:,0]
-                print 'TIMDE TO DESTINATION'
-                print timeToDest[:,0]
-                print 'TIME FROM DESTINATION'
-                print timeFromDest[:,0]
-                print '1154 Column Zero Row', destLocSetInd[:,1154]
-            """
+
         destLocSetInd = ma.masked_equal(destLocSetInd, 0)
 
-        print 'ORIGIN LOCS', originLocColVals[:5, 0]
-        print 'DESTINATION LOCS', destinationLocColVals[:5, 0]
-        print 'TIME AVAILABLE', timeAvailable[:5, 0]
-        print destLocSetInd[0,1154], skimsMatrix[357,1154]
+        #print 'ORIGIN LOCS', originLocColVals[:5, 0]
+        #print 'DESTINATION LOCS', destinationLocColVals[:5, 0]
+        #print 'TIME AVAILABLE', timeAvailable[:5, 0]
+        #print destLocSetInd.sum(-1)
         
         #destLocSetIndSum = destLocSetInd.sum(-1)
         
@@ -573,7 +557,7 @@ class ComponentManager(object):
         count = spatialconst.countChoices
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
-            print 'SAMPLING LOCATIONS'
+            print '\tSampling Locations'
             self.sample_choices(data, destLocSetInd, zoneLabels, count, sampleVarName, seed)
             sampledVarNames = sampleVarDict['temp']
             sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
@@ -593,10 +577,13 @@ class ComponentManager(object):
             skimLocColName = '%s%s' %(spatialconst.skimField, i+1)
             #print skimLocColName
             data.setcolumn(skimLocColName, vals)
-        #print data.columns(sampleVarDict['temp'] + [originLocColName])
-        #tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
-        #print tt> 9000 
-        print 'TT SKIMS ASSIGNED'
+        colsInTable = sampleVarDict['temp']
+        colsInTable.sort()
+        #print data.columns(colsInTable + [originLocColName])
+        tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
+        #print tt
+        print '\tTravel skims extracted for the sampled locations'
+        #raw_input()
 
             
             
@@ -618,16 +605,12 @@ class ComponentManager(object):
 
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
-
-
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
             #print 'NUMBER OF DESTINATIONS'
-            #print destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
             #print probLocSet.shape, 'PROBABILITY SHAPE'
             #raw_input()
-
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
@@ -651,7 +634,7 @@ class ComponentManager(object):
             colIndices = actualLocIds.astype(int)
             #print res.data.shape
             destLocSetInd[rowIndices, colIndices] = 0
-        print data.varnames
+        #print data.varnames
 
     def check_sampled_choices(self, data, sampledVarNames):
         for i in range(len(sampledVarNames)):
@@ -666,11 +649,10 @@ class ComponentManager(object):
                     #print columnI[:,0]
                     #print columnJ[:,0]
                     #raw_input()
-                    print 'CHOICES ARE REPEATED'
-                    #raw_input()
+                    print '\t -- Warning:Choices are repeated; Repeating location sampling step --'
                     return True
 
-        print 'CHOICES ARE NOT REPEATED'
+        print '\t -- Choices are not repeated --'
         return False
 
                 #xraw_input()
@@ -751,20 +733,17 @@ class ComponentManager(object):
 if __name__ == '__main__':
     fileloc = '/home/kkonduri/simtravel/test/vehown'
     #componentManager = ComponentManager(fileLoc = "%s/config_spatialqueries.xml" %fileloc)
-    f = open('test_res','w')
-    f.close()
-    componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
-    componentManager.establish_databaseConnection()
-    componentManager.establish_cacheDatabase(fileloc, 'w')
 
-    for i in range(10):
+
+    for i in range(1):
         f = open('test_res', 'a')
-        f.write('iteration - %s\n' %(i+1))
+        f.write('\nRUN - %s' %(i+1))
         f.close()
+        componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
+        componentManager.establish_databaseConnection()
+        componentManager.establish_cacheDatabase(fileloc, 'w')
         componentManager.run_components()
-    raw_input()
-    
-    componentManager.db.close()
+        componentManager.db.close()
 
     
 

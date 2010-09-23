@@ -369,7 +369,7 @@ class QueryBrowser(object):
         # ADD APPROPRIATE JOIN/?INNER JOINS
 
 
-        print 'db_dict', db_dict
+        #print 'db_dict', db_dict
 
         #initialize the variables
         final_list = []
@@ -650,7 +650,7 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        print 'SQL STRING', sql_string
+        #print 'SQL STRING', sql_string
             
 
 
