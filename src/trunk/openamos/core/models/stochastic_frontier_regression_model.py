@@ -132,10 +132,12 @@ class TestStocFronRegressionModel(unittest.TestCase):
                                                     self.specification.coefficients[0])
         expected_act.shape = (4,1)
         variance = self.errorspecification.variance
-        pred_act = (expected_act + 
-                    norm.rvs(scale=variance[0, 0], size=(4,1)) + 
-                    halfnorm.rvs(scale=variance[1, 1], size=(4,1)))
 
+        dist = RandomDistribution(seed=1)
+        err_norm = dist.return_normal_variables(location=0, scale=variance[0,0]**0.5, size=(4,1))
+        
+        pred_act = (expected_act + err_norm)
+        
         pred_diff = all(pred_value.data == pred_act)
         self.assertEquals(True, pred_diff)
         

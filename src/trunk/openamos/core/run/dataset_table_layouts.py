@@ -64,4 +64,4 @@ class Schedule_R(t.IsDescription):
     locationid = t.Int16Col()
     starttime = t.Float32Col()
     endtime = t.Float32Col()
-
+    duration = t.Float32Col()

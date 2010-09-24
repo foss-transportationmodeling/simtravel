@@ -96,7 +96,7 @@ class AbstractComponent(object):
                 if dep_varname not in cols_to_write and not isinstance(dep_varModel, InteractionModel):
                     cols_to_write.append(dep_varname)
             print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
-            print "\t    Writing for to %s: records - %s" %(self.table, sum(data_filter))
+            print "\t    Writing to %s: records - %s" %(self.table, sum(data_filter))
 
             if count_key is not None and count_key not in cols_to_write:
                 cols_to_write = cols_to_write + count_key
@@ -123,6 +123,18 @@ class AbstractComponent(object):
         print """\t    Writing to hdf5 cache format (appending one record at a time) """\
             """%.4f""" %(time.time()-t)
             
+
+    def create_filter(self, data_filter):
+        data_subset_filter = array([True]*self.data.rows)
+        if data_filter is None:
+            return data_subset_filter
+        
+        for filterInst in data_filter:
+            condition_filter = filterInst.compare(self.data)
+            data_subset_filter[~condition_filter] = False
+        print '\t\tData Filter returned %s number of rows for above model' %sum(data_subset_filter)
+        return data_subset_filter
+
     def iterate_through_the_model_list(self, model_list_duringrun, iteration):
         model_list_forlooping = []
         
@@ -133,42 +145,38 @@ class AbstractComponent(object):
             #f.close()
 
             # Creating the subset filter
-            if i.data_filter is not None:
-                data_subset_filter = i.data_filter.compare(self.data)
-            else:
-                data_subset_filter = array([True]*self.data.rows)
-            #print '\t RUN UNTIL CONDITION FILTER'
-            # The run condition filter to loop over records for which a certain
-            # condition is not satisfied
-            if i.run_until_condition is not None:
-                # Creating the run condition filter
-                run_condition_filter = i.run_until_condition.compare(self.data)
-            else:
-                run_condition_filter = array([True]*self.data.rows) 
-            #print '\t ', run_condition_filter
+            data_subset_filter = self.create_filter(i.data_filter)
+            if data_subset_filter.sum() > 0:
+                #print '\t RUN UNTIL CONDITION FILTER'
+                # The run condition filter to loop over records for which a certain
+                # condition is not satisfied
+                if i.run_until_condition is not None:
+                    # Creating the run condition filter
+                    run_condition_filter = i.run_until_condition.compare(self.data)
+                else:
+                    run_condition_filter = array([True]*self.data.rows) 
+                    
+                # Creating the compound filter based on above two conditions 
+                data_subset_filter[~run_condition_filter] = False
+                data_subset = self.data.columns(self.data.varnames, 
+                                                data_subset_filter)
 
-            # Creating the compound filter based on above two conditions 
-            data_subset_filter[~run_condition_filter] = False
-            data_subset = self.data.columns(self.data.varnames, 
-                                            data_subset_filter)
-            #print '\t DATA SUBSET FILTER'
-            #print '\t ', data_subset_filter
-            # Generate a choiceset for the corresponding agents
-            choiceset_shape = (data_subset.rows,
-                               i.model.specification.number_choices)
-            choicenames = i.model.specification.choices
+                # Generate a choiceset for the corresponding agents
+                choiceset_shape = (data_subset.rows,
+                                   i.model.specification.number_choices)
+                choicenames = i.model.specification.choices
             #print '-----', choicenames, '--------'
             #print i
-            choiceset = self.create_choiceset(choiceset_shape, 
-                                              i.choiceset_criterion, 
-                                              choicenames)
-            result = i.simulate_choice(data_subset, choiceset, iteration)
-            self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+                choiceset = self.create_choiceset(choiceset_shape, 
+                                                  i.choiceset_criterion, 
+                                                  choicenames)
+                result = i.simulate_choice(data_subset, choiceset, iteration)
+                self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
             #print result.data
 
-            if i.run_until_condition is not None:
-                if data_subset.rows > 0:                    
-                    model_list_forlooping.append(i)
+                if i.run_until_condition is not None:
+                    if data_subset.rows > 0:                    
+                        model_list_forlooping.append(i)
                 # Indiciator variable updating no longer happens in the ABSTRACT COMPONENT
                 # Instead they are specified as simple regression models with the appropriate
                 # specifications
@@ -182,7 +190,7 @@ class AbstractComponent(object):
             #else:
             #    data_subset_filter = array([True]*self.data.rows)
             
-        print '\t-- Iteration Complete --', sum(data_subset_filter)
+        print '\t-- Iteration Complete --'
         #raw_input()
         return model_list_forlooping, data_subset_filter
 

@@ -12,6 +12,7 @@ from numpy import array
 from openamos.core.component.abstract_controller import BasicController
 
 from openamos.core.models.linear_regression_model import LinearRegressionModel
+from openamos.core.models.log_linear_regression_model import LogLinearRegressionModel
 from openamos.core.models.stochastic_frontier_regression_model import StocFronRegressionModel
 from openamos.core.models.count_regression_model import CountRegressionModel
 from openamos.core.models.logit_choice_model import LogitChoiceModel
@@ -237,8 +238,13 @@ class ConfigParser(object):
                 variance = array([[float(i.get('value'))]])
             errorSpec = LinearRegErrorSpecification(variance)         
             model = LinearRegressionModel(specification, errorSpec)
+
+        if model_type == 'LogLinear':
+            for i in varianceIterator:
+                variance = array([[float(i.get('value'))]])
+            errorSpec = LinearRegErrorSpecification(variance)         
+            model = LogLinearRegressionModel(specification, errorSpec)
             
-        
         if model_type == 'Stochastic Frontier':
             for i in varianceIterator:
                 variance_type = i.get('type', default=None)
@@ -256,7 +262,7 @@ class ConfigParser(object):
             model = StocFronRegressionModel(specification, errorSpec)                 
             
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model_type = 'regression'
@@ -308,7 +314,7 @@ class ConfigParser(object):
         specification = CountSpecification(choice, coefficients)
         
         # filters
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
 
@@ -372,7 +378,7 @@ class ConfigParser(object):
         # logit specification object
         specification = Specification(choice, coefficients_list)
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
     
         model = LogitChoiceModel(specification) 
@@ -430,7 +436,7 @@ class ConfigParser(object):
         # logit specification object
         specification = Specification(choice, coeff_list)
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
     
         model = LogitChoiceModel(specification) 
@@ -457,7 +463,7 @@ class ConfigParser(object):
                 countChoices = i.countChoices
                 destinationField = i.destinationField
 
-                dataFilter = self.return_filter_condition(model_element)
+                dataFilter = self.return_filter_condition_list(model_element)
                 runUntilFilter = self.return_run_until_condition(model_element)
 
                 choice = [dep_varname]
@@ -600,7 +606,7 @@ class ConfigParser(object):
         
         specification = NestedSpecification(spec_dict)
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model = NestedLogitChoiceModel(specification)
@@ -668,7 +674,7 @@ class ConfigParser(object):
             specification = OLSpecification(choice, coefficients_list, threshold_list,
                                             distribution=model_type.lower())
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)            
 
         model = OrderedModel(specification) 
@@ -715,7 +721,7 @@ class ConfigParser(object):
         # logit specification object
         specification = Specification(choice, coefficients_list)
 
-        dataFilter = self.return_filter_condition(model_element)
+        dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model = ProbabilityModel(specification) 
@@ -924,8 +930,15 @@ class ConfigParser(object):
 
     
 
-    def return_filter_condition(self, model_element):
-        filter_element = model_element.find('Filter')
+    def return_filter_condition_list(self, model_element):
+        filterIterator = model_element.getiterator("Filter")
+        filterList = []
+        for i in filterIterator:
+            filterCondition = self.return_filter_condition(i)
+            filterList.append(filterCondition)
+        return filterList
+
+    def return_filter_condition(self, filter_element):
         
         if filter_element is None:
             return None

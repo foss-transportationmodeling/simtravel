@@ -54,6 +54,17 @@ class DataArray(object):
         if type(varname) is not str:
             raise DataError, 'variable name is not a valid string'
 
+    def sort(self, columnames):
+
+        if not isinstance(columnames, list):
+            raise DataError, """the column names input must be of """\
+                """list type"""
+        for i in columnames:
+            colnum = self._colnames[i]
+            colsIndex = self.data[:,colnum].argsort(0)
+            
+            self.data = self.data[colsIndex,:]
+
 
     def calculate_equation(self, coefficients, rows=None):
         if not isinstance(coefficients, dict):

@@ -1,5 +1,4 @@
-from scipy.stats import norm
-from numpy import random, all
+from numpy import all
 from openamos.core.models.abstract_regression_model import AbstractRegressionModel
 from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 from openamos.core.errors import ErrorSpecificationError
@@ -75,10 +74,11 @@ class TestLinearRegressionModel(unittest.TestCase):
         model = LinearRegressionModel(self.specification, self.errorspecification)
         pred_value = model.calc_predvalue(self.data)
 
-        expected_act = self.data.calculate_equation(
-                                                    self.specification.coefficients[0])
+        expected_act = self.data.calculate_equation(self.specification.coefficients[0])
         expected_act.shape = (4,1)
-        pred_act = norm.rvs(loc=expected_act, scale=1, size=(4,1))
+
+        dist = RandomDistribution(seed=1)
+        pred_act = dist.return_normal_variables(location=expected_act, scale=1, size=(4,1))
 
         pred_diff = all(pred_value.data == pred_act)
         self.assertEqual(True, pred_diff)

@@ -31,8 +31,9 @@ class SubModel(object):
             self.dep_varname = dep_varname.lower()
 
         if data_filter is not None:
-            if not isinstance(data_filter, DataFilter):
-                raise ModelError, 'the model input is not a valid DataFilter object'
+            for i in data_filter:
+                if not isinstance(i, DataFilter):
+                    raise ModelError, 'the model input is not a valid DataFilter object'
         self.data_filter = data_filter
         
         if run_until_condition is not None:

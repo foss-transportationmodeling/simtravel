@@ -1,5 +1,5 @@
 from scipy.stats import genlogistic, norm
-from numpy import array, zeros, random, all
+from numpy import array, zeros, all
 
 from openamos.core.models.abstract_choice_model import AbstractChoiceModel
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel

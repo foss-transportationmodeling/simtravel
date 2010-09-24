@@ -109,7 +109,7 @@ class ComponentManager(object):
                 depvars_dict = self.update_dictionary(depvars_dict, temp_dict)
 
                 #print 'VARS AFTER REMOVING TEMP', vars_dict
-                print type(temp_tableEntries)
+                #print type(temp_tableEntries)
 
 
             tableName = i.table
@@ -131,8 +131,9 @@ class ComponentManager(object):
                 f = open('test_res', 'a')
                 f.write('%s,rows - %s\n' %(i.component_name, nRowsProcessed))
                 f.close()
-
-
+                
+                #if nRowsProcessed <> 6:
+                #    raw_input()
 
 
 
@@ -580,7 +581,7 @@ class ComponentManager(object):
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
         #print data.columns(colsInTable + [originLocColName])
-        tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
+        #tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
         #print tt
         print '\tTravel skims extracted for the sampled locations'
         #raw_input()
@@ -607,7 +608,7 @@ class ComponentManager(object):
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
-            #print 'NUMBER OF DESTINATIONS'
+            #print 'NUMBER OF DESTINATIONS', destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
             #print probLocSet.shape, 'PROBABILITY SHAPE'
             #raw_input()
@@ -732,18 +733,14 @@ class ComponentManager(object):
 
 if __name__ == '__main__':
     fileloc = '/home/kkonduri/simtravel/test/vehown'
-    #componentManager = ComponentManager(fileLoc = "%s/config_spatialqueries.xml" %fileloc)
-
-
+    componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
     for i in range(1):
         f = open('test_res', 'a')
-        f.write('\nRUN - %s' %(i+1))
+        f.write('Run - %s' %(i+1))
         f.close()
-        componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
         componentManager.establish_databaseConnection()
         componentManager.establish_cacheDatabase(fileloc, 'w')
         componentManager.run_components()
         componentManager.db.close()
-
     
 

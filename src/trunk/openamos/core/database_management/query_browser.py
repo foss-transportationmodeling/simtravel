@@ -369,7 +369,9 @@ class QueryBrowser(object):
         # ADD APPROPRIATE JOIN/?INNER JOINS
 
 
-        #print 'db_dict', db_dict
+        print 'Database Dictionary of Table and Columns - ', db_dict
+        print 'Column Names', column_names
+        #raw_input()
 
         #initialize the variables
         final_list = []
@@ -407,13 +409,15 @@ class QueryBrowser(object):
             #print 'clist', clist
             #print 'list1', list1
             chk_list = len(list(set(list1) & set(clist)))
+            #print 'Check List - ', clist
+            #print 'Actual List of Columns requested from table - ', list1
             if chk_list == len(list1):
                 for j in db_dict[i]:
+                    #print '\tColumn - ', j
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
             else:
-                #print i
-                print 'Column(s) passed in the dictionary do not exist in the table'
+                print ('Column - %s passed in the dictionary does not exist in the table - %s' %(j, i))
                 return None
         #print 'final_list is %s'%final_list
         
@@ -425,6 +429,11 @@ class QueryBrowser(object):
         # Generating the left join statements
         mainTable = table_names[0]
         #print 'mainTable ----> ', mainTable
+
+        primCols = []
+        for i in column_names:
+            primCols += column_names[i]
+        primCols = list(set(primCols))
 
         joinStrList = []
         for table in table_list:
@@ -650,7 +659,7 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        #print 'SQL STRING', sql_string
+        print 'SQL string for query - ', sql_string
             
 
 
@@ -685,6 +694,7 @@ class QueryBrowser(object):
             # Returns the query as a DataArray object
             data = DataArray(resultArray, cols_list)
 
+            data.sort(primCols)
             self.dbcon_obj.close_sessionInstance()        
         
             return data
@@ -713,6 +723,10 @@ class QueryBrowser(object):
 
         if mask.any():
             data[mask] = fillValue
+
+        #Sorting the array by primary cols identifying the agent as 
+        # postgres seems to return queries without any order
+            
         
         # Convert it back to a regular array to enable all the other processing
         print '\tSize of the data set that was retrieved - ', data.shape
