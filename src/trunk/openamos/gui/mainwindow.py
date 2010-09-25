@@ -12,11 +12,12 @@ from file_menu.databaseconfig import *
 
 
 from openamos.core.config import *
+from openamos.core.run.simulation_manager import ComponentManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setWindowTitle("OpenAMOS-1.0")
+        self.setWindowTitle("OpenAMOS: Version-1.0")
         self.showMaximized()
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
@@ -162,8 +163,8 @@ class MainWindow(QMainWindow):
 
     # Defining Run
         self.run_menu = self.menuBar().addMenu("&Run")
-        run_simulation_action = self.createaction("&Simulation", None, None, 
-                                            "run", "Implement the model.")        
+        run_simulation_action = self.createaction("&Simulation", self.run_simulation, None, 
+                                            "run", "Implement the model.", False, True)        
         setting_preference_action = self.createaction("&Preference", None, None, 
                                             "preferences", "Make a configuration.")        
         self.addActions(self.run_menu, (setting_preference_action, ))
@@ -215,7 +216,7 @@ class MainWindow(QMainWindow):
     def showflowchart(self,selitem,col):
         if selitem.text(col) == 'Long Term Choices':
             self.models.show_long_term_models()
-        if selitem.text(col) == 'Fixed Activity Location Choices': #Fixed Activity Location Choice Generator':
+        if selitem.text(col) == 'Fixed Activity Location Choices':
             self.models.show_fixed_activity_models()
         if selitem.text(col) == 'Vehicle Ownership Model':
             self.models.show_vehicle_ownership_models()
@@ -242,6 +243,7 @@ class MainWindow(QMainWindow):
             self.proconfig = ConfigObject(configtree=project_new.configtree)
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
+            self.run_menu.actions()[1].setEnabled(True)
             
 
     def projectopen(self):
@@ -251,6 +253,7 @@ class MainWindow(QMainWindow):
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
+            self.run_menu.actions()[1].setEnabled(True)
             
 
     def projectsave(self):
@@ -281,6 +284,7 @@ class MainWindow(QMainWindow):
         self.proconfig = None
         self.checkProject()
         self.data_menu.actions()[2].setDisabled(True)
+        self.run_menu.actions()[1].setDisabled(True)
         
 
     def projectQuit(self):
@@ -294,7 +298,7 @@ class MainWindow(QMainWindow):
     def checkProject(self):
         actpro = bool(self.proconfig)
         if actpro:
-            self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT_NAME))
+            self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT,NAME))
         self.centralwidget.setEnabled(actpro)
         self.model_management.setConfigObject(self.proconfig)
         self.models.setConfigObject(self.proconfig)
@@ -303,9 +307,20 @@ class MainWindow(QMainWindow):
         if self.proconfig <> None:
             project_database = DatabaseConfig(self.proconfig)
             project_database.exec_()
+            
+    def run_simulation(self):
+        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
+        pname = self.proconfig.getConfigElement(PROJECT,NAME)
+        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
+            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+            componentManager.establish_databaseConnection()
+            componentManager.establish_cacheDatabase(fileloc, 'w')
+            componentManager.run_components()
+            componentManager.db.close()
+#        else:
+#            print "Something Wrong"
         
-
-
+        
         
 
 def main():
