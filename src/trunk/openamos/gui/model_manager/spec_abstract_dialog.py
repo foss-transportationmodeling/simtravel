@@ -193,14 +193,27 @@ class AbtractSpecDialog(QDialog):
                     nestable.setItem(nestable.rowCount()-1, 1, nescoeff)                   
             
     def populateFilterWidget(self,modelelt):
-        for filt in modelelt.getiterator(FILTER):
-            ind = self.subpoptab.findText(filt.get(TABLE))
-            self.subpoptab.setCurrentIndex(ind)
-            ind = self.subpopvar.findText(filt.get(COLUMN))
-            self.subpopvar.setCurrentIndex(ind)
-            ind = self.subpopop.findText(filt.get(COND))
-            self.subpopop.setCurrentIndex(ind)                
-            self.subpopval.setText(filt.get(VALUE))
+        temp = modelelt.find(FILTER)
+        if temp <> None:
+            for filt in modelelt.getiterator(FILTER):
+                ind = self.subpoptab.findText(filt.get(TABLE))
+                self.subpoptab.setCurrentIndex(ind)
+                ind = self.subpopvar.findText(filt.get(COLUMN))
+                self.subpopvar.setCurrentIndex(ind)
+                ind = self.subpopop.findText(filt.get(COND))
+                self.subpopop.setCurrentIndex(ind)                
+                self.subpopval.setText(filt.get(VALUE))
+        else:
+            self.subpopgb.setChecked(False)
+            
+#        for filt in modelelt.getiterator(FILTER):
+#            ind = self.subpoptab.findText(filt.get(TABLE))
+#            self.subpoptab.setCurrentIndex(ind)
+#            ind = self.subpopvar.findText(filt.get(COLUMN))
+#            self.subpopvar.setCurrentIndex(ind)
+#            ind = self.subpopop.findText(filt.get(COND))
+#            self.subpopop.setCurrentIndex(ind)                
+#            self.subpopval.setText(filt.get(VALUE))
     
     def populateVarsWidget(self,modelelt):
         for varelt in modelelt.getiterator(VARIABLE):
@@ -240,16 +253,19 @@ class AbtractSpecDialog(QDialog):
             altstable = self.modwidget.choicetable
             altstable.insertRow(altstable.rowCount())
             
-            altitem = QTableWidgetItem()
-            altitem.setText(altelt.get(ID))
-            altstable.setItem(altstable.rowCount()-1, 0, altitem)
+            altitem1 = QTableWidgetItem()
+            altitem1.setText(altelt.get(ID))
+            altstable.setItem(altstable.rowCount()-1, 0, altitem1)
+            altitem2 = QTableWidgetItem()
+            altitem2.setText(altelt.get(VALUE))
+            altstable.setItem(altstable.rowCount()-1, 1, altitem2)
             if i > 0:
                 thitem = QTableWidgetItem()
                 thitem.setText(altelt.get(THRESHOLD))
-                altstable.setItem(altstable.rowCount()-1, 1, thitem)
+                altstable.setItem(altstable.rowCount()-1, 2, thitem)
             else:
-                altstable.setItem(0,1,QTableWidgetItem())
-                disableitem = altstable.item(0, 1)
+                altstable.setItem(0,2,QTableWidgetItem())
+                disableitem = altstable.item(0, 2)
                 disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
                 disableitem.setBackgroundColor(Qt.darkGray)
             i = i+1
@@ -491,7 +507,7 @@ class AbtractSpecDialog(QDialog):
         self.user_name = self.configobject.getConfigElement(DB_CONFIG,DB_USER)
         self.password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
         self.host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
-        self.database_name = self.configobject.getConfigElement(DB_NAME)
+        self.database_name = self.configobject.getConfigElement(DB_CONFIG,DB_NAME)
         self.database_config_object = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
         
         new_obj = DataBaseConnection(self.database_config_object)
