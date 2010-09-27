@@ -360,8 +360,10 @@ class AbtractSpecDialog(QDialog):
                     altname = (self.modwidget.choicetable.item(i,0)).text()
                     altelt = etree.SubElement(modelelt,ALTERNATIVE)
                     altelt.set(ID,str(altname))
+                    altvalue = (self.modwidget.choicetable.item(i,1)).text()
+                    altelt.set(VALUE,str(altvalue))
                     if i > 0:
-                        threshval = (self.modwidget.choicetable.item(i,1)).text()
+                        threshval = (self.modwidget.choicetable.item(i,2)).text()
                         altelt.set(THRESHOLD,str(threshval))
                 
                 self.addVariables(modelelt) 
@@ -387,8 +389,10 @@ class AbtractSpecDialog(QDialog):
                 specs = self.modwidget.specs
                 for i in range(numrows):
                     altname = str((self.modwidget.choicetable.item(i,0)).text())
+                    altvalue = str((self.modwidget.choicetable.item(i,1)).text())
                     altelt = etree.SubElement(modelelt,ALTERNATIVE)
                     altelt.set(ID,altname)
+                    altelt.set(VALUE,altvalue)
                     altspecs = specs[altname]
                     numvars = len(altspecs)
                     for i in range(numvars):
@@ -463,11 +467,11 @@ class AbtractSpecDialog(QDialog):
 
     def addDepVarToElt(self,elt,col):
         depvarelt = etree.SubElement(elt,DEPVARIABLE)
-        if col in PERSON_TABLE_MODELS:
-            tab = TABLE_PER
-        elif col in HH_TABLE_MODELS:
-            tab = TABLE_HH
-        depvarelt.set(TABLE,tab)
+#        if col in PERSON_TABLE_MODELS:
+#            tab = TABLE_PER
+#        elif col in HH_TABLE_MODELS:
+#            tab = TABLE_HH
+#        depvarelt.set(TABLE,tab)
         depvarelt.set(COLUMN,col.lower())
     
     def addFiltToElt(self,elt):
@@ -540,17 +544,17 @@ class AbtractSpecDialog(QDialog):
         for i in range(numrows):
             
             if self.modwidget.choicetable.item(i,1) == None:
-                    QMessageBox.warning(self, "Warning", "The value of an alternative must be entered as a number.")
+                    QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
                     return False
                 
             coeff = unicode((self.modwidget.choicetable.item(i,1)).text())
             if not self.checkFloat(coeff):
                 QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")
                 return False
-            else:
-                if float(coeff) < 0.0:
-                    QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
-                    return False
+#            else:
+#                if float(coeff) < 0.0:
+#                    QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
+#                    return False
                 
         return True
     
@@ -560,17 +564,17 @@ class AbtractSpecDialog(QDialog):
         for i in range(numrows):
             
             if self.modwidget.varstable.item(i,2) == None:
-                    QMessageBox.warning(self, "Warning", "Coefficient must be entered as a number greater than or equal to zero.")
+                    QMessageBox.warning(self, "Warning", "Coefficient must be numeric.")
                     return False
                 
             coeff = unicode((self.modwidget.varstable.item(i,2)).text())
             if not self.checkFloat(coeff):
                 QMessageBox.warning(self, "Warning", "Coefficient must be numeric.")
                 return False
-            else:
-                if float(coeff) < 0.0:
-                    QMessageBox.warning(self, "Warning", "Coefficient must be greater than or equal to zero.")
-                    return False
+#            else:
+#                if float(coeff) < 0.0:
+#                    QMessageBox.warning(self, "Warning", "Coefficient must be greater than or equal to zero.")
+#                    return False
                 
         return True
     
@@ -693,19 +697,22 @@ class AbtractSpecDialog(QDialog):
                         QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
                         return False
                 
-                if self.modwidget.choicetable.item(i,2) == None:
-                    QMessageBox.warning(self, "Warning", "Threshold must be entered as a number greater than 0.0.")
-                    return False
+#                if self.modwidget.choicetable.item(i,2) == None:
+#                    QMessageBox.warning(self, "Warning", "Threshold must be entered as a number greater than 0.0.")
+#                    return False
                 
                 if i > 0:
                     thresh = unicode((self.modwidget.choicetable.item(i,2)).text())
                     if self.checkFloat(thresh):
                         if float(thresh) < 0.0:
-                            QMessageBox.warning(self, "Warning", "Threshold must be greater than 0.0.")
+                            QMessageBox.warning(self, "Warning", "Threshold must be greater than or equal to 0.0.")
                             return False
-                        else:
-                            QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
-                            return False
+#                        else:
+#                            QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
+#                            return False
+                    else:
+                        QMessageBox.warning(self, "Warning", "Threshold must be numeric.")
+                        return False
                             
                 
             if not self.checkInput_table2():
