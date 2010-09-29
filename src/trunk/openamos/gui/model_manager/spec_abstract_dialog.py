@@ -75,12 +75,49 @@ class AbtractSpecDialog(QDialog):
         subpoplayout.setColumnStretch(2,1)
         subpoplayout.setColumnStretch(3,1)
         self.glayout.addWidget(self.subpopgb,1,0)
+        
+        #RunUntilCondition
+        self.subRunUntil = QGroupBox("Iteration")
+        self.subRunUntil.setVisible(False)
+        subRununtilLayout = QGridLayout()
+        self.subRunUntil.setLayout(subRununtilLayout)
+        tablelb = QLabel("Table")
+        subRununtilLayout.addWidget(tablelb,0,0)
+        self.subruntab = QComboBox()
+        self.subruntab.addItems(self.tablelist)
+        subRununtilLayout.addWidget(self.subruntab,1,0)
+        varlb = QLabel("Column")
+        subRununtilLayout.addWidget(varlb,0,1)
+        self.subrunvar = QComboBox()
+        subRununtilLayout.addWidget(self.subrunvar,1,1)
+        oplb = QLabel("Operator")
+        subRununtilLayout.addWidget(oplb,0,2)          
+        self.subrunop = QComboBox()
+        self.subrunop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
+                                QString(OP_GT), QString(OP_LT),
+                                QString(OP_GTE), QString(OP_LTE)])
+        subRununtilLayout.addWidget(self.subrunop,1,2)
+        valtablb = QLabel("Value Table")  
+        subRununtilLayout.addWidget(valtablb,0,3)          
+        self.subrunvaltab = QComboBox()
+        subRununtilLayout.addWidget(self.subrunvaltab,1,3)
+        valvarlb = QLabel("Value Column")  
+        subRununtilLayout.addWidget(valvarlb,0,4)          
+        self.subrunval = QComboBox()
+        subRununtilLayout.addWidget(self.subrunval,1,4)
+        subRununtilLayout.setColumnStretch(0,1)
+        subRununtilLayout.setColumnStretch(1,1)
+        subRununtilLayout.setColumnStretch(2,1)
+        subRununtilLayout.setColumnStretch(3,1)
+        subRununtilLayout.setColumnStretch(4,1)
+        self.glayout.addWidget(self.subRunUntil,2,0)
+        
 
         self.modwidget = QWidget()
-        self.glayout.addWidget(self.modwidget,2,0)
+        self.glayout.addWidget(self.modwidget,3,0) #2,0)
         
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.glayout.addWidget(self.dialogButtonBox,3,0)
+        self.glayout.addWidget(self.dialogButtonBox,4,0) #3,0)
         
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
         self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
@@ -123,6 +160,7 @@ class AbtractSpecDialog(QDialog):
         self.populateColumns()
         
         if modelspecified is not None:
+            self.populateRununtilWidget(modelspecified)
             self.populateFilterWidget(modelspecified)
             
             if self.modeltypecb.currentText() == SF_MODEL:
@@ -190,7 +228,24 @@ class AbtractSpecDialog(QDialog):
                     nestable.setItem(nestable.rowCount()-1, 0, nesname) 
                     nescoeff = QTableWidgetItem()
                     nescoeff.setText(neselt.get(COEFF))
-                    nestable.setItem(nestable.rowCount()-1, 1, nescoeff)                   
+                    nestable.setItem(nestable.rowCount()-1, 1, nescoeff)
+                    
+    def populateRununtilWidget(self,modelelt):
+        temp = modelelt.find(RUNUNTIL)
+        if temp <> None:
+            for rununtil in modelelt.getiterator(FILTER):
+                ind = self.subruntab.findText(rununtil.get(TABLE))
+                self.subruntab.setCurrentIndex(ind)
+                ind = self.subrunvar.findText(rununtil.get(COLUMN))
+                self.subrunvar.setCurrentIndex(ind)
+                ind = self.subrunop.findText(rununtil.get(COND))
+                self.subrunop.setCurrentIndex(ind)                
+                ind = self.subrunvaltab.setText(rununtil.get(VTABLE))
+                self.subrunvaltab.setCurrentIndex(ind)
+                ind = self.subrunval.setText(rununtil.get(VCOLUMN))
+                self.subrunval.setCurrentIndex(ind)
+        else:
+            self.subRunUntil.setVisible(False)                
             
     def populateFilterWidget(self,modelelt):
         temp = modelelt.find(FILTER)
@@ -383,6 +438,7 @@ class AbtractSpecDialog(QDialog):
                 type = ALTSPEC
                 modelelt = self.createModelElement(modelkey,modelform,type)
                 self.addDepVarToElt(modelelt,modelkey)
+                self.addRununtilToElt(modelelt)
                 self.addFiltToElt(modelelt)
                 
                 numrows = self.modwidget.choicetable.rowCount()
@@ -473,6 +529,15 @@ class AbtractSpecDialog(QDialog):
 #            tab = TABLE_HH
 #        depvarelt.set(TABLE,tab)
         depvarelt.set(COLUMN,col.lower())
+        
+    def addRununtilToElt(self,elt):
+        if self.subRunUntil.isVisible():
+            runelt = etree.SubElement(elt,RUNUNTIL)
+            runelt.set(TABLE,str(self.subruntab.currentText()))
+            runelt.set(COLUMN,str(self.subrunvar.currentText()))
+            runelt.set(COND,str(self.subrunop.currentText()))
+            runelt.set(VTABLE,str(self.subrunvaltab.text()))
+            runelt.set(VCOLUMN,str(self.subrunval.text()))
     
     def addFiltToElt(self,elt):
         if self.subpopgb.isChecked():
@@ -676,8 +741,22 @@ class AbtractSpecDialog(QDialog):
             if not self.checkInput_table1():
                 return False
             
-            if not self.checkInput_table2():
-                return False
+#            if not self.checkInput_table2():
+#                return False
+            
+            numrows = self.modwidget.choicetable.rowCount()
+            specs = self.modwidget.specs
+            for i in range(numrows):
+                altname = str((self.modwidget.choicetable.item(i,0)).text())
+                altspecs = specs[altname]
+                numvars = len(altspecs)
+                for i in range(numvars):
+                    specrow = altspecs[i]
+                    print specrow[2]
+                    if not self.checkFloat(specrow[2]):
+                        QMessageBox.warning(self, "Warning", "The value of a coefficient must be numeric.")
+                        return False
+                    
             
         elif self.modeltypecb.currentText() == ORD_MODEL:
             
