@@ -247,71 +247,6 @@ class DataBaseConnection(object):
                 sys.exit()
     
 
-    #define mapping for the columns and datatypes                
-    def define_mapping(self, ctype, map_flag = True):
-        """
-        This method is used to map the columns in the table. This method implements
-        mapping and reverse mapping. This method helps identify the datatype 
-        of the column.
-     
-        Input:
-        Column type and map flag which identifies mapping or reverse mapping
-    
-        Output:
-        Return the column datatype
-        """
-        if map_flag:
-            #mapping datatyes
-            filter_data = { "INTEGER" : Integer,
-                            "SHORT" : SmallInteger,
-                            "FLOAT" : Float,
-                            "DOUBLE" : Numeric,
-                            "VARCHAR" : VARCHAR(255),
-                            "BOOLEAN" : Boolean,
-                            "TINYTEXT" : VARCHAR(255),
-                            "TEXT" : Text,
-                            "MEDIUMTEXT" : Text,
-                            "LONGTEXT": Text,
-                            "DATETIME": DateTime}
-           
-            return filter_data[ctype]
-        else:
-            #reverse mapping
-            filter_data = {Integer: "INTEGER",
-                            SmallInteger: "SHORT",
-                            Float: "FLOAT",
-                            Numeric: "DOUBLE",
-                            VARCHAR: "VARCHAR",
-                            Boolean: "BOOLEAN",
-                            CLOB: "MEDIUMTEXT",
-                            DateTime: "DATETIME",
-                            String: "VARCHAR"}
-	   
-            try:
-                c_type = filter_data[ctype.__class__]
-            except:
-                if isinstance(ctype, VARCHAR):
-                    c_type = "VARCHAR"
-                elif isinstance(ctype, CLOB):
-                    c_type = "MEDIUMTEXT"
-                elif isinstance(ctype, Boolean):
-                    c_type = "BOOLEAN"
-                elif isinstance(ctype, SmallInteger):
-                    c_type = "SHORT"
-                elif isinstance(ctype, Float):
-                    c_type = "DOUBLE"
-                elif isinstance(ctype, DateTime):
-                    c_type = "DATETIME"
-                elif isinstance(ctype, Numeric):
-                    c_type = "DOUBLE"
-                elif isinstance(ctype, String):
-                    c_type = "VARCHAR"
-                if isinstance(ctype, Integer):
-                    c_type = "INTEGER"
-            
-            return c_type            
-
-
     #check if table exists 
     def check_if_table_exists(self, table_name):
         """
@@ -382,37 +317,6 @@ class DataBaseConnection(object):
                 raise Exception
         else:
             print 'Table %s does not exist. Cannot get the column list'%table_name
-
-
-    #get the description of the table
-    def get_table_desc(self, columns, ctypes, keys):
-        """
-        This method is used to get the description of the table.
-        The method returns the columns with the datatypes and keys if any. It 
-        calls the mapping function to obtain the datatypes of the columns.
-        
-        Input:
-        Column names, their datatypes and keys in the form of lists.
-        All three lists have one to one mapping
-        
-        Output:
-        Returns the columns of the table in the required format.        
-        """
-        #store the column names, datatypes and keys in local variables
-        col_names = columns
-        col_types = ctypes
-        key_types = keys
-        table_columns = []
-
-        for col, ctype, ktype in zip(col_names, col_types, key_types):
-            #ktype identifies if key is a primary or not
-            if ktype == "1":
-                column = Column(col, self.define_mapping(ctype), primary_key=True)
-            else:
-                column = Column(col, self.define_mapping(ctype))
-            table_columns.append(column)
-            
-        return table_columns
 
 
     #creates a new table
@@ -514,16 +418,16 @@ class TestDataBaseConnection(unittest.TestCase):
 
 	def testDB(self):
 	    print 'test'
-	    db_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
-	    print db_obj
-	    db_obj.new_connection()
-	    table_name = 'abc'
-	    columns = ['aa', 'bb']
-	    ctypes = ['integer', 'integer']
-	    keys = ['1', '0']
-	    print table_name, columns, ctypes, keys
-	    db_obj.create_table(table_name, columns, ctypes, keys)
-	    db_obj.close_connection()
+	    #db_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+	    #print db_obj
+	    #db_obj.new_connection()
+	    #table_name = 'abc'
+	    #columns = ['aa', 'bb']
+	    #ctypes = ['integer', 'integer']
+	    #keys = ['1', '0']
+	    #print table_name, columns, ctypes, keys
+	    #db_obj.create_table(table_name, columns, ctypes, keys)
+	    #db_obj.close_connection()
         
 
 if __name__ == '__main__':
