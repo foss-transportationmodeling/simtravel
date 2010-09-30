@@ -129,7 +129,7 @@ class DataBaseConnection(object):
                     #dispose the engine and close the raw connection			
                     self.cursor.close()
                     self.connection.close()
-                    print 'Database does not exist.'
+                    print 'Database %s does not exist.'%self.database_name
                     return 0
             except Exception, e:
                 print e
@@ -204,15 +204,18 @@ class DataBaseConnection(object):
         """
         
         #before connecting to the database check if the database exists
-        
-        #create a connection and try to establish a session with the database
-        try:
-            self.connection = dbapi2.connect("host=%s dbname=%s user=%s password=%s port=5432"%(self.host_name, self.database_name, self.user_name, self.password))
-            self.cursor = self.connection.cursor()
-            print 'New connection created.\n'
-        except Exception, e:
-            print "Exiting the program since database connectivity failed"
-            print e
+        db_flag = self.check_if_database_exists()
+        if db_flag:
+            #create a connection and try to establish a session with the database
+            try:
+                self.connection = dbapi2.connect("host=%s dbname=%s user=%s password=%s port=5432"%(self.host_name, self.database_name, self.user_name,     self.password))
+                self.cursor = self.connection.cursor()
+                print 'New connection created.\n'
+            except Exception, e:
+                print "Exiting the program since database connectivity failed"
+                print e
+        else:
+            print 'Database %s does not exists. Cannot create connection to the database'%self.database_name
 
     
     #close the connection            
@@ -226,20 +229,22 @@ class DataBaseConnection(object):
         Output:
         Close the connection
         """
-
-        try:
-            print "Closing the database connection."
-            self.cursor.close()
-            self.connection.close()
-            if self.connection.closed:
-                print 'Connection to database closed.\n'
-            else:
-                print 'Connection to database not closed.\n'
-        except:
-            print "Error while closing the database connection. Exiting the program."
-            self.cursor = None
-            self.connection = None
-            sys.exit()
+        if self.connection is None:
+            print 'Connection is None. Cannot close the connection.'
+        else:
+            try:
+                print "Closing the database connection."
+                self.cursor.close()
+                self.connection.close()
+                if self.connection.closed:
+                    print 'Connection to database closed.\n'
+                else:
+                    print 'Connection to database not closed.\n'
+            except:
+                print "Error while closing the database connection. Exiting the program."
+                self.cursor = None
+                self.connection = None
+                sys.exit()
     
 
     #define mapping for the columns and datatypes                
@@ -305,6 +310,7 @@ class DataBaseConnection(object):
                     c_type = "INTEGER"
             
             return c_type            
+
 
     #check if table exists 
     def check_if_table_exists(self, table_name):
@@ -410,7 +416,7 @@ class DataBaseConnection(object):
 
 
     #creates a new table
-    def create_table(self, table_name, columns):
+    def create_table(self, table_name, columns, ctypes, keys):
         """
         This method is used to create new table in the database.
 
@@ -429,8 +435,16 @@ class DataBaseConnection(object):
         else:
             #create a new table since it does not exist
             print 'Table does not exist. Create a new table'
+            column = ' '
+            for col, ctype, key in zip(columns, ctypes, keys):
+                if key == '1':
+                    column = column + col + ' ' + ctype + ' primary key,'
+                else:
+                    column = column + col + ' ' + ctype + ','
+            column = '('+column[1:-1]+')'
+            print column
             try:
-                self.cursor.execute("create table %s %s"%(self.table_name, columns))
+                self.cursor.execute("create table %s %s"%(self.table_name, column))
                 self.connection.commit()
                 print "Table '%s' created"%self.table_name
             except Exception, e:
@@ -498,31 +512,19 @@ class TestDataBaseConnection(unittest.TestCase):
 		self.host_name = 'localhost'
 		self.database_name = 'postgres'
 
-
 	def testDB(self):
 	    print 'test'
-		#test to connect to database 
-		#dbobj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
-		#print dbobj
-		#dbobj.new_connection()
-        """
-        table_name = 'abc'
-        columns = ['aa','bb','cc','dd']
-        ctypes = ['integer','integer', 'integer', 'integer']
-        keys = ['1','0','0','0']
-        column = ' '
-        for col, ctype, key in zip(columns, ctypes, keys):
-            if key == '1':
-                column = column + col + ' ' + ctype + ' primary key,'
-            else:
-                column = column + col + ' ' + ctype + ','
-        column = '('+column[1:-1]+')'
-        print 'haha',column,'hehe'
-        """
-        #dbobj.create_table(table_name, column)
-        #dbobj.drop_table(table_name)
-        #dbobj.close_connection()
-
+	    db_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+	    print db_obj
+	    db_obj.new_connection()
+	    table_name = 'abc'
+	    columns = ['aa', 'bb']
+	    ctypes = ['integer', 'integer']
+	    keys = ['1', '0']
+	    print table_name, columns, ctypes, keys
+	    db_obj.create_table(table_name, columns, ctypes, keys)
+	    db_obj.close_connection()
+        
 
 if __name__ == '__main__':
     unittest.main()
