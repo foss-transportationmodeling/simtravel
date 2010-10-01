@@ -74,6 +74,7 @@ class AbstractModWidget(QGroupBox):
         self.choicetable.setRowCount(0)
         self.choicetable.setColumnCount(2)
         self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value'])
+        #self.choicetable.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
         self.choicetable.setSizePolicy(sizePolicy)
@@ -419,7 +420,8 @@ class MNLogitModWidget(AbstractModWidget):
         self.curralt = None
         self.makeChoiceWidget() 
         self.makeVarsWidget() 
-        self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable)
+        #self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable)
+        self.connect(self.choicetable, SIGNAL("currentCellChanged (int,int,int,int)"), self.showVarsTable)
         #self.connect(self.varstable, SIGNAL("cellChanged (int,int)"), self.storeVarsTable)
         
     def addVariable(self):
@@ -442,11 +444,12 @@ class MNLogitModWidget(AbstractModWidget):
                     self.alternatives.append(selalt)
                 super(MNLogitModWidget,self).addVariable()
 
-    def showVarsTable(self,curritem,previtem):
-        self.storeVarsTable(previtem)
-        print 'change var table'
+    def showVarsTable(self,currrow,currcol,prevrow,prevcol):
+        self.storeVarsTable(prevrow)
+        #print 'change var table'
         self.varstable.clearContents()
         self.varstable.setRowCount(0)
+        curritem = self.choicetable.item(currrow, 0)
         if curritem != None:
             selalt = str(curritem.text())
             self.curralt = selalt
@@ -466,10 +469,11 @@ class MNLogitModWidget(AbstractModWidget):
                 self.varstable.setItem(i,2,coeffitem)
                 i = i + 1
         else:
-            pass    
+            pass  
 
-    def storeVarsTable(self,storeitem):
-        print 'store var table'
+    def storeVarsTable(self,prevrow):
+        #print 'store var table'
+        storeitem = self.choicetable.item(prevrow, 0)
         if storeitem != None:
             selalt = str(storeitem.text())
             altspecs = []
@@ -486,6 +490,56 @@ class MNLogitModWidget(AbstractModWidget):
                     altspecs.append(var)
                 i = i + 1
             self.specs[selalt] = altspecs
+        else:
+            print 'storeitem is None'
+
+#    def showVarsTable(self,curritem,previtem):
+#        self.storeVarsTable(previtem)
+#        print 'change var table'
+#        self.varstable.clearContents()
+#        self.varstable.setRowCount(0)
+#        if curritem != None:
+#            selalt = str(curritem.text())
+#            self.curralt = selalt
+#            altspecs = self.specs[selalt]
+#            self.varstable.setRowCount(len(altspecs))
+#            i = 0
+#            while i < self.varstable.rowCount():
+#                altspecrow = altspecs[i]
+#                tableitem = QTableWidgetItem()
+#                tableitem.setText(altspecrow[0])
+#                self.varstable.setItem(i,0,tableitem)
+#                varitem = QTableWidgetItem()
+#                varitem.setText(altspecrow[1])
+#                self.varstable.setItem(i,1,varitem)
+#                coeffitem = QTableWidgetItem()
+#                coeffitem.setText(altspecrow[2])
+#                self.varstable.setItem(i,2,coeffitem)
+#                i = i + 1
+#        else:
+#            pass    
+
+#    def storeVarsTable(self,storeitem):
+#        print 'store var table'
+#        if storeitem != None:
+#            selalt = str(storeitem.text())
+#            print selalt
+#            altspecs = []
+#            i = 0
+#            while i < self.varstable.rowCount():
+#                if self.varstable.item(i, 2) != None:
+#                    var = []
+#                    tab = (self.varstable.item(i, 0)).text()
+#                    col = (self.varstable.item(i, 1)).text()
+#                    coeff = (self.varstable.item(i, 2)).text()
+#                    var.append(tab)
+#                    var.append(col)
+#                    var.append(coeff)
+#                    altspecs.append(var)
+#                i = i + 1
+#            self.specs[selalt] = altspecs
+#        else:
+#            print 'storeitem is None'
 
 
     def checkInputs(self):
