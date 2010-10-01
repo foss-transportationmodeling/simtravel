@@ -257,8 +257,6 @@ class MainWindow(QMainWindow):
             
 
     def projectsave(self):
-        print self.proconfig.getConfigElement(DB_CONFIG,DB_HOST)
-        print self.proconfig.getConfigElement(DB_CONFIG,DB_USER)
         self.proconfig.write()
 
 
