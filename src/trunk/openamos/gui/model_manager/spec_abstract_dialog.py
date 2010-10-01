@@ -394,7 +394,7 @@ class AbtractSpecDialog(QDialog):
                 self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == MNL_MODEL:
-                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
+                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentRow()) #self.modwidget.choicetable.currentItem())
                 modelform = MODELFORM_MNL
                 type = ALTSPEC
                 modelelt = self.createModelElement(modelkey,modelform,type)
