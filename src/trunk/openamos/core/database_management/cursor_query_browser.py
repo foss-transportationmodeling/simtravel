@@ -49,14 +49,20 @@ class MainClass(object):
         Output:
         Returns all the rows in the table
         """
-        try:    
-            self.dbcon_obj.cursor.execute("SELECT * FROM %s"%table_name)
-            tables = self.dbcon_obj.cursor.fetchall()
-            tbs = [tb for tb in tables]
-            return self.dbcon_obj.cursor, tbs
-        except Exception, e:
-            print 'Error while retreiving the data from the table'
-            print e
+        #check if table exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            print 'Table %s exists.'%table_name
+            try:    
+                self.dbcon_obj.cursor.execute("SELECT * FROM %s"%table_name)
+                tables = self.dbcon_obj.cursor.fetchall()
+                tbs = [tb for tb in tables]
+                return self.dbcon_obj.cursor, tbs
+            except Exception, e:
+                print 'Error while retreiving the data from the table'
+                print e
+        else:
+            print 'Table %s does not exist.'%table_name
     
   
     #select rows based on a selection criteria
@@ -70,26 +76,40 @@ class MainClass(object):
         Output:
         Returns the rows that satisfy the selection criteria
         """
-        print 'table name is ', table_name
-        print 'column name is ', column_name
-        print 'value is ', value
-        try:
-            self.dbcon_obj.cursor.execute("SELECT * FROM %s where %s = '%s'"%(table_name, column_name, value))
-            data = self.dbcon_obj.cursor.fetchall()
+        fin_flag = None
+        #check if table exists and then if columns exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            #check for columns
+            get_cols = self.dbcon_obj.get_column_list(table_name)
+            if column_name in get_cols:
+                fin_flag = True
+            else:
+                fin_flag = False
+        else:
+            print 'Table %s does not exist.'%table_name
+            
+        if fin_flag:
+            try:
+                self.dbcon_obj.cursor.execute("SELECT * FROM %s where %s = '%s'"%(table_name, column_name, value))
+                data = self.dbcon_obj.cursor.fetchall()
+    
+                row_list = []
+                counter = 0
+                for each in data:
+                    counter = counter + 1
+                    row_list.append(each)
 
-            row_list = []
-            counter = 0
-            for each in data:
-                counter = counter + 1
-                row_list.append(each)
-
-            if counter == 0:
-                print 'No rows selected.\n'           
-            print 'Select query successful.\n'
-            return self.dbcon_obj.cursor, row_list
-        except Exception, e:
-            print 'Error retrieving the information. Query failed.\n'
-            print e
+                if counter == 0:
+                    print 'No rows selected.\n'           
+                print 'Select query successful.\n'
+                return self.dbcon_obj.cursor, row_list
+            except Exception, e:
+                print 'Error retrieving the information. Query failed.\n'
+                print e
+        else:
+            print 'Column %s does not belong to the table %s'%(column_name, table_name)
+            return None    
     #select join query pending
     ########## methods for select query end ##########
     
@@ -106,13 +126,29 @@ class MainClass(object):
         Output:
         Deletes the rows that satisfy the selection criteria
         """
-        try:
-            self.dbcon_obj.cursor.execute("delete FROM %s where %s = '%s'"%(table_name, column_name, value))
-            self.dbcon_obj.connection.commit()
-            print 'Delete successful'
-        except Exception, e:
-            print e
-            print 'Error deleting the information. Query failed.'
+        fin_flag = None
+        #check if table exists and then if columns exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            #check for columns
+            get_cols = self.dbcon_obj.get_column_list(table_name)
+            if column_name in get_cols:
+                fin_flag = True
+            else:
+                fin_flag = False
+        else:
+            print 'Table %s does not exist.'%table_name
+            
+        if fin_flag:
+            try:
+                self.dbcon_obj.cursor.execute("delete FROM %s where %s = '%s'"%(table_name, column_name, value))
+                self.dbcon_obj.connection.commit()
+                print 'Delete successful'
+            except Exception, e:
+                print e
+                print 'Error deleting the information. Query failed.'
+        else:
+            print 'Column %s does not belong to the table %s. Could not delete rows.'%(column_name, table_name)
 
 
     #delete all rows i.e. empty table
@@ -126,31 +162,52 @@ class MainClass(object):
         Output:
         Deletes all rows in the table
         """
-        try:
-            self.dbcon_obj.cursor.execute("delete FROM %s "%table_name)
-            self.dbcon_obj.connection.commit()
-            print 'Delete all records successful.'
-        except Exception, e:
-            print e
-            print 'Error retrieving the information. Query failed.'
+        #check if table exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            print 'Table %s exists.'%table_name
+            try:
+                self.dbcon_obj.cursor.execute("delete FROM %s "%table_name)
+                self.dbcon_obj.connection.commit()
+                print 'Delete all records successful.'
+            except Exception, e:
+                print e
+                print 'Error retrieving the information. Query failed.'
+        else:
+            print 'Table %s does not exist.'%table_name
+            
     ########## methods for delete query end ##########
 
 
     ########## methods for insert query     ##########
-     #insert values in the table
+    #insert values in the table
     def insert_into_table(self, data_arr, table_name):
-        try:
-            print 'time before insert query ', time.time()
-            arr_str = [tuple(each) for each in data_arr]
-            arr_str = str(arr_str)[1:-1]
-            insert_stmt = "insert into %s values %s"%(table_name, arr_str)
-            #insert_stmt = "copy school from '/home/namrata/Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
-            result = self.dbcon_obj.cursor.execute(insert_stmt)
-            self.dbcon_obj.connection.commit()
-            print 'time after insert query ', time.time()
-        except Exception, e:
-            print e
-    
+        """
+        This method is used to insert rows into the table.
+
+        Input:
+        Database configuration object, table name, data array
+
+        Output:
+        Inserts all the rows from data array in the table
+        """
+        #check if table exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            print 'Table %s exists.'%table_name
+            try:
+                print 'time before insert query ', time.time()
+                arr_str = [tuple(each) for each in data_arr]
+                arr_str = str(arr_str)[1:-1]
+                insert_stmt = "insert into %s values %s"%(table_name, arr_str)
+                #insert_stmt = "copy school from '/home/namrata/Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
+                result = self.dbcon_obj.cursor.execute(insert_stmt)
+                self.dbcon_obj.connection.commit()
+                print 'time after insert query ', time.time()
+            except Exception, e:
+                print e
+        else:
+           print 'Table %s does not exist.'%table_name 
     ########## methods for delete query end ##########
 
 
@@ -215,10 +272,12 @@ class TestMainClass(unittest.TestCase):
         newobject.dbcon_obj.new_connection()
         
         table_name = 'asu'
-        column_name = 'role_id'
+        column_name = 'rol_id'
         value = '1'
-        #newobject.select_all_from_table(table_name)
-
+        abc = None
+        defg = None
+        #abc = newobject.fetch_selected_rows(table_name, column_name, value)
+        #print abc
         #newobject.fetch_selected_rows(table_name, column_name, value)
         
         #newobject.delete_selected_rows(table_name, column_name, value)
