@@ -38,7 +38,7 @@ class NewProject(QWizard):
         
         project = etree.SubElement(configroot, PROJECT)
         project.set(NAME, str(self.page1.pronameline.text()))
-        project.set(LOCATION, str(self.page1.proloccombobox.currentText()))
+        project.set(LOCATION, str(self.page1.proloccombobox.currentText()) + '/' + project.get(NAME))
         project.set(SEED, SEED_DEF)
         project.set(SUBSAMPLE, SUBSAMPLE_DEF)
         #projectname = etree.SubElement(configroot, PROJECT_NAME)
@@ -66,7 +66,7 @@ class NewProject(QWizard):
         self.create_table_element(dbtables,'tsp_r','houseid,personid')
         self.create_table_element(dbtables,'schedule_r','houseid,personid',countkey='scheduleid')
         
-        configpath = project.get(LOCATION) + os.path.sep + project.get(NAME)
+        configpath = project.get(LOCATION)
         if not os.path.exists(configpath):
             os.mkdir(configpath)
         configfileloc = configpath + os.path.sep + project.get(NAME) + '.xml'
