@@ -409,15 +409,16 @@ class QueryBrowser(object):
             #print 'clist', clist
             #print 'list1', list1
             chk_list = len(list(set(list1) & set(clist)))
-            #print 'Check List - ', clist
-            #print 'Actual List of Columns requested from table - ', list1
             if chk_list == len(list1):
                 for j in db_dict[i]:
                     #print '\tColumn - ', j
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
             else:
-                print ('Column - %s passed in the dictionary does not exist in the table - %s' %(j, i))
+                print ('Column passed in the dictionary does not exist in the table - ')
+                print 'Column List in the Table - ', clist
+                print 'Actual List of Columns requested from table - ', list1
+                
                 return None
         #print 'final_list is %s'%final_list
         
