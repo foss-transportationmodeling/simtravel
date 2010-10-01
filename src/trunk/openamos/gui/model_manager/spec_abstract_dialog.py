@@ -44,6 +44,7 @@ class AbtractSpecDialog(QDialog):
         self.configobject = configobject
         self.modelkey = key
         self.populateFromDatabase()
+        print key
         
         
         self.subpopgb = QGroupBox("Sub-Population")
@@ -75,49 +76,14 @@ class AbtractSpecDialog(QDialog):
         subpoplayout.setColumnStretch(2,1)
         subpoplayout.setColumnStretch(3,1)
         self.glayout.addWidget(self.subpopgb,1,0)
-        
-        #RunUntilCondition
-        self.subRunUntil = QGroupBox("Iteration")
-        self.subRunUntil.setVisible(False)
-        subRununtilLayout = QGridLayout()
-        self.subRunUntil.setLayout(subRununtilLayout)
-        tablelb = QLabel("Table")
-        subRununtilLayout.addWidget(tablelb,0,0)
-        self.subruntab = QComboBox()
-        self.subruntab.addItems(self.tablelist)
-        subRununtilLayout.addWidget(self.subruntab,1,0)
-        varlb = QLabel("Column")
-        subRununtilLayout.addWidget(varlb,0,1)
-        self.subrunvar = QComboBox()
-        subRununtilLayout.addWidget(self.subrunvar,1,1)
-        oplb = QLabel("Operator")
-        subRununtilLayout.addWidget(oplb,0,2)          
-        self.subrunop = QComboBox()
-        self.subrunop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
-                                QString(OP_GT), QString(OP_LT),
-                                QString(OP_GTE), QString(OP_LTE)])
-        subRununtilLayout.addWidget(self.subrunop,1,2)
-        valtablb = QLabel("Value Table")  
-        subRununtilLayout.addWidget(valtablb,0,3)          
-        self.subrunvaltab = QComboBox()
-        subRununtilLayout.addWidget(self.subrunvaltab,1,3)
-        valvarlb = QLabel("Value Column")  
-        subRununtilLayout.addWidget(valvarlb,0,4)          
-        self.subrunval = QComboBox()
-        subRununtilLayout.addWidget(self.subrunval,1,4)
-        subRununtilLayout.setColumnStretch(0,1)
-        subRununtilLayout.setColumnStretch(1,1)
-        subRununtilLayout.setColumnStretch(2,1)
-        subRununtilLayout.setColumnStretch(3,1)
-        subRununtilLayout.setColumnStretch(4,1)
-        self.glayout.addWidget(self.subRunUntil,2,0)
+    
         
 
         self.modwidget = QWidget()
-        self.glayout.addWidget(self.modwidget,3,0) #2,0)
+        self.glayout.addWidget(self.modwidget,2,0)
         
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.glayout.addWidget(self.dialogButtonBox,4,0) #3,0)
+        self.glayout.addWidget(self.dialogButtonBox,3,0)
         
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
         self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
@@ -158,6 +124,7 @@ class AbtractSpecDialog(QDialog):
             
         self.changeModelWidget()
         self.populateColumns()
+        
         
         if modelspecified is not None:
             self.populateRununtilWidget(modelspecified)
@@ -233,19 +200,12 @@ class AbtractSpecDialog(QDialog):
     def populateRununtilWidget(self,modelelt):
         temp = modelelt.find(RUNUNTIL)
         if temp <> None:
-            for rununtil in modelelt.getiterator(FILTER):
-                ind = self.subruntab.findText(rununtil.get(TABLE))
-                self.subruntab.setCurrentIndex(ind)
-                ind = self.subrunvar.findText(rununtil.get(COLUMN))
-                self.subrunvar.setCurrentIndex(ind)
-                ind = self.subrunop.findText(rununtil.get(COND))
-                self.subrunop.setCurrentIndex(ind)                
-                ind = self.subrunvaltab.setText(rununtil.get(VTABLE))
-                self.subrunvaltab.setCurrentIndex(ind)
-                ind = self.subrunval.setText(rununtil.get(VCOLUMN))
-                self.subrunval.setCurrentIndex(ind)
-        else:
-            self.subRunUntil.setVisible(False)                
+            for rununtil in modelelt.getiterator(RUNUNTIL):
+                self.runtable = rununtil.get(TABLE)
+                self.runvar = rununtil.get(COLUMN)
+                self.runcond = rununtil.get(COND)
+                self.runtablev = rununtil.get(VTABLE)
+                self.runvarv = rununtil.get(VCOLUMN)
             
     def populateFilterWidget(self,modelelt):
         temp = modelelt.find(FILTER)
@@ -357,6 +317,7 @@ class AbtractSpecDialog(QDialog):
         self.subpopvar.clear()
         seltab = str(self.subpoptab.currentText())
         self.subpopvar.addItems(self.coldict[seltab])
+        
         
     
     def storeSpec(self):
@@ -531,13 +492,13 @@ class AbtractSpecDialog(QDialog):
         depvarelt.set(COLUMN,col.lower())
         
     def addRununtilToElt(self,elt):
-        if self.subRunUntil.isVisible():
+        if self.runtable <> "" and self.runtable <> None:
             runelt = etree.SubElement(elt,RUNUNTIL)
-            runelt.set(TABLE,str(self.subruntab.currentText()))
-            runelt.set(COLUMN,str(self.subrunvar.currentText()))
-            runelt.set(COND,str(self.subrunop.currentText()))
-            runelt.set(VTABLE,str(self.subrunvaltab.text()))
-            runelt.set(VCOLUMN,str(self.subrunval.text()))
+            runelt.set(TABLE,str(self.runtable))
+            runelt.set(COLUMN,str(self.runvar))
+            runelt.set(COND,str(self.runcond))
+            runelt.set(VTABLE,str(self.runtablev))
+            runelt.set(VCOLUMN,str(self.runvarv))
     
     def addFiltToElt(self,elt):
         if self.subpopgb.isChecked():
