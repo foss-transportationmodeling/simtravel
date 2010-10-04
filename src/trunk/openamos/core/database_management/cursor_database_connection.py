@@ -188,6 +188,45 @@ class DataBaseConnection(object):
         else:
             print 'Database does not exists. Cannot drop database.'
     
+    #get the list of databases
+    def get_list_databases(self):
+        """
+        This method is used to get the list of all the databases for the 
+        database engine
+        
+        Input:
+        Database configuration object
+        
+        Output:
+        List of databases present.
+        """
+        installed_db = self.check_if_database_engine_exits()
+        if installed_db:
+            print 'Database %s is installed.'%installed_db
+        else:
+            print 'Database is not installed. Cannot proceed furthur.'
+            print 'Exiting the program'
+            sys.exit()
+
+
+        if self.protocol is 'postgres':
+            try:
+                #create a connection
+                self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
+
+                #create a cursor
+                self.cursor = self.connection.cursor()
+                self.cursor.execute("select datname from pg_database")
+                
+                dbs = [db[0] for db in self.cursor.fetchall()]
+                self.cursor.close()
+                self.connection.close()
+                return dbs
+            except Exception, e:
+                self.cursor.close()
+                self.connection.close()
+                print e
+    
     
     #create a new connection with the database name
     def new_connection(self):
@@ -308,13 +347,13 @@ class DataBaseConnection(object):
         table_flag = self.check_if_table_exists(table_name)
         if table_flag:
             try:
-                self.cursor.execute("select column_name from information_schema.columns where table_name = %s"%table_name)
+                self.cursor.execute("select column_name from information_schema.columns where table_name = '%s'"%table_name)
                 columns = self.cursor.fetchall()
                 cols = [cl[0] for cl in columns]
                 return cols
-            except:
+            except Exception, e:
                 print 'Error while fetching the columns from the table'
-                raise Exception
+                print e
         else:
             print 'Table %s does not exist. Cannot get the column list'%table_name
 
@@ -418,8 +457,10 @@ class TestDataBaseConnection(unittest.TestCase):
 
 	def testDB(self):
 	    print 'test'
-	    #db_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
-	    #print db_obj
+	    db_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+	    print db_obj
+	    temp = db_obj.get_list_databases()
+	    print temp
 	    #db_obj.new_connection()
 	    #table_name = 'abc'
 	    #columns = ['aa', 'bb']
