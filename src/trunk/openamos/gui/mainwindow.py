@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         all_manager_dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea, all_manager_dock_widget)
 
+
         # Defining model_management as a QTreeWidget
         self.model_management = Model_Manager_Treewidget()
         self.model_management.setObjectName("model_management")
@@ -60,14 +61,12 @@ class MainWindow(QMainWindow):
         self.connect(self.model_management, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.showflowchart)
 
 
-
-        
-
         # Defining data_management as a QTreeWidget
         self.data_management = QTreeWidget()
         self.data_management.setObjectName("data_management")
         self.data_management.headerItem().setText(0, "Data Management")
         self.data_management.setMinimumSize(50,50)
+
 
         # Adding model_management and data_management to all_manager_dock_widget
         splitter.addWidget(self.model_management)
@@ -240,6 +239,19 @@ class MainWindow(QMainWindow):
         project_new = NewProject()
         project_new.exec_()
         if project_new.configtree != None:
+            if self.proconfig <> None:
+                self.proconfig = None
+                self.models = None
+                self.centralwidget = None
+                self.centralwidgetscroll = QScrollArea()
+                self.centralwidget = QWidget()
+                self.centralwidget.setObjectName("centralwidget")        
+                self.setCentralWidget(self.centralwidgetscroll)
+                self.centralwidget.setFixedSize(1140, 1200)
+                self.centralwidgetscroll.setWidget(self.centralwidget)
+                self.models = Models(self.centralwidget)
+
+            
             self.proconfig = ConfigObject(configtree=project_new.configtree)
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
@@ -247,9 +259,28 @@ class MainWindow(QMainWindow):
             
 
     def projectopen(self):
+        if self.proconfig <> None:
+            reply = QMessageBox.warning(self, "Save Existing Project...",
+                                        QString("""Would you like to save the project?"""), 
+                                        QMessageBox.Yes| QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.proconfig.write()
+            
         self.project_open = OpenProject()
         #print self.project_open.file
         if self.project_open.file != '':
+            self.proconfig = None
+            self.models = None
+            self.centralwidget = None
+            self.centralwidgetscroll = QScrollArea()
+            self.centralwidget = QWidget()
+            self.centralwidget.setObjectName("centralwidget")        
+            self.setCentralWidget(self.centralwidgetscroll)
+            self.centralwidget.setFixedSize(1140, 1200)
+            self.centralwidgetscroll.setWidget(self.centralwidget)
+            self.models = Models(self.centralwidget)
+
+            
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
