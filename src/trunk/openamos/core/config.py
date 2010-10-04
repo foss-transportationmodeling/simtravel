@@ -81,7 +81,7 @@ class ConfigObject(object):
     def write(self):
         projecthome = self.getConfigElement(PROJECT,PROJECT_HOME)
         projectname = self.getConfigElement(PROJECT,PROJECT_NAME)
-        configfileloc = projecthome + os.path.sep + projectname + os.path.sep + projectname + '.xml'
+        configfileloc = projecthome + '/' + projectname + '.xml'
         configfile = open(configfileloc, 'w')
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
