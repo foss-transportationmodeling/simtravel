@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self.showMaximized()
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
-        
+
 
         # Variable for a project properties; can be used to see if a project is open or not
         self.proconfig = None
@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         # Defining central widget
         self.centralwidgetscroll = QScrollArea()
         self.centralwidget = QWidget()
-        self.centralwidget.setObjectName("centralwidget")        
+        self.centralwidget.setObjectName("centralwidget")
         self.setCentralWidget(self.centralwidgetscroll)
         self.centralwidget.setFixedSize(1140, 1200)
         self.centralwidgetscroll.setWidget(self.centralwidget)
@@ -243,10 +243,8 @@ class MainWindow(QMainWindow):
                 self.proconfig = None
                 self.models = None
                 self.centralwidget = None
-                self.centralwidgetscroll = QScrollArea()
                 self.centralwidget = QWidget()
                 self.centralwidget.setObjectName("centralwidget")        
-                self.setCentralWidget(self.centralwidgetscroll)
                 self.centralwidget.setFixedSize(1140, 1200)
                 self.centralwidgetscroll.setWidget(self.centralwidget)
                 self.models = Models(self.centralwidget)
@@ -272,10 +270,8 @@ class MainWindow(QMainWindow):
             self.proconfig = None
             self.models = None
             self.centralwidget = None
-            self.centralwidgetscroll = QScrollArea()
             self.centralwidget = QWidget()
             self.centralwidget.setObjectName("centralwidget")        
-            self.setCentralWidget(self.centralwidgetscroll)
             self.centralwidget.setFixedSize(1140, 1200)
             self.centralwidgetscroll.setWidget(self.centralwidget)
             self.models = Models(self.centralwidget)
