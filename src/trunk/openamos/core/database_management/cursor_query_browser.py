@@ -110,7 +110,390 @@ class MainClass(object):
         else:
             print 'Column %s does not belong to the table %s'%(column_name, table_name)
             return None    
-    #select join query pending
+
+#############################################################################################
+    def select_join(self, db_dict, column_names, table_names, max_dict=None, 
+                    spatialConst_list=None, analysisInterval=None, subsample=None):
+        """
+        This method is used to select the join of tables and display them.
+        
+        Input:
+        Database configuration object, table names, columns and values.
+        
+        Output:
+        Displays the rows based on the join and the selection criterion.
+        """
+        #self.dbcon_obj.new_sessionInstance()        
+        #db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
+        #           'vehicles_r': ['vehtype', 'vehid'], 
+        #           'households_r': ['numvehs']}
+        #columns_names = ['houseid']
+        #table_names = ['households', 'households_r', 'vehicles_r']
+        #max_dict = {'vehicles_r':['vehid']}
+        
+        # Prism Query or or just a Travel Time Query with Vertices
+        # ADD APPROPRIATE JOIN/?INNER JOINS
+
+
+        print 'Database Dictionary of Table and Columns - ', db_dict
+        print 'Column Names', column_names
+        #raw_input()
+
+        #initialize the variables
+        final_list = []
+        table_list = []
+        class_list = []
+        cols_list = []
+        tabs_list = []
+        #col_name = column_name
+        final_col_list = db_dict.values()
+        table_list = db_dict.keys()      
+        
+        """
+        #check if the table exists. If not return none
+        if chk_table.lower() in [each.lower() for each in table_list]:
+            print 'table %s is present in the table list'%chk_table
+        else:
+            print 'table %s is not present in the table list'%chk_table
+            return None
+        """
+        
+        #similarly check if the table in the list exists
+        num_tab = len(list(set(table_list) & set(table_names)))
+        if num_tab <= len(table_list):
+            #print 'Tables exist'
+            pass
+        else:
+            #print 'Tables do not exists'
+            return None
+        
+        #check for the columns passed in the dictionary
+        for i in db_dict.keys():
+            clist = self.dbcon_obj.get_column_list(i.lower())
+            list1 = db_dict[i]
+            #print 'table--', i
+            #print 'clist', clist
+            #print 'list1', list1
+            chk_list = len(list(set(list1) & set(clist)))
+            if chk_list == len(list1):
+                for j in db_dict[i]:
+                    #print '\tColumn - ', j
+                    new_str = i.lower() + '.' + j.lower()
+                    final_list.append(new_str)                    
+            else:
+                print ('Column passed in the dictionary does not exist in the table - ')
+                print 'Column List in the Table - ', clist
+                print 'Actual List of Columns requested from table - ', list1
+                
+                return None
+        #print 'final_list is %s'%final_list
+        
+
+                
+        #print 'FINAL LIST', final_list
+        #print 'TABLE LIST', table_list
+
+        # Generating the left join statements
+        mainTable = table_names[0]
+        #print 'mainTable ----> ', mainTable
+
+        primCols = []
+        for i in column_names:
+            primCols += column_names[i]
+        primCols = list(set(primCols))
+
+        joinStrList = []
+        for table in table_list:
+            if table == mainTable:
+                continue
+            joinCondition = ''
+            for col in column_names[table]:
+                joinCondition = (joinCondition 
+                                 + ' %s.%s=%s.%s ' %(mainTable, col, 
+                                                     table, col) 
+                                 + 'and')
+                
+            joinCondition = joinCondition[:-3]
+            joinStr = ' left join %s on (%s)' %(table, joinCondition)
+            joinStrList.append(joinStr)
+
+        #print 'JOIN STRING LIST', joinStrList
+
+        #check the max flag
+        
+        if max_dict is not None:
+            max_flag = 1
+            max_table = max_dict.keys()
+            max_column = max_dict.values()[0][0]
+            #print max_column, max_table
+            #for each in max_dict.values():
+            #    max_column = each[0]
+        else:
+            max_flag = 0
+
+        # Index of the table containing the max dict var
+        # as it stands only querying for one count variable is 
+        # provided
+        #print max_dict
+        if max_dict is not None:
+            maxTable = max_dict.keys()[0]
+            maxColumn = max_dict.values()[0][0]
+            index = table_list.index(maxTable)
+            #print 'INDEX--->', index
+        
+            #remove the count column from the col list
+            countVarStr = '%s.%s' %(maxTable, maxColumn)
+            final_list.remove(countVarStr)
+            final_list.append('temp.%s'%maxColumn)
+
+            #print 'NEW FINAL LIST -->', final_list
+
+            # left join for the count variable
+            joinStr = ''
+
+
+            #grouping string
+            grpStr = ''
+            joinCondition=''
+
+            #print 'column_names of max TABLE ----->', column_names
+            for i in column_names[maxTable]:
+                #print 'createing join string for column name - ', i
+                grpStr = grpStr + '%s,' %(i)
+                joinCondition = (joinCondition 
+                                 + ' temp.%s=%s.%s ' %(i, 
+                                                       mainTable, i) 
+                                 + 'and')
+            grpStr = grpStr[:-1]
+            joinCondition = joinCondition[:-3]
+            
+        #combine left join along with the count variable/max condition
+            mJoinStr = joinStrList.pop(index-1)
+            mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
+                                          'and %s.%s=temp.%s)' 
+                                          %(maxTable, maxColumn, maxColumn))
+            
+            joinStrList.append(""" left join (select %s, max(%s) as %s from """
+                               """%s group by %s) as temp on (%s) """ %(grpStr, maxColumn, 
+                                                                        maxColumn,maxTable, grpStr,
+                                                                        joinCondition)
+                               + mJoinStrIncMaxConditionVar)
+            #print 'LEFT JOIN MAX COL LIST--->', joinStrList
+
+        # Spatial TSP identification
+        if spatialConst_list is not None:
+            for i in spatialConst_list:
+                if i.countChoices is not None:
+                    # substring for the inner join
+                    stTable = i.startConstraint.table
+                    #stLocationField = 'st_' + i.startConstraint.locationField
+                    stLocationCol = 'stl.%s' %i.startConstraint.locationField
+                    #stTimeField = 'st_'+ i.startConstraint.timeField
+                    stTimeCol = 'st.%s' %i.startConstraint.timeField
+
+                    enTable = i.endConstraint.table
+                    #enLocationField = 'en_' + i.endConstraint.locationField
+                    enLocationCol = 'enl.%s' %i.endConstraint.locationField
+                    #enTimeField = 'en_' + i.endConstraint.timeField                    
+                    enTimeCol = 'en.%s' %i.endConstraint.timeField
+
+                    timeCols = [stTimeCol, enTimeCol]
+
+                    table_list.append(stTable)
+                    
+
+                    # left join for end location
+                    
+                    # time cols are part of sptime
+                    timeColsNewNames = []
+                    for j in timeCols:
+                        timeColsNewNames.append(j.replace('.', '_'))
+                        
+                    timeColsStr = ''
+                    for j in range(len(timeCols)):
+                        # minimum of the time cols gives the first prism
+                        timeColsStr += 'min(%s) %s,' %(timeCols[j], timeColsNewNames[j])
+
+                    timeColsStr = timeColsStr[:-1]
+
+                    spGrpNewNameStr = ''
+                    spGrpStr = ''
+                    for j in column_names[stTable]:
+                        spGrpNewNameStr += 'st.%s %s,' %(j, j)
+                        spGrpStr += 'st.%s,' %(j)
+                    spGrpNewNameStr = spGrpNewNameStr[:-1]
+                    spGrpStr = spGrpStr[:-1]
+
+                    spInnerJoinCondition = ''
+                    for j in column_names[stTable]:
+                        spInnerJoinCondition += ' %s.%s = %s.%s and' %('st', j, 'en', j)
+                    spInnerJoinCondition = spInnerJoinCondition[:-3]
+                        
+                    spJoinCondition = ''
+                    for j in column_names[stTable]:
+                        spJoinCondition += ' %s.%s = %s.%s and' %('sptime', j, mainTable, j)
+                    spJoinCondition = spJoinCondition[:-3]
+
+                    # Left join condition for prism start location
+                    stLocJoinCondition = ''
+                    stLocCondCols = column_names[stTable] 
+                    for j in stLocCondCols:
+                        stLocJoinCondition += ' %s.%s = %s.%s and' %('stl', j, mainTable, j)
+                    stLocJoinCondition += ' sptime.st_%s = %s.%s' %(i.startConstraint.timeField,
+                                                               'stl', i.startConstraint.timeField)
+
+                    final_list.append('stl.%s as st_%s' %(i.startConstraint.locationField,
+                                                          i.startConstraint.locationField))
+                    cols_list.append('st_%s' %i.startConstraint.locationField)
+                    #stLocJoinCondition = stLocJoinCondition[:-3]
+
+                    # Left join condition for prism end location
+                    enLocJoinCondition = ''
+                    enLocCondCols = column_names[stTable] 
+                    for j in enLocCondCols:
+                        enLocJoinCondition += ' %s.%s = %s.%s and' %('enl', j, mainTable, j)
+                    enLocJoinCondition += ' sptime.en_%s = %s.%s' %(i.endConstraint.timeField,
+                                                               'enl', i.endConstraint.timeField)
+                    final_list.append('enl.%s as en_%s' %(i.endConstraint.locationField, 
+                                                       i.endConstraint.locationField))
+                    cols_list.append('en_%s' %i.endConstraint.locationField)
+                    #enLocJoinCondition = enLocJoinCondition[:-3]
+
+                    
+                    # TSP consistency check
+                    # nextepisode_starttime > lastepisode_endtime
+                    #consistencyStr = '%s < %s' %(stTimeCol, endTimeCol)
+                    
+
+                    analysisPeriodStr = ('%s=%s and %s>%s' 
+                                         %(stTimeCol, analysisInterval,
+                                           enTimeCol, analysisInterval))
+
+                    spatialJoinStr = (""" join (select %s, %s """\
+                                          """from %s as %s """\
+                                          """inner join %s as %s """\
+                                          """on ( %s and %s) group by"""\
+                                          """ %s) """\
+                                          """as sptime on (%s)"""
+                                      % (spGrpNewNameStr, timeColsStr, 
+                                         stTable, 'st', 
+                                         enTable, 'en',
+                                         spInnerJoinCondition, analysisPeriodStr,
+                                         spGrpStr,
+                                         spJoinCondition))
+                    #print 'SPATIAL JOIN'
+                    #print spatialJoinStr
+                    # left join for start location
+
+                    stLocJoinStr = (""" left join %s %s on """\
+                                        """(%s) """ 
+                                    %(stTable, 'stl', stLocJoinCondition))
+
+
+                    enLocJoinStr = (""" left join %s %s on """\
+                                        """(%s) """ 
+                                    %(enTable, 'enl', enLocJoinCondition))
+
+
+                    joinStrList.append(spatialJoinStr)
+                    joinStrList.append(stLocJoinStr)
+                    joinStrList.append(enLocJoinStr)
+                    
+                    cols_list += timeColsNewNames
+                    
+
+                    for i in timeColsNewNames:
+                        final_list.append('sptime.%s' %(i))
+                    # Only one time-space prism can be retrieved within a component
+                    # there cannot be two TSP's in the same component
+                    break
+                                         
+
+        # Generating the col list
+        colStr = ''
+        for i in final_list:
+            colStr = colStr + '%s,' %(i)
+        colStr = colStr[:-1]
+        
+        # Build the SQL string
+        allJoinStr = ''
+        for i in joinStrList:
+            allJoinStr = allJoinStr + '%s' %i
+            
+
+        sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
+        print 'SQL string for query - ', sql_string
+            
+
+
+        #convert all the table names to upper case
+        for each in table_list:
+            tabs_list.append(each.upper())
+        #print 'tabs_list is %s'%tabs_list
+        
+        #separate all the columns from the lists
+        new_keys = db_dict.keys()
+        for i in new_keys:
+            cols_list = cols_list + db_dict[i]
+        #print 'cols_list is %s'%cols_list
+        
+        try:
+            sample_str = ''
+            ctr = 0
+            for i in tabs_list:
+                if ctr==0:
+                    sample_str = i
+                    ctr = ctr + 1
+                else:
+                    sample_str = sample_str + ', ' + i
+                #query = self.dbcon_obj.session.query((sample_str))
+
+            #print 'sample_str is %s'%sample_str                
+                
+            #result = query.from_statement(sql_string).values(*cols_list)
+            result = self.cursor.execute(sql_string)
+                        
+            resultArray = self.createResultArray(result)
+
+            # Returns the query as a DataArray object
+            data = DataArray(resultArray, cols_list)
+
+            data.sort(primCols)
+            #self.dbcon_obj.close_sessionInstance()        
+        
+            return data
+        except Exception, e:
+            print e
+            print 'Error retrieving the information. Query failed.'
+
+#############################################################################################
+    def createResultArray(self, result, fillValue=0):
+        t = time.time()
+
+        # Create list of records
+        data = [i[:] for i in result]
+        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
+
+        # Converting the none values returned into a zero value
+        # using the ma library in numpy
+        # - retrieve mask for None
+        # - then assign the fillValue to those columns
+        data = array(data)
+        mask = ma.masked_equal(data, None).mask
+
+        if mask.any():
+            data[mask] = fillValue
+
+        #Sorting the array by primary cols identifying the agent as 
+        # postgres seems to return queries without any order
+            
+        
+        # Convert it back to a regular array to enable all the other processing
+        print '\tSize of the data set that was retrieved - ', data.shape
+        print '\tRecords were processed after query in %.4f' %(time.time()-t)
+
+        return data
+
     ########## methods for select query end ##########
     
     
@@ -214,38 +597,74 @@ class MainClass(object):
     ########## methods for creating and deleting index##########
     #create an index
     def create_index(self, table_name, col_list):
-        index_stmt = ''
-        columns = ''
-        count = 0
-        index_name = table_name + '_index'
-
-        for i in col_list:
-            if count < (len(col_list)-1):
-                columns = columns + i + ', '
-                count = count + 1
+        """
+        This method creates an index on the table
+        
+        Input:
+        Database configuration object, table name and column list
+        
+        Output:
+        Index created on the table with the specified columns
+        """
+        fin_flag = None
+        #check if table exists and then if columns exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            #check for columns
+            get_cols = self.dbcon_obj.get_column_list(table_name)
+            num_tab = len(list(set(get_cols) & set(col_list)))
+            if num_tab <= len(get_cols):
+                fin_flag = True
             else:
-                columns = columns + i
-        index_stmt = 'create index %s on %s (%s)'%(index_name, table_name, columns)
-        print index_stmt
-        try:
-            self.dbcon_obj.cursor.execute(index_stmt)
-            self.dbcon_obj.connection.commit()
-            print 'Index %s created'%index_name
-        except Exception, e:
-            print 'Error while creating an index'
-            print e
+                fin_flag = False
+        else:
+            print 'Table %s does not exist.'%table_name
+
+        if fin_flag:
+            index_stmt = ''
+            columns = ''
+            count = 0
+            index_name = table_name + '_index'
+
+            for i in col_list:
+                if count < (len(col_list)-1):
+                    columns = columns + i + ', '
+                    count = count + 1
+                else:
+                    columns = columns + i
+            index_stmt = 'create index %s on %s (%s)'%(index_name, table_name, columns)
+            print index_stmt
+            try:
+                self.dbcon_obj.cursor.execute(index_stmt)
+                self.dbcon_obj.connection.commit()
+                print 'Index %s created'%index_name
+            except Exception, e:
+                print 'Error while creating an index'
+                print e
 
 
     #delete an index
     def delete_index(self, table_name):
-        index_name = table_name + '_index'
-        try:
-            self.dbcon_obj.cursor.execute("drop index %s"%index_name)
-            self.dbcon_obj.connection.commit()
-            print 'Index %s deleted'%index_name
-        except Exception, e:
-            print 'Error while creating an index'
-            print e
+        """
+        This method deletes an index on the table
+        
+        Input:
+        Database configuration object and table name
+        
+        Output:
+        Index on the table is deleted
+        """
+        #check if table exists and then if columns exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        if tab_flag:
+            index_name = table_name + '_index'
+            try:
+                self.dbcon_obj.cursor.execute("drop index %s"%index_name)
+                self.dbcon_obj.connection.commit()
+                print 'Index %s deleted'%index_name
+            except Exception, e:
+                print 'Error while creating an index'
+                print e
         
     ########## methods for creating and deleting index##########
 
@@ -272,7 +691,7 @@ class TestMainClass(unittest.TestCase):
         newobject.dbcon_obj.new_connection()
         
         table_name = 'asu'
-        column_name = 'rol_id'
+        column_name = 'role_id'
         value = '1'
         abc = None
         defg = None
@@ -287,7 +706,7 @@ class TestMainClass(unittest.TestCase):
         col_list = ['grad', 'role_id']
         #newobject.create_index(table_name, col_list)
         
-        #newobject.delete_index(table_name)
+        newobject.delete_index(table_name)
 
         #data_arr = [('aa','aa','1'),('bb','bb','1')]
         #newobject.insert_into_table(data_arr, table_name)
