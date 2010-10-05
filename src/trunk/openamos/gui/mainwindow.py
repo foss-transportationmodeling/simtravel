@@ -240,6 +240,9 @@ class MainWindow(QMainWindow):
         project_new.exec_()
         if project_new.configtree != None:
             if self.proconfig <> None:
+                Temp = self.model_management.currentItem()
+                if Temp <> None:
+                    Temp.setSelected(False)
                 self.proconfig = None
                 self.models = None
                 self.centralwidget = None
@@ -267,6 +270,9 @@ class MainWindow(QMainWindow):
         self.project_open = OpenProject()
         #print self.project_open.file
         if self.project_open.file != '':
+            Temp = self.model_management.currentItem()
+            if Temp <> None:
+                Temp.setSelected(False)
             self.proconfig = None
             self.models = None
             self.centralwidget = None
