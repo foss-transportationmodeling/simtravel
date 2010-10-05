@@ -373,6 +373,24 @@ class QueryBrowser(object):
          ANALYSISINTERVAL 195
          SUBSAMPLE None
 
+         Test SQL String for above inputs:
+         select households.htaz,households.numchild,households.inclt35k,households.hhsize,persons.male,persons.schstatus,persons.one,
+         persons.houseid,persons.personid,schedule_r.activitytype,temp.scheduleid,stl.locationid as st_locationid,enl.locationid 
+         as en_locationid,sptime.st_endtime,sptime.en_starttime from persons  left join households on 
+         ( persons.houseid=households.houseid ) left join (select personid,houseid, max(scheduleid) 
+         as scheduleid from schedule_r group by personid,houseid) as temp on 
+         ( temp.personid=persons.personid and temp.houseid=persons.houseid )  
+         left join schedule_r on 
+         ( persons.personid=schedule_r.personid and persons.houseid=schedule_r.houseid and schedule_r.scheduleid=temp.scheduleid) 
+         join (select st.personid personid,st.houseid houseid, min(st.endtime) st_endtime,min(en.starttime) 
+               en_starttime from schedule_r as st inner join schedule_r as en on 
+               (  st.personid = en.personid and st.houseid = en.houseid  and st.endtime=195 and en.starttime>195) 
+               group by st.personid,st.houseid) as sptime on ( sptime.personid = persons.personid and sptime.houseid = persons.houseid ) 
+               left join schedule_r stl on 
+               ( stl.personid = persons.personid and stl.houseid = persons.houseid and sptime.st_endtime = stl.endtime)  
+               left join schedule_r enl on 
+               ( enl.personid = persons.personid and enl.houseid = persons.houseid and sptime.en_starttime = enl.starttime) 
+
 
 
         Output:
