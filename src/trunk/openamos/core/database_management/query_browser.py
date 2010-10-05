@@ -354,10 +354,40 @@ class QueryBrowser(object):
         Input:
         Database configuration object, table names, columns and values.
         
+        DB_DICT {'households': ['htaz', 'numchild', 'inclt35k', 'hhsize'], 
+                 'persons': ['male', 'schstatus', 'one', 'houseid', 'personid'], 
+                 'schedule_r': ['scheduleid', 'activitytype']}
+        COLUMN_NAMES {'households': ['houseid'], 
+                      'schedule_r': ['personid', 'houseid']}
+        TABLE_NAMES ['persons', 'households', 'schedule_r']
+        MAX_DICT {'schedule_r': ['scheduleid']}
+        SPATIALCONST_LIST [Table - travel_skims; 
+                           Field - tt
+                           Orifin Field - origin; 
+                           Destination Field - destination; 
+                           Sample Field - destination
+                           Start Constraint - Table - schedule_r; Location Field - locationid; Time Field - endtime
+                           End Constraint - Table - schedule_r; Location Field - locationid; Time Field - starttime
+                           Number of choices - 5
+                           Threshold for window - 120]
+         ANALYSISINTERVAL 195
+         SUBSAMPLE None
+
+
+
         Output:
         Displays the rows based on the join and the selection criterion.
         """
         self.dbcon_obj.new_sessionInstance()        
+
+        print 'DB_DICT', db_dict
+        print 'COLUMN_NAMES', column_names
+        print 'TABLE_NAMES', table_names
+        print 'MAX_DICT', max_dict
+        print 'SPATIALCONST_LIST', spatialConst_list
+        print 'ANALYSISINTERVAL', analysisInterval
+        print 'SUBSAMPLE', subsample
+
         #db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
         #           'vehicles_r': ['vehtype', 'vehid'], 
         #           'households_r': ['numvehs']}
