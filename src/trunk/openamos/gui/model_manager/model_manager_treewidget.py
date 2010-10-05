@@ -420,7 +420,7 @@ class Model_Manager_Treewidget(QTreeWidget):
             modelkey = MODELKEY_NUMVEHS
         elif item.text(col) == COMPMODEL_NUMTYPES:
             diagtitle = COMPMODEL_NUMTYPES
-            modelkey = MODELKEY_VEHTYPES
+            modelkey = MODELKEY_VEHTYPE
 #        elif item.text(col) == COMPMODEL_NONWORKER:
 #            diagtitle = COMPMODEL_NONWORKER
 #            modelkey = MODELKEY_NONWORKER
@@ -620,7 +620,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 
             
         
-        if diagtitle != None:
+        if diagtitle != None and self.configobject != None:
             diag = AbtractSpecDialog(self.configobject,modelkey,diagtitle)
             diag.exec_()
 
