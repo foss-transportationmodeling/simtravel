@@ -111,7 +111,7 @@ class MainClass(object):
             print 'Column %s does not belong to the table %s'%(column_name, table_name)
             return None    
 
-#############################################################################################
+
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, subsample=None):
         """
@@ -123,7 +123,6 @@ class MainClass(object):
         Output:
         Displays the rows based on the join and the selection criterion.
         """
-        #self.dbcon_obj.new_sessionInstance()        
         #db_dict = {'households': ['urb', 'numchild', 'inclt35k', 'ownhome', 'one', 'drvrcnt', 'houseid'], 
         #           'vehicles_r': ['vehtype', 'vehid'], 
         #           'households_r': ['numvehs']}
@@ -147,16 +146,19 @@ class MainClass(object):
         tabs_list = []
         #col_name = column_name
         final_col_list = db_dict.values()
-        table_list = db_dict.keys()      
-        
-        """
-        #check if the table exists. If not return none
-        if chk_table.lower() in [each.lower() for each in table_list]:
-            print 'table %s is present in the table list'%chk_table
-        else:
-            print 'table %s is not present in the table list'%chk_table
-            return None
-        """
+        table_list = db_dict.keys()
+
+        table_flag = None
+        all_tables = table_list + table_names
+
+        #check if the tables exist in the database.
+        for each_tab in all_tables:
+            table_flag = self.dbcon_obj.check_if_table_exists(each_tab)
+            if table_flag:
+                pass
+            else:
+                print 'Table %s does not exist in the database. Exiting the funtion.'%each_tab
+                return 0
         
         #similarly check if the table in the list exists
         num_tab = len(list(set(table_list) & set(table_names)))
@@ -279,7 +281,7 @@ class MainClass(object):
                                                                         joinCondition)
                                + mJoinStrIncMaxConditionVar)
             #print 'LEFT JOIN MAX COL LIST--->', joinStrList
-
+        
         # Spatial TSP identification
         if spatialConst_list is not None:
             for i in spatialConst_list:
@@ -368,7 +370,7 @@ class MainClass(object):
                     analysisPeriodStr = ('%s=%s and %s>%s' 
                                          %(stTimeCol, analysisInterval,
                                            enTimeCol, analysisInterval))
-
+        
                     spatialJoinStr = (""" join (select %s, %s """\
                                           """from %s as %s """\
                                           """inner join %s as %s """\
@@ -394,7 +396,7 @@ class MainClass(object):
                                         """(%s) """ 
                                     %(enTable, 'enl', enLocJoinCondition))
 
-
+        
                     joinStrList.append(spatialJoinStr)
                     joinStrList.append(stLocJoinStr)
                     joinStrList.append(enLocJoinStr)
@@ -422,36 +424,10 @@ class MainClass(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        print 'SQL string for query - ', sql_string
-            
-
-
-        #convert all the table names to upper case
-        for each in table_list:
-            tabs_list.append(each.upper())
-        #print 'tabs_list is %s'%tabs_list
-        
-        #separate all the columns from the lists
-        new_keys = db_dict.keys()
-        for i in new_keys:
-            cols_list = cols_list + db_dict[i]
-        #print 'cols_list is %s'%cols_list
+        print '\n\nSQL string for query - \n', sql_string
         
         try:
-            sample_str = ''
-            ctr = 0
-            for i in tabs_list:
-                if ctr==0:
-                    sample_str = i
-                    ctr = ctr + 1
-                else:
-                    sample_str = sample_str + ', ' + i
-                #query = self.dbcon_obj.session.query((sample_str))
-
-            #print 'sample_str is %s'%sample_str                
-                
-            #result = query.from_statement(sql_string).values(*cols_list)
-            result = self.cursor.execute(sql_string)
+            result = self.dbcon_obj.cursor.execute(sql_string)
                         
             resultArray = self.createResultArray(result)
 
@@ -459,14 +435,13 @@ class MainClass(object):
             data = DataArray(resultArray, cols_list)
 
             data.sort(primCols)
-            #self.dbcon_obj.close_sessionInstance()        
         
             return data
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'
+        
 
-#############################################################################################
     def createResultArray(self, result, fillValue=0):
         t = time.time()
 
@@ -706,11 +681,23 @@ class TestMainClass(unittest.TestCase):
         col_list = ['grad', 'role_id']
         #newobject.create_index(table_name, col_list)
         
-        newobject.delete_index(table_name)
+        #newobject.delete_index(table_name)
 
         #data_arr = [('aa','aa','1'),('bb','bb','1')]
         #newobject.insert_into_table(data_arr, table_name)
         
+        DB_DICT = {'households': ['htaz', 'numchild', 'inclt35k', 'hhsize'], 
+                 'persons': ['male', 'schstatus', 'one', 'houseid', 'personid'], 
+                 'schedule_r': ['scheduleid', 'activitytype']}
+        COLUMN_NAMES = {'households': ['houseid'], 
+                      'schedule_r': ['personid', 'houseid']}
+        TABLE_NAMES = ['persons', 'households', 'schedule_r', 'abcd']
+        MAX_DICT = {'schedule_r': ['scheduleid']}
+
+        #print DB_DICT, COLUMN_NAMES, TABLE_NAMES, MAX_DICT
+        
+        #newobject.select_join(DB_DICT, COLUMN_NAMES, TABLE_NAMES, MAX_DICT)
+
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
 
