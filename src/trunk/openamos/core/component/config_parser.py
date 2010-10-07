@@ -65,8 +65,8 @@ class ConfigParser(object):
         componentList = []
         
         for i in self.iterator:
-            component = self.create_component(i)
-            componentList.append(component)
+            componentIntermediateList = self.parse_analysis_interval_and_create_component(i)
+            componentList += componentIntermediateList
             if i.attrib['name'] == self.componentName:
                 return componentList
 
@@ -123,9 +123,32 @@ class ConfigParser(object):
             tableNamesKeyDict[tableName] = [tableKeys, countKeys]
         return tableOrderDict, tableNamesKeyDict
 
+    def parse_analysis_interval_and_create_component(self, component_element):
+        interval_element = component_element.find("AnalysisInterval")
+        if interval_element is not None:
+            startInterval = interval_element.get("start")
+            startInterval = int(startInterval)
+
+            endInterval = interval_element.get("end")
+            endInterval = int(endInterval)
+
+            componentList = []
+
+            for i in range(endInterval - startInterval):
+                repeatComponent = self.create_component(component_element)
+                for model in repeatComponent.model_list:
+                    model.seed +=  i 
+                repeatComponent.analysisInterval = startInterval + i
+                componentList.append(repeatComponent)
+            return componentList
+                
+        
+        else:
+            component = self.create_component(component_element)
+            return [component]
+
+
     
-                
-                
     def create_component(self, component_element):
         comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
         
@@ -160,7 +183,11 @@ class ConfigParser(object):
                                       comp_keys,
                                       spatialConst_list)
         return component
+
+
+
         
+
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
         

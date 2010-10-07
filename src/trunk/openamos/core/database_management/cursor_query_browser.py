@@ -9,34 +9,34 @@ import exceptions
 import time
 import sqlalchemy
 import psycopg2 as dbapi2
-from database_connection import DataBaseConnection
+from cursor_database_connection import DataBaseConnection
 from psycopg2 import extensions
 from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
+from numpy import array, ma
+from database_configuration import DataBaseConfiguration
+from openamos.core.data_array import DataArray
 
-
-class MainClass(object):
+class QueryBrowser(object):
     #initialize the class 
-    def __init__(self, protocol = None, user_name = None,
-                    password = None, host_name = None, 
-                    database_name = None, engine = None, 
-                    connection = None, result = None):
 
-        self.protocol = protocol
-        self.user_name = user_name
-        self.password = password
-        self.host_name = host_name
-        self.database_name = database_name
-        self.connection = None
-        self.result = None
-        self.cursor = None
-        dbcon_obj = DataBaseConnection(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
-        self.dbcon_obj = dbcon_obj
+    def __init__(self,dbconfig):
+        
+        if not isinstance(dbconfig, DataBaseConfiguration):
+            raise DatabaseConfigurationError, """The dbconfig input is not a valid """\
+                """DataBaseConfiguration object."""
+
+        self.protocol = dbconfig.protocol
+        self.user_name = dbconfig.user_name
+        self.password = dbconfig.password
+        self.host_name = dbconfig.host_name
+        self.database_name = dbconfig.database_name
+        self.database_config_object = dbconfig
+        self.dbcon_obj = DataBaseConnection(dbconfig)
         print self.dbcon_obj
-    
-    
+
     ########## methods for select query  ##########
     #select all rows from the table
     def select_all_from_table(self, table_name):
@@ -55,9 +55,14 @@ class MainClass(object):
             print 'Table %s exists.'%table_name
             try:    
                 self.dbcon_obj.cursor.execute("SELECT * FROM %s"%table_name)
-                tables = self.dbcon_obj.cursor.fetchall()
-                tbs = [tb for tb in tables]
-                return self.dbcon_obj.cursor, tbs
+                result = self.dbcon_obj.cursor.fetchall()
+                cols_list = self.dbcon_obj.get_column_list(table_name)
+                
+                data = self.createResultArray(result, cols_list)
+
+
+
+                return data
             except Exception, e:
                 print 'Error while retreiving the data from the table'
                 print e
@@ -282,6 +287,13 @@ class MainClass(object):
                                + mJoinStrIncMaxConditionVar)
             #print 'LEFT JOIN MAX COL LIST--->', joinStrList
         
+        # separate all the columns from the lists
+        new_keys = db_dict.keys()
+        for i in new_keys:
+            cols_list = cols_list + db_dict[i]
+            
+
+
         # Spatial TSP identification
         if spatialConst_list is not None:
             for i in spatialConst_list:
@@ -425,25 +437,26 @@ class MainClass(object):
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
         print '\n\nSQL string for query - \n', sql_string
+        print cols_list
         
         try:
-            result = self.dbcon_obj.cursor.execute(sql_string)
-                        
-            resultArray = self.createResultArray(result)
+            self.dbcon_obj.cursor.execute(sql_string)
+            result = self.dbcon_obj.cursor.fetchall()
+            data = self.createResultArray(result, cols_list)
 
-            # Returns the query as a DataArray object
-            data = DataArray(resultArray, cols_list)
-
+            # Sort with respect to primary columns
             data.sort(primCols)
-        
+
             return data
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'
         
 
-    def createResultArray(self, result, fillValue=0):
+
+    def createResultArray(self, result, cols_list, fillValue=0):
         t = time.time()
+
 
         # Create list of records
         data = [i[:] for i in result]
@@ -467,7 +480,7 @@ class MainClass(object):
         print '\tSize of the data set that was retrieved - ', data.shape
         print '\tRecords were processed after query in %.4f' %(time.time()-t)
 
-        return data
+        return DataArray(data, cols_list)
 
     ########## methods for select query end ##########
     
@@ -539,7 +552,7 @@ class MainClass(object):
 
     ########## methods for insert query     ##########
     #insert values in the table
-    def insert_into_table(self, data_arr, table_name):
+    def insert_into_table(self, arr, cols_list, table_name, keyCols, chunkSize=None):
         """
         This method is used to insert rows into the table.
 
@@ -549,24 +562,51 @@ class MainClass(object):
         Output:
         Inserts all the rows from data array in the table
         """
+        
+        table_name = table_name.lower()
+
+        # Delete index before inserting
+        index_cols = self.delete_index(table_name)
+
+
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        tab_flag = True
+        print 'table found in the actual function ---->'
+
         if tab_flag:
             print 'Table %s exists.'%table_name
             try:
-                print 'time before insert query ', time.time()
-                arr_str = [tuple(each) for each in data_arr]
+                ti = time.time()
+                arr_str = [tuple(each) for each in arr]
                 arr_str = str(arr_str)[1:-1]
-                insert_stmt = "insert into %s values %s"%(table_name, arr_str)
-                #insert_stmt = "copy school from '/home/namrata/Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
+
+                cols_listStr = ""
+                for i in cols_list:
+                    cols_listStr += "%s," %i
+                cols_listStr = cols_listStr[0:-1]
+                cols_listStr = "(%s)" %cols_listStr
+
+                insert_stmt = ("insert into %s %s values %s"
+                               %(table_name, cols_listStr, arr_str))
+
+                #insert_stmt = "copy school from '/home/namrata/
+                #Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
+
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print 'time after insert query ', time.time()
+                print 'time for insert query - %.4f' %(ti-time.time())
             except Exception, e:
                 print e
+                raise Exception, e
         else:
            print 'Table %s does not exist.'%table_name 
+
+
+        self.create_index(table_name, keyCols)
+
     ########## methods for delete query end ##########
+
 
 
     ########## methods for creating and deleting index##########
@@ -616,7 +656,7 @@ class MainClass(object):
             except Exception, e:
                 print 'Error while creating an index'
                 print e
-
+                self.dbcon_obj.connection.commit()
 
     #delete an index
     def delete_index(self, table_name):
@@ -638,7 +678,7 @@ class MainClass(object):
                 self.dbcon_obj.connection.commit()
                 print 'Index %s deleted'%index_name
             except Exception, e:
-                print 'Error while creating an index'
+                print 'Error while deleting an index'
                 print e
         
     ########## methods for creating and deleting index##########

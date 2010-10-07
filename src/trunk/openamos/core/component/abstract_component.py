@@ -18,7 +18,8 @@ class AbstractComponent(object):
                  model_list, variable_list,
                  table,
                  key,
-                 spatialConst_list=None):
+                 spatialConst_list=None,
+                 analysisInterval=None):
 
         # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
         # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
@@ -47,7 +48,7 @@ class AbstractComponent(object):
         self.table = table
         self.key = key
         self.spatialConst_list = spatialConst_list
-
+        self.analysisInterval = analysisInterval
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
@@ -139,7 +140,7 @@ class AbstractComponent(object):
         model_list_forlooping = []
         
         for i in model_list_duringrun:
-            print '\t    Running Model - ', i.dep_varname
+            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #f = open('test_res', 'a')
             #f.write('%s,' %i.dep_varname)
             #f.close()
@@ -170,6 +171,10 @@ class AbstractComponent(object):
                 choiceset = self.create_choiceset(choiceset_shape, 
                                                   i.choiceset_criterion, 
                                                   choicenames)
+                #print "DATA SUBSET"
+                #print data_subset
+                #print data_subset.varnames
+                
                 result = i.simulate_choice(data_subset, choiceset, iteration)
                 self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
             #print result.data

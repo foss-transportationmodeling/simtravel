@@ -16,6 +16,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
 
+from database_configuration import DataBaseConfiguration
 
 
 #class to define the database connection along with other functions
@@ -28,19 +29,17 @@ class DataBaseConnection(object):
     Input: Database configuration object
     """
 
-    def __init__(self, protocol = None, user_name = None,
-                password = None, host_name = None, 
-                database_name = None):
-
+    def __init__(self, dbconfig):
+        if not isinstance(dbconfig, DataBaseConfiguration):
+            raise DatabaseConfigurationError, """the dbconfig input is not a valid """\
+                """DatabaseConfiguration object."""
 
         #create the database object here
-        self.protocol = protocol
-        self.user_name = user_name
-        self.password = password
-        self.host_name = host_name
-        self.database_name = database_name
-        self.connection = None
-        self.cursor = None
+        self.protocol = dbconfig.protocol
+        self.user_name = dbconfig.user_name
+        self.password = dbconfig.password
+        self.host_name = dbconfig.host_name
+        self.database_name = dbconfig.database_name
 
     
     #checks if the database engine is installed
@@ -69,6 +68,7 @@ class DataBaseConnection(object):
         the database configuration object is present in the array
         """
         db_engine = self.protocol
+
         if db_engine == database_engine:
             return db_engine
         else:
@@ -106,10 +106,13 @@ class DataBaseConnection(object):
         """
         Create a connection to the database.
         """
-        if self.protocol is 'postgres':
+
+        if self.protocol == 'postgres':
             try:
                 #create a connection
-                self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
+
+                self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"
+                                                 %(self.host_name, self.user_name, self.password))
 
                 #create a cursor
                 self.cursor = self.connection.cursor()
@@ -118,6 +121,8 @@ class DataBaseConnection(object):
                 dbs = [db[0] for db in self.cursor.fetchall()]
                 database_flag = self.database_name.lower() in dbs
 		
+
+
                 #set a flag that indicates the existence of the database.
                 if database_flag:
                     print 'Database %s exists'%self.database_name
@@ -247,7 +252,9 @@ class DataBaseConnection(object):
         if db_flag:
             #create a connection and try to establish a session with the database
             try:
-                self.connection = dbapi2.connect("host=%s dbname=%s user=%s password=%s port=5432"%(self.host_name, self.database_name, self.user_name,     self.password))
+                self.connection = dbapi2.connect("host=%s dbname=%s user=%s password=%s port=5432"
+                                                 %(self.host_name, self.database_name, 
+                                                   self.user_name, self.password))
                 self.cursor = self.connection.cursor()
                 print 'New connection created.\n'
             except Exception, e:
@@ -304,8 +311,9 @@ class DataBaseConnection(object):
             tbs = [tb[0] for tb in tables]
             table_exists = self.table_name in tbs
             return table_exists
-        except:
+        except Exception, e:
             print 'Error when checking for existing tables'
+            print e
             raise Exception
 
 

@@ -89,7 +89,8 @@ class ComponentManager(object):
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
 
             t = time.time()
-            print '\nRunning Component - %s' %(i.component_name)
+            print '\nRunning Component - %s; Analysis Interval - %s' %(i.component_name,
+                                                                       i.analysisInterval)
 
             # Prepare variable list/objects for retrieving the corresponding records for processing
             variableList = i.variable_list
@@ -111,13 +112,15 @@ class ComponentManager(object):
                 #print 'VARS AFTER REMOVING TEMP', vars_dict
                 #print type(temp_tableEntries)
 
-
+            
             tableName = i.table
+
+            analysisInterval = i.analysisInterval
 
 
             # Prepare Data
             data = self.prepare_data(vars_dict, depvars_dict, count_keys, 
-                                     spatialConst_list, subsample)        
+                                     spatialConst_list, analysisInterval, subsample)        
             # Append the Spatial Query Results
             # data = self.process_spatial_query(data, i.spatialConst_list)
             
@@ -146,6 +149,7 @@ class ComponentManager(object):
 
             print '-- Finished simulating model --'
             print '-- Time taken to complete - %.4f' %(time.time()-t)
+            #print raw_input('-- Press any key to continue... --')
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.close_sessionInstance()
             #raw_input()
@@ -174,6 +178,8 @@ class ComponentManager(object):
         t = time.time()
 
         print '\tNumber of rows processed in this iteration - ', nRowsProcessed
+        if nRowsProcessed == 0:
+            return
         resArr = list(table[-nRowsProcessed:])
         print """\tCreating the array object (WITHOUT iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
@@ -304,7 +310,9 @@ class ComponentManager(object):
         #raw_input()
         return columnDict
 
-    def prepare_data(self, indepVarDict, depVarDict, count_keys=None, spatialConst_list=None, subsample=None):
+    def prepare_data(self, indepVarDict, depVarDict, 
+                     count_keys=None, spatialConst_list=None, 
+                     analysisInterval=None, subsample=None):
         # get hierarchy of the tables
 
         #print indepVarDict
@@ -430,7 +438,6 @@ class ComponentManager(object):
         #print 'TABLE HIERARCHY', tableNamesForComponent
         #print 'MATCHING COLUMN', matchingKey
         #maxDict = {'vehicles_r':['vehid']}
-        analysisInterval = 195
         
         # Cleaning up the independent variables dictionary
         iterIndepDictKeys = indepVarDict.keys()
@@ -602,13 +609,14 @@ class ComponentManager(object):
         vals = skimsMatrix[originLocColVals, destinationLocColVals]
         #vals.shape = (data.rows,1)
         data.insertcolumn(['tt'], vals)
+        
 
 
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
-            #print 'NUMBER OF DESTINATIONS', destLocSetIndSum
+            #print 'NUMBER OF DESTINATIONS', destLocSetInd
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
             #print probLocSet.shape, 'PROBABILITY SHAPE'
             #raw_input()

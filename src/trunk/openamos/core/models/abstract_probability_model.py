@@ -63,6 +63,8 @@ class AbstractProbabilityModel(object):
         cumsum_across_rows = self.probabilities.sum(-1)
         #print cumsum_across_rows
         diff_from_unity = abs(cumsum_across_rows - 1)
+        #print self.probabilities
+        #print diff_from_unity
         if not ma.all(diff_from_unity < 1e-6):
             raise ProbabilityError, """probability values do not add up """ \
                 """to one across rows"""    
@@ -136,6 +138,7 @@ class AbstractProbabilityModel(object):
         alt_text.shape = (self.num_agents, 1)
 
         #return alt_text
+        #print choice
         return DataArray(choice, ['selected choice'])
 
 import unittest
