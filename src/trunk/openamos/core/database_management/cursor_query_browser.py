@@ -581,32 +581,52 @@ class QueryBrowser(object):
             #print 'Table %s exists.'%table_name
             try:
                 ti = time.time()
-                arr_str = [tuple(each) for each in arr]
-                arr_str = str(arr_str)[1:-1]
-
+                #arr_str = [tuple(each) for each in arr]
+                #arr_str = str(arr_str)[1:-1]
+                #Generate the column list
                 cols_listStr = ""
                 for i in cols_list:
                     cols_listStr += "%s," %i
                 cols_listStr = cols_listStr[0:-1]
                 cols_listStr = "(%s)" %cols_listStr
-
-                insert_stmt = ("insert into %s %s values %s"
-                               %(table_name, cols_listStr, arr_str))
+                
+                #Divide the data into chunks
+                last = 0
+                lastRow = len(arr)
+                nChunks = int(lastRow/chunkSize)
+                for i in range(nChunks):
+                    last = (i+1)*chunkSize
+                    arrSub = arr[i*chunkSize:last]
+                    self.insert_nrows(table_name, cols_listStr, arrSub)
+                #insert_stmt = ("insert into %s %s values %s"
+                #               %(table_name, cols_listStr, arr_str))
 
                 #insert_stmt = "copy school from '/home/namrata/
                 #Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
 
-                result = self.dbcon_obj.cursor.execute(insert_stmt)
-                self.dbcon_obj.connection.commit()
-                print '\t\tTime to insert - %.4f' %(time.time()-ti)
+                #result = self.dbcon_obj.cursor.execute(insert_stmt)
+                #self.dbcon_obj.connection.commit()
+                #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
-                raise Exception, e
         else:
            print 'Table %s does not exist.'%table_name 
-
-
+        print 'Create index on the table.'
         self.create_index(table_name, keyCols)
+        
+        
+    def insert_nrows(self, table_name, cols_listStr, arr):
+        arr_str = [tuple(each) for each in arr]
+        arr_str = str(arr_str)[1:-1]
+        print 'time before insert ', time.time()
+        try:
+            insert_stmt = "insert into %s %s values %s"%(table_name, cols_listStr, arr_str)
+            result = self.dbcon_obj.cursor.execute(insert_stmt)
+            self.dbcon_obj.connection.commit()
+            print 'time after insert query ', time.time()
+        except Exception, e:
+            print '\t    Error while inserting data in the table'
+            print e
 
     ########## methods for delete query end ##########
 
