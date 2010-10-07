@@ -162,7 +162,7 @@ class AbstractComponent(object):
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
 
-                # Generate a choiceset for the corresponding agents
+               # Generate a choiceset for the corresponding agents
                 choiceset_shape = (data_subset.rows,
                                    i.model.specification.number_choices)
                 choicenames = i.model.specification.choices

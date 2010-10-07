@@ -52,7 +52,7 @@ class QueryBrowser(object):
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         if tab_flag:
-            print 'Table %s exists.'%table_name
+            #print 'Table %s exists.'%table_name
             try:    
                 self.dbcon_obj.cursor.execute("SELECT * FROM %s"%table_name)
                 result = self.dbcon_obj.cursor.fetchall()
@@ -139,8 +139,8 @@ class QueryBrowser(object):
         # ADD APPROPRIATE JOIN/?INNER JOINS
 
 
-        print 'Database Dictionary of Table and Columns - ', db_dict
-        print 'Column Names', column_names
+        #print 'Database Dictionary of Table and Columns - ', db_dict
+        #print 'Column Names', column_names
         #raw_input()
 
         #initialize the variables
@@ -175,18 +175,20 @@ class QueryBrowser(object):
             return None
         
         #check for the columns passed in the dictionary
-        for i in db_dict.keys():
+	tables = db_dict.keys()
+	tables.sort()
+        for i in tables:
             clist = self.dbcon_obj.get_column_list(i.lower())
             list1 = db_dict[i]
-            #print 'table--', i
-            #print 'clist', clist
-            #print 'list1', list1
             chk_list = len(list(set(list1) & set(clist)))
             if chk_list == len(list1):
-                for j in db_dict[i]:
+	        cols = db_dict[i]
+	        cols.sort()
+                for j in cols:
                     #print '\tColumn - ', j
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
+                cols_list = cols_list + cols
             else:
                 print ('Column passed in the dictionary does not exist in the table - ')
                 print 'Column List in the Table - ', clist
@@ -286,12 +288,14 @@ class QueryBrowser(object):
                                                                         joinCondition)
                                + mJoinStrIncMaxConditionVar)
             #print 'LEFT JOIN MAX COL LIST--->', joinStrList
-        
+	"""        
         # separate all the columns from the lists
         new_keys = db_dict.keys()
         for i in new_keys:
-            cols_list = cols_list + db_dict[i]
-            
+	    cols = db_dict[i]
+	    cols.sort()
+            cols_list = cols_list + cols
+        """    
 
 
         # Spatial TSP identification
@@ -459,14 +463,14 @@ class QueryBrowser(object):
 
 
         # Create list of records
-        data = [i[:] for i in result]
-        print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
+        #data = [i[:] for i in result]
+        #print '\tLooping through results took - %.4f' %(time.time()-t), len(data)
 
         # Converting the none values returned into a zero value
         # using the ma library in numpy
         # - retrieve mask for None
         # - then assign the fillValue to those columns
-        data = array(data)
+        data = array(result)
         mask = ma.masked_equal(data, None).mask
 
         if mask.any():
@@ -536,7 +540,7 @@ class QueryBrowser(object):
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         if tab_flag:
-            print 'Table %s exists.'%table_name
+            #print 'Table %s exists.'%table_name
             try:
                 self.dbcon_obj.cursor.execute("delete FROM %s "%table_name)
                 self.dbcon_obj.connection.commit()
@@ -572,10 +576,9 @@ class QueryBrowser(object):
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         tab_flag = True
-        print 'table found in the actual function ---->'
 
         if tab_flag:
-            print 'Table %s exists.'%table_name
+            #print 'Table %s exists.'%table_name
             try:
                 ti = time.time()
                 arr_str = [tuple(each) for each in arr]
@@ -595,7 +598,7 @@ class QueryBrowser(object):
 
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print 'time for insert query - %.4f' %(ti-time.time())
+                print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
                 raise Exception, e
@@ -648,11 +651,10 @@ class QueryBrowser(object):
                 else:
                     columns = columns + i
             index_stmt = 'create index %s on %s (%s)'%(index_name, table_name, columns)
-            print index_stmt
             try:
                 self.dbcon_obj.cursor.execute(index_stmt)
                 self.dbcon_obj.connection.commit()
-                print 'Index %s created'%index_name
+                print '\t\tIndex %s created'%index_name
             except Exception, e:
                 print 'Error while creating an index'
                 print e
@@ -676,7 +678,7 @@ class QueryBrowser(object):
             try:
                 self.dbcon_obj.cursor.execute("drop index %s"%index_name)
                 self.dbcon_obj.connection.commit()
-                print 'Index %s deleted'%index_name
+                print '\t\tIndex %s deleted'%index_name
             except Exception, e:
                 print 'Error while deleting an index'
                 print e

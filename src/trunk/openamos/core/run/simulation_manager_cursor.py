@@ -121,6 +121,7 @@ class ComponentManager(object):
             # Prepare Data
             data = self.prepare_data(vars_dict, depvars_dict, count_keys, 
                                      spatialConst_list, analysisInterval, subsample)        
+            print 'Variable Names order - ', data.varnames
             # Append the Spatial Query Results
             # data = self.process_spatial_query(data, i.spatialConst_list)
             
