@@ -90,18 +90,21 @@ class AbstractComponent(object):
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
                 model_list_duringrun, iteration)   
             cols_to_write = [] + prim_key
+            #print 'COLS TO WRITE BEFORE ADDING DEP VARNAMES' , cols_to_write
             for model in model_st:
                 dep_varname = model.dep_varname
                 dep_varModel = model.model
                 # Creating column list for caching
                 if dep_varname not in cols_to_write and not isinstance(dep_varModel, InteractionModel):
                     cols_to_write.append(dep_varname)
+            #print 'COLS TO WRITE AFTER ADDING DEP VARNAMES' , cols_to_write
             print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
             print "\t    Writing to %s: records - %s" %(self.table, sum(data_filter))
 
-            if count_key is not None and count_key not in cols_to_write:
-                cols_to_write = cols_to_write + count_key
-            
+            if count_key is not None:
+                cols_to_write = list(set(cols_to_write) or set(count_key))
+            #print 'COLS AFTER ADDING COUNT KEY', cols_to_write
+            #raw_input()
             self.write_data_to_cache(db, cols_to_write, data_filter)
 
             nRowsProcessed += sum(data_filter)
