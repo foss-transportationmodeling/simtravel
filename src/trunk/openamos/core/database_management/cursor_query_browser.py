@@ -575,7 +575,7 @@ class QueryBrowser(object):
 
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
-        tab_flag = True
+        #tab_flag = True
 
         if tab_flag:
             #print 'Table %s exists.'%table_name
@@ -594,10 +594,17 @@ class QueryBrowser(object):
                 last = 0
                 lastRow = len(arr)
                 nChunks = int(lastRow/chunkSize)
+                
+                # this inserts the first n chunks
                 for i in range(nChunks):
                     last = (i+1)*chunkSize
                     arrSub = arr[i*chunkSize:last]
                     self.insert_nrows(table_name, cols_listStr, arrSub)
+
+                # this inserts the last ODD chunk
+                arrSub = arr[nChunks*chunkSize:]
+                self.insert_nrows(table_name, cols_listStr, arrSub)
+
                 #insert_stmt = ("insert into %s %s values %s"
                 #               %(table_name, cols_listStr, arr_str))
 
@@ -611,19 +618,18 @@ class QueryBrowser(object):
                 print e
         else:
            print 'Table %s does not exist.'%table_name 
-        print 'Create index on the table.'
         self.create_index(table_name, keyCols)
         
         
     def insert_nrows(self, table_name, cols_listStr, arr):
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
-        print 'time before insert ', time.time()
+        ti = time.time()
         try:
             insert_stmt = "insert into %s %s values %s"%(table_name, cols_listStr, arr_str)
             result = self.dbcon_obj.cursor.execute(insert_stmt)
             self.dbcon_obj.connection.commit()
-            print 'time after insert query ', time.time()
+            print '\t\tTime after insert query - %.4f' %(time.time()-ti)
         except Exception, e:
             print '\t    Error while inserting data in the table'
             print e
@@ -678,7 +684,7 @@ class QueryBrowser(object):
             except Exception, e:
                 print 'Error while creating an index'
                 print e
-                self.dbcon_obj.connection.commit()
+                self.dbcon_obj.connection.rollback()
 
     #delete an index
     def delete_index(self, table_name):
@@ -702,7 +708,7 @@ class QueryBrowser(object):
             except Exception, e:
                 print 'Error while deleting an index'
                 print e
-        
+                self.dbcon_obj.connection.rollback()
     ########## methods for creating and deleting index##########
 
 
