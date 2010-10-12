@@ -178,7 +178,7 @@ class ComponentManager(object):
         
         t = time.time()
 
-        print '\tNumber of rows processed in this iteration - ', nRowsProcessed
+        print '\tNumber of rows processed for this component - ', nRowsProcessed
         if nRowsProcessed == 0:
             return
         resArr = list(table[-nRowsProcessed:])
