@@ -9,6 +9,7 @@ import exceptions
 import time
 import sqlalchemy
 import psycopg2 as dbapi2
+import numpy as na
 from cursor_database_connection import DataBaseConnection
 from psycopg2 import extensions
 from sqlalchemy.types import Integer, SmallInteger, \
@@ -17,7 +18,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
-from openamos.core.data_array import DataArray
+from data_array import DataArray
 
 class QueryBrowser(object):
     #initialize the class 
@@ -60,9 +61,7 @@ class QueryBrowser(object):
                 
                 data = self.createResultArray(result, cols_list)
 
-
-
-                return data
+                return data, cols_list ##changes made here
             except Exception, e:
                 print 'Error while retreiving the data from the table'
                 print e
@@ -556,8 +555,9 @@ class QueryBrowser(object):
 
     ########## methods for insert query     ##########
     #insert values in the table
-    def insert_into_table(self, arr, cols_list, table_name, keyCols, chunkSize=None):
+    def insert_into_table(self, table_name):
         """
+        self, arr, cols_list, table_name, keyCols, chunkSize=None):
         This method is used to insert rows into the table.
 
         Input:
@@ -575,11 +575,12 @@ class QueryBrowser(object):
 
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
-        #tab_flag = True
+        tab_flag = True
 
         if tab_flag:
             #print 'Table %s exists.'%table_name
             try:
+                """
                 ti = time.time()
                 #arr_str = [tuple(each) for each in arr]
                 #arr_str = str(arr_str)[1:-1]
@@ -594,42 +595,37 @@ class QueryBrowser(object):
                 last = 0
                 lastRow = len(arr)
                 nChunks = int(lastRow/chunkSize)
-                
-                # this inserts the first n chunks
                 for i in range(nChunks):
                     last = (i+1)*chunkSize
                     arrSub = arr[i*chunkSize:last]
                     self.insert_nrows(table_name, cols_listStr, arrSub)
-
-                # this inserts the last ODD chunk
-                arrSub = arr[nChunks*chunkSize:]
-                self.insert_nrows(table_name, cols_listStr, arrSub)
-
                 #insert_stmt = ("insert into %s %s values %s"
                 #               %(table_name, cols_listStr, arr_str))
-
-                #insert_stmt = "copy school from '/home/namrata/
-                #Documents/DBclasses/myfile.csv' with delimiter as ',' csv header"
-
-                #result = self.dbcon_obj.cursor.execute(insert_stmt)
-                #self.dbcon_obj.connection.commit()
+                """
+                insert_stmt = "copy %s from '/home/namrata/Documents/DBclasses/dbapi/myfile.csv' with delimiter as ',' csv header"%table_name
+                print insert_stmt
+                print 'time before insert query ------>', time.time()
+                result = self.dbcon_obj.cursor.execute(insert_stmt)
+                self.dbcon_obj.connection.commit()
+                print 'time after insert query ------>', time.time()
                 #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
-           print 'Table %s does not exist.'%table_name 
+           print 'Table %s does not exist.'##%table_name 
+        print 'Create index on the table.'
         self.create_index(table_name, keyCols)
         
         
     def insert_nrows(self, table_name, cols_listStr, arr):
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
-        ti = time.time()
+        print 'time before insert ', time.time()
         try:
             insert_stmt = "insert into %s %s values %s"%(table_name, cols_listStr, arr_str)
             result = self.dbcon_obj.cursor.execute(insert_stmt)
             self.dbcon_obj.connection.commit()
-            print '\t\tTime after insert query - %.4f' %(time.time()-ti)
+            print 'time after insert query ', time.time()
         except Exception, e:
             print '\t    Error while inserting data in the table'
             print e
@@ -711,6 +707,42 @@ class QueryBrowser(object):
                 self.dbcon_obj.connection.rollback()
     ########## methods for creating and deleting index##########
 
+    ########### file function #################
+    def file_write(self, data_arr, column_list):
+        """
+        This method write the resultset to a file.
+        
+        Input:
+        Data array or resultset and the column list
+        
+        Output:
+        File created with all data written in it.
+        """
+        #open the file
+        print 'opening a file'
+        myfile = open('/home/namrata/Documents/DBclasses/dbapi/myfile.csv', 'w')
+        
+        #enter the columns in the file
+        myfile.write(str(column_list)[1:-1])
+        myfile.write('\n')
+        
+        #data_arr = na.zeros(7).reshape(1,7)
+        #loop through the array and write to file
+        for each in data_arr:
+            each = list(each)
+            myfile.write(str(each)[1:-1])
+            myfile.write('\n')
+        """
+        print 'time before writing to file -------> ', time.time()
+        for each in res:
+            myfile.write(str(each)[1:-1])
+            myfile.write('\n')
+            
+        print 'time after writing to file -------> ', time.time()
+        """
+        myfile.close()
+        print 'file closed'
+    ########### file function ends ############
 
 
 #unit test to test the code
@@ -728,12 +760,13 @@ class TestMainClass(unittest.TestCase):
 
     
     def testMainClass(self):
-        newobject = MainClass(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+        abc = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+        newobject = QueryBrowser(abc)
 
         """ create a connection to the database """
         newobject.dbcon_obj.new_connection()
         
-        table_name = 'asu'
+        table_name = 'temp_table1'
         column_name = 'role_id'
         value = '1'
         abc = None
@@ -765,7 +798,12 @@ class TestMainClass(unittest.TestCase):
         #print DB_DICT, COLUMN_NAMES, TABLE_NAMES, MAX_DICT
         
         #newobject.select_join(DB_DICT, COLUMN_NAMES, TABLE_NAMES, MAX_DICT)
-
+        print '\n-----------------> select all from table'
+        res, temp, columns = newobject.select_all_from_table(table_name)
+        print '\n-----------------> write data to file'
+        newobject.file_write(temp, columns)
+        print '\n-----------------> insert into table'
+        #newobject.insert_into_table()
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
 
