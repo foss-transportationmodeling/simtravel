@@ -252,6 +252,7 @@ class DataArray(object):
         return self.data <> value
 
 
+
 class DataFilter(object):
     """
     This is the base class for specifying data filtering criterion.
@@ -311,6 +312,9 @@ class DataFilter(object):
 
         valid_rows.shape = (valid_rows.shape[0], )
         return valid_rows            
+
+    def __repr__(self):
+	return '%s %s %s' %(self.varname, self.filter_string, self.value)
 
 
 import unittest
