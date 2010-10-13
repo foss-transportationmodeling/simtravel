@@ -40,7 +40,7 @@ class QueryBrowser(object):
 
     ########## methods for select query  ##########
     #select all rows from the table
-    def select_all_from_table(self, table_name):
+    def select_all_from_table(self, table_name, cols=None):
         """
         This method is used to fetch all rows from the table specified.
 
@@ -50,12 +50,21 @@ class QueryBrowser(object):
         Output:
         Returns all the rows in the table
         """
+	colsStr = ""
+	if cols == None:
+            colsStr = "*"
+	else:
+	    for i in cols:
+		colsStr += "%s," %(i)
+	    colsStr = colsStr[:-1]
+
+
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         if tab_flag:
             #print 'Table %s exists.'%table_name
             try:    
-                self.dbcon_obj.cursor.execute("SELECT * FROM %s"%table_name)
+                self.dbcon_obj.cursor.execute("SELECT %s FROM %s" %(colsStr, table_name))
                 result = self.dbcon_obj.cursor.fetchall()
                 cols_list = self.dbcon_obj.get_column_list(table_name)
                 

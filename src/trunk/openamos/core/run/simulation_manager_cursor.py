@@ -7,7 +7,7 @@ from openamos.core.component.config_parser import ConfigParser
 from openamos.core.database_management.cursor_query_browser import QueryBrowser
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
-from openamos.core.run.dataset import DB
+from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 
@@ -44,7 +44,7 @@ class ComponentManager(object):
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
         self.projectConfigObject = self.configParser.parse_projectAttributes()
-        
+        self.projectSkimsObject = self.configParser.parse_skims_tables()
 
     def establish_databaseConnection(self):
         dbConfigObject = self.configParser.parse_databaseAttributes()
@@ -65,7 +65,14 @@ class ComponentManager(object):
         # placeholders for creating the hdf5 tables 
         # only the network data is read and processed for faster 
         # queries
-        self.db.createTableFromDatabase('travel_skims', self.queryBrowser)
+
+        print 'Processing Travel Skims'
+        for tableInfo in self.projectSkimsObject.tableDBInfoList:
+            
+            self.db.createSkimsTableFromDatabase(tableInfo,
+                                                 self.queryBrowser)
+
+        #self.db.createTableFromDatabase('travel_skims', self.queryBrowser)
         
         
     def run_components(self):
@@ -321,7 +328,7 @@ class ComponentManager(object):
                      analysisInterval=None, subsample=None):
         # get hierarchy of the tables
 
-        #print indepVarDict
+        #pint indepVarDict
 
         # PROCESSING TO INCLUDE THE APPROPRIATE SPATIAL QUERY ANCHORS
         if spatialConst_list is not None:
@@ -460,7 +467,7 @@ class ComponentManager(object):
                                              subsample)
 
         self.append_cols_for_dependent_variables(data, depVarDict)
-        self.process_data_for_locs(data, spatialConst_list)
+        self.process_data_for_locs(data, spatialConst_list, analysisInterval)
         return data
     
 
@@ -476,7 +483,7 @@ class ComponentManager(object):
                 data.insertcolumn([j], tempValsArr)
         #print data.varnames, 'after'
 
-    def process_data_for_locs(self, data, spatialConst_list):
+    def process_data_for_locs(self, data, spatialConst_list, analysisInterval):
         """
         This method is called whenever there are location type queries involved as part
         of the model run. Eg. In a Destination Choice Model, if there are N number of 
@@ -491,11 +498,19 @@ class ComponentManager(object):
         if spatialConst_list is not None:
             for i in spatialConst_list:
                 print '\n\tProcessing spatial queries'
+
                 tableName = i.table
                 originColName = i.originField
                 destinationColName = i.destinationField
                 skimColName = i.skimField
+
+                if analysisInterval is not None:
+                    tableName = self.projectSkimsObject.lookup_table(analysisInterval)
+                else:
+                    tableName = self.projectSkimsObject.tableNamesList[0]
                 
+                print '\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
+
                 ti = time.time()
                 skimsMatrix, uniqueIDs = self.db.returnTableAsMatrix(tableName,
                                                                      originColName,
@@ -677,66 +692,6 @@ class ComponentManager(object):
         print '\t -- Choices are not repeated --'
         return False
 
-                #xraw_input()
-        
-
-        
-        
-
-
-
-        """
-        tableName = 'travel_skims'
-        table = self.db.returnTableReference(tableName)
-
-        origin = table.col('origin')
-        destination = table.col('destination')
-        tt = table.col('tt')
-
-        ttMatrix = zeros((max(origin)+1, max(destination)+1))
-
-        ttMatrix[origin, destination] = tt
-        
-        originQ = 110
-        destinationQ = 1745
-        timeWindow = 45
-
-        randint = random.randint
-        
-        destMatrix = zeros((10000, max(destination) + 1))
-
-
-        #print ttToDest.shape, ttFromDest.shape
-        for i in range(4000):
-            originQ = randint(101, 2095)
-            destinationQ = randint(101, 2095)
-            timeWindow = randint(15, 60)
-            ttToDest = ttMatrix[originQ,:]
-            ttFromDest = ttMatrix[:,destinationQ]
-            dest = ttToDest + ttFromDest < 45
-            #destMatrix[i, dest] = 1
-
-        print 'time taken - %.4f' %(time.time()-t)
-
-        print 'travel skims read'
-        raw_input()
-        
-        print cols
-        queryData = array([i[:] for i in query_gen])
-
-        mask = array == None
-        mask = ma.masked_values(queryData, None).mask
-        queryData = array(queryData)
-        queryData[mask] = 0
-        data = DataArray(queryData, cols)
-        from numpy import where
-        t = time.time()
-        print 'start'
-        
-        print sum(data.columns(['origin']).data == 101), sum(data.columns(['destination']).data == 1994)
-        print 'end', time.time()-t
-        raw_input()
-        """
 
 # Storing data ??                                                                                                             
 # Linearizing data for calculating activity-travel choice attributes??                                                        
@@ -755,14 +710,9 @@ class ComponentManager(object):
 if __name__ == '__main__':
     fileloc = '/home/kkonduri/simtravel/test/vehown'
     componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
-    for i in range(1):
-        f = open('test_res', 'a')
-        f.write('Run - %s' %(i+1))
-        f.close()
-        componentManager.establish_databaseConnection()
-        #componentManager.establish_cacheDatabase(fileloc, 'w')
-        componentManager.establish_cacheDatabase('w')
-        componentManager.run_components()
-        componentManager.db.close()
+    componentManager.establish_databaseConnection()
+    componentManager.establish_cacheDatabase('w')
+    componentManager.run_components()
+    componentManager.db.close()
     
 

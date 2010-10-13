@@ -32,6 +32,8 @@ from openamos.core.component.abstract_component import AbstractComponent
 
 from openamos.core.spatial_analysis.spatial_query_components import SpatioTemporalConstraint, PrismConstraints
 
+from openamos.core.travel_skims.travel_skims_components import TravelSkimsInfo
+
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
 
 from openamos.core.project_configuration import ProjectConfiguration
@@ -122,6 +124,35 @@ class ConfigParser(object):
                 tableOrderDict[tableOrder] = [tableName, tableKeys]
             tableNamesKeyDict[tableName] = [tableKeys, countKeys]
         return tableOrderDict, tableNamesKeyDict
+
+
+    def parse_skims_tables(self):
+        skims_element = self.configObject.find("TravelSkims")
+        referenceTablename = skims_element.get("reference_tablename")
+        indb_flag = skims_element.get("indb")
+
+        periodIterator = skims_element.getiterator("Period")
+
+        travelSkimsLookup = TravelSkimsInfo(referenceTablename, indb_flag)
+        
+        travelSkimsPeriodDBInfoList = []
+        for period_element in periodIterator:
+            tablename = period_element.get("tablename")
+            target_tablename = period_element.get("target_tablename")
+            origin_var = period_element.get("origin_var")
+            destination_var = period_element.get("destination_var")
+            skim_var = period_element.get("skim_var")
+            interval_start = int(period_element.get("intervalStart"))
+            interval_end = int(period_element.get("intervalEnd"))
+
+            travelSkimsLookup.add_tableInfoToList(tablename, origin_var,
+                                                  destination_var,
+                                                  skim_var,
+                                                  interval_start,
+                                                  interval_end,
+                                                  target_tablename)
+                                                  
+        return travelSkimsLookup
 
     def parse_analysis_interval_and_create_component(self, component_element):
         interval_element = component_element.find("AnalysisInterval")
