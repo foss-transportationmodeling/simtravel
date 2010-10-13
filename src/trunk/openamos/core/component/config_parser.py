@@ -500,11 +500,15 @@ class ConfigParser(object):
                 for i in range(countChoices):
                     coefficients = [{'%s%s'%(destinationField, i+1):1}]
                     specification = Specification(choice, coefficients)                
+
+                    # additional data filter
+                    
+                    dataFilterLoc = DataFilter(dep_varname, 'equals', i+1)
                     
                     model = LinearRegressionModel(specification, errorSpec)
 
                     model_type = 'regression'
-                    model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                    model_object = SubModel(model, model_type, dep_varname, dataFilter + [dataFilterLoc], 
                                             runUntilFilter, seed=seed)
 
                     self.model_list.append(model_object)
