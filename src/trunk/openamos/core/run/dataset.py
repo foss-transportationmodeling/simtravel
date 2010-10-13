@@ -2,7 +2,7 @@ import tables as t
 import time
 
 from numpy import unique
-from numpy.ma import zeros, masked_values
+from numpy.ma import zeros, masked_values, ones
 from openamos.core.run.dataset_table_layouts import *
 
 class DB(object):
@@ -91,12 +91,12 @@ class DB(object):
         skims = tableRef.col(skimColName)
 
         # Initialize matrix
-        skimsMatrix = zeros((max(origin)+1, max(destination)+1))
+        skimsMatrix = ones((max(origin)+1, max(destination)+1)) * fillValue
         #skimsMatrix.fill(fillValue)
 
         # Populate matrix
         skimsMatrix[origin, destination] = skims
-        skimsMatrix = masked_values(skimsMatrix, 0)
+        #skimsMatrix = masked_values(skimsMatrix, 0)
         
         return skimsMatrix, unique(origin)
 
