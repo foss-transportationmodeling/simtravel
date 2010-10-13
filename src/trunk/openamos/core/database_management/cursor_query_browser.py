@@ -18,7 +18,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
-from data_array import DataArray
+from openamos.core.data_array import DataArray
 
 class QueryBrowser(object):
     #initialize the class 
@@ -61,7 +61,8 @@ class QueryBrowser(object):
                 
                 data = self.createResultArray(result, cols_list)
 
-                return data, cols_list ##changes made here
+                #return data, cols_list ##changes made here
+                return data
             except Exception, e:
                 print 'Error while retreiving the data from the table'
                 print e
@@ -558,7 +559,7 @@ class QueryBrowser(object):
 
     ########## methods for insert query     ##########
     #insert values in the table
-    def insert_into_table(self, table_name):
+    def insert_into_table(self, arr, cols_list, table_name, keyCols, chunkSize=100000):
         """
         self, arr, cols_list, table_name, keyCols, chunkSize=None):
         This method is used to insert rows into the table.
@@ -583,7 +584,7 @@ class QueryBrowser(object):
         if tab_flag:
             #print 'Table %s exists.'%table_name
             try:
-                """
+                
                 ti = time.time()
                 #arr_str = [tuple(each) for each in arr]
                 #arr_str = str(arr_str)[1:-1]
@@ -602,33 +603,75 @@ class QueryBrowser(object):
                     last = (i+1)*chunkSize
                     arrSub = arr[i*chunkSize:last]
                     self.insert_nrows(table_name, cols_listStr, arrSub)
-                #insert_stmt = ("insert into %s %s values %s"
-                #               %(table_name, cols_listStr, arr_str))
-                """
-                insert_stmt = "copy %s from '/home/namrata/Documents/DBclasses/dbapi/myfile.csv' with delimiter as ',' csv header"%table_name
+                
+                #Insert last ODD chunk
+                arrSub = arr[nChunks*chunkSize:]
+                self.insert_nrows(table_name, cols_listStr, arrSub)
+                    
+                #result = self.dbcon_obj.cursor.execute(insert_stmt)
+                self.dbcon_obj.connection.commit()
+                print '\t\tTime after insert query %.4f' %(time.time()-ti)
+            except Exception, e:
+                print e
+        else:
+           print 'Table %s does not exist.'##%table_name 
+        self.create_index(table_name, keyCols)
+
+    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc):
+        """
+        self, arr, cols_list, table_name, keyCols, chunkSize=None):
+        This method is used to insert rows into the table.
+
+        Input:
+        Database configuration object, table name, data array
+
+        Output:
+        Inserts all the rows from data array in the table
+        """
+        
+        table_name = table_name.lower()
+
+        # Delete index before inserting
+        index_cols = self.delete_index(table_name)
+
+
+        self.file_write(arr, loc)
+        
+        #check if table exists
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        tab_flag = True
+
+        cols_listStr = ""
+        for i in cols_list:
+            cols_listStr += "%s,"%i
+        cols_listStr = "(%s)" %cols_listStr[:-1]
+
+        if tab_flag:
+            #print 'Table %s exists.'%table_name
+            try:
+                ti = time.time()
+                insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
+                               """ delimiters ','""" %(table_name, cols_listStr, loc))
+                                                                       
                 print insert_stmt
-                print 'time before insert query ------>', time.time()
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print 'time after insert query ------>', time.time()
+                print 'Time after insert query - %.4f' %(time.time() - ti)
                 #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
            print 'Table %s does not exist.'##%table_name 
-        print 'Create index on the table.'
         self.create_index(table_name, keyCols)
         
         
     def insert_nrows(self, table_name, cols_listStr, arr):
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
-        print 'time before insert ', time.time()
         try:
             insert_stmt = "insert into %s %s values %s"%(table_name, cols_listStr, arr_str)
             result = self.dbcon_obj.cursor.execute(insert_stmt)
             self.dbcon_obj.connection.commit()
-            print 'time after insert query ', time.time()
         except Exception, e:
             print '\t    Error while inserting data in the table'
             print e
@@ -711,7 +754,7 @@ class QueryBrowser(object):
     ########## methods for creating and deleting index##########
 
     ########### file function #################
-    def file_write(self, data_arr, column_list):
+    def file_write(self, data_arr, loc):
         """
         This method write the resultset to a file.
         
@@ -722,12 +765,13 @@ class QueryBrowser(object):
         File created with all data written in it.
         """
         #open the file
+        ti = time.time()
         print 'opening a file'
-        myfile = open('/home/namrata/Documents/DBclasses/dbapi/myfile.csv', 'w')
+        myfile = open('%s/tempData.csv' %loc, 'w')
         
         #enter the columns in the file
-        myfile.write(str(column_list)[1:-1])
-        myfile.write('\n')
+        #myfile.write(str(cols_list)[1:-1])
+        #myfile.write('\n')
         
         #data_arr = na.zeros(7).reshape(1,7)
         #loop through the array and write to file
@@ -735,16 +779,8 @@ class QueryBrowser(object):
             each = list(each)
             myfile.write(str(each)[1:-1])
             myfile.write('\n')
-        """
-        print 'time before writing to file -------> ', time.time()
-        for each in res:
-            myfile.write(str(each)[1:-1])
-            myfile.write('\n')
-            
-        print 'time after writing to file -------> ', time.time()
-        """
         myfile.close()
-        print 'file closed'
+        print '\t\tTime to write to file - %.4f' %(time.time()-ti)
     ########### file function ends ############
 
 
