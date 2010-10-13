@@ -188,6 +188,7 @@ class QueryBrowser(object):
                     new_str = i.lower() + '.' + j.lower()
                     final_list.append(new_str)                    
                 cols_list = cols_list + cols
+                #print cols_list, 'initial list without spatial const'
             else:
                 print ('Column passed in the dictionary does not exist in the table - ')
                 print 'Column List in the Table - ', clist
@@ -253,6 +254,8 @@ class QueryBrowser(object):
             countVarStr = '%s.%s' %(maxTable, maxColumn)
             final_list.remove(countVarStr)
             final_list.append('temp.%s'%maxColumn)
+            cols_list.remove(maxColumn)
+            cols_list.append(maxColumn)
 
             #print 'NEW FINAL LIST -->', final_list
 
