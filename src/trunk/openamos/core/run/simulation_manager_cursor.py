@@ -57,7 +57,8 @@ class ComponentManager(object):
     def close_databaseConnection(self):
         pass
         
-    def establish_cacheDatabase(self, fileLoc, mode='w'):
+    def establish_cacheDatabase(self, mode='w'):
+        fileLoc = self.projectConfigObject.location
         self.db = DB(fileLoc, mode)
         if mode == 'w':
             self.db.create()
@@ -121,6 +122,7 @@ class ComponentManager(object):
             # Prepare Data
             data = self.prepare_data(vars_dict, depvars_dict, count_keys, 
                                      spatialConst_list, analysisInterval, subsample)        
+
             print 'Variable Names order - ', data.varnames
             # Append the Spatial Query Results
             # data = self.process_spatial_query(data, i.spatialConst_list)
@@ -165,6 +167,8 @@ class ComponentManager(object):
         and hence the need to reflect the run-time caches to the database
         """
 
+        fileLoc = self.projectConfigObject.location
+
         #self.queryBrowser.inser_into_table(data.data
         table = self.db.returnTableReference(tableName)
         
@@ -194,6 +198,7 @@ class ComponentManager(object):
         
         #self.queryBrowser.delete_all(tableName)            
         self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
+        #self.queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc)
 
         
     def prepare_vars(self, variableList, component):
@@ -480,11 +485,12 @@ class ComponentManager(object):
         to the N random location choices.
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
-        print '\n\tProcessing spatial queries'
+
         t = time.time()
 
         if spatialConst_list is not None:
             for i in spatialConst_list:
+                print '\n\tProcessing spatial queries'
                 tableName = i.table
                 originColName = i.originField
                 destinationColName = i.destinationField
@@ -754,7 +760,8 @@ if __name__ == '__main__':
         f.write('Run - %s' %(i+1))
         f.close()
         componentManager.establish_databaseConnection()
-        componentManager.establish_cacheDatabase(fileloc, 'w')
+        #componentManager.establish_cacheDatabase(fileloc, 'w')
+        componentManager.establish_cacheDatabase('w')
         componentManager.run_components()
         componentManager.db.close()
     
