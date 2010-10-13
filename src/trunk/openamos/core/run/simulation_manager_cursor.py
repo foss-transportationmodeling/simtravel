@@ -75,7 +75,7 @@ class ComponentManager(object):
         
         for i in componentList:
             for j in i.model_list:
-                print j.dep_varname
+                print j.dep_varname, j.model_type, j.data_filter
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
             tableName = i.table
             print '\nFor component - %s deleting corresponding table - %s' %(i.component_name, tableName)
@@ -83,7 +83,7 @@ class ComponentManager(object):
             #delete the delete statement; this was done to clean the tables during testing
             self.queryBrowser.delete_all(tableName)            
         #self.queryBrowser.dbcon_obj.close_sessionInstance()            
-        
+        #raw_input()
         for i in componentList:
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
@@ -461,14 +461,15 @@ class ComponentManager(object):
 
     def append_cols_for_dependent_variables(self, data, depVarDict):
         #print 'INSERTING FOLLOWING DEPENDENT COLS', depVarDict
-
+        #print data.varnames, 'before'
         numRows = data.rows
         tempValsArr = zeros((numRows,1))
         for i in depVarDict:
-            colsInTable = depVarDict[i]
+            colsInTable = list(set(depVarDict[i]))
             colsInTable.sort()
             for j in colsInTable:
                 data.insertcolumn([j], tempValsArr)
+        #print data.varnames, 'after'
 
     def process_data_for_locs(self, data, spatialConst_list):
         """
@@ -479,6 +480,7 @@ class ComponentManager(object):
         to the N random location choices.
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
+        print '\n\tProcessing spatial queries'
         t = time.time()
 
         if spatialConst_list is not None:
@@ -488,15 +490,17 @@ class ComponentManager(object):
                 destinationColName = i.destinationField
                 skimColName = i.skimField
                 
+                ti = time.time()
                 skimsMatrix, uniqueIDs = self.db.returnTableAsMatrix(tableName,
                                                                      originColName,
                                                                      destinationColName,
                                                                      skimColName)
+                print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
                 if i.countChoices is not None: 
-                    print '\n\tNeed to sample location choices for the following model'
+                    print '\t\tNeed to sample location choices for the following model'
                     self.sample_location_choices(data, skimsMatrix, uniqueIDs, i)
                 else:
-                    print '\n\tNeed to extract skims'
+                    print '\tNeed to extract skims'
                     self.extract_skims(data, skimsMatrix, i)
 
         #raw_input()
