@@ -109,7 +109,7 @@ class SimulationManager(object):
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
 
         #self.queryBrowser.dbcon_obj.close_sessionInstance()            
-        raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
+        #raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
         for i in componentList:
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
