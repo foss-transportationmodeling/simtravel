@@ -61,7 +61,6 @@ class PrismConstraints(object):
                 """is not a valid SpatioTemporalConstraint object"""
         self.endConstraint = endConstraint
         
-        print sampleField
         if sampleField is not None and not isinstance(sampleField, str):
             raise PrismConstraintError, """The sample field is """\
                 """not valid; should be a str object"""

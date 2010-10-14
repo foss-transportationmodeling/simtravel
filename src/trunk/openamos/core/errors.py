@@ -1,3 +1,6 @@
+class ArgumentsError(Exception):
+    pass
+
 class SpecificationError(Exception):
     pass
 

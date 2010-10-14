@@ -72,7 +72,7 @@ class DB(object):
 	colsList.append(tableInfo.skims_var)
 
         data = queryBrowser.select_all_from_table(tableName, colsList)
-        print 'Time taken to retrieve records %.4f' %(time.time()-t)
+        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
 
         cols = data.varnames
         colIndices = range(data.cols)
@@ -87,7 +87,7 @@ class DB(object):
                     tableRow[cols[j]] = i[j]
             tableRow.append()
         tableRef.flush()
-        print 'Time taken to write to hdf5 format %.4f' %(time.time()-t)
+        print '\tTime taken to write to hdf5 format %.4f' %(time.time()-t)
         
 
     def returnTableAsMatrix(self, tableName, originColName, destinationColName, skimColName, fillValue=9999):

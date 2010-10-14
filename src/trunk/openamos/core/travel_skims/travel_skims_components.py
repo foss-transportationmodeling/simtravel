@@ -4,21 +4,20 @@
 
 class TravelSkimsPeriodDBInfo(object):
     def __init__(self, tableName, origin_var, destination_var, 	
-                 skims_var, intervalStart, intervalEnd, targetTableName=None):
+                 skims_var, intervalStart, intervalEnd):
         self.tableName = tableName
         self.origin_var = origin_var
         self.destination_var = destination_var
         self.skims_var = skims_var
         self.intervalStart = intervalStart
         self.intervalEnd = intervalEnd
-        self.targetTableName = targetTableName
 
 
     def __repr__(self):
-        return ("""Table name - %s, Target table name - %s, """\
-                    """origin variable - %s, destination variable - %s, """\
-                    """skims variable - %s, interval start - %s, """\
-                    """interval end - %s""" %(self.tableName, self.targetTableName,
+        return ("""\tTravel skims table that will be cached - %s """\
+                    """\n\t\tOrigin variable - %s, Destination variable - %s, """\
+                    """Skims variable - %s, Interval start - %s, """\
+                    """Interval end - %s""" %(self.tableName, 
                                               self.origin_var, self.destination_var,
                                               self.skims_var, self.intervalStart,
                                               self.intervalEnd))
@@ -36,8 +35,8 @@ class TravelSkimsInfo(object):
 
     def add_tableLookup(self, intervalStart, intervalEnd, tableName):
         self.table_lookup[(intervalStart, intervalEnd)] = tableName
-        print 'tablename - %s, start - %s, end - %s' %(tableName, intervalStart,
-                                                       intervalEnd)
+        print '\tSkims table name - %s applies for interval starting at %s and ending at %s' %(tableName, intervalStart,
+                                                              intervalEnd)
         
     def add_tableInfoToList(self, tableName, origin_var, destination_var,
                             skims_var, intervalStart, intervalEnd, targetTableName):

@@ -72,7 +72,7 @@ class DataBaseConnection(object):
         if db_engine == database_engine:
             return db_engine
         else:
-            raise Exception('Required database is not installed')
+            raise Exception('\tRequired database is not installed')
             sys.exit()
 
     
@@ -97,10 +97,10 @@ class DataBaseConnection(object):
         """
         installed_db = self.check_if_database_engine_exits()
         if installed_db:
-            print 'Database %s is installed.'%installed_db
+            print '\tDatabase %s is installed.'%installed_db
         else:
-            print 'Database is not installed. Cannot proceed furthur.'
-            print 'Exiting the program'
+            print '\tDatabase is not installed. Cannot proceed furthur.'
+            print '\tExiting the program'
             sys.exit()
 
         """
@@ -125,7 +125,7 @@ class DataBaseConnection(object):
 
                 #set a flag that indicates the existence of the database.
                 if database_flag:
-                    print 'Database %s exists'%self.database_name
+                    print '\tDatabase %s exists'%self.database_name
                     #dispose the engine and close the raw connection
                     self.cursor.close()
                     self.connection.close()
@@ -134,7 +134,7 @@ class DataBaseConnection(object):
                     #dispose the engine and close the raw connection			
                     self.cursor.close()
                     self.connection.close()
-                    print 'Database %s does not exist.'%self.database_name
+                    print '\tDatabase %s does not exist.'%self.database_name
                     return 0
             except Exception, e:
                 print e
@@ -161,11 +161,11 @@ class DataBaseConnection(object):
                 self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
                 self.cursor = self.connection.cursor()
                 self.cursor.execute("create database %s encoding = 'utf8'"%new_database)
-                print 'Database %s created'%new_database
+                print '\tDatabase %s created'%new_database
             except:
                 raise Exception('Error while creating a new database')
         else:
-            print 'Database exists. No need to create a new database'
+            print '\tDatabase exists. No need to create a new database'
 
 
     #drops a database
@@ -187,11 +187,11 @@ class DataBaseConnection(object):
                 self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
                 self.cursor = self.connection.cursor()
                 self.cursor.execute("drop database %s"%self.database_name)
-                print 'Database dropped'
+                print '\tDatabase dropped'
             except:
                 raise Exception('Error while deleting a database')
         else:
-            print 'Database does not exists. Cannot drop database.'
+            print '\tDatabase does not exists. Cannot drop database.'
     
     #get the list of databases
     def get_list_databases(self):
@@ -207,10 +207,10 @@ class DataBaseConnection(object):
         """
         installed_db = self.check_if_database_engine_exits()
         if installed_db:
-            print 'Database %s is installed.'%installed_db
+            print '\tDatabase %s is installed.'%installed_db
         else:
-            print 'Database is not installed. Cannot proceed furthur.'
-            print 'Exiting the program'
+            print '\tDatabase is not installed. Cannot proceed furthur.'
+            print '\tExiting the program'
             sys.exit()
 
 
@@ -256,12 +256,12 @@ class DataBaseConnection(object):
                                                  %(self.host_name, self.database_name, 
                                                    self.user_name, self.password))
                 self.cursor = self.connection.cursor()
-                print 'New connection created.\n'
+                print '\tNew connection created.'
             except Exception, e:
-                print "Exiting the program since database connectivity failed"
+                print "\tExiting the program since database connectivity failed"
                 print e
         else:
-            print 'Database %s does not exists. Cannot create connection to the database'%self.database_name
+            print '\tDatabase %s does not exists. Cannot create connection to the database'%self.database_name
 
     
     #close the connection            
@@ -279,15 +279,14 @@ class DataBaseConnection(object):
             print 'Connection is None. Cannot close the connection.'
         else:
             try:
-                print "Closing the database connection."
                 self.cursor.close()
                 self.connection.close()
                 if self.connection.closed:
-                    print 'Connection to database closed.\n'
+                    print '\tConnection to database closed.\n'
                 else:
-                    print 'Connection to database not closed.\n'
+                    print '\tConnection to database not closed.\n'
             except:
-                print "Error while closing the database connection. Exiting the program."
+                print "\tError while closing the database connection. Exiting the program."
                 self.cursor = None
                 self.connection = None
                 sys.exit()
@@ -312,7 +311,7 @@ class DataBaseConnection(object):
             table_exists = self.table_name in tbs
             return table_exists
         except Exception, e:
-            print 'Error when checking for existing tables'
+            print '\tError when checking for existing tables'
             print e
             raise Exception
 
@@ -334,7 +333,7 @@ class DataBaseConnection(object):
             tbs = [tb[0] for tb in tables]
             return tbs
         except:
-            print 'Error while fetching the tables from the database'
+            print '\tError while fetching the tables from the database'
             raise Exception
 
 
@@ -360,10 +359,10 @@ class DataBaseConnection(object):
                 cols = [cl[0] for cl in columns]
                 return cols
             except Exception, e:
-                print 'Error while fetching the columns from the table'
+                print '\tError while fetching the columns from the table'
                 print e
         else:
-            print 'Table %s does not exist. Cannot get the column list'%table_name
+            print '\tTable %s does not exist. Cannot get the column list'%table_name
 
 
     #creates a new table
@@ -382,10 +381,10 @@ class DataBaseConnection(object):
         self.table_name = table_name
         table_flag = self.check_if_table_exists(table_name)
         if table_flag:
-            print 'Table already exists in the database. No need to create a new table'
+            print '\tTable already exists in the database. No need to create a new table'
         else:
             #create a new table since it does not exist
-            print 'Table does not exist. Create a new table'
+            print '\tTable does not exist. Create a new table'
             column = ' '
             for col, ctype, key in zip(columns, ctypes, keys):
                 if key == '1':
@@ -397,9 +396,9 @@ class DataBaseConnection(object):
             try:
                 self.cursor.execute("create table %s %s"%(self.table_name, column))
                 self.connection.commit()
-                print "Table '%s' created"%self.table_name
+                print "\tTable '%s' created"%self.table_name
             except Exception, e:
-                print 'Error while creating the table %s'%self.table_name
+                print '\tError while creating the table %s'%self.table_name
                 print e
 
 
@@ -420,11 +419,11 @@ class DataBaseConnection(object):
         table_flag = self.check_if_table_exists(table_name)
         if table_flag:
             #table exists and hence can be dropped
-            print 'Table exists in the database.'
+            print '\tTable exists in the database.'
             self.cursor.execute("drop table %s"%self.table_name)
             self.connection.commit()
         else:
-            print 'Table does not exist in the database. Cannot the drop the table'
+            print '\tTable does not exist in the database. Cannot the drop the table'
 
 
     #temp function prints the values of the database configuration object	

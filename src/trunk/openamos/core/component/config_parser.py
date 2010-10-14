@@ -75,6 +75,7 @@ class ConfigParser(object):
         return componentList
 
     def parse_projectAttributes(self):
+        print "-- Parse project attributes --"
         projectElement = self.configObject.find('Project')
         projectName = projectElement.get('name')
         projectLocation = projectElement.get('location')
@@ -89,6 +90,7 @@ class ConfigParser(object):
         return projectConfigObject
 
     def parse_databaseAttributes(self):
+        print "-- Parse database attributes --"
         dbConfig_element = self.configObject.find('DBConfig')
         protocol = dbConfig_element.get('dbprotocol')
         host = dbConfig_element.get('dbhost')
@@ -104,6 +106,7 @@ class ConfigParser(object):
         return dbConfigObject
         
     def parse_tableHierarchy(self):
+        print "-- Parse table hierarchy --"
         dbTables_element = self.configObject.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
@@ -127,6 +130,7 @@ class ConfigParser(object):
 
 
     def parse_skims_tables(self):
+        print "-- Parse skims tables' Time of Day information --"
         skims_element = self.configObject.find("TravelSkims")
         referenceTablename = skims_element.get("reference_tablename")
         indb_flag = skims_element.get("indb")

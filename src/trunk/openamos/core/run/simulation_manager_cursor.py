@@ -1,5 +1,6 @@
 import copy
 import time
+import os
 from lxml import etree
 from numpy import array, ma, ones, zeros, vstack, where
 
@@ -13,7 +14,7 @@ from openamos.core.models.interaction_model import InteractionModel
 
 from multiprocessing import Process
 
-class ComponentManager(object):
+class SimulationManager(object):
     """
     The class reads the configuration file, creates the component and model objects,
     and runs the models to simulate the various activity-travel choice processes.
@@ -25,7 +26,7 @@ class ComponentManager(object):
 
     def __init__(self, configObject=None, fileLoc=None, component=None):
         if configObject is None and fileLoc is None:
-                raise ConfigurationError, """The configuration input is not valid; a """\
+            raise ConfigurationError, """The configuration input is not valid; a """\
                 """location of the XML configuration file or a valid etree """\
                 """object must be passed"""
 
@@ -35,8 +36,11 @@ class ComponentManager(object):
                 """ file."""
 
         try:
+            fileLoc = fileLoc.lower()
             configObject = etree.parse(fileLoc)
-        except Exception, e:
+        except AttributeError, e:
+            raise ConfigurationError, """The file location is not a valid."""
+        except IOError, e:
             print e
             raise ConfigurationError, """The path for configuration file was """\
                 """invalid or the file is not a valid configuration file."""
@@ -51,13 +55,15 @@ class ComponentManager(object):
         self.queryBrowser = QueryBrowser(dbConfigObject)
         self.queryBrowser.dbcon_obj.new_connection()
         #self.queryBrowser.create_mapper_for_all_classes()
-        print 'Database Connection Established'
+        #print 'Database Connection Established'
 
 
-    def close_databaseConnection(self):
-        pass
+    def close_connections(self):
+        self.queryBrowser.dbcon_obj.close_connection()
+        self.db.close()
         
     def establish_cacheDatabase(self, mode='w'):
+        print "-- Creating a hdf5 cache database --"
         fileLoc = self.projectConfigObject.location
         self.db = DB(fileLoc, mode)
         if mode == 'w':
@@ -66,7 +72,7 @@ class ComponentManager(object):
         # only the network data is read and processed for faster 
         # queries
 
-        print 'Processing Travel Skims'
+        print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
             
             self.db.createSkimsTableFromDatabase(tableInfo,
@@ -77,21 +83,33 @@ class ComponentManager(object):
         
     def run_components(self):
         t_c = time.time()
+        print "-- Parsing components and model specifications --"
         componentList = self.configParser.parse_models()
-        
         subsample = self.projectConfigObject.subsample
         
+        tableNamesDelete = []
         for i in componentList:
-            for j in i.model_list:
-                print j.dep_varname, j.model_type, j.data_filter
-            #self.queryBrowser.dbcon_obj.new_sessionInstance()
-            tableName = i.table
-            print '\nFor component - %s deleting corresponding table - %s' %(i.component_name, tableName)
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
-            self.queryBrowser.delete_all(tableName)            
+            tableName = i.table
+            if tableName not in tableNamesDelete:
+                tableNamesDelete.append(tableName)
+                print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
+                self.queryBrowser.delete_all(tableName)                            
+
+        modelCount = 0
+        for i in componentList:
+            print '\n\tFor component - %s ' %(i.component_name)
+            print "\t -- Model list including model formulation and data filters if any  -- "
+            for j in i.model_list:
+                print "\t\t - name:", j.dep_varname, ",formulation:", j.model_type, ",filter:", j.data_filter
+                modelCount += 1
+
+        print "\tTotal of %s components and %s models will be processed" %(len(componentList), modelCount)
+        print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
+
         #self.queryBrowser.dbcon_obj.close_sessionInstance()            
-        #raw_input()
+        raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
         for i in componentList:
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
@@ -130,7 +148,7 @@ class ComponentManager(object):
             data = self.prepare_data(vars_dict, depvars_dict, count_keys, 
                                      spatialConst_list, analysisInterval, subsample)        
 
-            print 'Variable Names order - ', data.varnames
+            #print 'Variable Names order - ', data.varnames
             # Append the Spatial Query Results
             # data = self.process_spatial_query(data, i.spatialConst_list)
             
@@ -777,10 +795,10 @@ class ComponentManager(object):
 
 if __name__ == '__main__':
     fileloc = '/home/kkonduri/simtravel/test/vehown'
-    componentManager = ComponentManager(fileLoc = "%s/config.xml" %fileloc)
-    componentManager.establish_databaseConnection()
-    componentManager.establish_cacheDatabase('w')
-    componentManager.run_components()
-    componentManager.db.close()
+    simulationManager = SimulationManager(fileLoc = "%s/config.xml" %fileloc)
+    simulationManager.establish_databaseConnection()
+    simulationManager.establish_cacheDatabase('w')
+    simulationManager.run_components()
+    simulationManager.close_connections()
     
 

@@ -36,7 +36,7 @@ class QueryBrowser(object):
         self.database_name = dbconfig.database_name
         self.database_config_object = dbconfig
         self.dbcon_obj = DataBaseConnection(dbconfig)
-        print self.dbcon_obj
+        #print self.dbcon_obj
 
     ########## methods for select query  ##########
     #select all rows from the table
@@ -452,8 +452,8 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        print '\n\nSQL string for query - \n', sql_string
-        print cols_list
+        print 'SQL string for query - ', sql_string
+        #print cols_list
         
         try:
             self.dbcon_obj.cursor.execute(sql_string)
@@ -493,8 +493,8 @@ class QueryBrowser(object):
             
         
         # Convert it back to a regular array to enable all the other processing
-        print '\tSize of the data set that was retrieved - ', data.shape
-        print '\tRecords were processed after query in %.4f' %(time.time()-t)
+        print '\t - Size of the data set that was retrieved - ', data.shape
+        print '\t - Records were processed after query in %.4f' %(time.time()-t)
 
         return DataArray(data, cols_list)
 
@@ -535,7 +535,7 @@ class QueryBrowser(object):
                 print e
                 print 'Error deleting the information. Query failed.'
         else:
-            print 'Column %s does not belong to the table %s. Could not delete rows.'%(column_name, table_name)
+             'Column %s does not belong to the table %s. Could not delete rows.'%(column_name, table_name)
 
 
     #delete all rows i.e. empty table
@@ -556,12 +556,12 @@ class QueryBrowser(object):
             try:
                 self.dbcon_obj.cursor.execute("delete FROM %s "%table_name)
                 self.dbcon_obj.connection.commit()
-                print 'Delete all records successful.'
+                print '\t - Delete all records successful.'
             except Exception, e:
                 print e
-                print 'Error retrieving the information. Query failed.'
+                print '\t - Error retrieving the information. Query failed.'
         else:
-            print 'Table %s does not exist.'%table_name
+            print '\t - Table %s does not exist.'%table_name
             
     ########## methods for delete query end ##########
 
