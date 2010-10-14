@@ -187,6 +187,14 @@ class DataArray(object):
             raise DataError, e
 
 
+    def deleterows(self, rows=None):
+        """
+        the method returns a dataarray of columns with the rows removed
+        """
+        self.data = self.data[~rows]
+        self.rows = self.data.shape[0]
+        #return DataArray(self.data, self.varnames)
+
     def columns(self, columnames, rows=None):
         """
         the method retrieves and returns a dataarray of columnames that 
