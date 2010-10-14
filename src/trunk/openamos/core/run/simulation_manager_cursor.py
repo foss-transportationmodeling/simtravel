@@ -138,8 +138,11 @@ class ComponentManager(object):
             #    print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
 
             # Run the component
+            if data.rows == 0:
+                continue
             nRowsProcessed = i.run(data, self.db)
             
+            """
             if i.component_name == 'AfterSchoolActivities':
                 f = open('test_res', 'a')
                 f.write('%s,rows - %s\n' %(i.component_name, nRowsProcessed))
@@ -147,7 +150,7 @@ class ComponentManager(object):
                 
                 #if nRowsProcessed <> 6:
                 #    raw_input()
-
+            """
 
 
             # Write the data to the database from the hdf5 results cache
@@ -509,26 +512,26 @@ class ComponentManager(object):
                 else:
                     tableName = self.projectSkimsObject.tableNamesList[0]
                 
-                print '\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
+                print '\t\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
 
                 ti = time.time()
-                skimsMatrix, uniqueIDs = self.db.returnTableAsMatrix(tableName,
+                skimsMatrix1, skimsMatrix2, uniqueIDs = self.db.returnTableAsMatrix(tableName,
                                                                      originColName,
                                                                      destinationColName,
                                                                      skimColName)
                 print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
                 if i.countChoices is not None: 
                     print '\t\tNeed to sample location choices for the following model'
-                    self.sample_location_choices(data, skimsMatrix, uniqueIDs, i)
+                    self.sample_location_choices(data, skimsMatrix1, skimsMatrix2, uniqueIDs, i)
                 else:
                     print '\tNeed to extract skims'
-                    self.extract_skims(data, skimsMatrix, i)
+                    self.extract_skims(data, skimsMatrix1, skimsMatrix2, i)
 
         #raw_input()
         return data
     
                                         
-    def sample_location_choices(self, data, skimsMatrix, uniqueIDs, spatialconst):
+    def sample_location_choices(self, data, skimsMatrix1, skimsMatrix2, uniqueIDs, spatialconst):
         # extract destinations subject to the spatio-temporal
         # constraints
 
@@ -549,20 +552,67 @@ class ComponentManager(object):
 
         timeAvailable = destinationTimeColVals - originTimeColVals
 
-        destLocSetInd = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
+        destLocSetInd1 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
+        destLocSetInd2 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
 
         for zone in uniqueIDs:
             destZone = zone * ones((data.rows, 1), dtype=int)
-            timeToDest = skimsMatrix[originLocColVals, destZone]
-            timeFromDest = skimsMatrix[destZone, destinationLocColVals]
-
-            #print 'TIME TO DEST', zone, min(timeToDest), max(timeToDest)
-            #print 'TIME FROM DEST', zone, min(timeFromDest), max(timeFromDest)
-
+            timeToDest = skimsMatrix1[originLocColVals, destZone]
+            timeFromDest = skimsMatrix1[destZone, destinationLocColVals]
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
-            destLocSetInd[rowsLessThan, zone] = 1
+            destLocSetInd1[rowsLessThan, zone] = 1
+            k1 = rowsLessThan.sum()
+            #print destLocSetInd1[:,zone]            
+            
+            destZone = zone * ones((data.rows, 1), dtype=int)
+            timeToDest = skimsMatrix2[originLocColVals, destZone]
+            timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
+            rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
+            #print rowsLessThan, rowsLessThan.mask, destZone
+            #print "DONE" 
 
-        destLocSetInd = ma.masked_equal(destLocSetInd, 0)
+            if ma.any(rowsLessThan.mask):
+                destLocSetInd2[~rowsLessThan.mask, zone] = 1
+                k2 = rowsLessThan.sum()
+            #print rowsLessThan.mask
+            #print destLocSetInd2[:,zone]
+            #raw_input()
+            
+            
+        #print destLocSetInd1.sum(axis=1)
+        #print destLocSetInd2.sum(axis=1)
+        #print timeAvailable[:,0]
+        rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
+        print """\t\t%s records were deleted because there """\
+            """were no location reachable given the spatial/temporal """\
+            """constraints""" %(rowsZeroChoices.sum())
+
+
+        #print rowsZeroChoices
+        #print data.rows
+
+        #print data.rows, data.data.shape
+
+        # Deleting records for zero choices
+        data.deleterows(rowsZeroChoices)
+
+        originLocColVals = originLocColVals[~rowsZeroChoices, :]
+        destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
+
+        originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
+        destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
+
+        #print data.rows, data.data.shape
+        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
+        #raw_input('SAME STUFF')
+
+
+        print """\t\tResulting records in the dataset - %s """%(data.rows)
+
+        if data.rows == 0:
+            return
+
+        destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
         #print 'ORIGIN LOCS', originLocColVals[:5, 0]
         #print 'DESTINATION LOCS', destinationLocColVals[:5, 0]
@@ -591,8 +641,8 @@ class ComponentManager(object):
         count = spatialconst.countChoices
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
-            print '\tSampling Locations'
-            self.sample_choices(data, destLocSetInd, zoneLabels, count, sampleVarName, seed)
+            print '\t\tSampling Locations'
+            self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
             sampledVarNames = sampleVarDict['temp']
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
             sampledChoicesCheck = False
@@ -608,22 +658,39 @@ class ComponentManager(object):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
             sampleLocColVals = array(data.columns([sampleLocColName]).data, dtype=int)
 
-            vals = skimsMatrix[originLocColVals, sampleLocColVals]
+            vals = skimsMatrix2[originLocColVals, sampleLocColVals]
+            
+            #print originLocColVals[:,0], sampleLocColVals[:,0]
+            # the default missing value for skim was 9999 but that was causing problems with
+            # calculation as aresult it is changed to a small number so that the alternative
+            # corresponding to that is very negative. This is for those cases where the number
+            # of choices is less than the minimum number of choices to be sampled
+            rowsEqualsDefault = vals.mask
+            vals[rowsEqualsDefault] = -9999
+
+            #print 'ROWS MISSING', rowsEqualsDefault[:,0]
+            #print vals[:,0]
+            #raw_input()
+            
             skimLocColName = '%s%s' %(spatialconst.skimField, i+1)
             #print skimLocColName
             data.setcolumn(skimLocColName, vals)
+
+
+
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
         #print data.columns(colsInTable + [originLocColName])
         #tt = data.columns(['tt1', 'tt2', 'tt3', 'tt4', 'tt5'])
         #print tt
+        #print data.columns(['houseid', 'personid']).data
         #print '\tTravel skims extracted for the sampled locations'
         #raw_input()
 
             
             
             
-    def extract_skims(self, data, skimsMatrix, spatialconst):
+    def extract_skims(self, data, skimsMatrix1, skimsMatrix2, spatialconst):
 
         # hstack a column for the skims that need to be extracted for the
         # location pair
@@ -633,7 +700,7 @@ class ComponentManager(object):
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
 
-        vals = skimsMatrix[originLocColVals, destinationLocColVals]
+        vals = skimsMatrix1[originLocColVals, destinationLocColVals]
         #vals.shape = (data.rows,1)
         data.insertcolumn(['tt'], vals)
 
@@ -643,6 +710,7 @@ class ComponentManager(object):
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
+            #print data.columns(['houseid']).data[:,0]
             #print 'NUMBER OF DESTINATIONS', destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
             #print probLocSet.shape, 'PROBABILITY SHAPE'
@@ -670,8 +738,8 @@ class ComponentManager(object):
             rowIndices = array(xrange(dataCol.shape[0]), int)
             colIndices = actualLocIds.astype(int)
             #print res.data.shape
-            destLocSetInd[rowIndices, colIndices] = 0
-        print "\t -- Sampling choices took - %.4f" %(time.time()-ti)
+            destLocSetInd.mask[rowIndices, colIndices] = True
+        print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
 
     def check_sampled_choices(self, data, sampledVarNames):
         for i in range(len(sampledVarNames)):
