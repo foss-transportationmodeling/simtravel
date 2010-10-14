@@ -7,7 +7,7 @@ from openamos.core.component.config_parser import ConfigParser
 from openamos.core.database_management.query_browser import QueryBrowser
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
-from openamos.core.run.dataset import DB
+from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 
