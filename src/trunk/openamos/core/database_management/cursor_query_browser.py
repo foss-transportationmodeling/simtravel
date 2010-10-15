@@ -791,6 +791,125 @@ class QueryBrowser(object):
         myfile.close()
         print '\t\tTime to write to file - %.4f' %(time.time()-ti)
     ########### file function ends ############
+    
+    ###########################################
+    #new code for copy file
+    #file to get datatype
+    def column_data_type(self, res, temp_arr):
+        """
+        Input:
+        resultset and data array object
+        """
+        temp_cols = temp_arr.varnames
+        print temp_cols
+        write_file_str = ""
+        write_file_str = self.get_column_data_type(temp_cols)
+        print write_file_str
+        
+        print 'write file start ----------->', time.time()
+        try:
+            file_fp = open('/home/namrata/Documents/DBclasses/dbapi/temp1.csv', 'w')
+            print 'file opened'
+            data_arr_len = len(temp_arr.data)
+            myfile.write(str(temp_cols)[1:-1])
+            myfile.write('\n')
+        
+            for each in temp_arr.data:
+                each = list(each)
+                each = str(each)[1:-1]
+                parts = each.split(', ')
+                count = len(parts)
+                ctr = 0
+                #write_str = "'%s,%s,%s,%s'%(int(float(parts[0])), long(float(parts[1])), float(parts[2]), int(float(parts[3])))"
+                #print write_str
+                #file_fp.write('%s,%s,%s,%s\n'%(int(float(parts[0])), long(float(parts[1])), float(parts[2]), int(float(parts[3]))))
+                file_fp.write(eval(write_file_str))
+                file_fp.write('\n')                    
+        except Exception, e:
+            print e
+        file_fp.close()
+        print 'write file end ----------->', time.time()
+        
+        print '\ninsert data'
+        
+        try:
+            insert_stmt = "copy abc from '/home/namrata/Documents/DBclasses/dbapi/temp1.csv' with delimiter as ',' csv header"
+            #print insert_stmt
+            print 'time before insert query ------>', time.time()
+            result = self.dbcon_obj.cursor.execute(insert_stmt)
+            self.dbcon_obj.connection.commit()
+            print 'time after insert query ------>', time.time()
+        except Exception, e:
+            print e
+        print '\n'
+        
+    
+    def get_column_data_type(self, temp_arr):
+        """
+        Input:
+        resultset and data array object
+        """
+        data_type_arr = []
+        data_type_stmt = "select column_name, data_type  from information_schema.columns where table_schema = 'public'"
+        try:
+            self.dbcon_obj.cursor.execute(data_type_stmt)
+            result = self.dbcon_obj.cursor.fetchall()
+            
+            columns = [cl[0] for cl in result]
+            data_type = [dt[1] for dt in result]
+            print columns
+            for each in temp_arr:
+                for col, dat in zip(columns, data_type):
+                    if each == col:
+                        data_type_arr.append(dat)
+                        break
+        except Exception, e:
+            print e
+        print 'data_type_arr is ------>', data_type_arr
+        final_data_types = self.define_mapping(data_type_arr)
+        print 'final data types are ------->', final_data_types
+        
+        #create string for file 
+        file_str = ""
+        type_iden_str = " '"
+        #create string for the type identifier
+        for each in range(len(temp_arr)):
+            type_iden_str = type_iden_str + "%s\t"
+        type_iden_str = type_iden_str[1:-1]
+        type_iden_str = type_iden_str + "'%"
+        
+        #create string for 
+        data_type_str = "("
+        count = 0
+        for each in final_data_types:
+            if count == (len(final_data_types)-1):
+                data_type_str = data_type_str + each + "(float(parts["+ str(count) + "])))"
+            else:
+                data_type_str = data_type_str + each + "(float(parts["+ str(count) + "])), "
+                count = count + 1
+        
+        final_str = type_iden_str + data_type_str
+        return final_str
+    
+    
+    def define_mapping(self, data_type_list):
+        new_data_types = []
+        
+        for each in data_type_list:
+            if each == 'integer':
+                new_data_types.append('int')
+            elif each == 'real':
+                new_data_types.append('float')
+            elif each == 'bigint':
+                new_data_types.append('long')
+            elif each == 'character varying':
+                new_data_types.append('str')
+            elif each == 'double precision':
+                new_data_types.append('float')
+
+        return new_data_types
+    ###########################################################
+
 
 
 #unit test to test the code
