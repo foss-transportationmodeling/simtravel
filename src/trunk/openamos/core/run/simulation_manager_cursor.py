@@ -213,7 +213,7 @@ class SimulationManager(object):
         print '\tNumber of rows processed for this component - ', nRowsProcessed
         if nRowsProcessed == 0:
             return
-        resArr = list(table[-nRowsProcessed:])
+        resArr = table[-nRowsProcessed:]
         print """\tCreating the array object (WITHOUT iterating through the hdf5 results) """\
             """to insert into tbale - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
@@ -225,8 +225,8 @@ class SimulationManager(object):
         # inserting old rows and creating indices for them
         
         #self.queryBrowser.delete_all(tableName)            
-        self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
-        #self.queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc)
+        #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
+        self.queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc)
 
         
     def prepare_vars(self, variableList, component):
