@@ -662,10 +662,10 @@ class QueryBrowser(object):
                 insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
                                """ delimiters ','""" %(table_name, cols_listStr, loc))
                                                                        
-                print insert_stmt
+                #print insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print 'Time after insert query - %.4f' %(time.time() - ti)
+                print '\t\tTime after insert query - %.4f' %(time.time() - ti)
                 #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
@@ -775,7 +775,6 @@ class QueryBrowser(object):
         """
         #open the file
         ti = time.time()
-        print 'opening a file'
         myfile = open('%s/tempData.csv' %loc, 'w')
         
         #enter the columns in the file
