@@ -1,6 +1,8 @@
 from scipy.stats import genlogistic, norm
 from numpy import array, zeros, all
 
+import time
+
 from openamos.core.models.abstract_choice_model import AbstractChoiceModel
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.ordered_choice_model_components import OLSpecification
@@ -68,10 +70,16 @@ class OrderedModel(AbstractChoiceModel):
         Inputs:
         data = DataArray object
         """
+        #ti = time.time()
         probabilities = DataArray(self.calc_probabilities(data), 
                                   self.specification.choices)
+        #print "\t\t\tprobabilities calculated in %.4f" %(time.time()-ti)
         prob_model = AbstractProbabilityModel(probabilities, seed)
-        return prob_model.selected_choice()
+        #ti = time.time()
+        choice = prob_model.selected_choice()
+        #print "\t\t\tsimulated completed in %.4f" %(time.time()-ti)
+        
+        return choice
         
 
 

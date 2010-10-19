@@ -178,13 +178,12 @@ class SimulationManager(object):
                 keyCols = i.key[0]
             self.reflectToDatabase(tableName, keyCols, nRowsProcessed)
 
-            print '-- Finished simulating model --'
-            print '-- Time taken to complete - %.4f' %(time.time()-t)
+            print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #print raw_input('-- Press any key to continue... --')
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.close_sessionInstance()
             #raw_input()
-        print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f' %(time.time()-t_c)
+        print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
 
     def reflectToDatabase(self, tableName, keyCols=[], nRowsProcessed=0):
         """
@@ -214,8 +213,7 @@ class SimulationManager(object):
         if nRowsProcessed == 0:
             return
         resArr = table[-nRowsProcessed:]
-        print """\tCreating the array object (WITHOUT iterating through the hdf5 results) """\
-            """to insert into tbale - %.4f""" %(time.time()-t)
+        print """\t    creating the array object to insert into table took - %.4f""" %(time.time()-t)
         colsToWrite = table.colnames
 
         #print resArr

@@ -112,22 +112,28 @@ class AbstractProbabilityModel(object):
 
         for i in range(self.num_choices):
             # Indicator for the zero cells in the choice array
-            indicator_zero_cells = ones(self.num_agents)
+            #indicator_zero_cells = ones(self.num_agents)
+            indicator = array([True]*self.num_agents)
+
             zero_indices = choice == 0
-            indicator_zero_cells[~zero_indices] = ma.masked
+            #indicator_zero_cells[~zero_indices] = ma.masked
+            indicator[~zero_indices] = False
 
             # Indicator for the cells where the random number 
             # is less than the probability
-            indicator_less_cells = ones(self.num_agents)
+            #indicator_less_cells = ones(self.num_agents)
+            #indicator_less_cells = array([True]*self.num_agents)
             less_indices = random_numbers < self.prob_cumsum[:,i]
-            indicator_less_cells[~less_indices] = ma.masked
+            #indicator_less_cells[~less_indices] = ma.masked
+            #indicator_less_cells
+            indicator[~less_indices] = False
 
 
-            indicator_less_zero_cells = indicator_zero_cells + indicator_less_cells
+            #indicator_less_zero_cells = indicator_zero_cells + indicator_less_cells
             
-            indicator_less_zero_cells = indicator_less_zero_cells == 2
+            #indicator_less_zero_cells = indicator_less_zero_cells == 2
 
-            choice[indicator_less_zero_cells] = i + 1
+            choice[indicator] = i + 1
 
         choice.shape = (self.num_agents, 1)
 

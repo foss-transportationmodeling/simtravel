@@ -61,6 +61,24 @@ class DB(object):
         loc = '/%s_grp' %(grp)
         return self.fileh.getNode(loc, name=tableName)
 
+
+    def returnTypeConversion(self, tableName):
+        tableRef = self.returnTableReference(tableName)
+        colDtypes = tableRef.coldtypes
+
+        uniqColDtypes = list(set(colDtypes.values()))
+
+        convType = ""
+        for i in uniqColDtypes:
+            if i.kind in "iu":
+                convType = "int"
+            if i.kind in "f":
+                convType = "float"
+                return convType
+        return convType
+
+        
+
     def createSkimsTableFromDatabase(self, tableInfo, queryBrowser):
         t = time.time()
 
@@ -83,8 +101,9 @@ class DB(object):
 
         for i in data.data:
             for j in colIndices:
-                if i[j] is not None:
-                    tableRow[cols[j]] = i[j]
+                #if i[j] is not None:
+                #    tableRow[cols[j]] = i[j]
+                tableRow[cols[j]] = i[j]
             tableRow.append()
         tableRef.flush()
         print '\tTime taken to write to hdf5 format %.4f' %(time.time()-t)

@@ -98,37 +98,94 @@ class AbstractComponent(object):
                 if dep_varname not in cols_to_write and not isinstance(dep_varModel, InteractionModel):
                     cols_to_write.append(dep_varname)
             #print 'COLS TO WRITE AFTER ADDING DEP VARNAMES' , cols_to_write
-            print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
-            print "\t    Writing to %s: records - %s" %(self.table, sum(data_filter))
+            #print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
 
             if count_key is not None:
                 cols_to_write = list(set(cols_to_write) or set(count_key))
             #print 'COLS AFTER ADDING COUNT KEY', cols_to_write
             #raw_input()
+
+            nRowsIter = data_filter.sum()
+            nRowsProcessed += nRowsIter
+
+            print "\t    Writing to cache table %s: records - %s" %(self.table, nRowsIter)
             self.write_data_to_cache(db, cols_to_write, data_filter)
 
-            nRowsProcessed += sum(data_filter)
+
         return nRowsProcessed
 
     def write_data_to_cache(self, db, cols_to_write, data_filter):
         print '\t    Columns - ', cols_to_write
-        data_to_write = self.data.columns(cols_to_write)
+        data_to_write = self.data.columns(cols_to_write, data_filter)
+
         
-        t = time.time()
+
             # writing to the hdf5 cache
         cacheTableRef = db.returnTableReference(self.table)
         cacheTableRow = cacheTableRef.row
-        
-        for i in data_to_write.data[data_filter,:]:
-            for j in xrange(len(cols_to_write)):
-                cacheTableRow[cols_to_write[j]] = i[j]
-            cacheTableRow.append()
-        cacheTableRef.flush()
-        print """\t    Writing to hdf5 cache format (appending one record at a time) """\
-            """%.4f""" %(time.time()-t)
-            
 
+        colIndices = xrange(len(cols_to_write))
+
+
+        #t = time.time()
+        #data_to_write = self.data.columns(cols_to_write, data_filter)
+        #print data_to_write.data.shape
+        #for i in data_to_write.data:
+        #    for j in colIndices:
+        #        pass
+        
+        #print """\t   Iterating through the cols one record at a time took %.4f """ %(time.time()-t)
+
+        #t = time.time()
+        #data_to_write = self.data.columns(cols_to_write, data_filter)
+
+        #for i in data_to_write.data:
+        #    for j in colIndices:
+        #        cacheTableRow[cols_to_write[j]] = i[j]
+        #    cacheTableRow.append()
+        #cacheTableRef.flush()
+        #print """\t    Writing to hdf5 cache format (appending one record at a time) """\
+        #    """%.4f""" %(time.time()-t)
+
+        #t = time.time()
+        #darray = xrange(1000000)
+        #drows = xrange(5)
+        #for i in darray:
+        #    for j in drows:
+        #        pass
+        #print 'Dummy iteration took - %.4f' %(time.time() - t)
+
+        cacheColsTable = cacheTableRef.colnames
+
+        #print '\t\tSequence in cache', cacheColsTable
+
+        t = time.time()
+        convType = db.returnTypeConversion(self.table)
+        #print '\t\tConversion Type - ', convType
+        dtypesInput = cacheTableRef.coldtypes
+        #print dtypesInput
+        data_to_write = self.data.columnsOfType(cacheColsTable, data_filter, dtypesInput)
+        #data_to_write.data = data_to_write.data.astype(convType)
+        print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 
+
+        #print data_to_write
+
+        ti = time.time()
+        cacheTableRef.append(data_to_write.data)
+        cacheTableRef.flush()
+        print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
+
+        #for i in data_to_write.data:
+        #    for j in colIndices:
+        #        cacheTableRow[cols_to_write[j]] = i[j]
+        #    cacheTableRow.append()
+        #cacheTableRef.flush()
+        #db.fileh.flush()
+        #print """\t    Writing to hdf5 cache format (appending one record at a time) """\
+        #    """%.4f""" %(time.time()-t)
+        
     def create_filter(self, data_filter):
+        ti = time.time()
         data_subset_filter = array([True]*self.data.rows)
         if data_filter is None:
             return data_subset_filter
@@ -136,10 +193,12 @@ class AbstractComponent(object):
         for filterInst in data_filter:
             condition_filter = filterInst.compare(self.data)
             data_subset_filter[~condition_filter] = False
-        print '\t\tData Filter returned %s number of rows for above model' %sum(data_subset_filter)
+        #print '\t\tData Filter returned %s number of rows for above model took - %.4f' %(data_subset_filter.sum(),
+        #                                                                                 time.time()-ti)
         return data_subset_filter
 
     def iterate_through_the_model_list(self, model_list_duringrun, iteration):
+        ti = time.time()
         model_list_forlooping = []
         
         for i in model_list_duringrun:
@@ -150,6 +209,7 @@ class AbstractComponent(object):
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter)
+            tiii = time.time()
             if data_subset_filter.sum() > 0:
                 #print '\t RUN UNTIL CONDITION FILTER'
                 # The run condition filter to loop over records for which a certain
@@ -164,27 +224,32 @@ class AbstractComponent(object):
                 data_subset_filter[~run_condition_filter] = False
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-
+                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                                                                              time.time()-tiii)
                # Generate a choiceset for the corresponding agents
                 choiceset_shape = (data_subset.rows,
                                    i.model.specification.number_choices)
                 choicenames = i.model.specification.choices
             #print '-----', choicenames, '--------'
             #print i
-                choiceset = self.create_choiceset(choiceset_shape, 
-                                                  i.choiceset_criterion, 
-                                                  choicenames)
+                #choiceset = self.create_choiceset(choiceset_shape, 
+                #                                  i.choiceset_criterion, 
+                #                                  choicenames)
+                choiceset = None
                 #print "DATA SUBSET"
                 #print data_subset
                 #print data_subset.varnames
                 
-                result = i.simulate_choice(data_subset, choiceset, iteration)
-                self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+
+                if data_subset.rows > 0:                    
+                    if i.run_until_condition is not None:
+                        model_list_forlooping.append(i)
+
+
+                    result = i.simulate_choice(data_subset, choiceset, iteration)
+                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
             #print result.data
 
-                if i.run_until_condition is not None:
-                    if data_subset.rows > 0:                    
-                        model_list_forlooping.append(i)
                 # Indiciator variable updating no longer happens in the ABSTRACT COMPONENT
                 # Instead they are specified as simple regression models with the appropriate
                 # specifications
@@ -198,7 +263,7 @@ class AbstractComponent(object):
             #else:
             #    data_subset_filter = array([True]*self.data.rows)
             
-        print '\t-- Iteration Complete --'
+        print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
         #raw_input()
         return model_list_forlooping, data_subset_filter
 

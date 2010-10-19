@@ -47,7 +47,7 @@ class LogitChoiceModel(AbstractChoiceModel):
                 valid_values.setcolumn(i, ma.masked, mask)
         return valid_values
 
-
+    
     def calc_exp_choice_utilities(self, data, choiceset):
         """
         The method returns the exponent of the observed portion of the 
@@ -59,7 +59,8 @@ class LogitChoiceModel(AbstractChoiceModel):
         """
         values = self.validchoiceutilities(data, choiceset)
         values.data = exp(values.data)
-        return values
+        return self.calculate_exp_expected_values(data)
+    
 
     def calc_probabilities(self, data, choiceset):
         """

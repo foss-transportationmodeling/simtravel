@@ -42,9 +42,16 @@ class Model(object):
         Inputs:
         data - DataArray object
         """
-        exp_expected_values = self.calculate_expected_values(data)
-        exp_expected_values.data = exp(exp_expected_values.data)
-        return exp_expected_values
+        num_choices = self.specification.number_choices
+        exp_expected_value_array = DataArray(zeros((data.rows, num_choices)),
+                                        self.choices)
+        for i in range(num_choices):
+            coefficients = self.coefficients[i]
+            exp_expected_value_array.data[:,i] = data.exp_calculate_equation(coefficients)
+
+        #exp_expected_values = self.calculate_expected_values(data)
+        #exp_expected_values.data = exp(exp_expected_values.data)
+        return exp_expected_value_array
         
 
 import unittest

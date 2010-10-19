@@ -1,9 +1,8 @@
-from numpy import ndarray, array, zeros, ones, hstack
+from numpy import ndarray, array, zeros, ones, hstack, rec
 from scipy import exp
 import numexpr as ne
 import re
 import time
-
 
 from openamos.core.errors import DataError
 
@@ -84,30 +83,23 @@ class DataArray(object):
             except ValueError, e:
                 raise DataError, 'enter valid values for coefficients'
 
+        """
         ti = time.time()
         result = zeros((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             result += self.data[:,colnum] * coefficients[i]
-        
-        print 'numpy approach - %.4f' %(time.time()-ti)
-        print result
-
+        print '\t\t\tNumpy approach for linear combination - %.4f' %(time.time()-ti)
+        """
         ti = time.time()
         result = zeros((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             temp = self.data[:,colnum]
-            #result += self.data[:,colnum] * coefficients[i]
             exprStr = "%s*temp + result" %coefficients[i]
-            #print result.shape, temp.shape
-            #print exprStr
-            #print type(temp), temp.dtype.itemsize, temp.dtype.kind, temp.dtype
-            #raw_input()
             result = ne.evaluate(exprStr)
-        
-        print 'numexpr approach - %.4f' %(time.time()-ti)
-        print result
+        #print '\t\t\tNumexpr approach for linear combination - %.4f' %(time.time()-ti)
+
         if rows is not None:
             return result[rows]
         return result
@@ -126,19 +118,33 @@ class DataArray(object):
                 float(i)
             except ValueError, e:
                 raise DataError, 'enter valid values for coefficients'
-
+        """
+        ti = time.time()
         result = ones((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             result = result * self.data[:,colnum] * coefficients[i]
-        
+        print '\t\t\tNumpy approach for product - %.4f' %(time.time()-ti)
+        """
+
+        ti = time.time()
+        result = ones((self.rows,))
+        for i in coefficients.keys():
+            colnum = self._colnames[i.lower()]
+            temp = self.data[:,colnum]
+            exprStr = "%s*temp * result" %coefficients[i]
+            result = ne.evaluate(exprStr)
+        #print '\t\t\tNumexpr approach for product - %.4f' %(time.time()-ti)
+
+
         if rows is not None:
             return result[rows]
         return result        
 
     def exp_calculate_equation(self, coefficients):
         result = self.calculate_equation(coefficients)
-        return exp(result)
+        result = ne.evaluate("exp(result)")
+        return result
 
     
     def __repr__(self):
@@ -225,9 +231,12 @@ class DataArray(object):
         if not isinstance(columnames, list):
             return DataError, """the column names input should be a list"""\
                 """ of variable names"""
-        
+        missingColumnNames = []
         for i in columnames:
-            self.check_varname(i)
+            try:
+                self.check_varname(i)
+            except DataError, e:
+                print "Model for %s not specified for this particular component" %i
 
         columnums = []
         for i in columnames:
@@ -236,9 +245,33 @@ class DataArray(object):
             except KeyError, e:
                 raise DataError, '%s not a recognized column name' %i
 
+
         if rows is not None:
-            return DataArray(self.data[rows,:][:,columnums], columnames)
-        return DataArray(self.data[:,columnums], columnames)
+            #dataSubset = self.data[rows,:][:,columnums]
+            dataSubset = self.data[rows,:][:,columnums]
+            return DataArray(dataSubset, columnames)
+        dataSubset = self.data[:,columnums]
+        return DataArray(dataSubset, columnames)
+
+    def columnsOfType(self, columnames, rows=None, colTypes=None):
+        if colTypes == None:
+            return self.columns(columnames, rows)
+
+        dataSubset = self.columns(columnames, rows)
+        dataCols = []
+
+        dtypeInput = []
+        for i in range(len(columnames)):
+            colName = columnames[i]
+            colType = colTypes[colName]
+            dataCols.append(dataSubset.data[:,i].astype(colType))
+
+        dataSubset.data = rec.array(dataCols)
+
+        return dataSubset
+            
+            
+
 
     def rowsof(self, rows):
         """
@@ -319,6 +352,7 @@ class DataFilter(object):
                 """if a column was specified instead for the value to check against. """
 
     def compare(self, data):
+        #ti = time.time()
         if type(self.value) == str:
             self.value = data.columns([self.value]).data
             
@@ -341,6 +375,7 @@ class DataFilter(object):
             valid_rows = data.columns([self.varname]) <> self.value
 
         valid_rows.shape = (valid_rows.shape[0], )
+        #print "\t\t\t\tExtracting for one filter took - %.4f" %(time.time()-ti)
         return valid_rows            
 
     def __repr__(self):
