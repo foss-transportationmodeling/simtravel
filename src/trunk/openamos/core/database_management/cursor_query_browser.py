@@ -487,7 +487,7 @@ class QueryBrowser(object):
 
         if mask.any():
             data[mask] = fillValue
-
+            data = ma.array(data, dtype=float)
         #Sorting the array by primary cols identifying the agent as 
         # postgres seems to return queries without any order
             

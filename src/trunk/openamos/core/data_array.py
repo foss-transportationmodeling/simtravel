@@ -1,6 +1,9 @@
 from numpy import ndarray, array, zeros, ones, hstack
 from scipy import exp
+import numexpr as ne
 import re
+import time
+
 
 from openamos.core.errors import DataError
 
@@ -81,11 +84,30 @@ class DataArray(object):
             except ValueError, e:
                 raise DataError, 'enter valid values for coefficients'
 
+        ti = time.time()
         result = zeros((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             result += self.data[:,colnum] * coefficients[i]
         
+        print 'numpy approach - %.4f' %(time.time()-ti)
+        print result
+
+        ti = time.time()
+        result = zeros((self.rows,))
+        for i in coefficients.keys():
+            colnum = self._colnames[i.lower()]
+            temp = self.data[:,colnum]
+            #result += self.data[:,colnum] * coefficients[i]
+            exprStr = "%s*temp + result" %coefficients[i]
+            #print result.shape, temp.shape
+            #print exprStr
+            #print type(temp), temp.dtype.itemsize, temp.dtype.kind, temp.dtype
+            #raw_input()
+            result = ne.evaluate(exprStr)
+        
+        print 'numexpr approach - %.4f' %(time.time()-ti)
+        print result
         if rows is not None:
             return result[rows]
         return result
