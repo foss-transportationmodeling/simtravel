@@ -270,8 +270,14 @@ class ConfigParser(object):
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
         dep_varname = depvariable_element.get('var')
 
-        #print dep_varname, '----variable Name -----'
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
+        #print dep_varname, '----variable Name -----'
         choice = [dep_varname]
 
         # Creating the coefficients input for the regression model
@@ -328,7 +334,8 @@ class ConfigParser(object):
         runUntilFilter = self.return_run_until_condition(model_element)
 
         model_type = 'regression'
-        model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, seed=seed)
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, seed=seed, filter_type=filter_type)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -347,6 +354,12 @@ class ConfigParser(object):
         dep_varname = depvariable_element.get('var')
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         #Creating the coefficients input for the regression model
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
@@ -383,7 +396,7 @@ class ConfigParser(object):
         model_type = 'choice'
         model = CountRegressionModel(specification)
         model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, 
-                                values=values, seed=seed)
+                                values=values, seed=seed, filter_type=filter_type)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -410,6 +423,13 @@ class ConfigParser(object):
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
 
         #print dep_varname, "inside, regiular"
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -446,7 +466,8 @@ class ConfigParser(object):
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, values=values, seed=seed)#Model Object
+                                runUntilFilter, values=values, seed=seed, 
+                                filter_type=filter_type)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -472,6 +493,13 @@ class ConfigParser(object):
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         #print dep_varname, 'other one'
         # alternatives
@@ -504,26 +532,38 @@ class ConfigParser(object):
         model = LogitChoiceModel(specification) 
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, values=values, seed=seed)#Model Object
+                                runUntilFilter, values=values, seed=seed, 
+                                filter_type=filter_type)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
+
     def create_linear_object_for_locations(self, model_element, spatialConst_list):
+        """
+        creates linear combination objects for locations and travel times
+        """
 
         seed = self.process_seed(model_element)
         altSetElement = model_element.find('AlternativeSet')        
         if altSetElement is None or spatialConst_list is None: 
             return 
 
-        for i in spatialConst_list:
-            if i.countChoices is not None:
+        for const in spatialConst_list:
+            if const.countChoices is not None:
                 depvariable_element = model_element.find('DependentVariable')
                 dep_varname = depvariable_element.get('var')
                 
-                countChoices = i.countChoices
-                destinationField = i.destinationField
+                countChoices = const.countChoices
+                destinationField = const.destinationField
+
+                #Filter set
+                filter_set_element = model_element.find('FilterSet')
+                if filter_set_element is not None:
+                    filter_type = filter_set_element.get('type')
+                else:
+                    filter_type = None
 
                 dataFilter = self.return_filter_condition_list(model_element)
                 runUntilFilter = self.return_run_until_condition(model_element)
@@ -531,22 +571,44 @@ class ConfigParser(object):
                 choice = [dep_varname]
                 variance = array([[0.0]])
                 errorSpec = LinearRegErrorSpecification(variance)         
+                model_type = 'regression'
+
+                variableIterator = model_element.getiterator('Variable')
+                rep_var_list = []
+                for variable_element in variableIterator:
+                    rep_var = variable_element.get('repeat')
+
+                    if rep_var is not None:
+                        rep_var_list += re.split('[,]', rep_var)
+
+                
 
                 for i in range(countChoices):
+                    #Models to populate the location id variable
                     coefficients = [{'%s%s'%(destinationField, i+1):1}]
                     specification = Specification(choice, coefficients)                
 
                     # additional data filter
-                    
                     dataFilterLoc = DataFilter(dep_varname, 'equals', i+1)
                     
                     model = LinearRegressionModel(specification, errorSpec)
 
-                    model_type = 'regression'
                     model_object = SubModel(model, model_type, dep_varname, dataFilter + [dataFilterLoc], 
-                                            runUntilFilter, seed=seed)
+                                            runUntilFilter, seed=seed, filter_type=filter_type)
 
                     self.model_list.append(model_object)
+                    
+                    #Models to populate the travel time variable
+                    for var in rep_var_list:
+                        coefficients = [{'%s%s'%(var, i+1):1}]
+                        specification = Specification([var], coefficients)
+                        
+                        model = LinearRegressionModel(specification, errorSpec)
+                        
+                        model_type = 'regression'
+                        model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
+                                                runUntilFilter, seed=seed, filter_type=filter_type)
+                        self.model_list.append(model_object)
 
 
     def create_nested_logit_object(self, model_element):
@@ -557,6 +619,13 @@ class ConfigParser(object):
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')        
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         #Specification dict
         spec_build_ind = {}
@@ -678,7 +747,8 @@ class ConfigParser(object):
         model = NestedLogitChoiceModel(specification)
         model_type = 'choice'
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, values=values, seed=seed)
+                                runUntilFilter, values=values, seed=seed,
+                                filter_type=filter_type)
 
 
         #return model_object, variable_list
@@ -706,6 +776,13 @@ class ConfigParser(object):
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -746,7 +823,8 @@ class ConfigParser(object):
         model = OrderedModel(specification) 
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, values=values, seed=seed) #Model Object
+                                runUntilFilter, values=values, seed=seed,
+                                filter_type=filter_type) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -764,6 +842,13 @@ class ConfigParser(object):
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
         #dep_varname, dep_table, dep_keys = self.return_dep_var_attribs(depvariable_element)
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -793,7 +878,8 @@ class ConfigParser(object):
         model = ProbabilityModel(specification) 
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, values=values, seed=seed) #Model Object
+                                runUntilFilter, values=values, seed=seed,
+                                filter_type=filter_type) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -1014,11 +1100,19 @@ class ConfigParser(object):
         variable_list = [(tablename, varname)]
         
         filterCondition = filter_element.get('condition')
-        filterValue = float(filter_element.get('value'))
-
+        filterValue = filter_element.get('value')
+        if filterValue is not None:
+            filterValue = float(filter_element.get('value'))
+        else:
+            filterTablename = filter_element.get('valuetable')
+            filterValue = filter_element.get('valuevar')
+            variable_list_val = [(filterTablename, filterValue)]
+            self.component_variable_list = (self.component_variable_list + 
+                                            variable_list_val)
         dataFilter = DataFilter(varname, filterCondition, filterValue)
 
-        self.component_variable_list = self.component_variable_list + variable_list
+        self.component_variable_list = (self.component_variable_list + 
+                                        variable_list)
         
         #print 'FILTERCONDITION - ', filterCondition
 

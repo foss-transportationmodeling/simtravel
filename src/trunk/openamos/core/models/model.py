@@ -18,7 +18,8 @@ class SubModel(object):
                  #table=None,
                  #key=None,
                  values=None, 
-                 seed=1):
+                 seed=1,
+                 filter_type=None):
 
         if not isinstance(model, Model):
             raise ModelError, 'the model input is not a valid Model object'
@@ -61,6 +62,7 @@ class SubModel(object):
                     """values are not consistent. They both should be of the same """\
                     """size."""
         self.values = values
+        self.filter_type = filter_type
         #print model.choices, values
 
     def check_string(self, value, valid_values):

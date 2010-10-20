@@ -9,31 +9,21 @@ class RandomDistribution(RandomState):
     def return_normal_variables(self, location, scale, size):
         if scale == 0:
             return zeros(size) + location
-        
-        #err = self.normal(size=(3,1))
-        #f = open('test_res', 'a')
-        #f.write('linearNormal - %s' %self.seed)
-        #f.write(str(list(err[:,0])))
-        #f.write('\n')
-        #f.close()
-        
         norm_vars = self.normal(loc=location, 
                                 scale=scale, 
                                 size=size)
-
         return norm_vars
         
     def return_random_variables(self, size):
-        """"
-        err = self.random_sample(size=(3,1))
-        f = open('test_res', 'a')
-        f.write('RANDOM UNIFORM - %s' %self.seed)
-        f.write(str(list(err[:,0])))
-        f.write('\n')
-        f.close()
-        """
         rand_vars = self.random_sample(size)
         return rand_vars
+
+    def return_half_normal_variables(self, location, scale, size):
+	norm_vars = self.return_normal_variables(location, scale, size)
+	half_norm_vars = abs(norm_vars)
+	return half_norm_vars
+
+
 
 import unittest
 

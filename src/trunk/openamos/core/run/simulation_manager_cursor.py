@@ -296,6 +296,10 @@ class SimulationManager(object):
             else:
                 indepColDict[tableName] = [colName]
 
+	# pop the runtime variables
+	if 'runtime' in indepColDict:
+	    indepColDict.pop('runtime')	
+
         return indepColDict
 
 

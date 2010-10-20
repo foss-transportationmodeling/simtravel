@@ -1,6 +1,6 @@
 import copy
 import time
-
+from numpy import logical_or, logical_and
 from openamos.core.data_array import DataArray
 from openamos.core.models.model import SubModel
 from openamos.core.models.interaction_model import InteractionModel
@@ -108,6 +108,7 @@ class AbstractComponent(object):
             nRowsIter = data_filter.sum()
             nRowsProcessed += nRowsIter
 
+            #print data.varnames
             print "\t    Writing to cache table %s: records - %s" %(self.table, nRowsIter)
             self.write_data_to_cache(db, cols_to_write, data_filter)
 
@@ -184,15 +185,22 @@ class AbstractComponent(object):
         #print """\t    Writing to hdf5 cache format (appending one record at a time) """\
         #    """%.4f""" %(time.time()-t)
         
-    def create_filter(self, data_filter):
+    def create_filter(self, data_filter, filter_type):
         ti = time.time()
-        data_subset_filter = array([True]*self.data.rows)
-        if data_filter is None:
-            return data_subset_filter
-        
-        for filterInst in data_filter:
-            condition_filter = filterInst.compare(self.data)
-            data_subset_filter[~condition_filter] = False
+        if data_filter is not None:
+	    if filter_type == "and":
+	        filter_method = logical_and
+	        data_subset_filter = array([True]*self.data.rows)
+	    else:
+	        filter_method = logical_or
+		data_subset_filter = array([False]*self.data.rows)
+
+            for filterInst in data_filter:
+                condition_filter = filterInst.compare(self.data)
+		data_subset_filter = filter_method(data_subset_filter, condition_filter)
+	else:
+	    data_subset_filter = array([True]*self.data.rows)
+
         #print '\t\tData Filter returned %s number of rows for above model took - %.4f' %(data_subset_filter.sum(),
         #                                                                                 time.time()-ti)
         return data_subset_filter
@@ -208,7 +216,7 @@ class AbstractComponent(object):
             #f.close()
 
             # Creating the subset filter
-            data_subset_filter = self.create_filter(i.data_filter)
+            data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
             tiii = time.time()
             if data_subset_filter.sum() > 0:
                 #print '\t RUN UNTIL CONDITION FILTER'
@@ -247,6 +255,7 @@ class AbstractComponent(object):
 
 
                     result = i.simulate_choice(data_subset, choiceset, iteration)
+		    #print result.data[:,0]
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
             #print result.data
 

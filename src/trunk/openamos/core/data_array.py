@@ -328,7 +328,7 @@ class DataFilter(object):
     coefficients - dictionary (used for recalculating the varname after say some
     a certain choice process was simulated)  
     """
-    def __init__(self, varname, filter_string, value):
+    def __init__(self, varname, filter_string, value, filter_type=None):
         
         if not isinstance(varname, str):
             raise DataError, """variable input has to be a valid """\
@@ -350,6 +350,12 @@ class DataFilter(object):
                 """ a valid column name string object """\
                 """only 'float', 'int', 'str' objects are accepted checking to see """\
                 """if a column was specified instead for the value to check against. """
+
+
+	if not isinstance(filter_type, str) and (filter_type is not None):
+            raise DataError, """the data filter type has to be whether it is a logical """\
+                """ or/and keywords"""
+        self.filter_type = filter_type
 
     def compare(self, data):
         #ti = time.time()
