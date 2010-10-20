@@ -187,13 +187,16 @@ class AbstractComponent(object):
         
     def create_filter(self, data_filter, filter_type):
         ti = time.time()
-        if data_filter is not None:
+	if data_filter is None:
+	    data_filter = []
+        if len(data_filter) > 0:
 	    if filter_type == "and":
 	        filter_method = logical_and
 	        data_subset_filter = array([True]*self.data.rows)
 	    else:
 	        filter_method = logical_or
 		data_subset_filter = array([False]*self.data.rows)
+	
 
             for filterInst in data_filter:
                 condition_filter = filterInst.compare(self.data)
