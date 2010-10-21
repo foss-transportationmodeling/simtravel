@@ -9,7 +9,6 @@ import copy
 import re
 from lxml import etree
 from numpy import array
-from openamos.core.component.abstract_controller import BasicController
 
 from openamos.core.models.linear_regression_model import LinearRegressionModel
 from openamos.core.models.log_linear_regression_model import LogLinearRegressionModel
