@@ -306,13 +306,15 @@ class DataArray(object):
         return self.data <= value
 
     def __ge__(self, value):
-        return self.data >= value
+	return self.data >= value
 
     def __eq__(self, value):
-        return self.data == value
+        if value is not None:
+            return self.data == value
 
     def __ne__(self, value):
-        return self.data <> value
+        if value is not None:
+            return self.data <> value
 
 
 

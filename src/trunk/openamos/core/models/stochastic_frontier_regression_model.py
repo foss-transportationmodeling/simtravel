@@ -51,9 +51,9 @@ class StocFronRegressionModel(AbstractRegressionModel):
 
         """
         dist = RandomDistribution(seed=seed)
-        #randState = RandomState(seed)
-        #dist = randState.normal(loc=0, scale=variance_norm**0.5, size=size, seed
 	err_halfnorm = dist.return_half_normal_variables(location=0, scale=variance_halfnorm**0.5, size=size)
+
+	dist = RandomDistribution(seed=seed)
         err_norm = dist.return_normal_variables(location=0, scale=variance_norm**0.5, size=size)
 
         if vertex == 'start':

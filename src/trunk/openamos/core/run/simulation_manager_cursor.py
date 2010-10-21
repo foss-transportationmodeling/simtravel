@@ -148,6 +148,8 @@ class SimulationManager(object):
             data = self.prepare_data(vars_dict, depvars_dict, count_keys, 
                                      spatialConst_list, analysisInterval, subsample)        
 
+	    	
+
             #print 'Variable Names order - ', data.varnames
             # Append the Spatial Query Results
             # data = self.process_spatial_query(data, i.spatialConst_list)
@@ -156,6 +158,8 @@ class SimulationManager(object):
             #    print 'Data', data.columns(['houseid', 'personid', 'scheduleid']).data
 
             # Run the component
+	    if data == None:
+		continue
             if data.rows == 0:
                 continue
             nRowsProcessed = i.run(data, self.db)
@@ -488,6 +492,8 @@ class SimulationManager(object):
                                              spatialConst_list,
                                              analysisInterval,
                                              subsample)
+	if data == None:
+	    return
 
         self.append_cols_for_dependent_variables(data, depVarDict)
         self.process_data_for_locs(data, spatialConst_list, analysisInterval)

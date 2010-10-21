@@ -461,7 +461,8 @@ class QueryBrowser(object):
             data = self.createResultArray(result, cols_list)
 
             # Sort with respect to primary columns
-            data.sort(primCols)
+	    if data <> None:
+                data.sort(primCols)
 
             return data
         except Exception, e:
@@ -496,7 +497,11 @@ class QueryBrowser(object):
         print '\t - Size of the data set that was retrieved - ', data.shape
         print '\t - Records were processed after query in %.4f' %(time.time()-t)
 
+	if data.shape[0] == 0:
+	    return None
+
         return DataArray(data, cols_list)
+	
 
     ########## methods for select query end ##########
     
