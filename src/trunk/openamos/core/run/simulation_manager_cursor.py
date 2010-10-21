@@ -101,6 +101,7 @@ class SimulationManager(object):
         for i in componentList:
             print '\n\tFor component - %s ' %(i.component_name)
             print "\t -- Model list including model formulation and data filters if any  -- "
+            print '\tPost Run Filters - ', i.post_run_filter
             for j in i.model_list:
                 print "\t\t - name:", j.dep_varname, ",formulation:", j.model_type, ",filter:", j.data_filter
                 modelCount += 1
@@ -108,8 +109,7 @@ class SimulationManager(object):
         print "\tTotal of %s components and %s models will be processed" %(len(componentList), modelCount)
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
 
-        #self.queryBrowser.dbcon_obj.close_sessionInstance()            
-        #raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
+        raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
         for i in componentList:
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
@@ -117,7 +117,6 @@ class SimulationManager(object):
             t = time.time()
             print '\nRunning Component - %s; Analysis Interval - %s' %(i.component_name,
                                                                        i.analysisInterval)
-
             # Prepare variable list/objects for retrieving the corresponding records for processing
             variableList = i.variable_list
 
@@ -658,6 +657,8 @@ class SimulationManager(object):
 
         for i in range(spatialconst.countChoices):
             sampleVarDict['temp'].append('%s%s' %(sampleVarName, i+1))
+            # Add a tt from destination field for checking heuristics etc...
+            sampleVarDict['temp'].append('tt_from%s' %(i+1))
 
         self.append_cols_for_dependent_variables(data, sampleVarDict)
         #print data.varnames
@@ -697,8 +698,13 @@ class SimulationManager(object):
             #print 'ROWS MISSING', rowsEqualsDefault[:,0]
             #print vals[:,0]
             #raw_input()
+            if spatialconst.asField:
+                colName = spatialconst.asField
+            else:
+                colName = spatialconst.skimField
+
             
-            skimLocColName = '%s%s' %(spatialconst.skimField, i+1)
+            skimLocColName = '%s%s' %(colName, i+1)
             #print skimLocColName
             data.setcolumn(skimLocColName, vals)
 
@@ -726,9 +732,18 @@ class SimulationManager(object):
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
 
+
         vals = skimsMatrix1[originLocColVals, destinationLocColVals]
         #vals.shape = (data.rows,1)
-        data.insertcolumn(['tt'], vals)
+        if spatialconst.asField:
+            colName = spatialconst.asField
+        else:
+            colName = spatialconst.skimField
+
+        sampleVarDict = {'temp':[colName]}
+        self.append_cols_for_dependent_variables(data, sampleVarDict)
+
+        data.insertcolumn([colName], vals)
 
 
 

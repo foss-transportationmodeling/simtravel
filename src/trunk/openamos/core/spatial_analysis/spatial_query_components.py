@@ -26,8 +26,10 @@ class SpatioTemporalConstraint(object):
                 %(self.table, self.locationField, self.timeField))
 
 class PrismConstraints(object):
-    def __init__(self, table, skimField, originField, destinationField, 
+    def __init__(self, table, skimField, 
+                 originField, destinationField, 
                  startConstraint, endConstraint,
+                 asField, 
                  sampleField = None,
                  countChoices=None, activityTypeFilter=None, threshold=None, seed=1):
 
@@ -61,6 +63,11 @@ class PrismConstraints(object):
                 """is not a valid SpatioTemporalConstraint object"""
         self.endConstraint = endConstraint
         
+        if asField is not None and not isinstance(asField, str):
+            raise PrismConstraintError, """The sample field is """\
+                """not valid; should be a str object"""
+        self.asField = asField
+
         if sampleField is not None and not isinstance(sampleField, str):
             raise PrismConstraintError, """The sample field is """\
                 """not valid; should be a str object"""

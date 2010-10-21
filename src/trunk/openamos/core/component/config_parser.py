@@ -193,7 +193,13 @@ class ConfigParser(object):
             spatialConst = self.return_spatial_query(i)
             spatialConst_list.append(spatialConst)
 
-
+            
+        consistencyChecks_element = component_element.find("ConsistencyChecks")
+        if consistencyChecks_element is not None:
+            post_run_filter = self.return_filter_condition_list(consistencyChecks_element)
+        else:
+            post_run_filter = None
+            
         modelsIterator = component_element.getiterator("Model")
         self.model_list = []
         self.component_variable_list = []
@@ -216,7 +222,8 @@ class ConfigParser(object):
                                       self.component_variable_list, 
                                       comp_table,
                                       comp_keys,
-                                      spatialConst_list)
+                                      spatialConst_list,
+                                      post_run_filter=post_run_filter)
         return component
 
 
@@ -598,17 +605,31 @@ class ConfigParser(object):
 
                     self.model_list.append(model_object)
                     
-                    #Models to populate the travel time variable
-                    for var in rep_var_list:
-                        coefficients = [{'%s%s'%(var, i+1):1}]
-                        specification = Specification([var], coefficients)
+                    #Models to populate the travel time to destination variable
+                    var = const.asField
                         
-                        model = LinearRegressionModel(specification, errorSpec)
+                    coefficients = [{'%s%s'%(var, i+1):1}]
+                    specification = Specification([var], coefficients)
                         
-                        model_type = 'regression'
-                        model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
-                                                runUntilFilter, seed=seed, filter_type=filter_type)
-                        self.model_list.append(model_object)
+                    model = LinearRegressionModel(specification, errorSpec)
+                        
+                    model_type = 'regression'
+                    model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
+                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                    self.model_list.append(model_object)
+
+                    #Models to populate the travel time from destination variable
+                    var = 'tt_from' 
+                        
+                    coefficients = [{'%s%s'%(var, i+1):1}]
+                    specification = Specification([var], coefficients)
+                        
+                    model = LinearRegressionModel(specification, errorSpec)
+                        
+                    model_type = 'regression'
+                    model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
+                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                    self.model_list.append(model_object)
 
 
     def create_nested_logit_object(self, model_element):
@@ -1013,6 +1034,7 @@ class ConfigParser(object):
         # Parsing attributes of the spatial query
         table = spatial_query_element.get('table')
         skimField = spatial_query_element.get('skim_var')
+        asField = spatial_query_element.get('as_var')
         originField = spatial_query_element.get('origin_var')
         destinationField = spatial_query_element.get('destination_var')
         sampleField = spatial_query_element.get('sample_var')
@@ -1044,8 +1066,10 @@ class ConfigParser(object):
         endConstraint_element = spatial_query_element.find('End')
         endConstraint = self.return_spatio_temporal_constraint(endConstraint_element)
 
-        prismConstraint = PrismConstraints(table, skimField, originField, destinationField, 
+        prismConstraint = PrismConstraints(table, skimField, 
+                                           originField, destinationField, 
                                            startConstraint, endConstraint, 
+                                           asField,
                                            sampleField, countChoices, activityTypeFilter, 
                                            thresholdTimeConstraint, seed)
         return prismConstraint

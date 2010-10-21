@@ -19,7 +19,8 @@ class AbstractComponent(object):
                  table,
                  key,
                  spatialConst_list=None,
-                 analysisInterval=None):
+                 analysisInterval=None,
+                 post_run_filter=None):
 
         # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
         # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
@@ -49,6 +50,7 @@ class AbstractComponent(object):
         self.key = key
         self.spatialConst_list = spatialConst_list
         self.analysisInterval = analysisInterval
+        self.post_run_filter = post_run_filter
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
@@ -116,8 +118,8 @@ class AbstractComponent(object):
         return nRowsProcessed
 
     def write_data_to_cache(self, db, cols_to_write, data_filter):
-        print '\t    Columns - ', cols_to_write
-        data_to_write = self.data.columns(cols_to_write, data_filter)
+        #print '\t    Columns - ', cols_to_write
+        #data_to_write = self.data.columns(cols_to_write, data_filter)
 
         
 
@@ -157,7 +159,7 @@ class AbstractComponent(object):
         #print 'Dummy iteration took - %.4f' %(time.time() - t)
 
         cacheColsTable = cacheTableRef.colnames
-
+        print '\t    Columns - ', cacheColsTable
         #print '\t\tSequence in cache', cacheColsTable
 
         t = time.time()
@@ -207,6 +209,7 @@ class AbstractComponent(object):
         #print '\t\tData Filter returned %s number of rows for above model took - %.4f' %(data_subset_filter.sum(),
         #                                                                                 time.time()-ti)
         return data_subset_filter
+
 
     def iterate_through_the_model_list(self, model_list_duringrun, iteration):
         ti = time.time()
@@ -260,7 +263,7 @@ class AbstractComponent(object):
                     result = i.simulate_choice(data_subset, choiceset, iteration)
 		    #print result.data[:,0]
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
-            #print result.data
+                    print result.data
 
                 # Indiciator variable updating no longer happens in the ABSTRACT COMPONENT
                 # Instead they are specified as simple regression models with the appropriate
@@ -274,6 +277,13 @@ class AbstractComponent(object):
                 """
             #else:
             #    data_subset_filter = array([True]*self.data.rows)
+            data_post_run_filter = self.create_filter(i.data_filter, i.filter_type)
+
+            valid_data_rows = logical_and(data_post_run_filter, data_subset_filter)
+            count_invalid_rows = valid_data_rows.sum() - data_subset_filter.sum()
+            if count_invalid_rows > 0:
+                print 'some rows not valid'
+                raw_input()
             
         print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
         #raw_input()

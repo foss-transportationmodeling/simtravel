@@ -15,8 +15,6 @@ class SubModel(object):
                  data_filter=None,
                  run_until_condition=None,
                  choiceset_criterion=None,
-                 #table=None,
-                 #key=None,
                  values=None, 
                  seed=1,
                  filter_type=None):
