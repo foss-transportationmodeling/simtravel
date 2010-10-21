@@ -91,73 +91,36 @@ class AbstractComponent(object):
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
                 model_list_duringrun, iteration)   
-            cols_to_write = [] + prim_key
-            #print 'COLS TO WRITE BEFORE ADDING DEP VARNAMES' , cols_to_write
-            for model in model_st:
-                dep_varname = model.dep_varname
-                dep_varModel = model.model
-                # Creating column list for caching
-                if dep_varname not in cols_to_write and not isinstance(dep_varModel, InteractionModel):
-                    cols_to_write.append(dep_varname)
-            #print 'COLS TO WRITE AFTER ADDING DEP VARNAMES' , cols_to_write
-            #print "\t-- Iteration - %d took %.4f --" %(iteration, time.time()-t)
 
-            if count_key is not None:
-                cols_to_write = list(set(cols_to_write) or set(count_key))
-            #print 'COLS AFTER ADDING COUNT KEY', cols_to_write
-            #raw_input()
+            data_filter_count = data_filter.sum()
 
-            nRowsIter = data_filter.sum()
-            nRowsProcessed += nRowsIter
+            data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
 
-            #print data.varnames
-            print "\t    Writing to cache table %s: records - %s" %(self.table, nRowsIter)
-            self.write_data_to_cache(db, cols_to_write, data_filter)
+            #print 'POST RUN FILTER ', data_post_run_filter
+            #print 'MODEL RUN FILTER', data_filter
+            valid_data_rows = logical_and(data_post_run_filter, data_filter)
+            valid_data_rows_count = valid_data_rows.sum()
 
+            count_invalid_rows = data_filter_count - valid_data_rows_count
+
+            if count_invalid_rows > 0:
+                print """\tSome rows (%s) are not valid; they do not """\
+                    """satisfy consistency checks - %s""" %(count_invalid_rows, 
+                                                            self.post_run_filter)
+                raw_input()
+            
+
+            nRowsProcessed += valid_data_rows_count
+
+            print "\t    Writing to cache table %s: records - %s" %(self.table, valid_data_rows_count)
+            self.write_data_to_cache(db, valid_data_rows)
 
         return nRowsProcessed
 
-    def write_data_to_cache(self, db, cols_to_write, data_filter):
-        #print '\t    Columns - ', cols_to_write
-        #data_to_write = self.data.columns(cols_to_write, data_filter)
+    def write_data_to_cache(self, db, data_filter):
+        # writing to the hdf5 cache
 
-        
-
-            # writing to the hdf5 cache
         cacheTableRef = db.returnTableReference(self.table)
-        cacheTableRow = cacheTableRef.row
-
-        colIndices = xrange(len(cols_to_write))
-
-
-        #t = time.time()
-        #data_to_write = self.data.columns(cols_to_write, data_filter)
-        #print data_to_write.data.shape
-        #for i in data_to_write.data:
-        #    for j in colIndices:
-        #        pass
-        
-        #print """\t   Iterating through the cols one record at a time took %.4f """ %(time.time()-t)
-
-        #t = time.time()
-        #data_to_write = self.data.columns(cols_to_write, data_filter)
-
-        #for i in data_to_write.data:
-        #    for j in colIndices:
-        #        cacheTableRow[cols_to_write[j]] = i[j]
-        #    cacheTableRow.append()
-        #cacheTableRef.flush()
-        #print """\t    Writing to hdf5 cache format (appending one record at a time) """\
-        #    """%.4f""" %(time.time()-t)
-
-        #t = time.time()
-        #darray = xrange(1000000)
-        #drows = xrange(5)
-        #for i in darray:
-        #    for j in drows:
-        #        pass
-        #print 'Dummy iteration took - %.4f' %(time.time() - t)
-
         cacheColsTable = cacheTableRef.colnames
         print '\t    Columns - ', cacheColsTable
         #print '\t\tSequence in cache', cacheColsTable
@@ -178,15 +141,6 @@ class AbstractComponent(object):
         cacheTableRef.flush()
         print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
 
-        #for i in data_to_write.data:
-        #    for j in colIndices:
-        #        cacheTableRow[cols_to_write[j]] = i[j]
-        #    cacheTableRow.append()
-        #cacheTableRef.flush()
-        #db.fileh.flush()
-        #print """\t    Writing to hdf5 cache format (appending one record at a time) """\
-        #    """%.4f""" %(time.time()-t)
-        
     def create_filter(self, data_filter, filter_type):
         ti = time.time()
 	if data_filter is None:
@@ -244,8 +198,8 @@ class AbstractComponent(object):
                 choiceset_shape = (data_subset.rows,
                                    i.model.specification.number_choices)
                 choicenames = i.model.specification.choices
-            #print '-----', choicenames, '--------'
-            #print i
+                #print '-----', choicenames, '--------'
+                #print i
                 #choiceset = self.create_choiceset(choiceset_shape, 
                 #                                  i.choiceset_criterion, 
                 #                                  choicenames)
@@ -263,30 +217,9 @@ class AbstractComponent(object):
                     result = i.simulate_choice(data_subset, choiceset, iteration)
 		    #print result.data[:,0]
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
-                    print result.data
+                    #print result.data
 
-                # Indiciator variable updating no longer happens in the ABSTRACT COMPONENT
-                # Instead they are specified as simple regression models with the appropriate
-                # specifications
-                """
-                print i.run_until_condition.coefficients, '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
-                result_run_var = self.data.calculate_equation(i.run_until_condition.coefficients, 
-                                                              data_subset_filter)
-                self.data.setcolumn(i.run_until_condition.varname, 
-                                    result_run_var, data_subset_filter)
-                """
-            #else:
-            #    data_subset_filter = array([True]*self.data.rows)
-            data_post_run_filter = self.create_filter(i.data_filter, i.filter_type)
-
-            valid_data_rows = logical_and(data_post_run_filter, data_subset_filter)
-            count_invalid_rows = valid_data_rows.sum() - data_subset_filter.sum()
-            if count_invalid_rows > 0:
-                print 'some rows not valid'
-                raw_input()
-            
         print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
-        #raw_input()
         return model_list_forlooping, data_subset_filter
 
         # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
