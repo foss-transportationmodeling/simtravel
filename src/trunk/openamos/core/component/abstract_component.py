@@ -215,7 +215,7 @@ class AbstractComponent(object):
 
 
                     result = i.simulate_choice(data_subset, choiceset, iteration)
-		    #print result.data[:,0]
+		    print result.data[:,0]
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
                     #print result.data
 
