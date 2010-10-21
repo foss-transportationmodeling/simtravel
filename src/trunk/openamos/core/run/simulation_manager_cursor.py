@@ -109,7 +109,7 @@ class SimulationManager(object):
         print "\tTotal of %s components and %s models will be processed" %(len(componentList), modelCount)
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
 
-        raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
+        #raw_input("\tParsing of the model specifications complete, press any key to continue ... ")
         for i in componentList:
             # Create New Instance of the Session
             #self.queryBrowser.dbcon_obj.new_sessionInstance()
@@ -685,30 +685,34 @@ class SimulationManager(object):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
             sampleLocColVals = array(data.columns([sampleLocColName]).data, dtype=int)
 
-            vals = skimsMatrix2[originLocColVals, sampleLocColVals]
+
             
             #print originLocColVals[:,0], sampleLocColVals[:,0]
             # the default missing value for skim was 9999 but that was causing problems with
             # calculation as aresult it is changed to a small number so that the alternative
             # corresponding to that is very negative. This is for those cases where the number
             # of choices is less than the minimum number of choices to be sampled
+
+            # TO TRAVEL SKIMS
+            vals = skimsMatrix2[originLocColVals, sampleLocColVals]
             rowsEqualsDefault = vals.mask
             vals[rowsEqualsDefault] = -9999
-
-            #print 'ROWS MISSING', rowsEqualsDefault[:,0]
-            #print vals[:,0]
-            #raw_input()
             if spatialconst.asField:
                 colName = spatialconst.asField
             else:
                 colName = spatialconst.skimField
-
-            
             skimLocColName = '%s%s' %(colName, i+1)
-            #print skimLocColName
             data.setcolumn(skimLocColName, vals)
+            #print 'TRAVEL TO', vals
 
 
+            # FROM TRAVEL SKIMS
+            vals = skimsMatrix2[sampleLocColVals, destinationLocColVals]
+            rowsEqualsDefault = vals.mask
+            vals[rowsEqualsDefault] = -9999            
+            destSkimColName = 'tt_from%s' %(i+1)
+            data.setcolumn(destSkimColName, vals)
+            #print 'TRAVEL FROM', vals
 
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
