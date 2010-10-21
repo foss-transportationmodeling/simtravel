@@ -362,27 +362,27 @@ class DataFilter(object):
     def compare(self, data):
         #ti = time.time()
         if type(self.value) == str:
-            self.valueCheck = data.columns([self.value]).data
+            valueCheck = data.columns([self.value]).data
 	else:
-	    self.valueCheck = self.value
+	    valueCheck = self.value
             
         if self.filter_string == 'less than':
-            valid_rows = data.columns([self.varname]) < self.valueCheck
+            valid_rows = data.columns([self.varname]) < valueCheck
 
         if self.filter_string == 'greater than':
-            valid_rows = data.columns([self.varname]) > self.valueCheck
+            valid_rows = data.columns([self.varname]) > valueCheck
 
         if self.filter_string == 'less than equals':
-            valid_rows = data.columns([self.varname]) <= self.valueCheck
+            valid_rows = data.columns([self.varname]) <= valueCheck
 
         if self.filter_string == 'greater than equals':
-            valid_rows = data.columns([self.varname]) >= self.valueCheck
+            valid_rows = data.columns([self.varname]) >= valueCheck
 
         if self.filter_string == 'equals':
-            valid_rows = data.columns([self.varname]) == self.valueCheck
+            valid_rows = data.columns([self.varname]) == valueCheck
 
         if self.filter_string == 'not equals':
-            valid_rows = data.columns([self.varname]) <> self.valueCheck
+            valid_rows = data.columns([self.varname]) <> valueCheck
 
         valid_rows.shape = (valid_rows.shape[0], )
         #print "\t\t\t\tExtracting for one filter took - %.4f" %(time.time()-ti)
