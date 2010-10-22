@@ -590,28 +590,15 @@ class ConfigParser(object):
                 
 
                 for i in range(countChoices):
-                    #Models to populate the location id variable
-                    coefficients = [{'%s%s'%(destinationField, i+1):1}]
-                    specification = Specification(choice, coefficients)                
-
+                   
                     # additional data filter
                     dataFilterLoc = DataFilter(dep_varname, 'equals', i+1)
-                    
-                    model = LinearRegressionModel(specification, errorSpec)
 
-                    model_object = SubModel(model, model_type, dep_varname, dataFilter + [dataFilterLoc], 
-                                            runUntilFilter, seed=seed, filter_type=filter_type)
-
-                    self.model_list.append(model_object)
-                    
                     #Models to populate the travel time to destination variable
                     var = const.asField
-                        
                     coefficients = [{'%s%s'%(var, i+1):1}]
                     specification = Specification([var], coefficients)
-                        
                     model = LinearRegressionModel(specification, errorSpec)
-                        
                     model_type = 'regression'
                     model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
                                             runUntilFilter, seed=seed, filter_type=filter_type)
@@ -619,14 +606,19 @@ class ConfigParser(object):
 
                     #Models to populate the travel time from destination variable
                     var = 'tt_from' 
-                        
                     coefficients = [{'%s%s'%(var, i+1):1}]
                     specification = Specification([var], coefficients)
-                        
                     model = LinearRegressionModel(specification, errorSpec)
-                        
                     model_type = 'regression'
                     model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
+                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                    self.model_list.append(model_object)
+
+                    #Models to populate the location id variable
+                    coefficients = [{'%s%s'%(destinationField, i+1):1}]
+                    specification = Specification(choice, coefficients)                
+                    model = LinearRegressionModel(specification, errorSpec)
+                    model_object = SubModel(model, model_type, dep_varname, dataFilter + [dataFilterLoc], 
                                             runUntilFilter, seed=seed, filter_type=filter_type)
                     self.model_list.append(model_object)
 
