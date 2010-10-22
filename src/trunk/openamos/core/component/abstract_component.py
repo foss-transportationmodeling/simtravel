@@ -81,6 +81,14 @@ class AbstractComponent(object):
 
         #table = self.table
 
+	"""
+	print data.varnames
+	try:
+	    print data.columns(['tt_to'])
+	except:
+	    pass
+
+	"""
         nRowsProcessed = 0
         while len(model_list_duringrun) > 0:
             t = time.time()
@@ -96,7 +104,7 @@ class AbstractComponent(object):
 
             data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
 
-            #print 'POST RUN FILTER ', data_post_run_filter
+            print 'POST RUN FILTER ', data_post_run_filter[data_filter]
             #print 'MODEL RUN FILTER', data_filter
             valid_data_rows = logical_and(data_post_run_filter, data_filter)
             valid_data_rows_count = valid_data_rows.sum()
@@ -107,7 +115,7 @@ class AbstractComponent(object):
                 print """\tSome rows (%s) are not valid; they do not """\
                     """satisfy consistency checks - %s""" %(count_invalid_rows, 
                                                             self.post_run_filter)
-                raw_input()
+                #raw_input()
             
 
             nRowsProcessed += valid_data_rows_count
