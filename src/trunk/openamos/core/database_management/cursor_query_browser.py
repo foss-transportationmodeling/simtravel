@@ -461,10 +461,12 @@ class QueryBrowser(object):
             data = self.createResultArray(result, cols_list)
 
             # Sort with respect to primary columns
-	    if data <> None:
-                data.sort(primCols)
-
+            data.sort(primCols)
+	    #print primCols
+	    #raw_input()
             return data
+	except AttributeError, e:
+	    print 'Query returned None since no records were found. Hence, nothing to sort'
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'
