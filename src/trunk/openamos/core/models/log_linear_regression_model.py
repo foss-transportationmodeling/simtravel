@@ -1,4 +1,4 @@
-from scipy import exp
+import numexpr as ne
 
 from openamos.core.models.linear_regression_model import LinearRegressionModel
 
@@ -31,7 +31,8 @@ class LogLinearRegressionModel(LinearRegressionModel):
         pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data,
                                               sd=variance, seed=seed)
-        exp_pred_value = exp(pred_value)
+        #exp_pred_value = exp(pred_value)
+        exp_pred_valye = ne.evaluate("exp(%s)" %pred_value)
         return DataArray(exp_pred_value, self.specification.choices)
 
 import unittest
