@@ -1,6 +1,6 @@
 <ProjectConfig>
   <Project name="vehown" location="/home/kkonduri/simtravel/test/vehown" seed="10" subsample="40000"/>
-  <DBConfig dbprotocol = "postgres" dbhost="localhost" dbname="mag_db" dbusername="openamos" dbpassword="1234"/>
+  <DBConfig dbprotocol = "postgres" dbhost="localhost" dbname="mag_db" dbusername="postgres" dbpassword="1234"/>
   <DBTables>
     <Table table = 'persons' key = 'houseid,personid' order="1"/>
     <Table table = 'households' key = 'houseid' order="2"/>	
@@ -116,7 +116,7 @@
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
-      <Model name="endtime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='0' seed="1">
+      <Model name="endtime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='1' seed="1">
 	<DependentVariable var="endtime"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Variance value="2292.42"/>
@@ -129,7 +129,7 @@
         <Variable table="persons" var="aggte65" coeff="14.91"/>
         <Variable table="households" var="urb" coeff="7.38"/>
       </Model>
-      <Model name="endtime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='0' seed="1">
+      <Model name="endtime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='1' seed="1">
 	<DependentVariable var="endtime" />
 	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
 	<Variance value="3550.32"/>
@@ -196,7 +196,7 @@
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
 
-      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='end' threshold='1439' seed="1">
+      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='end' threshold='1440' seed="1">
 	<DependentVariable var="starttime"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Variance value="23916.84"/>
@@ -209,7 +209,7 @@
         <Variable table="households" var="urb" coeff="21.41"/>
         <Variable table="persons" var="drvr" coeff="23.47"/>
       </Model>
-      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='end' threshold='1439' seed="1">
+      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='end' threshold='1440' seed="1">
 	<DependentVariable var="starttime"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
 	<Variance value="9189.56"/>
@@ -274,7 +274,7 @@
 	<Variance value="0"/>
         <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
-      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='0' seed="1">
+      <Model name="starttime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='1' seed="1">
  	<DependentVariable var="starttime"/>
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
  	<Variance value="2737.94"/>
@@ -326,7 +326,7 @@
 	<Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
-      <Model name="StartTime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='239' seed="1">
+      <Model name="StartTime" formulation='Regression' type="Stochastic Frontier" vertex='start' threshold='240' seed="1">
  	<DependentVariable var="starttime"/>
  	<Filter table="persons" var="schstatus" condition="equals" value="1"/>
  	<Variance value="426.72"/>
@@ -377,7 +377,7 @@
     </Component>
 
     <Component name="AfterSchoolActivities" table="schedule_r" key="houseid,personid" count_key="scheduleid" location="True">
-      <AnalysisInterval start="195" end="196" step="1"/>
+      <AnalysisInterval start="1" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed='1' threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
@@ -463,16 +463,16 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-      <Model name="StartTimeOHActs" formulation='Regression' type="Linear" vertex='start' threshold='239' seed="1">
+      <Model name="StartTimeOHActs" formulation='Regression' type="Linear" vertex='start' threshold='240' seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="schstatus" condition="equals" value="1"/>
-	<Filter table="runtime" var="activitytype" condition="less than" value="500"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
+	<Filter table="runtime" var="activitytype" condition="greater than" value="500"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="travel_skims" var="tt" coeff="1"/>
+        <Variable table="travel_skims" var="tt_to" coeff="1"/>
       </Model>
 
       <Model name="EndTime" formulation='Regression' type="Linear" seed="1">
