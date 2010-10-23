@@ -13,6 +13,7 @@ from numpy import array
 from openamos.core.models.linear_regression_model import LinearRegressionModel
 from openamos.core.models.log_linear_regression_model import LogLinearRegressionModel
 from openamos.core.models.stochastic_frontier_regression_model import StocFronRegressionModel
+from openamos.core.models.log_stochastic_frontier_regression_model import LogStocFronRegressionModel
 from openamos.core.models.count_regression_model import CountRegressionModel
 from openamos.core.models.logit_choice_model import LogitChoiceModel
 from openamos.core.models.ordered_choice_model import OrderedModel
@@ -186,6 +187,8 @@ class ConfigParser(object):
     def create_component(self, component_element):
         comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
         
+	print "Parsing Component - %s" %(comp_name)
+
         spatialConstIterator = component_element.getiterator("SpatialConstraints")
         spatialConst_list = []
         for i in spatialConstIterator:
@@ -231,7 +234,7 @@ class ConfigParser(object):
 
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
-        
+	print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
         
         if model_formulation == 'Regression':
@@ -307,19 +310,23 @@ class ConfigParser(object):
         
         varianceIterator = model_element.getiterator('Variance')
         
-        if model_type == 'Linear':
+        if model_type in ['Linear', 'Log Linear'] :
             for i in varianceIterator:
                 variance = array([[float(i.get('value'))]])
             errorSpec = LinearRegErrorSpecification(variance)         
-            model = LinearRegressionModel(specification, errorSpec)
-
-        if model_type == 'LogLinear':
+            if model_type == 'Linear':
+                model = LinearRegressionModel(specification, errorSpec)
+            else:
+                model = LogLinearRegressionModel(specification, errorSpec)
+        """
+        if model_type == 'Log Linear':
             for i in varianceIterator:
                 variance = array([[float(i.get('value'))]])
             errorSpec = LinearRegErrorSpecification(variance)         
             model = LogLinearRegressionModel(specification, errorSpec)
-            
-        if model_type == 'Stochastic Frontier':
+        """
+
+        if model_type in ['Stochastic Frontier', 'Log Stochastic Frontier']:
             for i in varianceIterator:
                 variance_type = i.get('type', default=None)
                 if variance_type == None:
@@ -333,8 +340,11 @@ class ConfigParser(object):
             else:
                 threshold = float(threshold)
             errorSpec = StochasticRegErrorSpecification(variance, vertex, threshold)
-            model = StocFronRegressionModel(specification, errorSpec)                 
-            
+
+            if model_type == 'Stochastic Frontier':
+                model = StocFronRegressionModel(specification, errorSpec)                 
+            else:
+                model = LogStocFronRegressionModel(specification, errorSpec)                                 
 
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
