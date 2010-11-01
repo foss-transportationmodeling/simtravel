@@ -219,7 +219,7 @@ class DataArray(object):
         """
         the method returns a dataarray of columns with the rows removed
         """
-        self.data = self.data[~rows]
+        self.data = self.data[rows]
         self.rows = self.data.shape[0]
         #return DataArray(self.data, self.varnames)
 
