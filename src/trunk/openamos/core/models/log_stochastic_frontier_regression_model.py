@@ -32,7 +32,7 @@ class LogStocFronRegressionModel(StocFronRegressionModel):
         
         ln_pred_value = expected_value.data + err
         
-        pred_value = ne.evaluate("exp(%s)" %(ln_pred_value))
+        pred_value = ne.evaluate("exp(ln_pred_value)")
         
         if vertex == 'start':
             predValue_lessThresholdInd = pred_value < threshold
