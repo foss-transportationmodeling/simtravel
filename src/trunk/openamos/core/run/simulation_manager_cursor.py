@@ -617,9 +617,12 @@ class SimulationManager(object):
         #print data.rows
 
         #print data.rows, data.data.shape
+        
+        #print rowsZeroChoices
+        #print data
 
         # Deleting records for zero choices
-        data.deleterows(rowsZeroChoices)
+        data.deleterows(~rowsZeroChoices)
 
         originLocColVals = originLocColVals[~rowsZeroChoices, :]
         destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
@@ -738,6 +741,8 @@ class SimulationManager(object):
 
 
         vals = skimsMatrix1[originLocColVals, destinationLocColVals]
+        rowsEqualsDefault = vals.mask
+        vals[rowsEqualsDefault] = -9999            
         #vals.shape = (data.rows,1)
         if spatialconst.asField:
             colName = spatialconst.asField
