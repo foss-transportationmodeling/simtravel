@@ -80,6 +80,8 @@ class SubModel(object):
         seed = self.seed + iteration
         #f.write('%s,%s\n' %(iteration, seed))
         #f.close()
+
+        print '\t    Running model - %s; Seed - %s' %(self.dep_varname, seed)
         if self.model_type == 'regression':
             result = self.model.calc_predvalue(data, seed)
 
