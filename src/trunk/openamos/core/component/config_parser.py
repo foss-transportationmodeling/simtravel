@@ -183,9 +183,24 @@ class ConfigParser(object):
             return [component]
 
 
+    def return_delete_records_criterion(self, component_element):
+        delete_records_element = component_element.find("DeleteRecords")
+        if delete_records_element is not None:
+            delete_criterion = delete_records_element.get("value")
+            if delete_criterion == "True":
+                delete_criterion = True
+            elif delete_criterion == "False":
+                delete_criterion = False
+        else:
+            delete_criterion = None
+
+        return delete_criterion
+
     
     def create_component(self, component_element):
         comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
+
+        deleteCriterion = self.return_delete_records_criterion(component_element)
         
 	print "Parsing Component - %s" %(comp_name)
 
@@ -225,7 +240,8 @@ class ConfigParser(object):
                                       comp_table,
                                       comp_keys,
                                       spatialConst_list,
-                                      post_run_filter=post_run_filter)
+                                      post_run_filter=post_run_filter,
+                                      delete_criterion=deleteCriterion)
         return component
 
 
@@ -1154,6 +1170,20 @@ class ConfigParser(object):
         variable_list_ind = [(tablename_ind, varname_ind)]
 
         runUntilCondition = run_until_element.get('condition')
+        filterValue = run_until_element.get('value')
+        if filterValue is not None:
+            filterValue = float(run_until_element.get('value'))
+        else:
+            filterTablename = run_until_element.get('valuetable')
+            filterValue = run_until_element.get('valuevar')
+            variable_list_val = [(filterTablename, filterValue)]
+            self.component_variable_list = (self.component_variable_list + 
+                                            variable_list_val)
+        runUntilFilter = DataFilter(varname_ind, runUntilCondition, filterValue)
+
+
+        """
+
 
         tablename_val = run_until_element.get('valuetable')
         varname_val = run_until_element.get('valuevar')
@@ -1165,6 +1195,7 @@ class ConfigParser(object):
         #print 'RUNUNTILCONDITION - ', runUntilCondition
 
         runUntilFilter = DataFilter(varname_ind, runUntilCondition, varname_val)
+        """
         return runUntilFilter
 
     def return_component_attribs(self, component_element):

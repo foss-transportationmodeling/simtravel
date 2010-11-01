@@ -20,7 +20,8 @@ class AbstractComponent(object):
                  key,
                  spatialConst_list=None,
                  analysisInterval=None,
-                 post_run_filter=None):
+                 post_run_filter=None,
+                 delete_criterion=None):
 
         # TODO: DEAL WITH TAGGING COMPONENTS THAT NEED EXTRA PROCESSING
         # MAYBE JUST DO IT USING THE MODEL NAMES IN THE
@@ -51,6 +52,7 @@ class AbstractComponent(object):
         self.spatialConst_list = spatialConst_list
         self.analysisInterval = analysisInterval
         self.post_run_filter = post_run_filter
+        self.delete_criterion = delete_criterion
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
@@ -149,6 +151,23 @@ class AbstractComponent(object):
         cacheTableRef.flush()
         print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
 
+        ti = time.time()
+        if self.delete_criterion is not None:
+            if self.delete_criterion:
+                #deleterows where the condition is satisfied
+                # repeat only for those that did not satisfy
+                self.data.deleterows(~data_filter)
+                print 'INSIDE VALUE EQUAL TO TRUE CRITERION'
+            else:
+                #deleterows where the condition is not satisfied
+                # repeat only for those that do satisfy
+                self.data.deleterows(data_filter)          
+                print 'INSIDE VALUE EQUAL TO FALSE CRITERION'      
+        print '\t\t', self.delete_criterion
+        print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
+        print '\t\tSize of dataset', self.data.rows
+        #raw_input()
+
     def create_filter(self, data_filter, filter_type):
         ti = time.time()
 	if data_filter is None:
@@ -190,14 +209,18 @@ class AbstractComponent(object):
                 #print '\t RUN UNTIL CONDITION FILTER'
                 # The run condition filter to loop over records for which a certain
                 # condition is not satisfied
-                if i.run_until_condition is not None:
-                    # Creating the run condition filter
-                    run_condition_filter = i.run_until_condition.compare(self.data)
-                else:
-                    run_condition_filter = array([True]*self.data.rows) 
+                #if i.run_until_condition is not None:
+                #    # Creating the run condition filter
+                #    run_condition_filter = i.run_until_condition.compare(self.data)
+                #else:
+                #    run_condition_filter = array([True]*self.data.rows) 
+
+                #run_condition_filter = ~run_condition_filter
+                #print '\t\t', self.delete_criterion
                     
+    
                 # Creating the compound filter based on above two conditions 
-                data_subset_filter[~run_condition_filter] = False
+                #data_subset_filter[~run_condition_filter] = False
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
                 print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
@@ -226,7 +249,9 @@ class AbstractComponent(object):
 		    print result.data[:,0]
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
                     #print result.data
-
+                    
+        #if data_subset.rows > 0:
+        #    self.data.deleterows(~data_subset_filter)
         print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
         return model_list_forlooping, data_subset_filter
 
