@@ -313,21 +313,24 @@ class QueryBrowser(object):
         # Spatial TSP identification
         if spatialConst_list is not None:
             for i in spatialConst_list:
-                if i.countChoices is not None:
+                #if i.countChoices is not None:
+                if i.startConstraint.table == i.endConstraint.table:
                     # substring for the inner join
                     stTable = i.startConstraint.table
                     #stLocationField = 'st_' + i.startConstraint.locationField
                     stLocationCol = 'stl.%s' %i.startConstraint.locationField
                     #stTimeField = 'st_'+ i.startConstraint.timeField
-                    stTimeCol = 'st.%s' %i.startConstraint.timeField
+                    stVEndTimeCol = 'st.%s' %i.startConstraint.timeField
+                    stVStTimeCol = 'st.%s' %(i.endConstraint.timeField)
 
                     enTable = i.endConstraint.table
                     #enLocationField = 'en_' + i.endConstraint.locationField
                     enLocationCol = 'enl.%s' %i.endConstraint.locationField
                     #enTimeField = 'en_' + i.endConstraint.timeField                    
-                    enTimeCol = 'en.%s' %i.endConstraint.timeField
+                    enVStTimeCol = 'en.%s' %i.endConstraint.timeField
+                    enVEndTimeCol = 'en.%s' %i.startConstraint.timeField
 
-                    timeCols = [stTimeCol, enTimeCol]
+                    timeCols = [stVEndTimeCol, enVStTimeCol]
 
                     table_list.append(stTable)
                     
@@ -375,6 +378,10 @@ class QueryBrowser(object):
                     final_list.append('stl.%s as st_%s' %(i.startConstraint.locationField,
                                                           i.startConstraint.locationField))
                     cols_list.append('st_%s' %i.startConstraint.locationField)
+
+                    final_list.append('stl.%s as st_%s' %(i.endConstraint.timeField,
+                                                          i.endConstraint.timeField))
+                    cols_list.append('st_%s' %i.endConstraint.timeField)
                     #stLocJoinCondition = stLocJoinCondition[:-3]
 
                     # Left join condition for prism end location
@@ -387,6 +394,10 @@ class QueryBrowser(object):
                     final_list.append('enl.%s as en_%s' %(i.endConstraint.locationField, 
                                                        i.endConstraint.locationField))
                     cols_list.append('en_%s' %i.endConstraint.locationField)
+
+                    final_list.append('enl.%s as en_%s' %(i.startConstraint.timeField,
+                                                          i.startConstraint.timeField))
+                    cols_list.append('en_%s' %i.startConstraint.timeField)
                     #enLocJoinCondition = enLocJoinCondition[:-3]
 
                     
@@ -394,10 +405,14 @@ class QueryBrowser(object):
                     # nextepisode_starttime > lastepisode_endtime
                     #consistencyStr = '%s < %s' %(stTimeCol, endTimeCol)
                     
+                    #Old Implementation of the condition for mergining
+                    #analysisPeriodStr = ('%s=%s and %s>%s' 
+                    #                     %(stVEndTimeCol, analysisInterval,
+                    #                       enVStTimeCol, analysisInterval))
 
                     analysisPeriodStr = ('%s=%s and %s>%s' 
-                                         %(stTimeCol, analysisInterval,
-                                           enTimeCol, analysisInterval))
+                                         %(stVEndTimeCol, analysisInterval,
+                                           enVStTimeCol, stVStTimeCol))
         
                     spatialJoinStr = (""" join (select %s, %s """\
                                           """from %s as %s """\
@@ -438,7 +453,6 @@ class QueryBrowser(object):
                     # there cannot be two TSP's in the same component
                     break
                                          
-
         # Generating the col list
         colStr = ''
         for i in final_list:
@@ -460,6 +474,7 @@ class QueryBrowser(object):
             result = self.dbcon_obj.cursor.fetchall()
             data = self.createResultArray(result, cols_list)
 
+            print cols_list
             # Sort with respect to primary columns
             data.sort(primCols)
 	    #print primCols
