@@ -28,12 +28,12 @@ class LogLinearRegressionModel(LinearRegressionModel):
 
         expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
-        pred_value = self.calc_errorcomponent(size=(data.rows, 1),
+        ln_pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data,
                                               sd=variance, seed=seed)
         #exp_pred_value = exp(pred_value)
-        exp_pred_valye = ne.evaluate("exp(%s)" %pred_value)
-        return DataArray(exp_pred_value, self.specification.choices)
+        pred_value = ne.evaluate("exp(ln_pred_value)")
+        return DataArray(pred_value, self.specification.choices)
 
 import unittest
 from numpy import array
