@@ -17,7 +17,8 @@ class SubModel(object):
                  choiceset_criterion=None,
                  values=None, 
                  seed=1,
-                 filter_type=None):
+                 filter_type=[],
+                 run_filter_type=[]):
 
         if not isinstance(model, Model):
             raise ModelError, 'the model input is not a valid Model object'
@@ -35,10 +36,12 @@ class SubModel(object):
                     raise ModelError, 'the model input is not a valid DataFilter object'
         self.data_filter = data_filter
         
+        print run_until_condition
         if run_until_condition is not None:
-            if not isinstance(run_until_condition, DataFilter):
-                raise ModelError, """the model input - run_until_cindition is not """\
-                    """a valid DataFilter object"""
+            for i in run_until_condition:
+                if not isinstance(i, DataFilter):
+                    raise ModelError, """the model input - run_until_condition is not """\
+                        """a valid DataFilter object"""
         self.run_until_condition = run_until_condition 
         
         #TODO: Checks for table and key need to be included
@@ -61,6 +64,7 @@ class SubModel(object):
                     """size."""
         self.values = values
         self.filter_type = filter_type
+        self.run_filter_type = run_filter_type
         #print model.choices, values
 
     def check_string(self, value, valid_values):
@@ -81,7 +85,7 @@ class SubModel(object):
         #f.write('%s,%s\n' %(iteration, seed))
         #f.close()
 
-        print '\t    Running model - %s; Seed - %s' %(self.dep_varname, seed)
+        #print '\t    Running model - %s; Seed - %s' %(self.dep_varname, seed)
         if self.model_type == 'regression':
             result = self.model.calc_predvalue(data, seed)
 
