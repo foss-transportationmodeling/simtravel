@@ -149,7 +149,7 @@ class QueryBrowser(object):
 
 
         #print 'Database Dictionary of Table and Columns - ', db_dict
-        #print 'Column Names', column_names
+        #print 'Column Names', db_dict
         #raw_input()
 
         #initialize the variables
@@ -322,6 +322,11 @@ class QueryBrowser(object):
                     #stTimeField = 'st_'+ i.startConstraint.timeField
                     stVEndTimeCol = 'st.%s' %i.startConstraint.timeField
                     stVStTimeCol = 'st.%s' %(i.endConstraint.timeField)
+                    #TODO: Make these dynamic entries or properties of the 
+                    # prism constraints 
+                    #stActType = 'st.%s' %('activitytype')
+                    #stScheduleid = 'st.%s' %('scheduleid')
+
 
                     enTable = i.endConstraint.table
                     #enLocationField = 'en_' + i.endConstraint.locationField
@@ -329,6 +334,9 @@ class QueryBrowser(object):
                     #enTimeField = 'en_' + i.endConstraint.timeField                    
                     enVStTimeCol = 'en.%s' %i.endConstraint.timeField
                     enVEndTimeCol = 'en.%s' %i.startConstraint.timeField
+
+                    #enActType = 'en.%s' %('activitytype')
+                    #enScheduleid = 'en.%s' %('scheduleid')
 
                     timeCols = [stVEndTimeCol, enVStTimeCol]
 
@@ -382,6 +390,16 @@ class QueryBrowser(object):
                     final_list.append('stl.%s as st_%s' %(i.endConstraint.timeField,
                                                           i.endConstraint.timeField))
                     cols_list.append('st_%s' %i.endConstraint.timeField)
+
+                    #TODO: Make these dynamic entries or properties of the 
+                    # prism constraints 
+                    final_list.append('stl.%s as st_%s' %('activitytype', 'activitytype'))
+                    cols_list.append('st_%s' %'activitytype')
+
+                    final_list.append('stl.%s as st_%s' %('scheduleid', 'scheduleid'))
+                    cols_list.append('st_%s' %'scheduleid')
+
+
                     #stLocJoinCondition = stLocJoinCondition[:-3]
 
                     # Left join condition for prism end location
@@ -399,6 +417,14 @@ class QueryBrowser(object):
                                                           i.startConstraint.timeField))
                     cols_list.append('en_%s' %i.startConstraint.timeField)
                     #enLocJoinCondition = enLocJoinCondition[:-3]
+
+                    #TODO: Make these dynamic entries or properties of the 
+                    # prism constraints 
+                    final_list.append('enl.%s as en_%s' %('activitytype', 'activitytype'))
+                    cols_list.append('en_%s' %'activitytype')
+
+                    final_list.append('enl.%s as en_%s' %('scheduleid', 'scheduleid'))
+                    cols_list.append('en_%s' %'scheduleid')
 
                     
                     # TSP consistency check
@@ -474,7 +500,8 @@ class QueryBrowser(object):
             result = self.dbcon_obj.cursor.fetchall()
             data = self.createResultArray(result, cols_list)
 
-            print cols_list
+            #print cols_list
+            #print primCols
             # Sort with respect to primary columns
             data.sort(primCols)
 	    #print primCols
@@ -684,7 +711,7 @@ class QueryBrowser(object):
                 insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
                                """ delimiters ','""" %(table_name, cols_listStr, loc))
                                                                        
-                #print insert_stmt
+                print insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
                 print '\t\tTime after insert query - %.4f' %(time.time() - ti)
