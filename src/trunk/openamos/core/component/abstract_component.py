@@ -16,7 +16,8 @@ class AbstractComponent(object):
     """
     def __init__(self, component_name, 
                  model_list, variable_list,
-                 table,
+                 readFromTable,
+                 writeToTable,
                  key,
                  spatialConst_list=None,
                  analysisInterval=None,
@@ -47,7 +48,9 @@ class AbstractComponent(object):
         self.model_list = model_list
 
 	self.variable_list = variable_list
-        self.table = table
+        #self.table = table
+        self.readFromTable = readFromTable
+        self.writeToTable = writeToTable
         self.key = key
         self.spatialConst_list = spatialConst_list
         self.analysisInterval = analysisInterval
@@ -92,7 +95,10 @@ class AbstractComponent(object):
 
 	"""
         nRowsProcessed = 0
+        #while len(model_list_duringrun) > 0:
         while len(model_list_duringrun) > 0:
+
+            #print model_list_duringrun
             t = time.time()
         
             model_st = copy.deepcopy(model_list_duringrun)
@@ -106,7 +112,7 @@ class AbstractComponent(object):
 
             data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
 
-            print 'POST RUN FILTER ', data_post_run_filter[data_filter]
+            #print 'POST RUN FILTER ', data_post_run_filter[data_filter]
             #print 'MODEL RUN FILTER', data_filter
             valid_data_rows = logical_and(data_post_run_filter, data_filter)
             valid_data_rows_count = valid_data_rows.sum()
@@ -122,7 +128,7 @@ class AbstractComponent(object):
 
             nRowsProcessed += valid_data_rows_count
 
-            print "\t    Writing to cache table %s: records - %s" %(self.table, valid_data_rows_count)
+            print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
             self.write_data_to_cache(db, valid_data_rows)
 
         return nRowsProcessed
@@ -130,13 +136,16 @@ class AbstractComponent(object):
     def write_data_to_cache(self, db, data_filter):
         # writing to the hdf5 cache
 
-        cacheTableRef = db.returnTableReference(self.table)
+        if data_filter.sum() < 1:
+            return
+
+        cacheTableRef = db.returnTableReference(self.writeToTable)
         cacheColsTable = cacheTableRef.colnames
-        print '\t    Columns - ', cacheColsTable
+        #print '\t    Columns - ', cacheColsTable
         #print '\t\tSequence in cache', cacheColsTable
 
         t = time.time()
-        convType = db.returnTypeConversion(self.table)
+        convType = db.returnTypeConversion(self.writeToTable)
         #print '\t\tConversion Type - ', convType
         dtypesInput = cacheTableRef.coldtypes
         #print dtypesInput
@@ -157,12 +166,12 @@ class AbstractComponent(object):
                 #deleterows where the condition is satisfied
                 # repeat only for those that did not satisfy
                 self.data.deleterows(~data_filter)
-                print 'INSIDE VALUE EQUAL TO TRUE CRITERION'
+                #print 'INSIDE VALUE EQUAL TO TRUE CRITERION'
             else:
                 #deleterows where the condition is not satisfied
                 # repeat only for those that do satisfy
                 self.data.deleterows(data_filter)          
-                print 'INSIDE VALUE EQUAL TO FALSE CRITERION'      
+                #print 'INSIDE VALUE EQUAL TO FALSE CRITERION'      
         print '\t\t', self.delete_criterion
         print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
         print '\t\tSize of dataset', self.data.rows
@@ -198,19 +207,23 @@ class AbstractComponent(object):
         
         for i in model_list_duringrun:
             print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t', i.run_until_condition
             #f = open('test_res', 'a')
             #f.write('%s,' %i.dep_varname)
             #f.close()
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+            #print 'FILTER', data_subset_filter
+            #print self.data.rows
             tiii = time.time()
+
             if data_subset_filter.sum() > 0:
                 #print '\t RUN UNTIL CONDITION FILTER'
                 # The run condition filter to loop over records for which a certain
                 # condition is not satisfied
                 #if i.run_until_condition is not None:
-                #    # Creating the run condition filter
+                    # Creating the run condition filter
                 #    run_condition_filter = i.run_until_condition.compare(self.data)
                 #else:
                 #    run_condition_filter = array([True]*self.data.rows) 
@@ -239,17 +252,26 @@ class AbstractComponent(object):
                 #print data_subset
                 #print data_subset.varnames
                 
-
-                if data_subset.rows > 0:                    
-                    if i.run_until_condition is not None:
-                        model_list_forlooping.append(i)
-
-
-                    result = i.simulate_choice(data_subset, choiceset, iteration)
-		    print result.data[:,0]
-                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
-                    #print result.data
+                #if data_subset.rows > 0:             
+                #    if i.run_until_condition is not None:       
+                #        run_condition_filter = i.run_until_condition.compare(self.data)
+                #        if run_condition_filter.sum() > 0:
+                #            model_list_forlooping.append(i)
                     
+                result = i.simulate_choice(data_subset, choiceset, iteration)
+                print result.data[:,0]
+                self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+        
+        
+        for i in model_list_duringrun:
+            if i.run_until_condition is None:
+                i.run_until_condition = []
+            if self.data.rows > 0 and len(i.run_until_condition) > 0:
+                run_subset_filter = self.create_filter(i.run_until_condition, 
+                                                       i.run_filter_type)
+                if run_subset_filter.sum() > 0:
+                    model_list_forlooping.append(i)
+
         #if data_subset.rows > 0:
         #    self.data.deleterows(~data_subset_filter)
         print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
