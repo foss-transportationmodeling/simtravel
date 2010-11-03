@@ -198,7 +198,7 @@ class ConfigParser(object):
 
     
     def create_component(self, component_element):
-        comp_name, comp_table, comp_keys = self.return_component_attribs(component_element)
+        comp_name, comp_read_table, comp_write_table, comp_keys = self.return_component_attribs(component_element)
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
@@ -237,7 +237,8 @@ class ConfigParser(object):
         self.component_variable_list = list(set(self.component_variable_list))
         component = AbstractComponent(comp_name, self.model_list, 
                                       self.component_variable_list, 
-                                      comp_table,
+                                      comp_read_table,
+                                      comp_write_table,
                                       comp_keys,
                                       spatialConst_list,
                                       post_run_filter=post_run_filter,
@@ -301,6 +302,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         #print dep_varname, '----variable Name -----'
         choice = [dep_varname]
@@ -367,7 +375,8 @@ class ConfigParser(object):
 
         model_type = 'regression'
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
-                                runUntilFilter, seed=seed, filter_type=filter_type)
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -392,6 +401,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         #Creating the coefficients input for the regression model
         coeff_dict, vars_list = self.return_coeff_vars(model_element)
@@ -428,7 +444,8 @@ class ConfigParser(object):
         model_type = 'choice'
         model = CountRegressionModel(specification)
         model_object = SubModel(model, model_type, dep_varname, dataFilter, runUntilFilter, 
-                                values=values, seed=seed, filter_type=filter_type)
+                                values=values, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
         
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -462,6 +479,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -499,7 +523,8 @@ class ConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
                                 runUntilFilter, values=values, seed=seed, 
-                                filter_type=filter_type)#Model Object
+                                filter_type=filter_type,
+                                run_filter_type=run_filter_type)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -533,6 +558,13 @@ class ConfigParser(object):
         else:
             filter_type = None
 
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
         #print dep_varname, 'other one'
         # alternatives
         altSetElement = model_element.find('AlternativeSet')
@@ -565,7 +597,8 @@ class ConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
                                 runUntilFilter, values=values, seed=seed, 
-                                filter_type=filter_type)#Model Object
+                                filter_type=filter_type,
+                                run_filter_type=run_filter_type)#Model Object
 
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -597,6 +630,13 @@ class ConfigParser(object):
                 else:
                     filter_type = None
 
+                #Filter set
+                run_filter_set_element = model_element.find('RunUntilConditionSet')
+                if run_filter_set_element is not None:
+                    run_filter_type = run_filter_set_element.get('type')
+                else:
+                    run_filter_type = None
+
                 dataFilter = self.return_filter_condition_list(model_element)
                 runUntilFilter = self.return_run_until_condition(model_element)
 
@@ -627,7 +667,8 @@ class ConfigParser(object):
                     model = LinearRegressionModel(specification, errorSpec)
                     model_type = 'regression'
                     model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
-                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                                            runUntilFilter, seed=seed, filter_type=filter_type,
+                                            run_filter_type=run_filter_type)
                     self.model_list.append(model_object)
 
                     #Models to populate the travel time from destination variable
@@ -637,7 +678,8 @@ class ConfigParser(object):
                     model = LinearRegressionModel(specification, errorSpec)
                     model_type = 'regression'
                     model_object = SubModel(model, model_type, var, dataFilter + [dataFilterLoc], 
-                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                                            runUntilFilter, seed=seed, filter_type=filter_type,
+                                            run_filter_type=run_filter_type)
                     self.model_list.append(model_object)
 
                     #Models to populate the location id variable
@@ -645,7 +687,8 @@ class ConfigParser(object):
                     specification = Specification(choice, coefficients)                
                     model = LinearRegressionModel(specification, errorSpec)
                     model_object = SubModel(model, model_type, dep_varname, dataFilter + [dataFilterLoc], 
-                                            runUntilFilter, seed=seed, filter_type=filter_type)
+                                            runUntilFilter, seed=seed, filter_type=filter_type,
+                                            run_filter_type=run_filter_type)
                     self.model_list.append(model_object)
 
 
@@ -664,6 +707,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         #Specification dict
         spec_build_ind = {}
@@ -786,7 +836,8 @@ class ConfigParser(object):
         model_type = 'choice'
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
                                 runUntilFilter, values=values, seed=seed,
-                                filter_type=filter_type)
+                                filter_type=filter_type,
+                                run_filter_type=run_filter_type)
 
 
         #return model_object, variable_list
@@ -821,6 +872,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -862,7 +920,8 @@ class ConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
                                 runUntilFilter, values=values, seed=seed,
-                                filter_type=filter_type) #Model Object
+                                filter_type=filter_type,
+                                run_filter_type=run_filter_type) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -887,6 +946,13 @@ class ConfigParser(object):
             filter_type = filter_set_element.get('type')
         else:
             filter_type = None
+
+        #Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
 
         # alternatives
         alternativeIterator = model_element.getiterator('Alternative')
@@ -917,7 +983,8 @@ class ConfigParser(object):
         model_type = 'choice'                   #Type of Model 
         model_object = SubModel(model, model_type, dep_varname, dataFilter, 
                                 runUntilFilter, values=values, seed=seed,
-                                filter_type=filter_type) #Model Object
+                                filter_type=filter_type,
+                                run_filter_type=run_filter_type) #Model Object
     
         #return model_object, variable_list
         self.model_list.append(model_object)
@@ -1160,7 +1227,15 @@ class ConfigParser(object):
         return dataFilter
 
     def return_run_until_condition(self, model_element):
-        run_until_element = model_element.find('RunUntilCondition')
+        runIterator = model_element.getiterator('RunUntilCondition')
+        runList = []
+        
+        for i in runIterator:
+            runCondition = self.return_filter_condition(i)
+            runList.append(runCondition)
+        return runList
+
+    def dummy(self):
         
         if run_until_element is None:
             return None
@@ -1203,7 +1278,12 @@ class ConfigParser(object):
         Returns the variable name, table name, keys for the component.
         """
         name = component_element.get('name')
-        tablename = component_element.get('table')
+        readFromTable = component_element.get('read_from_table')
+        writeToTable = component_element.get('write_to_table')
+        if writeToTable is None:
+            writeToTable = readFromTable
+            
+
         prim_keys = component_element.get('key')
         if prim_keys is not None:
             prim_keys = re.split('[,]', prim_keys)
@@ -1213,7 +1293,7 @@ class ConfigParser(object):
 
         
         #print varname, tablename, [prim_keys, index_keys]
-        return name, tablename, [prim_keys, index_keys]
+        return name, readFromTable, writeToTable, [prim_keys, index_keys]
         
                             
 
