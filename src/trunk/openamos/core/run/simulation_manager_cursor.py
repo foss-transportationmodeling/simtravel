@@ -91,7 +91,7 @@ class SimulationManager(object):
         for i in componentList:
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
-            tableName = i.table
+            tableName = i.writeToTable
             if tableName not in tableNamesDelete:
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
@@ -138,7 +138,7 @@ class SimulationManager(object):
                 #print type(temp_tableEntries)
 
             
-            tableName = i.table
+            writeToTable = i.writeToTable
 
             analysisInterval = i.analysisInterval
 
@@ -179,7 +179,7 @@ class SimulationManager(object):
                 keyCols = i.key[0] + i.key[1]
             else:
                 keyCols = i.key[0]
-            self.reflectToDatabase(tableName, keyCols, nRowsProcessed)
+            self.reflectToDatabase(writeToTable, keyCols, nRowsProcessed)
 
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #print raw_input('-- Press any key to continue... --')
@@ -216,7 +216,8 @@ class SimulationManager(object):
         if nRowsProcessed == 0:
             return
         resArr = table[-nRowsProcessed:]
-        print """\t    creating the array object to insert into table took - %.4f""" %(time.time()-t)
+        print """\t    creating the array object to insert into table - %s took - %.4f""" %(tableName,
+                                                                                            time.time()-t)
         colsToWrite = table.colnames
 
         #print resArr
@@ -241,31 +242,41 @@ class SimulationManager(object):
         prim_keys = {}
         count_keys = {}
 
-
-        depVarTable = component.table
+        depVarTable = component.readFromTable
+        depVarWriteTable = component.writeToTable
 
         if component.key[0] is not None:
             prim_keys[depVarTable] = component.key[0]
         if component.key[1] is not None:
             count_keys[depVarTable] = component.key[1]
         
-        
+
+        indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
+        indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
+            
+
+        # Needed only when updating to the same table
+        # if writing to another table there is no need
+        # to include dependent variables in the SQL query
         for submodel in component.model_list:
             
             depVarName = submodel.dep_varname
 
-            if isinstance(submodel.model, InteractionModel):
+            if depVarTable <> depVarWriteTable:
                 tempdep_columnDict['temp'].append(depVarName)
             else:
-                #depVarTable = model.table
-                if depVarTable in indep_columnDict:
-                    if depVarName in indep_columnDict[depVarTable]:
-                        continue
-
-                if depVarTable in dep_columnDict:
-                    dep_columnDict[depVarTable].append(depVarName)
+                if isinstance(submodel.model, InteractionModel):
+                    tempdep_columnDict['temp'].append(depVarName)
                 else:
-                    dep_columnDict[depVarTable] = [depVarName]
+                #depVarTable = model.table
+                    if depVarTable in indep_columnDict:
+                        if depVarName in indep_columnDict[depVarTable]:
+                            continue
+
+                    if depVarTable in dep_columnDict:
+                        dep_columnDict[depVarTable].append(depVarName)
+                    else:
+                        dep_columnDict[depVarTable] = [depVarName]
         
 
         #print '\tDependent Column Dictionary - ', dep_columnDict
@@ -274,8 +285,7 @@ class SimulationManager(object):
         #print '\tIndex Keys - ', count_keys
        
         #columnDict = self.update_dictionary(indep_columnDict, dep_columnDict)
-        indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
-        indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
+
 
         if len(tempdep_columnDict['temp']) > 0:
             dep_columnDict = self.update_dictionary(dep_columnDict, tempdep_columnDict)
@@ -376,7 +386,7 @@ class SimulationManager(object):
 
             #Processing Anchors for variables to be included                                                            
             for i in spatialConst_list:
-                if i.countChoices is None:
+                if i.startConstraint.table <> i.endConstraint.table:
                     # Adding the columns that can then be used to retrieve the
                     # respective skims
                     stAnchor = i.startConstraint
@@ -698,7 +708,10 @@ class SimulationManager(object):
 
             # TO TRAVEL SKIMS
             vals = skimsMatrix2[originLocColVals, sampleLocColVals]
+            #rowsEqualsDefault = vals == 9999
             rowsEqualsDefault = vals.mask
+            # If OD pair missing for travel to set it to -9999 to make location
+            # unattractive
             vals[rowsEqualsDefault] = -9999
             if spatialconst.asField:
                 colName = spatialconst.asField
@@ -711,8 +724,10 @@ class SimulationManager(object):
 
             # FROM TRAVEL SKIMS
             vals = skimsMatrix2[sampleLocColVals, destinationLocColVals]
+            #rowsEqualsDefault = vals == 9999
             rowsEqualsDefault = vals.mask
-            vals[rowsEqualsDefault] = -9999            
+            # If OD pair missing for travel from then set it zero
+            vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
             data.setcolumn(destSkimColName, vals)
             #print 'TRAVEL FROM', vals
@@ -740,9 +755,10 @@ class SimulationManager(object):
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
 
 
-        vals = skimsMatrix1[originLocColVals, destinationLocColVals]
+        vals = skimsMatrix2[originLocColVals, destinationLocColVals]
+        
         rowsEqualsDefault = vals.mask
-        vals[rowsEqualsDefault] = -9999            
+        vals[rowsEqualsDefault] = 0
         #vals.shape = (data.rows,1)
         if spatialconst.asField:
             colName = spatialconst.asField
