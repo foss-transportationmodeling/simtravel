@@ -36,7 +36,7 @@ class SubModel(object):
                     raise ModelError, 'the model input is not a valid DataFilter object'
         self.data_filter = data_filter
         
-        print run_until_condition
+        #print run_until_condition
         if run_until_condition is not None:
             for i in run_until_condition:
                 if not isinstance(i, DataFilter):
