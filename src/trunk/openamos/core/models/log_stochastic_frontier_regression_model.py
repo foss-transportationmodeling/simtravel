@@ -1,5 +1,6 @@
 import numexpr as ne
 
+from openamos.core.data_array import DataArray
 from openamos.core.models.stochastic_frontier_regression_model import StocFronRegressionModel
 
 class LogStocFronRegressionModel(StocFronRegressionModel):
@@ -20,7 +21,7 @@ class LogStocFronRegressionModel(StocFronRegressionModel):
         data - DataArray object
         """
 
-        expected_Value = self.calc_expected_value(data)
+        expected_value = self.calc_expected_value(data)
         variance_norm = self.error_specification.variance[0,0]
         variance_halfnorm = self.error_specification.variance[1,1]
         vertex = self.error_specification.vertex
