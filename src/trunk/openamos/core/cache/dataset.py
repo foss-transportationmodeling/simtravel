@@ -40,7 +40,8 @@ class DB(object):
         self.fileh.createTable(output_grp, "tsp_r", Tsp_R)
         self.fileh.createTable(output_grp, "schedule_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_R)
-        self.fileh.createTable(output_grp, "persons_r", Persons_R)
+        self.fileh.createTable(output_grp, "workers_r", Workers_R)
+
         #Input Tables - Creatign the table
         self.fileh.createTable(input_grp, "travel_skims1", Travel_Skims)
         self.fileh.createTable(input_grp, "travel_skims2", Travel_Skims)
@@ -124,7 +125,7 @@ class DB(object):
         skimsMatrix[origin, destination] = skims
 	#skimsMatrix = masked_equal(skimsMatrix, 9999)
         
-        return skimsMatrix, masked_equal(skimsMatrix, 9999), unique(origin)
+        return masked_equal(skimsMatrix, 9999), unique(origin)
 
 
     
