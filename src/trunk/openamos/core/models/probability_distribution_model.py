@@ -36,10 +36,10 @@ class ProbabilityModel(AbstractChoiceModel):
         probabilities = (expected_utilities.data.transpose()/utility_sum_max).transpose()
         return probabilities
 
-    def calc_chosenalternative(self, data, choiceset=None):
+    def calc_chosenalternative(self, data, choiceset=None, seed=1):
         probabilities = DataArray(self.calc_probabilities(data), 
                                   self.specification.choices)
-        prob_model = AbstractProbabilityModel(probabilities, self.specification.seed)
+        prob_model = AbstractProbabilityModel(probabilities, seed)
         return prob_model.selected_choice()
         
         
