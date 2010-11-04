@@ -23,8 +23,11 @@ def main():
 
     
     simulationManagerObject = SimulationManager(fileLoc = args[0])
-    simulationManagerObject.establish_databaseConnection()
-    simulationManagerObject.establish_cacheDatabase('w')
+    simulationManagerObject.setup_databaseConnection()
+    simulationManagerObject.setup_cacheDatabase('w')
+    simulationManagerObject.setup_tod_skims()
+    simulationManagerObject.parse_config()
+    simulationManagerObject.clean_database_tables()
     simulationManagerObject.run_components()
     simulationManagerObject.close_connections()
     
