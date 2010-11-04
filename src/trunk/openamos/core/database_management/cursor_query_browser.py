@@ -190,6 +190,7 @@ class QueryBrowser(object):
             clist = self.dbcon_obj.get_column_list(i.lower())
             list1 = db_dict[i]
             chk_list = len(list(set(list1) & set(clist)))
+
             if chk_list == len(list1):
 	        cols = db_dict[i]
 	        cols.sort()
@@ -202,6 +203,7 @@ class QueryBrowser(object):
             else:
                 print ('Column passed in the dictionary does not exist in the table - ')
                 print 'Column List in the Table - ', clist
+                print (set(list1) & set(clist))
                 print 'Actual List of Columns requested from table - ', list1
                 
                 return None
