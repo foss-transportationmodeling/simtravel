@@ -38,6 +38,9 @@ class VehicleOwnershipModels(QWidget):
         diagtitle = COMPMODEL_NUMVEHS
         modelkey = MODELKEY_NUMVEHS
         
+        print diagtitle
+        print modelkey
+        
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
