@@ -202,6 +202,21 @@ class AbstractModWidget(QGroupBox):
     def delNest(self):
         self.nesttable.removeRow(self.nesttable.currentRow())
     
+    def makeVarianceWidget(self):
+        self.variancevwidget = QWidget(self)
+        self.variancevlayout = QHBoxLayout()
+        self.variancevwidget.setLayout(self.variancevlayout)
+
+        self.variancevlabel = QLabel('Variance')
+        self.variancevlayout.addWidget(self.variancevlabel)
+
+        self.variancevline = LineEdit()
+        self.variancevline.setFixedWidth(100)
+        self.variancevlayout.addWidget(self.variancevline)
+
+        self.mainlayout.addWidget(self.variancevwidget,0,0,1,1,Qt.AlignLeft)
+ 
+        
     def makeSFVarianceWidget(self):
         self.variancevwidget = QWidget(self)
         self.varianceuwidget = QWidget(self)
@@ -567,7 +582,8 @@ class LogRegModWidget(AbstractModWidget):
     '''
     def __init__(self, parent = None):
         super(LogRegModWidget, self).__init__(parent) 
-        self.makeVarsWidget() 
+        self.makeVarianceWidget()
+        self.makeVarsWidget(1,0) 
 
     def checkInputs(self):
         res = True
