@@ -22,11 +22,11 @@ class FixedActivityPrismModels(QWidget):
         day_start1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 370,180, 50)
         #day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
-        self.connect(day_start1_button, SIGNAL('clicked()'), self.day_start)
-        
+        self.connect(day_start1_button, SIGNAL('clicked()'), self.day_start_aw)
+
         day_end1_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 290, 180, 50)
-        self.connect(day_end1_button, SIGNAL('clicked()'), self.day_end)
+        self.connect(day_end1_button, SIGNAL('clicked()'), self.day_end_aw)
         
         num_work_episodes_button = QPushButton('Number of work episodes \n(Daily)', self)
         num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 210, 180, 50)
@@ -68,11 +68,11 @@ class FixedActivityPrismModels(QWidget):
         day_start2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 370,180, 50)
         #day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
-        self.connect(day_start2_button, SIGNAL('clicked()'), self.day_start)
+        self.connect(day_start2_button, SIGNAL('clicked()'), self.day_start_nw)
         
         day_end2_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 290, 180, 50)
-        self.connect(day_end2_button, SIGNAL('clicked()'), self.day_end)
+        self.connect(day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
         
         
 
@@ -84,11 +84,11 @@ class FixedActivityPrismModels(QWidget):
         day_start3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 370,180, 50)
         #day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
-        self.connect(day_start3_button, SIGNAL('clicked()'), self.day_start)
+        self.connect(day_start3_button, SIGNAL('clicked()'), self.day_start_na)
         
         day_end3_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 290, 180, 50)
-        self.connect(day_end3_button, SIGNAL('clicked()'), self.day_end)
+        self.connect(day_end3_button, SIGNAL('clicked()'), self.day_end_na)
 
         children_arrive_button = QPushButton('Latest Arrival Time', self)
         children_arrive_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 210, 180, 50)
@@ -99,19 +99,7 @@ class FixedActivityPrismModels(QWidget):
         self.connect(children_depart_button, SIGNAL('clicked()'), self.school_end)
 
 
-#        sch_start_1_button = QPushButton('Latest arrival at school', self)
-#        sch_start_1_button.setGeometry((size.width()) / 2 + 225, size.height() / 2 + 30, 180, 50)
-#        self.connect(sch_start_1_button, SIGNAL('clicked()'), self.school_start1)
-#
-#
-#        sch_end_1_button = QPushButton('Earliest Departure Time', self)
-#        sch_end_1_button.setGeometry((size.width()) / 2 + 225, size.height() / 2 + 110, 180, 50)
-#        self.connect(sch_end_1_button, SIGNAL('clicked()'), self.school_end1)
 
-
-#        pre_sch_button = QPushButton('The arrival and \ndeparture time from \nPre-school are dependent \non the adult \n(worker/non-worker) that \nthe kid is assigned \nto', self)
-#        pre_sch_button.setGeometry((size.width()) / 2 + 380, size.height() / 2 - 100, 180, 200)
-#        self.connect(pre_sch_button, SIGNAL('clicked()'), self.pre_sch)
 
         prechildren_button = QPushButton('Pre-school Children\n(0-4 years)', self)
         prechildren_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 450, 180, 50)
@@ -120,11 +108,11 @@ class FixedActivityPrismModels(QWidget):
         day_start4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 370,180, 50)
         #day_start_button.setStyleSheet("background-color: rgb(0, 255, 0)")
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
-        self.connect(day_start4_button, SIGNAL('clicked()'), self.day_start)
+        self.connect(day_start4_button, SIGNAL('clicked()'), self.day_start_ps)
         
         day_end4_button = QPushButton(COMPMODEL_DAYEND, self)     
         day_end4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 290, 180, 50)
-        self.connect(day_end4_button, SIGNAL('clicked()'), self.day_end)
+        self.connect(day_end4_button, SIGNAL('clicked()'), self.day_end_ps)
 
         presch_arrive_button = QPushButton('Latest Arrival Time', self)
         presch_arrive_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 210, 180, 50)
@@ -143,27 +131,68 @@ class FixedActivityPrismModels(QWidget):
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
         
         self.configob = co
-
-        
-    def day_start(self):
+  
+    def day_start_aw(self):
         diagtitle = COMPMODEL_DAYSTART
-        modelkey = MODELKEY_DAYSTART
+        modelkey = MODELKEY_DAYSTART_AW
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_start_nw(self):
+        diagtitle = COMPMODEL_DAYSTART
+        modelkey = MODELKEY_DAYSTART_AN
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_start_na(self):
+        diagtitle = COMPMODEL_DAYSTART
+        modelkey = MODELKEY_DAYSTART_NA
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_start_ps(self):
+        diagtitle = COMPMODEL_DAYSTART
+        modelkey = MODELKEY_DAYSTART_PS
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
         
-    def day_end(self):
+    def day_end_aw(self):
         diagtitle = COMPMODEL_DAYEND
-        modelkey = MODELKEY_DAYEND
+        modelkey = MODELKEY_DAYEND_AW
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_end_nw(self):
+        diagtitle = COMPMODEL_DAYEND
+        modelkey = MODELKEY_DAYEND_NW
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_end_na(self):
+        diagtitle = COMPMODEL_DAYEND
+        modelkey = MODELKEY_DAYEND_NA
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+    def day_end_ps(self):
+        diagtitle = COMPMODEL_DAYEND
+        modelkey = MODELKEY_DAYEND_PS
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
         
     def num_work(self):
-        diagtitle = COMPMODEL_NUMWRKEPISODES
-        modelkey = MODELKEY_NUMWRKEPISODES
+        diagtitle = COMPMODEL_WRKEPISODES
+        modelkey = MODELKEY_WRKEPISODES
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
@@ -218,16 +247,16 @@ class FixedActivityPrismModels(QWidget):
         
         
     def school_start(self):
-        diagtitle = COMPMODEL_SCHSTART1
-        modelkey = MODELKEY_SCHSTART1
+        diagtitle = COMPMODEL_SCHSTART
+        modelkey = MODELKEY_SCHSTART
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
         
     def school_end(self):
-        diagtitle = COMPMODEL_SCHEND1
-        modelkey = MODELKEY_SCHEND1
+        diagtitle = COMPMODEL_SCHEND
+        modelkey = MODELKEY_SCHEND
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
