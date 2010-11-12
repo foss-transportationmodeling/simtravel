@@ -340,7 +340,7 @@ class QueryBrowser(object):
                     #enActType = 'en.%s' %('activitytype')
                     #enScheduleid = 'en.%s' %('scheduleid')
 
-                    timeCols = [stVEndTimeCol, enVStTimeCol]
+                    timeCols = [stVStTimeCol, enVEndTimeCol]
 
                     table_list.append(stTable)
                     
@@ -381,13 +381,22 @@ class QueryBrowser(object):
                     stLocJoinCondition = ''
                     stLocCondCols = column_names[stTable] 
                     for j in stLocCondCols:
-                        stLocJoinCondition += ' %s.%s = %s.%s and' %('stl', j, mainTable, j)
-                    stLocJoinCondition += ' sptime.st_%s = %s.%s' %(i.startConstraint.timeField,
-                                                               'stl', i.startConstraint.timeField)
+                        stLocJoinCondition += ' %s.%s = %s.%s and ' %('stl', j, mainTable, j)
+
+                    stLocJoinCondition += 'sptime.st_%s = %s.%s' %(i.endConstraint.timeField, 'stl',
+                                                                   i.endConstraint.timeField)
+                    #stLocJoinCondition += '%s.%s = %s' %('stl', i.startConstraint.timeField,
+                    #                                     analysisInterval)
+                    #stLocJoinCondition += ' sptime.st_%s = %s.%s' %(i.startConstraint.timeField,
+                    #                                           'stl', i.startConstraint.timeField)
 
                     final_list.append('stl.%s as st_%s' %(i.startConstraint.locationField,
                                                           i.startConstraint.locationField))
                     cols_list.append('st_%s' %i.startConstraint.locationField)
+
+                    final_list.append('stl.%s as st_%s' %(i.startConstraint.timeField,
+                                                          i.startConstraint.timeField))
+                    cols_list.append('st_%s' %i.startConstraint.timeField)
 
                     final_list.append('stl.%s as st_%s' %(i.endConstraint.timeField,
                                                           i.endConstraint.timeField))
@@ -409,11 +418,15 @@ class QueryBrowser(object):
                     enLocCondCols = column_names[stTable] 
                     for j in enLocCondCols:
                         enLocJoinCondition += ' %s.%s = %s.%s and' %('enl', j, mainTable, j)
-                    enLocJoinCondition += ' sptime.en_%s = %s.%s' %(i.endConstraint.timeField,
-                                                               'enl', i.endConstraint.timeField)
+                    enLocJoinCondition += ' sptime.en_%s = %s.%s' %(i.startConstraint.timeField,
+                                                               'enl', i.startConstraint.timeField)
                     final_list.append('enl.%s as en_%s' %(i.endConstraint.locationField, 
                                                        i.endConstraint.locationField))
                     cols_list.append('en_%s' %i.endConstraint.locationField)
+
+                    final_list.append('enl.%s as en_%s' %(i.endConstraint.timeField, 
+                                                       i.endConstraint.timeField))
+                    cols_list.append('en_%s' %i.endConstraint.timeField)
 
                     final_list.append('enl.%s as en_%s' %(i.startConstraint.timeField,
                                                           i.startConstraint.timeField))
@@ -440,7 +453,7 @@ class QueryBrowser(object):
 
                     analysisPeriodStr = ('%s=%s and %s>%s' 
                                          %(stVEndTimeCol, analysisInterval,
-                                           enVStTimeCol, stVStTimeCol))
+                                           enVEndTimeCol, stVEndTimeCol))
         
                     spatialJoinStr = (""" join (select %s, %s """\
                                           """from %s as %s """\
@@ -472,14 +485,18 @@ class QueryBrowser(object):
                     joinStrList.append(stLocJoinStr)
                     joinStrList.append(enLocJoinStr)
                     
-                    cols_list += timeColsNewNames
+                    joinStrList.append(' where enl.%s > stl.%s ' %(i.endConstraint.timeField, 
+                                                                   i.endConstraint.timeField))
+                    
+                    #cols_list += timeColsNewNames
                     
 
-                    for i in timeColsNewNames:
-                        final_list.append('sptime.%s' %(i))
+                    #for i in timeColsNewNames:
+                    #    final_list.append('sptime.%s' %(i))
                     # Only one time-space prism can be retrieved within a component
                     # there cannot be two TSP's in the same component
                     break
+
                                          
         # Generating the col list
         colStr = ''
@@ -495,7 +512,7 @@ class QueryBrowser(object):
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
         print 'SQL string for query - ', sql_string
-        #print cols_list
+        print cols_list
         
         try:
             self.dbcon_obj.cursor.execute(sql_string)
