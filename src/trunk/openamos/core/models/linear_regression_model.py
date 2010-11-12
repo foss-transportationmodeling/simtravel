@@ -48,7 +48,7 @@ class LinearRegressionModel(AbstractRegressionModel):
         variance = self.error_specification.variance[0,0]
         pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data, 
-                                              sd=variance, seed=seed)
+                                              sd=variance**0.5, seed=seed)
         return DataArray(pred_value, self.specification.choices)
 
     
