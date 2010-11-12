@@ -77,13 +77,28 @@ class LinearRegErrorSpecification(ErrorSpecification):
     distribution - string (type of distribution)
     """
     
-    def __init__(self, variance):
+    def __init__(self, variance, vertex=None, threshold=0):
         ErrorSpecification.__init__(self, variance, distribution='normal')
 
         if self.num_err_components > 1:
             raise ErrorSpecificationError, """the error specification is invalid, """\
                 """the input - variance should contain only one error component"""
         
+        if vertex is not None:
+	    if vertex.lower() not in ['start', 'end']:
+                raise ErrorSpecificationError, """the error specification is invalid, """\
+           	     """the input - vertex should take a value - start or end; this """\
+           	     """determines how the predicted value of the frontier """\
+           	     """is calculated"""
+            self.vertex = vertex.lower()
+	else:
+	    self.vertex = None
+
+        if type(threshold) not in [int, float]:
+            raise ErrorSpecificationError, """the error specification is invalid, """\
+                """the threshold should take a numeric value. The threshold """\
+                """is used to capoff the start and end values."""
+        self.threshold = threshold
 
 
 
