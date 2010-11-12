@@ -28,11 +28,33 @@ class LogLinearRegressionModel(LinearRegressionModel):
 
         expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
+        vertex = self.error_specification.vertex
+        threshold = self.error_specification.threshold
         ln_pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data,
-                                              sd=variance, seed=seed)
+                                              sd=variance**0.5, seed=seed)
         #exp_pred_value = exp(pred_value)
         pred_value = ne.evaluate("exp(ln_pred_value)")
+
+        if vertex == 'start':
+            predValue_lessThresholdInd = pred_value < threshold
+            print '\t\tPred value is less than START threshold for - %d cases ' \
+                % predValue_lessThresholdInd.sum()
+            pred_value[predValue_lessThresholdInd] = threshold
+
+
+        if vertex == 'end':
+            predValue_moreThresholdInd = pred_value > threshold
+            print '\t\tPred value is greater than END threshold for - %d cases ' \
+                % predValue_moreThresholdInd.sum()
+            pred_value[predValue_moreThresholdInd] = threshold
+
+        _sum = ((pred_value) < 0).sum()
+        if _sum > 0:
+            print '\t\t -- SUM LESS THAN ZERO --', _sum
+
+
+
         return DataArray(pred_value, self.specification.choices)
 
 import unittest
