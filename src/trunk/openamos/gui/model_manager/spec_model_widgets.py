@@ -36,8 +36,8 @@ class AbstractModWidget(QGroupBox):
         choicebuttonlayout.addWidget(self.choicedelbutton)
         self.choicelayout.addWidget(self.choicebuttonwidget)
         
-        self.choicetable = QTableWidget(0,3,self)
-        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value', 'Probability'])
+        self.choicetable = QTableWidget(0,2,self) #3,self)
+        self.choicetable.setHorizontalHeaderLabels(['Alternative', 'Value']) #, 'Probability'])
         self.choicetable.setSelectionMode(QAbstractItemView.SingleSelection)
         self.choicetable.horizontalHeader().setResizeMode(0,1)
         self.choicetable.horizontalHeader().setResizeMode(1,1)
@@ -293,6 +293,9 @@ class ProbModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(ProbModWidget, self).__init__(parent)
         self.makeProbChoiceWidget()
+        self.makeVarsWidget(0,1)
+        self.intbutton.setVisible(False)
+        #self.delbutton.setVisible(False)
     
     def checkInputs(self):
         res = True
