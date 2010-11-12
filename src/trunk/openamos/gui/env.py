@@ -129,6 +129,11 @@ COMPMODEL_WORKEND1 = 'Earliest Departure Time (Episode 1)'
 COMPMODEL_WORKSTART2 = 'Latest Arrival Time (Episode 2)'
 COMPMODEL_WORKEND2 = 'Earliest Departure Time (Episode 2)'
 
+COMPMODEL_SCHSTART = 'Latest Arrival Time'
+COMPMODEL_SCHEND = 'Earliest Departure Time'
+COMPMODEL_PRESCHSTART = 'Latest Arrival Time'
+COMPMODEL_PRESCHEND = 'Earliest Departure Time'
+
 
 COMPMODEL_SYNTHPOP = 'Generate Synthetic Population'
 COMPMODEL_WORKSTAT = 'Labor Force Participation Model'      #COMPMODEL_WORKSTAT = 'Worker Status'
@@ -144,10 +149,7 @@ COMPMODEL_PRESCHLOC = 'PreSchool Location: Ages 0 - 4'
 COMPMODEL_SCHLOC1 = 'School Location: Ages 5 - 14'
 COMPMODEL_SCHLOC2 = 'School Location: Ages 15 and over'
 COMPMODEL_NUMSCHEPISODES = 'Number of School Episodes'
-COMPMODEL_SCHSTART = 'Latest Arrival Time'
-COMPMODEL_SCHEND = 'Earliest Departure Time'
-COMPMODEL_PRESCHSTART = 'Latest Arrival Time'
-COMPMODEL_PRESCHEND = 'Earliest Departure Time'
+
 COMPMODEL_PRESCHDAILYSTAT = 'PreSchool Daily Status'
 COMPMODEL_SCHDAILYSTAT = 'School Daily Status: Ages 5 - 17'
 COMPMODEL_SCHDAILYINDEP = 'School Daily Independence: Ages 5 - 17'
