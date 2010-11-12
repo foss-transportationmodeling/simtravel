@@ -49,6 +49,7 @@ class AbtractSpecDialog(QDialog):
         
         self.subpopgb = QGroupBox("Sub-Population")
         self.subpopgb.setCheckable(True)
+        self.subpopgb.setVisible(False)
         subpoplayout = QGridLayout()
         self.subpopgb.setLayout(subpoplayout)
         self.logical = QComboBox()
@@ -223,18 +224,9 @@ class AbtractSpecDialog(QDialog):
             self.populateRununtilWidget(modelspecified)
             self.populateFilterWidget(modelspecified)
             
-#            if self.modeltypecb.currentText() == PROB_MODEL:
-#                self.populateAltsWidget(modelspecified)
-#                self.modwidget.specs = {}
-#                for altelt in modelspecified.getiterator(ALTERNATIVE):
-#                    altspecs = []
-#                    for varelt in altelt.getiterator(VARIABLE):
-#                        varspec = []
-#                        varspec.append(varelt.get(TABLE))
-#                        varspec.append(varelt.get(COLUMN))
-#                        varspec.append(varelt.get(COEFF))
-#                        altspecs.append(varspec)
-#                    self.modwidget.specs[altelt.get(ID)] = altspecs
+            if self.modeltypecb.currentText() == PROB_MODEL:
+                self.populateAltsWidget(modelspecified)
+                self.populateVarsWidget(modelspecified)
             if self.modeltypecb.currentText() == SF_MODEL:
                 self.populateVarsWidget(modelspecified)
                 for varianceelt in modelspecified.getiterator(VARIANCE):
@@ -464,8 +456,7 @@ class AbtractSpecDialog(QDialog):
             model = self.configobject.modelSpecInConfig(self.modelkey)
             
             if self.modeltypecb.currentText() == SF_MODEL:
-                self.addDepVarToElt(model, modelkey)
-                self.addFiltToElt(model)
+                self.setModeltoElt(model,MODELFORM_REG,SF_MODEL)
                 self.saveVariables(model)
 #                modelform = MODELFORM_REG
 #                otherattr = None
@@ -485,13 +476,12 @@ class AbtractSpecDialog(QDialog):
 
                 
             elif self.modeltypecb.currentText() == COUNT_MODEL:
+                self.setModeltoElt(model,MODELFORM_CNT,COUNT_MODEL)
                 if self.modwidget.nbradio.isChecked():
                     model.set(MODELTYPE,NEGBIN_MODEL)
                 else:
                     model.set(MODELTYPE,POI_MODEL)
                 
-                self.addDepVarToElt(model, modelkey)
-                self.addFiltToElt(model)
                 if type == NEGBIN_MODEL:
                     variance = model.find(VARIANCE)
                     variance.set(VALUE,str(self.modwidget.odline.text()))
@@ -515,8 +505,10 @@ class AbtractSpecDialog(QDialog):
 #                self.addVariables(modelelt) 
     
             elif self.modeltypecb.currentText() == ORD_MODEL:
-                self.addDepVarToElt(model, modelkey)
-                self.addFiltToElt(model)
+                if self.modwidget.probradio.isChecked():
+                    self.setModeltoElt(model,MODELFORM_ORD,PROBIT)
+                else:
+                    self.setModeltoElt(model,MODELFORM_ORD,LOGIT)
                 self.saveAlternatives(model)
                 self.saveVariables(model)
 #                modelform = MODELFORM_ORD
@@ -543,8 +535,6 @@ class AbtractSpecDialog(QDialog):
 #                self.addVariables(modelelt) 
     
             elif self.modeltypecb.currentText() == GC_MNL_MODEL:
-                self.addDepVarToElt(modelelt,modelkey)
-                self.addFiltToElt(model)
                 self.saveVariables(model)
                 
 #                modelform = MODELFORM_MNL
@@ -553,8 +543,7 @@ class AbtractSpecDialog(QDialog):
 #                self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == MNL_MODEL:
-                self.addDepVarToElt(model, modelkey)
-                self.addFiltToElt(model)
+                self.setModeltoElt(model,MODELFORM_MNL,ALTSPEC)
                 for alter in model.findall(ALTERNATIVE):
                     model.remove(alter)
                     
@@ -568,8 +557,8 @@ class AbtractSpecDialog(QDialog):
                     altelt.set(VALUE,altvalue)
                     altspecs = specs[altname]
                     numvars = len(altspecs)
-                    for i in range(numvars):
-                        specrow = altspecs[i]
+                    for j in range(numvars):
+                        specrow = altspecs[j]
                         self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
                     model.append(altelt) 
 #                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentRow()) #self.modwidget.choicetable.currentItem())
@@ -599,8 +588,7 @@ class AbtractSpecDialog(QDialog):
                 self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
                 modelform = MODELFORM_NL
                 modelelt = self.createModelElement(modelkey,modelform,'')
-                self.addDepVarToElt(modelelt,modelkey)
-                self.addFiltToElt(modelelt)
+
                 
                 numrows = self.modwidget.choicetable.rowCount()
                 specs = self.modwidget.specs
@@ -633,8 +621,7 @@ class AbtractSpecDialog(QDialog):
                     modelelt.append(neselt)
                                       
             elif self.modeltypecb.currentText() == LOGREG_MODEL:
-                self.addDepVarToElt(model, modelkey)
-                self.addFiltToElt(model)
+                self.setModeltoElt(model,MODELFORM_REG,LOGREG_MODEL)
                 self.saveVariables(model)
 #                modelform = MODELFORM_REG
 #                modelelt = self.createModelElement(modelkey,modelform,'')
@@ -643,19 +630,23 @@ class AbtractSpecDialog(QDialog):
 #                self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == PROB_MODEL:
-                modelform = PROB_MODEL
-                modelelt = self.createModelElement(modelkey,modelform,'')
-                self.addDepVarToElt(modelelt,modelkey)
-                self.addFiltToElt(modelelt)
+                self.setModeltoElt(model,PROB_MODEL)
+                for alter in model.findall(ALTERNATIVE):
+                    model.remove(alter)
+                    
                 numrows = self.modwidget.choicetable.rowCount()
                 for i in range(numrows):
-                    altname = (self.modwidget.choicetable.item(i,0)).text()
-                    altvalue = (self.modwidget.choicetable.item(i,1)).text()
-                    altprob = (self.modwidget.choicetable.item(i,2)).text()
-                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
-                    altelt.set(ID,str(altname))
-                    altelt.set(VALUE,str(altvalue))
-                    altelt.set(PROB,str(altprob))
+                    altname = str((self.modwidget.choicetable.item(i,0)).text())
+                    altvalue = str((self.modwidget.choicetable.item(i,1)).text())
+                    altelt = etree.SubElement(model,ALTERNATIVE)
+                    altelt.set(ID,altname)
+                    altelt.set(VALUE,altvalue)
+                    
+                    valtable = str((self.modwidget.varstable.item(i,0)).text())
+                    valname = str((self.modwidget.varstable.item(i,1)).text())
+                    valcoff = str((self.modwidget.varstable.item(i,2)).text())
+                    self.addVariabletoElt(altelt,valtable,valname,valcoff)
+                    model.append(altelt) 
     
             
             #self.configobject.addModelElement(modelelt)
@@ -678,6 +669,22 @@ class AbtractSpecDialog(QDialog):
         elt.set(SEED,'1')
         return elt
 
+    def setModeltoElt(self,elt,formular,type='',thresh=''):
+        elt.set(FORMULATION,str(formular))
+        if type != '':
+            elt.set(MODELTYPE,str(type))
+        else:
+            if elt.get(MODELTYPE) != None:
+                elt.set(MODELTYPE,'')
+#        if thresh != '':
+#            print '33'
+#            elt.set(THRESHOLD,str(thresh))
+#        else:
+#            if elt.get(THRESHOLD) != None:
+#                print '44'
+#                elt.set(THRESHOLD,'')
+
+        
     def addDepVarToElt(self,model,col):
         depend = model.find(DEPVARIABLE)
         depend.set(COLUMN, col)
@@ -698,29 +705,29 @@ class AbtractSpecDialog(QDialog):
 #            runelt.set(VTABLE,str(self.runtablev))
 #            runelt.set(VCOLUMN,str(self.runvarv))
     
-    def addFiltToElt(self,elt):
-        for set in elt.findall(FILTERSET):
-            elt.remove(set)
-        for filter in elt.findall(FILTER):
-            elt.remove(filter)
-        
-        if self.subpopgb.isChecked():
-            if len(self.filter1) > 1:
-                fset = etree.SubElement(elt,FILTERSET)
-                if self.logical.currentIndex() == 0:
-                    fset.set(MODELTYPE,'and')
-                else:
-                    fset.set(MODELTYPE,'or')
-            
-            i = 0
-            while i < len(self.filter1):
-                if (str(self.filter4[i].text()) != ''):
-                    filter = etree.SubElement(elt,FILTER)
-                    filter.set(TABLE,str(self.filter1[i].currentText()))
-                    filter.set(COLUMN,str(self.filter2[i].currentText()))
-                    filter.set(COND,str(self.filter3[i].currentText()))
-                    filter.set(VALUE,str(self.filter4[i].text()))
-                i = i + 1
+#    def addFiltToElt(self,elt):
+#        for set in elt.findall(FILTERSET):
+#            elt.remove(set)
+#        for filter in elt.findall(FILTER):
+#            elt.remove(filter)
+#        
+#        if self.subpopgb.isChecked():
+#            if len(self.filter1) > 1:
+#                fset = etree.SubElement(elt,FILTERSET)
+#                if self.logical.currentIndex() == 0:
+#                    fset.set(MODELTYPE,'and')
+#                else:
+#                    fset.set(MODELTYPE,'or')
+#            
+#            i = 0
+#            while i < len(self.filter1):
+#                if (str(self.filter4[i].text()) != ''):
+#                    filter = etree.SubElement(elt,FILTER)
+#                    filter.set(TABLE,str(self.filter1[i].currentText()))
+#                    filter.set(COLUMN,str(self.filter2[i].currentText()))
+#                    filter.set(COND,str(self.filter3[i].currentText()))
+#                    filter.set(VALUE,str(self.filter4[i].text()))
+#                i = i + 1
                 
     def saveAlternatives(self,elt):
         for alter in elt.findall(ALTERNATIVE):
@@ -865,11 +872,11 @@ class AbtractSpecDialog(QDialog):
                         QMessageBox.warning(self, "Warning", "The value of an alternative must be greater than or equal to zero.")
                         return False
                 
-                if self.modwidget.choicetable.item(i,2) == None:
-                    QMessageBox.warning(self, "Warning", "Probability must be entered between 0.0 and 1.0.")
-                    return False
+#                if self.modwidget.choicetable.item(i,2) == None:
+#                    QMessageBox.warning(self, "Warning", "Probability must be entered between 0.0 and 1.0.")
+#                    return False
                 
-                coeff = unicode((self.modwidget.choicetable.item(i,2)).text())
+                coeff = unicode((self.modwidget.varstable.item(i,2)).text())
                 if self.checkFloat(coeff):
                     coeff1 = float(coeff)
                     if coeff1 < 0.0 or coeff1 > 1.0:
