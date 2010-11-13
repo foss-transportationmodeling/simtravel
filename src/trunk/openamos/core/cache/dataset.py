@@ -4,6 +4,7 @@ import time
 from numpy import unique
 from numpy.ma import zeros, masked_equal, ones
 from openamos.core.cache.dataset_table_layouts import *
+from openamos.core.data_array import DataArray
 
 class DB(object):
     def __init__(self, fileLoc, mode='w'):
@@ -35,9 +36,8 @@ class DB(object):
         input_grp = self.fileh.createGroup(self.fileh.root, "input_grp")
 
         # Output Tables - Creating the table
+        self.fileh.createTable(output_grp, "households_vehicles_count_r", Households_Vehicles_Count_R)
         self.fileh.createTable(output_grp, "vehicles_r", Vehicles_R)
-        self.fileh.createTable(output_grp, "households_r", Households_R)
-        self.fileh.createTable(output_grp, "tsp_r", Tsp_R)
         self.fileh.createTable(output_grp, "schedule_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_R)
         self.fileh.createTable(output_grp, "workers_r", Workers_R)
@@ -45,6 +45,7 @@ class DB(object):
         #Input Tables - Creatign the table
         self.fileh.createTable(input_grp, "travel_skims1", Travel_Skims)
         self.fileh.createTable(input_grp, "travel_skims2", Travel_Skims)
+        self.fileh.createTable(input_grp, "locations", Locations)
 
 
     def close(self):
@@ -109,7 +110,51 @@ class DB(object):
             tableRow.append()
         tableRef.flush()
         print '\tTime taken to write to hdf5 format %.4f' %(time.time()-t)
+
+
+
+    def createLocationsTableFromDatabase(self, tableInfo, queryBrowser):
+        t = time.time()
         
+        colsList = tableInfo.locations_varsList + [tableInfo.location_id_var]
+
+        tableName = tableInfo.tableName
+        data = queryBrowser.select_all_from_table(tableName, colsList)
+        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
+
+        colsList = data.varnames
+        colIndices = range(data.cols)
+
+        tableRef = self.returnTableReference(tableInfo.referenceTableName)
+        tableRow = tableRef.row
+
+
+        for i in data.data:
+            for j in colIndices:
+                #if i[j] is not None:
+                #    tableRow[cols[j]] = i[j]
+                tableRow[colsList[j]] = i[j]
+            tableRow.append()
+        tableRef.flush()
+        print '\tTime taken to write to hdf5 format %.4f' %(time.time()-t)
+
+
+    def returnTable(self, tableName, id_var, colNames):
+	tableRef = self.returnTableReference(tableName)
+	
+	idVarColumn = tableRef.col(id_var)
+	
+	uniqueIds = unique(idVarColumn)
+
+	table = zeros((max(uniqueIds) + 1, len(colNames)))
+
+        for i in range(len(colNames)):
+	    table[uniqueIds, i] = tableRef.col(colNames[i])
+	
+	print table
+	return DataArray(table, colNames), uniqueIds
+
+
 
     def returnTableAsMatrix(self, tableName, originColName, destinationColName, skimColName, fillValue=9999):
         tableRef = self.returnTableReference(tableName)

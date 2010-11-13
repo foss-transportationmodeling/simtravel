@@ -6,6 +6,23 @@ class Travel_Skims(t.IsDescription):
     destination = t.Int32Col()
     tt = t.Float32Col()
 
+class Locations(t.IsDescription):
+    locationid = t.Int32Col()
+    population = t.Int32Col()
+    public_employment = t.Int32Col()
+    retail_employment = t.Int32Col()
+    office_employment = t.Int32Col()
+    industrial_employment = t.Int32Col()
+    other_employment = t.Int32Col()
+    public_employment_ind = t.Int32Col()
+    retail_employment_ind = t.Int32Col()
+    office_employment_ind = t.Int32Col()
+    industrial_employment_ind = t.Int32Col()
+    other_employment_ind = t.Int32Col()
+    total_area = t.Float32Col()
+    residential_population = t.Int32Col()
+    single_family_dwelling = t.Int32Col()
+    institutional_population = t.Int32Col()
 
 class Persons_R(t.IsDescription):
     houseid = t.Int64Col()
@@ -13,15 +30,14 @@ class Persons_R(t.IsDescription):
     wtt = t.Float32Col()
 
 
+class Households_Vehicles_Count_R(t.IsDescription):
+    houseid = t.Int64Col()
+    vehcount = t.Int32Col()
+
 class Vehicles_R(t.IsDescription):
     houseid = t.Int64Col()
     vehid = t.Int32Col()
     vehtype = t.Int32Col()
-
-
-class Households_R(t.IsDescription):
-    houseid = t.Int64Col()
-    numvehs = t.Int32Col()
 
 class Tsp_R(t.IsDescription):
     houseid = t.Int64Col()
@@ -39,7 +55,6 @@ class Schedule_R(t.IsDescription):
     endtime = t.Int32Col()
     duration = t.Int32Col()
 
-
 class DailyStatus_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
@@ -50,7 +65,6 @@ class ChildDependency_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
     dependency = t.Int32Col()
-
 
 class Workers_R(t.IsDescription):
     houseid = t.Int64Col()
