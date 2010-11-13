@@ -12,6 +12,7 @@ from file_menu.databaseconfig import *
 
 
 from openamos.core.config import *
+from openamos.core.run.simulation_manager_cursor import SimulationManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -345,12 +346,26 @@ class MainWindow(QMainWindow):
     def run_simulation(self):
         fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
         pname = self.proconfig.getConfigElement(PROJECT,NAME)
-        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
-            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
-            componentManager.establish_databaseConnection()
-            componentManager.establish_cacheDatabase(fileloc, 'w')
-            componentManager.run_components()
-            componentManager.db.close()
+        """This accepts only one argument which is the location of the configuration """\
+        """file. e.g. /home/config.xml (linux machine) """\
+        """or c:/testproject/config.xml (windows machine)"""
+
+        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+        simulationManagerObject.setup_databaseConnection()
+        simulationManagerObject.setup_cacheDatabase('w')
+        simulationManagerObject.setup_location_information()
+        simulationManagerObject.setup_tod_skims()
+        simulationManagerObject.parse_config()
+        simulationManagerObject.clean_database_tables()
+        simulationManagerObject.run_components()
+        simulationManagerObject.close_connections()
+        
+#        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
+#            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+#            componentManager.establish_databaseConnection()
+#            componentManager.establish_cacheDatabase(fileloc, 'w')
+#            componentManager.run_components()
+#            componentManager.db.close()
 #        else:
 #            print "Something Wrong"
         
