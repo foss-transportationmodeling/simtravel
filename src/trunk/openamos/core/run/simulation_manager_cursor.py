@@ -89,13 +89,13 @@ class SimulationManager(object):
 
         # Printing models that were parsed
         modelCount = 0
-        #for comp in self.componentList:
-        #    print '\n\tFor component - %s ' %(comp.component_name)
-        #    print "\t -- Model list including model formulation and data filters if any  -- "
-        #    print '\tPost Run Filters - ', comp.post_run_filter
-        #    for mod in comp.model_list:
-        #        print "\t\t - name:", mod.dep_varname, ",formulation:", mod.model_type, ",filter:", mod.data_filter
-        #        modelCount += 1
+        for comp in self.componentList:
+            print '\n\tFor component - %s ' %(comp.component_name)
+            print "\t -- Model list including model formulation and data filters if any  -- "
+            print '\tPost Run Filters - ', comp.post_run_filter
+            for mod in comp.model_list:
+                print "\t\t - name:", mod.dep_varname, ",formulation:", mod.model_type, ",filter:", mod.data_filter
+                modelCount += 1
 
         print "\tTotal of %s components and %s models will be processed" %(len(self.componentList), modelCount)
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
@@ -130,7 +130,7 @@ class SimulationManager(object):
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed = comp.run(data)
+                nRowsProcessed = comp.run(data, self.projectSkimsObject)
             
             # Write the data to the database from the hdf5 results cache
             # after running each component because the subsequent components
