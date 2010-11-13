@@ -34,7 +34,8 @@ class ConfigObject(object):
         return element
 
     def modelSpecInConfig(self,modelkey):
-        print modelkey
+        if modelkey not in MODELMAP.keys():
+            return None
         mapvals = MODELMAP[modelkey]
         compname = mapvals[0]
         modelname = mapvals[1]
