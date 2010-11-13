@@ -49,6 +49,7 @@ class SimulationManager(object):
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
         self.projectConfigObject = self.configParser.parse_projectAttributes()
         self.projectSkimsObject = self.configParser.parse_skims_tables()
+        self.projectLocationsObject = self.configParser.parse_locations_table()
 
     def setup_databaseConnection(self):
         dbConfigObject = self.configParser.parse_databaseAttributes()
@@ -74,6 +75,12 @@ class SimulationManager(object):
             self.db.createSkimsTableFromDatabase(tableInfo,
                                                  self.queryBrowser)
 
+    def setup_location_information(self):
+        print "-- Processing Location Information --"
+        self.db.createLocationsTableFromDatabase(self.projectLocationsObject, 
+                                            self.queryBrowser)
+
+
     def parse_config(self):
         print "-- Parsing components and model specifications --"
         self.componentList = self.configParser.parse_models()
@@ -92,7 +99,7 @@ class SimulationManager(object):
 
         print "\tTotal of %s components and %s models will be processed" %(len(self.componentList), modelCount)
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
-
+        #raw_input()
 
     def clean_database_tables(self):
         tableNamesDelete = []
@@ -109,12 +116,12 @@ class SimulationManager(object):
     def run_components(self):
         t_c = time.time()
         
+	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+
         for comp in self.componentList:
             t = time.time()
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
-
-            tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
             data = comp.pre_process(self.queryBrowser, self.subsample, 
                                     tableOrderDict, tableNamesKeyDict, 
