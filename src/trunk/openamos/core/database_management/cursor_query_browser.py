@@ -66,14 +66,18 @@ class QueryBrowser(object):
             try:    
                 self.dbcon_obj.cursor.execute("SELECT %s FROM %s" %(colsStr, table_name))
                 result = self.dbcon_obj.cursor.fetchall()
-                cols_list = self.dbcon_obj.get_column_list(table_name)
+                if cols is None:
+                    cols_list = self.dbcon_obj.get_column_list(table_name)
+                else:
+                    cols_list = cols
                 
+
                 data = self.createResultArray(result, cols_list)
 
                 #return data, cols_list ##changes made here
                 return data
             except Exception, e:
-                print 'Error while retreiving the data from the table'
+                print '\tError while retreiving the data from the table'
                 print e
         else:
             print 'Table %s does not exist.'%table_name
@@ -127,7 +131,8 @@ class QueryBrowser(object):
 
 
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
-                    spatialConst_list=None, analysisInterval=None, subsample=None):
+                    spatialConst_list=None, analysisInterval=None, 
+                    history_info=None, subsample=None):
         """
         This method is used to select the join of tables and display them.
         
@@ -151,6 +156,11 @@ class QueryBrowser(object):
         #print 'Database Dictionary of Table and Columns - ', db_dict
         #print 'Column Names', db_dict
         #raw_input()
+
+        #print
+        #print db_dict
+        #print max_dict
+
 
         #initialize the variables
         final_list = []
@@ -212,6 +222,7 @@ class QueryBrowser(object):
 
                 
         #print 'FINAL LIST', final_list
+        #print 'TABLE NAMES', table_names
         #print 'TABLE LIST', table_list
 
         # Generating the left join statements
@@ -224,9 +235,8 @@ class QueryBrowser(object):
         primCols = list(set(primCols))
 
         joinStrList = []
+        table_list.remove(mainTable)
         for table in table_list:
-            if table == mainTable:
-                continue
             joinCondition = ''
             for col in column_names[table]:
                 joinCondition = (joinCondition 
@@ -291,7 +301,7 @@ class QueryBrowser(object):
             joinCondition = joinCondition[:-3]
             
         #combine left join along with the count variable/max condition
-            mJoinStr = joinStrList.pop(index-1)
+            mJoinStr = joinStrList.pop(index)
             mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
                                           'and %s.%s=temp.%s)' 
                                           %(maxTable, maxColumn, maxColumn))
@@ -310,6 +320,57 @@ class QueryBrowser(object):
 	    cols.sort()
             cols_list = cols_list + cols
         """    
+
+
+
+        #Add history information
+        if history_info is not None:
+            histVarAggConditions = history_info.historyVarAggConditions
+            histAggVar = history_info.historyAggVar
+            histTable = history_info.tableName
+            
+            for histVar in histVarAggConditions:
+                conditions = histVarAggConditions[histVar]
+                conditionsStr = ""
+                for j in conditions:
+                    conditionsStr += " %s and" %(j)
+                conditionsStr = conditionsStr[:-3]
+
+                selectVarStr = "sum(%s) as %s" %(histAggVar, histVar)
+                
+                histTempTableName = "history_%s" %(histVar)
+
+
+                final_list.append("%s.%s" %(histTempTableName, histVar))
+                cols_list.append(histVar)
+
+                keyCols = column_names[histTable]
+                
+                grpStr = ""
+                for i in keyCols:
+                    grpStr += "%s," %(i)
+                grpStr = grpStr[:-1]
+
+
+
+                selectAggStr = ("(select %s,%s from %s where %s group by %s) as %s "
+                                %(grpStr, selectVarStr, histTable, conditionsStr, 
+                                  grpStr, histTempTableName))
+
+                print column_names
+
+                joinCondition = ""
+                for i in keyCols:
+                    joinCondition += " %s.%s = %s.%s and" %(mainTable, i, 
+                                                       histTempTableName, i)
+                joinCondition = joinCondition[:-3]
+
+                leftJoinStr = (" left join %s on (%s and endtime < %s)" 
+                               %(selectAggStr, joinCondition, analysisInterval))
+
+                joinStrList.append(leftJoinStr)
+                
+            
 
 
         # Spatial TSP identification
@@ -548,6 +609,8 @@ class QueryBrowser(object):
         # - then assign the fillValue to those columns
         data = array(result)
         mask = ma.masked_equal(data, None).mask
+
+        print cols_list
 
         if mask.any():
             data[mask] = fillValue
