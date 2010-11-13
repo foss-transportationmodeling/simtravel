@@ -106,7 +106,7 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data):
+    def run(self, data, projectSkimsObject):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
         #raw_input()
@@ -132,7 +132,7 @@ class AbstractComponent(object):
             print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
-                model_list_duringrun, iteration)   
+                model_list_duringrun, iteration, projectSkimsObject)   
 
             data_filter_count = data_filter.sum()
             data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
@@ -207,7 +207,8 @@ class AbstractComponent(object):
         return data_subset_filter
 
 
-    def iterate_through_the_model_list(self, model_list_duringrun, iteration):
+    def iterate_through_the_model_list(self, model_list_duringrun, 
+                                       iteration, projectSkimsObject):
         ti = time.time()
         model_list_forlooping = []
         
@@ -220,7 +221,7 @@ class AbstractComponent(object):
                 current_model_name = i.dep_varname
                 
                 self.check_for_dynamic_spatial_queries(prev_model_name, 
-                                                       current_model_name)
+                                                       current_model_name, projectSkimsObject)
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
@@ -269,12 +270,14 @@ class AbstractComponent(object):
         # LOOP, THE SEED IS BEING SET TO THE DEFAULT VALUE
         # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
-    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name):
+    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, projectSkimsObject):
         if len(self.dynamicspatialConst_list) > 0:
-            for i in self.dynamicspatialConst_list:
-                if prev_model_name == i.beforeModel and prev_model_name == i.afterModel:
+            for const in self.dynamicspatialConst_list:
+                if prev_model_name == const.beforeModel and current_model_name == const.afterModel:
                     print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
+                    self.process_data_for_locs(self.data, [const], self.analysisInterval,
+                                               projectSkimsObject)
                 
                 
     
@@ -511,8 +514,10 @@ class AbstractComponent(object):
         for i in depVarDict:
             colsInTable = list(set(depVarDict[i]))
             colsInTable.sort()
+
             for j in colsInTable:
-                data.insertcolumn([j], tempValsArr)
+                if j not in data._colnames:
+                    data.insertcolumn([j], tempValsArr)
         return data
 
     def process_data_for_locs(self, data, spatialConst_list, 
@@ -525,6 +530,7 @@ class AbstractComponent(object):
         to the N random location choices.
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
+        
 
         t = time.time()
 
@@ -727,6 +733,7 @@ class AbstractComponent(object):
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
+        print vals[:,0]
         data.insertcolumn([colName], vals)
 
         return data
