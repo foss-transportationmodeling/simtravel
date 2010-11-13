@@ -236,6 +236,13 @@ class ConfigParser(object):
             spatialConst = self.return_spatial_query(i)
             spatialConst_list.append(spatialConst)
 
+
+        dynamicSpatialConstIterator = component_element.getiterator("DynamicSpatialConstraints")
+        dynamicSpatialConst_list = []
+        for i in dynamicSpatialConstIterator:
+            dynamicSpatialConst = self.return_spatial_query(i)
+            dynamicSpatialConst_list.append(dynamicSpatialConst)
+
             
         consistencyChecks_element = component_element.find("ConsistencyChecks")
         if consistencyChecks_element is not None:
@@ -274,6 +281,7 @@ class ConfigParser(object):
                                       comp_write_table,
                                       comp_keys,
                                       spatialConst_list,
+                                      dynamicSpatialConst_list,
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion)
@@ -1219,8 +1227,8 @@ class ConfigParser(object):
 
 
         locationVariables = []
-        locationInfoTable = ""
-        locationIdVar = ""
+        locationInfoTable = None
+        locationIdVar = None
         locationInformationElement = spatial_query_element.find('ExtractLocationInformation')
         if locationInformationElement is not None:
             locationInfoTable = locationInformationElement.get('table')
@@ -1232,12 +1240,16 @@ class ConfigParser(object):
                 locationVariables.append(varname)
                 
 
+        beforeModel = spatial_query_element.get('before_model')
+        afterModel = spatial_query_element.get('after_model')
+
         prismConstraint = PrismConstraints(table, skimField, 
                                            originField, destinationField, 
                                            startConstraint, endConstraint, 
                                            asField,
                                            sampleField, countChoices, activityTypeFilter, 
                                            thresholdTimeConstraint, seed,
+                                           afterModel, beforeModel,
                                            locationInfoTable,
                                            locationIdVar,
                                            locationVariables)
