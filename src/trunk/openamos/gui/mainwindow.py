@@ -12,7 +12,6 @@ from file_menu.databaseconfig import *
 
 
 from openamos.core.config import *
-from openamos.core.run.simulation_manager import ComponentManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -105,37 +104,39 @@ class MainWindow(QMainWindow):
         project_quit_action = self.createaction("&Quit", self.projectQuit, "Ctrl+Q",icon="Quit",
                                                 tip="Quit OpenAMOS.")
 
+#        self.addActions(self.fileMenu, (project_new_action,project_open_action,None,project_save_action,project_save_as_action,
+#                                        project_print_action,None,project_close_action,project_quit_action, ))
         self.addActions(self.fileMenu, (project_new_action,project_open_action,None,project_save_action,project_save_as_action,
-                                        project_print_action,None,project_close_action,project_quit_action, ))
+                                        None,project_close_action,project_quit_action, ))
       
     # Defining Models
         self.models_menu = self.menuBar().addMenu("&Models")
 
         models_interactive_ui_action = self.createaction("&Interactive UI", None, None, 
                                             None, "Chose a model in a visual form.")
-        component_long_term_choices_action = self.createaction("Long Term Choices", self.models.show_long_term_models, None, 
+        component_long_term_choices_action = self.createaction(COMP_LONGTERM, self.models.show_long_term_models, None, 
                                             None, None)
-        component_fixed_activity_location_choice_generator_action = self.createaction("Fixed Activity Location Choice Generator", self.models.show_fixed_activity_models, None, 
+        component_fixed_activity_location_choice_generator_action = self.createaction(COMP_FIXEDACTLOCATION, self.models.show_fixed_activity_models, None, 
                                             None, None)
-        component_vehicle_ownership_model_action = self.createaction("Vehicle Ownership Model", self.models.show_vehicle_ownership_models, None, 
+        component_vehicle_ownership_model_action = self.createaction(COMP_VEHOWN, self.models.show_vehicle_ownership_models, None, 
                                             None, None)
-        component_fixed_activity_prism_generator_action = self.createaction("Fixed Activity Prism Generator", self.models.show_fixed_activity_prism_models, None, 
+        component_fixed_activity_prism_generator_action = self.createaction(COMP_FIXEDACTPRISM, self.models.show_fixed_activity_prism_models, None, 
                                             None, None)
-        component_child_daily_status_and_allocation_model_action = self.createaction("Child Daily Status and Allocation Model", self.models.show_child_model, None, 
+        component_child_daily_status_and_allocation_model_action = self.createaction(COMP_CHILDSTATUS, self.models.show_child_model, None, 
                                             None, None)
-        component_adult_daily_status_model_action = self.createaction("Adult Daily Status Model", self.models.show_adult_model, None, 
+        component_adult_daily_status_model_action = self.createaction(COMP_ADULTSTATUS, self.models.show_adult_model, None, 
                                             None, None)
-        component_activity_skeleton_reconciliation_system_action = self.createaction("Activity Skeleton Reconciliation System", self.models.show_skeleton_reconciliation_system, None, 
+        component_activity_skeleton_reconciliation_system_action = self.createaction(COMP_ACTSKELRECONCILIATION, self.models.show_skeleton_reconciliation_system, None, 
                                             None, None)
-        component_activity_travel_pattern_simulator_action = self.createaction("Activity Travel Pattern Simulator", self.models.show_activity_travel_pattern_simulator, None, 
+        component_activity_travel_pattern_simulator_action = self.createaction(COMP_ACTTRAVSIMULATOR, self.models.show_activity_travel_pattern_simulator, None, 
                                             None, None)
-        component_activity_travel_reconciliation_system_action = self.createaction("Activity Travel Reconciliation System", self.models.show_travel_reconciliation_system, None, 
+        component_activity_travel_reconciliation_system_action = self.createaction(COMP_ACTTRAVRECONCILIATION, self.models.show_travel_reconciliation_system, None, 
                                             None, None)
-        component_time_use_utility_calculator_action = self.createaction("Time Use Utility Calculator", None, None, 
+        component_time_use_utility_calculator_action = self.createaction(COMP_TIMEUSEUTILITY, None, None, 
                                             None, None)
 
         self.modelsComponentSubMenu = self.models_menu.addMenu("&Component")
-        self.addActions(self.models_menu, (models_interactive_ui_action, ))
+        #self.addActions(self.models_menu, (models_interactive_ui_action, ))
         self.addActions(self.modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_location_choice_generator_action,
                                                       component_vehicle_ownership_model_action, component_fixed_activity_prism_generator_action,
                                                        component_child_daily_status_and_allocation_model_action, component_adult_daily_status_model_action,
@@ -166,7 +167,7 @@ class MainWindow(QMainWindow):
                                             "run", "Implement the model.", False, True)        
         setting_preference_action = self.createaction("&Preference", None, None, 
                                             "preferences", "Make a configuration.")        
-        self.addActions(self.run_menu, (setting_preference_action, ))
+        #self.addActions(self.run_menu, (setting_preference_action, ))
         self.addActions(self.run_menu, (run_simulation_action, ))
 
     # Defining help        
@@ -180,9 +181,11 @@ class MainWindow(QMainWindow):
 # Defining toolbar
         self.fileToolBar = self.addToolBar("File")
         self.fileToolBar.setObjectName("FileToolBar")
+#        self.addActions(self.fileToolBar, (project_new_action, project_open_action,
+#                                           project_save_action, display_zoom_in_action,
+#                                           display_zoom_out_action,))
         self.addActions(self.fileToolBar, (project_new_action, project_open_action,
-                                           project_save_action, display_zoom_in_action,
-                                           display_zoom_out_action,))
+                                           project_save_action,))
 
 # Define Action
     def createaction(self, text, slot=None, shortcut=None, icon=None, 
@@ -213,23 +216,23 @@ class MainWindow(QMainWindow):
 
 # Show flowcharts from model management tree widget
     def showflowchart(self,selitem,col):
-        if selitem.text(col) == 'Long Term Choices':
+        if selitem.text(col) == COMP_LONGTERM:
             self.models.show_long_term_models()
-        if selitem.text(col) == 'Fixed Activity Location Choices':
+        if selitem.text(col) == COMP_FIXEDACTLOCATION:
             self.models.show_fixed_activity_models()
-        if selitem.text(col) == 'Vehicle Ownership Model':
+        if selitem.text(col) == COMP_VEHOWN:
             self.models.show_vehicle_ownership_models()
-        if selitem.text(col) == 'Fixed Activity Prism Generator':
+        if selitem.text(col) == COMP_FIXEDACTPRISM:
             self.models.show_fixed_activity_prism_models()
-        if selitem.text(col) == 'Child Daily Status and Allocation Model':
+        if selitem.text(col) == COMP_CHILDSTATUS:
             self.models.show_child_model()
-        if selitem.text(col) == 'Adult Daily Status Model':
+        if selitem.text(col) == COMP_ADULTSTATUS:
             self.models.show_adult_model()
-        if selitem.text(col) == 'Activity Skeleton Reconciliation System':
+        if selitem.text(col) == COMP_ACTSKELRECONCILIATION:
             self.models.show_skeleton_reconciliation_system()
-        if selitem.text(col) == 'Activity Travel Pattern Simulator':
+        if selitem.text(col) == COMP_ACTTRAVSIMULATOR:
             self.models.show_activity_travel_pattern_simulator()
-        if selitem.text(col) == 'Activity Travel Reconciliation System':
+        if selitem.text(col) == COMP_ACTTRAVRECONCILIATION:
             self.models.show_travel_reconciliation_system()
 
 
