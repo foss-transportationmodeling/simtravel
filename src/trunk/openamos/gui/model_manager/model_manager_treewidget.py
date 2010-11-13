@@ -78,49 +78,117 @@ class Model_Manager_Treewidget(QTreeWidget):
         fixed_activity_prism_models = QTreeWidgetItem(self)
         fixed_activity_prism_models.setText(0, COMP_FIXEDACTPRISM)
 
-        earliest_start_day = QTreeWidgetItem(fixed_activity_prism_models)
-        earliest_start_day.setText(0, COMPMODEL_DAYSTART)
-
-        latest_end_day = QTreeWidgetItem(fixed_activity_prism_models)
-        latest_end_day.setText(0, COMPMODEL_DAYEND)
-
         worker = QTreeWidgetItem(fixed_activity_prism_models)
-        worker.setText(0, "Worker")
+        worker.setText(0, "Adult Workers")
+        
+        start_day1 = QTreeWidgetItem(worker)
+        start_day1.setText(0, COMPMODEL_DAYSTART)
 
+        end_day1 = QTreeWidgetItem(worker)
+        end_day1.setText(0, COMPMODEL_DAYEND)
+        
         number_work_episodes = QTreeWidgetItem(worker)
-        number_work_episodes.setText(0, COMPMODEL_NUMWRKEPISODES)
-
-        latest_arrival_work= QTreeWidgetItem(worker)
-        latest_arrival_work.setText(0, COMPMODEL_WORKSTART1)
-
-        earliest_departure_work = QTreeWidgetItem(worker)
-        earliest_departure_work.setText(0, COMPMODEL_WORKEND1)
-
+        number_work_episodes.setText(0, COMPMODEL_WRKEPISODES)
+        
+        one_episodes = QTreeWidgetItem(number_work_episodes)
+        one_episodes.setText(0, "One Episode")
+        
+        latest_oneepiso = QTreeWidgetItem(one_episodes)
+        latest_oneepiso.setText(0, "Latest Arrival Time")
+        
+        early_oneepiso = QTreeWidgetItem(one_episodes)
+        early_oneepiso.setText(0, "Earliest Departure Time")
+        
+        two_episodes = QTreeWidgetItem(number_work_episodes)
+        two_episodes.setText(0, "Two Episodes")
+        
+        latest_twoepiso1 = QTreeWidgetItem(two_episodes)
+        latest_twoepiso1.setText(0, "Latest Arrival Time (Episode 1)")
+        
+        early_twoepiso1 = QTreeWidgetItem(two_episodes)
+        early_twoepiso1.setText(0, "Earliest Departure Time (Episode 1)")
+        
+        latest_twoepiso2 = QTreeWidgetItem(two_episodes)
+        latest_twoepiso2.setText(0, "Latest Arrival Time (Episode 2)")
+        
+        early_twoepiso2 = QTreeWidgetItem(two_episodes)
+        early_twoepiso2.setText(0, "Earliest Departure Time (Episode 2)")
+        
+        
         nonworker = QTreeWidgetItem(fixed_activity_prism_models)
-        nonworker.setText(0, COMPMODEL_NONWORKER)
+        nonworker.setText(0, "Adult Non-worker")
+        
+        start_day2 = QTreeWidgetItem(nonworker)
+        start_day2.setText(0, COMPMODEL_DAYSTART)
+
+        end_day2 = QTreeWidgetItem(nonworker)
+        end_day2.setText(0, COMPMODEL_DAYEND)
+        
+        
+        
+        student = QTreeWidgetItem(fixed_activity_prism_models)
+        student.setText(0, "Children (5-17 years) and Adult Students")
+        
+        start_day3 = QTreeWidgetItem(student)
+        start_day3.setText(0, COMPMODEL_DAYSTART)
+
+        end_day3 = QTreeWidgetItem(student)
+        end_day3.setText(0, COMPMODEL_DAYEND)
+        
+        latest_school = QTreeWidgetItem(student)
+        latest_school.setText(0, "Latest Arrival Time")
+        
+        early_school = QTreeWidgetItem(student)
+        early_school.setText(0, "Earliest Departure Time")
+        
+        
+        
+        preschool = QTreeWidgetItem(fixed_activity_prism_models)
+        preschool.setText(0, "Pre-school Children (0-4 years)")
+        
+        start_day4 = QTreeWidgetItem(preschool)
+        start_day4.setText(0, COMPMODEL_DAYSTART)
+
+        end_day4 = QTreeWidgetItem(preschool)
+        end_day4.setText(0, COMPMODEL_DAYEND)
+
+        latest_preschool = QTreeWidgetItem(preschool)
+        latest_preschool.setText(0, "Latest Arrival Time")
+        
+        early_preschool = QTreeWidgetItem(preschool)
+        early_preschool.setText(0, "Earliest Departure Time")        
+
+#        latest_arrival_work= QTreeWidgetItem(worker)
+#        latest_arrival_work.setText(0, COMPMODEL_WORKSTART1)
+#
+#        earliest_departure_work = QTreeWidgetItem(worker)
+#        earliest_departure_work.setText(0, COMPMODEL_WORKEND1)
+
+#        nonworker = QTreeWidgetItem(fixed_activity_prism_models)
+#        nonworker.setText(0, COMPMODEL_NONWORKER)
+#
+#
+#        children_adults = QTreeWidgetItem(fixed_activity_prism_models)
+#        children_adults.setText(0, "children adults")
 
 
-        children_adults = QTreeWidgetItem(fixed_activity_prism_models)
-        children_adults.setText(0, "children adults")
+#        number_school_episodes = QTreeWidgetItem(children_adults)
+#        number_school_episodes.setText(0, COMPMODEL_NUMSCHEPISODES)
+#
+#
+#        latest_arrival_school = QTreeWidgetItem(children_adults)
+#        latest_arrival_school.setText(0, COMPMODEL_SCHSTART1)
+#
+#
+#        earliest_departure_school = QTreeWidgetItem(children_adults)
+#        earliest_departure_school.setText(0, COMPMODEL_SCHEND1)
 
 
-        number_school_episodes = QTreeWidgetItem(children_adults)
-        number_school_episodes.setText(0, COMPMODEL_NUMSCHEPISODES)
+#        children_2 = QTreeWidgetItem(fixed_activity_prism_models)
+#        children_2.setText(0, "Children")
 
-
-        latest_arrival_school = QTreeWidgetItem(children_adults)
-        latest_arrival_school.setText(0, COMPMODEL_SCHSTART1)
-
-
-        earliest_departure_school = QTreeWidgetItem(children_adults)
-        earliest_departure_school.setText(0, COMPMODEL_SCHEND1)
-
-
-        children_2 = QTreeWidgetItem(fixed_activity_prism_models)
-        children_2.setText(0, "Children")
-
-        arrival_departure_time_preschool = QTreeWidgetItem(children_2)
-        arrival_departure_time_preschool.setText(0, COMPMODEL_ARRIVALDEPARTPRESCH)  #"The arrival and departure time from Pre-school")
+#        arrival_departure_time_preschool = QTreeWidgetItem(children_2)
+#        arrival_departure_time_preschool.setText(0, COMPMODEL_ARRIVALDEPARTPRESCH)  #"The arrival and departure time from Pre-school")
 
         time_space_prism_vertices = QTreeWidgetItem(fixed_activity_prism_models)
         time_space_prism_vertices.setText(0, COMPMODEL_TIMESPACE)                   #"Time-space prism vertices")
@@ -388,24 +456,24 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif item.text(col) == COMPMODEL_DAYEND:
             diagtitle = COMPMODEL_DAYEND
             modelkey = MODELKEY_DAYEND
-        elif item.text(col) == COMPMODEL_NUMWRKEPISODES:
-            diagtitle = COMPMODEL_NUMWRKEPISODES
-            modelkey = MODELKEY_NUMWRKEPISODES
-        elif item.text(col) == COMPMODEL_WORKSTART1:
-            diagtitle = COMPMODEL_WORKSTART1
-            modelkey = MODELKEY_WORKSTART1
-        elif item.text(col) == COMPMODEL_WORKEND1:
-            diagtitle = COMPMODEL_WORKEND1
-            modelkey = MODELKEY_WORKEND1
-        elif item.text(col) == COMPMODEL_NUMSCHEPISODES:
-            diagtitle = COMPMODEL_NUMSCHEPISODES
-            modelkey = MODELKEY_NUMSCHEPISODES
-        elif item.text(col) == COMPMODEL_SCHSTART1:
-            diagtitle = COMPMODEL_SCHSTART1
-            modelkey = MODELKEY_SCHSTART1
-        elif item.text(col) == COMPMODEL_SCHEND1:
-            diagtitle = COMPMODEL_SCHEND1
-            modelkey = MODELKEY_SCHEND1
+        elif item.text(col) == COMPMODEL_WRKEPISODES:
+            diagtitle = COMPMODEL_WRKEPISODES
+            modelkey = MODELKEY_WRKEPISODES
+#        elif item.text(col) == COMPMODEL_WORKSTART1:
+#            diagtitle = COMPMODEL_WORKSTART1
+#            modelkey = MODELKEY_WORKSTART1
+#        elif item.text(col) == COMPMODEL_WORKEND1:
+#            diagtitle = COMPMODEL_WORKEND1
+#            modelkey = MODELKEY_WORKEND1
+#        elif item.text(col) == COMPMODEL_NUMSCHEPISODES:
+#            diagtitle = COMPMODEL_NUMSCHEPISODES
+#            modelkey = MODELKEY_NUMSCHEPISODES
+#        elif item.text(col) == COMPMODEL_SCHSTART1:
+#            diagtitle = COMPMODEL_SCHSTART1
+#            modelkey = MODELKEY_SCHSTART1
+#        elif item.text(col) == COMPMODEL_SCHEND1:
+#            diagtitle = COMPMODEL_SCHEND1
+#            modelkey = MODELKEY_SCHEND1
         elif item.text(col) == COMPMODEL_PRESCHLOC:
             diagtitle = COMPMODEL_PRESCHLOC
             modelkey = MODELKEY_PRESCHLOC
@@ -424,9 +492,9 @@ class Model_Manager_Treewidget(QTreeWidget):
 #        elif item.text(col) == COMPMODEL_NONWORKER:
 #            diagtitle = COMPMODEL_NONWORKER
 #            modelkey = MODELKEY_NONWORKER
-        elif item.text(col) == COMPMODEL_ARRIVALDEPARTPRESCH:
-            diagtitle = COMPMODEL_ARRIVALDEPARTPRESCH
-            modelkey = MODELKEY_ARRIVALDEPARTPRESCH
+#        elif item.text(col) == COMPMODEL_ARRIVALDEPARTPRESCH:
+#            diagtitle = COMPMODEL_ARRIVALDEPARTPRESCH
+#            modelkey = MODELKEY_ARRIVALDEPARTPRESCH
 #        elif item.text(col) == COMPMODEL_TIMESPACE:
 #            diagtitle = COMPMODEL_TIMESPACE
 #            modelkey = MODELKEY_TIMESPACE
