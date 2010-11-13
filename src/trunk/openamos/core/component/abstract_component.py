@@ -21,6 +21,7 @@ class AbstractComponent(object):
                  writeToTable,
                  key,
                  spatialConst_list=None,
+                 dynamicspatialConst_list=None,
                  analysisInterval=None,
                  history_info=None,
                  post_run_filter=None,
@@ -40,6 +41,7 @@ class AbstractComponent(object):
         self.writeToTable = writeToTable
         self.key = key
         self.spatialConst_list = spatialConst_list
+        self.dynamicspatialConst_list = dynamicspatialConst_list
         self.analysisInterval = analysisInterval
         self.post_run_filter = post_run_filter
         self.delete_criterion = delete_criterion
@@ -209,8 +211,16 @@ class AbstractComponent(object):
         ti = time.time()
         model_list_forlooping = []
         
-        for i in model_list_duringrun:
+        for j in range(len(model_list_duringrun)):
+            i = model_list_duringrun[j]
             print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            print '\t\tChecking for dynamic spatial queries'
+            if j >=1:
+                prev_model_name = model_list_duringrun[j-1].dep_varname
+                current_model_name = i.dep_varname
+                
+                self.check_for_dynamic_spatial_queries(prev_model_name, 
+                                                       current_model_name)
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
@@ -259,6 +269,15 @@ class AbstractComponent(object):
         # LOOP, THE SEED IS BEING SET TO THE DEFAULT VALUE
         # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
+    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name):
+        if len(self.dynamicspatialConst_list) > 0:
+            for i in self.dynamicspatialConst_list:
+                if prev_model_name == i.beforeModel and prev_model_name == i.afterModel:
+                    print 'FOUND DYNAMICS SPATIAL QUERY'
+                    #raw_input()
+                
+                
+    
     def prepare_vars(self):
         #print variableList                                                                                      
         indep_columnDict = self.prepare_vars_independent()
