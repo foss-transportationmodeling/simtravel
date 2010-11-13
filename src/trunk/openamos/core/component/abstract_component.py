@@ -1,10 +1,11 @@
 import copy
 import time
-from numpy import logical_or, logical_and
+from numpy import logical_or, logical_and, ones, ma, zeros, where, vstack
 from openamos.core.data_array import DataArray
 from openamos.core.models.model import SubModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.errors import ModelError
+from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 
 class AbstractComponent(object):
     """
@@ -21,6 +22,7 @@ class AbstractComponent(object):
                  key,
                  spatialConst_list=None,
                  analysisInterval=None,
+                 history_info=None,
                  post_run_filter=None,
                  delete_criterion=None):
 
@@ -41,6 +43,7 @@ class AbstractComponent(object):
         self.analysisInterval = analysisInterval
         self.post_run_filter = post_run_filter
         self.delete_criterion = delete_criterion
+        self.history_info = history_info
         self.keyColsList()
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
@@ -98,13 +101,13 @@ class AbstractComponent(object):
 
         # this choiceset creation criterion must be an attribute of the 
         # SubModel class
-        from numpy import ones
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
     def run(self, data):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
+        #raw_input()
         #self.db = db
 
         # the variable keeps a running list of models that need to be run
@@ -366,6 +369,9 @@ class AbstractComponent(object):
                      count_keys=None, subsample=None):
         #Get hierarchy of the tables
 
+	print 'INDEPEDNENT VAR DICTS', indepVarDict
+	print 'DEP VAR DICTS', depVarDict
+
         # PROCESSING TO INCLUDE THE APPROPRIATE SPATIAL QUERY ANCHORS
         if self.spatialConst_list is not None:
             # Removing those table/column entries which will be processed                                               
@@ -450,6 +456,8 @@ class AbstractComponent(object):
             if i == mainTable:
                 continue
             else:
+		print tableNamesKeyDict
+		print 'KEY', i
                 matchTableKeys = tableNamesKeyDict[i][0]
             matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
 
@@ -471,6 +479,7 @@ class AbstractComponent(object):
                                         max_dict, 
                                         self.spatialConst_list,
                                         self.analysisInterval,
+                                        self.history_info, 
                                         subsample)
 	if data == None:
 	    return None
@@ -521,9 +530,13 @@ class AbstractComponent(object):
                                                                       originColName,
                                                                       destinationColName,
                                                                       skimColName)
+
+
+
                 print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
                 if i.countChoices is not None: 
-                    print '\t\tNeed to sample location choices for the following model'
+                    print ("""\t\tNeed to sample location choices for the following""" \
+                               """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix2, uniqueIDs, i)
                 else:
                     print '\tNeed to extract skims'
@@ -614,6 +627,13 @@ class AbstractComponent(object):
             sampledChoicesCheck = False
             seed = seed + 1
 
+        # Extract the location variables cache
+        if len(spatialconst.locationVariables) > 0:
+            locationsTable, uniqueIDs = self.db.returnTable(spatialconst.locationInfoTable, 
+                                                            spatialconst.locationIdVar, 
+                                                            spatialconst.locationVariables)
+
+
 
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
@@ -649,6 +669,16 @@ class AbstractComponent(object):
             vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
             data.setcolumn(destSkimColName, vals)
+
+            # Process Location Information if requested
+            if len(spatialconst.locationVariables) > 0:
+                for j in spatialconst.locationVariables:
+                    #print j
+                    locationVarName = '%s%s' %(j, i+1)
+                    locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
+                    data.setcolumn(locationVarName, locVarVals)
+                    #print locVarVals
+        #raw_input()
 
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
