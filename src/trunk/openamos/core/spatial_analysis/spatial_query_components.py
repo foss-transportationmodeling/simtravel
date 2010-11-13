@@ -105,17 +105,21 @@ class PrismConstraints(object):
 
 
     def __repr__(self):
-        return ("""Table - %s; Field - %s\n"""\
-                    """\n\t\tOrigin Field - %s; Destination Field - %s; Sample Field - %s"""\
+        return ("""\nTable - %s; Field - %s\n"""\
+                    """\t\tOrigin Field - %s; Destination Field - %s; Sample Field - %s"""\
                     """\n\t\tStart Constraint - %s"""\
-                    """\n\t\tEnd Constraint - %s"""\
-                    """\n\t\tNumber of choices - %s"""\
+                    """\t\tEnd Constraint - %s"""\
+                    """\t\tNumber of choices - %s"""\
                     """\n\t\tThreshold for window - %s"""\
+                    """\n\t\tAfter Model - %s"""\
+                    """\n\t\tBefore Model - %s"""\
                     """\n\t\tLocation Variables = %s"""\
                 %(self.table, self.skimField, self.originField, self.destinationField,
                   self.sampleField, self.startConstraint,
                   self.endConstraint, self.countChoices,
                   self.threshold,
+                  self.afterModel,
+                  self.beforeModel,
                   self.locationVariables))
 
 
