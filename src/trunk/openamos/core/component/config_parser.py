@@ -269,9 +269,14 @@ class ConfigParser(object):
         #print self.component_variable_list
 
 
-        if spatialConst_list == []:
-            spatialConst_list = None
+        #if spatialConst_list == []:
+        #    spatialConst_list = None
 
+        skipFlag = component_element.get("skip")
+        if skipFlag == "True":
+            skipFlag = True
+        else:
+            skipFlag = False
 
 
         self.component_variable_list = list(set(self.component_variable_list))
@@ -284,7 +289,8 @@ class ConfigParser(object):
                                       dynamicSpatialConst_list,
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
-                                      delete_criterion=deleteCriterion)
+                                      delete_criterion=deleteCriterion,
+                                      skipFlag = skipFlag)
         return component
 
 

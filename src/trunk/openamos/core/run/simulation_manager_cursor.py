@@ -123,6 +123,9 @@ class SimulationManager(object):
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
 
+            if comp.skipFlag:
+                print '\tSkipping the run for this component'
+                continue
             data = comp.pre_process(self.queryBrowser, self.subsample, 
                                     tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.db)

@@ -25,7 +25,8 @@ class AbstractComponent(object):
                  analysisInterval=None,
                  history_info=None,
                  post_run_filter=None,
-                 delete_criterion=None):
+                 delete_criterion=None,
+                 skipFlag=False):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -46,6 +47,7 @@ class AbstractComponent(object):
         self.post_run_filter = post_run_filter
         self.delete_criterion = delete_criterion
         self.history_info = history_info
+        self.skipFlag = skipFlag
         self.keyColsList()
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
