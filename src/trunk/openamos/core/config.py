@@ -27,22 +27,54 @@ class ConfigObject(object):
         if prop == 'text':
             return self.protree.findtext(elt)
         else:
-            return element.get(prop)  
+            return element.get(prop) 
+         
+    def getConfigElt(self, elt):
+        element = self.protree.find(elt)
+        return element
 
     def modelSpecInConfig(self,modelkey):
-        compname = self.getCompName(modelkey)
-        modelconfigelt = self.protree.find(MODELCONFIG)
-        if modelconfigelt != None:
-            modelfound = None
-            for comp in modelconfigelt.getiterator(COMP):
-                if compname == comp.get(NAME):
-                    for model in comp.getiterator(MODEL): 
-                        if modelkey == model.get(NAME):
-                            modelfound = deepcopy(model)
-            return modelfound
-        else:
-            return None
+        print modelkey
+        mapvals = MODELMAP[modelkey]
+        compname = mapvals[0]
+        modelname = mapvals[1]
+        modelnum = 0
+        if len(mapvals) == 3:
+            modelnum = mapvals[2]
+        print modelnum
+        compelt = self.protree.find(MODELCONFIG)
+        for comp in compelt.getiterator(COMP):
+            if compname == comp.get(NAME):
+                modelcnt = 1
+                for model in comp.getiterator(MODEL): 
+                    if modelname == model.get(NAME):
+                        if modelnum == 0:
+                            return model
+                        else:
+                            if modelcnt ==  modelnum:
+                                return model
+                            else:
+                                modelcnt += 1 
+
+
+
     
+#    def modelSpecInConfig(self,modelkey):
+#        compname = self.getCompName(modelkey)
+#        modelconfigelt = self.protree.find(MODELCONFIG)
+#        if modelconfigelt != None:
+#            modelfound = None
+#            for comp in modelconfigelt.getiterator(COMP):
+#                if compname == comp.get(NAME):
+#                    for model in comp.getiterator(MODEL): 
+#                        if modelkey == model.get(NAME):
+#                            modelfound = deepcopy(model)
+#            return modelfound
+#        else:
+#            return None
+
+            
+                    
     def addModelElement(self,modelelt):
         compname = self.getCompName(modelelt.get(NAME))
         modelconfigelt = self.protree.find(MODELCONFIG)
@@ -72,16 +104,28 @@ class ConfigObject(object):
             compelt.set(NAME,compname)
             compelt.append(modelelt)  
     
+    
     def getCompName(self,modelkey):
-        for compkey in COMPMODELMAP.keys():
-            modelist = COMPMODELMAP[compkey]
-            if modelkey in modelist:
-                return compkey
+        mapvals = MODELMAP[modelkey]
+        compkey = mapvals[0]
+        return compkey
+
+            
+            
+#    def getCompName(self,modelkey):
+#        for compkey in COMPMODELMAP.keys():
+#            modelist = COMPMODELMAP[compkey]
+#            if modelkey in modelist:
+#                return compkey
     
     def write(self):
         projecthome = self.getConfigElement(PROJECT,PROJECT_HOME)
         projectname = self.getConfigElement(PROJECT,PROJECT_NAME)
+        configpath = self.getConfigElement(PROJECT,LOCATION)
+        if not os.path.exists(configpath):
+            os.mkdir(configpath)
         configfileloc = projecthome + '/' + projectname + '.xml'
+        print configfileloc
         configfile = open(configfileloc, 'w')
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
