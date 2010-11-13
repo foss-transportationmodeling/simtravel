@@ -30,9 +30,12 @@ from openamos.core.models.model import SubModel
 
 from openamos.core.component.abstract_component import AbstractComponent
 
+from openamos.core.activity_travel.activity_travel_components import HistoryInfo
+
 from openamos.core.spatial_analysis.spatial_query_components import SpatioTemporalConstraint, PrismConstraints
 
 from openamos.core.travel_skims.travel_skims_components import TravelSkimsInfo
+from openamos.core.travel_skims.locations_components import LocationsInfo
 
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
 
@@ -158,6 +161,29 @@ class ConfigParser(object):
                                                   
         return travelSkimsLookup
 
+
+    def parse_locations_table(self):
+        print "-- Parse locations table --"
+        locations_element = self.configObject.find("Locations")
+        referenceTablename = locations_element.get("reference_tablename")
+        tablename = locations_element.get("tablename")
+        location_var = locations_element.get("location_var")
+        indb_flag = locations_element.get("indb")
+	
+	variablesIterator = locations_element.getiterator("LocationVariable")
+	
+	variablesList = []
+	for var_element in variablesIterator:
+	    varName = var_element.get("var")
+	    variablesList.append(varName)
+
+
+        locationsInfo = LocationsInfo(tablename, referenceTablename, 
+                                      location_var, variablesList)
+
+        return locationsInfo
+
+
     def parse_analysis_interval_and_create_component(self, component_element):
         interval_element = component_element.find("AnalysisInterval")
         if interval_element is not None:
@@ -217,6 +243,13 @@ class ConfigParser(object):
         else:
             post_run_filter = None
             
+        historyInfo_element = component_element.find("HistoryInformation")
+        if historyInfo_element is not None:
+            historyInfoObject = self.return_history_info(historyInfo_element)
+        else:
+            historyInfoObject = None
+        
+
         modelsIterator = component_element.getiterator("Model")
         self.model_list = []
         self.component_variable_list = []
@@ -241,6 +274,7 @@ class ConfigParser(object):
                                       comp_write_table,
                                       comp_keys,
                                       spatialConst_list,
+                                      history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion)
         return component
@@ -248,6 +282,36 @@ class ConfigParser(object):
 
 
         
+    def return_history_info(self, history_element):
+        historyVarsIterator = history_element.getiterator("HistoryVar")
+        histTableName = history_element.get('table')
+
+        histAggVar = history_element.get('history_var')
+
+        histVarAggConditions = {}
+        for histVar_element in historyVarsIterator:
+            conditions = self.return_var_values_list(histVar_element)
+            histVar = histVar_element.get('var')
+            histVarAggConditions[histVar] = conditions
+
+        historyInfoObject = HistoryInfo(histTableName, histAggVar, histVarAggConditions)
+        return historyInfoObject
+
+
+    def return_var_values_list(self, histVar_element):
+        histVarValuesIterator = histVar_element.getiterator('Aggregate')
+        
+        conditions = []
+        for i in histVarValuesIterator:
+            value = i.get('value')
+            conditionVariable = i.get('condition_var')
+            if value is not None:
+                conditions.append('%s=%s' %(conditionVariable, value))
+
+        return conditions
+
+
+
 
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
@@ -1079,6 +1143,8 @@ class ConfigParser(object):
                 model_type = 'regression'                   #Type of Model 
                 model_object = SubModel(model, model_type, dep_varname) #Model Object
                 dep_var = [dep_varname]
+                self.model_list.append(model_object)
+                self.component_variable_list = self.component_variable_list + variable_list            
             else:
                 dep_var = []
                 dep_rep_varname = copy.deepcopy(dep_varname)
@@ -1139,7 +1205,6 @@ class ConfigParser(object):
             thresholdTimeConstraint = int(thresholdTimeConstraint)
 
 
-
         activity_element = spatial_query_element.get('ActivityFilter')
         if activity_element is not None:
             activityTypeFilter = self.return_activity_type_condition(activity_element)
@@ -1152,12 +1217,31 @@ class ConfigParser(object):
         endConstraint_element = spatial_query_element.find('End')
         endConstraint = self.return_spatio_temporal_constraint(endConstraint_element)
 
+
+        locationVariables = []
+        locationInfoTable = ""
+        locationIdVar = ""
+        locationInformationElement = spatial_query_element.find('ExtractLocationInformation')
+        if locationInformationElement is not None:
+            locationInfoTable = locationInformationElement.get('table')
+            locationIdVar = locationInformationElement.get('location_var')
+            locationVarsIterator = locationInformationElement.getiterator('LocationVariable')
+            
+            for var in locationVarsIterator:
+                varname = var.get('var')
+                locationVariables.append(varname)
+                
+
         prismConstraint = PrismConstraints(table, skimField, 
                                            originField, destinationField, 
                                            startConstraint, endConstraint, 
                                            asField,
                                            sampleField, countChoices, activityTypeFilter, 
-                                           thresholdTimeConstraint, seed)
+                                           thresholdTimeConstraint, seed,
+                                           locationInfoTable,
+                                           locationIdVar,
+                                           locationVariables)
+        print prismConstraint
         return prismConstraint
 
     def return_spatio_temporal_constraint(self, constraint_element):
