@@ -92,14 +92,14 @@ class NewProject(QWizard):
         proconfig.write()
         self.configtree = proconfig.protree
     
-    def create_table_element(self,parelt,table,key,order=None,countkey=None):
-        tab = etree.SubElement(parelt, TABLEELT)
-        tab.set(TABLE,table)
-        tab.set(KEY,key)
-        if order!=None:
-            tab.set(ORDER,order)
-        elif countkey!=None:
-            tab.set(COUNT_KEY,countkey)
+#    def create_table_element(self,parelt,table,key,order=None,countkey=None):
+#        tab = etree.SubElement(parelt, TABLEELT)
+#        tab.set(TABLE,table)
+#        tab.set(KEY,key)
+#        if order!=None:
+#            tab.set(ORDER,order)
+#        elif countkey!=None:
+#            tab.set(COUNT_KEY,countkey)
 
 
 def main():
