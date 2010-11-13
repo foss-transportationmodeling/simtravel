@@ -31,7 +31,9 @@ class PrismConstraints(object):
                  startConstraint, endConstraint,
                  asField, 
                  sampleField = None,
-                 countChoices=None, activityTypeFilter=None, threshold=None, seed=1):
+                 countChoices=None, activityTypeFilter=None, threshold=None, 
+                 seed=1, locationInfoTable="", 
+                 locationIdVar="", locationVariables=[]):
 
         if not isinstance(table, str):
             raise PrismConstraintError, """The destination locations table name is """\
@@ -78,6 +80,7 @@ class PrismConstraints(object):
                 """to be returned; should be a valid integer type """
         self.countChoices = countChoices
 
+        
         if not isinstance(seed, int):
             raise PrismConstraintError, """The seed  """\
                 """should be a valid integer type """
@@ -92,19 +95,24 @@ class PrismConstraints(object):
             raise PrismConstraintError, """The threshold level for the prism constraint """\
                 """not a valid numeric type object"""
         self.threshold = threshold
+        self.locationInfoTable = locationInfoTable
+        self.locationIdVar = locationIdVar
+        self.locationVariables = locationVariables
 
 
     def __repr__(self):
         return ("""Table - %s; Field - %s\n"""\
-                    """ Orifin Field - %s; Destination Field - %s; Sample Field - %s"""\
-                    """Start Constraint - %s"""\
-                    """End Constraint - %s"""\
-                    """Number of choices - %s\n"""\
-                    """Threshold for window - %s"""
+                    """\n\t\tOrigin Field - %s; Destination Field - %s; Sample Field - %s"""\
+                    """\n\t\tStart Constraint - %s"""\
+                    """\n\t\tEnd Constraint - %s"""\
+                    """\n\t\tNumber of choices - %s"""\
+                    """\n\t\tThreshold for window - %s"""\
+                    """\n\t\tLocation Variables = %s"""\
                 %(self.table, self.skimField, self.originField, self.destinationField,
                   self.sampleField, self.startConstraint,
                   self.endConstraint, self.countChoices,
-                  self.threshold))
+                  self.threshold,
+                  self.locationVariables))
 
 
 #class PrismLocationChoicesConstraints(PrismConstraints):
