@@ -32,8 +32,8 @@ class PrismConstraints(object):
                  asField, 
                  sampleField = None,
                  countChoices=None, activityTypeFilter=None, threshold=None, 
-                 seed=1, locationInfoTable="", 
-                 locationIdVar="", locationVariables=[]):
+                 seed=1, afterModel=None, beforeModel=None, locationInfoTable=None, 
+                 locationIdVar=None, locationVariables=[]):
 
         if not isinstance(table, str):
             raise PrismConstraintError, """The destination locations table name is """\
@@ -95,6 +95,10 @@ class PrismConstraints(object):
             raise PrismConstraintError, """The threshold level for the prism constraint """\
                 """not a valid numeric type object"""
         self.threshold = threshold
+
+        self.afterModel = afterModel
+        self.beforeModel = beforeModel
+
         self.locationInfoTable = locationInfoTable
         self.locationIdVar = locationIdVar
         self.locationVariables = locationVariables
