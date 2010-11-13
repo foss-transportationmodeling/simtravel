@@ -14,6 +14,9 @@ class Models(QWidget):
         # Define a global var named "model_widget" to ues in the each function as a parent widget
         global model_widget
         model_widget = parent
+
+     
+        
         
     def show_long_term_models(self):
         self.long_term_models = LongTermModels(model_widget, self.configobject)
