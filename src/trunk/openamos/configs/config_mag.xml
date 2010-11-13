@@ -34,7 +34,7 @@
 
   <ModelConfig>
 
-    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="True">
+    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="False">
       <Model name="VehCount" formulation='Ordered' type="Probit" seed="1">
 	<DependentVariable var="vehcount"/>
         <Alternative id="Alt 0" value="0" />
@@ -51,7 +51,7 @@
       </Model>
     </Component>
 
-    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="True">
+    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="False">
       <DeleteRecords value="False"/>	
       <Model name="Vehtype" formulation='Multinomial Logit' type="Alternative Specific" seed="1">
 	<DependentVariable var="vehtype"/>
@@ -95,7 +95,7 @@
     </Component>
 
 
-    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True">
+    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="False">
       <Model name="NumEpisodes" formulation='Probability Distribution' seed="1">
         <DependentVariable var="episodes" />
         <FilterSet type="and"/>
@@ -111,7 +111,7 @@
     </Component>	
 
  
-    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="wtaz"/>
@@ -201,7 +201,7 @@
 
 
 
-    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetosch" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="schtaz"/>
@@ -294,7 +294,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <DeleteRecords value="True"/>	
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
@@ -409,7 +409,7 @@
 
 
 
-    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -499,7 +499,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -601,7 +601,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -688,7 +688,7 @@
     </Component>
 
 
-    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
+    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -785,7 +785,7 @@
 
 
 
-    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
+    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
       <DeleteRecords value="False"/>	
       <AnalysisInterval start="195" end="196" step="1"/>
 
