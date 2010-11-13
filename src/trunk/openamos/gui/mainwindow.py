@@ -9,7 +9,7 @@ from file_menu.newproject import *
 from file_menu.openproject import *
 from file_menu.saveproject import *
 from file_menu.databaseconfig import *
-
+from results_menu.view_trips import *
 
 from openamos.core.config import *
 from openamos.core.run.simulation_manager_cursor import SimulationManager
@@ -170,6 +170,14 @@ class MainWindow(QMainWindow):
                                             "preferences", "Make a configuration.")        
         #self.addActions(self.run_menu, (setting_preference_action, ))
         self.addActions(self.run_menu, (run_simulation_action, ))
+        
+    # Defining Results
+        self.result_menu = self.menuBar().addMenu("R&esults")
+        activity_pattern_action = self.createaction("Activity Pattern", self.results_schedules, None,
+                                            "", "Show results of activity pattern")
+        travel_pattern_action = self.createaction("Travel Pattern", self.results_trips, None,
+                                                  None, "Show results of travel pattern")
+        self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action, ))
 
     # Defining help        
         self.help_menu = self.menuBar().addMenu("&Help")
@@ -189,7 +197,7 @@ class MainWindow(QMainWindow):
                                            project_save_action,))
 
 # Define Action
-    def createaction(self, text, slot=None, shortcut=None, icon=None, 
+    def createaction(self, text, slot=None, shortcut=None, icon=None,
                      tip=None, checkable=False, disabled = None, signal="triggered()"):
         action = QAction(text, self)
         if icon is not None:
@@ -342,6 +350,16 @@ class MainWindow(QMainWindow):
         if self.proconfig <> None:
             project_database = DatabaseConfig(self.proconfig)
             project_database.exec_()
+    
+    def results_schedules(self):
+        if self.proconfig <> None:
+            show_plot = MakePlot(self.proconfig,"schedule_r")
+            show_plot.exec_()
+            
+    def results_trips(self):
+        if self.proconfig <> None:
+            show_plot = MakePlot(self.proconfig,"trips")
+            show_plot.exec_()
             
     def run_simulation(self):
         fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
