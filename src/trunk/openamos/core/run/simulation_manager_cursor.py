@@ -50,6 +50,10 @@ class SimulationManager(object):
         self.projectConfigObject = self.configParser.parse_projectAttributes()
         self.projectSkimsObject = self.configParser.parse_skims_tables()
         self.projectLocationsObject = self.configParser.parse_locations_table()
+	self.householdStructureObject = self.configParser.parse_household_structure_info()
+
+	
+
 
     def setup_databaseConnection(self):
         dbConfigObject = self.configParser.parse_databaseAttributes()
@@ -81,6 +85,11 @@ class SimulationManager(object):
                                             self.queryBrowser)
 
 
+    def setup_household_structures(self):
+	print "-- Processing Household Structures --"
+	self.db.create
+
+
     def parse_config(self):
         print "-- Parsing components and model specifications --"
         self.componentList = self.configParser.parse_models()
@@ -104,6 +113,8 @@ class SimulationManager(object):
     def clean_database_tables(self):
         tableNamesDelete = []
         for comp in self.componentList:
+	    if comp.skipFlag:
+                continue
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
             tableName = comp.writeToTable
@@ -111,7 +122,7 @@ class SimulationManager(object):
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
                 self.queryBrowser.delete_all(tableName)                            
-        
+
         
     def run_components(self):
         t_c = time.time()
@@ -128,12 +139,12 @@ class SimulationManager(object):
                 continue
             data = comp.pre_process(self.queryBrowser, self.subsample, 
                                     tableOrderDict, tableNamesKeyDict, 
-                                    self.projectSkimsObject, self.db)
+                                    self.projectSkimsObject, self.householdStructureObject, self.db)
             if data is not None:
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed = comp.run(data, self.projectSkimsObject)
+                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
             
             # Write the data to the database from the hdf5 results cache
             # after running each component because the subsequent components
@@ -143,6 +154,74 @@ class SimulationManager(object):
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #raw_input()
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
+
+
+    def run_selected_components_for_malta(self, analysisInterval):
+	t_c = time.time()
+
+
+	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+
+
+	# Get the two components one for dynamic activity simulation and another for extracting trips
+	compObjects = []
+        for comp in self.componentList:
+	    if comp.component_name in ['ReconcileLongerTermSchedules', 'AfterSchoolActivities', 'DynamicNonMandatoryActivities']:
+	        compObjects.append(comp)
+
+	for comp in compObjects:
+	    comp.analysisInterval = analysisInterval
+	    t = time.time()
+            print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
+                                                                       comp.analysisInterval)
+
+            if comp.skipFlag:
+                print '\tSkipping the run for this component'
+                continue
+            data = comp.pre_process(self.queryBrowser, self.subsample, 
+                                    tableOrderDict, tableNamesKeyDict, 
+                                    self.projectSkimsObject, self.householdStructureObject, self.db)
+            if data is not None:
+                # Call the run function to simulate the chocies(models)
+                # as per the specification in the configuration file
+                # data is written to the hdf5 cache because of the faster I/O
+                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
+
+            # Write the data to the database from the hdf5 results cache
+            # after running each component because the subsequent components
+            # are often dependent on the choices generated in the previous components
+            # run
+                self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
+		tripInfo = self.tripInfoToMalta('trips_r', ['houseid', 'personid'], tripsProcessed)
+            print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
+            #raw_input()
+	return tripInfo
+        print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
+
+
+
+
+    def tripInfoToMalta(self, tableName, keyCols=[], nRowsProcessed=0):
+        fileLoc = self.projectConfigObject.location
+        table = self.db.returnTableReference(tableName)
+        
+        t = time.time()
+
+        print '\tNumber of rtrips processed  - ', nRowsProcessed
+        if nRowsProcessed == 0:
+            return
+        resArr = table[-nRowsProcessed:]
+
+	colnames = table.colnames
+	trips_data_array = zeros((nRowsProcessed, len(colnames)))
+	for i in range(len(colnames)):
+	    name = colnames[i]
+	    trips_data_array[:,i] = resArr[name]
+
+	print trips_data_array
+
+	print 'THIS IS WHAT WILL BE PASSED OVER TO MALTA'
+	return trips_data_array
 
 
     def reflectToDatabase(self, tableName, keyCols=[], nRowsProcessed=0):
