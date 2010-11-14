@@ -1529,7 +1529,7 @@
 
 
 
-    <Component name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="False">
+    <Component name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="True">
       <Model name="PreSchoolKidsDependency" formulation='Regression' type="Linear" seed="1">
         <DependentVariable var="dependency" />
         <FilterSet type="and"/>
@@ -1577,7 +1577,7 @@
     </Component>	
 
 
-    <Component name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid">
+    <Component name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid" skip="True">
       <Model name="DailySchStatus" formulation='Probability Distribution' seed="1">
         <DependentVariable var="schdailystatus" />
         <FilterSet type="and"/>
@@ -1660,7 +1660,7 @@
     </Component>	
 
 
-    <Component name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid">
+    <Component name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid" skip="True">
       <Model name="DailyWorkStatus" formulation='Probability Distribution' seed="1">
         <DependentVariable var="wrkdailystatus" />
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
@@ -1675,7 +1675,7 @@
     </Component>	
 
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
       <AnalysisInterval start="195" end="196" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed='1' threshold="120">
