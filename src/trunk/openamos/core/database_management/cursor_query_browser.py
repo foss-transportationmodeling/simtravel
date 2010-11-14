@@ -275,7 +275,7 @@ class QueryBrowser(object):
             #remove the count column from the col list
             countVarStr = '%s.%s' %(maxTable, maxColumn)
             final_list.remove(countVarStr)
-            final_list.append('temp.%s'%maxColumn)
+            final_list.append('temp_%s.%s'%(maxTable, maxColumn))
             cols_list.remove(maxColumn)
             cols_list.append(maxColumn)
 
@@ -294,7 +294,7 @@ class QueryBrowser(object):
                 #print 'createing join string for column name - ', i
                 grpStr = grpStr + '%s,' %(i)
                 joinCondition = (joinCondition 
-                                 + ' temp.%s=%s.%s ' %(i, 
+                                 + ' temp_%s.%s=%s.%s ' %(maxTable, i, 
                                                        mainTable, i) 
                                  + 'and')
             grpStr = grpStr[:-1]
@@ -303,13 +303,13 @@ class QueryBrowser(object):
         #combine left join along with the count variable/max condition
             mJoinStr = joinStrList.pop(index)
             mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
-                                          'and %s.%s=temp.%s)' 
-                                          %(maxTable, maxColumn, maxColumn))
+                                          'and %s.%s=temp_%s.%s)' 
+                                          %(maxTable, maxColumn, maxTable, maxColumn))
             
             joinStrList.append(""" left join (select %s, max(%s) as %s from """
-                               """%s group by %s) as temp on (%s) """ %(grpStr, maxColumn, 
-                                                                        maxColumn,maxTable, grpStr,
-                                                                        joinCondition)
+                               """%s group by %s) as temp_%s on (%s) """ %(grpStr, maxColumn, 
+                                                            	           maxColumn, maxTable, grpStr,
+                                                                	   maxTable, joinCondition)
                                + mJoinStrIncMaxConditionVar)
             #print 'LEFT JOIN MAX COL LIST--->', joinStrList
 	"""        
@@ -353,8 +353,8 @@ class QueryBrowser(object):
 
 
 
-                selectAggStr = ("(select %s,%s from %s where %s group by %s) as %s "
-                                %(grpStr, selectVarStr, histTable, conditionsStr, 
+                selectAggStr = ("(select %s,%s from %s where %s and endtime < %s group by %s) as %s "
+                                %(grpStr, selectVarStr, histTable, conditionsStr, analysisInterval,
                                   grpStr, histTempTableName))
 
                 print column_names
@@ -365,8 +365,8 @@ class QueryBrowser(object):
                                                        histTempTableName, i)
                 joinCondition = joinCondition[:-3]
 
-                leftJoinStr = (" left join %s on (%s and endtime < %s)" 
-                               %(selectAggStr, joinCondition, analysisInterval))
+                leftJoinStr = (" left join %s on (%s)" 
+                               %(selectAggStr, joinCondition))
 
                 joinStrList.append(leftJoinStr)
                 
@@ -793,7 +793,7 @@ class QueryBrowser(object):
                 insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
                                """ delimiters ','""" %(table_name, cols_listStr, loc))
                                                                        
-                print insert_stmt
+                print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
                 print '\t\tTime after insert query - %.4f' %(time.time() - ti)
