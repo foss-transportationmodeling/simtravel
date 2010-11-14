@@ -38,9 +38,15 @@ class DB(object):
         # Output Tables - Creating the table
         self.fileh.createTable(output_grp, "households_vehicles_count_r", Households_Vehicles_Count_R)
         self.fileh.createTable(output_grp, "vehicles_r", Vehicles_R)
+        self.fileh.createTable(output_grp, "workers_r", Workers_R)
         self.fileh.createTable(output_grp, "schedule_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_R)
-        self.fileh.createTable(output_grp, "workers_r", Workers_R)
+        self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
+        self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
+        self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
+        self.fileh.createTable(output_grp, "trips_r", Trips_R)
+
+
 
         #Input Tables - Creatign the table
         self.fileh.createTable(input_grp, "travel_skims1", Travel_Skims)

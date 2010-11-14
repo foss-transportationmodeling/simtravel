@@ -23,6 +23,7 @@ class Locations(t.IsDescription):
     residential_population = t.Int32Col()
     single_family_dwelling = t.Int32Col()
     institutional_population = t.Int32Col()
+    multi_family_dwelling = t.Int32Col()    
 
 class Persons_R(t.IsDescription):
     houseid = t.Int64Col()
@@ -55,19 +56,38 @@ class Schedule_R(t.IsDescription):
     endtime = t.Int32Col()
     duration = t.Int32Col()
 
-class DailyStatus_R(t.IsDescription):
-    houseid = t.Int64Col()
-    personid = t.Int32Col()
-    schdailystatus = t.Int32Col()
-    wrkdailystatus = t.Int32Col()
-
-class ChildDependency_R(t.IsDescription):
+class Child_Dependency_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
     dependency = t.Int32Col()
+
+class Daily_School_Status_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    schdailystatus = t.Int32Col()
+
+class Daily_Work_Status_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    wrkdailystatus = t.Int32Col()
 
 class Workers_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
     episodes = t.Int32Col()
+
+class Trips_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    tripid = t.Int32Col()
+    vehid = t.Int32Col()
+    tripmode = t.Int32Col()
+    fromzone = t.Int32Col()
+    tozone = t.Int32Col()
+    starttime = t.Int32Col()
+    endtime = t.Int32Col()
+
+
+
+
 
