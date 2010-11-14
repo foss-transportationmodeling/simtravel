@@ -75,7 +75,7 @@ class DataArray(object):
 
         for i in coefficients.keys():
             if i.lower() not in self._colnames.keys():
-                raise DataError, 'coefficient refers to a column not in the dataset'
+                raise DataError, 'coefficient refers to a column - %s not in the dataset' %(i.lower())
 
         for i in coefficients.values():
             try:
@@ -111,7 +111,7 @@ class DataArray(object):
 
         for i in coefficients.keys():
             if i.lower() not in self._colnames.keys():
-                raise DataError, 'coefficient refers to a column not in the dataset'
+                raise DataError, 'coefficient refers to a column - %s not in the dataset' %(i.lower())
 
         for i in coefficients.values():
             try:
