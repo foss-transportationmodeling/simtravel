@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
-            self.run_menu.actions()[1].setEnabled(True)
+            #self.run_menu.actions()[1].setEnabled(True)
             
 
     def projectsave(self):
