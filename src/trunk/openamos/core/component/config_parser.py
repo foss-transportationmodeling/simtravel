@@ -30,7 +30,7 @@ from openamos.core.models.model import SubModel
 
 from openamos.core.component.abstract_component import AbstractComponent
 
-from openamos.core.activity_travel.activity_travel_components import HistoryInfo
+from openamos.core.activity_travel.activity_travel_components import HistoryInfo, HouseholdStructureInfo
 
 from openamos.core.spatial_analysis.spatial_query_components import SpatioTemporalConstraint, PrismConstraints
 
@@ -184,6 +184,31 @@ class ConfigParser(object):
         return locationsInfo
 
 
+    def parse_household_structure_info(self):
+        print "-- Parse household structures --"
+        structures_element = self.configObject.find("HouseholdStructure")
+        tablename = structures_element.get('tablename')
+        houseid = structures_element.get('houseid')
+        personid = structures_element.get('personid')
+
+        #prim_keys = re.split('[,]', keys_element)
+        
+        structuresIterator = structures_element.getiterator('Structure')
+        
+        structuresDict = {}
+        for structure in structuresIterator:
+            name = structure.get("name")
+            var = structure.get("var")
+            value = structure.get("value")
+            
+            structuresDict[name] = [var,int(value)]
+            
+        householdStructureInfoObject = HouseholdStructureInfo(tablename,
+                                                              houseid,
+                                                              personid,
+                                                              structuresDict)
+        return householdStructureInfoObject
+
     def parse_analysis_interval_and_create_component(self, component_element):
         interval_element = component_element.find("AnalysisInterval")
         if interval_element is not None:
@@ -272,6 +297,13 @@ class ConfigParser(object):
         #if spatialConst_list == []:
         #    spatialConst_list = None
 
+
+        dependencyAllocationFlag = component_element.get("dependency")
+        if dependencyAllocationFlag == "True":
+            dependencyAllocationFlag = True
+        else:
+            dependencyAllocationFlag = False
+
         skipFlag = component_element.get("skip")
         if skipFlag == "True":
             skipFlag = True
@@ -290,6 +322,7 @@ class ConfigParser(object):
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,
+                                      dependencyAllocationFlag = dependencyAllocationFlag,
                                       skipFlag = skipFlag)
         return component
 
