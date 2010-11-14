@@ -15,14 +15,14 @@ class Adult_Model(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        children_assigned_button = QPushButton('Is a dependent child/children assigned \nto household including stay home and \nchauffeuring activities?', self)
+        children_assigned_button = QPushButton("Dependent events assigned to household? \n(Stay-home and/or Chauffeuring)", self)
         children_assigned_button.setGeometry((size.width()) / 2 - 150, 40, 300, 60)
         self.connect(children_assigned_button, SIGNAL('clicked()'), self.children_assigned)
 
-        children_stay_home_button = QPushButton('Child/Children with staying \nhome activities', self)
+        children_stay_home_button = QPushButton("Households with dependent \nstay-home events", self)
         children_stay_home_button.setGeometry((size.width()) / 2 - 100, 140, 200, 50)
        
-        children_chauffeuring_button = QPushButton('Child/Children with \nchauffeuring activities', self)
+        children_chauffeuring_button = QPushButton("Households with dependent \nchauffeuring events", self)
         children_chauffeuring_button.setGeometry((size.width()) * 3 / 4 - 100, 140, 200, 50)
        
         nonworking_adult_button = QPushButton('Households with at least \none non-working adult', self)
@@ -33,7 +33,7 @@ class Adult_Model(QWidget):
         all_working_adult_button.setGeometry((size.width()) / 4 - 100, 220, 200, 50)
         self.connect(all_working_adult_button, SIGNAL('clicked()'), self.all_working_adult)
 
-        assign_children_3_button = QPushButton('Assign each dependent child \nto a household adult subject \nto the fixed activity \nschedule of the adult', self)
+        assign_children_3_button = QPushButton('Assign each dependent child \nto a household adult subject \nto the fixed activity schedule', self)
         assign_children_3_button.setGeometry((size.width()) * 3 / 4 - 100, 220, 200, 80)
         self.connect(assign_children_3_button, SIGNAL('clicked()'), self.assign_children_3)
 
@@ -49,11 +49,11 @@ class Adult_Model(QWidget):
         adult_work_button.setGeometry((size.width()) / 4 - 100, 380, 200, 50)
         self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
 
-        check_adult_button = QPushButton('For all other adults, \ncheck to see if the \nadult is worker?', self)
+        check_adult_button = QPushButton('Adult work status', self)
         check_adult_button.setGeometry((size.width()) / 2 - 100, 470, 200, 50)
         self.connect(check_adult_button, SIGNAL('clicked()'), self.check_adult)
 
-        work_today_button = QPushButton('Is an employed adult \ngoing to work today?', self)
+        work_today_button = QPushButton('Adult worker going to \nwork on travel day?', self)
         work_today_button.setGeometry((size.width()) / 4 - 100, 550, 200, 50)
         self.connect(work_today_button, SIGNAL('clicked()'), self.work_today)
 
@@ -61,11 +61,11 @@ class Adult_Model(QWidget):
         work_from_home_button.setGeometry((size.width()) / 4 - 100, 630, 200, 50)
         #self.connect(work_from_home_button, SIGNAL('clicked()'), self.work_from_home)
 
-        go_to_work_button = QPushButton('Go to Work', self)
+        go_to_work_button = QPushButton('Go to work', self)
         go_to_work_button.setGeometry((size.width()) / 2 - 100, 630, 200, 50)
         #self.connect(go_to_work_button, SIGNAL('clicked()'), self.go_to_work)
 
-        no_work_episodes_button = QPushButton('No Work Episodes', self)
+        no_work_episodes_button = QPushButton('No work episodes', self)
         no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
         #self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
         

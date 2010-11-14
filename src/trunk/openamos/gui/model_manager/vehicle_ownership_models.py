@@ -18,12 +18,13 @@ class VehicleOwnershipModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        num_vehs_button = QPushButton('Count of Vehicles \nOwned by The household', self)
+        num_vehs_button = QPushButton('Count of Vehicles \nOwned by the Household', self)
         num_vehs_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 180,200, 50)
         self.connect(num_vehs_button, SIGNAL('clicked()'), self.num_vehs)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        veh_types_button = QPushButton("Vehicle body/fuel type \nfor each household vehicle \n\nIf the data permits also \nthe age of the vehicle \n\nBody types \55 Use the \ncategories from MOVES to \nenable emission estimation \n\nFuel types \55 Gasoline, Others", self)     
+        #veh_types_button = QPushButton("Vehicle body/fuel type \nfor each household vehicle \n\nIf the data permits also \nthe age of the vehicle \n\nBody types \55 Use the \ncategories from MOVES to \nenable emission estimation \n\nFuel types \55 Gasoline, Others", self)     
+        veh_types_button = QPushButton("Vehicle Body Type \nfor each Household Vehicle", self)     
         veh_types_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 100, 200, 200)
         self.connect(veh_types_button, SIGNAL('clicked()'), self.veh_types)
         
@@ -37,9 +38,6 @@ class VehicleOwnershipModels(QWidget):
     def num_vehs(self):
         diagtitle = COMPMODEL_NUMVEHS
         modelkey = MODELKEY_NUMVEHS
-        
-        print diagtitle
-        print modelkey
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()

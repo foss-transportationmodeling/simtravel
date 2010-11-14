@@ -221,8 +221,8 @@ class AbtractSpecDialog(QDialog):
         
         
         if modelspecified is not None:
-            self.populateRununtilWidget(modelspecified)
-            self.populateFilterWidget(modelspecified)
+            #self.populateRununtilWidget(modelspecified)
+            #self.populateFilterWidget(modelspecified)
             
             if self.modeltypecb.currentText() == PROB_MODEL:
                 self.populateAltsWidget(modelspecified)

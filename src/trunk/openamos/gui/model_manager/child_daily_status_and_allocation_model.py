@@ -32,7 +32,7 @@ class Child_Model(QWidget):
         
         drop_off_school1_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
         drop_off_school1_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 235, 200, 50)
-        self.connect(drop_off_school1_button, SIGNAL('clicked()'), self.drop_off_event)
+        #self.connect(drop_off_school1_button, SIGNAL('clicked()'), self.drop_off_event)
         
         independent_from_school_button = QPushButton('Child\nindependent\nafter-school', self)
         independent_from_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 135, 120, 75)
@@ -40,29 +40,27 @@ class Child_Model(QWidget):
         
         after_school_activity_button = QPushButton('Is there time to\nengage in an\nafter school\nchild activity?', self)
         after_school_activity_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 35, 120, 75)
-        self.connect(after_school_activity_button, SIGNAL('clicked()'), self.after_school_activity)
+        #self.connect(after_school_activity_button, SIGNAL('clicked()'), self.after_school_activity)
         
         activity_type_button = QPushButton('After-school activity type choice', self)
         activity_type_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 90, 200, 50)
-        self.connect(activity_type_button, SIGNAL('clicked()'), self.choice)
+        self.connect(activity_type_button, SIGNAL('clicked()'), self.activity_type)
         
         destination_button = QPushButton('After-school activity\ndestination choice', self)
         destination_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 170, 200, 50)
-        self.connect(destination_button, SIGNAL('clicked()'), self.choice)
+        self.connect(destination_button, SIGNAL('clicked()'), self.activity_dest)
         
         duration_button = QPushButton('After-school activity\nduration model', self)
         duration_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 250, 200, 50)
-        self.connect(duration_button, SIGNAL('clicked()'), self.choice)
+        self.connect(duration_button, SIGNAL('clicked()'), self.activity_dur)
         
         drop_off_school2_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
         drop_off_school2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 330, 200, 50)
-        self.connect(drop_off_school2_button, SIGNAL('clicked()'), self.drop_off_event)
+        #self.connect(drop_off_school2_button, SIGNAL('clicked()'), self.drop_off_event)
         
         activity_with_adult_button = QPushButton('Adult stays with child for\nactivity', self)
         activity_with_adult_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 410, 200, 50)
         self.connect(activity_with_adult_button, SIGNAL('clicked()'), self.activity_with_adult)
-        
-        
         
         in_activity_independently_button = QPushButton('Child is\nindependent', self)
         in_activity_independently_button.setGeometry((size.width()) / 2 - 340, size.height() / 2 - 460, 120, 75)
@@ -70,23 +68,23 @@ class Child_Model(QWidget):
         
         assign_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
         assign_hh_button.setGeometry((size.width()) / 2 - 500, size.height() / 2 - 360, 200, 50)
-        self.connect(assign_hh_button, SIGNAL('clicked()'), self.assign_hh)
+        #self.connect(assign_hh_button, SIGNAL('clicked()'), self.assign_hh)
 
         generate_travel_pattern_button = QPushButton('Simulate activity\ntravel patterns for\nchild dynamically', self)
         generate_travel_pattern_button.setGeometry((size.width()) / 2 - 360, size.height() / 2 - 280, 160, 50)
-        self.connect(generate_travel_pattern_button, SIGNAL('clicked()'), self.generate_travel_pattern)
+        #self.connect(generate_travel_pattern_button, SIGNAL('clicked()'), self.generate_travel_pattern)
         
         travel_mode_school_button = QPushButton('Simulate mode\nchoice dynamically', self)
         travel_mode_school_button.setGeometry((size.width()) / 2 - 360, size.height() / 2 - 123, 160, 50)
-        self.connect(travel_mode_school_button, SIGNAL('clicked()'), self.travel_mode_school)
+        #self.connect(travel_mode_school_button, SIGNAL('clicked()'), self.travel_mode_school)
         
         pick_up_school_button = QPushButton('Assign an adult pick-up event to\nhousehold', self)
         pick_up_school_button.setGeometry((size.width()) / 2 - 380, size.height() / 2 - 23, 200, 50)
-        self.connect(pick_up_school_button, SIGNAL('clicked()'), self.pick_up_event)
+        #self.connect(pick_up_school_button, SIGNAL('clicked()'), self.pick_up_event)
         
         return_home_button = QPushButton('Return home', self)
         return_home_button.setGeometry((size.width()) / 2 - 360, size.height() / 2 + 57, 160, 50)
-        self.connect(return_home_button, SIGNAL('clicked()'), self.return_home)        
+        #self.connect(return_home_button, SIGNAL('clicked()'), self.return_home)        
  
         
         # Pre-school Children
@@ -100,210 +98,85 @@ class Child_Model(QWidget):
         
         assign_preschool_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
         assign_preschool_hh_button.setGeometry((size.width()) / 2 + 360, size.height() / 2 - 448, 160, 50)
-        self.connect(assign_preschool_hh_button, SIGNAL('clicked()'), self.assign_preschool_hh)
+        #self.connect(assign_preschool_hh_button, SIGNAL('clicked()'), self.assign_preschool_hh)
         
         drop_off_preschool_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
         drop_off_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 335, 180, 50)
-        self.connect(drop_off_preschool_button, SIGNAL('clicked()'), self.drop_off_event)
+        #self.connect(drop_off_preschool_button, SIGNAL('clicked()'), self.drop_off_event)
         
         pick_up_preschool_button = QPushButton('Assign an adult pick-up event to \nhousehold', self)
         pick_up_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 255, 180, 50)
-        self.connect(pick_up_preschool_button, SIGNAL('clicked()'), self.pick_up_event)
+        #self.connect(pick_up_preschool_button, SIGNAL('clicked()'), self.pick_up_event)
         
         Dummy  = QPushButton('', self)
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
         
-        self.configob = co
-        
-        
-
+        self.configob = co     
         
     def goto_school(self):
-        diagtitle = COMPMODEL_SCHDAILYSTATUS1
-        modelkey = MODELKEY_SCHDAILYSTATUS1
+        diagtitle = COMPMODEL_SCHDAILYSTATUS
+        modelkey = MODELKEY_SCHDAILYSTATUS
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     
     def goto_preschool(self):
-        diagtitle = COMPMODEL_CSSCHPRE
-        modelkey = MODELKEY_CSSCHPRE
+        diagtitle = COMPMODEL_PRESCHDAILYSTATUS
+        modelkey = MODELKEY_PRESCHDAILYSTATUS
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     def child_independent(self):
-        diagtitle = COMPMODEL_CSINDCHILD
-        modelkey = MODELKEY_CSINDCHILD
+        diagtitle = COMPMODEL_HMINDEP
+        modelkey = MODELKEY_HMINDEP
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-    
-    def assign_hh(self):
-        diagtitle = COMPMODEL_CSASSIGN
-        modelkey = MODELKEY_CSASSIGN
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-    
-        
-    def assign_preschool_hh(self):
-        diagtitle = COMPMODEL_CSASSIGN
-        modelkey = MODELKEY_CSASSIGN
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-        
-    def travel_mode_school(self):
-        diagtitle = COMPMODEL_CSMODETOSCH
-        modelkey = MODELKEY_CSMODETOSCH
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    
     def travel_independently_to_school(self):
-        diagtitle = COMPMODEL_SCHDAILYINDEPENDENCE
-        modelkey = MODELKEY_SCHDAILYINDEPENDENCE
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    def drop_off_event(self):
-        diagtitle = COMPMODEL_CSDROPOFF
-        modelkey = MODELKEY_CSDROPOFF
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-        
-    def pick_up_event(self):
-        diagtitle = COMPMODEL_CSPICKUP
-        modelkey = MODELKEY_CSPICKUP
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    
-    def generate_travel_pattern(self):
-        diagtitle = COMPMODEL_CSTREAT
-        modelkey = MODELKEY_CSTREAT
+        diagtitle = COMPMODEL_SCHDAILYINDEP
+        modelkey = MODELKEY_SCHDAILYINDEP
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     def independently_after_school(self):
-        diagtitle = COMPMODEL_AFTSCHACTSTATUS
-        modelkey = MODELKEY_AFTSCHACTSTATUS
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-        
-    def after_school_activity(self):
-        diagtitle = COMPMODEL_CSISTHERE
-        modelkey = MODELKEY_CSISTHERE
+        diagtitle = COMPMODEL_AFTSCHDAILYINDEP
+        modelkey = MODELKEY_AFTSCHDAILYINDEP
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     
-    def choice(self):
-        diagtitle = COMPMODEL_CSACTTYPE
-        modelkey = MODELKEY_CSACTTYPE
+    def activity_type(self):
+        diagtitle = COMPMODEL_AFTSCHACTTYPE
+        modelkey = MODELKEY_AFTSCHACTTYPE
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+
+    def activity_dest(self):
+        diagtitle = COMPMODEL_AFTSCHACTDEST
+        modelkey = MODELKEY_AFTSCHACTDEST
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+
+    def activity_dur(self):
+        diagtitle = COMPMODEL_AFTSCHACTDUR
+        modelkey = MODELKEY_AFTSCHACTDUR
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     def activity_with_adult(self):
-        diagtitle = COMPMODEL_CSWORKSTAT
-        modelkey = MODELKEY_CSWORKSTAT
+        diagtitle = COMPMODEL_AFTSCHJOINTACT
+        modelkey = MODELKEY_AFTSCHJOINTACT
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
-        
-        
-    def return_home(self):
-        diagtitle = COMPMODEL_CSRETURNH
-        modelkey = MODELKEY_CSRETURNH
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
-
-
-
-#    def children(self):
-#        diagtitle = COMPMODEL_CSCHILD017
-#        modelkey = MODELKEY_CSCHILD017
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-
-    
-#    def children_preschool_1(self):
-#        diagtitle = COMPMODEL_PRESCHDAILYSTATUS1
-#        modelkey = MODELKEY_PRESCHDAILYSTATUS1
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-
-  
-#    def children_home(self):
-#        diagtitle = COMPMODEL_CSCHILDSTA
-#        modelkey = MODELKEY_CSCHILDSTA
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-        
-        
-#    def children_school_2(self):
-#        diagtitle = COMPMODEL_SCHDAILYSTATUS2
-#        modelkey = MODELKEY_SCHDAILYSTATUS2
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-        
-    
-#    def children_preschool_2(self):
-#        diagtitle = COMPMODEL_PRESCHDAILYSTATUS2
-#        modelkey = MODELKEY_PRESCHDAILYSTATUS2
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-        
-        
-#    def in_activity_independently(self):
-#        diagtitle = COMPMODEL_CSCHILDIND
-#        modelkey = MODELKEY_CSCHILDIND
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-
-
-#    def more_activity(self):
-#        diagtitle = COMPMODEL_CSMOREACT
-#        modelkey = MODELKEY_CSMOREACT
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-        
-    
-#    def to_adult(self):
-#        diagtitle = COMPMODEL_CSMOVEADULT
-#        modelkey = MODELKEY_CSMOVEADULT
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
-        
-    
-#    def travel_independently_from_school(self):
-#        diagtitle = COMPMODEL_AFTSCHDAILYINDEPENDENCE
-#        modelkey = MODELKEY_AFTSCHDAILYINDEPENDENCE
-#        
-#        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-#        diag.exec_()
  
         
     def paintEvent(self, parent = None):

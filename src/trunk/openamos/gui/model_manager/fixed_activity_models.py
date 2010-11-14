@@ -23,30 +23,30 @@ class FixedActivityModels(QWidget):
         workers_button.setGeometry((size.width()) / 4 - 100, size.height() / 2 - 280,200, 50)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
-        children_adult_button = QPushButton("Children (Status-School) \n+ Adult (Status-School)", self)     
+        children_adult_button = QPushButton("Students \n(Children 5-14 years)\n+ (Adults)", self)     
         children_adult_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 280, 200, 50)
 
         
-        children_button = QPushButton('Children \n(Status-Preschool)', self)
+        children_button = QPushButton('Preschoolers \n(Children 0-4 years)', self)
         children_button.setGeometry((size.width()) * 3 / 4 - 100, size.height() / 2 - 280, 200, 50)
 
 
-        work_loc_button = QPushButton('For each job identify \na primary work location;\n\n\nDuring simulation, \ngenerate Choice Sets \nconditional on the home \nlocation e.g. within a 90 \nmin or 120 min travel time\n\nWork related trips/\nactivities will be generated \nduring the open periods to \naccount for multiple job \nsites per job', self)
+        work_loc_button = QPushButton('Identify Primary Work Location \n\n\nSimulate Choice Sets \nWithin 90-120 mins \nTravel from Residence', self)
         work_loc_button.setGeometry((size.width()) / 4 - 100, size.height() / 2 - 200, 200, 400)
         self.connect(work_loc_button, SIGNAL('clicked()'), self.work_loc)
 
 
-        school_loc_button = QPushButton('School location choice\n\nDuring simulation, \ngenerate Choice Sets \nconditional on the home \nlocation e.g. within a 60 \nmin', self)
+        school_loc_button = QPushButton('School Location \n\n\nSimulate Choice Sets \nWithin 60 mins \nTravel from Residence', self)
         school_loc_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 200, 200, 400)
         self.connect(school_loc_button, SIGNAL('clicked()'), self.school_loc)
 
 
-        preschool_loc_button = QPushButton('Pre-school location \nchoice\n\nDuring simulation, \ngenerate Choice Sets \nthat are within a 20 \nminute driving distance \nfrom home or work \nlocation of the adult(s)\n\nAlternatively just identify\n possible locations similar \nto school location', self)
+        preschool_loc_button = QPushButton('Pre-school Location \n\n\nSimulate Choice Sets \nWithin 20 mins \nTravel from either \nWork or Residence', self)
         preschool_loc_button.setGeometry((size.width()) * 3 / 4 - 100, size.height() / 2 - 200, 200, 400)
         self.connect(preschool_loc_button, SIGNAL('clicked()'), self.preschool_loc)
 
 
-        activity_loc_button = QPushButton('Fixed activity locations for all individuals within the population', self)
+        activity_loc_button = QPushButton('Fixed Activity Locations for the Population', self)
         activity_loc_button.setGeometry((size.width()) / 4 - 100, size.height() / 2 + 230, (size.width()) / 2 + 200, 50)
         
         Dummy  = QPushButton('', self)

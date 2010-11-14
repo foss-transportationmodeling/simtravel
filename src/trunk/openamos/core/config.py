@@ -35,20 +35,23 @@ class ConfigObject(object):
 
     def modelSpecInConfig(self,modelkey):
         if modelkey not in MODELMAP.keys():
+            print "Model not found in the Map"
             return None
+        print "Model found in the Map"
         mapvals = MODELMAP[modelkey]
         compname = mapvals[0]
         modelname = mapvals[1]
+        print compname, modelname
         modelnum = 0
         if len(mapvals) == 3:
             modelnum = mapvals[2]
         print modelnum
         compelt = self.protree.find(MODELCONFIG)
         for comp in compelt.getiterator(COMP):
-            if compname == comp.get(NAME):
+            if compname.lower() == comp.get(NAME).lower():
                 modelcnt = 1
                 for model in comp.getiterator(MODEL): 
-                    if modelname == model.get(NAME):
+                    if modelname.lower() == model.get(NAME).lower():
                         if modelnum == 0:
                             return model
                         else:

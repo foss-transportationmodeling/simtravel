@@ -18,34 +18,35 @@ class LongTermModels(QWidget):
         widgetheight = size.height()
         
         
-        generate_synthetic_population_button = QPushButton('Generate Synthetic \nPopulation', self)
+        generate_synthetic_population_button = QPushButton(COMPMODEL_SYNTHPOP, self)
         generate_synthetic_population_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 400,200, 50)
         #self.connect(generate_synthetic_population_button, SIGNAL('clicked()'), self.synthetic_population)
 #        self.connect(generate_synthetic_population_button, SIGNAL('clicked()'),
 #                     qApp, SLOT('deleteLater()'))
 
         
-        labor_force_participation_model_button = QPushButton('If worker status was not \n generated then run a Labor \n Force Participation Model to \n simulate the worker status \n individuals', self)
+        #labor_force_participation_model_button = QPushButton('If worker status was not \n generated then run a Labor \n Force Participation Model to \n simulate the worker status \n individuals', self)
+        labor_force_participation_model_button = QPushButton(COMPMODEL_WORKSTAT, self)
         labor_force_participation_model_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 320, 200, 110)
         self.connect(labor_force_participation_model_button, SIGNAL('clicked()'), self.labor_force)
 
         
-        number_of_jobs_button = QPushButton('For each worker identify \n the number of jobs', self)
+        number_of_jobs_button = QPushButton(COMPMODEL_NUMJOBS, self)
         number_of_jobs_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 180, 200, 50)
         self.connect(number_of_jobs_button, SIGNAL('clicked()'), self.number_jobs)
 
 
-        primary_worker_button = QPushButton('Primary worker in the \nhousehold \n\nIn the absence of data \nidentified based on personal \nincome', self)
+        primary_worker_button = QPushButton(COMPMODEL_PRIMWORK, self)
         primary_worker_button.setGeometry((size.width())/2 - 100, size.height() / 2 - 100, 200, 130)
         self.connect(primary_worker_button, SIGNAL('clicked()'), self.primary_worker)
 
 
-        school_status_button  = QPushButton('School status of everyone \nincluding those individuals \nthat are workers', self)
+        school_status_button  = QPushButton(COMPMODEL_SCHSTAT, self)
         school_status_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 60, 200, 70)
         self.connect(school_status_button, SIGNAL('clicked()'), self.school_status)
 
 
-        residential_location_choice_button  = QPushButton('Residential Location Choice', self)
+        residential_location_choice_button  = QPushButton(COMPMODEL_RESLOC, self)
         residential_location_choice_button.setGeometry((size.width())/2 - 100, size.height() / 2 + 160, 200, 50)
         #self.connect(residential_location_choice_button, SIGNAL('clicked()'), self.residential_location)
         
