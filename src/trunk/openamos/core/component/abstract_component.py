@@ -745,15 +745,26 @@ class AbstractComponent(object):
 
         destLocSetInd2 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
 
+
+
         for zone in uniqueIDs:
             destZone = zone * ones((data.rows, 1), dtype=int)
             timeToDest = skimsMatrix2[originLocColVals, destZone]
             timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
 
-            if ma.any(rowsLessThan.mask):
-                destLocSetInd2[~rowsLessThan.mask, zone] = 1
-                k2 = rowsLessThan.sum()
+	    #print zone
+	    #print timeToDest[:,0]
+	    #print timeFromDest[:,0]
+	    #print timeAvailable[:,0]
+	    #print rowsLessThan
+
+	    k2 = rowsLessThan.sum()
+
+            if k2 > 0:
+                destLocSetInd2[rowsLessThan, zone] = 1
+	print timeAvailable
+	print destLocSetInd2
 
         rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
         print """\t\t%s records were deleted because there """\
@@ -812,6 +823,8 @@ class AbstractComponent(object):
 
 
 
+	print 'count', count
+
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
             sampleLocColVals = array(data.columns([sampleLocColName]).data, dtype=int)
@@ -836,6 +849,9 @@ class AbstractComponent(object):
                 colName = spatialconst.skimField
             skimLocColName = '%s%s' %(colName, i+1)
             data.setcolumn(skimLocColName, vals)
+
+	    print 'Origin Loc', originLocColVals
+	    print 'Destination Loc', sampleLocColVals
 
 
             # FROM TRAVEL SKIMS
@@ -885,7 +901,7 @@ class AbstractComponent(object):
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
-        print vals[:,0]
+        #print vals[:,0]
         data.insertcolumn([colName], vals)
 
         return data
@@ -894,6 +910,13 @@ class AbstractComponent(object):
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
+	    print '-->', destLocSetIndSum
+	
+	    zeroChoices = destLocSetIndSum.mask
+	    print 'zero choices', zeroChoices
+	    if (~zeroChoices).sum() == 0:
+	        continue
+		    
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
             probDataArray = DataArray(probLocSet, zoneLabels)
@@ -911,12 +934,15 @@ class AbstractComponent(object):
             nonZeroRows = where(res.data <> 0)
             actualLocIds = res.data
             actualLocIds[nonZeroRows] -= 1
-            data.setcolumn(colName, actualLocIds)
+            data.setcolumn(colName, actualLocIds, ~zeroChoices)
+
+	    print colName
 
             # Retrieving the row indices
             dataCol = data.columns([colName]).data
 
             rowIndices = array(xrange(dataCol.shape[0]), int)
+	    rowIndices = 0
             colIndices = actualLocIds.astype(int)
 
             destLocSetInd.mask[rowIndices, colIndices] = True
