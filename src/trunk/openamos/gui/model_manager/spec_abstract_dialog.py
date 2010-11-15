@@ -543,6 +543,8 @@ class AbtractSpecDialog(QDialog):
 #                self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == MNL_MODEL:
+                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentRow())
+                
                 self.setModeltoElt(model,MODELFORM_MNL,ALTSPEC)
                 for alter in model.findall(ALTERNATIVE):
                     model.remove(alter)
@@ -844,15 +846,15 @@ class AbtractSpecDialog(QDialog):
         
         res = True
         
-        if self.subpopgb.isChecked():
-            subvalue = unicode(self.subpopval.text())
-            if not self.checkFloat(subvalue):
-                QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
-                return False
-            else:
-                if float(subvalue) < 0.0:
-                    QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
-                    return False
+#        if self.subpopgb.isChecked():
+#            subvalue = unicode(self.subpopval.text())
+#            if not self.checkFloat(subvalue):
+#                QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
+#                return False
+#            else:
+#                if float(subvalue) < 0.0:
+#                    QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
+#                    return False
 
                 
         if self.modeltypecb.currentText() == PROB_MODEL:
