@@ -81,7 +81,6 @@ class AbstractComponent(object):
 	            count_keys[table] = keys[1]
 	    except Exception, e:
 		pass
-	print 'NEW MAX DICT', count_keys
 
 
 
@@ -910,14 +909,15 @@ class AbstractComponent(object):
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
-	    print '-->', destLocSetIndSum
 	
-	    zeroChoices = destLocSetIndSum.mask
-	    print 'zero choices', zeroChoices
-	    if (~zeroChoices).sum() == 0:
-	        continue
-		    
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
+
+	    zeroChoices = destLocSetIndSum == 0
+            print 'zero choices', zeroChoices
+            if (~zeroChoices).sum() == 0:
+                continue
+
+	    #probLocSet = probLocSet[zeroChoices,:]
 
             probDataArray = DataArray(probLocSet, zoneLabels)
 

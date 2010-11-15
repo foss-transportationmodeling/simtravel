@@ -80,9 +80,6 @@ class AbstractComponent(object):
 	            count_keys[table] = keys[1]
 	    except Exception, e:
 		pass
-	print 'NEW MAX DICT', count_keys
-
-
 
 
 
@@ -255,7 +252,7 @@ class AbstractComponent(object):
             else:
                 self.data.deleterows(valid_data_filter)          
 
-        print '\t\t', self.delete_criterion
+        #print '\t\t', self.delete_criterion
         print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
         print '\t\tSize of dataset', self.data.rows
 	return trips_data_array
@@ -399,7 +396,7 @@ class AbstractComponent(object):
                 choiceset = None
                     
                 result = i.simulate_choice(data_subset, choiceset, iteration)
-                print result.data[:,0]
+                #print result.data[:,0]
                 self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component

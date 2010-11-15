@@ -109,7 +109,7 @@ class ConfigParser(object):
         return dbConfigObject
         
     def parse_tableHierarchy(self):
-        print "-- Parse table hierarchy --"
+        #print "-- Parse table hierarchy --"
         dbTables_element = self.configObject.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
