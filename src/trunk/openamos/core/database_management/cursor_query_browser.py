@@ -159,7 +159,11 @@ class QueryBrowser(object):
 
         #print
         #print db_dict
-        #print max_dict
+	print
+        print max_dict
+
+	
+
 
 
         #initialize the variables
@@ -221,9 +225,9 @@ class QueryBrowser(object):
         
 
                 
-        #print 'FINAL LIST', final_list
-        #print 'TABLE NAMES', table_names
-        #print 'TABLE LIST', table_list
+        print 'FINAL LIST', final_list
+        print 'TABLE NAMES', table_names
+        print 'TABLE LIST', table_list
 
         # Generating the left join statements
         mainTable = table_names[0]
@@ -248,7 +252,7 @@ class QueryBrowser(object):
             joinStr = ' left join %s on (%s)' %(table, joinCondition)
             joinStrList.append(joinStr)
 
-        #print 'JOIN STRING LIST', joinStrList
+        print 'JOIN STRING LIST', joinStrList
 
         #check the max flag
         
@@ -267,51 +271,53 @@ class QueryBrowser(object):
         # provided
         #print max_dict
         if max_dict is not None:
-            maxTable = max_dict.keys()[0]
-            maxColumn = max_dict.values()[0][0]
-            index = table_list.index(maxTable)
-            #print 'INDEX--->', index
+	    for maxTable in max_dict:
+		print '---', maxTable, '---'
+                maxColumn = max_dict[maxTable][0]
+            	index = table_list.index(maxTable)
+            	print 'INDEX--->', index
+		table_list.pop(index)
         
-            #remove the count column from the col list
-            countVarStr = '%s.%s' %(maxTable, maxColumn)
-            final_list.remove(countVarStr)
-            final_list.append('temp_%s.%s'%(maxTable, maxColumn))
-            cols_list.remove(maxColumn)
-            cols_list.append(maxColumn)
+            	#remove the count column from the col list
+            	countVarStr = '%s.%s' %(maxTable, maxColumn)
+           	final_list.remove(countVarStr)
+          	final_list.append('temp_%s.%s'%(maxTable, maxColumn))
+          	cols_list.remove(maxColumn)
+            	cols_list.append(maxColumn)
 
-            #print 'NEW FINAL LIST -->', final_list
+            	#print 'NEW FINAL LIST -->', final_list
 
-            # left join for the count variable
-            joinStr = ''
+            	# left join for the count variable
+            	joinStr = ''
 
 
-            #grouping string
-            grpStr = ''
-            joinCondition=''
+            	#grouping string
+            	grpStr = ''
+            	joinCondition=''
 
-            #print 'column_names of max TABLE ----->', column_names
-            for i in column_names[maxTable]:
-                #print 'createing join string for column name - ', i
-                grpStr = grpStr + '%s,' %(i)
-                joinCondition = (joinCondition 
-                                 + ' temp_%s.%s=%s.%s ' %(maxTable, i, 
-                                                       mainTable, i) 
-                                 + 'and')
-            grpStr = grpStr[:-1]
-            joinCondition = joinCondition[:-3]
+            	#print 'column_names of max TABLE ----->', column_names
+            	for i in column_names[maxTable]:
+            	    #print 'createing join string for column name - ', i
+            	    grpStr = grpStr + '%s,' %(i)
+            	    joinCondition = (joinCondition 
+            	                     + ' temp_%s.%s=%s.%s ' %(maxTable, i, 
+            	                                           mainTable, i) 
+            	                     + 'and')
+            	grpStr = grpStr[:-1]
+            	joinCondition = joinCondition[:-3]
             
-        #combine left join along with the count variable/max condition
-            mJoinStr = joinStrList.pop(index)
-            mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
-                                          'and %s.%s=temp_%s.%s)' 
-                                          %(maxTable, maxColumn, maxTable, maxColumn))
+	        #combine left join along with the count variable/max condition
+        	mJoinStr = joinStrList.pop(index)
+        	mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
+        	                              'and %s.%s=temp_%s.%s)' 
+        	                              %(maxTable, maxColumn, maxTable, maxColumn))
             
-            joinStrList.append(""" left join (select %s, max(%s) as %s from """
-                               """%s group by %s) as temp_%s on (%s) """ %(grpStr, maxColumn, 
-                                                            	           maxColumn, maxTable, grpStr,
-                                                                	   maxTable, joinCondition)
-                               + mJoinStrIncMaxConditionVar)
-            #print 'LEFT JOIN MAX COL LIST--->', joinStrList
+        	joinStrList.append(""" left join (select %s, max(%s) as %s from """
+        	                   """%s group by %s) as temp_%s on (%s) """ %(grpStr, maxColumn, 
+        		                                         	       maxColumn, maxTable, grpStr,
+        	                                                               maxTable, joinCondition)
+        	                       + mJoinStrIncMaxConditionVar)
+            print 'LEFT JOIN MAX COL LIST--->', joinStrList
 	"""        
         # separate all the columns from the lists
         new_keys = db_dict.keys()
@@ -357,7 +363,7 @@ class QueryBrowser(object):
                                 %(grpStr, selectVarStr, histTable, conditionsStr, analysisInterval,
                                   grpStr, histTempTableName))
 
-                print column_names
+                #print column_names
 
                 joinCondition = ""
                 for i in keyCols:
@@ -573,7 +579,7 @@ class QueryBrowser(object):
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
         print 'SQL string for query - ', sql_string
-        print cols_list
+        #print cols_list
         
         try:
             self.dbcon_obj.cursor.execute(sql_string)
@@ -610,7 +616,7 @@ class QueryBrowser(object):
         data = array(result)
         mask = ma.masked_equal(data, None).mask
 
-        print cols_list
+        #print cols_list
 
         if mask.any():
             data[mask] = fillValue
