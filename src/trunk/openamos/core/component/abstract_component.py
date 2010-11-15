@@ -73,6 +73,19 @@ class AbstractComponent(object):
 
         print self.variable_list
 
+
+	for table in vars_dict:
+	    try:
+	        keys = tableNamesKeyDict[table]
+	        if len(keys[1]) > 0:
+	            count_keys[table] = keys[1]
+	    except Exception, e:
+		pass
+	print 'NEW MAX DICT', count_keys
+
+
+
+
         # Prepare Data
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
                                  tableOrderDict, tableNamesKeyDict, 
