@@ -35,7 +35,7 @@ class NewProject(QWizard):
         QWizard.accept(self)
     
     def createProConfig(self):
-        masterconfig = '../configs/config_mag.xml'
+        masterconfig = '../configs/config_mag_full.xml'
         proconfig = ConfigObject(configfileloc=masterconfig)
         
         proelt = proconfig.getConfigElt(PROJECT)
