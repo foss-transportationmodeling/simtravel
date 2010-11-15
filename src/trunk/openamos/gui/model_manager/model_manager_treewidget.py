@@ -400,6 +400,10 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif str(item.text(col)).lower() == COMPMODEL_AFTSCHJOINTACT.lower():
             diagtitle = COMPMODEL_AFTSCHJOINTACT
             modelkey = MODELKEY_AFTSCHJOINTACT 
+
+        elif str(item.text(col)).lower() == COMPMODEL_WRKDAILYSTATUS.lower():
+            diagtitle = COMPMODEL_WRKDAILYSTATUS
+            modelkey = MODELKEY_WRKDAILYSTATUS 
             
 
         elif item.text(col) == COMPMODEL_SMACTIVEPURSUE:

@@ -47,7 +47,7 @@ class Adult_Model(QWidget):
 
         adult_work_button = QPushButton('This adult works from home', self)
         adult_work_button.setGeometry((size.width()) / 4 - 100, 380, 200, 50)
-        self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
+        #self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
 
         check_adult_button = QPushButton('Adult work status', self)
         check_adult_button.setGeometry((size.width()) / 2 - 100, 470, 200, 50)
@@ -118,13 +118,7 @@ class Adult_Model(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
-        
-    def adult_work(self):
-        diagtitle = COMPMODEL_ASADULTHOME
-        modelkey = MODELKEY_ASADULTHOME
-        
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
-        diag.exec_()
+
         
     
     def check_adult(self):
@@ -135,8 +129,8 @@ class Adult_Model(QWidget):
         diag.exec_()
         
     def work_today(self):
-        diagtitle = COMPMODEL_ASEMPLOYWORK
-        modelkey = MODELKEY_ASEMPLOYWORK
+        diagtitle = COMPMODEL_WRKDAILYSTATUS
+        modelkey = MODELKEY_WRKDAILYSTATUS
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
