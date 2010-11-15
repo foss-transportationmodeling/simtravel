@@ -12,7 +12,7 @@ from file_menu.databaseconfig import *
 from results_menu.view_trips import *
 
 from openamos.core.config import *
-from openamos.core.run.simulation_manager_cursor import SimulationManager
+#from openamos.core.run.simulation_manager_cursor import SimulationManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -133,8 +133,8 @@ class MainWindow(QMainWindow):
                                             None, None)
         component_activity_travel_reconciliation_system_action = self.createaction(COMP_ACTTRAVRECONCILIATION, self.models.show_travel_reconciliation_system, None, 
                                             None, None)
-        component_time_use_utility_calculator_action = self.createaction(COMP_TIMEUSEUTILITY, None, None, 
-                                            None, None)
+#        component_time_use_utility_calculator_action = self.createaction(COMP_TIMEUSEUTILITY, None, None, 
+#                                            None, None)
 
         self.modelsComponentSubMenu = self.models_menu.addMenu("&Component")
         #self.addActions(self.models_menu, (models_interactive_ui_action, ))
@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
                                                       component_vehicle_ownership_model_action, component_fixed_activity_prism_generator_action,
                                                        component_child_daily_status_and_allocation_model_action, component_adult_daily_status_model_action,
                                                       component_activity_skeleton_reconciliation_system_action,component_activity_travel_pattern_simulator_action,
-                                                      component_activity_travel_reconciliation_system_action,component_time_use_utility_calculator_action))
+                                                      component_activity_travel_reconciliation_system_action))#,component_time_use_utility_calculator_action))
 
     # Defining Data
         self.data_menu = self.menuBar().addMenu("&Data")
@@ -155,28 +155,28 @@ class MainWindow(QMainWindow):
         self.addActions(self.data_menu, (data_import_action, data_export_action,data_dataconfig_action,))
 
     # Defining Display
-        self.display_menu = self.menuBar().addMenu("D&isplay")
-        display_zoom_in_action = self.createaction("Zoom &In",None,None,
-                                               "viewmag+", "Zoom in.")
-        display_zoom_out_action = self.createaction("Zoom &Out",None,None,
-                                               "viewmag-", "Zoom out.")
-        self.addActions(self.display_menu, (display_zoom_in_action,display_zoom_out_action,))
+#        self.display_menu = self.menuBar().addMenu("D&isplay")
+#        display_zoom_in_action = self.createaction("Zoom &In",None,None,
+#                                               "viewmag+", "Zoom in.")
+#        display_zoom_out_action = self.createaction("Zoom &Out",None,None,
+#                                               "viewmag-", "Zoom out.")
+#        self.addActions(self.display_menu, (display_zoom_in_action,display_zoom_out_action,))
 
     # Defining Run
         self.run_menu = self.menuBar().addMenu("&Run")
         run_simulation_action = self.createaction("&Simulation", self.run_simulation, None, 
                                             "run", "Implement the model.", False, True)        
-        setting_preference_action = self.createaction("&Preference", None, None, 
-                                            "preferences", "Make a configuration.")        
-        #self.addActions(self.run_menu, (setting_preference_action, ))
+#        setting_preference_action = self.createaction("&Preference", None, None, 
+#                                            "preferences", "Make a configuration.")        
+#        self.addActions(self.run_menu, (setting_preference_action, ))
         self.addActions(self.run_menu, (run_simulation_action, ))
         
     # Defining Results
         self.result_menu = self.menuBar().addMenu("R&esults")
-        activity_pattern_action = self.createaction("Activity Pattern", self.results_schedules, None,
-                                            "", "Show results of activity pattern")
-        travel_pattern_action = self.createaction("Travel Pattern", self.results_trips, None,
-                                                  None, "Show results of travel pattern")
+        activity_pattern_action = self.createaction("Activity Characteristics", self.results_schedules, None,
+                                            "", "Show activity characteristics", False, True)
+        travel_pattern_action = self.createaction("Travel Characteristics", self.results_trips, None,
+                                                  None, "Show travel characteristics", False, True)
         self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action, ))
 
     # Defining help        
@@ -268,7 +268,9 @@ class MainWindow(QMainWindow):
             self.proconfig = ConfigObject(configtree=project_new.configtree)
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
-            self.run_menu.actions()[1].setEnabled(True)
+            #self.run_menu.actions()[1].setEnabled(True)
+            self.result_menu.actions()[0].setEnabled(True)
+            self.result_menu.actions()[1].setEnabled(True)
             
 
     def projectopen(self):
@@ -299,6 +301,8 @@ class MainWindow(QMainWindow):
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
             #self.run_menu.actions()[1].setEnabled(True)
+            self.result_menu.actions()[0].setEnabled(True)
+            self.result_menu.actions()[1].setEnabled(True)
             
 
     def projectsave(self):
@@ -326,8 +330,11 @@ class MainWindow(QMainWindow):
     def projectClose(self):
         self.proconfig = None
         self.checkProject()
+        self.setWindowTitle("OpenAMOS: Version-1.0")
         self.data_menu.actions()[2].setDisabled(True)
-        self.run_menu.actions()[1].setDisabled(True)
+        #self.run_menu.actions()[1].setDisabled(True)
+        self.result_menu.actions()[0].setDisabled(True)
+        self.result_menu.actions()[1].setDisabled(True)
         
 
     def projectQuit(self):
@@ -368,15 +375,15 @@ class MainWindow(QMainWindow):
         """file. e.g. /home/config.xml (linux machine) """\
         """or c:/testproject/config.xml (windows machine)"""
 
-        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
-        simulationManagerObject.setup_databaseConnection()
-        simulationManagerObject.setup_cacheDatabase('w')
-        simulationManagerObject.setup_location_information()
-        simulationManagerObject.setup_tod_skims()
-        simulationManagerObject.parse_config()
-        simulationManagerObject.clean_database_tables()
-        simulationManagerObject.run_components()
-        simulationManagerObject.close_connections()
+#        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+#        simulationManagerObject.setup_databaseConnection()
+#        simulationManagerObject.setup_cacheDatabase('w')
+#        simulationManagerObject.setup_location_information()
+#        simulationManagerObject.setup_tod_skims()
+#        simulationManagerObject.parse_config()
+#        simulationManagerObject.clean_database_tables()
+#        simulationManagerObject.run_components()
+#        simulationManagerObject.close_connections()
         
 #        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
 #            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
