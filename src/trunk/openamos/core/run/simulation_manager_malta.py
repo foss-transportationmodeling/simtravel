@@ -3,13 +3,13 @@ import copy
 import time
 import os
 from lxml import etree
-from numpy import array, ma, ones, zeros, vstack, where
+from numpy import array, ma, ones, zeros, vstack, where, save, load
 
-from openamos.core.component.config_parser import ConfigParser
+from openamos.core.component.config_parser_malta import ConfigParser
 from openamos.core.database_management.cursor_query_browser import QueryBrowser
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
-from openamos.core.cache.dataset import DB
+from openamos.core.cache.dataset_malta import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 
@@ -61,7 +61,7 @@ class SimulationManager(object):
 	self.householdStructureObject = self.configParser.parse_household_structure_info()
 
 	self.setup_databaseConnection()
-	self.setup_cacheDatabase('w')
+	self.setup_cacheDatabase()
 	self.setup_location_information()
 	self.setup_tod_skims()
 	self.parse_config()
@@ -77,6 +77,8 @@ class SimulationManager(object):
         #self.queryBrowser.create_mapper_for_all_classes()
         #print 'Database Connection Established'
 
+
+    """
     def setup_cacheDatabase(self, mode='w'):
         print "-- Creating a hdf5 cache database --"
         fileLoc = self.projectConfigObject.location
@@ -86,26 +88,61 @@ class SimulationManager(object):
         # placeholders for creating the hdf5 tables 
         # only the network data is read and processed for faster 
         # queries
+    """
+    def setup_cacheDatabase(self):
+	self.db = DB()
 
+    def createSkimsTableFromDatabase(self, tableInfo):
+        t = time.time()
+
+	tableName = tableInfo.tableName
+
+	colsList = []
+	colsList.append(tableInfo.origin_var)
+	colsList.append(tableInfo.destination_var)
+	colsList.append(tableInfo.skims_var)
+
+        data = self.queryBrowser.select_all_from_table(tableName, colsList)
+        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
+
+	fileLoc = self.projectConfigObject.location
+	save('%s/%s.npy' %(fileLoc, tableName), data.data)
+
+        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
 
 
     def setup_tod_skims(self):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
-            self.db.createSkimsTableFromDatabase(tableInfo,
-                                                 self.queryBrowser)
+            self.createSkimsTableFromDatabase(tableInfo)
+
+
+    def createLocationsTableFromDatabase(self, tableInfo):
+        t = time.time()
+        
+        colsList = [tableInfo.location_id_var] + tableInfo.locations_varsList
+
+        tableName = tableInfo.tableName
+        data = self.queryBrowser.select_all_from_table(tableName, colsList)
+        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
+
+	fileLoc = self.projectConfigObject.location
+	save('%s/%s.npy' %(fileLoc, tableName), data.data)
+
+        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
+
+	    
 
     def setup_location_information(self):
         print "-- Processing Location Information --"
-        self.db.createLocationsTableFromDatabase(self.projectLocationsObject, 
-	                                            self.queryBrowser)
+        self.createLocationsTableFromDatabase(self.projectLocationsObject)
 
-
+    """
     def setup_household_structures(self):
 	print "-- Processing Household Structures --"
 	self.db.create
-
-
+    """
+ 
     def parse_config(self):
         print "-- Parsing components and model specifications --"
         self.componentList = self.configParser.parse_models()
@@ -160,7 +197,7 @@ class SimulationManager(object):
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
+                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject, tableNamesKeyDict)
             
             # Write the data to the database from the hdf5 results cache
             # after running each component because the subsequent components
@@ -185,6 +222,7 @@ class SimulationManager(object):
 	    if comp.component_name in ['ReconcileLongerTermSchedules', 'AfterSchoolActivities', 'DynamicNonMandatoryActivities']:
 	        compObjects.append(comp)
 
+	tripInfo = ones((1,9))
 	for comp in compObjects:
 	    comp.analysisInterval = analysisInterval
 	    t = time.time()
@@ -194,23 +232,32 @@ class SimulationManager(object):
             if comp.skipFlag:
                 print '\tSkipping the run for this component'
                 continue
+	    fileLoc = self.projectConfigObject.location
             data = comp.pre_process(self.queryBrowser, self.subsample, 
                                     tableOrderDict, tableNamesKeyDict, 
-                                    self.projectSkimsObject, self.householdStructureObject, self.db)
+                                    self.projectSkimsObject, self.householdStructureObject, self.db, fileLoc)
+
+	    print data, '--- --- --- --- --- --- '
             if data is not None:
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
-
+                tripInfo = comp.run(data, self.projectSkimsObject, tableNamesKeyDict, 
+							self.queryBrowser, fileLoc)
+	    else:
+		tripInfo = ones((1,9))
             # Write the data to the database from the hdf5 results cache
             # after running each component because the subsequent components
             # are often dependent on the choices generated in the previous components
             # run
-                self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
-		tripInfo = self.tripInfoToMalta('trips_r', ['houseid', 'personid'], tripsProcessed)
+                #self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
+		#tripInfo = self.tripInfoToMalta('trips_r', ['houseid', 'personid'], tripsProcessed)
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #raw_input()
+
+	print '-----', tripInfo, '-------'
+
+	print '-----', type(tripInfo), '-------'
 	return tripInfo
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
 
@@ -272,5 +319,5 @@ class SimulationManager(object):
 if __name__ == '__main__':
     simulationObject = SimulationManager()
     simulationObject.run_selected_components_for_malta(195, None)
-    simulationObject.close_connections()
+
 
