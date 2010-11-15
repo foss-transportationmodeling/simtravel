@@ -21,7 +21,7 @@ class Matplot(QDialog):
     
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
-        self.setMinimumSize(QSize(800,500))
+        self.setMinimumSize(QSize(900,500))
         # Create the mpl Figure and FigCanvas objects.
         # 5x4 inches, 100 dots-per-inch
         #
@@ -59,18 +59,18 @@ class Matplot(QDialog):
         addfilter.addWidget(self.choicevar2,1,1)
         addfilterlayout.addWidget(filter,0,0)
         
-        segment = QGroupBox(self)
-        addsegment = QGridLayout()
-        segment.setLayout(addsegment)
-        self.segment1 = QRadioButton("Adult Worker")
-        self.segment2 = QRadioButton("Adult Non-worker")
-        self.segment3 = QRadioButton("Non-adult (5-17)")
-        self.segment4 = QRadioButton("Preschool (0-4)")
-        addsegment.addWidget(self.segment1,0,0)
-        addsegment.addWidget(self.segment2,0,1)
-        addsegment.addWidget(self.segment3,1,0)
-        addsegment.addWidget(self.segment4,1,1)
-        addfilterlayout.addWidget(segment,0,1)
+#        segment = QGroupBox(self)
+#        addsegment = QGridLayout()
+#        segment.setLayout(addsegment)
+#        self.segment1 = QRadioButton("Adult Worker")
+#        self.segment2 = QRadioButton("Adult Non-worker")
+#        self.segment3 = QRadioButton("Non-adult (5-17)")
+#        self.segment4 = QRadioButton("Preschool (0-4)")
+#        addsegment.addWidget(self.segment1,0,0)
+#        addsegment.addWidget(self.segment2,0,1)
+#        addsegment.addWidget(self.segment3,1,0)
+#        addsegment.addWidget(self.segment4,1,1)
+#        addfilterlayout.addWidget(segment,0,1)
         
         addfilterlayout.setColumnStretch(0,3)
         addfilterlayout.setColumnStretch(1,2)
@@ -113,22 +113,6 @@ class Matplot(QDialog):
     def on_draw(self):
         pass
 
-    def create_action(  self, text, slot=None, shortcut=None,
-                        icon=None, tip=None, checkable=False,
-                        signal="triggered()"):
-        action = QAction(text, self)
-        if icon is not None:
-            action.setIcon(QIcon(":/%s.png" % icon))
-        if shortcut is not None:
-            action.setShortcut(shortcut)
-        if tip is not None:
-            action.setToolTip(tip)
-            action.setStatusTip(tip)
-        if slot is not None:
-            self.connect(action, SIGNAL(signal), slot)
-        if checkable:
-            action.setCheckable(True)
-        return action
 
     def executeSelectQuery(self, cursor, vars, tablename, filter="", group ="", order =""):
 #        if self.checkIfTableExists(tablename):
@@ -161,27 +145,31 @@ class Matplot(QDialog):
 
     def checkIfTableExists(self, tablename):
         tables = self.tableList()
-
         try:
             tables.index(tablename)
         except:
             return False
         return True
 
-
     def tableList(self):
-
         tables = self.new_obj.get_table_list()
         return tables
+    
+    def  checkColumnExists(self, tablename, columnname):
+        columns = self.new_obj.get_column_list(tablename)
+        try:
+            columns.index(columnname)
+        except:
+            return False
+        return True
 
 
     def fill_variable1(self,pattern):
-
         vars = []
         if pattern == "trips":
-            vars = ["","purpose","strttime","endtime","mode","occupancy"]
+            vars = ["","purpose_rec","strttime_rec","endtime_rec","mode_rec","occupancy_rec","duration_rec","miles_rec"]
         else:
-            vars = ["","purpose","strttime","endtime","mode","occupancy"]
+            vars = ["","activitytype","strttime_rec","endtime_rec","duration_rec"] #,"locationid"]
             
         self.choicevar1.addItems(vars)
         self.choicevar2.addItems(vars)
@@ -201,13 +189,6 @@ class Matplot(QDialog):
 #        
 #        self.choicevar2.addItems(vars)
 
-        
-        
-    def getGeographies(self):
-        self.geolist = []
-        for geo in self.project.synGeoIds.keys():
-            geostr = str(geo[0]) + "," + str(geo[1]) + "," + str(geo[3]) + "," + str(geo[4])
-            self.geolist.append(geostr)
 
 
 
