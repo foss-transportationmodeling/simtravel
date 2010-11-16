@@ -49,8 +49,8 @@ class DB(object):
 
 
         #Input Tables - Creatign the table
-        self.fileh.createTable(input_grp, "travel_skims1", Travel_Skims)
-        self.fileh.createTable(input_grp, "travel_skims2", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_peak", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_offpeak", Travel_Skims)
         self.fileh.createTable(input_grp, "locations", Locations)
 
 
