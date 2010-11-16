@@ -253,7 +253,7 @@ class ConfigParser(object):
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
-	#print "Parsing Component - %s" %(comp_name)
+	print "Parsing Component - %s" %(comp_name)
 
         spatialConstIterator = component_element.getiterator("SpatialConstraints")
         spatialConst_list = []
@@ -362,7 +362,7 @@ class ConfigParser(object):
 
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
-	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
+	print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
         
         if model_formulation == 'Regression':
