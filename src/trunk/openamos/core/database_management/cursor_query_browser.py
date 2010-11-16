@@ -159,10 +159,11 @@ class QueryBrowser(object):
 
         #print
         #print db_dict
-	print
-        print max_dict
+	#print
+        #print max_dict
 
-	
+
+
 
 
 
@@ -174,10 +175,13 @@ class QueryBrowser(object):
         tabs_list = []
         #col_name = column_name
         final_col_list = db_dict.values()
-        table_list = db_dict.keys()
+        table_list = db_dict.keys() 
 
         table_flag = None
         all_tables = table_list + table_names
+
+	#print table_list
+	#print 'column_names', column_names
 
         #check if the tables exist in the database.
         for each_tab in all_tables:
@@ -225,10 +229,11 @@ class QueryBrowser(object):
         
 
                 
-        print 'FINAL LIST', final_list
-        print 'TABLE NAMES', table_names
-        print 'TABLE LIST', table_list
-
+        #print 'FINAL LIST', final_list
+        #print 'TABLE NAMES', table_names
+	#print 'db dict', db_dict
+        #print 'TABLE LIST', table_list
+	
         # Generating the left join statements
         mainTable = table_names[0]
         #print 'mainTable ----> ', mainTable
@@ -252,7 +257,7 @@ class QueryBrowser(object):
             joinStr = ' left join %s on (%s)' %(table, joinCondition)
             joinStrList.append(joinStr)
 
-        print 'JOIN STRING LIST', joinStrList
+        #print 'JOIN STRING LIST', joinStrList
 
         #check the max flag
         
@@ -272,10 +277,15 @@ class QueryBrowser(object):
         #print max_dict
         if max_dict is not None:
 	    for maxTable in max_dict:
-		print '---', maxTable, '---'
+		#print '---', maxTable, '---'
                 maxColumn = max_dict[maxTable][0]
-            	index = table_list.index(maxTable)
-            	print 'INDEX--->', index
+		try:
+            	    index = table_list.index(maxTable)
+		except Exception, e:
+		    print e
+		    continue	
+            	#print 'INDEX--->', index
+
 		table_list.pop(index)
         
             	#remove the count column from the col list
@@ -317,7 +327,7 @@ class QueryBrowser(object):
         		                                         	       maxColumn, maxTable, grpStr,
         	                                                               maxTable, joinCondition)
         	                       + mJoinStrIncMaxConditionVar)
-            print 'LEFT JOIN MAX COL LIST--->', joinStrList
+            #print 'LEFT JOIN MAX COL LIST--->', joinStrList
 	"""        
         # separate all the columns from the lists
         new_keys = db_dict.keys()
@@ -578,7 +588,7 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        print 'SQL string for query - ', sql_string
+        #print 'SQL string for query - ', sql_string
         #print cols_list
         
         try:
@@ -594,7 +604,8 @@ class QueryBrowser(object):
 	    #raw_input()
             return data
 	except AttributeError, e:
-	    print 'Query returned None since no records were found. Hence, nothing to sort'
+	    #print '\t\tQuery returned None since no records were found. Hence, nothing to sort'
+	    pass
         except Exception, e:
             print e
             print 'Error retrieving the information. Query failed.'
@@ -627,7 +638,7 @@ class QueryBrowser(object):
         
         # Convert it back to a regular array to enable all the other processing
         print '\t - Size of the data set that was retrieved - ', data.shape
-        print '\t - Records were processed after query in %.4f' %(time.time()-t)
+        #print '\t - Records were processed after query in %.4f' %(time.time()-t)
 
 	if data.shape[0] == 0:
 	    return None
@@ -799,10 +810,10 @@ class QueryBrowser(object):
                 insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
                                """ delimiters ','""" %(table_name, cols_listStr, loc))
                                                                        
-                print '\t\t', insert_stmt
+                #print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print '\t\tTime after insert query - %.4f' %(time.time() - ti)
+                #print '\t\tTime after insert query - %.4f' %(time.time() - ti)
                 #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
@@ -868,7 +879,7 @@ class QueryBrowser(object):
             try:
                 self.dbcon_obj.cursor.execute(index_stmt)
                 self.dbcon_obj.connection.commit()
-                print '\t\tIndex %s created'%index_name
+                #print '\t\tIndex %s created'%index_name
             except Exception, e:
                 print 'Error while creating an index'
                 print e
@@ -925,7 +936,7 @@ class QueryBrowser(object):
             myfile.write(str(each)[1:-1])
             myfile.write('\n')
         myfile.close()
-        print '\t\tTime to write to file - %.4f' %(time.time()-ti)
+        #print '\t\tTime to write to file - %.4f' %(time.time()-ti)
     ########### file function ends ############
     
     ###########################################
