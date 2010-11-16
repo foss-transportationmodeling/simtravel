@@ -1,5 +1,5 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone" seed="10" subsample="40000"/>
+  <Project name="mag_zone" location="/media/storage/workspace/mag_zone" seed="10" subsample="40000"/>
   <DBConfig dbprotocol = "postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
   <DBTables>
     <Table table = 'persons' key = 'houseid,personid' order="1"/>
@@ -40,7 +40,7 @@
 
   <ModelConfig>
 
-    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="False">
+    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="True">
       <Model name="VehCount" formulation='Ordered' type="Probit" seed="1">
 	<DependentVariable var="vehcount"/>
         <Alternative id="Alt 0" value="0" />
@@ -57,7 +57,7 @@
       </Model>
     </Component>
 
-    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="False">
+    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="True">
       <DeleteRecords value="False"/>	
       <Model name="Vehtype" formulation='Multinomial Logit' type="Alternative Specific" seed="1">
 	<DependentVariable var="vehtype"/>
@@ -101,7 +101,7 @@
     </Component>
 
 
-    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="False">
+    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True">
       <Model name="NumEpisodes" formulation='Probability Distribution' seed="1">
         <DependentVariable var="episodes" />
         <FilterSet type="and"/>
@@ -117,7 +117,7 @@
     </Component>	
 
  
-    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="wtaz"/>
@@ -207,7 +207,7 @@
 
 
 
-    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetosch" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="schtaz"/>
@@ -300,7 +300,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
@@ -405,7 +405,7 @@
 
 
 
-    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -498,7 +498,7 @@
 
 
 
-    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
 
 
@@ -663,7 +663,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -741,7 +741,7 @@
     </Component>
 
 
-    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -828,7 +828,7 @@
 
 
 
-    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
+    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
       <DeleteRecords value="False"/>	
       <AnalysisInterval start="157" end="160" step="1"/>
 
@@ -1022,7 +1022,7 @@
    </Component>	
 
 
-    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
+    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
       <AnalysisInterval start="157" end="160" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed='1' threshold="120">
@@ -1358,7 +1358,7 @@
         <Variable table="households_vehicles_count_r,travel_skims" var="vehcount,tt_to" coeff="0.0113" interaction="True" repeat="tt_to"/>
       </Model>
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var = "tt" as_var="tt_home" origin_var="origin" destination_var="destination" before_model="locationid" after_model="starttime">
+      <DynamicSpatialConstraints table="travel_skims" skim_var = "tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="starttime">
 	<Start table="runtime" location_var="locationid"/>
 	<End table="persons" location_var="htaz"/>
       </DynamicSpatialConstraints>
@@ -1599,7 +1599,7 @@
 
 
     <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
-      <AnalysisInterval start="157" end="160" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed='1' threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
@@ -1638,7 +1638,7 @@
 	</HistoryVar>
       </HistoryInformation>
 
-	indu
+
       <ConsistencyChecks name="DynamicNonMandatoryChecks">
 	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
@@ -2010,7 +2010,7 @@
       </Model>
 
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var = "tt" as_var="tt_home" origin_var="origin" destination_var="destination">
+      <DynamicSpatialConstraints table="travel_skims" skim_var = "tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="starttime">
 	<Start table="runtime" location_var="locationid"/>
 	<End table="persons" location_var="htaz"/>
       </DynamicSpatialConstraints>
@@ -2019,8 +2019,6 @@
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="runtime" var="activitytype" condition="less than" value="200"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="100"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -2032,7 +2030,6 @@
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -2045,13 +2042,12 @@
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="travel_skims" var="tt_home" coeff="1"/>
+        <Variable table="travel_skims" var="tt_to" coeff="1"/>
       </Model>
 
 
@@ -2059,7 +2055,6 @@
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -2107,13 +2102,19 @@
 
 
     <Component name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="False">
-      <AnalysisInterval start="157" end="160" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_ltrec_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_ltrec_r" location_var="locationid" time_var="starttime"/>
       </SpatialConstraints>
+
+      <Model name="DummyLocationId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="locationid"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="locationid" coeff="1"/>
+      </Model>
 
       <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="vehid"/>
@@ -2144,7 +2145,7 @@
         <Variable table="runtime" var="en_locationid" coeff="1"/>
       </Model>
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="st_endtime"/>
+	<DependentVariable var="starttime"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
       </Model>
