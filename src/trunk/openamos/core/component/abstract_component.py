@@ -1,3 +1,4 @@
+
 import copy
 import time
 from numpy import logical_or, logical_and, ones, ma, zeros, where, vstack
@@ -69,7 +70,7 @@ class AbstractComponent(object):
         # process the variable list to exclude double columns, 
         # return the primary keys, the county keys, 
         # the independent variable dictionary and dependent variables dictionary
-        vars_dict, depvars_dict, prim_keys, count_keys = self.prepare_vars()
+        vars_dict, depvars_dict, prim_keys, count_keys = self.prepare_vars(tableNamesKeyDict)
 
         print self.variable_list
 
@@ -352,7 +353,7 @@ class AbstractComponent(object):
                 
                 
     
-    def prepare_vars(self):
+    def prepare_vars(self, tableNamesKeyDict):
         #print variableList                                                                                      
         indep_columnDict = self.prepare_vars_independent()
         
@@ -365,14 +366,27 @@ class AbstractComponent(object):
         depVarTable = self.readFromTable
         depVarWriteTable = self.writeToTable
 
-        if self.key[0] is not None:
-            prim_keys[depVarTable] = self.key[0]
-        if self.key[1] is not None:
-            count_keys[depVarTable] = self.key[1]
 
+	if tableNamesKeyDict[depVarTable] == tableNamesKeyDict[depVarWriteTable]:
+	    if self.key[0] is not None:
+                prim_keys[depVarTable] = self.key[0]
+            if self.key[1] is not None:
+                count_keys[depVarTable] = self.key[1]
+	
+	if tableNamesKeyDict[depVarTable] <> tableNamesKeyDict[depVarWriteTable]:
+	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
+	    prim_keys[depVarWriteTable] = tableNamesKeyDict[depVarWriteTable][0]
+	    count_keys[depVarWriteTable] = tableNamesKeyDict[depVarWriteTable][1]
+	    prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
+	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
+	
         indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
         indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
+
+	
+	print indep_columnDict
+	#raw_input()
 
         # Needed only when updating to the same table
         # if writing to another table there is no need
@@ -566,6 +580,10 @@ class AbstractComponent(object):
             if len(indepVarDict[i]) == 0:
                 indepVarDict.pop(i)
 
+
+	for i in indepVarDict:
+	    indepVarDict[i] = list(set(indepVarDict[i]))
+
         data = queryBrowser.select_join(indepVarDict, 
                                         matchingKey, 
                                         tableNamesForComponent, 
@@ -660,7 +678,7 @@ class AbstractComponent(object):
         childHhldStructureProbArray = DataArray(childHhldStructureProb, colLabels)
         
         print childHhldStructureProb[:5,:]
-        raw_input()
+        #raw_input()
 
         # 1 is the seed here
         probModel = AbstractProbabilityModel(childHhldStructureProbArray, 1)
@@ -822,7 +840,7 @@ class AbstractComponent(object):
 
 
 
-	print 'count', count
+	#print 'count', count
 
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
@@ -849,8 +867,8 @@ class AbstractComponent(object):
             skimLocColName = '%s%s' %(colName, i+1)
             data.setcolumn(skimLocColName, vals)
 
-	    print 'Origin Loc', originLocColVals
-	    print 'Destination Loc', sampleLocColVals
+	    #print 'Origin Loc', originLocColVals
+	    #print 'Destination Loc', sampleLocColVals
 
 
             # FROM TRAVEL SKIMS
@@ -913,7 +931,7 @@ class AbstractComponent(object):
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
 	    zeroChoices = destLocSetIndSum == 0
-            print 'zero choices', zeroChoices
+            #print 'zero choices', zeroChoices
             if (~zeroChoices).sum() == 0:
                 continue
 
@@ -934,9 +952,9 @@ class AbstractComponent(object):
             nonZeroRows = where(res.data <> 0)
             actualLocIds = res.data
             actualLocIds[nonZeroRows] -= 1
-            data.setcolumn(colName, actualLocIds, ~zeroChoices)
+            data.setcolumn(colName, actualLocIds)
 
-	    print colName
+	    #print colName
 
             # Retrieving the row indices
             dataCol = data.columns([colName]).data
