@@ -39,7 +39,7 @@
 
   <ModelConfig>
 
-    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="False">
+    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" key="houseid" skip="True">
       <Model name="VehCount" formulation='Ordered' type="Probit" seed="1">
 	<DependentVariable var="vehcount"/>
         <Alternative id="Alt 0" value="0" />
@@ -56,7 +56,7 @@
       </Model>
     </Component>
 
-    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="False">
+    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" key="houseid" count_key="vehid" skip="True">
       <DeleteRecords value="False"/>	
       <Model name="Vehtype" formulation='Multinomial Logit' type="Alternative Specific" seed="1">
 	<DependentVariable var="vehtype"/>
@@ -100,7 +100,7 @@
     </Component>
 
 
-    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="False">
+    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True">
       <Model name="NumEpisodes" formulation='Probability Distribution' seed="1">
         <DependentVariable var="episodes" />
         <FilterSet type="and"/>
@@ -116,7 +116,7 @@
     </Component>	
 
  
-    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="wtaz"/>
@@ -206,7 +206,7 @@
 
 
 
-    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetosch" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
 	<End table="persons" location_var="schtaz"/>
@@ -299,7 +299,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsWorkers1Episode" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <SpatialConstraints table="travel_skims" skim_var = "tt" as_var="timetowk" origin_var="origin" destination_var="destination">
 	<Start table="households" location_var="htaz"/>
@@ -404,7 +404,7 @@
 
 
 
-    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -497,7 +497,7 @@
 
 
 
-    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
 
 
@@ -662,7 +662,7 @@
 
 
 
-    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -740,7 +740,7 @@
     </Component>
 
 
-    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="False">
+    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" count_key="scheduleid" skip="True">
       <DeleteRecords value="True"/>	
       <Model name="ActivityType" formulation='Regression' type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
@@ -827,7 +827,7 @@
 
 
 
-    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
+    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
       <DeleteRecords value="False"/>	
       <AnalysisInterval start="0" end="1440" step="1"/>
 
@@ -1021,7 +1021,7 @@
    </Component>	
 
 
-    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False">
+    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True">
       <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var = "tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed='1' threshold="120">
@@ -1607,9 +1607,11 @@
 
 	<ExtractLocationInformation table="locations" location_var="locationid">
 	  <LocationVariable var="retail_employment"/>
-	  <LocationVariable var="industrial_employment"/>
+	  <LocationVariable var="public_employment"/>
 	  <LocationVariable var="total_area"/>
 	  <LocationVariable var="single_family_dwelling"/>
+	  <LocationVariable var="multi_family_dwelling"/>
+	  <LocationVariable var="residential_population"/>
 	  <LocationVariable var="institutional_population"/>
 	</ExtractLocationInformation>
       </SpatialConstraints>
@@ -1647,6 +1649,14 @@
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="120"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="299"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd9to12" formulation='Regression' type="Linear" seed="1">
+	<DependentVariable var="int9t12"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="300"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="479"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1988,7 +1998,7 @@
         <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.2123" interaction="True" repeat="tt_to"/>
         <Variable table="persons,locations" var="one,retail_employment" coeff=".0005" interaction="True" repeat="retail_employment"/>
         <Variable table="persons,locations" var="one,institutional_population" coeff=".0012" interaction="True" repeat="institutional_population"/>
-        <Variable table="persons,locations" var="one,resident_population_hh" coeff="-.0002" interaction="True" repeat="resident_population_hh"/>
+        <Variable table="persons,locations" var="one,residential_population" coeff="-.0002" interaction="True" repeat="residential_population"/>
         <Variable table="persons,locations" var="one,total_area" coeff=".0419" interaction="True" repeat="total_area"/>
         <Variable table="persons,travel_skims" var="female,tt_to" coeff="-.0166" interaction="True" repeat="tt_to"/>
         <Variable table="households,travel_skims" var="noc,tt_to" coeff="-.0423" interaction="True" repeat="tt_to"/>

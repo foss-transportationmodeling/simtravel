@@ -1,6 +1,6 @@
 <ProjectConfig>
   <Project name="vehown" location="/home/kkonduri/simtravel/test/vehown" seed="10" subsample="40000"/>
-  <DBConfig dbprotocol = "postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol = "postgres" dbhost="localhost" dbname="mag_zone_fulldata" dbusername="postgres" dbpassword="1234"/>
   <DBTables>
     <Table table = 'persons' key = 'houseid,personid' order="1"/>
     <Table table = 'households' key = 'houseid' order="2"/>
@@ -17,14 +17,11 @@
 
   </DBTables>
   <TravelSkims reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="179"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="180" intervalEnd="299"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="419"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="420" intervalEnd="539"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="420" intervalEnd="539"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="540" intervalEnd="659"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899"/>
-    <Period tablename="travel_skims1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439"/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119"/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659"/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899"/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439"/>
   </TravelSkims>
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
