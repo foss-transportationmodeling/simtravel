@@ -343,9 +343,11 @@ class AbstractComponent(object):
         # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
     def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, projectSkimsObject):
+	#print self.dynamicspatialConst_list, prev_model_name, current_model_name
+	#raw_input()
         if len(self.dynamicspatialConst_list) > 0:
             for const in self.dynamicspatialConst_list:
-                if prev_model_name == const.beforeModel and current_model_name == const.afterModel:
+                if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
                     print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], self.analysisInterval,
@@ -930,7 +932,7 @@ class AbstractComponent(object):
 	
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
-	    zeroChoices = destLocSetIndSum == 0
+	    zeroChoices = destLocSetIndSum.mask
             #print 'zero choices', zeroChoices
             if (~zeroChoices).sum() == 0:
                 continue
