@@ -70,7 +70,8 @@ class MakePlot(Matplot):
         
 
     def isValid(self):
-        return self.checkIfTableExists(self.table)
+        #return self.checkIfTableExists(self.table)
+        return True
 
 
     def updatecolumns(self):
