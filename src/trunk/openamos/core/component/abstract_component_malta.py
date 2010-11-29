@@ -223,11 +223,11 @@ class AbstractComponent(object):
 	        tripsProcessed = trips_filter.sum()
 	    else:
 		tripsProcessed = 0
-		trips_data_array = ones((1,9))
+		trips_data_array = zeros((1,9))
 	except Exception, e:
 	    print '-- Error -- ', e
 	    tripsProcessed = 0
-	    trips_data_array = ones((1,9))
+	    trips_data_array = zeros((1,9))
 	    pass
 
 
@@ -834,9 +834,14 @@ class AbstractComponent(object):
             timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
 
-            if ma.any(rowsLessThan.mask):
-                destLocSetInd2[~rowsLessThan.mask, zone] = 1
-                k2 = rowsLessThan.sum()
+            
+            if rowsLessThan.sum() > 0:
+                destLocSetInd2[rowsLessThan, zone] = 1
+            
+
+            #if ma.any(rowsLessThan.mask):
+            #    destLocSetInd2[~rowsLessThan.mask, zone] = 1
+            #    k2 = rowsLessThan.sum()
 
         rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
         print """\t\t%s records were deleted because there """\
