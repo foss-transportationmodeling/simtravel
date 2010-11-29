@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta.xml'
+	fileLoc = '/media/storage/workspace/openamos/configs/config_mag_malta.xml'
 	configObject = None
 
 
@@ -65,8 +65,9 @@ class SimulationManager(object):
 	self.setup_location_information()
 	self.setup_tod_skims()
 	self.parse_config()
-	self.clean_database_tables()
-
+	#self.clean_database_tables()
+        self.idCount = 0
+        self.idList = []
 
 
 
@@ -210,6 +211,8 @@ class SimulationManager(object):
 
 
     def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals):
+        print '-- INSIDE OpenAMOS generating activity-trvel records -- '
+        raw_input ('\t Press any key to continue')
 	t_c = time.time()
 
 
@@ -222,7 +225,7 @@ class SimulationManager(object):
 	    if comp.component_name in ['ReconcileLongerTermSchedules', 'AfterSchoolActivities', 'DynamicNonMandatoryActivities']:
 	        compObjects.append(comp)
 
-	tripInfo = ones((1,9))
+	tripInfo = zeros((1,9))
 	for comp in compObjects:
 	    comp.analysisInterval = analysisInterval
 	    t = time.time()
@@ -237,15 +240,17 @@ class SimulationManager(object):
                                     tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.householdStructureObject, self.db, fileLoc)
 
-	    print data, '--- --- --- --- --- --- '
             if data is not None:
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
                 tripInfo = comp.run(data, self.projectSkimsObject, tableNamesKeyDict, 
 							self.queryBrowser, fileLoc)
+                tripInfo[:,-4] = tripInfo[:,-4] - 100
+                tripInfo[:,-3] = tripInfo[:,-4] - 100
+
 	    else:
-		tripInfo = ones((1,9))
+		tripInfo = zeros((1,9))
             # Write the data to the database from the hdf5 results cache
             # after running each component because the subsequent components
             # are often dependent on the choices generated in the previous components
@@ -255,9 +260,30 @@ class SimulationManager(object):
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #raw_input()
 
-	print '-----', tripInfo, '-------'
 
-	print '-----', type(tripInfo), '-------'
+        #print tripInfo
+
+        tripInfo = tripInfo.astype(int)
+
+
+
+
+        rowC = tripInfo.shape[0]
+        
+        ids = zeros((rowC, 4))
+        ids[:,:-1] = tripInfo[:,:3]
+        ids[:,-1] = array(range(rowC)) + self.idCount + 1
+
+        self.idCount += rowC
+
+        tripInfo = tripInfo[:,2:]
+        tripInfo[:,0] = ids[:,-1]
+        
+        print tripInfo
+
+
+
+
 	return tripInfo
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
 
