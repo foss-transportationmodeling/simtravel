@@ -12,7 +12,7 @@ from file_menu.databaseconfig import *
 from results_menu.view_trips import *
 
 from openamos.core.config import *
-#from openamos.core.run.simulation_manager_cursor import SimulationManager
+from openamos.core.run.simulation_manager_cursor import SimulationManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -22,7 +22,11 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800,600)
         self.setWindowIcon(QIcon('images/run.png'))
 
-
+        self.setCorner(Qt.TopLeftCorner, Qt.LeftDockWidgetArea)
+        self.setCorner(Qt.BottomLeftCorner, Qt.LeftDockWidgetArea)
+        self.setCorner(Qt.TopRightCorner, Qt.RightDockWidgetArea)
+        self.setCorner(Qt.BottomRightCorner, Qt.RightDockWidgetArea)
+        
         # Variable for a project properties; can be used to see if a project is open or not
         self.proconfig = None
         
@@ -33,7 +37,22 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.centralwidgetscroll)
         self.centralwidget.setFixedSize(1140, 1200)
         self.centralwidgetscroll.setWidget(self.centralwidget)
+        
+        # Defining help widget under central widget
+#        size = self.geometry()
+#        height = []
+#        height.append(size.height() * 0.8)
+#        height.append(size.height() * 0.2)
+#        self.helpbrowser = QTextBrowser()
+#        mainSplitter = QSplitter(Qt.Vertical)
+#        mainSplitter.addWidget(self.centralwidgetscroll)
+#        mainSplitter.addWidget(self.helpbrowser)
+#        mainSplitter.setSizes(height)
+#        self.setCentralWidget(mainSplitter)
+#        self.centralwidget.setFixedSize(1140, 1200)
+#        self.centralwidgetscroll.setWidget(self.centralwidget)
 
+        
         # Defining status bar        
         self.sizelabel = QLabel()
         self.sizelabel.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
@@ -41,7 +60,15 @@ class MainWindow(QMainWindow):
         status.setSizeGripEnabled(False)
         status.addPermanentWidget(self.sizelabel)
         status.showMessage("Ready", 5000)
-
+        
+        # Setting help_dock_widget on the bottom of window to show instruction message
+        help_dock_widget = QDockWidget(self.centralwidget)
+        self.helpbrowser = QTextBrowser()
+        help_dock_widget.setWidget(self.helpbrowser)
+        help_dock_widget.setObjectName("help_dock_widget")
+        help_dock_widget.setAllowedAreas(Qt.BottomDockWidgetArea)
+        self.addDockWidget(Qt.BottomDockWidgetArea, help_dock_widget)
+        
         
         # Defining manager widget
         # Setting all_manager_dock_widget
@@ -375,15 +402,15 @@ class MainWindow(QMainWindow):
         """file. e.g. /home/config.xml (linux machine) """\
         """or c:/testproject/config.xml (windows machine)"""
 
-#        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
-#        simulationManagerObject.setup_databaseConnection()
-#        simulationManagerObject.setup_cacheDatabase('w')
-#        simulationManagerObject.setup_location_information()
-#        simulationManagerObject.setup_tod_skims()
-#        simulationManagerObject.parse_config()
-#        simulationManagerObject.clean_database_tables()
-#        simulationManagerObject.run_components()
-#        simulationManagerObject.close_connections()
+        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+        simulationManagerObject.setup_databaseConnection()
+        simulationManagerObject.setup_cacheDatabase('w')
+        simulationManagerObject.setup_location_information()
+        simulationManagerObject.setup_tod_skims()
+        simulationManagerObject.parse_config()
+        simulationManagerObject.clean_database_tables()
+        simulationManagerObject.run_components()
+        simulationManagerObject.close_connections()
         
 #        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
 #            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
