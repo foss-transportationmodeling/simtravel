@@ -18,19 +18,23 @@ class Travel_Reconciliation_System(QWidget):
         widgetheight = size.height()
 
         pattern_onciliation_button = QPushButton('Activity-travel \nPattern Reconciliation', self)
-        pattern_onciliation_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 270, 200, 80)
+        pattern_onciliation_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 350, 200, 80)
+        pattern_onciliation_button.setStyleSheet("background-color: #FFFDD0")
         #self.connect(pattern_onciliation_button, SIGNAL('clicked()'), self.pattern_reconciliation)
 
         person_constraints_2_button = QPushButton("Within person constraints", self)     
-        person_constraints_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 160, 200, 80)
+        person_constraints_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 240, 200, 80)
+        person_constraints_2_button.setStyleSheet("background-color: #FFFDD0")
         #self.connect(person_constraints_2_button, SIGNAL('clicked()'), self.person_constraints_2)
 
         hhold_constraints_button = QPushButton("Within household constraints", self)     
-        hhold_constraints_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 50, 200, 80)
+        hhold_constraints_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 130, 200, 80)
+        hhold_constraints_button.setStyleSheet("background-color: #FFFDD0")
         #self.connect(hhold_constraints_button, SIGNAL('clicked()'), self.hhold_constraints)
 
         adjustment_2_button = QPushButton('Duration adjustment \nafter arrival', self)
-        adjustment_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 + 60, 200, 80)
+        adjustment_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 20, 200, 80)
+        adjustment_2_button.setStyleSheet("background-color: #FFFDD0")
         #self.connect(adjustment_2_button, SIGNAL('clicked()'), self.adjustment_2)
         
         Dummy  = QPushButton('', self)
@@ -96,35 +100,26 @@ class Travel_Reconciliation_System(QWidget):
         pen = QPen(Qt.black,2,Qt.SolidLine)
         line.setPen(pen)
         #line.drawLine(widgetwidth / 2 - 200, widgetheight / 2 - 140, widgetwidth / 2 - 200, widgetheight / 2)
-        line.drawLine(widgetwidth / 2, widgetheight / 2 - 190, widgetwidth / 2, widgetheight / 2 + 60)
+        line.drawLine(widgetwidth / 2, widgetheight / 2 - 270, widgetwidth / 2, widgetheight / 2 - 20)
         line.end()
         # Drawing arrow
         arrow = QPainter()
         arrow.begin(self)
         point = QPoint()
-#        point.setX(widgetwidth / 2 - 200)  
-#        point.setY(widgetheight / 2 - 110)
-#        arrow.setBrush(QColor("black"))
-#        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-#
-#        point.setX(widgetwidth / 2 - 200)  
-#        point.setY(widgetheight / 2)
-#        arrow.setBrush(QColor("black"))
-#        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
 
         point.setX(widgetwidth / 2)  
-        point.setY(widgetheight / 2 - 160)
+        point.setY(widgetheight / 2 - 240)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
 
         point.setX(widgetwidth / 2)  
-        point.setY(widgetheight / 2 - 50)
+        point.setY(widgetheight / 2 - 130)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
 
 
         point.setX(widgetwidth / 2)  
-        point.setY(widgetheight / 2 + 60)
+        point.setY(widgetheight / 2 - 20)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
 
