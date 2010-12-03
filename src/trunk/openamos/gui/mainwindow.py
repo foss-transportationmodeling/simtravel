@@ -10,6 +10,7 @@ from file_menu.openproject import *
 from file_menu.saveproject import *
 from file_menu.databaseconfig import *
 from results_menu.view_trips import *
+from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
 from openamos.core.run.simulation_manager_cursor import SimulationManager
@@ -396,11 +397,14 @@ class MainWindow(QMainWindow):
             show_plot.exec_()
             
     def run_simulation(self):
-        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
-        pname = self.proconfig.getConfigElement(PROJECT,NAME)
-        """This accepts only one argument which is the location of the configuration """\
-        """file. e.g. /home/config.xml (linux machine) """\
-        """or c:/testproject/config.xml (windows machine)"""
+        simdiag = SimDialog(self.proconfig)  
+        simdiag.exec_() 
+        
+#        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
+#        pname = self.proconfig.getConfigElement(PROJECT,NAME)
+#        """This accepts only one argument which is the location of the configuration """\
+#        """file. e.g. /home/config.xml (linux machine) """\
+#        """or c:/testproject/config.xml (windows machine)"""
 
         simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
         simulationManagerObject.setup_databaseConnection()
