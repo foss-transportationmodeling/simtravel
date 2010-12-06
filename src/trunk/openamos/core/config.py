@@ -60,6 +60,13 @@ class ConfigObject(object):
                             else:
                                 modelcnt += 1 
 
+    def getCompSimStatus(self,compname):
+        compelt = self.protree.find(MODELCONFIG)
+        for comp in compelt.getiterator(COMP):
+            if compname.lower() == comp.get(NAME).lower():
+                completed = comp.get('completed').lower() == 'true'
+                skip = comp.get('skip').lower() == 'true'
+                return [completed,skip]
 
 
     
