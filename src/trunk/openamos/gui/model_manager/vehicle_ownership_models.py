@@ -10,6 +10,8 @@ class VehicleOwnershipModels(QWidget):
     def __init__(self, parent=None, co=None):
         super(VehicleOwnershipModels, self).__init__(parent)
         
+        self.configob = co
+        
         self.setWindowTitle('Vehicle Ownership Model')
         self.setAutoFillBackground(True)
         size =  parent.geometry()
@@ -18,21 +20,20 @@ class VehicleOwnershipModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        num_vehs_button = QPushButton('Count of Vehicles \nOwned by the Household', self)
-        num_vehs_button.setGeometry((size.width())/2 - 100, size.height()/2 - 330,200, 50)
-        num_vehs_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(num_vehs_button, SIGNAL('clicked()'), self.num_vehs)
+        self.num_vehs_button = QPushButton('Count of Vehicles \nOwned by the Household', self)
+        self.num_vehs_button.setGeometry((size.width())/2 - 100, size.height()/2 - 330,200, 50)
+        self.num_vehs_button.setStyleSheet(self.isUserModel(MODELKEY_NUMVEHS))
+        self.connect(self.num_vehs_button, SIGNAL('clicked()'), self.num_vehs)
         
         #veh_types_button = QPushButton("Vehicle body/fuel type \nfor each household vehicle \n\nIf the data permits also \nthe age of the vehicle \n\nBody types \55 Use the \ncategories from MOVES to \nenable emission estimation \n\nFuel types \55 Gasoline, Others", self)     
-        veh_types_button = QPushButton("Vehicle Body Type \nfor each Household Vehicle", self)     
-        veh_types_button.setGeometry((size.width())/2 - 100, size.height()/2 - 250, 200, 200)
-        veh_types_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(veh_types_button, SIGNAL('clicked()'), self.veh_types)
+        self.veh_types_button = QPushButton("Vehicle Body Type \nfor each Household Vehicle", self)     
+        self.veh_types_button.setGeometry((size.width())/2 - 100, size.height()/2 - 250, 200, 200)
+        self.veh_types_button.setStyleSheet(self.isUserModel(MODELKEY_VEHTYPE))
+        self.connect(self.veh_types_button, SIGNAL('clicked()'), self.veh_types)
         
         Dummy  = QPushButton('', self)
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
-        
-        self.configob = co
+
         
         
         
@@ -43,6 +44,10 @@ class VehicleOwnershipModels(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.num_vehs_button.setStyleSheet(self.isUserModel(modelkey))
+        
+        
+        
     
     def veh_types(self):
         diagtitle = COMPMODEL_NUMTYPES
@@ -51,6 +56,19 @@ class VehicleOwnershipModels(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.veh_types_button.setStyleSheet(self.isUserModel(modelkey))
+    
+    
+    def isUserModel(self,modelkey):
+        if self.configob <> None:
+            model = self.configob.modelSpecInConfig(modelkey)
+            if model <> None:
+                isUser = str.lower(model.get(DMODEL))   
+                if isUser == 'true':
+                    return "background-color: #8FBC8F"
+
+        return "background-color: #FFFDD0"
+
 
     def paintEvent(self, parent = None):
         # Drawing line
