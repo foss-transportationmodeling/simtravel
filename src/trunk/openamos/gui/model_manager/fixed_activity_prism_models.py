@@ -7,6 +7,7 @@ class FixedActivityPrismModels(QWidget):
     def __init__(self, parent=None, co=None):
         super(FixedActivityPrismModels,self).__init__(parent)
         
+        self.configob = co
         self.setWindowTitle('Fixed Activity Prism Models')
         self.setAutoFillBackground(True)
         size =  parent.geometry()
@@ -16,113 +17,113 @@ class FixedActivityPrismModels(QWidget):
         widgetheight = size.height()
         
         # Adult worker
-        day_start1_button = QPushButton(COMPMODEL_DAYSTART, self)
-        day_start1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 370,180, 50)
-        day_start1_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_start1_button, SIGNAL('clicked()'), self.day_start_aw)
+        self.day_start1_button = QPushButton(COMPMODEL_DAYSTART, self)
+        self.day_start1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 370,180, 50)
+        self.day_start1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_AW))#"background-color: #FFFDD0")
+        self.connect(self.day_start1_button, SIGNAL('clicked()'), self.day_start_aw)
 
-        day_end1_button = QPushButton(COMPMODEL_DAYEND, self)     
-        day_end1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 290, 180, 50)
-        day_end1_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_end1_button, SIGNAL('clicked()'), self.day_end_aw)
+        self.day_end1_button = QPushButton(COMPMODEL_DAYEND, self)     
+        self.day_end1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 290, 180, 50)
+        self.day_end1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_AW))#"background-color: #FFFDD0")
+        self.connect(self.day_end1_button, SIGNAL('clicked()'), self.day_end_aw)
         
-        num_work_episodes_button = QPushButton(COMPMODEL_WRKEPISODES, self)
-        num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 210, 180, 50)
-        num_work_episodes_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(num_work_episodes_button, SIGNAL('clicked()'), self.num_work)
+        self.num_work_episodes_button = QPushButton(COMPMODEL_WRKEPISODES, self)
+        self.num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 210, 180, 50)
+        self.num_work_episodes_button.setStyleSheet(self.isUserModel(MODELKEY_WRKEPISODES))#"background-color: #FFFDD0")
+        self.connect(self.num_work_episodes_button, SIGNAL('clicked()'), self.num_work)
 
-        work_start_button = QPushButton(COMPMODEL_WORKSTART, self)
-        work_start_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 - 60, 180, 50)
-        work_start_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_start_button, SIGNAL('clicked()'), self.work_start)
+        self.work_start_button = QPushButton(COMPMODEL_WORKSTART, self)
+        self.work_start_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 - 60, 180, 50)
+        self.work_start_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART))#"background-color: #FFFDD0")
+        self.connect(self.work_start_button, SIGNAL('clicked()'), self.work_start)
 
-        work_end_button = QPushButton(COMPMODEL_WORKEND, self)
-        work_end_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 + 20, 180, 50)
-        work_end_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_end_button, SIGNAL('clicked()'), self.work_end)
+        self.work_end_button = QPushButton(COMPMODEL_WORKEND, self)
+        self.work_end_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 + 20, 180, 50)
+        self.work_end_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND))#"background-color: #FFFDD0")
+        self.connect(self.work_end_button, SIGNAL('clicked()'), self.work_end)
 
-        work_start_1_button = QPushButton(COMPMODEL_WORKSTART1, self)
-        work_start_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 - 60, 180, 50)
-        work_start_1_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_start_1_button, SIGNAL('clicked()'), self.work_start1)
+        self.work_start_1_button = QPushButton(COMPMODEL_WORKSTART1, self)
+        self.work_start_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 - 60, 180, 50)
+        self.work_start_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART1))#"background-color: #FFFDD0")
+        self.connect(self.work_start_1_button, SIGNAL('clicked()'), self.work_start1)
 
-        work_end_1_button = QPushButton(COMPMODEL_WORKEND1, self)
-        work_end_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 20, 180, 50)
-        work_end_1_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_end_1_button, SIGNAL('clicked()'), self.work_end1)
+        self.work_end_1_button = QPushButton(COMPMODEL_WORKEND1, self)
+        self.work_end_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 20, 180, 50)
+        self.work_end_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND1))#"background-color: #FFFDD0")
+        self.connect(self.work_end_1_button, SIGNAL('clicked()'), self.work_end1)
         
-        work_start_2_button = QPushButton(COMPMODEL_WORKSTART2, self)
-        work_start_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 100, 180, 50)
-        work_start_2_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_start_2_button, SIGNAL('clicked()'), self.work_start2)
+        self.work_start_2_button = QPushButton(COMPMODEL_WORKSTART2, self)
+        self.work_start_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 100, 180, 50)
+        self.work_start_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART2))#"background-color: #FFFDD0")
+        self.connect(self.work_start_2_button, SIGNAL('clicked()'), self.work_start2)
 
-        work_end_2_button = QPushButton(COMPMODEL_WORKEND2, self)
-        work_end_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 180, 180, 50)
-        work_end_2_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(work_end_2_button, SIGNAL('clicked()'), self.work_end2)
+        self.work_end_2_button = QPushButton(COMPMODEL_WORKEND2, self)
+        self.work_end_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 180, 180, 50)
+        self.work_end_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND2))#"background-color: #FFFDD0")
+        self.connect(self.work_end_2_button, SIGNAL('clicked()'), self.work_end2)
         
         
         # Adult non-worker
-        day_start2_button = QPushButton(COMPMODEL_DAYSTART, self)
-        day_start2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 370,180, 50)
-        day_start2_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_start2_button, SIGNAL('clicked()'), self.day_start_nw)
+        self.day_start2_button = QPushButton(COMPMODEL_DAYSTART, self)
+        self.day_start2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 370,180, 50)
+        self.day_start2_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_AN))
+        self.connect(self.day_start2_button, SIGNAL('clicked()'), self.day_start_nw)
         
-        day_end2_button = QPushButton(COMPMODEL_DAYEND, self)     
-        day_end2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 290, 180, 50)
-        day_end2_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
+        self.day_end2_button = QPushButton(COMPMODEL_DAYEND, self)     
+        self.day_end2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 290, 180, 50)
+        self.day_end2_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_NW))
+        self.connect(self.day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
         
         
         # Children (5 - 17)
-        day_start3_button = QPushButton(COMPMODEL_DAYSTART, self)
-        day_start3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 370,180, 50)
-        day_start3_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_start3_button, SIGNAL('clicked()'), self.day_start_na)
+        self.day_start3_button = QPushButton(COMPMODEL_DAYSTART, self)
+        self.day_start3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 370,180, 50)
+        self.day_start3_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_NA))
+        self.connect(self.day_start3_button, SIGNAL('clicked()'), self.day_start_na)
         
-        day_end3_button = QPushButton(COMPMODEL_DAYEND, self)     
-        day_end3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 290, 180, 50)
-        day_end3_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_end3_button, SIGNAL('clicked()'), self.day_end_na)
+        self.day_end3_button = QPushButton(COMPMODEL_DAYEND, self)     
+        self.day_end3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 290, 180, 50)
+        self.day_end3_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_NA))
+        self.connect(self.day_end3_button, SIGNAL('clicked()'), self.day_end_na)
 
-        children_arrive_button = QPushButton(COMPMODEL_SCHSTART, self)
-        children_arrive_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 210, 180, 50)
-        children_arrive_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(children_arrive_button, SIGNAL('clicked()'), self.school_start)
+        self.children_arrive_button = QPushButton(COMPMODEL_SCHSTART, self)
+        self.children_arrive_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 210, 180, 50)
+        self.children_arrive_button.setStyleSheet(self.isUserModel(MODELKEY_SCHSTART))
+        self.connect(self.children_arrive_button, SIGNAL('clicked()'), self.school_start)
 
-        children_depart_button = QPushButton(COMPMODEL_SCHEND, self)
-        children_depart_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 130, 180, 50)
-        children_depart_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(children_depart_button, SIGNAL('clicked()'), self.school_end)
+        self.children_depart_button = QPushButton(COMPMODEL_SCHEND, self)
+        self.children_depart_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 130, 180, 50)
+        self.children_depart_button.setStyleSheet(self.isUserModel(MODELKEY_SCHEND))
+        self.connect(self.children_depart_button, SIGNAL('clicked()'), self.school_end)
 
 
         # Children (0 - 4)
-        day_start4_button = QPushButton(COMPMODEL_DAYSTART, self)
-        day_start4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 370,180, 50)
-        day_start4_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_start4_button, SIGNAL('clicked()'), self.day_start_ps)
+        self.day_start4_button = QPushButton(COMPMODEL_DAYSTART, self)
+        self.day_start4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 370,180, 50)
+        self.day_start4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_PS))
+        self.connect(self.day_start4_button, SIGNAL('clicked()'), self.day_start_ps)
         
-        day_end4_button = QPushButton(COMPMODEL_DAYEND, self)     
-        day_end4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 290, 180, 50)
-        day_end4_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(day_end4_button, SIGNAL('clicked()'), self.day_end_ps)
+        self.day_end4_button = QPushButton(COMPMODEL_DAYEND, self)     
+        self.day_end4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 290, 180, 50)
+        self.day_end4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_PS))
+        self.connect(self.day_end4_button, SIGNAL('clicked()'), self.day_end_ps)
 
-        presch_arrive_button = QPushButton(COMPMODEL_PRESCHSTART, self)
-        presch_arrive_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 210, 180, 50)
-        presch_arrive_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(presch_arrive_button, SIGNAL('clicked()'), self.preschool_start)
+        self.presch_arrive_button = QPushButton(COMPMODEL_PRESCHSTART, self)
+        self.presch_arrive_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 210, 180, 50)
+        self.presch_arrive_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHSTART))
+        self.connect(self.presch_arrive_button, SIGNAL('clicked()'), self.preschool_start)
 
-        presch_depart_button = QPushButton(COMPMODEL_PRESCHEND, self)
-        presch_depart_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 130, 180, 50)
-        presch_depart_button.setStyleSheet("background-color: #FFFDD0")
-        self.connect(presch_depart_button, SIGNAL('clicked()'), self.preschool_end)
+        self.presch_depart_button = QPushButton(COMPMODEL_PRESCHEND, self)
+        self.presch_depart_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 130, 180, 50)
+        self.presch_depart_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHEND))
+        self.connect(self.presch_depart_button, SIGNAL('clicked()'), self.preschool_end)
 
-        
         
         Dummy  = QPushButton('', self)
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
-        
-        self.configob = co
+
+
+
   
     def day_start_aw(self):
         diagtitle = COMPMODEL_DAYSTART
@@ -130,6 +131,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_start1_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_start_nw(self):
         diagtitle = COMPMODEL_DAYSTART
@@ -137,6 +139,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_start2_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_start_na(self):
         diagtitle = COMPMODEL_DAYSTART
@@ -144,6 +147,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_start3_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_start_ps(self):
         diagtitle = COMPMODEL_DAYSTART
@@ -151,6 +155,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_start4_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def day_end_aw(self):
@@ -159,6 +164,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_end1_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_end_nw(self):
         diagtitle = COMPMODEL_DAYEND
@@ -166,6 +172,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_end2_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_end_na(self):
         diagtitle = COMPMODEL_DAYEND
@@ -173,6 +180,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_end3_button.setStyleSheet(self.isUserModel(modelkey))
         
     def day_end_ps(self):
         diagtitle = COMPMODEL_DAYEND
@@ -180,6 +188,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.day_end4_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def num_work(self):
@@ -188,6 +197,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.num_work_episodes_button.setStyleSheet(self.isUserModel(modelkey))
         
 
     def work_start(self):
@@ -196,6 +206,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_start_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def work_end(self):
@@ -204,6 +215,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_end_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def work_start1(self):
@@ -212,6 +224,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_start_1_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def work_end1(self):
@@ -220,6 +233,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_end_1_button.setStyleSheet(self.isUserModel(modelkey))
         
 
     def work_start2(self):
@@ -228,6 +242,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_start_2_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def work_end2(self):
@@ -236,6 +251,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.work_end_2_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def school_start(self):
@@ -244,6 +260,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.children_arrive_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def school_end(self):
@@ -252,6 +269,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.children_depart_button.setStyleSheet(self.isUserModel(modelkey))
         
         
 #    def non_worker(self):
@@ -276,6 +294,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.presch_arrive_button.setStyleSheet(self.isUserModel(modelkey))
         
         
     def preschool_end(self):
@@ -284,6 +303,7 @@ class FixedActivityPrismModels(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        self.presch_depart_button.setStyleSheet(self.isUserModel(modelkey))
         
         
 #    def t_s_prism_vertices(self):
@@ -292,7 +312,17 @@ class FixedActivityPrismModels(QWidget):
 #        
 #        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
 #        diag.exec_()
-        
+
+
+    def isUserModel(self,modelkey):
+        if self.configob <> None:
+            model = self.configob.modelSpecInConfig(modelkey)
+            if model <> None:
+                isUser = str.lower(model.get(DMODEL))   
+                if isUser == 'true':
+                    return "background-color: #8FBC8F"
+
+        return "background-color: #FFFDD0"
 
 
    
