@@ -11,6 +11,7 @@ class Child_Model(QWidget):
         self.setAutoFillBackground(True)
         size =  parent.geometry()
      
+        self.configob = co 
         # These two global variables are used in paintevent.
         global widgetwidth, widgetheight
         widgetwidth = size.width()
@@ -19,73 +20,73 @@ class Child_Model(QWidget):
         # Children (5-17 years)
         goto_school_button = QPushButton('Child goes to\nschool on\ntravel day', self)
         goto_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 460, 120, 75)
-        goto_school_button.setStyleSheet("background-color: #FFFDD0")
+        goto_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYSTATUS))
         self.connect(goto_school_button, SIGNAL('clicked()'), self.goto_school)
         
         independent_to_school_button = QPushButton('Child travels to\nschool\nindependently', self)
         independent_to_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 360, 120, 75)
-        independent_to_school_button.setStyleSheet("background-color: #FFFDD0")
+        independent_to_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYINDEP))
         self.connect(independent_to_school_button, SIGNAL('clicked()'), self.travel_independently_to_school)
         
-        drop_off_school1_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
-        drop_off_school1_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 235, 200, 50)
-        drop_off_school1_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(drop_off_school1_button, SIGNAL('clicked()'), self.drop_off_event)
+#        drop_off_school1_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
+#        drop_off_school1_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 235, 200, 50)
+#        drop_off_school1_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(drop_off_school1_button, SIGNAL('clicked()'), self.drop_off_event)
         
         independent_from_school_button = QPushButton('Child\nindependent\nafter-school', self)
         independent_from_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 135, 120, 75)
-        independent_from_school_button.setStyleSheet("background-color: #FFFDD0")
+        independent_from_school_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHDAILYINDEP))
         self.connect(independent_from_school_button, SIGNAL('clicked()'), self.independently_after_school)
         
-        after_school_activity_button = QPushButton('Is there time to\nengage in an\nafter school\nchild activity?', self)
-        after_school_activity_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 35, 120, 75)
-        after_school_activity_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(after_school_activity_button, SIGNAL('clicked()'), self.after_school_activity)
+#        after_school_activity_button = QPushButton('Is there time to\nengage in an\nafter school\nchild activity?', self)
+#        after_school_activity_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 35, 120, 75)
+#        after_school_activity_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(after_school_activity_button, SIGNAL('clicked()'), self.after_school_activity)
         
         activity_type_button = QPushButton('After-school activity type choice', self)
         activity_type_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 90, 200, 50)
-        activity_type_button.setStyleSheet("background-color: #FFFDD0")
+        activity_type_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTTYPE))
         self.connect(activity_type_button, SIGNAL('clicked()'), self.activity_type)
         
         destination_button = QPushButton('After-school activity\ndestination choice', self)
         destination_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 170, 200, 50)
-        destination_button.setStyleSheet("background-color: #FFFDD0")
+        destination_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDEST))
         self.connect(destination_button, SIGNAL('clicked()'), self.activity_dest)
         
         duration_button = QPushButton('After-school activity\nduration model', self)
         duration_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 250, 200, 50)
-        duration_button.setStyleSheet("background-color: #FFFDD0")
+        duration_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDUR))
         self.connect(duration_button, SIGNAL('clicked()'), self.activity_dur)
         
-        drop_off_school2_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
-        drop_off_school2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 330, 200, 50)
-        drop_off_school2_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(drop_off_school2_button, SIGNAL('clicked()'), self.drop_off_event)
+#        drop_off_school2_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
+#        drop_off_school2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 330, 200, 50)
+#        drop_off_school2_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(drop_off_school2_button, SIGNAL('clicked()'), self.drop_off_event)
         
         activity_with_adult_button = QPushButton('Adult stays with child for\nactivity', self)
         activity_with_adult_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 410, 200, 50)
-        activity_with_adult_button.setStyleSheet("background-color: #FFFDD0")
+        activity_with_adult_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHJOINTACT))
         self.connect(activity_with_adult_button, SIGNAL('clicked()'), self.activity_with_adult)
         
         in_activity_independently_button = QPushButton('Child is\nindependent', self)
         in_activity_independently_button.setGeometry((size.width()) / 2 - 340, size.height() / 2 - 460, 120, 75)
-        in_activity_independently_button.setStyleSheet("background-color: #FFFDD0")
+        in_activity_independently_button.setStyleSheet(self.isUserModel(MODELKEY_HMINDEP))
         self.connect(in_activity_independently_button, SIGNAL('clicked()'), self.child_independent)
         
-        assign_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
-        assign_hh_button.setGeometry((size.width()) / 2 - 500, size.height() / 2 - 360, 200, 50)
-        assign_hh_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(assign_hh_button, SIGNAL('clicked()'), self.assign_hh)
-        
-        travel_mode_school_button = QPushButton('Simulate mode\nchoice dynamically', self)
-        travel_mode_school_button.setGeometry(widgetwidth/2 - 360, widgetheight/2 - 123, 160, 50)
-        travel_mode_school_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(generate_travel_pattern_button, SIGNAL('clicked()'), self.generate_travel_pattern)
-        
-        pick_up_school_button = QPushButton('Assign an adult pick-up event to\nhousehold', self)
-        pick_up_school_button.setGeometry((size.width()) / 2 - 380, size.height() / 2 - 23, 200, 50)
-        pick_up_school_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(pick_up_school_button, SIGNAL('clicked()'), self.pick_up_event)
+#        assign_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
+#        assign_hh_button.setGeometry((size.width()) / 2 - 500, size.height() / 2 - 360, 200, 50)
+#        assign_hh_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(assign_hh_button, SIGNAL('clicked()'), self.assign_hh)
+#        
+#        travel_mode_school_button = QPushButton('Simulate mode\nchoice dynamically', self)
+#        travel_mode_school_button.setGeometry(widgetwidth/2 - 360, widgetheight/2 - 123, 160, 50)
+#        travel_mode_school_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(generate_travel_pattern_button, SIGNAL('clicked()'), self.generate_travel_pattern)
+#        
+#        pick_up_school_button = QPushButton('Assign an adult pick-up event to\nhousehold', self)
+#        pick_up_school_button.setGeometry((size.width()) / 2 - 380, size.height() / 2 - 23, 200, 50)
+#        pick_up_school_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(pick_up_school_button, SIGNAL('clicked()'), self.pick_up_event)
         
        
  
@@ -93,28 +94,27 @@ class Child_Model(QWidget):
         # Pre-school Children
         goto_preschool_button = QPushButton('Child goes to\npre-school on\n travel day', self)
         goto_preschool_button.setGeometry((size.width()) / 2 + 160, size.height() / 2 - 460, 120, 75)
-        goto_preschool_button.setStyleSheet("background-color: #FFFDD0")
+        goto_preschool_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHDAILYSTATUS))
         self.connect(goto_preschool_button, SIGNAL('clicked()'), self.goto_preschool)
         
-        assign_preschool_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
-        assign_preschool_hh_button.setGeometry((size.width()) / 2 + 360, size.height() / 2 - 448, 160, 50)
-        assign_preschool_hh_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(assign_preschool_hh_button, SIGNAL('clicked()'), self.assign_preschool_hh)
-        
-        drop_off_preschool_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
-        drop_off_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 335, 180, 50)
-        drop_off_preschool_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(drop_off_preschool_button, SIGNAL('clicked()'), self.drop_off_event)
-        
-        pick_up_preschool_button = QPushButton('Assign an adult pick-up event to \nhousehold', self)
-        pick_up_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 255, 180, 50)
-        pick_up_preschool_button.setStyleSheet("background-color: #FFFDD0")
-        #self.connect(pick_up_preschool_button, SIGNAL('clicked()'), self.pick_up_event)
+#        assign_preschool_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
+#        assign_preschool_hh_button.setGeometry((size.width()) / 2 + 360, size.height() / 2 - 448, 160, 50)
+#        assign_preschool_hh_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(assign_preschool_hh_button, SIGNAL('clicked()'), self.assign_preschool_hh)
+#        
+#        drop_off_preschool_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
+#        drop_off_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 335, 180, 50)
+#        drop_off_preschool_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(drop_off_preschool_button, SIGNAL('clicked()'), self.drop_off_event)
+#        
+#        pick_up_preschool_button = QPushButton('Assign an adult pick-up event to \nhousehold', self)
+#        pick_up_preschool_button.setGeometry((size.width()) / 2 + 130, size.height() / 2 - 255, 180, 50)
+#        pick_up_preschool_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(pick_up_preschool_button, SIGNAL('clicked()'), self.pick_up_event)
         
         Dummy  = QPushButton('', self)
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
-        
-        self.configob = co     
+            
         
     def goto_school(self):
         diagtitle = COMPMODEL_SCHDAILYSTATUS
@@ -180,6 +180,17 @@ class Child_Model(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        
+        
+    def isUserModel(self,modelkey):
+        if self.configob <> None:
+            model = self.configob.modelSpecInConfig(modelkey)
+            if model <> None:
+                isUser = str.lower(model.get(DMODEL))   
+                if isUser == 'true':
+                    return "background-color: #8FBC8F"
+
+        return "background-color: #FFFDD0"
  
         
     def paintEvent(self, parent = None):
@@ -349,6 +360,17 @@ class Child_Model(QWidget):
         arrow.drawRoundedRect(widgetwidth/2 - 360, widgetheight/2 + 57, 160, 50, 15.0, 15.0)
         arrow.drawRoundedRect(widgetwidth/2 - 360, widgetheight/2 - 280, 160, 50, 15.0, 15.0)
         
+        arrow.drawRoundedRect(widgetwidth/2 - 140, widgetheight/2 - 235, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 100, widgetheight/2 - 35, 120, 75, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 140, widgetheight/2 + 330, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 500, widgetheight/2 - 360, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 360, widgetheight/2 - 123, 160, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 380, widgetheight/2 - 23, 200, 50, 15.0, 15.0)
+        
+        arrow.drawRoundedRect(widgetwidth/2 + 360, widgetheight/2 - 448, 160, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 + 130, widgetheight/2 - 335, 180, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 + 130, widgetheight/2 - 255, 180, 50, 15.0, 15.0)
+        
         arrow.end()
 
         # Drawing text
@@ -417,8 +439,35 @@ class Child_Model(QWidget):
         
         temp = QRect(widgetwidth/2 - 360, widgetheight/2 - 280, 160, 50)
         text.drawText(temp, Qt.AlignCenter, 'Simulate activity\ntravel patterns for\nchild dynamically')
-  
 
+        temp = QRect(widgetwidth/2 - 140, widgetheight/2 - 235, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult drop-off event to\nhousehold')
+        
+        temp = QRect(widgetwidth/2 - 100, widgetheight/2 - 35, 120, 75)
+        text.drawText(temp, Qt.AlignCenter, 'Is there time to\nengage in an\nafter school\nchild activity?')
+                
+        temp = QRect(widgetwidth/2 - 140, widgetheight/2 + 330, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult drop-off event to\nhousehold')        
+        
+        temp = QRect(widgetwidth/2 - 500, widgetheight/2 - 360, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult stay-\nhome event to household')
+        
+        temp = QRect(widgetwidth/2 - 360, widgetheight/2 - 123, 160, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Simulate mode\nchoice dynamically')
+        
+        temp = QRect(widgetwidth/2 - 380, widgetheight/2 - 23, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult pick-up event to\nhousehold')
+
+        temp = QRect(widgetwidth/2 + 360, widgetheight/2 - 448, 160, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult stay-\nhome event to household')
+        
+        temp = QRect(widgetwidth/2 + 130, widgetheight/2 - 335, 180, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult drop-off event to\nhousehold')
+        
+        temp = QRect(widgetwidth/2 + 130, widgetheight/2 - 255, 180, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Assign an adult pick-up event to \nhousehold')
+
+        
         text.end()
 
         
