@@ -50,6 +50,7 @@ PROB = 'Probability'
 RUNUNTIL = 'RunUntilCondition'
 VTABLE = 'valuetable'
 VCOLUMN = 'valuevar'
+DMODEL = 'default'
 
 PROB_MODEL = 'Probability Distribution'
 COUNT_MODEL = 'Count'
@@ -193,6 +194,14 @@ COMPMODEL_SMACTIVEPURSUE = 'Can activity be pursued jointly with a Household mem
 COMPMODEL_SMACTIVEASSIGNED = 'Activity assigned to a Non-household member comprising Joint Activity with Non-household member'
 COMPMODEL_SMASSIGNACTIVE = 'Assign the activity to Household member comprising Joint Activity with household member'
 COMPMODEL_AFTSCHACTIVITYMODE = 'Mode choice model for intra-household joint trips with children'
+#Adult daily status
+COMPMODEL_ASISDEPEND = 'Stay-home and/or Chauffeuring'
+COMPMODEL_ASONENWORKER = 'Households with at least one non-working adult'
+COMPMODEL_ASHOUSEWORKER = 'Households with all working adults'
+COMPMODEL_ASASSIGNHOUSE = 'Assign each dependent child to a household adult subject to the fixed activity schedule'
+COMPMODEL_ASDEPENDWORKER = 'Assign all dependent children to a working adult'
+COMPMODEL_ASDEPENDNONWORK = 'Assign all dependent children to one non-working adult'
+COMPMODEL_ASISWORKER = 'Adult work status'
 #All other individuals
 COMPMODEL_SMINDIVIDUAL = 'Adult individuals, children with independent activities'
 COMPMODEL_SMTRIPTIME = 'Is travel time to next fixed activity \74 time available in the prism?'
