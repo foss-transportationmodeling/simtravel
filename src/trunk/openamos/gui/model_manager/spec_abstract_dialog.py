@@ -8,6 +8,7 @@ import sys
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from copy import deepcopy
 
 from lxml import etree
 
@@ -119,6 +120,8 @@ class AbtractSpecDialog(QDialog):
         self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
         
         self.loadFromConfigObject()
+        
+        self.models = [] # In order to compare between previous and current model
         
         
     def addFiter(self):
@@ -449,11 +452,13 @@ class AbtractSpecDialog(QDialog):
     def storeSpec(self):
         if self.checkInputs():
             modelmap = MODELMAP[self.modelkey]
-            modelkey = modelmap[1]
+            #modelkey = modelmap[1]
             #modelkey = self.modelkey
     
             modelelt = None
             model = self.configobject.modelSpecInConfig(self.modelkey)
+            
+            tempmodel = deepcopy(model)
             
             if self.modeltypecb.currentText() == SF_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,SF_MODEL)
@@ -474,6 +479,9 @@ class AbtractSpecDialog(QDialog):
 #                varianceuelt.set(MODELTYPE,'Half Normal')
 #                self.addVariables(modelelt)
 
+            elif self.modeltypecb.currentText() == LOGSF_MODEL:
+                self.setModeltoElt(model,MODELFORM_REG,LOGSF_MODEL)
+                self.saveVariables(model)
                 
             elif self.modeltypecb.currentText() == COUNT_MODEL:
                 self.setModeltoElt(model,MODELFORM_CNT,COUNT_MODEL)
@@ -588,10 +596,11 @@ class AbtractSpecDialog(QDialog):
             
             elif self.modeltypecb.currentText() == NL_MODEL:
                 self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
-                modelform = MODELFORM_NL
-                modelelt = self.createModelElement(modelkey,modelform,'')
-
+                self.setModeltoElt(model,MODELFORM_NL,NL_MODEL)
                 
+                for alter in model.findall(ALTERNATIVE):
+                    model.remove(alter)
+
                 numrows = self.modwidget.choicetable.rowCount()
                 specs = self.modwidget.specs
                 for i in range(numrows):
@@ -604,7 +613,7 @@ class AbtractSpecDialog(QDialog):
                     if l>1:
                         altid = altdet[1]
                         altbr = 'root/' + altdet[0]
-                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
+                    altelt = etree.SubElement(model,ALTERNATIVE)
                     altelt.set(ID,altid)
                     altelt.set(BRANCH,altbr)
                     altspecs = specs[altname]
@@ -612,15 +621,53 @@ class AbtractSpecDialog(QDialog):
                     for i in range(numvars):
                         specrow = altspecs[i]
                         self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
-                    modelelt.append(altelt)  
+                    model.append(altelt)
+
+
+                for branch in model.findall(BRANCH):
+                    model.remove(branch)
+                    
                 numnests = self.modwidget.nesttable.rowCount()
                 for i in range(numnests):
                     nestname = str((self.modwidget.nesttable.item(i,0)).text())
                     nestiv = str((self.modwidget.nesttable.item(i,1)).text())
-                    neselt = etree.SubElement(modelelt,BRANCH)
+                    neselt = etree.SubElement(model,BRANCH)
                     neselt.set(NAME,nestname)
                     neselt.set(COEFF,nestiv)
-                    modelelt.append(neselt)
+                    model.append(neselt)
+                    
+#                modelform = MODELFORM_NL
+#                modelelt = self.createModelElement(modelkey,modelform,'')
+#                
+#                numrows = self.modwidget.choicetable.rowCount()
+#                specs = self.modwidget.specs
+#                for i in range(numrows):
+#                    altname = str((self.modwidget.choicetable.item(i,0)).text())
+#                    altdet = altname.rsplit('/',1)
+#                    l = len(altdet)
+#                    if l==1:
+#                        altid = altdet[0]
+#                        altbr = 'root'
+#                    if l>1:
+#                        altid = altdet[1]
+#                        altbr = 'root/' + altdet[0]
+#                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
+#                    altelt.set(ID,altid)
+#                    altelt.set(BRANCH,altbr)
+#                    altspecs = specs[altname]
+#                    numvars = len(altspecs)
+#                    for i in range(numvars):
+#                        specrow = altspecs[i]
+#                        self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
+#                    modelelt.append(altelt)  
+#                numnests = self.modwidget.nesttable.rowCount()
+#                for i in range(numnests):
+#                    nestname = str((self.modwidget.nesttable.item(i,0)).text())
+#                    nestiv = str((self.modwidget.nesttable.item(i,1)).text())
+#                    neselt = etree.SubElement(modelelt,BRANCH)
+#                    neselt.set(NAME,nestname)
+#                    neselt.set(COEFF,nestiv)
+#                    modelelt.append(neselt)
                                       
             elif self.modeltypecb.currentText() == LOGREG_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,LOGREG_MODEL)
@@ -648,12 +695,15 @@ class AbtractSpecDialog(QDialog):
                     valname = str((self.modwidget.varstable.item(i,1)).text())
                     valcoff = str((self.modwidget.varstable.item(i,2)).text())
                     self.addVariabletoElt(altelt,valtable,valname,valcoff)
-                    model.append(altelt) 
-    
+                    model.append(altelt)
+                    
             
-            #self.configobject.addModelElement(modelelt)
+            if not self.comparemodels(tempmodel, model):
+                print 'Successful to change'
+                model.set(DMODEL,'True')
             
             QDialog.accept(self)
+            
         #else:
             #msg = self.modwidget.errmsg
             #QMessageBox.information(self, "Warning", msg, QMessageBox.Ok)
@@ -672,19 +722,48 @@ class AbtractSpecDialog(QDialog):
         return elt
 
     def setModeltoElt(self,elt,formular,type='',thresh=''):
+        
         elt.set(FORMULATION,str(formular))
         if type != '':
             elt.set(MODELTYPE,str(type))
         else:
             if elt.get(MODELTYPE) != None:
                 elt.set(MODELTYPE,'')
-#        if thresh != '':
-#            print '33'
-#            elt.set(THRESHOLD,str(thresh))
-#        else:
-#            if elt.get(THRESHOLD) != None:
-#                print '44'
-#                elt.set(THRESHOLD,'')
+        
+        seed = str(elt.get(SEED))
+        user = str(elt.get(DMODEL))
+        del elt.attrib[SEED]
+        del elt.attrib[DMODEL]
+        
+        elt.set(SEED,seed)
+        elt.set(DMODEL,user)
+#        if self.modeltypecb.currentText() == PROB_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == COUNT_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == MNL_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == GC_MNL_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == SF_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == LOGSF_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == LOGREG_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == ORD_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
+#        elif self.modeltypecb.currentText() == NL_MODEL:
+#            del elt.attrib[VERTEX]
+#            del elt.attrib[THRESHOLD]
 
         
     def addDepVarToElt(self,model,col):
@@ -1015,6 +1094,109 @@ class AbtractSpecDialog(QDialog):
 #            res = True
 #        return res
 
+
+    def comparemodels(self,previous,current):
+        
+        #Model name="EndTime" formulation='Regression' type="Linear" vertex='end' threshold='755' seed="1"
+        temp1 = str(previous.get(NAME))
+        temp2 = str(current.get(NAME))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(FORMULATION))
+        temp2 = str(current.get(FORMULATION))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(MODELTYPE))
+        temp2 = str(current.get(MODELTYPE))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(VERTEX))
+        temp2 = str(current.get(VERTEX))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(THRESHOLD))
+        temp2 = str(current.get(THRESHOLD))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(SEED))
+        temp2 = str(current.get(SEED))
+        if temp1 <> temp2:
+            return False
+        
+        pre_var = previous.findall(VARIANCE)
+        cur_var = current.findall(VARIANCE)
+        if len(pre_var) <> len(cur_var):
+            return False
+            
+        i = 0
+        for varelt in pre_var:
+            value1 = str(varelt.get(VALUE))
+            value2 = str((cur_var[i]).get(VALUE))
+            if value1 <> value2:
+                return False
+            
+            type1 = str(varelt.get(MODELTYPE))
+            type2 = str((cur_var[i]).get(MODELTYPE))
+            if type1 <> type2:
+                return False
+                
+            i = i+1
+            
+        
+        
+        pre_alt = previous.findall(ALTERNATIVE)
+        cur_alt = current.findall(ALTERNATIVE)
+        if len(pre_alt) <> len(cur_alt):
+            return False
+            
+        i = 0
+        for altelt in pre_alt:
+            id1 = str(altelt.get(ID))
+            id2 = str((cur_alt[i]).get(ID))
+            if id1 <> id2:
+                return False
+            
+            value1 = str(altelt.get(VALUE))
+            value2 = str((cur_alt[i]).get(VALUE))
+            if value1 <> value2:
+                return False
+            
+            thres1 = str(altelt.get(THRESHOLD))
+            thres2 = str((cur_alt[i]).get(THRESHOLD))
+            if thres1 <> thres2:
+                return False
+            i = i+1
+            
+        pre_vari = previous.findall(VARIABLE)
+        cur_vari = current.findall(VARIABLE)
+        if len(pre_vari) <> len(cur_vari):
+            return False
+            
+        i = 0
+        for varielt in pre_vari:
+            table1 = str(varielt.get(TABLE))
+            table2 = str((cur_vari[i]).get(TABLE))
+            if table1 <> table2:
+                return False
+            
+            var1 = str(varielt.get(COLUMN))
+            var2 = str((cur_vari[i]).get(COLUMN))
+            if var1 <> var2:
+                return False
+            
+            coeff1 = str(varielt.get(COEFF))
+            coeff2 = str((cur_vari[i]).get(COEFF))
+            if coeff1 <> coeff2:
+                return False
+            i = i+1
+            
+            
+        return True
     
 
 
