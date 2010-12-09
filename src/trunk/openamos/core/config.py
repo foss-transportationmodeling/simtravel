@@ -20,7 +20,12 @@ class ConfigObject(object):
             parser = etree.XMLParser(remove_blank_text=True)
             self.protree = etree.parse(configfileloc,parser)
         elif configtree:
-            self.protree = configtree        
+            self.protree = configtree
+            
+        # Approach to the default configuration file
+        parser = etree.XMLParser(remove_blank_text=True)
+        self.default = etree.parse('../configs/config_mag_full.xml',parser)        
+
 
     def getConfigElement(self, elt, prop='text' ):
         element = self.protree.find(elt)
@@ -37,15 +42,15 @@ class ConfigObject(object):
         if modelkey not in MODELMAP.keys():
             print "Model not found in the Map"
             return None
-        print "Model found in the Map"
+        #print "Model found in the Map"
         mapvals = MODELMAP[modelkey]
         compname = mapvals[0]
         modelname = mapvals[1]
-        print compname, modelname
+        #print compname, modelname
         modelnum = 0
         if len(mapvals) == 3:
             modelnum = mapvals[2]
-        print modelnum
+        #print modelnum
         compelt = self.protree.find(MODELCONFIG)
         for comp in compelt.getiterator(COMP):
             if compname.lower() == comp.get(NAME).lower():
@@ -59,6 +64,34 @@ class ConfigObject(object):
                                 return model
                             else:
                                 modelcnt += 1 
+                                
+    def modelSpecInDefault(self,modelkey):
+        if modelkey not in MODELMAP.keys():
+            print "Model not found in the Map"
+            return None
+        #print "Model found in the Map"
+        mapvals = MODELMAP[modelkey]
+        compname = mapvals[0]
+        modelname = mapvals[1]
+        #print compname, modelname
+        modelnum = 0
+        if len(mapvals) == 3:
+            modelnum = mapvals[2]
+        #print modelnum
+        compelt = self.default.find(MODELCONFIG)
+        for comp in compelt.getiterator(COMP):
+            if compname.lower() == comp.get(NAME).lower():
+                modelcnt = 1
+                for model in comp.getiterator(MODEL): 
+                    if modelname.lower() == model.get(NAME).lower():
+                        if modelnum == 0:
+                            return model
+                        else:
+                            if modelcnt ==  modelnum:
+                                return model
+                            else:
+                                modelcnt += 1 
+                                
 
     def getCompSimStatus(self,compname):
         compelt = self.protree.find(MODELCONFIG)
@@ -140,3 +173,136 @@ class ConfigObject(object):
         configfile = open(configfileloc, 'w')
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
+        
+        
+    def comparemodels(self,modelkey):
+        previous = self.modelSpecInDefault(modelkey)
+        current = self.modelSpecInConfig(modelkey)
+
+        if current == None or previous == None:
+            return True
+
+        
+        #Model name="EndTime" formulation='Regression' type="Linear" vertex='end' threshold='755' seed="1"
+        temp1 = str(previous.get(NAME))
+        temp2 = str(current.get(NAME))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(FORMULATION))
+        temp2 = str(current.get(FORMULATION))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(MODELTYPE))
+        temp2 = str(current.get(MODELTYPE))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(VERTEX))
+        temp2 = str(current.get(VERTEX))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(THRESHOLD))
+        temp2 = str(current.get(THRESHOLD))
+        if temp1 <> temp2:
+            return False
+        
+        temp1 = str(previous.get(SEED))
+        temp2 = str(current.get(SEED))
+        if temp1 <> temp2:
+            return False
+        
+        pre_var = previous.findall(VARIANCE)
+        cur_var = current.findall(VARIANCE)
+        if len(pre_var) <> len(cur_var):
+            return False
+            
+        i = 0
+        for varelt in pre_var:
+            value1 = str(varelt.get(VALUE))
+            value2 = str((cur_var[i]).get(VALUE))
+            if value1 <> value2:
+                return False
+            
+            type1 = str(varelt.get(MODELTYPE))
+            type2 = str((cur_var[i]).get(MODELTYPE))
+            if type1 <> type2:
+                return False
+                
+            i = i+1
+            
+        
+        pre_alt = previous.findall(ALTERNATIVE)
+        cur_alt = current.findall(ALTERNATIVE)
+        if len(pre_alt) <> len(cur_alt):
+            return False
+            
+        i = 0
+        for altelt in pre_alt:
+            id1 = str(altelt.get(ID))
+            id2 = str((cur_alt[i]).get(ID))
+            if id1 <> id2:
+                return False
+            
+            value1 = str(altelt.get(VALUE))
+            value2 = str((cur_alt[i]).get(VALUE))
+            if value1 <> value2:
+                return False
+            
+            thres1 = str(altelt.get(THRESHOLD))
+            thres2 = str((cur_alt[i]).get(THRESHOLD))
+            if thres1 <> thres2:
+                return False
+            
+            p_vari = altelt.findall(VARIABLE)
+            c_vari = (cur_alt[i]).findall(VARIABLE)
+            if len(p_vari) <> len(c_vari):
+                return False
+            
+            j = 0
+            for varielt in p_vari:
+                table1 = str(varielt.get(TABLE))
+                table2 = str((c_vari[j]).get(TABLE))
+                if table1 <> table2:
+                    return False
+                
+                var1 = str(varielt.get(COLUMN))
+                var2 = str((c_vari[j]).get(COLUMN))
+                if var1 <> var2:
+                    return False
+                
+                coeff1 = str(varielt.get(COEFF))
+                coeff2 = str((c_vari[j]).get(COEFF))
+                if coeff1 <> coeff2:
+                    return False
+                j = j+1
+            
+            i = i+1
+            
+            
+        pre_vari = previous.findall(VARIABLE)
+        cur_vari = current.findall(VARIABLE)
+        if len(pre_vari) <> len(cur_vari):
+            return False
+            
+        i = 0
+        for varielt in pre_vari:
+            table1 = str(varielt.get(TABLE))
+            table2 = str((cur_vari[i]).get(TABLE))
+            if table1 <> table2:
+                return False
+            
+            var1 = str(varielt.get(COLUMN))
+            var2 = str((cur_vari[i]).get(COLUMN))
+            if var1 <> var2:
+                return False
+            
+            coeff1 = str(varielt.get(COEFF))
+            coeff2 = str((cur_vari[i]).get(COEFF))
+            if coeff1 <> coeff2:
+                return False
+            i = i+1
+            
+        return True
