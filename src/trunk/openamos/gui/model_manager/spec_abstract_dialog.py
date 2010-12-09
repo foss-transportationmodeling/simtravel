@@ -697,8 +697,8 @@ class AbtractSpecDialog(QDialog):
                     self.addVariabletoElt(altelt,valtable,valname,valcoff)
                     model.append(altelt)
                     
-            
-            if not self.comparemodels(tempmodel, model):
+            if not self.configobject.comparemodels(self.modelkey):
+            #if not self.comparemodels(tempmodel, model):
                 print 'Successful to change'
                 model.set(DMODEL,'True')
             
@@ -730,40 +730,13 @@ class AbtractSpecDialog(QDialog):
             if elt.get(MODELTYPE) != None:
                 elt.set(MODELTYPE,'')
         
-        seed = str(elt.get(SEED))
-        user = str(elt.get(DMODEL))
-        del elt.attrib[SEED]
-        del elt.attrib[DMODEL]
-        
-        elt.set(SEED,seed)
-        elt.set(DMODEL,user)
-#        if self.modeltypecb.currentText() == PROB_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == COUNT_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == MNL_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == GC_MNL_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == SF_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == LOGSF_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == LOGREG_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == ORD_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
-#        elif self.modeltypecb.currentText() == NL_MODEL:
-#            del elt.attrib[VERTEX]
-#            del elt.attrib[THRESHOLD]
+#        seed = str(elt.get(SEED))
+#        user = str(elt.get(DMODEL))
+#        del elt.attrib[SEED]
+#        del elt.attrib[DMODEL]
+#        
+#        elt.set(SEED,seed)
+#        elt.set(DMODEL,user)
 
         
     def addDepVarToElt(self,model,col):
@@ -1094,109 +1067,6 @@ class AbtractSpecDialog(QDialog):
 #            res = True
 #        return res
 
-
-    def comparemodels(self,previous,current):
-        
-        #Model name="EndTime" formulation='Regression' type="Linear" vertex='end' threshold='755' seed="1"
-        temp1 = str(previous.get(NAME))
-        temp2 = str(current.get(NAME))
-        if temp1 <> temp2:
-            return False
-        
-        temp1 = str(previous.get(FORMULATION))
-        temp2 = str(current.get(FORMULATION))
-        if temp1 <> temp2:
-            return False
-        
-        temp1 = str(previous.get(MODELTYPE))
-        temp2 = str(current.get(MODELTYPE))
-        if temp1 <> temp2:
-            return False
-        
-        temp1 = str(previous.get(VERTEX))
-        temp2 = str(current.get(VERTEX))
-        if temp1 <> temp2:
-            return False
-        
-        temp1 = str(previous.get(THRESHOLD))
-        temp2 = str(current.get(THRESHOLD))
-        if temp1 <> temp2:
-            return False
-        
-        temp1 = str(previous.get(SEED))
-        temp2 = str(current.get(SEED))
-        if temp1 <> temp2:
-            return False
-        
-        pre_var = previous.findall(VARIANCE)
-        cur_var = current.findall(VARIANCE)
-        if len(pre_var) <> len(cur_var):
-            return False
-            
-        i = 0
-        for varelt in pre_var:
-            value1 = str(varelt.get(VALUE))
-            value2 = str((cur_var[i]).get(VALUE))
-            if value1 <> value2:
-                return False
-            
-            type1 = str(varelt.get(MODELTYPE))
-            type2 = str((cur_var[i]).get(MODELTYPE))
-            if type1 <> type2:
-                return False
-                
-            i = i+1
-            
-        
-        
-        pre_alt = previous.findall(ALTERNATIVE)
-        cur_alt = current.findall(ALTERNATIVE)
-        if len(pre_alt) <> len(cur_alt):
-            return False
-            
-        i = 0
-        for altelt in pre_alt:
-            id1 = str(altelt.get(ID))
-            id2 = str((cur_alt[i]).get(ID))
-            if id1 <> id2:
-                return False
-            
-            value1 = str(altelt.get(VALUE))
-            value2 = str((cur_alt[i]).get(VALUE))
-            if value1 <> value2:
-                return False
-            
-            thres1 = str(altelt.get(THRESHOLD))
-            thres2 = str((cur_alt[i]).get(THRESHOLD))
-            if thres1 <> thres2:
-                return False
-            i = i+1
-            
-        pre_vari = previous.findall(VARIABLE)
-        cur_vari = current.findall(VARIABLE)
-        if len(pre_vari) <> len(cur_vari):
-            return False
-            
-        i = 0
-        for varielt in pre_vari:
-            table1 = str(varielt.get(TABLE))
-            table2 = str((cur_vari[i]).get(TABLE))
-            if table1 <> table2:
-                return False
-            
-            var1 = str(varielt.get(COLUMN))
-            var2 = str((cur_vari[i]).get(COLUMN))
-            if var1 <> var2:
-                return False
-            
-            coeff1 = str(varielt.get(COEFF))
-            coeff2 = str((cur_vari[i]).get(COEFF))
-            if coeff1 <> coeff2:
-                return False
-            i = i+1
-            
-            
-        return True
     
 
 
