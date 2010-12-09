@@ -61,11 +61,8 @@ class VehicleOwnershipModels(QWidget):
     
     def isUserModel(self,modelkey):
         if self.configob <> None:
-            model = self.configob.modelSpecInConfig(modelkey)
-            if model <> None:
-                isUser = str.lower(model.get(DMODEL))   
-                if isUser == 'true':
-                    return "background-color: #8FBC8F"
+            if not self.configob.comparemodels(modelkey):
+                return "background-color: #8FBC8F"
 
         return "background-color: #FFFDD0"
 
