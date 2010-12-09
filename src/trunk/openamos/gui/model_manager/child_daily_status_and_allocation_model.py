@@ -18,60 +18,60 @@ class Child_Model(QWidget):
         widgetheight = size.height()
         
         # Children (5-17 years)
-        goto_school_button = QPushButton('Child goes to\nschool on\ntravel day', self)
-        goto_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 460, 120, 75)
-        goto_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYSTATUS))
-        self.connect(goto_school_button, SIGNAL('clicked()'), self.goto_school)
+        self.goto_school_button = QPushButton('Child goes to\nschool on\ntravel day', self)
+        self.goto_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 460, 120, 75)
+        self.goto_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYSTATUS))
+        self.connect(self.goto_school_button, SIGNAL('clicked()'), self.goto_school)
         
-        independent_to_school_button = QPushButton('Child travels to\nschool\nindependently', self)
-        independent_to_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 360, 120, 75)
-        independent_to_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYINDEP))
-        self.connect(independent_to_school_button, SIGNAL('clicked()'), self.travel_independently_to_school)
+        self.independent_to_school_button = QPushButton('Child travels to\nschool\nindependently', self)
+        self.independent_to_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 360, 120, 75)
+        self.independent_to_school_button.setStyleSheet(self.isUserModel(MODELKEY_SCHDAILYINDEP))
+        self.connect(self.independent_to_school_button, SIGNAL('clicked()'), self.travel_independently_to_school)
         
 #        drop_off_school1_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
 #        drop_off_school1_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 235, 200, 50)
 #        drop_off_school1_button.setStyleSheet("background-color: #FFFDD0")
 #        #self.connect(drop_off_school1_button, SIGNAL('clicked()'), self.drop_off_event)
         
-        independent_from_school_button = QPushButton('Child\nindependent\nafter-school', self)
-        independent_from_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 135, 120, 75)
-        independent_from_school_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHDAILYINDEP))
-        self.connect(independent_from_school_button, SIGNAL('clicked()'), self.independently_after_school)
+        self.independent_from_school_button = QPushButton('Child\nindependent\nafter-school', self)
+        self.independent_from_school_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 135, 120, 75)
+        self.independent_from_school_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHDAILYINDEP))
+        self.connect(self.independent_from_school_button, SIGNAL('clicked()'), self.independently_after_school)
         
 #        after_school_activity_button = QPushButton('Is there time to\nengage in an\nafter school\nchild activity?', self)
 #        after_school_activity_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 35, 120, 75)
 #        after_school_activity_button.setStyleSheet("background-color: #FFFDD0")
 #        #self.connect(after_school_activity_button, SIGNAL('clicked()'), self.after_school_activity)
         
-        activity_type_button = QPushButton('After-school activity type choice', self)
-        activity_type_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 90, 200, 50)
-        activity_type_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTTYPE))
-        self.connect(activity_type_button, SIGNAL('clicked()'), self.activity_type)
+        self.activity_type_button = QPushButton('After-school activity type choice', self)
+        self.activity_type_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 90, 200, 50)
+        self.activity_type_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTTYPE))
+        self.connect(self.activity_type_button, SIGNAL('clicked()'), self.activity_type)
         
-        destination_button = QPushButton('After-school activity\ndestination choice', self)
-        destination_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 170, 200, 50)
-        destination_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDEST))
-        self.connect(destination_button, SIGNAL('clicked()'), self.activity_dest)
+        self.destination_button = QPushButton('After-school activity\ndestination choice', self)
+        self.destination_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 170, 200, 50)
+        self.destination_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDEST))
+        self.connect(self.destination_button, SIGNAL('clicked()'), self.activity_dest)
         
-        duration_button = QPushButton('After-school activity\nduration model', self)
-        duration_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 250, 200, 50)
-        duration_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDUR))
-        self.connect(duration_button, SIGNAL('clicked()'), self.activity_dur)
+        self.duration_button = QPushButton('After-school activity\nduration model', self)
+        self.duration_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 250, 200, 50)
+        self.duration_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHACTDUR))
+        self.connect(self.duration_button, SIGNAL('clicked()'), self.activity_dur)
         
 #        drop_off_school2_button = QPushButton('Assign an adult drop-off event to\nhousehold', self)
 #        drop_off_school2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 330, 200, 50)
 #        drop_off_school2_button.setStyleSheet("background-color: #FFFDD0")
 #        #self.connect(drop_off_school2_button, SIGNAL('clicked()'), self.drop_off_event)
         
-        activity_with_adult_button = QPushButton('Adult stays with child for\nactivity', self)
-        activity_with_adult_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 410, 200, 50)
-        activity_with_adult_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHJOINTACT))
-        self.connect(activity_with_adult_button, SIGNAL('clicked()'), self.activity_with_adult)
+        self.activity_with_adult_button = QPushButton('Adult stays with child for\nactivity', self)
+        self.activity_with_adult_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 410, 200, 50)
+        self.activity_with_adult_button.setStyleSheet(self.isUserModel(MODELKEY_AFTSCHJOINTACT))
+        self.connect(self.activity_with_adult_button, SIGNAL('clicked()'), self.activity_with_adult)
         
-        in_activity_independently_button = QPushButton('Child is\nindependent', self)
-        in_activity_independently_button.setGeometry((size.width()) / 2 - 340, size.height() / 2 - 460, 120, 75)
-        in_activity_independently_button.setStyleSheet(self.isUserModel(MODELKEY_HMINDEP))
-        self.connect(in_activity_independently_button, SIGNAL('clicked()'), self.child_independent)
+        self.in_activity_independently_button = QPushButton('Child is\nindependent', self)
+        self.in_activity_independently_button.setGeometry((size.width()) / 2 - 340, size.height() / 2 - 460, 120, 75)
+        self.in_activity_independently_button.setStyleSheet(self.isUserModel(MODELKEY_HMINDEP))
+        self.connect(self.in_activity_independently_button, SIGNAL('clicked()'), self.child_independent)
         
 #        assign_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
 #        assign_hh_button.setGeometry((size.width()) / 2 - 500, size.height() / 2 - 360, 200, 50)
@@ -92,10 +92,10 @@ class Child_Model(QWidget):
  
         
         # Pre-school Children
-        goto_preschool_button = QPushButton('Child goes to\npre-school on\n travel day', self)
-        goto_preschool_button.setGeometry((size.width()) / 2 + 160, size.height() / 2 - 460, 120, 75)
-        goto_preschool_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHDAILYSTATUS))
-        self.connect(goto_preschool_button, SIGNAL('clicked()'), self.goto_preschool)
+        self.goto_preschool_button = QPushButton('Child goes to\npre-school on\n travel day', self)
+        self.goto_preschool_button.setGeometry((size.width()) / 2 + 160, size.height() / 2 - 460, 120, 75)
+        self.goto_preschool_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHDAILYSTATUS))
+        self.connect(self.goto_preschool_button, SIGNAL('clicked()'), self.goto_preschool)
         
 #        assign_preschool_hh_button = QPushButton('Assign an adult stay-\nhome event to household', self)
 #        assign_preschool_hh_button.setGeometry((size.width()) / 2 + 360, size.height() / 2 - 448, 160, 50)
@@ -123,6 +123,8 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.goto_school_button.setStyleSheet(self.isUserModel(modelkey))
+        
     
     def goto_preschool(self):
         diagtitle = COMPMODEL_PRESCHDAILYSTATUS
@@ -131,12 +133,16 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.goto_preschool_button.setStyleSheet(self.isUserModel(modelkey))
+        
     def child_independent(self):
         diagtitle = COMPMODEL_HMINDEP
         modelkey = MODELKEY_HMINDEP
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        
+        self.in_activity_independently_button.setStyleSheet(self.isUserModel(modelkey))
         
     def travel_independently_to_school(self):
         diagtitle = COMPMODEL_SCHDAILYINDEP
@@ -145,12 +151,16 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.independent_to_school_button.setStyleSheet(self.isUserModel(modelkey))
+        
     def independently_after_school(self):
         diagtitle = COMPMODEL_AFTSCHDAILYINDEP
         modelkey = MODELKEY_AFTSCHDAILYINDEP
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        
+        self.independent_from_school_button.setStyleSheet(self.isUserModel(modelkey))
         
     
     def activity_type(self):
@@ -159,6 +169,8 @@ class Child_Model(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        
+        self.activity_type_button.setStyleSheet(self.isUserModel(modelkey))
 
     def activity_dest(self):
         diagtitle = COMPMODEL_AFTSCHACTDEST
@@ -166,6 +178,8 @@ class Child_Model(QWidget):
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
+        
+        self.destination_button.setStyleSheet(self.isUserModel(modelkey))
 
     def activity_dur(self):
         diagtitle = COMPMODEL_AFTSCHACTDUR
@@ -174,6 +188,8 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.duration_button.setStyleSheet(self.isUserModel(modelkey))
+        
     def activity_with_adult(self):
         diagtitle = COMPMODEL_AFTSCHJOINTACT
         modelkey = MODELKEY_AFTSCHJOINTACT
@@ -181,14 +197,13 @@ class Child_Model(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
+        self.activity_with_adult_button.setStyleSheet(self.isUserModel(modelkey))
+        
         
     def isUserModel(self,modelkey):
         if self.configob <> None:
-            model = self.configob.modelSpecInConfig(modelkey)
-            if model <> None:
-                isUser = str.lower(model.get(DMODEL))   
-                if isUser == 'true':
-                    return "background-color: #8FBC8F"
+            if not self.configob.comparemodels(modelkey):
+                return "background-color: #8FBC8F"
 
         return "background-color: #FFFDD0"
  
