@@ -1,6 +1,7 @@
 import copy
 import time
 import os
+import traceback, sys
 from lxml import etree
 from numpy import array, ma, ones, zeros, vstack, where
 
@@ -37,6 +38,7 @@ class SimulationManager(object):
 
         try:
             fileLoc = fileLoc.lower()
+            self.fileLoc = fileLoc
             configObject = etree.parse(fileLoc)
         except AttributeError, e:
             raise ConfigurationError, """The file location is not a valid."""
@@ -51,8 +53,6 @@ class SimulationManager(object):
         self.projectSkimsObject = self.configParser.parse_skims_tables()
         self.projectLocationsObject = self.configParser.parse_locations_table()
 	self.householdStructureObject = self.configParser.parse_household_structure_info()
-
-	
 
 
     def setup_databaseConnection(self):
@@ -129,31 +129,48 @@ class SimulationManager(object):
         
 	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
-        for comp in self.componentList:
-            t = time.time()
-            print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
-                                                                       comp.analysisInterval)
+        try:
+            for comp in self.componentList:
+                t = time.time()
+                print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
+                                                                           comp.analysisInterval)
 
-            if comp.skipFlag:
-                print '\tSkipping the run for this component'
-                continue
-            data = comp.pre_process(self.queryBrowser, self.subsample, 
-                                    tableOrderDict, tableNamesKeyDict, 
-                                    self.projectSkimsObject, self.householdStructureObject, self.db)
-            if data is not None:
-                # Call the run function to simulate the chocies(models)
-                # as per the specification in the configuration file
-                # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
+                if comp.skipFlag:
+                    print '\tSkipping the run for this component'
+                    continue
+                data = comp.pre_process(self.queryBrowser, self.subsample, 
+                                        tableOrderDict, tableNamesKeyDict, 
+                                        self.projectSkimsObject, self.householdStructureObject, self.db)
+
+                if data is not None:
+                    # Call the run function to simulate the chocies(models)
+                    # as per the specification in the configuration file
+                    # data is written to the hdf5 cache because of the faster I/O
+                    nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
             
-            # Write the data to the database from the hdf5 results cache
-            # after running each component because the subsequent components
-            # are often dependent on the choices generated in the previous components
-            # run
-                self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
-            print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
-            #raw_input()
+                    # Write the data to the database from the hdf5 results cache
+                    # after running each component because the subsequent components
+                    # are often dependent on the choices generated in the previous components
+                    # run
+                    self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
+
+                self.configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
+        
+                print '-- Finished simulating component - %s; time taken %.4f --' %(comp.component_name,
+                                                                                    time.time()-t)
+        except Exception, e:
+            print 'Exception occurred - %s' %e
+            traceback.print_exc(file=sys.stdout)
+            print '_'*80
+
+        #self.save_configFile()
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
+
+
+    def save_configFile(self):
+        configFile = open(self.fileLoc, 'w')
+        self.configParser.configObject.write(configFile, pretty_print=True)
+        configFile.close()
 
 
     def run_selected_components_for_malta(self, analysisInterval):

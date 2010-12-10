@@ -65,6 +65,34 @@ class ConfigParser(object):
         self.configObject = configObject
         self.componentName = component
 
+    def update_completedFlag(self, component_name, analysisInterval=None):
+        self.iterator = self.configObject.getiterator('Component')
+
+        for compElement in self.iterator:
+            if compElement.get('name') == component_name:
+                if analysisInterval is None:
+                    print 'OLD FLAG _ ', compElement.get('completed')
+                    compElement.set('completed', "True")
+                    compElement.set('skip', "True")
+                    print 'NEW FLAG _ ', compElement.get('completed')
+
+
+                if analysisInterval is not None:
+                    analysisIntervalElement = compElement.find('AnalysisInterval')
+                    print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    analysisIntervalElement.set('start', str(analysisInterval + 1))
+                    print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    print dir(analysisIntervalElement)
+                
+                    endIntervalValue = int(analysisIntervalElement.get('end'))
+                    
+                    if endIntervalValue == analysisInterval + 1:
+                        print 'OLD FLAG _ ', compElement.get('completed')
+                        compElement.set('completed', "True")
+                        compElement.set('skip', "True")
+                        print 'NEW FLAG _ ', compElement.get('completed')                    
+
+
     def parse_models(self):
         self.iterator = self.configObject.getiterator("Component")
         componentList = []
