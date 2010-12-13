@@ -16,105 +16,109 @@ class FixedActivityPrismModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
-        # Adult worker
-        self.day_start1_button = QPushButton(COMPMODEL_DAYSTART, self)
-        self.day_start1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 370,180, 50)
-        self.day_start1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_AW))#"background-color: #FFFDD0")
+        
+        # Earliest Day Start Time
+        self.day_start1_button = QPushButton('Adult Workers', self) #COMPMODEL_DAYSTART, self)
+        self.day_start1_button.setGeometry((size.width()) / 2 - 200, size.height() / 2 - 450,180, 50)
+        self.day_start1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_AW))
         self.connect(self.day_start1_button, SIGNAL('clicked()'), self.day_start_aw)
-
-        self.day_end1_button = QPushButton(COMPMODEL_DAYEND, self)     
-        self.day_end1_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 290, 180, 50)
-        self.day_end1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_AW))#"background-color: #FFFDD0")
-        self.connect(self.day_end1_button, SIGNAL('clicked()'), self.day_end_aw)
         
-        self.num_work_episodes_button = QPushButton(COMPMODEL_WRKEPISODES, self)
-        self.num_work_episodes_button.setGeometry((size.width()) / 2 - 405, size.height() / 2 - 210, 180, 50)
-        self.num_work_episodes_button.setStyleSheet(self.isUserModel(MODELKEY_WRKEPISODES))#"background-color: #FFFDD0")
-        self.connect(self.num_work_episodes_button, SIGNAL('clicked()'), self.num_work)
-
-        self.work_start_button = QPushButton(COMPMODEL_WORKSTART, self)
-        self.work_start_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 - 60, 180, 50)
-        self.work_start_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART))#"background-color: #FFFDD0")
-        self.connect(self.work_start_button, SIGNAL('clicked()'), self.work_start)
-
-        self.work_end_button = QPushButton(COMPMODEL_WORKEND, self)
-        self.work_end_button.setGeometry((size.width()) / 2 - 505, size.height() / 2 + 20, 180, 50)
-        self.work_end_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND))#"background-color: #FFFDD0")
-        self.connect(self.work_end_button, SIGNAL('clicked()'), self.work_end)
-
-        self.work_start_1_button = QPushButton(COMPMODEL_WORKSTART1, self)
-        self.work_start_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 - 60, 180, 50)
-        self.work_start_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART1))#"background-color: #FFFDD0")
-        self.connect(self.work_start_1_button, SIGNAL('clicked()'), self.work_start1)
-
-        self.work_end_1_button = QPushButton(COMPMODEL_WORKEND1, self)
-        self.work_end_1_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 20, 180, 50)
-        self.work_end_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND1))#"background-color: #FFFDD0")
-        self.connect(self.work_end_1_button, SIGNAL('clicked()'), self.work_end1)
-        
-        self.work_start_2_button = QPushButton(COMPMODEL_WORKSTART2, self)
-        self.work_start_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 100, 180, 50)
-        self.work_start_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART2))#"background-color: #FFFDD0")
-        self.connect(self.work_start_2_button, SIGNAL('clicked()'), self.work_start2)
-
-        self.work_end_2_button = QPushButton(COMPMODEL_WORKEND2, self)
-        self.work_end_2_button.setGeometry((size.width()) / 2 - 305, size.height() / 2 + 180, 180, 50)
-        self.work_end_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND2))#"background-color: #FFFDD0")
-        self.connect(self.work_end_2_button, SIGNAL('clicked()'), self.work_end2)
-        
-        
-        # Adult non-worker
-        self.day_start2_button = QPushButton(COMPMODEL_DAYSTART, self)
-        self.day_start2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 370,180, 50)
+        self.day_start2_button = QPushButton('Adult Non-workers', self) #COMPMODEL_DAYSTART, self)
+        self.day_start2_button.setGeometry((size.width()) / 2 - 200, size.height() / 2 - 370,180, 50)
         self.day_start2_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_AN))
         self.connect(self.day_start2_button, SIGNAL('clicked()'), self.day_start_nw)
-        
-        self.day_end2_button = QPushButton(COMPMODEL_DAYEND, self)     
-        self.day_end2_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 - 290, 180, 50)
-        self.day_end2_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_NW))
-        self.connect(self.day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
-        
-        
-        # Children (5 - 17)
-        self.day_start3_button = QPushButton(COMPMODEL_DAYSTART, self)
-        self.day_start3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 370,180, 50)
+
+        self.day_start3_button = QPushButton('Children (5-17 years) and\nAdult Students', self) #COMPMODEL_DAYSTART, self)
+        self.day_start3_button.setGeometry((size.width()) / 2 - 200, size.height() / 2 - 290,180, 50)
         self.day_start3_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_NA))
         self.connect(self.day_start3_button, SIGNAL('clicked()'), self.day_start_na)
+
+        self.day_start4_button = QPushButton('Pre-school Children\n(0-4 years)', self) #COMPMODEL_DAYSTART, self)
+        self.day_start4_button.setGeometry((size.width()) / 2 - 200, size.height() / 2 - 210,180, 50)
+        self.day_start4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_PS))
+        self.connect(self.day_start4_button, SIGNAL('clicked()'), self.day_start_ps)
         
-        self.day_end3_button = QPushButton(COMPMODEL_DAYEND, self)     
-        self.day_end3_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 290, 180, 50)
+        
+        # Latest Day End Time
+        self.day_end1_button = QPushButton('Adult Workers', self) #COMPMODEL_DAYEND, self)     
+        self.day_end1_button.setGeometry((size.width()) / 2 + 350, size.height() / 2 - 450, 180, 50)
+        self.day_end1_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_AW))
+        self.connect(self.day_end1_button, SIGNAL('clicked()'), self.day_end_aw)        
+
+        self.day_end2_button = QPushButton('Adult Non-workers', self) #COMPMODEL_DAYEND, self)     
+        self.day_end2_button.setGeometry((size.width()) / 2 + 350, size.height() / 2 - 370, 180, 50)
+        self.day_end2_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_NW))
+        self.connect(self.day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
+
+        self.day_end3_button = QPushButton('Children (5-17 years) and\nAdult Students', self) #COMPMODEL_DAYEND, self)     
+        self.day_end3_button.setGeometry((size.width()) / 2 + 350, size.height() / 2 - 290, 180, 50)
         self.day_end3_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_NA))
         self.connect(self.day_end3_button, SIGNAL('clicked()'), self.day_end_na)
 
+        self.day_end4_button = QPushButton('Pre-school Children\n(0-4 years)', self) #COMPMODEL_DAYEND, self)     
+        self.day_end4_button.setGeometry((size.width()) / 2 + 350, size.height() / 2 - 210, 180, 50)
+        self.day_end4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_PS))
+        self.connect(self.day_end4_button, SIGNAL('clicked()'), self.day_end_ps)
+
+
+
+        # Adult worker   
+        self.num_work_episodes_button = QPushButton(COMPMODEL_WRKEPISODES, self)
+        self.num_work_episodes_button.setGeometry((size.width()) / 2 - 325, size.height() / 2 - 50, 160, 50)
+        self.num_work_episodes_button.setStyleSheet(self.isUserModel(MODELKEY_WRKEPISODES))
+        self.connect(self.num_work_episodes_button, SIGNAL('clicked()'), self.num_work)
+
+        self.work_start_button = QPushButton(COMPMODEL_WORKSTART, self)
+        self.work_start_button.setGeometry((size.width()) / 2 - 125, size.height() / 2 - 50, 160, 50)
+        self.work_start_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART))
+        self.connect(self.work_start_button, SIGNAL('clicked()'), self.work_start)
+
+        self.work_end_button = QPushButton(COMPMODEL_WORKEND, self)
+        self.work_end_button.setGeometry((size.width()) / 2 + 75, size.height() / 2 - 50, 160, 50)
+        self.work_end_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND))
+        self.connect(self.work_end_button, SIGNAL('clicked()'), self.work_end)
+
+        self.work_start_1_button = QPushButton(COMPMODEL_WORKSTART1, self)
+        self.work_start_1_button.setGeometry((size.width()) / 2 - 200, size.height() / 2 + 30, 160, 50)
+        self.work_start_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART1))
+        self.connect(self.work_start_1_button, SIGNAL('clicked()'), self.work_start1)
+
+        self.work_end_1_button = QPushButton(COMPMODEL_WORKEND1, self)
+        self.work_end_1_button.setGeometry((size.width()) / 2, size.height() / 2 + 30, 160, 50)
+        self.work_end_1_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND1))
+        self.connect(self.work_end_1_button, SIGNAL('clicked()'), self.work_end1)
+        
+        self.work_start_2_button = QPushButton(COMPMODEL_WORKSTART2, self)
+        self.work_start_2_button.setGeometry((size.width()) / 2 + 200, size.height() / 2 + 30, 160, 50)
+        self.work_start_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKSTART2))
+        self.connect(self.work_start_2_button, SIGNAL('clicked()'), self.work_start2)
+
+        self.work_end_2_button = QPushButton(COMPMODEL_WORKEND2, self)
+        self.work_end_2_button.setGeometry((size.width()) / 2 + 400, size.height() / 2 + 30, 160, 50)
+        self.work_end_2_button.setStyleSheet(self.isUserModel(MODELKEY_WORKEND2))
+        self.connect(self.work_end_2_button, SIGNAL('clicked()'), self.work_end2)
+
+        
+        # Children (5 - 17)
         self.children_arrive_button = QPushButton(COMPMODEL_SCHSTART, self)
-        self.children_arrive_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 210, 180, 50)
+        self.children_arrive_button.setGeometry((size.width()) / 2 - 105, size.height() / 2 + 190, 170, 50)
         self.children_arrive_button.setStyleSheet(self.isUserModel(MODELKEY_SCHSTART))
         self.connect(self.children_arrive_button, SIGNAL('clicked()'), self.school_start)
 
         self.children_depart_button = QPushButton(COMPMODEL_SCHEND, self)
-        self.children_depart_button.setGeometry((size.width()) / 2 + 125, size.height() / 2 - 130, 180, 50)
+        self.children_depart_button.setGeometry((size.width()) / 2 + 115, size.height() / 2 + 190, 170, 50)
         self.children_depart_button.setStyleSheet(self.isUserModel(MODELKEY_SCHEND))
         self.connect(self.children_depart_button, SIGNAL('clicked()'), self.school_end)
 
 
         # Children (0 - 4)
-        self.day_start4_button = QPushButton(COMPMODEL_DAYSTART, self)
-        self.day_start4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 370,180, 50)
-        self.day_start4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYSTART_PS))
-        self.connect(self.day_start4_button, SIGNAL('clicked()'), self.day_start_ps)
-        
-        self.day_end4_button = QPushButton(COMPMODEL_DAYEND, self)     
-        self.day_end4_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 290, 180, 50)
-        self.day_end4_button.setStyleSheet(self.isUserModel(MODELKEY_DAYEND_PS))
-        self.connect(self.day_end4_button, SIGNAL('clicked()'), self.day_end_ps)
-
         self.presch_arrive_button = QPushButton(COMPMODEL_PRESCHSTART, self)
-        self.presch_arrive_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 210, 180, 50)
+        self.presch_arrive_button.setGeometry((size.width()) / 2 - 105, size.height() / 2 + 350, 170, 50)
         self.presch_arrive_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHSTART))
         self.connect(self.presch_arrive_button, SIGNAL('clicked()'), self.preschool_start)
 
         self.presch_depart_button = QPushButton(COMPMODEL_PRESCHEND, self)
-        self.presch_depart_button.setGeometry((size.width()) / 2 + 390, size.height() / 2 - 130, 180, 50)
+        self.presch_depart_button.setGeometry((size.width()) / 2 + 115, size.height() / 2 + 350, 170, 50)
         self.presch_depart_button.setStyleSheet(self.isUserModel(MODELKEY_PRESCHEND))
         self.connect(self.presch_depart_button, SIGNAL('clicked()'), self.preschool_end)
 
@@ -330,132 +334,158 @@ class FixedActivityPrismModels(QWidget):
         pen = QPen(Qt.black,2,Qt.SolidLine)
         line.setPen(pen)
 
-        line.drawLine(widgetwidth / 2 - 315, widgetheight / 2 - 400, widgetwidth / 2 - 315, widgetheight / 2 - 120)
-        line.drawLine(widgetwidth / 2 - 415, widgetheight / 2 - 120, widgetwidth / 2 - 415, widgetheight / 2 + 40)
-        line.drawLine(widgetwidth / 2 - 215, widgetheight / 2 - 120, widgetwidth / 2 - 215, widgetheight / 2 + 200)
-        line.drawLine(widgetwidth / 2 - 415, widgetheight / 2 - 120, widgetwidth / 2 - 215, widgetheight / 2 - 120)
-        
-        line.drawLine(widgetwidth / 2 - 50, widgetheight / 2 - 400, widgetwidth / 2 - 50, widgetheight / 2 - 290)
-        line.drawLine(widgetwidth / 2 + 215, widgetheight / 2 - 400, widgetwidth / 2 + 215, widgetheight / 2 - 100)
-        line.drawLine(widgetwidth / 2 + 480, widgetheight / 2 - 400, widgetwidth / 2 + 480, widgetheight / 2 - 100)
+        line.drawLine(widgetwidth / 2 - 243, widgetheight / 2 - 425, widgetwidth / 2 - 243, widgetheight / 2 - 185)
+        line.drawLine(widgetwidth / 2 - 285, widgetheight / 2 - 425, widgetwidth / 2 - 200, widgetheight / 2 - 425)
+        line.drawLine(widgetwidth / 2 - 243, widgetheight / 2 - 345, widgetwidth / 2 - 200, widgetheight / 2 - 345)
+        line.drawLine(widgetwidth / 2 - 243, widgetheight / 2 - 265, widgetwidth / 2 - 200, widgetheight / 2 - 265)
+        line.drawLine(widgetwidth / 2 - 243, widgetheight / 2 - 185, widgetwidth / 2 - 200, widgetheight / 2 - 185)
 
-                
+        line.drawLine(widgetwidth / 2 + 307, widgetheight / 2 - 425, widgetwidth / 2 + 307, widgetheight / 2 - 185)
+        line.drawLine(widgetwidth / 2 + 265, widgetheight / 2 - 425, widgetwidth / 2 + 350, widgetheight / 2 - 425)
+        line.drawLine(widgetwidth / 2 + 307, widgetheight / 2 - 345, widgetwidth / 2 + 350, widgetheight / 2 - 345)
+        line.drawLine(widgetwidth / 2 + 307, widgetheight / 2 - 265, widgetwidth / 2 + 350, widgetheight / 2 - 265)
+        line.drawLine(widgetwidth / 2 + 307, widgetheight / 2 - 185, widgetwidth / 2 + 350, widgetheight / 2 - 185)
+
+        line.drawLine(widgetwidth / 2 - 245, widgetheight / 2, widgetwidth / 2 - 245, widgetheight / 2 + 55)
+        line.drawLine(widgetwidth / 2 - 365, widgetheight / 2 - 25, widgetwidth / 2 + 75, widgetheight / 2 - 25)
+        line.drawLine(widgetwidth / 2 - 245, widgetheight / 2 + 55, widgetwidth / 2 + 400, widgetheight / 2 + 55)
+        
+        line.drawLine(widgetwidth / 2 - 365, widgetheight / 2 + 215, widgetwidth / 2 + 115, widgetheight / 2 + 215)
+        line.drawLine(widgetwidth / 2 - 365, widgetheight / 2 + 375, widgetwidth / 2 + 115, widgetheight / 2 + 375)
+
+
         line.end()
+        
         # Drawing arrow
         arrow = QPainter()
         arrow.begin(self)
         point = QPoint()
 
 
-        # Adult Workers Arrow
+        # Earliest Day Start Time
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 - 425)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 - 345)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 - 265)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 - 185)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+
+
+        # Latest Day End Time
+        point.setX(widgetwidth / 2 + 350)  
+        point.setY(widgetheight / 2 - 425)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 350)  
+        point.setY(widgetheight / 2 - 345)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 350)  
+        point.setY(widgetheight / 2 - 265)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 350)  
+        point.setY(widgetheight / 2 - 185)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        
+        # Adult Workers
+        point.setX(widgetwidth / 2 - 325)  
+        point.setY(widgetheight / 2 - 25)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 - 125)  
+        point.setY(widgetheight / 2 - 25)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 75)  
+        point.setY(widgetheight / 2 - 25)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 - 200)  
+        point.setY(widgetheight / 2 + 55)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2)  
+        point.setY(widgetheight / 2 + 55)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 200)  
+        point.setY(widgetheight / 2 + 55)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 400)  
+        point.setY(widgetheight / 2 + 55)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        
+        # Children (5-17 years)
         point.setX(widgetwidth / 2 - 315)  
-        point.setY(widgetheight / 2 - 370)
+        point.setY(widgetheight / 2 + 215)
         arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
         
+        point.setX(widgetwidth / 2 - 105)  
+        point.setY(widgetheight / 2 + 215)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        point.setX(widgetwidth / 2 + 115)  
+        point.setY(widgetheight / 2 + 215)
+        arrow.setBrush(QColor("black"))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
+        
+        # Children (5-17 years)
         point.setX(widgetwidth / 2 - 315)  
-        point.setY(widgetheight / 2 - 290)
+        point.setY(widgetheight / 2 + 375)
         arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 315)  
-        point.setY(widgetheight / 2 - 210)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 415)  
-        point.setY(widgetheight / 2 - 60)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 415)  
-        point.setY(widgetheight / 2 + 20)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
         
-        point.setX(widgetwidth / 2 - 215)  
-        point.setY(widgetheight / 2 - 60)
+        point.setX(widgetwidth / 2 - 105)  
+        point.setY(widgetheight / 2 + 375)
         arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 215)  
-        point.setY(widgetheight / 2 + 20)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
         
-        point.setX(widgetwidth / 2 - 215)  
-        point.setY(widgetheight / 2 + 100)
+        point.setX(widgetwidth / 2 + 115)  
+        point.setY(widgetheight / 2 + 375)
         arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 215)  
-        point.setY(widgetheight / 2 + 180)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
+        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 13, point.y() - 4), QPoint(point.x() - 13, point.y() + 4))
         
-
-        # Adult Non-workers Arrow
-        point.setX(widgetwidth / 2 - 50)  
-        point.setY(widgetheight / 2 - 370)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 - 50)  
-        point.setY(widgetheight / 2 - 290)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-
-        # Non-adults
-        point.setX(widgetwidth / 2 + 215)  
-        point.setY(widgetheight / 2 - 370)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 215)  
-        point.setY(widgetheight / 2 - 290)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 215)  
-        point.setY(widgetheight / 2 - 210)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 215)  
-        point.setY(widgetheight / 2 - 130)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
         
-        # Non-adults
-        point.setX(widgetwidth / 2 + 480)  
-        point.setY(widgetheight / 2 - 370)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 480)  
-        point.setY(widgetheight / 2 - 290)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 480)  
-        point.setY(widgetheight / 2 - 210)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
-        point.setX(widgetwidth / 2 + 480)  
-        point.setY(widgetheight / 2 - 130)
-        arrow.setBrush(QColor("black"))
-        arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
         arrow.setBrush(QColor("#1e90ff"))
-        #arrow.setOpacity(0.7)
-        arrow.drawRoundedRect(widgetwidth/2 - 405, widgetheight/2 - 450, 180, 50, 15.0, 15.0)
-        arrow.drawRoundedRect(widgetwidth/2 - 140, widgetheight/2 - 450, 180, 50, 15.0, 15.0)
-        arrow.drawRoundedRect(widgetwidth/2 + 125, widgetheight/2 - 450, 180, 50, 15.0, 15.0)
-        arrow.drawRoundedRect(widgetwidth/2 + 390, widgetheight/2 - 450, 178, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 525, widgetheight/2 - 50, 160, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 525, widgetheight/2 + 190, 170, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 525, widgetheight/2 + 350, 170, 50, 15.0, 15.0)
         arrow.setBrush(QColor("#F0F0F0"))
-        arrow.drawRoundedRect(widgetwidth/2 + 150, widgetheight/2 + 180, 350, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 465, widgetheight/2 - 450, 180, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 + 85, widgetheight/2 - 450, 180, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 315, widgetheight/2 + 190, 170, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 315, widgetheight/2 + 350, 170, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 + 410, widgetheight/2 + 250, 150, 150, 15.0, 15.0)
         
         arrow.end()
 
@@ -464,28 +494,37 @@ class FixedActivityPrismModels(QWidget):
         text.begin(self)
         point = QPoint()
         
-        point.setX(widgetwidth / 2 - 415)  
-        point.setY(widgetheight / 2 - 125)
+        point.setX(widgetwidth / 2 - 160)  
+        point.setY(widgetheight / 2 - 30)
         text.drawText(point, "One")
 
-        point.setX(widgetwidth / 2 - 230)  
-        point.setY(widgetheight / 2 - 125)
+        point.setX(widgetwidth / 2 - 270)  
+        point.setY(widgetheight / 2 + 30)
         text.drawText(point, "Two")
         
-        temp = QRect(widgetwidth/2 - 405, widgetheight/2 - 450, 180, 50)
+        temp = QRect(widgetwidth/2 - 465, widgetheight/2 - 450, 180, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Earliest Day Start Time')
+        
+        temp = QRect(widgetwidth/2 + 85, widgetheight/2 - 450, 180, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Latest Day End Time')
+
+        temp = QRect(widgetwidth/2 - 525, widgetheight/2 - 50, 160, 50)
         text.drawText(temp, Qt.AlignCenter, 'Adult Workers')
-        
-        temp = QRect(widgetwidth/2 - 140, widgetheight/2 - 450, 180, 50)
-        text.drawText(temp, Qt.AlignCenter, 'Adult Non-workers')
 
-        temp = QRect(widgetwidth/2 + 125, widgetheight/2 - 450, 180, 50)
+        temp = QRect(widgetwidth/2 - 525, widgetheight/2 + 190, 170, 50)
         text.drawText(temp, Qt.AlignCenter, 'Children (5-17 years)')
-
-        temp = QRect(widgetwidth/2 + 390, widgetheight/2 - 450, 178, 50)
-        text.drawText(temp, Qt.AlignCenter, 'Preschool Children\n(0-4 years)')
         
-        temp = QRect(widgetwidth/2 + 150, widgetheight/2 + 180, 350, 50)
-        text.drawText(temp, Qt.AlignCenter, 'Time-space Prism Vertices for the Population')
+        temp = QRect(widgetwidth/2 - 315, widgetheight/2 + 190, 170, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Daily School Episode')
+        
+        temp = QRect(widgetwidth/2 - 525, widgetheight/2 + 350, 170, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Pre-school Children\n(0-4 years)')
+        
+        temp = QRect(widgetwidth/2 - 315, widgetheight/2 + 350, 170, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Daily Pre-school Episode')
+        
+        temp = QRect(widgetwidth/2 + 410, widgetheight/2 + 250, 150, 150)
+        text.drawText(temp, Qt.AlignCenter, 'Pre-school arrival and\ndeparture times are\ndependent on the adult\n(worker/non-worker)\nthat the kid is\nassigned to')
 
         text.end()
 
