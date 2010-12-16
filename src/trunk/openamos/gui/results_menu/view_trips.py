@@ -18,7 +18,9 @@ class MakePlot(Matplot):
         self.connects(config)
         self.cursor = self.new_obj.cursor
         self.table = table
-        #self.makeTempTables(self.cursor,table)
+        
+        self.makeTempTables()
+        self.makecolumns()
 
             
         if self.isValid():
@@ -61,7 +63,6 @@ class MakePlot(Matplot):
                 self.labelsdict['strttime_rec'] = self.schedule_labels(2)
                 self.labelsdict['endtime_rec'] = self.schedule_labels(3)
                 self.labelsdict['duration_rec'] = self.schedule_labels(4)
-                #self.labelsdict['locationid'] = self.schedule_labes(5)
             
             
             self.connect(self.choicevar1, SIGNAL("currentIndexChanged(int)"), self.on_draw1)
@@ -74,69 +75,126 @@ class MakePlot(Matplot):
         return True
 
 
-    def updatecolumns(self):
-        try:
-            table_name = ""
-            if self.table == "trips":
-                table_name = "temptrips"
-            else:
-                table_name = 'tempschedule'
-                
-            self.cursor.execute("UPDATE %s SET strttime_rec = 1 WHERE strttime >= 0 AND strttime < 120"%(table_name))
-            self.cursor.execute("UPDATE %s SET strttime_rec = 2 WHERE strttime >= 120 AND strttime < 300"%(table_name))
-            self.cursor.execute("UPDATE %s SET strttime_rec = 3 WHERE strttime >= 300 AND strttime < 480"%(table_name))
-            self.cursor.execute("UPDATE %s SET strttime_rec = 4 WHERE strttime >= 480 AND strttime < 660"%(table_name))
-            self.cursor.execute("UPDATE %s SET strttime_rec = 5 WHERE strttime >= 660 AND strttime < 900"%(table_name))
-            self.cursor.execute("UPDATE %s SET strttime_rec = 6 WHERE strttime >= 900"%(table_name))
-            
-            self.cursor.execute("UPDATE %s SET endtime_rec = 1 WHERE endtime >= 0 AND endtime < 120"%(table_name))
-            self.cursor.execute("UPDATE %s SET endtime_rec = 2 WHERE endtime >= 120 AND endtime < 300"%(table_name))
-            self.cursor.execute("UPDATE %s SET endtime_rec = 3 WHERE endtime >= 300 AND endtime < 480"%(table_name))
-            self.cursor.execute("UPDATE %s SET endtime_rec = 4 WHERE endtime >= 480 AND endtime < 660"%(table_name))
-            self.cursor.execute("UPDATE %s SET endtime_rec = 5 WHERE endtime >= 660 AND endtime < 900"%(table_name))
-            self.cursor.execute("UPDATE %s SET endtime_rec = 6 WHERE endtime >= 900"%(table_name))
-            
-            if self.table == "trips":
-                
-                self.cursor.execute("UPDATE tempschedule SET duration_rec = 1 WHERE duration >= 0 AND duration <= 10")
-                self.cursor.execute("UPDATE tempschedule SET duration_rec = 2 WHERE duration >= 11 AND duration <= 30")
-                self.cursor.execute("UPDATE tempschedule SET duration_rec = 3 WHERE duration >= 31 AND duration <= 120")
-                self.cursor.execute("UPDATE tempschedule SET duration_rec = 4 WHERE duration >= 121 AND duration <= 240")
-                self.cursor.execute("UPDATE tempschedule SET duration_rec = 5 WHERE duration > 240")
+    def updatestrt(self, table_name):
         
-        except Exception, e:
-            print '\tError while creating the table %s'%self.table_name
-            print e
+        self.cursor.execute("UPDATE %s SET strttime_rec = 1 WHERE starttime >= 0 AND starttime < 120"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET strttime_rec = 2 WHERE starttime >= 120 AND starttime < 300"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET strttime_rec = 3 WHERE starttime >= 300 AND starttime < 480"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET strttime_rec = 4 WHERE starttime >= 480 AND starttime < 660"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET strttime_rec = 5 WHERE starttime >= 660 AND starttime < 900"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET strttime_rec = 6 WHERE starttime >= 900"%(table_name))
+        self.new_obj.connection.commit()
+            
+    def updateend(self, table_name):
+        
+        self.cursor.execute("UPDATE %s SET endtime_rec = 1 WHERE endtime >= 0 AND endtime < 120"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET endtime_rec = 2 WHERE endtime >= 120 AND endtime < 300"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET endtime_rec = 3 WHERE endtime >= 300 AND endtime < 480"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET endtime_rec = 4 WHERE endtime >= 480 AND endtime < 660"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET endtime_rec = 5 WHERE endtime >= 660 AND endtime < 900"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET endtime_rec = 6 WHERE endtime >= 900"%(table_name))
+        self.new_obj.connection.commit()
+
+    def updateduration(self, table_name):
+
+        self.cursor.execute("UPDATE %s SET duration_rec = 1 WHERE duration >= 0 AND duration <= 10"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET duration_rec = 2 WHERE duration >= 11 AND duration <= 30"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET duration_rec = 3 WHERE duration >= 31 AND duration <= 120"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET duration_rec = 4 WHERE duration >= 121 AND duration <= 240"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET duration_rec = 5 WHERE duration > 240"%(table_name))
+        self.new_obj.connection.commit()
+
+    def updatemiles(self, table_name):
+
+        self.cursor.execute("UPDATE %s SET miles_rec = 1 WHERE miles >= 0 AND miles < 5"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET miles_rec = 2 WHERE miles >= 5 AND miles < 15"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET miles_rec = 3 WHERE miles >= 15 AND miles < 30"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET miles_rec = 4 WHERE miles >= 30 AND miles < 50"%(table_name))
+        self.new_obj.connection.commit()
+        self.cursor.execute("UPDATE %s SET miles_rec = 5 WHERE miles >= 50"%(table_name))
+        self.new_obj.connection.commit()
+        
+    def updateoccupancy(self, table_name):
+
+        self.cursor.execute("UPDATE %s SET occupancy_rec = 5 WHERE occupancy_rec >= 5"%(table_name))
+        self.new_obj.connection.commit()
             
 
     def makecolumns(self):
         try:
             if self.table == "trips":
+
                 if not self.checkColumnExists("temptrips","strttime_rec"):
                     self.cursor.execute("ALTER TABLE temptrips ADD COLUMN strttime_rec bigint")
+                    self.new_obj.connection.commit()
+                    self.updatestrt("temptrips")
                 if not self.checkColumnExists("temptrips","endtime_rec"):
                     self.cursor.execute("ALTER TABLE temptrips ADD COLUMN endtime_rec bigint")
+                    self.new_obj.connection.commit()
+                    self.updateend("temptrips")
+                if not self.checkColumnExists("temptrips","duration_rec"):
+                    self.cursor.execute("ALTER TABLE temptrips ADD COLUMN duration_rec bigint")
+                    self.new_obj.connection.commit()
+                    self.updateduration("temptrips")
+                if not self.checkColumnExists("temptrips","miles_rec"):
+                    self.cursor.execute("ALTER TABLE temptrips ADD COLUMN miles_rec bigint")
+                    self.new_obj.connection.commit()
+                    self.updatemiles("temptrips")
+                if self.checkColumnExists("temptrips","occupancy_rec"):
+                    self.updateoccupancy("temptrips")
+#                if not self.checkColumnExists("temptrips","purpose_rec"):
+#                    self.cursor.execute("ALTER TABLE temptrips ADD COLUMN purpose_rec bigint")
+#                    self.new_obj.connection.commit()
+#                if not self.checkColumnExists("temptrips","mode_rec"):
+#                    self.cursor.execute("ALTER TABLE temptrips ADD COLUMN mode_rec bigint")
+#                    self.new_obj.connection.commit()
+
             else:
+                if not self.checkColumnExists("tempschedule","activitytype"):
+                    self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN activitytype bigint")
+                    self.new_obj.connection.commit()
                 if not self.checkColumnExists("tempschedule","strttime_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN strttime_rec bigint")
+                    self.new_obj.connection.commit()
                 if not self.checkColumnExists("tempschedule","endtime_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN endtime_rec bigint")
+                    self.new_obj.connection.commit()
                 if not self.checkColumnExists("tempschedule","duration_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN duration_rec bigint")
+                    self.new_obj.connection.commit()
         
         except Exception, e:
             print '\tError while creating the table %s'%self.table_name
             print e
         
             
-    def makeTempTables(self,cursor,table):
+    def makeTempTables(self):
         try:
-            if table == "trips":
+            if self.table == "trips":
                 if not self.checkIfTableExists("temptrips"):
-                    cursor.execute("CREATE TABLE temptrips AS SELECT * FROM %s"%(table))
+                    self.cursor.execute("CREATE TABLE temptrips AS SELECT *, purpose as purpose_rec, mode as mode_rec, occupancy as occupancy_rec FROM %s"%(self.table))
+                    self.new_obj.connection.commit()
             else:
                 if not self.checkIfTableExists("tempschedule"):
-                    cursor.execute("CREATE TABLE tempschedule AS SELECT * FROM %s"%(table))
+                    self.cursor.execute("CREATE TABLE tempschedule AS SELECT * FROM %s"%(self.table))
+                    self.new_obj.connection.commit()
         
         except Exception, e:
             print '\tError while creating the table %s'%self.table_name
