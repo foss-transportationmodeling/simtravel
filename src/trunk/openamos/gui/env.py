@@ -85,7 +85,7 @@ OP_OR = 'Or'
 TABLE_HH = 'households'
 TABLE_PER = 'persons'
 
-COMP_LONGTERM = 'Long Term Processes'
+COMP_LONGTERM = 'Long Term Models'
 COMP_FIXEDACTLOCATION = 'Fixed Activity Location Choices'
 COMP_VEHOWN = 'Vehicle Ownership Models'
 COMP_FIXEDACTPRISM = 'Fixed Activity Prisms Generator'
@@ -95,6 +95,14 @@ COMP_ACTSKELRECONCILIATION = 'Activity Skeleton Reconciliation System'
 COMP_ACTTRAVSIMULATOR = 'Activity Travel Pattern Simulator'
 COMP_ACTTRAVRECONCILIATION = 'Activity Travel Reconciliation System'
 COMP_TIMEUSEUTILITY = 'Time Use Utility Calculator'
+
+COMP_MEDIUMTERM = 'Medium Term Models'
+
+
+
+
+COMP_SHORTTERM = 'Short Term Models'
+
 
 COMPKEY_LONGTERM = 'LongTermModels'
 COMPKEY_VEHOWN = 'VehicleOwnershipModel'
@@ -365,6 +373,10 @@ MODELMAP[MODELKEY_AFTSCHACTDUR] = [COMPKEY_AFTSCHACTS,'AftSchActDuration']
 MODELMAP[MODELKEY_AFTSCHJOINTACT] = [COMPKEY_AFTSCHACTS,'']
 
 MODELMAP[MODELKEY_WRKDAILYSTATUS] = ['DailyWorkStatus','DailyWorkStatus']
+
+COMPONENTMAP = {}
+COMPONENTMAP[COMPMODEL_NUMVEHS] = [COMPKEY_VEHOWN]
+
 #MODELKEYSMAP = {}
 #MODELKEYSMAP[MODELKEY_WORKSTAT] = ['Person_ID','']
 #MODELKEYSMAP[MODELKEY_NUMJOBS] = ['Person_ID','']
