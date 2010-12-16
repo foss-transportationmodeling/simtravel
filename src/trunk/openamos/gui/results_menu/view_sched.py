@@ -11,39 +11,42 @@ from PyQt4.QtGui import *
 import numpy as np
 import matplotlib.font_manager as plot
 
-from openamos.core.database_management.cursor_database_connection import *
-from openamos.core.database_management.database_configuration import *
+#from openamos.core.database_management.cursor_database_connection import *
+#from openamos.core.database_management.database_configuration import *
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 from pylab import *
+from core_plot import *
 
 
 
-class MakeSchedPlot(QDialog):
-    def __init__(self, parent=None):
-        QDialog.__init__(self, parent)
-        self.setMinimumSize(QSize(900,500))
-        self.setWindowTitle("Child Activity Skeletons")
-        self.dpi = 100
-        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
-        self.canvas = FigureCanvas(self.fig)
-        self.axes = self.fig.add_subplot(111)
+class MakeSchedPlot(Matplot):
+    def __init__(self, config, table, parent=None):
+        Matplot.__init__(self, parent)
+        self.valid = False
+        self.connects(config)
+        self.cursor = self.new_obj.cursor
+        self.table = table
         
-        protocol = "postgres"        
-        user_name = "postgres"
-        password = "1234"
-        host_name = "10.206.111.111"
-        database_name = "mag_zone"
+#        self.setMinimumSize(QSize(900,500))
+#        self.setWindowTitle("Child Activity Skeletons")
+#        self.dpi = 100
+#        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
+#        self.canvas = FigureCanvas(self.fig)
+#        self.axes = self.fig.add_subplot(111)
         
-        self.database_config_object = DataBaseConfiguration(protocol, user_name, password, host_name, database_name)
-        self.new_obj = DataBaseConnection(self.database_config_object)
-        self.new_obj.new_connection()
+#        protocol = "postgres"        
+#        user_name = "postgres"
+#        password = "1234"
+#        host_name = "10.206.111.111"
+#        database_name = "mag_zone"
+        
+#        self.database_config_object = DataBaseConfiguration(protocol, user_name, password, host_name, database_name)
+#        self.new_obj = DataBaseConnection(self.database_config_object)
+#        self.new_obj.new_connection()
         
 
-        self.vbox = QVBoxLayout()
-        self.vbox.setStretch(0,1)
+        #self.vbox = QVBoxLayout()
+        #self.vbox.setStretch(0,1)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         
         self.vbox.addWidget(self.canvas)
@@ -53,6 +56,9 @@ class MakeSchedPlot(QDialog):
         self.on_draw()
 
         #self.makeTempTables(self.cursor,table)
+
+ 
+ 
 
 
 
@@ -65,20 +71,23 @@ class MakeSchedPlot(QDialog):
         """ Redraws the figure
         """
         
-        data = [[100,0,395,300,396,332,100,729,710],
-                [100,0,325,300,326,213,415,568,34,100,669,770],
-                [100,0,149,513,159,18,101,182,5,300,258,484,100,743,696],
-                [100,0,172,101,173,1,513,199,20,416,266,49,300,367,388,412,797,41,100,885,554],
-                [100,0,302,300,303,435,101,742,10,514,775,61,101,840,0,101,841,1,100,897,542],
-                [100,0,285,300,286,312,101,602,51,101,654,59,101,714,2,412,732,68,100,879,560],
-                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
-                ]
+#        data = [[100,0,395,300,396,332,100,729,710],
+#                [100,0,325,300,326,213,415,568,34,100,669,770],
+#                [100,0,149,513,159,18,101,182,5,300,258,484,100,743,696],
+#                [100,0,172,101,173,1,513,199,20,416,266,49,300,367,388,412,797,41,100,885,554],
+#                [100,0,302,300,303,435,101,742,10,514,775,61,101,840,0,101,841,1,100,897,542],
+#                [100,0,285,300,286,312,101,602,51,101,654,59,101,714,2,412,732,68,100,879,560],
+#                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
+#                ]
+        
+        data = self.retrieveResults()
+        
         rows = len(data)
         ticks = np.arange(rows+1)
         ind = 1
         height = 0.4
         
-        bars=[]
+        #bars=[]
         
         for row in data:
             rowlen = len(row)
@@ -107,9 +116,53 @@ class MakeSchedPlot(QDialog):
         self.axes.set_yticks(ticks)
                 
         self.canvas.draw()
+
+
+    def retrieveResults(self):
         
-                 
-    
+        try:
+            data = []
+            temp = None
+            vars = 'houseid, personid, activitytype, starttime, duration'
+            filter = 'starttime > 0'
+            tablename = 'tempschedule'
+            order = 'houseid, personid, starttime'
+            
+            if filter != "" and order != "":
+
+                self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
+                temp = self.cursor.fetchall()
+                
+                prior_id = '0'
+                aschedule = []
+                for i in temp:
+                    id = '%s%s'%(str(i[0]),str(i[1]))
+                    if prior_id <> id:
+                        prior_id = id
+                        
+                        if len(data) < 11:
+                            data.append(aschedule)
+                        
+                        aschedule = []
+                        aschedule.append(i[2])
+                        aschedule.append(i[3])
+                        aschedule.append(i[4])
+                    else:
+                        aschedule.append(i[2])
+                        aschedule.append(i[3])
+                        aschedule.append(i[4])                        
+
+            data.pop(0)
+            return data
+        
+        except Exception, e:
+            print '\tError while creating the table %s'%self.table_name
+            print e
+            return None
+        
+        return None
+
+
     def colors(self, index):
         colorpooldict = {100:'#0000FF',101:'#0000FF',200:'#A9A9A9',300:'#7B68EE',411:'#FF9933',
                          412:'#32CD32',415:'#66CCFF',416:'#B88A00',513:'#B8002E',
@@ -145,7 +198,7 @@ class MakeSchedPlot(QDialog):
 
 def main():
     app = QApplication(sys.argv)
-    diag = MakeSchedPlot()
+    diag = MakeSchedPlot(None, None)
     diag.show()
     app.exec_()
 
