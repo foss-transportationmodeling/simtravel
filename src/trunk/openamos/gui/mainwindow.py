@@ -85,7 +85,6 @@ class MainWindow(QMainWindow):
         self.model_management = Model_Manager_Treewidget()
         self.model_management.setObjectName("model_management")
         self.model_management.headerItem().setText(0, "Model Management")
-        self.model_management.setMinimumSize(50,50)
         self.connect(self.model_management, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.showflowchart)
 
 
@@ -377,9 +376,10 @@ class MainWindow(QMainWindow):
         actpro = bool(self.proconfig)
         if actpro:
             self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT,NAME))
+            self.model_management.setConfigObject(self.proconfig)
+            self.models.setConfigObject(self.proconfig)
         self.centralwidget.setEnabled(actpro)
-        self.model_management.setConfigObject(self.proconfig)
-        self.models.setConfigObject(self.proconfig)
+
         
     def databaseconfiguration(self):
         if self.proconfig <> None:
