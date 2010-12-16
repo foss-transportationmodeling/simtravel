@@ -20,15 +20,16 @@ class VehicleOwnershipModels(QWidget):
         widgetwidth = size.width()
         widgetheight = size.height()
         
+        self.color = buttonColor(self.configob)
         self.num_vehs_button = QPushButton('Count of Vehicles \nOwned by the Household', self)
         self.num_vehs_button.setGeometry((size.width())/2 - 100, size.height()/2 - 330,200, 50)
-        self.num_vehs_button.setStyleSheet(self.isUserModel(MODELKEY_NUMVEHS))
+        self.num_vehs_button.setStyleSheet(self.color.isUserModel(MODELKEY_NUMVEHS))
         self.connect(self.num_vehs_button, SIGNAL('clicked()'), self.num_vehs)
         
         #veh_types_button = QPushButton("Vehicle body/fuel type \nfor each household vehicle \n\nIf the data permits also \nthe age of the vehicle \n\nBody types \55 Use the \ncategories from MOVES to \nenable emission estimation \n\nFuel types \55 Gasoline, Others", self)     
         self.veh_types_button = QPushButton("Vehicle Body Type \nfor each Household Vehicle", self)     
         self.veh_types_button.setGeometry((size.width())/2 - 100, size.height()/2 - 250, 200, 200)
-        self.veh_types_button.setStyleSheet(self.isUserModel(MODELKEY_VEHTYPE))
+        self.veh_types_button.setStyleSheet(self.color.isUserModel(MODELKEY_VEHTYPE))
         self.connect(self.veh_types_button, SIGNAL('clicked()'), self.veh_types)
         
         Dummy  = QPushButton('', self)
@@ -44,7 +45,7 @@ class VehicleOwnershipModels(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-        self.num_vehs_button.setStyleSheet(self.isUserModel(modelkey))
+        self.num_vehs_button.setStyleSheet(self.color.isUserModel(modelkey))
         
         
         
@@ -56,15 +57,7 @@ class VehicleOwnershipModels(QWidget):
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
-        self.veh_types_button.setStyleSheet(self.isUserModel(modelkey))
-    
-    
-    def isUserModel(self,modelkey):
-        if self.configob <> None:
-            if not self.configob.comparemodels(modelkey):
-                return "background-color: #8FBC8F"
-
-        return "background-color: #FFFDD0"
+        self.veh_types_button.setStyleSheet(self.color.isUserModel(modelkey))
 
 
     def paintEvent(self, parent = None):
