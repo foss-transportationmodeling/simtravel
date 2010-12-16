@@ -19,22 +19,22 @@ class Travel_Reconciliation_System(QWidget):
 
         pattern_onciliation_button = QPushButton('Activity-travel \nPattern Reconciliation', self)
         pattern_onciliation_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 350, 200, 80)
-        pattern_onciliation_button.setStyleSheet("background-color: #FFFDD0")
+        pattern_onciliation_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(pattern_onciliation_button, SIGNAL('clicked()'), self.pattern_reconciliation)
 
         person_constraints_2_button = QPushButton("Within person constraints", self)     
         person_constraints_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 240, 200, 80)
-        person_constraints_2_button.setStyleSheet("background-color: #FFFDD0")
+        person_constraints_2_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(person_constraints_2_button, SIGNAL('clicked()'), self.person_constraints_2)
 
         hhold_constraints_button = QPushButton("Within household constraints", self)     
         hhold_constraints_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 130, 200, 80)
-        hhold_constraints_button.setStyleSheet("background-color: #FFFDD0")
+        hhold_constraints_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(hhold_constraints_button, SIGNAL('clicked()'), self.hhold_constraints)
 
         adjustment_2_button = QPushButton('Duration adjustment \nafter arrival', self)
         adjustment_2_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 20, 200, 80)
-        adjustment_2_button.setStyleSheet("background-color: #FFFDD0")
+        adjustment_2_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(adjustment_2_button, SIGNAL('clicked()'), self.adjustment_2)
         
         Dummy  = QPushButton('', self)
