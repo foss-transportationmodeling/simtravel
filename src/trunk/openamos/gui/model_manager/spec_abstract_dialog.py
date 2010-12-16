@@ -1067,7 +1067,16 @@ class AbtractSpecDialog(QDialog):
 #            res = True
 #        return res
 
-    
+class buttonColor:
+    def __init__(self, configobject, parent=None):
+        self.configob = configobject
+
+    def isUserModel(self,modelkey):
+        if self.configob <> None:
+            if not self.configob.comparemodels(modelkey):
+                return "background-color: #8FBC8F"
+
+        return "background-color: #00C5CD" #FFFDD0"
 
 
 def main():
