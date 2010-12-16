@@ -10,6 +10,14 @@ class Model_Manager_Treewidget(QTreeWidget):
     def __init__(self, parent = None):
         super(Model_Manager_Treewidget, self).__init__(parent)
         self.models = Models(parent)
+        self.setColumnCount(3)
+        self.setHeaderLabels(["Model", "Completed", "Skip"])
+        self.setColumnWidth(0, 260)
+        self.setColumnWidth(1, 60)
+        self.setColumnWidth(2, 30)
+        self.setMinimumSize(360,50)
+        
+        self.configobject = None
 
 # Define long term models
         
@@ -35,10 +43,9 @@ class Model_Manager_Treewidget(QTreeWidget):
         residential_location_choice = QTreeWidgetItem(long_term_models)
         residential_location_choice.setText(0, COMPMODEL_RESLOC)            #"Residential Location Choice")
 
-
 # Define fixed activity location choice generator
         
-        fixed_activity_models = QTreeWidgetItem(self)
+        fixed_activity_models = QTreeWidgetItem(long_term_models)
         fixed_activity_models.setText(0, COMP_FIXEDACTLOCATION)     #"Fixed Activity Location Choice Generator")
 
         workers = QTreeWidgetItem(fixed_activity_models)
@@ -61,21 +68,25 @@ class Model_Manager_Treewidget(QTreeWidget):
         preschool_location_choice = QTreeWidgetItem(children_1)
         preschool_location_choice.setText(0, COMPMODEL_PRESCHLOC)   #"Preschool location choice"
         
+
+        medium_term_models = QTreeWidgetItem(self)
+        medium_term_models.setText(0, COMP_MEDIUMTERM)         
         
 # Define Vehicle Ownership Model
 
-        vehicle_ownership_models = QTreeWidgetItem(self)
+        vehicle_ownership_models = QTreeWidgetItem(medium_term_models)
         vehicle_ownership_models.setText(0, COMP_VEHOWN)            #"Vehicle Ownership Model")
 
         count_vehicles = QTreeWidgetItem(vehicle_ownership_models)
         count_vehicles.setText(0, COMPMODEL_NUMVEHS)                #"Count of Vehicles")
+        
 
         Vehicle_body_fuel_type  = QTreeWidgetItem(vehicle_ownership_models)
         Vehicle_body_fuel_type.setText(0, COMPMODEL_NUMTYPES )      #"Vehicle body/fuel type")
 
 # Define Fixed Activity Prism Models       
 
-        fixed_activity_prism_models = QTreeWidgetItem(self)
+        fixed_activity_prism_models = QTreeWidgetItem(medium_term_models)
         fixed_activity_prism_models.setText(0, COMP_FIXEDACTPRISM)
 
         worker = QTreeWidgetItem(fixed_activity_prism_models)
@@ -155,7 +166,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 
 # Define Child Daily Status and Allocation Model
 
-        child_model = QTreeWidgetItem(self)
+        child_model = QTreeWidgetItem(medium_term_models)
         child_model.setText(0, COMP_CHILDSTATUS)
 
         children_1 = QTreeWidgetItem(child_model)
@@ -184,7 +195,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 
 # Define Adult Daily Status Model
 
-        adult_model = QTreeWidgetItem(self)
+        adult_model = QTreeWidgetItem(medium_term_models)
         adult_model.setText(0, COMP_ADULTSTATUS)
 
         assign_stayhmchild_wrk = QTreeWidgetItem(adult_model)
@@ -199,7 +210,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 
 # Define Activity Skeleton Reconciliation System        
 
-        skeleton_reconciliation_system = QTreeWidgetItem(self)
+        skeleton_reconciliation_system = QTreeWidgetItem(medium_term_models)
         skeleton_reconciliation_system.setText(0, COMP_ACTSKELRECONCILIATION)
         
         skeleton_reconciliation = QTreeWidgetItem(skeleton_reconciliation_system)
@@ -211,10 +222,11 @@ class Model_Manager_Treewidget(QTreeWidget):
         adjustment_1 = QTreeWidgetItem(skeleton_reconciliation_system)
         adjustment_1.setText(0, COMPMODEL_ASADJUST )                #"Adjustments to the activity skeleton based on expected Travel Time from previous day")
         
-
+        short_term_models = QTreeWidgetItem(self)
+        short_term_models.setText(0, COMP_SHORTTERM) 
         
 # Define Activity Travel Pattern Simulator
-        activity_travel_pattern_simulator = QTreeWidgetItem(self)
+        activity_travel_pattern_simulator = QTreeWidgetItem(short_term_models)
         activity_travel_pattern_simulator.setText(0, COMP_ACTTRAVSIMULATOR)
         
         time_slice = QTreeWidgetItem(activity_travel_pattern_simulator)
@@ -281,7 +293,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         activity_travel_pattern.setText(0, COMPMODEL_SMPATTERN)     #"Activity-travel patterns for all individuals within the time-slice")
         
 # Define Activity Travel Reconciliation System
-        travel_reconciliation_system = QTreeWidgetItem(self)
+        travel_reconciliation_system = QTreeWidgetItem(short_term_models)
         travel_reconciliation_system.setText(0, COMP_ACTTRAVRECONCILIATION)
 
         pattern_reconciliation = QTreeWidgetItem(travel_reconciliation_system)
@@ -305,6 +317,24 @@ class Model_Manager_Treewidget(QTreeWidget):
 
     def setConfigObject(self,co):
         self.configobject = co
+        self.setAllComSimStatuses()
+        
+    def setAllComSimStatuses(self):
+        self.setCompSimStatus(COMPMODEL_NUMVEHS)
+        
+
+    def setCompSimStatus(self,comptitle):
+        treecomp = self.findItems(QString(comptitle),Qt.MatchFixedString | Qt.MatchRecursive)[0]
+        treecomp.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+        compname = (COMPONENTMAP[comptitle])[0]
+        compsimstat = self.configobject.getCompSimStatus(compname)
+        if compsimstat != None:
+            treecomp.setIcon(1, QIcon("./images/%s" %(compsimstat[0])))
+            if compsimstat[1]:
+                treecomp.setCheckState(2, Qt.Checked)
+            else:
+                treecomp.setCheckState(2, Qt.Unchecked)
+
     
     def treeItemSelected(self,item,col):
         diagtitle = None
