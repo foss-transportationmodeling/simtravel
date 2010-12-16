@@ -91,6 +91,8 @@ class AbstractModWidget(QGroupBox):
         self.seedlabel = QLabel('Seed')
         self.seedline = QSpinBox()
         self.seedline.setFixedWidth(100)
+        self.seedline.setMinimum(1)
+        self.seedline.setMaximum(100)
         seedlayout = QHBoxLayout()
         seedlayout.addWidget(self.seedlabel)
         seedlayout.addWidget(self.seedline)
@@ -232,27 +234,27 @@ class AbstractModWidget(QGroupBox):
         
     def makeSFVarianceWidget(self):
         self.variancevwidget = QWidget(self)
-        self.varianceuwidget = QWidget(self)
+        #self.varianceuwidget = QWidget(self)
         self.variancevlayout = QHBoxLayout()
-        self.varianceulayout = QHBoxLayout()
+        #self.varianceulayout = QHBoxLayout()
         self.variancevwidget.setLayout(self.variancevlayout)
-        self.varianceuwidget.setLayout(self.varianceulayout)
+        #self.varianceuwidget.setLayout(self.varianceulayout)
         
 
         self.variancevlabel = QLabel('Variance (v) - Normal')
-        self.varianceulabel = QLabel('Variance (u) - Half Normal')
         self.variancevlayout.addWidget(self.variancevlabel)
-        self.varianceulayout.addWidget(self.varianceulabel)
-        
         self.variancevline = LineEdit()
         self.variancevline.setFixedWidth(100)
+        self.variancevlayout.addWidget(self.variancevline)
+        
+        self.varianceulabel = QLabel('   Variance (u) - Half Normal')
+        self.variancevlayout.addWidget(self.varianceulabel)
         self.varianceuline = LineEdit()
         self.varianceuline.setFixedWidth(100)
-        self.variancevlayout.addWidget(self.variancevline)
-        self.varianceulayout.addWidget(self.varianceuline)
+        self.variancevlayout.addWidget(self.varianceuline)
         
         self.mainlayout.addWidget(self.variancevwidget,0,0,1,1,Qt.AlignLeft)
-        self.mainlayout.addWidget(self.varianceuwidget,0,1,1,1,Qt.AlignLeft)
+        #self.mainlayout.addWidget(self.varianceuwidget,0,1,1,1,Qt.AlignLeft)
 
    
     def makeIntVar(self):
@@ -438,7 +440,7 @@ class SFModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(SFModWidget, self).__init__(parent) 
         self.makeSFVarianceWidget()
-        self.makeSeedWidget(0,2)
+        self.makeSeedWidget(0,1)
         self.makeVarsWidget(1,0)  
 
     def checkInputs(self):
