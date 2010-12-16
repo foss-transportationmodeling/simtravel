@@ -17,57 +17,66 @@ class Adult_Model(QWidget):
         
         children_assigned_button = QPushButton("Dependent events assigned to household? \n(Stay-home and/or Chauffeuring)", self)
         children_assigned_button.setGeometry((size.width()) / 2 - 150, 40, 300, 60)
+        children_assigned_button.setStyleSheet("background-color: #00C5CD")
         self.connect(children_assigned_button, SIGNAL('clicked()'), self.children_assigned)
 
-        children_stay_home_button = QPushButton("Households with dependent \nstay-home events", self)
-        children_stay_home_button.setGeometry((size.width()) / 2 - 100, 140, 200, 50)
-       
-        children_chauffeuring_button = QPushButton("Households with dependent \nchauffeuring events", self)
-        children_chauffeuring_button.setGeometry((size.width()) * 3 / 4 - 100, 140, 200, 50)
+#        children_stay_home_button = QPushButton("Households with dependent \nstay-home events", self)
+#        children_stay_home_button.setGeometry((size.width()) / 2 - 100, 140, 200, 50)
+#        children_stay_home_button.setStyleSheet("background-color: #FFFDD0")
+#       
+#        children_chauffeuring_button = QPushButton("Households with dependent \nchauffeuring events", self)
+#        children_chauffeuring_button.setGeometry((size.width()) * 3 / 4 - 100, 140, 200, 50)
+#        children_chauffeuring_button.setStyleSheet("background-color: #FFFDD0")
        
         nonworking_adult_button = QPushButton('Households with at least \none non-working adult', self)
         nonworking_adult_button.setGeometry((size.width()) / 2 - 100, 220, 200, 50)
+        nonworking_adult_button.setStyleSheet("background-color: #00C5CD")
         self.connect(nonworking_adult_button, SIGNAL('clicked()'), self.nonworking_adult)
        
         all_working_adult_button = QPushButton('Households with all \nworking adults', self)
         all_working_adult_button.setGeometry((size.width()) / 4 - 100, 220, 200, 50)
+        all_working_adult_button.setStyleSheet("background-color: #00C5CD")
         self.connect(all_working_adult_button, SIGNAL('clicked()'), self.all_working_adult)
 
         assign_children_3_button = QPushButton('Assign each dependent child \nto a household adult subject \nto the fixed activity schedule', self)
         assign_children_3_button.setGeometry((size.width()) * 3 / 4 - 100, 220, 200, 80)
+        assign_children_3_button.setStyleSheet("background-color: #00C5CD")
         self.connect(assign_children_3_button, SIGNAL('clicked()'), self.assign_children_3)
 
         assign_children_1_button = QPushButton('Assign all dependent \nchildren to a working adult', self)
         assign_children_1_button.setGeometry((size.width()) / 4 - 100, 300, 200, 50)
+        assign_children_1_button.setStyleSheet("background-color: #00C5CD")
         self.connect(assign_children_1_button, SIGNAL('clicked()'), self.assign_children_1)
 
         assign_children_2_button = QPushButton('Assign all dependent \nchildren to one \nnon-working adult', self)
         assign_children_2_button.setGeometry((size.width()) / 2 - 100, 300, 200, 50)
+        assign_children_2_button.setStyleSheet("background-color: #00C5CD")
         self.connect(assign_children_2_button, SIGNAL('clicked()'), self.assign_children_2)
 
-        adult_work_button = QPushButton('This adult works from home', self)
-        adult_work_button.setGeometry((size.width()) / 4 - 100, 380, 200, 50)
-        #self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
+#        adult_work_button = QPushButton('This adult works from home', self)
+#        adult_work_button.setGeometry((size.width()) / 4 - 100, 380, 200, 50)
+#        adult_work_button.setStyleSheet("background-color: #FFFDD0")
+#        #self.connect(adult_work_button, SIGNAL('clicked()'), self.adult_work)
 
         check_adult_button = QPushButton('Adult work status', self)
         check_adult_button.setGeometry((size.width()) / 2 - 100, 470, 200, 50)
+        check_adult_button.setStyleSheet("background-color: #00C5CD")
         self.connect(check_adult_button, SIGNAL('clicked()'), self.check_adult)
 
         work_today_button = QPushButton('Adult worker going to \nwork on travel day?', self)
         work_today_button.setGeometry((size.width()) / 4 - 100, 550, 200, 50)
+        work_today_button.setStyleSheet("background-color: #00C5CD")
         self.connect(work_today_button, SIGNAL('clicked()'), self.work_today)
 
-        work_from_home_button = QPushButton('Work from home', self)
-        work_from_home_button.setGeometry((size.width()) / 4 - 100, 630, 200, 50)
-        #self.connect(work_from_home_button, SIGNAL('clicked()'), self.work_from_home)
+#        work_from_home_button = QPushButton('Work from home', self)
+#        work_from_home_button.setGeometry((size.width()) / 4 - 100, 630, 200, 50)
+#
+#        go_to_work_button = QPushButton('Go to work', self)
+#        go_to_work_button.setGeometry((size.width()) / 2 - 100, 630, 200, 50)
+#
+#        no_work_episodes_button = QPushButton('No work episodes', self)
+#        no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
 
-        go_to_work_button = QPushButton('Go to work', self)
-        go_to_work_button.setGeometry((size.width()) / 2 - 100, 630, 200, 50)
-        #self.connect(go_to_work_button, SIGNAL('clicked()'), self.go_to_work)
-
-        no_work_episodes_button = QPushButton('No work episodes', self)
-        no_work_episodes_button.setGeometry((size.width()) * 3 / 4 - 100, 630, 200, 50)
-        #self.connect(no_work_episodes_button, SIGNAL('clicked()'), self.no_work_episodes)
         
         Dummy  = QPushButton('', self)
         Dummy.setGeometry(0, size.height() - 4, 1140, 2)
@@ -253,7 +262,17 @@ class Adult_Model(QWidget):
         point.setY(630)
         arrow.setBrush(QColor("black"))
         arrow.drawPolygon(QPoint(point.x(),point.y()),QPoint(point.x() - 4,point.y() - 13), QPoint(point.x() + 4,point.y() - 13))
-
+        
+        
+        arrow.setBrush(QColor("#F0F0F0"))
+        arrow.drawRoundedRect(widgetwidth/4 - 100, 630, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/2 - 100, 630, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth*3 / 4 - 100, 630, 200, 50, 15.0, 15.0) 
+        
+        arrow.drawRoundedRect(widgetwidth/2 - 100, 140, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth*3/4 - 100, 140, 200, 50, 15.0, 15.0)
+        arrow.drawRoundedRect(widgetwidth/4 - 100, 380, 200, 50, 15.0, 15.0)
+        
         arrow.end()
 
         # Drawing text
@@ -284,10 +303,27 @@ class Adult_Model(QWidget):
         point.setX(widgetwidth / 2 - 110)  
         point.setY(570)
         text.drawText(point, "Yes")
+
+        temp = QRect(widgetwidth/4 - 100, 630, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Work from home')
+
+        temp = QRect(widgetwidth/2 - 100, 630, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'Go to work')
+
+        temp = QRect(widgetwidth*3 / 4 - 100, 630, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'No work episodes')
         
+        temp = QRect(widgetwidth/2 - 100, 140, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, "Households with dependent \nstay-home events")
+
+        temp = QRect(widgetwidth*3/4 - 100, 140, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, "Households with dependent \nchauffeuring events")       
+
+        temp = QRect(widgetwidth/4 - 100, 380, 200, 50)
+        text.drawText(temp, Qt.AlignCenter, 'This adult works from home')               
+ 
         text.end()
 
-        #text.begin(self)
 
         
 
