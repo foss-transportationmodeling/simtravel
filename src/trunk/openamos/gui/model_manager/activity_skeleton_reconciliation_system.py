@@ -19,19 +19,19 @@ class Skeleton_Reconciliation_System(QWidget):
         
         skeleton_reconciliation_button = QPushButton('Activity \nSkeleton Reconciliation', self)
         skeleton_reconciliation_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 350, 200, 80)
-        skeleton_reconciliation_button.setStyleSheet("background-color: #FFFDD0")
+        skeleton_reconciliation_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(skeleton_reconciliation_button, SIGNAL('clicked()'), self.skeleton_reconciliation)
         #self.connect(workersbutton, SIGNAL('clicked()'), qApp, SLOT('Close()'))
         
         person_constraints_1_button = QPushButton("Within person constraints", self)     
         person_constraints_1_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 240, 200, 80)
-        person_constraints_1_button.setStyleSheet("background-color: #FFFDD0")
+        person_constraints_1_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(person_constraints_1_button, SIGNAL('clicked()'), self.person_constraints_1)
 
         
         adjustment_1_button = QPushButton('Adjustments to the activity \nskeleton based on expected \nTravel Time from previous day', self)
         adjustment_1_button.setGeometry((size.width()) / 2 - 100, size.height() / 2 - 130, 200, 80)
-        adjustment_1_button.setStyleSheet("background-color: #FFFDD0")
+        adjustment_1_button.setStyleSheet("background-color: #00C5CD")
         #self.connect(adjustment_1_button, SIGNAL('clicked()'), self.adjustment_1)
 
         
