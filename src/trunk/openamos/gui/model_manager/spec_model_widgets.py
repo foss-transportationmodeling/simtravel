@@ -45,7 +45,7 @@ class AbstractModWidget(QGroupBox):
         #self.choicetable.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.choicelayout.addWidget(self.choicetable)
     
-        self.mainlayout.addWidget(self.choicewidget,0,0,1,1)
+        self.mainlayout.addWidget(self.choicewidget,1,0,1,1)
         
         self.connect(self.choiceaddbutton, SIGNAL("clicked(bool)"), self.addChoice) 
         self.connect(self.choicedelbutton, SIGNAL("clicked(bool)"), self.delChoice)
@@ -85,6 +85,19 @@ class AbstractModWidget(QGroupBox):
         
         self.connect(self.choiceaddbutton, SIGNAL("clicked(bool)"), self.addChoice)
         self.connect(self.choicedelbutton, SIGNAL("clicked(bool)"), self.delChoice)
+
+
+    def makeSeedWidget(self,x=0,y=1):
+        self.seedlabel = QLabel('Seed')
+        self.seedline = QSpinBox()
+        self.seedline.setFixedWidth(100)
+        seedlayout = QHBoxLayout()
+        seedlayout.addWidget(self.seedlabel)
+        seedlayout.addWidget(self.seedline)
+        self.seedwidget = QWidget(self)
+        self.seedwidget.setLayout(seedlayout)
+        
+        self.mainlayout.addWidget(self.seedwidget,x,y,1,1,Qt.AlignLeft)
 
 
     def makeVarsWidget(self,x=0,y=1):
@@ -191,7 +204,7 @@ class AbstractModWidget(QGroupBox):
         self.nesttable.horizontalHeader().setResizeMode(1,1)
         self.nestlayout.addWidget(self.nesttable)
         
-        self.mainlayout.addWidget(self.nestwidget,0,0,1,1)
+        self.mainlayout.addWidget(self.nestwidget,1,0,1,1)
         
         self.connect(self.nesteaddbutton, SIGNAL("clicked(bool)"), self.addNest) 
         self.connect(self.nestdelbutton, SIGNAL("clicked(bool)"), self.delNest)
@@ -225,6 +238,7 @@ class AbstractModWidget(QGroupBox):
         self.variancevwidget.setLayout(self.variancevlayout)
         self.varianceuwidget.setLayout(self.varianceulayout)
         
+
         self.variancevlabel = QLabel('Variance (v) - Normal')
         self.varianceulabel = QLabel('Variance (u) - Half Normal')
         self.variancevlayout.addWidget(self.variancevlabel)
@@ -293,7 +307,8 @@ class ProbModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(ProbModWidget, self).__init__(parent)
         self.makeProbChoiceWidget()
-        self.makeVarsWidget(0,1)
+        self.makeSeedWidget(0,0)
+        self.makeVarsWidget(1,1) #(0,1)
         self.intbutton.setVisible(False)
         #self.delbutton.setVisible(False)
     
@@ -309,6 +324,7 @@ class CountModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(CountModWidget, self).__init__(parent) 
         self.makeCountTypeWidget()
+        self.makeSeedWidget(0,2)
         self.makeChoiceWidget(1,0) 
         self.makeVarsWidget(1,1) 
 
@@ -355,6 +371,7 @@ class OrderedModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(OrderedModWidget, self).__init__(parent) 
         self.makeOrdTypeWidget()
+        self.makeSeedWidget(0,1)
         self.makeOrdChoiceWidget(1,0)
         self.makeVarsWidget(1,1) 
 
@@ -369,6 +386,7 @@ class OrderedModWidget(AbstractModWidget):
         self.ordtypewidget.setLayout(buttonlayout)
                
         self.mainlayout.addWidget(self.ordtypewidget,0,0,1,1,Qt.AlignLeft)
+
 
     def makeOrdChoiceWidget(self,x=0,y=0):
         self.choicewidget = QWidget(self)
@@ -420,6 +438,7 @@ class SFModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(SFModWidget, self).__init__(parent) 
         self.makeSFVarianceWidget()
+        self.makeSeedWidget(0,2)
         self.makeVarsWidget(1,0)  
 
     def checkInputs(self):
@@ -436,8 +455,9 @@ class MNLogitModWidget(AbstractModWidget):
         self.alternatives = []
         self.specs = {}
         self.curralt = None
-        self.makeChoiceWidget() 
-        self.makeVarsWidget() 
+        self.makeSeedWidget(0,0)
+        self.makeChoiceWidget(1,0)
+        self.makeVarsWidget(1,1) 
         #self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable)
         self.connect(self.choicetable, SIGNAL("currentCellChanged (int,int,int,int)"), self.showVarsTable)
         #self.connect(self.varstable, SIGNAL("cellChanged (int,int)"), self.storeVarsTable)
@@ -572,7 +592,8 @@ class GCMNLogitModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(GCMNLogitModWidget, self).__init__(parent) 
         #self.makeChoiceWidget()
-        self.makeVarsWidget() 
+        self.makeSeedWidget(0,0)
+        self.makeVarsWidget(1,0) 
         
     def checkInputs(self):
         res = True
@@ -586,6 +607,7 @@ class LogRegModWidget(AbstractModWidget):
     def __init__(self, parent = None):
         super(LogRegModWidget, self).__init__(parent) 
         self.makeVarianceWidget()
+        self.makeSeedWidget(0,1)
         self.makeVarsWidget(1,0) 
 
     def checkInputs(self):
@@ -603,8 +625,9 @@ class NLogitModWidget(AbstractModWidget):
         self.specs = {}
         self.curralt = None
         self.makeNestWidget()
-        self.makeChoiceWidget(0, 1)
-        self.makeVarsWidget(0, 2) 
+        self.makeSeedWidget(0,0)
+        self.makeChoiceWidget(1, 1)
+        self.makeVarsWidget(1, 2) 
         self.connect(self.choicetable, SIGNAL("currentItemChanged (QTableWidgetItem *,QTableWidgetItem *)"), self.showVarsTable) 
         #self.connect(self.varstable, SIGNAL("itemSelectionChanged()"), self.printSelection) 
 
