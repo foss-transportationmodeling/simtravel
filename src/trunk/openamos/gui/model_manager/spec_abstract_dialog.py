@@ -226,6 +226,8 @@ class AbtractSpecDialog(QDialog):
         if modelspecified is not None:
             #self.populateRununtilWidget(modelspecified)
             #self.populateFilterWidget(modelspecified)
+            seed = int(modelspecified.get(SEED))
+            self.modwidget.seedline.setValue(seed)
             
             if self.modeltypecb.currentText() == PROB_MODEL:
                 self.populateAltsWidget(modelspecified)
@@ -730,6 +732,8 @@ class AbtractSpecDialog(QDialog):
             if elt.get(MODELTYPE) != None:
                 elt.set(MODELTYPE,'')
         
+        seed = self.modwidget.seedline.value()
+        elt.set(SEED,str(seed))
 #        seed = str(elt.get(SEED))
 #        user = str(elt.get(DMODEL))
 #        del elt.attrib[SEED]
