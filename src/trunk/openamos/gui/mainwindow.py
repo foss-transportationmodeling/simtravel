@@ -10,6 +10,7 @@ from file_menu.openproject import *
 from file_menu.saveproject import *
 from file_menu.databaseconfig import *
 from results_menu.view_trips import *
+from results_menu.view_sched import *
 from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
@@ -204,7 +205,9 @@ class MainWindow(QMainWindow):
                                             "", "Show activity characteristics", False, True)
         travel_pattern_action = self.createaction("Travel Characteristics", self.results_trips, None,
                                                   None, "Show travel characteristics", False, True)
-        self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action, ))
+        person_schedule_action = self.createaction("Person Schedule", self.results_person, None,
+                                                  None, "Show travel characteristics", False, True)
+        self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action,person_schedule_action, ))
 
     # Defining help        
         self.help_menu = self.menuBar().addMenu("&Help")
@@ -330,6 +333,7 @@ class MainWindow(QMainWindow):
             self.run_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
+            self.result_menu.actions()[2].setEnabled(True)
             
 
     def projectsave(self):
@@ -394,6 +398,11 @@ class MainWindow(QMainWindow):
     def results_trips(self):
         if self.proconfig <> None:
             show_plot = MakePlot(self.proconfig,"trips")
+            show_plot.exec_()
+            
+    def results_person(self):
+        if self.proconfig <> None:
+            show_plot = MakeSchedPlot(self.proconfig,"trips")
             show_plot.exec_()
             
     def run_simulation(self):
