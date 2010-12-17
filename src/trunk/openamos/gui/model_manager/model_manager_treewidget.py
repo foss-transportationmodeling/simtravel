@@ -89,79 +89,68 @@ class Model_Manager_Treewidget(QTreeWidget):
         fixed_activity_prism_models = QTreeWidgetItem(medium_term_models)
         fixed_activity_prism_models.setText(0, COMP_FIXEDACTPRISM)
 
-        worker = QTreeWidgetItem(fixed_activity_prism_models)
-        worker.setText(0, "Adult Workers")
-        
-        start_day1 = QTreeWidgetItem(worker)
-        start_day1.setText(0, COMPMODEL_DAYSTART)
+        daystart = QTreeWidgetItem(fixed_activity_prism_models)
+        daystart.setText(0, COMPMODEL_DAYSTART)
 
-        end_day1 = QTreeWidgetItem(worker)
-        end_day1.setText(0, COMPMODEL_DAYEND)
+        daystart_aw = QTreeWidgetItem(daystart)
+        daystart_aw.setText(0, "Adult Workers")
+        daystart_an = QTreeWidgetItem(daystart)
+        daystart_an.setText(0, "Adult Non-workers")
+        daystart_na = QTreeWidgetItem(daystart)
+        daystart_na.setText(0, "Children (5-17 years) and\nAdult Students")
+        daystart_ps = QTreeWidgetItem(daystart)
+        daystart_ps.setText(0, "Pre-school Children\n(0-4 years)")
+
+        dayend = QTreeWidgetItem(fixed_activity_prism_models)
+        dayend.setText(0, COMPMODEL_DAYEND)
+
+        dayend_aw = QTreeWidgetItem(dayend)
+        dayend_aw.setText(0, "Adult Workers")
+        dayend_an = QTreeWidgetItem(dayend)
+        dayend_an.setText(0, "Adult Non-workers")
+        dayend_na = QTreeWidgetItem(dayend)
+        dayend_na.setText(0, "Children (5-17 years) and\nAdult Students")
+        dayend_ps = QTreeWidgetItem(dayend)
+        dayend_ps.setText(0, "Pre-school Children\n(0-4 years)")
         
-        number_work_episodes = QTreeWidgetItem(worker)
-        number_work_episodes.setText(0, COMPMODEL_WRKEPISODES)
-        
-        latest_oneepiso = QTreeWidgetItem(worker)
+        work_episodes = QTreeWidgetItem(fixed_activity_prism_models)
+        work_episodes.setText(0, COMPMODEL_WRKEPISODES)
+
+        one_episode_workers = QTreeWidgetItem(fixed_activity_prism_models)
+        one_episode_workers.setText(0, COMPMODEL_1WEPISODE)
+        latest_oneepiso = QTreeWidgetItem(one_episode_workers)
         latest_oneepiso.setText(0, COMPMODEL_WORKSTART)
-        
-        early_oneepiso = QTreeWidgetItem(worker)
-        early_oneepiso.setText(0, COMPMODEL_WORKEND)
-        
-        latest_twoepiso1 = QTreeWidgetItem(worker)
+        early_oneepiso = QTreeWidgetItem(one_episode_workers)
+        early_oneepiso.setText(0, COMPMODEL_WORKEND)        
+
+
+        two_episode_workers1 = QTreeWidgetItem(fixed_activity_prism_models)
+        two_episode_workers1.setText(0, COMPMODEL_2WEPISODE1)
+        latest_twoepiso1 = QTreeWidgetItem(two_episode_workers1)
         latest_twoepiso1.setText(0, COMPMODEL_WORKSTART1)
-        
-        early_twoepiso1 = QTreeWidgetItem(worker)
+        early_twoepiso1 = QTreeWidgetItem(two_episode_workers1)
         early_twoepiso1.setText(0, COMPMODEL_WORKEND1)
-        
-        latest_twoepiso2 = QTreeWidgetItem(worker)
+
+        two_episode_workers2 = QTreeWidgetItem(fixed_activity_prism_models)
+        two_episode_workers2.setText(0, COMPMODEL_2WEPISODE2)
+        latest_twoepiso2 = QTreeWidgetItem(two_episode_workers2)
         latest_twoepiso2.setText(0, COMPMODEL_WORKSTART2)
-        
-        early_twoepiso2 = QTreeWidgetItem(worker)
-        early_twoepiso2.setText(0, COMPMODEL_WORKEND2)
-        
-        
-        nonworker = QTreeWidgetItem(fixed_activity_prism_models)
-        nonworker.setText(0, "Adult Non-workers")
-        
-        start_day2 = QTreeWidgetItem(nonworker)
-        start_day2.setText(0, COMPMODEL_DAYSTART)
-
-        end_day2 = QTreeWidgetItem(nonworker)
-        end_day2.setText(0, COMPMODEL_DAYEND)
-        
-        
-        
-        student = QTreeWidgetItem(fixed_activity_prism_models)
-        student.setText(0, "Children (5-17 years)")
-        
-        start_day3 = QTreeWidgetItem(student)
-        start_day3.setText(0, COMPMODEL_DAYSTART)
-
-        end_day3 = QTreeWidgetItem(student)
-        end_day3.setText(0, COMPMODEL_DAYEND)
-        
-        latest_school = QTreeWidgetItem(student)
+        early_twoepiso2 = QTreeWidgetItem(two_episode_workers2)
+        early_twoepiso2.setText(0, COMPMODEL_WORKEND2)        
+         
+        schoolprisms = QTreeWidgetItem(fixed_activity_prism_models)
+        schoolprisms.setText(0, COMPMODEL_SCHEPISODES)
+        latest_school = QTreeWidgetItem(schoolprisms)
         latest_school.setText(0, COMPMODEL_SCHSTART)
-        
-        early_school = QTreeWidgetItem(student)
-        early_school.setText(0, COMPMODEL_SCHEND)
-        
-        
-        
-        preschool = QTreeWidgetItem(fixed_activity_prism_models)
-        preschool.setText(0, "Preschool Children (0-4 years)")
-        
-        start_day4 = QTreeWidgetItem(preschool)
-        start_day4.setText(0, COMPMODEL_DAYSTART)
-
-        end_day4 = QTreeWidgetItem(preschool)
-        end_day4.setText(0, COMPMODEL_DAYEND)
-
-        latest_preschool = QTreeWidgetItem(preschool)
+        early_school = QTreeWidgetItem(schoolprisms)
+        early_school.setText(0, COMPMODEL_SCHEND)        
+                 
+        preschoolprisms = QTreeWidgetItem(fixed_activity_prism_models)
+        preschoolprisms.setText(0, COMPMODEL_PRESCHEPISODES)
+        latest_preschool = QTreeWidgetItem(preschoolprisms)
         latest_preschool.setText(0, COMPMODEL_PRESCHSTART)
-        
-        early_preschool = QTreeWidgetItem(preschool)
-        early_preschool.setText(0, COMPMODEL_PRESCHEND)        
+        early_preschool = QTreeWidgetItem(preschoolprisms)
+        early_preschool.setText(0, COMPMODEL_PRESCHEND) 
 
 
 # Define Child Daily Status and Allocation Model
@@ -321,6 +310,15 @@ class Model_Manager_Treewidget(QTreeWidget):
         
     def setAllComSimStatuses(self):
         self.setCompSimStatus(COMPMODEL_NUMVEHS)
+        self.setCompSimStatus(COMPMODEL_NUMTYPES)
+        self.setCompSimStatus(COMPMODEL_DAYSTART)
+        self.setCompSimStatus(COMPMODEL_DAYEND)
+        self.setCompSimStatus(COMPMODEL_WRKEPISODES)
+        self.setCompSimStatus(COMPMODEL_1WEPISODE)
+        self.setCompSimStatus(COMPMODEL_2WEPISODE1)
+        self.setCompSimStatus(COMPMODEL_2WEPISODE2)
+        self.setCompSimStatus(COMPMODEL_SCHEPISODES)
+        self.setCompSimStatus(COMPMODEL_PRESCHEPISODES)
         
 
     def setCompSimStatus(self,comptitle):
@@ -347,28 +345,39 @@ class Model_Manager_Treewidget(QTreeWidget):
             diagtitle = COMPMODEL_NUMTYPES
             modelkey = MODELKEY_VEHTYPE   
 
-        elif str(item.text(col)).lower() == COMPMODEL_DAYSTART.lower():
-            diagtitle = COMPMODEL_DAYSTART
+        elif str(item.text(col)).lower() == ('Adult Workers').lower():
             seg = str((item.parent()).text(0)).lower()
-            if seg == ('Adult Workers').lower():
+            if seg == COMPMODEL_DAYSTART.lower():
+                diagtitle = COMPMODEL_DAYSTART
                 modelkey = MODELKEY_DAYSTART_AW
-            elif seg == ('Adult Non-workers').lower():
-                modelkey = MODELKEY_DAYSTART_AN
-            elif seg == ('Children (5-17 years)').lower():
-                modelkey = MODELKEY_DAYSTART_NA
-            elif seg == ('Preschool Children (0-4 years)').lower():
-                modelkey = MODELKEY_DAYSTART_PS
-        elif str(item.text(col)).lower() == COMPMODEL_DAYEND.lower():
-            diagtitle = COMPMODEL_DAYEND
-            seg = str((item.parent()).text(0)).lower()
-            if seg == ('Adult Workers').lower():
+            elif seg == COMPMODEL_DAYEND.lower():
+                diagtitle = COMPMODEL_DAYEND
                 modelkey = MODELKEY_DAYEND_AW
-            elif seg == ('Adult Non-workers').lower():
-                modelkey = MODELKEY_DAYEND_NW
-            elif seg == ('Children (5-17 years)').lower():
-                modelkey = MODELKEY_DAYEND_NA
-            elif seg == ('Preschool Children (0-4 years)').lower():
-                modelkey = MODELKEY_DAYEND_PS
+        elif str(item.text(col)).lower() == ('Adult Non-workers').lower():
+            seg = str((item.parent()).text(0)).lower()
+            if seg == COMPMODEL_DAYSTART.lower():
+                diagtitle = COMPMODEL_DAYSTART
+                modelkey = MODELKEY_DAYSTART_AN
+            elif seg == COMPMODEL_DAYEND.lower():
+                diagtitle = COMPMODEL_DAYEND
+                modelkey = MODELKEY_DAYEND_AN                
+        elif str(item.text(col)).lower() == ('Children (5-17 years) and\nAdult Students').lower():
+            seg = str((item.parent()).text(0)).lower()
+            if seg == COMPMODEL_DAYSTART.lower():
+                diagtitle = COMPMODEL_DAYSTART
+                modelkey = MODELKEY_DAYSTART_NA
+            elif seg == COMPMODEL_DAYEND.lower():
+                diagtitle = COMPMODEL_DAYEND
+                modelkey = MODELKEY_DAYEND_NA  
+        elif str(item.text(col)).lower() == ('Pre-school Children\n(0-4 years)').lower():
+            seg = str((item.parent()).text(0)).lower()
+            if seg == COMPMODEL_DAYSTART.lower():
+                diagtitle = COMPMODEL_DAYSTART
+                modelkey = MODELKEY_DAYSTART_PS
+            elif seg == COMPMODEL_DAYEND.lower():
+                diagtitle = COMPMODEL_DAYEND
+                modelkey = MODELKEY_DAYEND_PS 
+
         elif str(item.text(col)).lower() == COMPMODEL_WRKEPISODES.lower():
             diagtitle = COMPMODEL_WRKEPISODES
             modelkey = MODELKEY_WRKEPISODES
@@ -390,12 +399,14 @@ class Model_Manager_Treewidget(QTreeWidget):
         elif str(item.text(col)).lower() == COMPMODEL_WORKEND2.lower():
             diagtitle = COMPMODEL_WORKEND2
             modelkey = MODELKEY_WORKEND2
+
         elif str(item.text(col)).lower() == COMPMODEL_SCHSTART.lower():
             diagtitle = COMPMODEL_SCHSTART
             modelkey = MODELKEY_SCHSTART
         elif str(item.text(col)).lower() == COMPMODEL_SCHEND.lower():
             diagtitle = COMPMODEL_SCHEND
             modelkey = MODELKEY_SCHEND     
+
         elif str(item.text(col)).lower() == COMPMODEL_PRESCHSTART.lower():
             diagtitle = COMPMODEL_PRESCHSTART
             modelkey = MODELKEY_PRESCHSTART

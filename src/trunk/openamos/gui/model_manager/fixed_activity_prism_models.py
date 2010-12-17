@@ -47,7 +47,7 @@ class FixedActivityPrismModels(QWidget):
 
         self.day_end2_button = QPushButton('Adult Non-workers', self) #COMPMODEL_DAYEND, self)     
         self.day_end2_button.setGeometry((size.width()) / 2 + 350, size.height() / 2 - 370, 180, 50)
-        self.day_end2_button.setStyleSheet(self.color.isUserModel(MODELKEY_DAYEND_NW))
+        self.day_end2_button.setStyleSheet(self.color.isUserModel(MODELKEY_DAYEND_AN))
         self.connect(self.day_end2_button, SIGNAL('clicked()'), self.day_end_nw)
 
         self.day_end3_button = QPushButton('Children (5-17 years) and\nAdult Students', self) #COMPMODEL_DAYEND, self)     
@@ -172,7 +172,7 @@ class FixedActivityPrismModels(QWidget):
         
     def day_end_nw(self):
         diagtitle = COMPMODEL_DAYEND
-        modelkey = MODELKEY_DAYEND_NW
+        modelkey = MODELKEY_DAYEND_AN
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()

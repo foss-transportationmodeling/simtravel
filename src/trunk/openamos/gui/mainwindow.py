@@ -381,7 +381,7 @@ class MainWindow(QMainWindow):
         if actpro:
             self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT,NAME))
             self.model_management.setConfigObject(self.proconfig)
-            self.models.setConfigObject(self.proconfig)
+        self.models.setConfigObject(self.proconfig)
         self.centralwidget.setEnabled(actpro)
 
         
