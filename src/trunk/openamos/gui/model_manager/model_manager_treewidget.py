@@ -152,6 +152,22 @@ class Model_Manager_Treewidget(QTreeWidget):
         early_preschool = QTreeWidgetItem(preschoolprisms)
         early_preschool.setText(0, COMPMODEL_PRESCHEND) 
 
+# Define Activity Skeleton Reconciliation System        
+
+        skeleton_reconciliation_system = QTreeWidgetItem(medium_term_models)
+        skeleton_reconciliation_system.setText(0, COMP_ACTSKELRECONCILIATION)
+        
+        skeleton_reconciliation = QTreeWidgetItem(skeleton_reconciliation_system)
+        skeleton_reconciliation.setText(0, COMPMODEL_ASRECONCIL)    #"Activity Skeleton Reconciliation")
+        
+        person_constraints_1 = QTreeWidgetItem(skeleton_reconciliation_system)
+        person_constraints_1.setText(0, COMPMODEL_ASCONST)          #"Within person constraints")
+        
+        adjustment_1 = QTreeWidgetItem(skeleton_reconciliation_system)
+        adjustment_1.setText(0, COMPMODEL_ASADJUST )                #"Adjustments to the activity skeleton based on expected Travel Time from previous day")
+        
+        short_term_models = QTreeWidgetItem(self)
+        short_term_models.setText(0, COMP_SHORTTERM) 
 
 # Define Child Daily Status and Allocation Model
 
@@ -196,23 +212,6 @@ class Model_Manager_Treewidget(QTreeWidget):
         work_today = QTreeWidgetItem(adult_model)
         work_today.setText(0, COMPMODEL_WRKDAILYSTATUS)
 
-
-# Define Activity Skeleton Reconciliation System        
-
-        skeleton_reconciliation_system = QTreeWidgetItem(medium_term_models)
-        skeleton_reconciliation_system.setText(0, COMP_ACTSKELRECONCILIATION)
-        
-        skeleton_reconciliation = QTreeWidgetItem(skeleton_reconciliation_system)
-        skeleton_reconciliation.setText(0, COMPMODEL_ASRECONCIL)    #"Activity Skeleton Reconciliation")
-        
-        person_constraints_1 = QTreeWidgetItem(skeleton_reconciliation_system)
-        person_constraints_1.setText(0, COMPMODEL_ASCONST)          #"Within person constraints")
-        
-        adjustment_1 = QTreeWidgetItem(skeleton_reconciliation_system)
-        adjustment_1.setText(0, COMPMODEL_ASADJUST )                #"Adjustments to the activity skeleton based on expected Travel Time from previous day")
-        
-        short_term_models = QTreeWidgetItem(self)
-        short_term_models.setText(0, COMP_SHORTTERM) 
         
 # Define Activity Travel Pattern Simulator
         activity_travel_pattern_simulator = QTreeWidgetItem(short_term_models)
@@ -303,6 +302,8 @@ class Model_Manager_Treewidget(QTreeWidget):
         time_use_utility_calculator.setText(0, COMP_TIMEUSEUTILITY)
 
         self.connect(self, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.treeItemSelected)
+        self.connect(self, SIGNAL('itemChanged (QTreeWidgetItem *,int)'), self.saveSkip)
+        
 
     def setConfigObject(self,co):
         self.configobject = co
@@ -319,7 +320,7 @@ class Model_Manager_Treewidget(QTreeWidget):
         self.setCompSimStatus(COMPMODEL_2WEPISODE2)
         self.setCompSimStatus(COMPMODEL_SCHEPISODES)
         self.setCompSimStatus(COMPMODEL_PRESCHEPISODES)
-        
+
 
     def setCompSimStatus(self,comptitle):
         treecomp = self.findItems(QString(comptitle),Qt.MatchFixedString | Qt.MatchRecursive)[0]
@@ -333,7 +334,18 @@ class Model_Manager_Treewidget(QTreeWidget):
             else:
                 treecomp.setCheckState(2, Qt.Unchecked)
 
-    
+
+    def saveSkip(self,item,col):
+        if self.configobject != None and col == 2:
+            compname = (COMPONENTMAP[str(item.text(0))])[0]
+            comp = self.configobject.getComponent(compname)
+            if comp != None:
+                if item.checkState(2) == 2:
+                    comp.set('skip','True')
+                else:
+                    comp.set('skip','False')
+
+
     def treeItemSelected(self,item,col):
         diagtitle = None
         diag = None
@@ -494,12 +506,11 @@ class Model_Manager_Treewidget(QTreeWidget):
             modelkey = MODELKEY_TRIPVEHICLE
 
 
-                    
+
         if diagtitle != None and self.configobject != None:
             diag = AbtractSpecDialog(self.configobject,modelkey,diagtitle)
             diag.exec_()
 
-        
 
-        
-        
+
+
