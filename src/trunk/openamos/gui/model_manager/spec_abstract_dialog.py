@@ -1078,7 +1078,7 @@ class buttonColor:
     def isUserModel(self,modelkey):
         if self.configob <> None:
             if not self.configob.comparemodels(modelkey):
-                return "background-color: #8FBC8F"
+                return "background-color: #cd853f" #8FBC8F"
 
         return "background-color: #00C5CD" #FFFDD0"
 
