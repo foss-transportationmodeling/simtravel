@@ -102,6 +102,12 @@ class ConfigObject(object):
                 return [completed,skip]
 
 
+    def getComponent(self,compname):
+        compelt = self.protree.find(MODELCONFIG)
+        for comp in compelt.getiterator(COMP):
+            if compname.lower() == comp.get(NAME).lower():
+                return comp
+        return None
     
 #    def modelSpecInConfig(self,modelkey):
 #        compname = self.getCompName(modelkey)
