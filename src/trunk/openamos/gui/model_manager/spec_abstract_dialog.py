@@ -102,14 +102,25 @@ class AbtractSpecDialog(QDialog):
         subpoplayout.setColumnStretch(2,1)
         subpoplayout.setColumnStretch(3,1)
         self.glayout.addWidget(self.subpopgb,1,0)
-    
-        
+
 
         self.modwidget = QWidget()
         self.glayout.addWidget(self.modwidget,2,0)
         
+
+        buttonwidget = QWidget(self)
+        buttonlayout = QHBoxLayout()
+        buttonlayout.setContentsMargins(0,11,0,11)
+        buttonwidget.setLayout(buttonlayout)
+        self.defaultbutton = QPushButton("Default Model")
+        buttonlayout.addWidget(self.defaultbutton)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.glayout.addWidget(self.dialogButtonBox,3,0)
+        buttonlayout.addWidget(self.dialogButtonBox)
+        self.glayout.addWidget(buttonwidget,3,0)
+        
+        
+#        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+#        self.glayout.addWidget(self.dialogButtonBox,3,0)
         
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
         self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
@@ -118,8 +129,9 @@ class AbtractSpecDialog(QDialog):
         
         self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addFiter)
         self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
+        self.connect(self.defaultbutton, SIGNAL("clicked(bool)"), self.defaultModel)
         
-        self.loadFromConfigObject()
+        self.loadFromConfigObject1()
         
         self.models = [] # In order to compare between previous and current model
         
@@ -185,9 +197,12 @@ class AbtractSpecDialog(QDialog):
         self.update()
 
 
-    
-    def loadFromConfigObject(self):
+    def loadFromConfigObject1(self):
         modelspecified = self.configobject.modelSpecInConfig(self.modelkey)
+        self.loadFromConfigObject2(modelspecified)
+    
+    def loadFromConfigObject2(self, modelspecified):
+        
         if modelspecified is not None:
             form = modelspecified.get(FORMULATION)
             if form == MODELFORM_REG:
@@ -846,7 +861,13 @@ class AbtractSpecDialog(QDialog):
             for col in cols:
                 varlist.append(QString(col))
             self.coldict[table] = varlist
-            
+
+
+    def defaultModel(self):
+        modelspecified = self.configobject.modelSpecInDefault(self.modelkey)
+        self.loadFromConfigObject2(modelspecified)
+
+
     def checkFloat(self,num):
         res = False
         try:
