@@ -6,6 +6,7 @@
 '''
 
 import copy
+import time
 import re
 from lxml import etree
 from numpy import array
@@ -65,6 +66,34 @@ class ConfigParser(object):
         self.configObject = configObject
         self.componentName = component
 
+    def update_completedFlag(self, component_name, analysisInterval=None):
+        self.iterator = self.configObject.getiterator('Component')
+
+        for compElement in self.iterator:
+            if compElement.get('name') == component_name:
+                if analysisInterval is None:
+                    print 'OLD FLAG _ ', compElement.get('completed')
+                    compElement.set('completed', "True")
+                    compElement.set('skip', "True")
+                    print 'NEW FLAG _ ', compElement.get('completed')
+
+
+                if analysisInterval is not None:
+                    analysisIntervalElement = compElement.find('AnalysisInterval')
+                    print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    analysisIntervalElement.set('start', str(analysisInterval + 1))
+                    print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    print dir(analysisIntervalElement)
+                
+                    endIntervalValue = int(analysisIntervalElement.get('end'))
+                    
+                    if endIntervalValue == analysisInterval + 1:
+                        print 'OLD FLAG _ ', compElement.get('completed')
+                        compElement.set('completed', "True")
+                        compElement.set('skip', "True")
+                        print 'NEW FLAG _ ', compElement.get('completed')                    
+
+
     def parse_models(self):
         self.iterator = self.configObject.getiterator("Component")
         componentList = []
@@ -109,7 +138,7 @@ class ConfigParser(object):
         return dbConfigObject
         
     def parse_tableHierarchy(self):
-        #print "-- Parse table hierarchy --"
+        print "-- Parse table hierarchy --"
         dbTables_element = self.configObject.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
@@ -210,7 +239,9 @@ class ConfigParser(object):
         return householdStructureInfoObject
 
     def parse_analysis_interval_and_create_component(self, component_element):
+        ti = time.time()
         interval_element = component_element.find("AnalysisInterval")
+        componentList = []
         if interval_element is not None:
             startInterval = interval_element.get("start")
             startInterval = int(startInterval)
@@ -218,21 +249,23 @@ class ConfigParser(object):
             endInterval = interval_element.get("end")
             endInterval = int(endInterval)
 
-            componentList = []
+
+
+            repeatComponent = self.create_component(component_element)
 
             for i in range(endInterval - startInterval):
-                repeatComponent = self.create_component(component_element)
-                for model in repeatComponent.model_list:
+                tempComponent = copy.deepcopy(repeatComponent)
+                for model in tempComponent.model_list:
                     model.seed +=  i 
-                repeatComponent.analysisInterval = startInterval + i
-                componentList.append(repeatComponent)
-            return componentList
-                
-        
+                tempComponent.analysisInterval = startInterval + i
+                componentList.append(tempComponent)
+
         else:
             component = self.create_component(component_element)
-            return [component]
+            componentList.append(component)
+        print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
 
+        return componentList
 
     def return_delete_records_criterion(self, component_element):
         delete_records_element = component_element.find("DeleteRecords")
@@ -1292,7 +1325,7 @@ class ConfigParser(object):
                                            locationInfoTable,
                                            locationIdVar,
                                            locationVariables)
-        print prismConstraint
+        #print prismConstraint
         return prismConstraint
 
     def return_spatio_temporal_constraint(self, constraint_element):

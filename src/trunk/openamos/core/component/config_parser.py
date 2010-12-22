@@ -6,6 +6,7 @@
 '''
 
 import copy
+import time
 import re
 from lxml import etree
 from numpy import array
@@ -238,7 +239,9 @@ class ConfigParser(object):
         return householdStructureInfoObject
 
     def parse_analysis_interval_and_create_component(self, component_element):
+        ti = time.time()
         interval_element = component_element.find("AnalysisInterval")
+        componentList = []
         if interval_element is not None:
             startInterval = interval_element.get("start")
             startInterval = int(startInterval)
@@ -246,21 +249,23 @@ class ConfigParser(object):
             endInterval = interval_element.get("end")
             endInterval = int(endInterval)
 
-            componentList = []
+
+
+            repeatComponent = self.create_component(component_element)
 
             for i in range(endInterval - startInterval):
-                repeatComponent = self.create_component(component_element)
-                for model in repeatComponent.model_list:
+                tempComponent = copy.deepcopy(repeatComponent)
+                for model in tempComponent.model_list:
                     model.seed +=  i 
-                repeatComponent.analysisInterval = startInterval + i
-                componentList.append(repeatComponent)
-            return componentList
-                
-        
+                tempComponent.analysisInterval = startInterval + i
+                componentList.append(tempComponent)
+
         else:
             component = self.create_component(component_element)
-            return [component]
+            componentList.append(component)
+        print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
 
+        return componentList
 
     def return_delete_records_criterion(self, component_element):
         delete_records_element = component_element.find("DeleteRecords")
