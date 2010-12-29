@@ -173,30 +173,42 @@ class Model_Manager_Treewidget(QTreeWidget):
 
         child_model = QTreeWidgetItem(medium_term_models)
         child_model.setText(0, COMP_CHILDSTATUS)
-
-        children_1 = QTreeWidgetItem(child_model)
-        children_1.setText(0, COMPMODEL_CSCHILD0t4)                 #"Children (0-4 years old)")
-        children_preschool = QTreeWidgetItem(children_1)
+        
+        sch_status = QTreeWidgetItem(child_model)
+        sch_status.setText(0, COMPMODEL_SCHSTATUS)
+        children_preschool = QTreeWidgetItem(sch_status)
         children_preschool.setText(0, COMPMODEL_PRESCHDAILYSTATUS)
-
-        children_2 = QTreeWidgetItem(child_model)
-        children_2.setText(0, COMPMODEL_CSCHILD5t17) 
-        children_school1 = QTreeWidgetItem(children_2)
+        children_school1 = QTreeWidgetItem(sch_status)
         children_school1.setText(0, COMPMODEL_SCHDAILYSTATUS)         #"Children (Status \55 School)")
-        children_hmindep = QTreeWidgetItem(children_2)
+
+        child_dependent = QTreeWidgetItem(child_model)
+        child_dependent.setText(0, COMPMODEL_CHIDDEPEND) 
+        children_hmindep = QTreeWidgetItem(child_dependent)
         children_hmindep.setText(0, COMPMODEL_HMINDEP)
-        children_schindep = QTreeWidgetItem(children_2)
+        children_schindep = QTreeWidgetItem(child_dependent)
         children_schindep.setText(0, COMPMODEL_SCHDAILYINDEP)
-        children_aftschindep = QTreeWidgetItem(children_2)
+        children_aftschindep = QTreeWidgetItem(child_dependent)
         children_aftschindep.setText(0, COMPMODEL_AFTSCHDAILYINDEP)
-        children_aftschacttype = QTreeWidgetItem(children_2)
+        
+        aft_sch_activity = QTreeWidgetItem(child_model)
+        aft_sch_activity.setText(0, COMPMODEL_AFTSCHACTIVITY)         
+        children_aftschacttype = QTreeWidgetItem(aft_sch_activity)
         children_aftschacttype.setText(0, COMPMODEL_AFTSCHACTTYPE)
-        children_aftschactdest = QTreeWidgetItem(children_2)
+        children_aftschactdest = QTreeWidgetItem(aft_sch_activity)
         children_aftschactdest.setText(0, COMPMODEL_AFTSCHACTDEST)
-        children_aftschactdur = QTreeWidgetItem(children_2)
+        children_aftschactdur = QTreeWidgetItem(aft_sch_activity)
         children_aftschactdur.setText(0, COMPMODEL_AFTSCHACTDUR)
-        children_aftschactjointact = QTreeWidgetItem(children_2)
+        children_aftschactjointact = QTreeWidgetItem(aft_sch_activity)
         children_aftschactjointact.setText(0, COMPMODEL_AFTSCHJOINTACT)
+        
+        
+#        children_1 = QTreeWidgetItem(child_model)
+#        children_1.setText(0, COMPMODEL_CSCHILD0t4)                 #"Children (0-4 years old)")
+#        children_2 = QTreeWidgetItem(child_model)
+#        children_2.setText(0, COMPMODEL_CSCHILD5t17) 
+
+
+
 
 # Define Adult Daily Status Model
 
@@ -320,7 +332,10 @@ class Model_Manager_Treewidget(QTreeWidget):
         self.setCompSimStatus(COMPMODEL_2WEPISODE2)
         self.setCompSimStatus(COMPMODEL_SCHEPISODES)
         self.setCompSimStatus(COMPMODEL_PRESCHEPISODES)
-
+        self.setCompSimStatus(COMPMODEL_SCHSTATUS)
+        self.setCompSimStatus(COMPMODEL_CHIDDEPEND)
+        self.setCompSimStatus(COMPMODEL_AFTSCHACTIVITY)
+        
 
     def setCompSimStatus(self,comptitle):
         treecomp = self.findItems(QString(comptitle),Qt.MatchFixedString | Qt.MatchRecursive)[0]
