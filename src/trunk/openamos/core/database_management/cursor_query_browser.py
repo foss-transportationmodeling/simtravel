@@ -160,7 +160,7 @@ class QueryBrowser(object):
         #print
         #print db_dict
 	#print
-        #print max_dict
+        print 'max_dict', max_dict
 
 
 
@@ -180,8 +180,8 @@ class QueryBrowser(object):
         table_flag = None
         all_tables = table_list + table_names
 
-	#print table_list
-	#print 'column_names', column_names
+	print 'table_list', table_list
+	print 'column_names', column_names
 
         #check if the tables exist in the database.
         for each_tab in all_tables:
@@ -277,23 +277,30 @@ class QueryBrowser(object):
         #print max_dict
         if max_dict is not None:
 	    for maxTable in max_dict:
-		#print '---', maxTable, '---'
+		print '---max', maxTable, mainTable, 'main---'
+                print 'table list here ------->', table_list
                 maxColumn = max_dict[maxTable][0]
 		try:
-            	    index = table_list.index(maxTable)
+                    if maxTable <> mainTable:
+                        index = table_list.index(maxTable)
+                        table_list.pop(index)
+                    else:
+                        index = 0
 		except Exception, e:
 		    print e
 		    continue	
             	#print 'INDEX--->', index
 
-		table_list.pop(index)
+
         
             	#remove the count column from the col list
-            	countVarStr = '%s.%s' %(maxTable, maxColumn)
-           	final_list.remove(countVarStr)
-          	final_list.append('temp_%s.%s'%(maxTable, maxColumn))
-          	cols_list.remove(maxColumn)
-            	cols_list.append(maxColumn)
+                if maxTable <> mainTable:
+                    countVarStr = '%s.%s' %(maxTable, maxColumn)
+                    final_list.remove(countVarStr)
+                    cols_list.remove(maxColumn)
+
+                final_list.append('temp_%s.max_%s'%(maxTable, maxColumn))
+                cols_list.append('max_%s'%maxColumn)
 
             	#print 'NEW FINAL LIST -->', final_list
 
@@ -317,12 +324,15 @@ class QueryBrowser(object):
             	joinCondition = joinCondition[:-3]
             
 	        #combine left join along with the count variable/max condition
-        	mJoinStr = joinStrList.pop(index)
-        	mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
-        	                              'and %s.%s=temp_%s.%s)' 
-        	                              %(maxTable, maxColumn, maxTable, maxColumn))
+                if maxTable <> mainTable:
+                    mJoinStr = joinStrList.pop(index)
+                    mJoinStrIncMaxConditionVar = (mJoinStr[:-1] + 
+                                                  'and %s.%s=temp_%s.max_%s)' 
+                                                  %(maxTable, maxColumn, maxTable, maxColumn))
+                else:
+                    mJoinStrIncMaxConditionVar = ''
             
-        	joinStrList.append(""" left join (select %s, max(%s) as %s from """
+        	joinStrList.append(""" left join (select %s, max(%s) as max_%s from """
         	                   """%s group by %s) as temp_%s on (%s) """ %(grpStr, maxColumn, 
         		                                         	       maxColumn, maxTable, grpStr,
         	                                                               maxTable, joinCondition)
@@ -588,8 +598,8 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
-        #print 'SQL string for query - ', sql_string
-        #print cols_list
+        print 'SQL string for query - ', sql_string
+        print cols_list
         
         try:
             self.dbcon_obj.cursor.execute(sql_string)
