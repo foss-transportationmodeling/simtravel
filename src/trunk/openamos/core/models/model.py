@@ -24,7 +24,7 @@ class SubModel(object):
             raise ModelError, 'the model input is not a valid Model object'
         self.model = model
 
-        if self.check_string(model_type, ['regression', 'choice']):
+        if self.check_string(model_type, ['regression', 'choice', 'consistency']):
             self.model_type = model_type.lower()
 
         if self.check_string(dep_varname, [dep_varname.lower()]):
@@ -96,7 +96,9 @@ class SubModel(object):
                     rows = result == i+1
                     result.data[rows] = self.values[i]
                     
-                    
+        if self.model_type == 'consistency':
+            result = self.model.resolve_consistency(data, seed)
+            
             
 
         # In case of regression model, an DataArray object is returned
