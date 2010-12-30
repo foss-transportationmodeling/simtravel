@@ -127,7 +127,7 @@ class SimulationManager(object):
     def run_components(self):
         t_c = time.time()
         
-	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
         try:
             for comp in self.componentList:
@@ -139,7 +139,7 @@ class SimulationManager(object):
                     print '\tSkipping the run for this component'
                     continue
                 data = comp.pre_process(self.queryBrowser, self.subsample, 
-                                        tableOrderDict, tableNamesKeyDict, 
+                                        #self.tableOrder, self.tableKeys, 
                                         self.projectSkimsObject, self.householdStructureObject, self.db)
 
                 if data is not None:
@@ -156,6 +156,7 @@ class SimulationManager(object):
 
                 self.configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
+            
                 print '-- Finished simulating component - %s; time taken %.4f --' %(comp.component_name,
                                                                                     time.time()-t)
         except Exception, e:
@@ -163,7 +164,7 @@ class SimulationManager(object):
             traceback.print_exc(file=sys.stdout)
             print '_'*80
 
-        #self.save_configFile()
+        self.save_configFile()
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
 
 
@@ -177,7 +178,7 @@ class SimulationManager(object):
 	t_c = time.time()
 
 
-	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
 
 	# Get the two components one for dynamic activity simulation and another for extracting trips
@@ -196,7 +197,7 @@ class SimulationManager(object):
                 print '\tSkipping the run for this component'
                 continue
             data = comp.pre_process(self.queryBrowser, self.subsample, 
-                                    tableOrderDict, tableNamesKeyDict, 
+                                    #tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.householdStructureObject, self.db)
             if data is not None:
                 # Call the run function to simulate the chocies(models)
