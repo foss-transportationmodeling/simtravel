@@ -27,6 +27,9 @@ from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.models.nested_logit_model_components import NestedChoiceSpecification, NestedSpecification
 from openamos.core.models.error_specification import LinearRegErrorSpecification
 from openamos.core.models.error_specification import StochasticRegErrorSpecification
+from openamos.core.models.reconcile_schedules_model_components import ReconcileSchedulesSpecification
+from openamos.core.models.reconcile_schedules import ReconcileSchedules
+
 from openamos.core.models.model import SubModel
 
 from openamos.core.component.abstract_component import AbstractComponent
@@ -137,9 +140,9 @@ class ConfigParser(object):
                                                dbname)
         return dbConfigObject
         
-    def parse_tableHierarchy(self):
+    def parse_tableHierarchy(self, component_element):
         print "-- Parse table hierarchy --"
-        dbTables_element = self.configObject.find('DBTables')
+        dbTables_element = component_element.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
         tableNamesKeyDict = {}
@@ -282,11 +285,20 @@ class ConfigParser(object):
 
     
     def create_component(self, component_element):
-        comp_name, comp_read_table, comp_write_table, comp_keys = self.return_component_attribs(component_element)
+        comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
 	print "Parsing Component - %s" %(comp_name)
+
+
+        tableOrder, tableKeys = self.parse_tableHierarchy(component_element)
+        if comp_write_table is not None:
+            comp_keys = tableKeys[comp_write_table]
+        else:
+            comp_keys = tableKeys[comp_read_table]
+
+
 
         spatialConstIterator = component_element.getiterator("SpatialConstraints")
         spatialConst_list = []
@@ -350,6 +362,8 @@ class ConfigParser(object):
                                       comp_read_table,
                                       comp_write_table,
                                       comp_keys,
+                                      tableOrder,
+                                      tableKeys,
                                       spatialConst_list,
                                       dynamicSpatialConst_list,
                                       history_info = historyInfoObject,
@@ -418,6 +432,9 @@ class ConfigParser(object):
 
         if model_formulation == 'Probability Distribution':
             self.create_probability_object(model_element)
+
+        if model_formulation == 'Reconcile Schedules':
+            self.create_reconcile_schedules_object(model_element)
 
 
     def process_seed(self, model_element):
@@ -1136,7 +1153,91 @@ class ConfigParser(object):
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
-    
+    def create_reconcile_schedules_object(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+        householdIdName_element = model_element.find('HouseholdIdName')
+        householdIdParsed = self.return_table_var(householdIdName_element)
+        variable_list.append(householdIdParsed)
+
+        personIdName_element = model_element.find('PersonIdName')
+        personIdParsed = self.return_table_var(personIdName_element)
+        variable_list.append(personIdParsed)
+
+        scheduleIdName_element = model_element.find('ScheduleIdName')
+        scheduleIdParsed = self.return_table_var(scheduleIdName_element)
+        variable_list.append(scheduleIdParsed)
+
+        activityTypeName_element = model_element.find('ActivityTypeName')
+        activityTypeParsed = self.return_table_var(activityTypeName_element)
+        variable_list.append(activityTypeParsed)
+
+        startTimeName_element = model_element.find('StartTimeName')
+        startTimeParsed = self.return_table_var(startTimeName_element)
+        variable_list.append(startTimeParsed)
+
+        endTimeName_element = model_element.find('EndTimeName')
+        endTimeParsed = self.return_table_var(endTimeName_element)
+        variable_list.append(endTimeParsed)
+
+        locationIdName_element = model_element.find('LocationIdName')
+        locationIdParsed = self.return_table_var(locationIdName_element)
+        variable_list.append(locationIdParsed)
+
+        durationName_element = model_element.find('DurationName')
+        durationParsed = self.return_table_var(durationName_element)
+        variable_list.append(durationParsed)
+
+        specification = ReconcileSchedulesSpecification(householdIdParsed[1],
+                                                        personIdParsed[1],
+                                                        scheduleIdParsed[1],
+                                                        activityTypeParsed[1],
+                                                        startTimeParsed[1],
+                                                        endTimeParsed[1],
+                                                        locationIdParsed[1],
+                                                        durationParsed[1])
+                                                        
+
+
+        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = ReconcileSchedules(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        
+        
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
         
@@ -1453,17 +1554,19 @@ class ConfigParser(object):
         if writeToTable is None:
             writeToTable = readFromTable
             
-
+        """    
         prim_keys = component_element.get('key')
         if prim_keys is not None:
             prim_keys = re.split('[,]', prim_keys)
         index_keys = component_element.get('count_key')
         if index_keys is not None:
             index_keys = re.split('[,]', index_keys)
-
+        """
         
         #print varname, tablename, [prim_keys, index_keys]
-        return name, readFromTable, writeToTable, [prim_keys, index_keys]
+        #return name, readFromTable, writeToTable, [prim_keys, index_keys]
+        return name, readFromTable, writeToTable
+        
         
                             
 
