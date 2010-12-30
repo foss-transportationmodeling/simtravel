@@ -22,6 +22,8 @@ class AbstractComponent(object):
                  readFromTable,
                  writeToTable,
                  key,
+                 tableOrder,
+                 tableKeys,
                  spatialConst_list=None,
                  dynamicspatialConst_list=None,
                  analysisInterval=None,
@@ -44,6 +46,8 @@ class AbstractComponent(object):
         self.readFromTable = readFromTable
         self.writeToTable = writeToTable
         self.key = key
+        self.tableOrder = tableOrder
+        self.tableKeys = tableKeys
         self.spatialConst_list = spatialConst_list
         self.dynamicspatialConst_list = dynamicspatialConst_list
         self.analysisInterval = analysisInterval
@@ -63,21 +67,20 @@ class AbstractComponent(object):
             self.keyCols = self.key[0]
 
     def pre_process(self, queryBrowser, subsample, 
-                    tableOrderDict, tableNamesKeyDict,
                     projectSkimsObject, householdStructureObject, db):
 
         t_d = time.time()
         # process the variable list to exclude double columns, 
         # return the primary keys, the county keys, 
         # the independent variable dictionary and dependent variables dictionary
-        vars_dict, depvars_dict, prim_keys, count_keys = self.prepare_vars(tableNamesKeyDict)
+        vars_dict, depvars_dict, prim_keys, count_keys = self.prepare_vars()
 
         print self.variable_list
 
 
 	for table in vars_dict:
 	    try:
-	        keys = tableNamesKeyDict[table]
+	        keys = self.tableKeys[table]
 	        if len(keys[1]) > 0:
 	            count_keys[table] = keys[1]
 	    except Exception, e:
@@ -88,7 +91,6 @@ class AbstractComponent(object):
 
         # Prepare Data
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
-                                 tableOrderDict, tableNamesKeyDict, 
                                  count_keys, subsample)        
 
 
@@ -307,14 +309,15 @@ class AbstractComponent(object):
                                                                               time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
-                choiceset_shape = (data_subset.rows,
-                                   i.model.specification.number_choices)
-                choicenames = i.model.specification.choices
+                #choiceset_shape = (data_subset.rows,
+                #                   i.model.specification.number_choices)
+                #choicenames = i.model.specification.choices
                 choiceset = None
                     
                 result = i.simulate_choice(data_subset, choiceset, iteration)
                 print result.data[:,0]
-                self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+                if i.model_type <> 'consistency':
+                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
 
@@ -355,7 +358,7 @@ class AbstractComponent(object):
                 
                 
     
-    def prepare_vars(self, tableNamesKeyDict):
+    def prepare_vars(self):
         #print variableList                                                                                      
         indep_columnDict = self.prepare_vars_independent()
         
@@ -369,22 +372,26 @@ class AbstractComponent(object):
         depVarWriteTable = self.writeToTable
 
 
-	if tableNamesKeyDict[depVarTable] == tableNamesKeyDict[depVarWriteTable]:
+	if self.tableKeys[depVarTable] == self.tableKeys[depVarWriteTable]:
 	    if self.key[0] is not None:
                 prim_keys[depVarTable] = self.key[0]
-            if self.key[1] is not None:
+            if len(self.key[1]) > 0:
                 count_keys[depVarTable] = self.key[1]
+                tempdep_columnDict['temp'] += self.key[1]
 	
-	if tableNamesKeyDict[depVarTable] <> tableNamesKeyDict[depVarWriteTable]:
+	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable]:
 	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
-	    prim_keys[depVarWriteTable] = tableNamesKeyDict[depVarWriteTable][0]
-	    count_keys[depVarWriteTable] = tableNamesKeyDict[depVarWriteTable][1]
-	    prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
+	    prim_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][0]
+	    count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
+	    prim_keys[depVarTable] = self.tableKeys[depVarTable][0]
 	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
 	
         indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
         indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
+
+        #dep_columnDict = self.update_dictionary(dep_columnDict, count_keys)
+        
 
 	
 	print indep_columnDict
@@ -396,22 +403,22 @@ class AbstractComponent(object):
         for submodel in self.model_list:
             depVarName = submodel.dep_varname
 
-            if depVarTable <> depVarWriteTable:
+            #if depVarTable <> depVarWriteTable:
+            #    tempdep_columnDict['temp'].append(depVarName)
+            #else:
+            if isinstance(submodel.model, InteractionModel):
                 tempdep_columnDict['temp'].append(depVarName)
             else:
-                if isinstance(submodel.model, InteractionModel):
-                    tempdep_columnDict['temp'].append(depVarName)
-                else:
                 #depVarTable = model.table                                                                 
-
-                    if depVarTable in indep_columnDict:
-                        if depVarName in indep_columnDict[depVarTable]:
-                            continue
-
-                    if depVarTable in dep_columnDict:
-                        dep_columnDict[depVarTable].append(depVarName)
-                    else:
-                        dep_columnDict[depVarTable] = [depVarName]
+                
+                if depVarTable in indep_columnDict:
+                    if depVarName in indep_columnDict[depVarTable]:
+                        continue
+                    
+                if depVarTable in dep_columnDict:
+                    dep_columnDict[depVarTable].append(depVarName)
+                else:
+                    dep_columnDict[depVarTable] = [depVarName]
 
         # Exclude the temp variables
         if 'temp' in indep_columnDict:
@@ -474,7 +481,6 @@ class AbstractComponent(object):
         return columnDict
 
     def prepare_data(self, queryBrowser, indepVarDict, depVarDict, 
-                     tableOrderDict, tableNamesKeyDict, 
                      count_keys=None, subsample=None):
         #Get hierarchy of the tables
 
@@ -517,12 +523,12 @@ class AbstractComponent(object):
 
 
 
-        orderKeys = tableOrderDict.keys()
+        orderKeys = self.tableOrder.keys()
         orderKeys.sort()
         
         tableNamesOrderDict = {}
         for i in orderKeys:
-            tableNamesOrderDict[tableOrderDict[i][0]] = i
+            tableNamesOrderDict[self.tableOrder[i][0]] = i
 
         tableNamesForComponent = indepVarDict.keys()
 
@@ -543,7 +549,7 @@ class AbstractComponent(object):
         found.reverse() # so that the tables higher in the hierarchy are fixed last; lowest to highest now
 
         for i in found:
-            key = tableNamesKeyDict[i][0] 
+            key = self.tableKeys[i][0] 
             for table in indepVarDict:
                 intersectKeyCols = set(key) & set(indepVarDict[table])
                 if len(intersectKeyCols) > 0:
@@ -559,15 +565,16 @@ class AbstractComponent(object):
         # matching keys
         matchingKey = {}
         mainTable = found[0]
-        mainTableKeys = tableNamesKeyDict[mainTable][0]
+        mainTableKeys = self.tableKeys[mainTable][0]
 
         for i in indepVarDict.keys():
             if i == mainTable:
+                matchingKey[i] = self.tableKeys[i][0]
                 continue
             else:
-		print tableNamesKeyDict
+		print self.tableKeys
 		print 'KEY', i
-                matchTableKeys = tableNamesKeyDict[i][0]
+                matchTableKeys = self.tableKeys[i][0]
             matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
 
         # count dictionary or max dictionary
