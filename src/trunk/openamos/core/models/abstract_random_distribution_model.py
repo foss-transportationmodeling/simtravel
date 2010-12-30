@@ -14,8 +14,11 @@ class RandomDistribution(RandomState):
                                 size=size)
         return norm_vars
         
-    def return_random_variables(self, size):
-        rand_vars = self.random_sample(size)
+    def return_random_variables(self, size=None):
+	if size is not None:
+	    rand_vars = self.random_sample(size)
+	else:
+	    rand_vars = self.random_sample()
         return rand_vars
 
     def return_half_normal_variables(self, location, scale, size):
