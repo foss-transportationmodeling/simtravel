@@ -1126,8 +1126,18 @@
      
    </Component>	
 
-    <Component1 name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="False">
-      <AnalysisInterval start="190" end="195" step="1"/>
+    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="households_vehicles_count_r" key="houseid"/>
+    	<Table table="vehicles_r" key="houseid" count_key="vehid"/>
+    	<Table table="workers_r" key="houseid,personid"/>		
+    	<Table table="schedule_r" key="houseid,personid" count_key="scheduleid"/>
+    	<Table table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid"/>
+      </DBTables>
+
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
@@ -1533,7 +1543,7 @@
 	<DependentVariable var="scheduleid"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
 	<Variance value="0"/>
-        <Variable table="schedule_ltrec_r" var="scheduleid" coeff="1"/>
+        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
@@ -1555,9 +1565,15 @@
         <Variable table="persons" var="one" coeff="-1"/>
       </Model>
 
-    </Component1>
+    </Component>
 
-    <Component1 name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="True" completed="False">
+    <Component name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+      </DBTables>
+
       <Model name="PreSchoolKidsDependency" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependency"/>
         <FilterSet type="and"/>
@@ -1600,9 +1616,15 @@
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model1>
-    </Component1>	
+    </Component>	
 
-    <Component1 name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid" skip="True" completed="False">
+    <Component name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>
+      </DBTables>
+
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
@@ -1681,9 +1703,15 @@
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
-    </Component1>	
+    </Component>	
 
-    <Component1 name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid" skip="True" completed="False">
+    <Component name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+      </DBTables>
+
       <Model name="DailyWorkStatus" formulation="Probability Distribution" seed="1">
         <DependentVariable var="wrkdailystatus"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
@@ -1695,9 +1723,19 @@
 	  <Variable table="persons" var="one" coeff="0.85"/>
         </Alternative>
       </Model>
-    </Component1>	
+    </Component>	
 
-    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="False">
+    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="False">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="households_vehicles_count_r" key="houseid"/>
+    	<Table table="vehicles_r" key="houseid" count_key="vehid"/>
+    	<Table table="workers_r" key="houseid,personid"/>		
+    	<Table table="schedule_r" key="houseid,personid" count_key="scheduleid"/>
+    	<Table table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid"/>
+      </DBTables>
+
       <AnalysisInterval start="0" end="0" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
@@ -2200,7 +2238,7 @@
     </Component1>
 
 
-    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="True" completed="False">
+    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="False" completed="False">
       <AnalysisInterval start="1" end="1" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">

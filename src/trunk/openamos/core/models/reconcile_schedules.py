@@ -57,9 +57,10 @@ class ReconcileSchedules(Model):
                 schedulesForPerson = data.rowsof(schedulesRowIndForPer)
             
                 #print 'Raw schedules for hid:%s and pid:%s' %(hid, pid)
-                #print schedulesForPerson._colnames
-                #print 'ORIGINAL'
+                print schedulesForPerson._colnames
+                print 'ORIGINAL'
                 #print schedulesForPerson.data.astype(int)
+                print data.rowsof(schedulesRowIndForPer).data.astype(int)
 
                 activityList = []
                 for sched in schedulesForPerson.data:
@@ -84,10 +85,10 @@ class ReconcileSchedules(Model):
                     i += 1
                                   
 
-                #print 'MODIFIED DATA'
-                #print data.rowsof(schedulesRowIndForPer).data.astype(int)
+                print 'MODIFIED DATA'
+                print data.rowsof(schedulesRowIndForPer).data.astype(int)
                 #print data.data.shape
-                
+                #raw_input()
                 
         return data
 

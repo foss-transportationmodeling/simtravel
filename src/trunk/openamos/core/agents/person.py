@@ -1,5 +1,5 @@
 import heapq as hp
-from numpy import array
+from numpy import array,zeros
 
 from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 
@@ -14,10 +14,11 @@ class Person(object):
 
     def add_and_reconcile_episodes(self, activityEpisodes, seed=1):
         self.seed = seed
-        print self.hid * self.pid + self.seed
+        #print self.hid * self.pid + self.seed
         self.rndGen = RandomDistribution(int(self.hid * self.pid + self.seed))
         self.add_episodes(activityEpisodes)
         self._reconcile_schedule()
+        self._check_for_conflicts()
         results = self._collate_results()
         return results
         
@@ -28,29 +29,57 @@ class Person(object):
 
     def _reconcile_schedule(self):
 
-        stAct = hp.heappop(self.listOfActivityEpisodes)[1]
+        #stAct = hp.heappop(self.listOfActivityEpisodes)[1]
+        stAct = self._return_start_activity()
 
         while (len(self.listOfActivityEpisodes) > 0):
+            
             endAct = hp.heappop(self.listOfActivityEpisodes)[1]
+            # If the second activity is identified as end of the day vertex, 
+            # then we move its location in the heap to end so that the adjustment
+            # for this activity happens at the end after all other activities have been
+            # reconciled
+            if endAct.endTime == 1439 and len(self.listOfActivityEpisodes) > 0:
+                hp.heappush(self.listOfActivityEpisodes, (1439, endAct))
+                continue
 
-            #print '\tSTART ACTIVITY OF PRISM --', stAct, stAct.startOfDay
-            #print '\tEND ACTIVITY OF PRISM --', endAct, endAct.endOfDay
+            # If there are subsequent activities with a start time of 0 then we need to
+            # move it and not process it as a start of day reconciliation
+            if endAct.startTime == 0 and len(self.listOfActivityEpisodes) > 0:
+                endAct.startOfDay = False
 
-        
+            # First act
             if stAct.startOfDay == True:
                 stAct = self._adjust_first_episode(stAct, endAct)
                 continue
 
-            if stAct.startOfDay == False and endAct.endOfDay == False:
-                stAct = self._move_episode(stAct, endAct)
-                continue
-
+            # Last act
             if endAct.endOfDay == True:
                 stAct = self._adjust_last_episode(stAct, endAct)
                 continue
-        
 
+            # intermediate acts
+            stAct = self._move_episode(stAct, endAct)
+            
+            
         hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
+
+
+    def _return_start_activity(self):
+        stActFound = False
+        
+        while (not stActFound):
+            act = hp.heappop(self.listOfActivityEpisodes)[1]
+        
+            if act.scheduleId == 1:
+                stActFound = True
+            else:
+                if act.startTime == 0:
+                    hp.heappush(self.listOfActivityEpisodes, (1, act))
+                else:
+                    hp.heappush(self.listOfActivityEpisodes, (act.startTime, act))
+        
+        return act
 
     def _collate_results(self):
         #print self.listOfActivityEpisodes
@@ -64,9 +93,16 @@ class Person(object):
         return array(resList)
 
     def _check_for_conflicts(self):
-        pass
-            
+        checkArray = zeros((1440,))
+        for recAct in self.reconciledActivityEpisodes:        
+            actObject = recAct[1]
+            checkArray[actObject.startTime:actObject.endTime] += 1
+        if (checkArray > 1).sum() > 1:
+            for recAct in self.reconciledActivityEpisodes:
+                print recAct
 
+            print 'TEHRE ARE STILL CONFLICTS'
+            raise Exception, "THE SCHEDULES ARE STILL MESSED UP"
             
     def _adjust_first_episode(self, stAct, endAct):
         tt = self._extract_travel_time(stAct.location, endAct.location)
@@ -92,8 +128,11 @@ class Person(object):
             endAct.startTime = endAct.startTime + endAct_StAdj
             # Modify end of the Ending Activity for the prism
             rndNum = self.rndGen.return_random_variables()
-            endAct_EndAdj = rndNum * endAct_StAdj
+            endAct_EndAdj = rndNum * 0.5 * endAct_StAdj
             endAct.endTime = endAct.endTime + endAct_EndAdj
+
+            if endAct.endTime > 1439:
+                endAct.endTime = 1439
             #Update duration
             endAct.duration = endAct.endTime - endAct.startTime
 
@@ -116,8 +155,15 @@ class Person(object):
             endAct.startTime = endAct.startTime + adjDur
             # Modify end of the Ending Activity for the prism
             rndNum = self.rndGen.return_random_variables()
-            endAct_EndAdj = rndNum * adjDur
+            endAct_EndAdj = rndNum * 0.5 * adjDur
             endAct.endTime = endAct.endTime + endAct_EndAdj
+            
+                #If the adjusted endtime is less than the adjusted starttime
+            if endAct.endTime < endAct.startTime:
+                rndNum = self.rndGen.return_random_variables()
+                endAct.endTime = endAct.startTime + rndNum * endAct.duration
+
+
             #Update duration
             endAct.duration = endAct.endTime - endAct.startTime
             

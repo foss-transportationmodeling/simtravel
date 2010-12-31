@@ -318,6 +318,8 @@ class AbstractComponent(object):
                 print result.data[:,0]
                 if i.model_type <> 'consistency':
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+		else:
+		    self.data = result
         
         # Update hte model list for next iteration within the component
 
