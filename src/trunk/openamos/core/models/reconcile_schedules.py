@@ -135,14 +135,14 @@ class ReconcileSchedules(Model):
             reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
                 
 
-            recsInd = array([False]*data.rows)
-            recsInd.shape = (data.rows,)
+            #recsInd = array([False]*data.rows)
+            #recsInd.shape = (data.rows,)
             
-            recsInd[perIndex[2]:perIndex[3]] = True
+            #recsInd[perIndex[2]:perIndex[3]] = True
 
             i = 0
             for colN in colNames:
-                data.setcolumn(colN, reconciledSchedules[:,i], recsInd)
+                data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
                 i += 1
                                   
 

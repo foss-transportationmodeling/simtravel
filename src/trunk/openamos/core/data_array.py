@@ -176,7 +176,7 @@ class DataArray(object):
         except KeyError, e:
             raise DataError, 'not a recognized column name'
 
-    def setcolumn(self, columname, values, rows=None):
+    def setcolumn(self, columname, values, rows=None, start=None, end=None):
         
         try:
             if len(values.shape) > 1:
@@ -189,9 +189,11 @@ class DataArray(object):
         self.check_varname(columname)
         colnum = self._colnames[columname.lower()]
         try:
-            if rows is None:
+            if rows is None and start is None and end is None:
                 self.data[:,colnum] = values
-            else:
+            elif rows is None and start is not None and end is not None:
+                self.data[start:end,colnum] = values
+            elif rows is not None and start is None and end is None:
                 self.data[rows,colnum] = values
         except ValueError, e:
             raise DataError, e
