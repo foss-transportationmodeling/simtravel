@@ -26,9 +26,9 @@ def run_long_term_choices():
     simulationManagerObject.setup_databaseConnection()
     simulationManagerObject.setup_cacheDatabase('w')
     simulationManagerObject.setup_location_information()
-    simulationManagerObject.setup_tod_skims()
+    #simulationManagerObject.setup_tod_skims()
     simulationManagerObject.parse_config()
-    #simulationManagerObject.clean_database_tables()
+    simulationManagerObject.clean_database_tables()
     simulationManagerObject.run_components()
     simulationManagerObject.close_connections()
 

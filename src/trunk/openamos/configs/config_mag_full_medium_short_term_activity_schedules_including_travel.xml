@@ -1725,7 +1725,7 @@
       </Model>
     </Component>	
 
-    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="False">
+    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="False">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -2238,7 +2238,7 @@
     </Component1>
 
 
-    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="False" completed="False">
+    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="True" completed="False">
       <AnalysisInterval start="1" end="1" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
