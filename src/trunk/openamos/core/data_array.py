@@ -1,4 +1,4 @@
-from numpy import ndarray, array, zeros, ones, hstack, rec
+from numpy import ndarray, array, zeros, ones, hstack, rec, lexsort
 from scipy import exp
 import numexpr as ne
 import re
@@ -57,16 +57,32 @@ class DataArray(object):
             raise DataError, 'variable name is not a valid string'
 
     def sort(self, columnames):
+        
+
+        columnames.reverse()
 
         if not isinstance(columnames, list):
             raise DataError, """the column names input must be of """\
                 """list type"""
+
+        cols = []
+        for i in columnames:
+            colnum = self._colnames[i]
+            cols.append(self.data[:,colnum])
+
+        cols = tuple(cols)
+
+        sortedIndex = lexsort(cols)
+
+        self.data = self.data[sortedIndex, :]
+
+        """
         for i in columnames:
             colnum = self._colnames[i]
             colsIndex = self.data[:,colnum].argsort(0)
             
             self.data = self.data[colsIndex,:]
-
+        """
 
     def calculate_equation(self, coefficients, rows=None):
         if not isinstance(coefficients, dict):
