@@ -28,18 +28,18 @@ class ReconcileSchedules(Model):
             hIdIndices = hId_reverse_indices == countOfHid
             #hIdIndices.shape = (hIdIndices.sum(), )
             schedulesForHid = data.rowsof(hIdIndices)
-            print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
-            print schedulesForHid.data.astype(int)
+            #print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
+            #print schedulesForHid.data.astype(int)
             
             pIdsUnique, pId_reverse_indices = unique(schedulesForHid.columns([self.specification.pidName]).data,
                                                   return_inverse=True)
-            print '\tperson Ids - ', pIdsUnique
+            #print '\tperson Ids - ', pIdsUnique
             countOfPid = 0
             for pid in pIdsUnique:
                 pIdIndices = pId_reverse_indices == countOfPid
-                print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
-                       ' start-', self.index, ' end-', (self.index + pIdIndices.sum()))
-                print data.data[self.index:(self.index + pIdIndices.sum()), :].astype(int)
+                #print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
+                #       ' start-', self.index, ' end-', (self.index + pIdIndices.sum()))
+                #print data.data[self.index:(self.index + pIdIndices.sum()), :].astype(int)
                 
                 self.indices.append([hid, pid, self.index, self.index + pIdIndices.sum()])
 
@@ -50,7 +50,7 @@ class ReconcileSchedules(Model):
 
 
         self.indices = array(self.indices)
-        print self.indices
+        #print self.indices
             #hIdIndex += schedulesForHid.rows
             #raw_input()
 
@@ -115,7 +115,7 @@ class ReconcileSchedules(Model):
 
             """
             schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
-            print schedulesForPerson.data.astype(int)
+            #print schedulesForPerson.data.astype(int)
            #raw_input()
 
             activityList = []
@@ -146,8 +146,8 @@ class ReconcileSchedules(Model):
                 i += 1
                                   
 
-            print 'MODIFIED DATA'
-            print data.rowsof(recsInd).data.astype(int)
+            #print 'MODIFIED DATA'
+            #print data.rowsof(recsInd).data.astype(int)
             #print reconciledSchedules.astype(int)
             #print data.data.shape
             #raw_input()
