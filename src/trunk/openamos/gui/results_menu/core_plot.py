@@ -102,7 +102,6 @@ class Matplot(QDialog):
         
     def disconnects(self):
         self.new_obj.close_connection()
-        print 'Successful to close database!'
         self.close()
 
         

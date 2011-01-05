@@ -9,63 +9,258 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 import numpy as np
-import matplotlib.font_manager as plot
-
-#from openamos.core.database_management.cursor_database_connection import *
-#from openamos.core.database_management.database_configuration import *
+from openamos.gui.env import *
+from openamos.core.database_management.cursor_database_connection import *
+from openamos.core.database_management.database_configuration import *
 
 from pylab import *
-from core_plot import *
+#from core_plot import *
+
+import matplotlib
+import matplotlib.font_manager as plot
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.figure import Figure
 
 
+class MakeSchedPlot(QDialog):
+    def __init__(self, config, parent=None):
+        QDialog.__init__(self, parent)
 
-class MakeSchedPlot(Matplot):
-    def __init__(self, config, table, parent=None):
-        Matplot.__init__(self, parent)
+        self.setMinimumSize(QSize(900,500))
+        self.new_obj = None
+        self.project = None        
         self.valid = False
         self.connects(config)
         self.cursor = self.new_obj.cursor
-        self.table = table
-        
-#        self.setMinimumSize(QSize(900,500))
-#        self.setWindowTitle("Child Activity Skeletons")
-#        self.dpi = 100
-#        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
-#        self.canvas = FigureCanvas(self.fig)
-#        self.axes = self.fig.add_subplot(111)
-        
-#        protocol = "postgres"        
-#        user_name = "postgres"
-#        password = "1234"
-#        host_name = "10.206.111.111"
-#        database_name = "mag_zone"
-        
-#        self.database_config_object = DataBaseConfiguration(protocol, user_name, password, host_name, database_name)
-#        self.new_obj = DataBaseConnection(self.database_config_object)
-#        self.new_obj.new_connection()
-        
+        self.table = 'households'
 
-        #self.vbox = QVBoxLayout()
-        #self.vbox.setStretch(0,1)
+        self.dpi = 100
+        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
+        self.canvas = FigureCanvas(self.fig)
+        QWidget.setSizePolicy(self.canvas,QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.axes = self.fig.add_subplot(111)
+
+        self.makeVarsWidget()
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.varswidget)
         self.vbox.addWidget(self.canvas)
         self.vbox.addWidget(self.dialogButtonBox)
+        self.vbox.setStretch(1,1)
         self.setLayout(self.vbox)
         
-        self.on_draw()
-
-        #self.makeTempTables(self.cursor,table)
+        self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
 
  
- 
+    def makeVarsWidget(self):
+        
+        self.varswidget = QWidget(self)
+        self.varslayout = QGridLayout()
+        self.varswidget.setLayout(self.varslayout)
+        
+        segment = QGroupBox(self)
+        addsegment = QVBoxLayout()
+        segment.setLayout(addsegment)
+        self.segment1 = QRadioButton("Households")
+        self.segment1.setChecked(True)
+        self.segment2 = QRadioButton("Persons")
+        addsegment.addWidget(self.segment1)
+        addsegment.addWidget(self.segment2)
+        self.varslayout.addWidget(segment,1,0)
+        
+        tableslabel = QLabel('Columns')
+        self.varslayout.addWidget(tableslabel,0,1)
+        
+        self.colswidget = QListWidget()
+        self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        columns = self.columnName()
+        self.colswidget.addItems(columns)
+        self.colswidget.setMaximumWidth(180)
+        self.colswidget.setMaximumHeight(200)
+        self.varslayout.addWidget(self.colswidget,1,1)
+        
+        varslabel = QLabel('Values')
+        self.varslayout.addWidget(varslabel,0,2)
+        
+        self.valwidget = QListWidget()
+        self.valwidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.valwidget.setMaximumWidth(180)
+        self.valwidget.setMaximumHeight(200)
+        self.varslayout.addWidget(self.valwidget,1,2)        
+        
+        self.selbutton1 = QPushButton('>>')
+        self.selbutton1.setFixedWidth(60)
+        self.varslayout.addWidget(self.selbutton1,1,3)
+
+        self.delbutton = QPushButton('Delete Row')
+        self.delbutton.setFixedWidth(90)
+        self.varslayout.addWidget(self.delbutton,0,4,Qt.AlignLeft)
+              
+        self.varstable = QTableWidget(0,2,self)
+        self.varstable.setHorizontalHeaderLabels(['Column', 'Value'])
+        self.varstable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        self.varstable.setSizePolicy(sizePolicy)
+        self.varstable.horizontalHeader().setResizeMode(0,1)
+        self.varstable.horizontalHeader().setResizeMode(1,1)
+        self.varstable.setMaximumWidth(360)
+        self.varstable.setMaximumHeight(200)
+        self.varslayout.addWidget(self.varstable,1,4)
+
+        self.selbutton2 = QPushButton('>>')
+        self.selbutton2.setFixedWidth(60)
+        self.varslayout.addWidget(self.selbutton2,1,5)
+
+        self.buttonwidget = QWidget(self)
+        buttonlayout = QHBoxLayout()
+        self.buttonwidget.setLayout(buttonlayout)
+        personlabel = QLabel('Person ID')
+        buttonlayout.addWidget(personlabel)
+        self.showbutton = QPushButton('Show Chart')
+        buttonlayout.addWidget(self.showbutton)
+        self.varslayout.addWidget(self.buttonwidget,0,6)
+
+        self.idwidget = QListWidget()
+        self.idwidget.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.idwidget.setMaximumWidth(180)
+        self.idwidget.setMaximumHeight(200)
+        self.varslayout.addWidget(self.idwidget,1,6)
+
+        self.connect(self.colswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateValues)
+        self.connect(self.selbutton1, SIGNAL("clicked(bool)"), self.selValue)
+        self.connect(self.selbutton2, SIGNAL("clicked(bool)"), self.retrieveResults)
+        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
+        self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
+        self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
+        self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw)
+        
+        
+         
+    def connects(self,configobject):
+        
+        protocol = configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
+        user_name = configobject.getConfigElement(DB_CONFIG,DB_USER)
+        password = configobject.getConfigElement(DB_CONFIG,DB_PASS)
+        host_name = configobject.getConfigElement(DB_CONFIG,DB_HOST)
+        database_name = configobject.getConfigElement(DB_CONFIG,DB_NAME)
+        
+        self.database_config_object = DataBaseConfiguration(protocol, user_name, password, host_name, database_name)
+        self.new_obj = DataBaseConnection(self.database_config_object)
+        self.new_obj.new_connection()
+
+        
+    def disconnects(self):
+        self.new_obj.close_connection()
+        self.close()
 
 
+    def columnName(self):
+        cols = self.new_obj.get_column_list(self.table)
+        columns = []
+        for col in cols:
+            columns.append(QString(col))
+        return columns
+    
+    def populateValues(self, item):
+        
+        try:
+            values = []
+            temp = None
+            vars = str(item.text())
+            tablename = self.table
+            order = str(item.text())
+            
+            self.cursor.execute("""SELECT DISTINCT %s FROM %s ORDER BY %s"""%(vars,tablename,order))
+            temp = self.cursor.fetchall()
+            
+            for i in temp:
+                value = str(i[0])
+                values.append(value)
+                
+            self.valwidget.clear()
+            self.valwidget.addItems(values)
+
+        except Exception, e:
+            print '\tError while creating the table %s'%self.table_name
+            print e
+
+
+    def selValue(self):
+        if (self.colswidget.currentItem() != None) & (self.valwidget.currentItem() != None):
+            currcolumn = (self.colswidget.currentItem()).text()
+            currvar = (self.valwidget.currentItem()).text()
+            if not self.isExist(currcolumn,currvar):
+                self.varstable.insertRow(self.varstable.rowCount())
+                tableitem = QTableWidgetItem()
+                tableitem.setText(currcolumn)
+                tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
+                self.varstable.setItem(self.varstable.rowCount()-1, 0, tableitem)
+                
+                varitem = QTableWidgetItem()
+                varitem.setText(currvar)
+                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+                self.varstable.setItem(self.varstable.rowCount()-1, 1, varitem)
+                
+                #self.stateSQL()
+                #self.on_draw()
+        else:
+            msg = "Please select a Column and a Value"
+            QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok) 
+
+
+    def isExist(self, ccolumn, cvalue):
+        numrows = self.varstable.rowCount()
+        for i in range(numrows):
+            column = str((self.varstable.item(i,0)).text())
+            value = str((self.varstable.item(i,1)).text())
+            if (column == ccolumn) & (value == cvalue):
+                return True
+            
+        return False
+    
+
+    def delValue(self):
+        self.varstable.removeRow(self.varstable.currentRow())
+
+
+    def initTables(self):
+        if self.segment1.isChecked() and self.table != 'households':
+            self.colswidget.clear()
+            self.valwidget.clear()
+            self.delRow()
+            self.table = 'households'
+            columns = self.columnName()
+            self.colswidget.addItems(columns)
+        if self.segment2.isChecked() and self.table != 'persons':
+            self.colswidget.clear()
+            self.valwidget.clear()
+            self.delRow()
+            self.table = 'persons'
+            columns = self.columnName()
+            self.colswidget.addItems(columns)
+        
+    def delRow(self):
+        numrows = self.varstable.rowCount() - 1
+        while numrows > -1:
+            self.varstable.removeRow(numrows)
+            numrows = numrows - 1
 
     def isValid(self):
         return True
         #return self.checkIfTableExists(self.table)   
 
+    def selectedResults(self):
+        sindex = self.idwidget.selectedIndexes()
+        sdata = []
+        for i in sindex:
+            temp = self.data[i.row()]
+            sdata.append(temp)
+            
+        return sdata
 
     def on_draw(self):
         """ Redraws the figure
@@ -80,87 +275,132 @@ class MakeSchedPlot(Matplot):
 #                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
 #                ]
         
-        data = self.retrieveResults()
-        
-        rows = len(data)
-        ticks = np.arange(rows+1)
-        ind = 1
-        height = 0.4
-        
-        #bars=[]
-        
-        for row in data:
-            rowlen = len(row)
-            for i in range(2,rowlen,3):
-                self.axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
-            ind = ind + 1
-        
-        bars=[]
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
-        bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
-        
-        prop = matplotlib.font_manager.FontProperties(size=8)   
-        self.axes.legend(bars,('In-home','Work','School','Pers Buss',
-                          'Shopping','Meal','Srv Passgr','Social',
-                          'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
-        self.axes.set_xlabel("Time")
-        self.axes.set_ylabel("Persons")
-        self.axes.set_yticks(ticks)
+        sdata = self.selectedResults()
+        if sdata != None:
+            rows = len(sdata)
+            self.axes.clear()
+            ticks = np.arange(rows+1)
+            ind = 1
+            height = 0.4
+
+
+            for row in sdata:
+                rowlen = len(row)
+                for i in range(2,rowlen,3):
+                    self.axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
+                ind = ind + 1
+            
+            bars=[]
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
+            
+            prop = matplotlib.font_manager.FontProperties(size=8)   
+            self.axes.legend(bars,('In-home','Work','School','Pers Buss',
+                              'Shopping','Meal','Srv Passgr','Social',
+                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+            self.axes.set_xlabel("Time")
+            self.axes.set_ylabel("Persons")
+            self.axes.set_xlim(0,1440)
+            
+            
+            sindex = self.idwidget.selectedIndexes()
+            labels = []
+            labels.append('')
+            for i in sindex:
+                labels.append(self.idwidget.item(i.row()).text())
                 
-        self.canvas.draw()
+            self.axes.set_yticks(ticks)
+            if len(labels) >= 13:
+                self.axes.set_yticklabels(labels, size='xx-small')
+            elif (len(labels) >= 7):
+                self.axes.set_yticklabels(labels, size='x-small')
+            else:
+                self.axes.set_yticklabels(labels)
+                    
+                    
+            self.canvas.draw()
 
 
     def retrieveResults(self):
         
-        try:
-            data = []
-            temp = None
-            vars = 'houseid, personid, activitytype, starttime, duration'
-            filter = 'starttime > 0'
-            tablename = 'tempschedule'
-            order = 'houseid, personid, starttime'
+        numrows = self.varstable.rowCount()
+        if numrows > 0:
+            try:
+                self.idwidget.clear()
+                self.data = []
+                pid = []
+                temp = None
+                SQL = self.stateSQL()
+                if SQL != "" and SQL != None:
+                    #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
+                    self.cursor.execute(SQL)
+                    temp = self.cursor.fetchall()
+                    
+                    prior_id = '0'
+                    aschedule = []
+                    for i in temp:
+                        id = '%s%s'%(str(i[0]),str(i[1]))
+                        if prior_id <> id:
+                            prior_id = id
+                            
+                            self.data.append(aschedule)
+                            
+                            aschedule = []
+                            pid.append(id)
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+                        else:
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+    
+                    self.data.append(aschedule)
+                    self.data.pop(0)
+                    self.idwidget.addItems(pid)
+    
+                #return data
             
-            if filter != "" and order != "":
+            except Exception, e:
+                print '\tError while unloading data from the table %s'%self.table
+                print e
+                #return None
+            
+            #return None
+        else:
+            msg = "Please insert a Column and a Value after selecting"
+            QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok) 
 
-                self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
-                temp = self.cursor.fetchall()
-                
-                prior_id = '0'
-                aschedule = []
-                for i in temp:
-                    id = '%s%s'%(str(i[0]),str(i[1]))
-                    if prior_id <> id:
-                        prior_id = id
-                        
-                        if len(data) < 11:
-                            data.append(aschedule)
-                        
-                        aschedule = []
-                        aschedule.append(i[2])
-                        aschedule.append(i[3])
-                        aschedule.append(i[4])
-                    else:
-                        aschedule.append(i[2])
-                        aschedule.append(i[3])
-                        aschedule.append(i[4])                        
 
-            data.pop(0)
-            return data
+    def stateSQL(self):
+        tablename = 'schedule_r AS A, %s AS B' %(self.table)
+        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
+        filter = '(A.starttime > 0'
+        order = 'A.houseid, A.personid, A.starttime'
         
-        except Exception, e:
-            print '\tError while creating the table %s'%self.table_name
-            print e
-            return None
-        
-        return None
+        numrows = self.varstable.rowCount()
+        for i in range(numrows):
+            filter = filter + " AND "
+            column = str((self.varstable.item(i,0)).text())
+            value = str((self.varstable.item(i,1)).text())
+            filter = filter + "B.%s = '%s'" %(column,value)
+            
+        filter = filter + ') AND A.houseid = B.houseid'
+        if self.table == 'persons':
+            filter = filter + ' AND A.personid = B.personid'
+        state = """SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+
+        return state
 
 
     def colors(self, index):
@@ -169,10 +409,10 @@ class MakeSchedPlot(Matplot):
                          514:'#FFD700',900:'#000000'}
 
         return colorpooldict[index]
-    
-    
-        
-        
+
+
+
+
     def schedule_labels(self, index):
         xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
                   'duration_rec':'Activity Duration (mins)'}
@@ -194,7 +434,7 @@ class MakeSchedPlot(Matplot):
             return duration
 
 
-        
+
 
 def main():
     app = QApplication(sys.argv)
