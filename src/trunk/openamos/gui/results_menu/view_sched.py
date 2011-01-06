@@ -8,6 +8,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+import random
 import numpy as np
 from openamos.gui.env import *
 from openamos.core.database_management.cursor_database_connection import *
@@ -27,7 +28,7 @@ class MakeSchedPlot(QDialog):
     def __init__(self, config, parent=None):
         QDialog.__init__(self, parent)
 
-        self.setMinimumSize(QSize(900,500))
+        self.setMinimumSize(QSize(900,600))
         self.new_obj = None
         self.project = None        
         self.valid = False
@@ -35,24 +36,67 @@ class MakeSchedPlot(QDialog):
         self.cursor = self.new_obj.cursor
         self.table = 'households'
 
-        self.dpi = 100
-        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
-        self.canvas = FigureCanvas(self.fig)
-        QWidget.setSizePolicy(self.canvas,QSizePolicy.Expanding,QSizePolicy.Expanding)
-        self.axes = self.fig.add_subplot(111)
+#        self.dpi = 100
+#        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
+#        self.canvas = FigureCanvas(self.fig)
+#        QWidget.setSizePolicy(self.canvas,QSizePolicy.Expanding,QSizePolicy.Expanding)
+#        self.axes = self.fig.add_subplot(111)
 
         self.makeVarsWidget()
+        self.tabs = QTabWidget()
+        self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)         
+        self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.varswidget)
-        self.vbox.addWidget(self.canvas)
+#        self.vbox.addWidget(self.canvas)
+        self.vbox.addWidget(self.tabs)
         self.vbox.addWidget(self.dialogButtonBox)
         self.vbox.setStretch(1,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
 
+
+    def on_context_menu(self,point):
+        menubar = QMenu(self)
+        one = menubar.addAction("Show Chart")
+        two = menubar.addAction("Remove Current Tab")
+        self.connect(one, SIGNAL("triggered()"),self.on_draw1)
+        self.connect(two, SIGNAL("triggered()"),self.removeTab)
+        menubar.popup(self.tabs.mapToGlobal(point))
+        
+        
+    def makeTabs(self,chart):
+        page1 = QWidget()
+        vbox = QVBoxLayout()
+        vbox.addWidget(chart)
+        page1.setLayout(vbox)
+        index = self.tabs.count() + 1
+        chartname = "Chart %s" %(index)
+        self.tabs.addTab(page1, chartname)
+        index = index - 1
+        self.tabs.setCurrentIndex(index)
+
+    def removeTab(self):
+        index = self.tabs.currentIndex()
+        reply = QMessageBox.information(self,"Warning","Do you really want to remove?",QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.tabs.removeTab(index)
+ 
+    def createCanvas(self):
+        mydpi = 100
+        myfig = Figure((5.0, 4.5), dpi=mydpi)
+        sketch = FigureCanvas(myfig)
+        QWidget.setSizePolicy(sketch,QSizePolicy.Expanding,QSizePolicy.Expanding)
+        myaxes = myfig.add_subplot(111)
+        
+        myCanvas = []
+        myCanvas.append(sketch)
+        myCanvas.append(myaxes)
+        return myCanvas
+ 
  
     def makeVarsWidget(self):
         
@@ -134,7 +178,7 @@ class MakeSchedPlot(QDialog):
         self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
         self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
         self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
-        self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw)
+        self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw1)
         
         
          
@@ -262,71 +306,70 @@ class MakeSchedPlot(QDialog):
             
         return sdata
 
-    def on_draw(self):
-        """ Redraws the figure
-        """
-        
-#        data = [[100,0,395,300,396,332,100,729,710],
-#                [100,0,325,300,326,213,415,568,34,100,669,770],
-#                [100,0,149,513,159,18,101,182,5,300,258,484,100,743,696],
-#                [100,0,172,101,173,1,513,199,20,416,266,49,300,367,388,412,797,41,100,885,554],
-#                [100,0,302,300,303,435,101,742,10,514,775,61,101,840,0,101,841,1,100,897,542],
-#                [100,0,285,300,286,312,101,602,51,101,654,59,101,714,2,412,732,68,100,879,560],
-#                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
-#                ]
-        
-        sdata = self.selectedResults()
-        if sdata != None:
-            rows = len(sdata)
-            self.axes.clear()
-            ticks = np.arange(rows+1)
-            ind = 1
-            height = 0.4
-
-
-            for row in sdata:
-                rowlen = len(row)
-                for i in range(2,rowlen,3):
-                    self.axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
-                ind = ind + 1
-            
-            bars=[]
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
-            
-            prop = matplotlib.font_manager.FontProperties(size=8)   
-            self.axes.legend(bars,('In-home','Work','School','Pers Buss',
-                              'Shopping','Meal','Srv Passgr','Social',
-                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
-            self.axes.set_xlabel("Time")
-            self.axes.set_ylabel("Persons")
-            self.axes.set_xlim(0,1440)
-            
-            
-            sindex = self.idwidget.selectedIndexes()
-            labels = []
-            labels.append('')
-            for i in sindex:
-                labels.append(self.idwidget.item(i.row()).text())
-                
-            self.axes.set_yticks(ticks)
-            if len(labels) >= 13:
-                self.axes.set_yticklabels(labels, size='xx-small')
-            elif (len(labels) >= 7):
-                self.axes.set_yticklabels(labels, size='x-small')
-            else:
-                self.axes.set_yticklabels(labels)
-                    
-                    
-            self.canvas.draw()
+#    def on_draw(self):
+#        """ Redraws the figure
+#        """
+#        
+##        data = [[100,0,395,300,396,332,100,729,710],
+##                [100,0,325,300,326,213,415,568,34,100,669,770],
+##                [100,0,149,513,159,18,101,182,5,300,258,484,100,743,696],
+##                [100,0,172,101,173,1,513,199,20,416,266,49,300,367,388,412,797,41,100,885,554],
+##                [100,0,302,300,303,435,101,742,10,514,775,61,101,840,0,101,841,1,100,897,542],
+##                [100,0,285,300,286,312,101,602,51,101,654,59,101,714,2,412,732,68,100,879,560],
+##                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
+##                ]
+#        
+#        sdata = self.selectedResults()
+#        if sdata != None:
+#            rows = len(sdata)
+#            self.axes.clear()
+#            ticks = np.arange(rows+1)
+#            ind = 1
+#            height = 0.4
+#
+#
+#            for row in sdata:
+#                rowlen = len(row)
+#                for i in range(2,rowlen,3):
+#                    self.axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
+#                ind = ind + 1
+#            
+#            bars=[]
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
+#            bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
+#            
+#            prop = matplotlib.font_manager.FontProperties(size=8)   
+#            self.axes.legend(bars,('In-home','Work','School','Pers Buss',
+#                              'Shopping','Meal','Srv Passgr','Social',
+#                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+#            self.axes.set_xlabel("Time")
+#            self.axes.set_ylabel("Persons")
+#            self.axes.set_xlim(0,1440)
+#            
+#            
+#            sindex = self.idwidget.selectedIndexes()
+#            labels = []
+#            labels.append('')
+#            for i in sindex:
+#                labels.append(self.idwidget.item(i.row()).text())
+#                
+#            self.axes.set_yticks(ticks)
+#            if len(labels) >= 13:
+#                self.axes.set_yticklabels(labels, size='xx-small')
+#            elif (len(labels) >= 7):
+#                self.axes.set_yticklabels(labels, size='x-small')
+#            else:
+#                self.axes.set_yticklabels(labels)
+#
+#            self.canvas.draw()
 
 
     def retrieveResults(self):
@@ -365,6 +408,7 @@ class MakeSchedPlot(QDialog):
     
                     self.data.append(aschedule)
                     self.data.pop(0)
+                    self.fixedFifty(pid)
                     self.idwidget.addItems(pid)
     
                 #return data
@@ -381,11 +425,20 @@ class MakeSchedPlot(QDialog):
                                     msg,
                                     QMessageBox.Ok) 
 
+    def fixedFifty(self, pid):
+        length = len(self.data)
+        while length > 50:
+            index = randint(0, length-1)
+            print index
+            pid.pop(index)
+            self.data.pop(index)
+            length = len(self.data)
+        
 
     def stateSQL(self):
         tablename = 'schedule_r AS A, %s AS B' %(self.table)
         vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
-        filter = '(A.starttime > 0'
+        filter = '(A.starttime >= 0'
         order = 'A.houseid, A.personid, A.starttime'
         
         numrows = self.varstable.rowCount()
@@ -398,7 +451,7 @@ class MakeSchedPlot(QDialog):
         filter = filter + ') AND A.houseid = B.houseid'
         if self.table == 'persons':
             filter = filter + ' AND A.personid = B.personid'
-        state = """SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
 
         return state
 
@@ -433,6 +486,65 @@ class MakeSchedPlot(QDialog):
         if index == 4:
             return duration
 
+    def on_draw1(self):
+        """ Redraws the figure
+        """
+        
+        sdata = self.selectedResults()
+        if sdata != None:
+            Sketch = self.createCanvas()
+            Canvas = Sketch[0]
+            axes = Sketch[1]
+            rows = len(sdata)
+            axes.clear()
+            ticks = np.arange(rows+1)
+            ind = 1
+            height = 0.4
+
+
+            for row in sdata:
+                rowlen = len(row)
+                for i in range(2,rowlen,3):
+                    axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
+                ind = ind + 1
+            
+            bars=[]
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
+            
+            prop = matplotlib.font_manager.FontProperties(size=8)   
+            axes.legend(bars,('In-home','Work','School','Pers Buss',
+                              'Shopping','Meal','Srv Passgr','Social',
+                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+            axes.set_xlabel("Time")
+            axes.set_ylabel("Persons")
+            axes.set_xlim(-1,1441)
+            
+            
+            sindex = self.idwidget.selectedIndexes()
+            labels = []
+            labels.append('')
+            for i in sindex:
+                labels.append(self.idwidget.item(i.row()).text())
+                
+            axes.set_yticks(ticks)
+            if len(labels) >= 13:
+                axes.set_yticklabels(labels, size='xx-small')
+            elif (len(labels) >= 7):
+                axes.set_yticklabels(labels, size='x-small')
+            else:
+                axes.set_yticklabels(labels)
+
+            Canvas.draw()
+            self.makeTabs(Canvas)
 
 
 
