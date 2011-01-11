@@ -57,17 +57,30 @@ class MakeSchedPlot(QDialog):
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
+        
+        if not self.isValid():  
+            msg = "There is no simulation output"
+            QMessageBox.information(self,"Warning",msg,QMessageBox.Ok)
+            self.showbutton.setDisabled(True)
+
+
+    def isValid(self):
+        isExist = False
+        if self.new_obj.check_if_table_exists("schedule_r"):
+            isExist = True
+        return isExist
 
 
     def on_context_menu(self,point):
         menubar = QMenu(self)
         one = menubar.addAction("Show Chart")
         two = menubar.addAction("Remove Current Tab")
-        self.connect(one, SIGNAL("triggered()"),self.on_draw1)
+        if self.isValid(): 
+            self.connect(one, SIGNAL("triggered()"),self.on_draw1)
         self.connect(two, SIGNAL("triggered()"),self.removeTab)
         menubar.popup(self.tabs.mapToGlobal(point))
-        
-        
+
+
     def makeTabs(self,chart):
         page1 = QWidget()
         vbox = QVBoxLayout()
@@ -119,8 +132,8 @@ class MakeSchedPlot(QDialog):
         
         self.colswidget = QListWidget()
         self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        columns = self.columnName()
-        self.colswidget.addItems(columns)
+        if self.columnName() <> None:
+            self.colswidget.addItems(self.columnName())
         self.colswidget.setMaximumWidth(180)
         self.colswidget.setMaximumHeight(200)
         self.varslayout.addWidget(self.colswidget,1,1)
@@ -201,11 +214,14 @@ class MakeSchedPlot(QDialog):
 
 
     def columnName(self):
-        cols = self.new_obj.get_column_list(self.table)
-        columns = []
-        for col in cols:
-            columns.append(QString(col))
-        return columns
+        if self.new_obj.check_if_table_exists(self.table):
+            cols = self.new_obj.get_column_list(self.table)
+            columns = []
+            for col in cols:
+                columns.append(QString(col))
+            return columns
+        else:
+            return None
     
     def populateValues(self, item):
         
@@ -247,8 +263,6 @@ class MakeSchedPlot(QDialog):
                 varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
                 self.varstable.setItem(self.varstable.rowCount()-1, 1, varitem)
                 
-                #self.stateSQL()
-                #self.on_draw()
         else:
             msg = "Please select a Column and a Value"
             QMessageBox.information(self, "Warning",
@@ -277,25 +291,21 @@ class MakeSchedPlot(QDialog):
             self.valwidget.clear()
             self.delRow()
             self.table = 'households'
-            columns = self.columnName()
-            self.colswidget.addItems(columns)
+            if self.columnName() <> None:
+                self.colswidget.addItems(self.columnName())
         if self.segment2.isChecked() and self.table != 'persons':
             self.colswidget.clear()
             self.valwidget.clear()
             self.delRow()
             self.table = 'persons'
-            columns = self.columnName()
-            self.colswidget.addItems(columns)
+            if self.columnName() <> None:
+                self.colswidget.addItems(self.columnName())
         
     def delRow(self):
         numrows = self.varstable.rowCount() - 1
         while numrows > -1:
             self.varstable.removeRow(numrows)
-            numrows = numrows - 1
-
-    def isValid(self):
-        return True
-        #return self.checkIfTableExists(self.table)   
+            numrows = numrows - 1  
 
     def selectedResults(self):
         sindex = self.idwidget.selectedIndexes()
@@ -429,7 +439,6 @@ class MakeSchedPlot(QDialog):
         length = len(self.data)
         while length > 50:
             index = randint(0, length-1)
-            print index
             pid.pop(index)
             self.data.pop(index)
             length = len(self.data)
@@ -491,7 +500,7 @@ class MakeSchedPlot(QDialog):
         """
         
         sdata = self.selectedResults()
-        if sdata != None:
+        if len(sdata) > 0:
             Sketch = self.createCanvas()
             Canvas = Sketch[0]
             axes = Sketch[1]
@@ -545,6 +554,13 @@ class MakeSchedPlot(QDialog):
 
             Canvas.draw()
             self.makeTabs(Canvas)
+            
+        else:
+            msg = "Please select Person ID"
+            QMessageBox.information(self, "Warning",
+                                    msg,
+                                    QMessageBox.Ok)
+
 
 
 
