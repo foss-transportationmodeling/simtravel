@@ -71,8 +71,7 @@ class MakePlot(Matplot):
         
 
     def isValid(self):
-        #return self.checkIfTableExists(self.table)
-        return True
+        return self.checkIfTableExists(self.table)
 
 
     def updatestrt(self, table_name):
@@ -173,12 +172,15 @@ class MakePlot(Matplot):
                 if not self.checkColumnExists("tempschedule","strttime_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN strttime_rec bigint")
                     self.new_obj.connection.commit()
+                    self.updatestrt("tempschedule")
                 if not self.checkColumnExists("tempschedule","endtime_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN endtime_rec bigint")
                     self.new_obj.connection.commit()
+                    self.updateend("tempschedule")
                 if not self.checkColumnExists("tempschedule","duration_rec"):
                     self.cursor.execute("ALTER TABLE tempschedule ADD COLUMN duration_rec bigint")
                     self.new_obj.connection.commit()
+                    self.updateduration("tempschedule")
         
         except Exception, e:
             print '\tError while creating the table %s'%self.table_name
@@ -219,6 +221,7 @@ class MakePlot(Matplot):
                 self.axes.bar(ind, self.err2, color='green', align='center')
                 self.axes.set_xlabel(self.xtitle[str(self.choicevar1.currentText())])
                 self.axes.set_ylabel("Percent (%)")
+                self.axes.set_ylim(0,100)
                 
                 labelsdict = self.labelsdict[str(self.choicevar1.currentText())]
                 labels = []
@@ -370,6 +373,7 @@ class MakePlot(Matplot):
             self.axes.legend(bars,legendlabel,prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             self.axes.set_xlabel(self.xtitle[str(self.choicevar2.currentText())])
             self.axes.set_ylabel("Percent (%)")
+            self.axes.set_ylim(0,100)
                     
             self.canvas.draw()
         
