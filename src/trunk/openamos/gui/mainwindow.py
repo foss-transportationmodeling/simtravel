@@ -141,8 +141,8 @@ class MainWindow(QMainWindow):
     # Defining Models
         self.models_menu = self.menuBar().addMenu("&Models")
 
-        models_interactive_ui_action = self.createaction("&Interactive UI", None, None, 
-                                            None, "Chose a model in a visual form.")
+#        models_interactive_ui_action = self.createaction("&Interactive UI", None, None, 
+#                                            None, "Chose a model in a visual form.")
         component_long_term_choices_action = self.createaction(COMP_LONGTERM, self.models.show_long_term_models, None, 
                                             None, None)
         component_fixed_activity_location_choice_generator_action = self.createaction(COMP_FIXEDACTLOCATION, self.models.show_fixed_activity_models, None, 
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
 #                                            None, None)
 
         self.modelsComponentSubMenu = self.models_menu.addMenu("&Component")
-        #self.addActions(self.models_menu, (models_interactive_ui_action, ))
+#        self.addActions(self.models_menu, (models_interactive_ui_action, ))
         self.addActions(self.modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_location_choice_generator_action,
                                                       component_vehicle_ownership_model_action, component_fixed_activity_prism_generator_action,
                                                        component_child_daily_status_and_allocation_model_action, component_adult_daily_status_model_action,
@@ -286,13 +286,14 @@ class MainWindow(QMainWindow):
                 if Temp <> None:
                     Temp.setSelected(False)
                 self.proconfig = None
-                self.models = None
-                self.centralwidget = None
-                self.centralwidget = QWidget()
-                self.centralwidget.setObjectName("centralwidget")        
-                self.centralwidget.setFixedSize(1140, 1200)
-                self.centralwidgetscroll.setWidget(self.centralwidget)
-                self.models = Models(self.centralwidget)
+#                self.models = None
+#                self.centralwidget = None
+#                self.centralwidget = QWidget()
+#                self.centralwidget.setObjectName("centralwidget")        
+#                self.centralwidget.setFixedSize(1140, 1200)
+#                self.centralwidgetscroll.setWidget(self.centralwidget)
+#                self.models = Models(self.centralwidget)
+                self.models.show_clear_widget()
 
             
             self.proconfig = ConfigObject(configtree=project_new.configtree)
@@ -301,6 +302,7 @@ class MainWindow(QMainWindow):
             self.run_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
+            self.result_menu.actions()[2].setEnabled(True)
             
 
     def projectopen(self):
@@ -318,13 +320,14 @@ class MainWindow(QMainWindow):
             if Temp <> None:
                 Temp.setSelected(False)
             self.proconfig = None
-            self.models = None
-            self.centralwidget = None
-            self.centralwidget = QWidget()
-            self.centralwidget.setObjectName("centralwidget")        
-            self.centralwidget.setFixedSize(1140, 1200)
-            self.centralwidgetscroll.setWidget(self.centralwidget)
-            self.models = Models(self.centralwidget)
+#            self.models = None
+#            self.centralwidget = None
+#            self.centralwidget = QWidget()
+#            self.centralwidget.setObjectName("centralwidget")        
+#            self.centralwidget.setFixedSize(1140, 1200)
+#            self.centralwidgetscroll.setWidget(self.centralwidget)
+#            self.models = Models(self.centralwidget)
+            self.models.show_clear_widget()
 
             
             self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
@@ -334,6 +337,7 @@ class MainWindow(QMainWindow):
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
             self.result_menu.actions()[2].setEnabled(True)
+
             
 
     def projectsave(self):
@@ -362,10 +366,11 @@ class MainWindow(QMainWindow):
         self.proconfig = None
         self.checkProject()
         self.setWindowTitle("OpenAMOS: Version-1.0")
+        self.run_menu.actions()[0].setDisabled(True)
         self.data_menu.actions()[2].setDisabled(True)
-        #self.run_menu.actions()[1].setDisabled(True)
         self.result_menu.actions()[0].setDisabled(True)
         self.result_menu.actions()[1].setDisabled(True)
+        self.result_menu.actions()[2].setDisabled(True)
         
 
     def projectQuit(self):
@@ -402,7 +407,7 @@ class MainWindow(QMainWindow):
             
     def results_person(self):
         if self.proconfig <> None:
-            show_plot = MakeSchedPlot(self.proconfig,"trips")
+            show_plot = MakeSchedPlot(self.proconfig)
             show_plot.exec_()
             
     def run_simulation(self):
