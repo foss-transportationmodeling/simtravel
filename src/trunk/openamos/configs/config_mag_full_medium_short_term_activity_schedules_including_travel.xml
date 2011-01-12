@@ -219,6 +219,11 @@
         <Variable table="schedule_r" var="endtime" coeff="1"/>
         <Variable table="schedule_r" var="starttime" coeff="-1"/>
       </Model>
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
 	<Variance value="0"/>
@@ -319,6 +324,11 @@
         <Variable table="schedule_r" var="endtime" coeff="1"/>
         <Variable table="schedule_r" var="starttime" coeff="-1"/>
       </Model>
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
 	<Variance value="0"/>
@@ -415,6 +425,11 @@
 	<Variance value="0"/>
         <Variable table="schedule_r" var="endtime" coeff="1"/>
         <Variable table="schedule_r" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -595,7 +610,11 @@
       </Model>
 
 
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
 
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -764,7 +783,11 @@
 
 
 
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
 
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -906,7 +929,11 @@
         <Variable table="schedule_r" var="endtime" coeff="1"/>
         <Variable table="schedule_r" var="starttime" coeff="-1"/>
       </Model>
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
 	<FilterSet type="and"/>
@@ -1067,7 +1094,11 @@
         <Variable table="schedule_r" var="endtime" coeff="1"/>
         <Variable table="schedule_r" var="starttime" coeff="-1"/>
       </Model>
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
 	<FilterSet type="and"/>
@@ -1090,11 +1121,6 @@
 
     <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
-    	<Table table="persons" key="houseid,personid" order="2"/>
-    	<Table table="households" key="houseid" order="3"/>
-    	<Table table="households_vehicles_count_r" key="houseid"/>
-    	<Table table="vehicles_r" key="houseid" count_key="vehid"/>
-    	<Table table="workers_r" key="houseid,personid"/>		
     	<Table table="schedule_r" key="houseid,personid" count_key="scheduleid" order="1"/>
     	<Table table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid"/>
       </DBTables>
@@ -1112,21 +1138,250 @@
       <Model name="ReconcileSchedules" formulation="Reconcile Schedules" seed="1">
 	<DependentVariable var="reconcileschedules"/>
 
-	<HouseholdIdName table="schedule_r" var="houseid"/>
-	<PersonIdName table="schedule_r" var="personid"/>
-	<ScheduleIdName table="schedule_r" var="scheduleid"/>
-	<ActivityTypeName table="schedule_r" var="activitytype"/>
-	<LocationIdName table="schedule_r" var="locationid"/>
-	<StartTimeName table="schedule_r" var="starttime"/>
-	<EndTimeName table="schedule_r" var="endtime"/>
-	<DurationName table="schedule_r" var="duration"/>
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_r" var="houseid"/>
+	  <PersonIdName table="schedule_r" var="personid"/>
+	  <ScheduleIdName table="schedule_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_r" var="activitytype"/>
+	  <LocationIdName table="schedule_r" var="locationid"/>
+	  <StartTimeName table="schedule_r" var="starttime"/>
+	  <EndTimeName table="schedule_r" var="endtime"/>
+	  <DurationName table="schedule_r" var="duration"/>
+	  <DependentPersonName table="schedule_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+      </Model>
+     
+    </Component>	
+
+    <Component name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>
+      </DBTables>
+
+      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="equals" value="0"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.15"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.85"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="equals" value="1"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.18"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.82"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="equals" value="2"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.24"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.76"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="equals" value="3"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.31"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.69"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="equals" value="4"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.41"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.59"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatusNonAdults" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="schstat" condition="equals" value="1"/>
+	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.67"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.33"/>
+        </Alternative>
+      </Model>
+      <Model name="DailySchStatusAdults" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="schdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="schstat" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.67"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.33"/>
+        </Alternative>
+      </Model>
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+    </Component>	
+
+    <Component name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+      </DBTables>
+
+      <Model name="DailyWorkStatusAdults" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="wrkdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.70"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.30"/>
+        </Alternative>
+      </Model>
+      <Model name="DailyWorkStatusNonAdults" formulation="Probability Distribution" seed="1">
+        <DependentVariable var="wrkdailystatus"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="0.41"/>
+        </Alternative>
+        <Alternative id="No" value="0">
+	  <Variable table="persons" var="one" coeff="0.59"/>
+        </Alternative>
+      </Model>
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+    </Component>	
+
+
+    <Component name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="True" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="households" key="houseid" order="2"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+      </DBTables>
+
+      <Model name="PreSchoolKidsDependency" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="dependency"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="presch" condition="equals" value="1"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+      <Model name="OtherKidsDependency" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+        <DependentVariable var="dependency"/>
+	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
+        <Alternative id="yes" value="1">
+	  <Variable table="persons" var="one" coeff="-0.93"/>
+	  <Variable table="persons" var="ag5t10" coeff="0.73"/>
+	  <Variable table="persons" var="ag11t14" coeff="0.35"/>
+	  <Variable table="persons" var="male" coeff="-0.09"/>
+	  <Variable table="persons" var="hisp" coeff="0.3"/>
+	  <Variable table="households" var="inclt35k" coeff="-0.08"/>
+	  <Variable table="households" var="urb" coeff="0.04"/>
+	  <Variable table="households" var="nwrkcnt" coeff="0.03"/>
+	  <Variable table="households" var="drvrcnt" coeff="0.035"/>
+	  <Variable table="households" var="noc" coeff="0.002"/>
+        </Alternative>
+        <Alternative id="no" value="0">
+	  <Variable table="persons" var="one" coeff="0.0"/>
+        </Alternative>
+      </Model>
+
+    </Component>	
+
+
+
+    <Component name="CleanDailyFixedActivitySchedule" read_from_table="schedule_ltrec_r" write_to_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
+      <DBTables>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>		
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" order="1"/>
+    	<Table table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" count_key="scheduleid"/>
+      </DBTables>
+
+      <DeleteRecords value="False"/>	
+
+
+
+      <SpatialConstraints1 table="travel_skims" skim_var="tt" origin_var="origin" destination_var="destination">
+	<Start table="schedule_ltrec_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_ltrec_r" location_var="locationid" time_var="starttime"/>
+      </SpatialConstraints1>
+
+
+      <Model name="CleanFixedActivitySchedulesofChildren" formulation="Clean Fixed Activity Schedule" seed="1">
+	<DependentVariable var="cleanfixedactivityschedulesofchildren"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_ltrec_r" var="houseid"/>
+	  <PersonIdName table="schedule_ltrec_r" var="personid"/>
+	  <ScheduleIdName table="schedule_ltrec_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_ltrec_r" var="activitytype"/>
+	  <LocationIdName table="schedule_ltrec_r" var="locationid"/>
+	  <StartTimeName table="schedule_ltrec_r" var="starttime"/>
+	  <EndTimeName table="schedule_ltrec_r" var="endtime"/>
+	  <DurationName table="schedule_ltrec_r" var="duration"/>
+	  <DependentPersonName table="schedule_ltrec_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+	<DailyStatus>
+	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	</DailyStatus>
+	
+	<Dependency>
+	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	</Dependency>
 
       </Model>
 
      
    </Component>	
 
-    <Component name="AfterSchoolActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
+
+
+
+    <Component name="AfterSchoolActivities" read_from_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -1134,15 +1389,15 @@
     	<Table table="vehicles_r" key="houseid" count_key="vehid"/>
     	<Table table="workers_r" key="houseid,personid"/>		
     	<Table table="schedule_r" key="houseid,personid" count_key="scheduleid"/>
-    	<Table table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid"/>
+    	<Table table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" count_key="scheduleid"/>
       </DBTables>
 
       <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
-	<Start table="schedule_ltrec_r" location_var="locationid" time_var="endtime"/>
-	<End table="schedule_ltrec_r" location_var="locationid" time_var="starttime"/>
+	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
 
 	<ExtractLocationInformation table="locations" location_var="locationid">
 	  <LocationVariable var="retail_employment"/>
@@ -1153,7 +1408,7 @@
 	</ExtractLocationInformation>
       </SpatialConstraints>
 
-      <HistoryInformation table="schedule_ltrec_r" history_var="duration">
+      <HistoryInformation table="schedule_cleanfixedactivityschedule_r" history_var="duration">
 	<HistoryVar var="ih_history">
 	  <Aggregate condition_var="activitytype" value="100"/>
 	  <Aggregate condition_var="activitytype" value="101"/>
@@ -1546,7 +1801,11 @@
         <Variable table="runtime" var="max_scheduleid" coeff="1"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
@@ -1567,165 +1826,59 @@
 
     </Component>
 
-    <Component name="ChildDependency" read_from_table="child_dependency_r" key="houseid,personid" dependency="False" skip="True" completed="True">
+
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanfixedactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
-    	<Table table="persons" key="houseid,personid" order="1"/>
-    	<Table table="households" key="houseid" order="2"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
-      </DBTables>
-
-      <Model name="PreSchoolKidsDependency" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependency"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-      <Model name="OtherKidsDependency" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
-        <DependentVariable var="dependency"/>
-	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="-0.93"/>
-	  <Variable table="persons" var="ag5t10" coeff="0.73"/>
-	  <Variable table="persons" var="ag11t14" coeff="0.35"/>
-	  <Variable table="persons" var="male" coeff="-0.09"/>
-	  <Variable table="persons" var="hisp" coeff="0.3"/>
-	  <Variable table="households" var="inclt35k" coeff="-0.08"/>
-	  <Variable table="households" var="urb" coeff="0.04"/>
-	  <Variable table="households" var="nwrkcnt" coeff="0.03"/>
-	  <Variable table="households" var="drvrcnt" coeff="0.035"/>
-	  <Variable table="households" var="noc" coeff="0.002"/>
-        </Alternative>
-        <Alternative id="no" value="0">
-	  <Variable table="persons" var="one" coeff="0.0"/>
-        </Alternative>
-      </Model>
-
-      <Model1 name="AdultAllocatedTo" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="allocated_adult_id"/>
-	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="allocated_adult" coeff="1"/>
-      </Model1>
-	
-
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dummy"/>
-	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
-    </Component>	
-
-    <Component name="DailySchStatus" read_from_table="daily_school_status_r" key="houseid,personid" skip="True" completed="True">
-      <DBTables>
-    	<Table table="persons" key="houseid,personid" order="1"/>
-    	<Table table="households" key="houseid" order="2"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>
-      </DBTables>
-
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="equals" value="0"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.15"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.85"/>
-        </Alternative>
-      </Model>
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="equals" value="1"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.18"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.82"/>
-        </Alternative>
-      </Model>
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="equals" value="2"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.24"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.76"/>
-        </Alternative>
-      </Model>
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="equals" value="3"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.31"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.69"/>
-        </Alternative>
-      </Model>
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="equals" value="4"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.41"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.59"/>
-        </Alternative>
-      </Model>
-      <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="schdailystatus"/>
-        <FilterSet type="and"/>
-	<Filter table="persons" var="schstat" condition="equals" value="1"/>
-	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.67"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.33"/>
-        </Alternative>
-      </Model>
-      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dummy"/>
-	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-    </Component>	
-
-    <Component name="DailyWorkStatus" read_from_table="daily_work_status_r" key="houseid,personid" skip="True" completed="True">
-      <DBTables>
-    	<Table table="persons" key="houseid,personid" order="1"/>
-    	<Table table="households" key="houseid" order="2"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>		
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" count_key="scheduleid" order="1"/>
+    	<Table table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid"/>
       </DBTables>
 
-      <Model name="DailyWorkStatus" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="wrkdailystatus"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-        <Alternative id="yes" value="1">
-	  <Variable table="persons" var="one" coeff="0.15"/>
-        </Alternative>
-        <Alternative id="No" value="0">
-	  <Variable table="persons" var="one" coeff="0.85"/>
-        </Alternative>
-      </Model>
-    </Component>	
+      <DeleteRecords value="False"/>	
 
-    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="False">
+
+
+      <SpatialConstraints1 table="travel_skims" skim_var="tt" origin_var="origin" destination_var="destination">
+	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
+      </SpatialConstraints1>
+
+
+      <Model name="ChildDependencyAllocation" formulation="Child Dependency Allocation" seed="1">
+	<DependentVariable var="childdependencyallocation"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_cleanfixedactivityschedule_r" var="houseid"/>
+	  <PersonIdName table="schedule_cleanfixedactivityschedule_r" var="personid"/>
+	  <ScheduleIdName table="schedule_cleanfixedactivityschedule_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_cleanfixedactivityschedule_r" var="activitytype"/>
+	  <LocationIdName table="schedule_cleanfixedactivityschedule_r" var="locationid"/>
+	  <StartTimeName table="schedule_cleanfixedactivityschedule_r" var="starttime"/>
+	  <EndTimeName table="schedule_cleanfixedactivityschedule_r" var="endtime"/>
+	  <DurationName table="schedule_cleanfixedactivityschedule_r" var="duration"/>
+	  <DependentPersonName table="schedule_cleanfixedactivityschedule_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+	<DailyStatus>
+	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	</DailyStatus>
+	
+	<Dependency>
+	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	</Dependency>
+
+      </Model>
+
+     
+   </Component>	
+
+
+
+
+    <Component1 name="DynamicNonMandatoryActivities" read_from_table="schedule_ltrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="False">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -2215,7 +2368,11 @@
         <Variable table="schedule_ltrec_r" var="scheduleid" coeff="1"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
-
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2238,7 +2395,7 @@
     </Component1>
 
 
-    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="True" completed="False">
+    <Component1 name="ExtractTravelEpisodes" read_from_table="schedule_ltrec_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="False" completed="False">
       <AnalysisInterval start="1" end="1" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
