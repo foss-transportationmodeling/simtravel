@@ -35,6 +35,7 @@ class MakeSchedPlot(QDialog):
         self.connects(config)
         self.cursor = self.new_obj.cursor
         self.table = 'households'
+        self.data = []
 
 #        self.dpi = 100
 #        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
@@ -48,34 +49,60 @@ class MakeSchedPlot(QDialog):
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
         
+        stablewidget = QWidget(self)
+        stablelayout = QHBoxLayout()
+        stablewidget.setLayout(stablelayout)
+        stablelabel = QLabel('Schedule Type')
+        stablelayout.addWidget(stablelabel)
+        self.stablecombo = QComboBox()
+#        self.stablecombo.addItems(["Non-reconciled Schedules","Reconciled Schedules for Fixed Activities",
+#                                "Simulation Daily Schedules","Schedules with Child Allocation"])
+        self.hasTables()
+        self.stablecombo.setFixedWidth(220)
+        stablelayout.addWidget(self.stablecombo)
+        stablelayout.setAlignment(Qt.AlignLeft)
+        
         self.vbox = QVBoxLayout()
+        self.vbox.addWidget(stablewidget)
         self.vbox.addWidget(self.varswidget)
-#        self.vbox.addWidget(self.canvas)
         self.vbox.addWidget(self.tabs)
         self.vbox.addWidget(self.dialogButtonBox)
-        self.vbox.setStretch(1,1)
+        self.vbox.setStretch(2,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
         
-        if not self.isValid():  
+        if self.stablecombo.count < 1:  
             msg = "There is no simulation output"
             QMessageBox.information(self,"Warning",msg,QMessageBox.Ok)
             self.showbutton.setDisabled(True)
 
 
-    def isValid(self):
-        isExist = False
+    def hasTables(self):
+#        isExist = False
+#        if self.new_obj.check_if_table_exists("schedule_r"):
+#            isExist = True
+#        
+#        return isExist
+
+        tables = []
         if self.new_obj.check_if_table_exists("schedule_r"):
-            isExist = True
-        return isExist
+            tables.append("Non-reconciled Schedules")
+        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
+            tables.append("Reconciled Schedules for Fixed Activities")
+        if self.new_obj.check_if_table_exists("schedule_cleanfixedactivityschedule_r"):
+            tables.append("Simulation Daily Schedules")
+        if self.new_obj.check_if_table_exists("schedule_dailyallocrec_r"):
+            tables.append("Schedules with Child Allocation")
+            
+        self.stablecombo.addItems(tables)
 
 
     def on_context_menu(self,point):
         menubar = QMenu(self)
         one = menubar.addAction("Show Chart")
         two = menubar.addAction("Remove Current Tab")
-        if self.isValid(): 
+        if self.stablecombo.count() > 0: 
             self.connect(one, SIGNAL("triggered()"),self.on_draw1)
         self.connect(two, SIGNAL("triggered()"),self.removeTab)
         menubar.popup(self.tabs.mapToGlobal(point))
@@ -113,9 +140,11 @@ class MakeSchedPlot(QDialog):
  
     def makeVarsWidget(self):
         
-        self.varswidget = QWidget(self)
+        #self.varswidget = QWidget(self)
+        self.varswidget = QGroupBox("")
         self.varslayout = QGridLayout()
         self.varswidget.setLayout(self.varslayout)
+        self.varswidget.setContentsMargins(0,0,0,0)
         
         segment = QGroupBox(self)
         addsegment = QVBoxLayout()
@@ -166,15 +195,15 @@ class MakeSchedPlot(QDialog):
         self.varstable.setMaximumHeight(200)
         self.varslayout.addWidget(self.varstable,1,4)
 
-        self.selbutton2 = QPushButton('>>')
+        self.selbutton2 = QPushButton('Populate')
         self.selbutton2.setFixedWidth(60)
         self.varslayout.addWidget(self.selbutton2,1,5)
 
         self.buttonwidget = QWidget(self)
         buttonlayout = QHBoxLayout()
         self.buttonwidget.setLayout(buttonlayout)
-        personlabel = QLabel('Person ID')
-        buttonlayout.addWidget(personlabel)
+        self.personlabel = QLabel('Household ID')
+        buttonlayout.addWidget(self.personlabel)
         self.showbutton = QPushButton('Show Chart')
         buttonlayout.addWidget(self.showbutton)
         self.varslayout.addWidget(self.buttonwidget,0,6)
@@ -184,10 +213,11 @@ class MakeSchedPlot(QDialog):
         self.idwidget.setMaximumWidth(180)
         self.idwidget.setMaximumHeight(200)
         self.varslayout.addWidget(self.idwidget,1,6)
+        #self.varslayout.setContentsMargins(11,0,11,0)
 
         self.connect(self.colswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateValues)
         self.connect(self.selbutton1, SIGNAL("clicked(bool)"), self.selValue)
-        self.connect(self.selbutton2, SIGNAL("clicked(bool)"), self.retrieveResults)
+        self.connect(self.selbutton2, SIGNAL("clicked(bool)"), self.retrieveID)
         self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
         self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
         self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
@@ -291,6 +321,7 @@ class MakeSchedPlot(QDialog):
             self.valwidget.clear()
             self.delRow()
             self.table = 'households'
+            self.personlabel.setText("Household ID")
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
         if self.segment2.isChecked() and self.table != 'persons':
@@ -298,6 +329,7 @@ class MakeSchedPlot(QDialog):
             self.valwidget.clear()
             self.delRow()
             self.table = 'persons'
+            self.personlabel.setText("Person ID")
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
         
@@ -382,7 +414,121 @@ class MakeSchedPlot(QDialog):
 #            self.canvas.draw()
 
 
+#    def retrieveResults(self):
+#        
+#        numrows = self.varstable.rowCount()
+#        if numrows > 0:
+#            try:
+#                self.idwidget.clear()
+#                self.data = []
+#                pid = []
+#                temp = None
+#                SQL = self.stateSQL()
+#                if SQL != "" and SQL != None:
+#                    #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
+#                    self.cursor.execute(SQL)
+#                    temp = self.cursor.fetchall()
+#                    
+#                    prior_id = '0'
+#                    id = ""
+#                    aschedule = []
+#                    for i in temp:
+#                        if self.segment1.isChecked():
+#                            id = str(i[0])
+#                        else:
+#                            id = '%s,%s'%(str(i[0]),str(i[1]))
+#                            
+#                        if prior_id <> id:
+#                            prior_id = id
+#                            
+#                            self.data.append(aschedule)
+#                            
+#                            aschedule = []
+#                            pid.append(id)
+#                            aschedule.append(i[2])
+#                            aschedule.append(i[3])
+#                            aschedule.append(i[4])
+#                        else:
+#                            aschedule.append(i[2])
+#                            aschedule.append(i[3])
+#                            aschedule.append(i[4])
+#    
+#                    self.data.append(aschedule)
+#                    self.data.pop(0)
+#                    self.fixedFifty(pid)
+#                    self.idwidget.addItems(pid)
+#    
+#                #return data
+#            
+#            except Exception, e:
+#                print '\tError while unloading data from the table %s'%self.table
+#                print e
+#                #return None
+#            
+#            #return None
+#        else:
+#            msg = "Please insert a Column and a Value after selecting"
+#            QMessageBox.information(self, "Warning",
+#                                    msg,
+#                                    QMessageBox.Ok)
+
+
     def retrieveResults(self):
+        
+        pid = []
+        pid.append("")
+        numrows = self.varstable.rowCount()
+        if numrows > 0:
+            try:
+                self.data = []
+                temp = None
+                
+                sindex = self.idwidget.selectedItems()
+                for i in sindex:
+                    id = i.text()
+                    SQL = self.stateSQL(id)
+            
+                    if SQL != "" and SQL != None:
+                        self.cursor.execute(SQL)
+                        temp = self.cursor.fetchall()
+                        
+                        prior_id = '0'
+                        aschedule = []
+                        for i in temp:
+                            id = '%s,%s' %(str(i[0]),str(i[1]))
+                                
+                            if prior_id <> id:
+                                if prior_id <> '0':
+                                    self.data.append(aschedule)
+                                prior_id = id
+                                
+                                aschedule = []
+                                pid.append(id)
+                                aschedule.append(i[2])
+                                aschedule.append(i[3])
+                                aschedule.append(i[4])
+                            else:
+                                aschedule.append(i[2])
+                                aschedule.append(i[3])
+                                aschedule.append(i[4])
+        
+                        self.data.append(aschedule)
+
+            
+            except Exception, e:
+                print '\tError while unloading data from the table %s'%self.table
+                print e
+
+#        else:
+#            msg = "Please insert a Column and a Value after selecting"
+#            QMessageBox.information(self, "Warning",
+#                                    msg,
+#                                    QMessageBox.Ok)
+        
+        return pid
+            
+
+    def retrieveID(self):
         
         numrows = self.varstable.rowCount()
         if numrows > 0:
@@ -391,64 +537,94 @@ class MakeSchedPlot(QDialog):
                 self.data = []
                 pid = []
                 temp = None
-                SQL = self.stateSQL()
+                SQL = self.SQL_ID()
                 if SQL != "" and SQL != None:
                     #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
                     self.cursor.execute(SQL)
                     temp = self.cursor.fetchall()
                     
-                    prior_id = '0'
-                    aschedule = []
+                    id = ""
                     for i in temp:
-                        id = '%s%s'%(str(i[0]),str(i[1]))
-                        if prior_id <> id:
-                            prior_id = id
-                            
-                            self.data.append(aschedule)
-                            
-                            aschedule = []
-                            pid.append(id)
-                            aschedule.append(i[2])
-                            aschedule.append(i[3])
-                            aschedule.append(i[4])
+                        if self.segment1.isChecked():
+                            id = str(i[0])
                         else:
-                            aschedule.append(i[2])
-                            aschedule.append(i[3])
-                            aschedule.append(i[4])
-    
-                    self.data.append(aschedule)
-                    self.data.pop(0)
+                            id = '%s,%s'%(str(i[0]),str(i[1]))
+                        
+                        pid.append(id)
+                        
                     self.fixedFifty(pid)
                     self.idwidget.addItems(pid)
-    
-                #return data
             
             except Exception, e:
                 print '\tError while unloading data from the table %s'%self.table
                 print e
-                #return None
-            
-            #return None
+
         else:
             msg = "Please insert a Column and a Value after selecting"
             QMessageBox.information(self, "Warning",
                                     msg,
-                                    QMessageBox.Ok) 
+                                    QMessageBox.Ok)
+
 
     def fixedFifty(self, pid):
-        length = len(self.data)
+        length = len(pid) #len(self.data)
         while length > 50:
             index = randint(0, length-1)
             pid.pop(index)
-            self.data.pop(index)
-            length = len(self.data)
+            #self.data.pop(index)
+            length = len(pid) #len(self.data)
         
 
-    def stateSQL(self):
-        tablename = 'schedule_r AS A, %s AS B' %(self.table)
+#    def stateSQL1(self):
+#        tablename = 'schedule_r AS A, %s AS B' %(self.table)
+#        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
+#        filter = '(A.starttime >= 0'
+#        order = 'A.houseid, A.personid, A.starttime'
+#        
+#        numrows = self.varstable.rowCount()
+#        for i in range(numrows):
+#            filter = filter + " AND "
+#            column = str((self.varstable.item(i,0)).text())
+#            value = str((self.varstable.item(i,1)).text())
+#            filter = filter + "B.%s = '%s'" %(column,value)
+#            
+#        filter = filter + ') AND A.houseid = B.houseid'
+#        if self.table == 'persons':
+#            filter = filter + ' AND A.personid = B.personid'
+#        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+#
+#        return state
+
+    def stateSQL(self,id):
+        tablename = '%s AS A' %(self.schedule_table())
         vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
-        filter = '(A.starttime >= 0'
         order = 'A.houseid, A.personid, A.starttime'
+        filter = 'A.starttime >= 0'
+        
+        if self.segment1.isChecked():
+            filter = filter + " AND A.houseid = '%s'" %(id)
+        else:
+            ids = id.split(',')
+            filter = filter + " AND A.houseid = '%s' AND A.personid = '%s'" %(ids[0],ids[1])
+            
+        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+
+        return state
+
+
+    def SQL_ID(self):
+        tablename = '%s AS A, %s AS B' %(self.schedule_table(),self.table)
+        vars = ''
+        if self.segment1.isChecked():
+            vars = 'A.houseid'
+        else:
+            vars = 'A.houseid, A.personid'
+        filter = '(A.starttime >= 0'
+        order = ''
+        if self.segment1.isChecked():
+            order = 'A.houseid'
+        else:
+            order = 'A.houseid, A.personid'
         
         numrows = self.varstable.rowCount()
         for i in range(numrows):
@@ -466,8 +642,8 @@ class MakeSchedPlot(QDialog):
 
 
     def colors(self, index):
-        colorpooldict = {100:'#0000FF',101:'#0000FF',200:'#A9A9A9',300:'#7B68EE',411:'#FF9933',
-                         412:'#32CD32',415:'#66CCFF',416:'#B88A00',513:'#B8002E',
+        colorpooldict = {100:'#0000FF',101:'#0000FF',200:'#A9A9A9',300:'#7B68EE',301:'#00FA9A',
+                         411:'#FF9933',412:'#32CD32',415:'#66CCFF',416:'#B88A00',513:'#B8002E',
                          514:'#FFD700',900:'#000000'}
 
         return colorpooldict[index]
@@ -478,7 +654,7 @@ class MakeSchedPlot(QDialog):
     def schedule_labels(self, index):
         xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
                   'duration_rec':'Activity Duration (mins)'}
-        activitytype = {100:'In-home',200:'Work',300:'School',411:'Pers Buss',412:'Shopping',
+        activitytype = {100:'In-home',200:'Work',300:'Pick Up',301:'Drop Off',411:'Pers Buss',412:'Shopping',
                         415:'Meal',416:'Serve Passgr',513:'Social Visit',514:'Sports/Rec',900:'Other'}
         strttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
         endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
@@ -494,24 +670,41 @@ class MakeSchedPlot(QDialog):
             return endtime
         if index == 4:
             return duration
+        
+    def schedule_table(self):
+        cur_text = self.stablecombo.currentText()
+        if cur_text == "Non-reconciled Schedules":
+            return "schedule_r"
+        elif cur_text == "Reconciled Schedules for Fixed Activities":
+            return "schedule_ltrec_r"
+        elif cur_text == "Simulation Daily Schedules":
+            return "schedule_cleanfixedactivityschedule_r"
+        else:
+            return "schedule_dailyallocrec_r"
+
 
     def on_draw1(self):
         """ Redraws the figure
         """
         
-        sdata = self.selectedResults()
-        if len(sdata) > 0:
+        #sdata = self.selectedResults()
+        pid = self.retrieveResults()
+        if len(self.data) > 0 : #len(sdata) > 0:
             Sketch = self.createCanvas()
             Canvas = Sketch[0]
             axes = Sketch[1]
-            rows = len(sdata)
+            rows = len(self.data) #len(sdata)
             axes.clear()
             ticks = np.arange(rows+1)
             ind = 1
             height = 0.4
 
-
-            for row in sdata:
+            if self.segment1.isChecked():
+                axes.set_title("Household Schedule")
+            else:
+                axes.set_title("Person Schedule")
+            
+            for row in self.data: #sdata:
                 rowlen = len(row)
                 for i in range(2,rowlen,3):
                     axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
@@ -521,6 +714,7 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(301)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
@@ -530,7 +724,7 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
             
             prop = matplotlib.font_manager.FontProperties(size=8)   
-            axes.legend(bars,('In-home','Work','School','Pers Buss',
+            axes.legend(bars,('In-home','Work','Pick Up','Drop Off','Pers Buss',
                               'Shopping','Meal','Srv Passgr','Social',
                               'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             axes.set_xlabel("Time")
@@ -538,12 +732,13 @@ class MakeSchedPlot(QDialog):
             axes.set_xlim(-1,1441)
             
             
-            sindex = self.idwidget.selectedIndexes()
-            labels = []
-            labels.append('')
-            for i in sindex:
-                labels.append(self.idwidget.item(i.row()).text())
-                
+#            sindex = self.idwidget.selectedIndexes()
+#            labels = []
+#            labels.append('')
+#            for i in sindex:
+#                labels.append(self.idwidget.item(i.row()).text())
+
+            labels = pid                
             axes.set_yticks(ticks)
             if len(labels) >= 13:
                 axes.set_yticklabels(labels, size='xx-small')
@@ -556,7 +751,7 @@ class MakeSchedPlot(QDialog):
             self.makeTabs(Canvas)
             
         else:
-            msg = "Please select Person ID"
+            msg = "Please select person or household ID"
             QMessageBox.information(self, "Warning",
                                     msg,
                                     QMessageBox.Ok)
