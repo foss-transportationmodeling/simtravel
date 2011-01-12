@@ -55,6 +55,7 @@ class Schedule_R(t.IsDescription):
     starttime = t.Int32Col()
     endtime = t.Int32Col()
     duration = t.Int32Col()
+    dependentpersonid = t.Int32Col()
 
 class Child_Dependency_R(t.IsDescription):
     houseid = t.Int64Col()

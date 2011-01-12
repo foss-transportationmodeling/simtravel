@@ -320,6 +320,9 @@ class AbstractComponent(object):
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 		else:
 		    self.data = result
+		    # Update the filter because the number of rows may have changed in the data
+		    # for eg. remove work activties from schedules when daily work status is zero
+		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
         
         # Update hte model list for next iteration within the component
 

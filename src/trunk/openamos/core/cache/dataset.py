@@ -41,6 +41,8 @@ class DB(object):
         self.fileh.createTable(output_grp, "workers_r", Workers_R)
         self.fileh.createTable(output_grp, "schedule_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_R)
+        self.fileh.createTable(output_grp, "schedule_cleanfixedactivityschedule_r", Schedule_R)
+        self.fileh.createTable(output_grp, "schedule_dailyallocrec_r", Schedule_R)
         self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
         self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
         self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
