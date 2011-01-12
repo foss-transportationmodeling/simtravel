@@ -27,8 +27,14 @@ from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.models.nested_logit_model_components import NestedChoiceSpecification, NestedSpecification
 from openamos.core.models.error_specification import LinearRegErrorSpecification
 from openamos.core.models.error_specification import StochasticRegErrorSpecification
-from openamos.core.models.reconcile_schedules_model_components import ReconcileSchedulesSpecification
+from openamos.core.models.schedules_model_components import ReconcileSchedulesSpecification
+from openamos.core.models.schedules_model_components import ActivityAttribsSpecification
+from openamos.core.models.schedules_model_components import DailyStatusAttribsSpecification
+from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
+from openamos.core.models.schedules_model_components import HouseholdSpecification
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
+from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
+from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 
 from openamos.core.models.model import SubModel
 
@@ -435,6 +441,12 @@ class ConfigParser(object):
 
         if model_formulation == 'Reconcile Schedules':
             self.create_reconcile_schedules_object(model_element)
+
+        if model_formulation == 'Clean Fixed Activity Schedule':
+            self.create_clean_fixed_activity_schedule(model_element)
+
+        if model_formulation == 'Child Dependency Allocation':
+            self.create_child_dependency_allocation_object(model_element)
 
 
     def process_seed(self, model_element):
@@ -1177,50 +1189,14 @@ class ConfigParser(object):
         else:
             run_filter_type = None
 
-        householdIdName_element = model_element.find('HouseholdIdName')
-        householdIdParsed = self.return_table_var(householdIdName_element)
-        variable_list.append(householdIdParsed)
 
-        personIdName_element = model_element.find('PersonIdName')
-        personIdParsed = self.return_table_var(personIdName_element)
-        variable_list.append(personIdParsed)
+        activity_attribs_element = model_element.find('ActivityAttributes')
 
-        scheduleIdName_element = model_element.find('ScheduleIdName')
-        scheduleIdParsed = self.return_table_var(scheduleIdName_element)
-        variable_list.append(scheduleIdParsed)
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
 
-        activityTypeName_element = model_element.find('ActivityTypeName')
-        activityTypeParsed = self.return_table_var(activityTypeName_element)
-        variable_list.append(activityTypeParsed)
 
-        startTimeName_element = model_element.find('StartTimeName')
-        startTimeParsed = self.return_table_var(startTimeName_element)
-        variable_list.append(startTimeParsed)
-
-        endTimeName_element = model_element.find('EndTimeName')
-        endTimeParsed = self.return_table_var(endTimeName_element)
-        variable_list.append(endTimeParsed)
-
-        locationIdName_element = model_element.find('LocationIdName')
-        locationIdParsed = self.return_table_var(locationIdName_element)
-        variable_list.append(locationIdParsed)
-
-        durationName_element = model_element.find('DurationName')
-        durationParsed = self.return_table_var(durationName_element)
-        variable_list.append(durationParsed)
-
-        specification = ReconcileSchedulesSpecification(householdIdParsed[1],
-                                                        personIdParsed[1],
-                                                        scheduleIdParsed[1],
-                                                        activityTypeParsed[1],
-                                                        startTimeParsed[1],
-                                                        endTimeParsed[1],
-                                                        locationIdParsed[1],
-                                                        durationParsed[1])
+        specification = ReconcileSchedulesSpecification(activityAttribsSpec)
                                                         
-
-
-        
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
@@ -1236,7 +1212,224 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+    def create_clean_fixed_activity_schedule(self, model_element):
+        #variable_list_required for running the model
         
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = CleanFixedActivitySchedule(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+    
+
+
+        
+    def create_child_dependency_allocation_object(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = ChildDependencyAllocation(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        
+
+    def return_daily_status_attribs(self, dailystatus_attribs_element):
+        variable_list = []
+
+        dailySchStatus_element = dailystatus_attribs_element.find('DailySchoolStatus')
+        dailySchStatusParsed = self.return_table_var(dailySchStatus_element)
+        variable_list.append(dailySchStatusParsed)
+
+        dailyWrkStatus_element = dailystatus_attribs_element.find('DailyWorkStatus')
+        dailyWrkStatusParsed = self.return_table_var(dailyWrkStatus_element)
+        variable_list.append(dailyWrkStatusParsed)
+
+        
+        dailyStatusSpec = DailyStatusAttribsSpecification(dailyWrkStatusParsed[1], 
+							  dailySchStatusParsed[1])
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return dailyStatusSpec
+
+    def return_dependency_attribs(self, dependency_attribs_element):
+        variable_list = []
+
+        childDependency_element = dependency_attribs_element.find('ChildDependency')
+        childDependencyParsed = self.return_table_var(childDependency_element)
+        variable_list.append(childDependencyParsed)
+
+
+        """
+        IN THE FUTURE IF WE WANT TO INCLUDE ELDERLY DEPENDENCY AS WELL
+        elderlyDependency_element = dependency_attribs_element.find('ElderlyDependency')
+        elderlyDepedencyParsed = self.return_table_var(elderlyDependency_element)
+        variable_list.append(elderlyDependencyParsed)
+        """
+        
+        dependencySpec = DependencyAttribsSpecification(childDependencyParsed[1], elderlyDependencyName=None)
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return dependencySpec
+
+
+
+
+
+
+    def return_activity_attribs(self, activity_attribs_element):
+        variable_list = []
+
+        householdIdName_element = activity_attribs_element.find('HouseholdIdName')
+        householdIdParsed = self.return_table_var(householdIdName_element)
+        variable_list.append(householdIdParsed)
+
+        personIdName_element = activity_attribs_element.find('PersonIdName')
+        personIdParsed = self.return_table_var(personIdName_element)
+        variable_list.append(personIdParsed)
+
+        scheduleIdName_element = activity_attribs_element.find('ScheduleIdName')
+        scheduleIdParsed = self.return_table_var(scheduleIdName_element)
+        variable_list.append(scheduleIdParsed)
+
+        activityTypeName_element = activity_attribs_element.find('ActivityTypeName')
+        activityTypeParsed = self.return_table_var(activityTypeName_element)
+        variable_list.append(activityTypeParsed)
+
+        startTimeName_element = activity_attribs_element.find('StartTimeName')
+        startTimeParsed = self.return_table_var(startTimeName_element)
+        variable_list.append(startTimeParsed)
+
+        endTimeName_element = activity_attribs_element.find('EndTimeName')
+        endTimeParsed = self.return_table_var(endTimeName_element)
+        variable_list.append(endTimeParsed)
+
+        locationIdName_element = activity_attribs_element.find('LocationIdName')
+        locationIdParsed = self.return_table_var(locationIdName_element)
+        variable_list.append(locationIdParsed)
+
+        durationName_element = activity_attribs_element.find('DurationName')
+        durationParsed = self.return_table_var(durationName_element)
+        variable_list.append(durationParsed)
+
+
+        dependentPersonName_element = activity_attribs_element.find('DependentPersonName')
+        dependentPersonParsed = self.return_table_var(dependentPersonName_element)
+        variable_list.append(dependentPersonParsed)
+
+        actAttribsSpec = ActivityAttribsSpecification(householdIdParsed[1],
+                                                      personIdParsed[1],
+                                                      scheduleIdParsed[1],
+                                                      activityTypeParsed[1],
+                                                      startTimeParsed[1],
+                                                      endTimeParsed[1],
+                                                      locationIdParsed[1],
+                                                      durationParsed[1],
+                                                      dependentPersonParsed[1])        
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return actAttribsSpec
+        
+
+
+
         
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
