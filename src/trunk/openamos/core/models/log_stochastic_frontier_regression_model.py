@@ -44,8 +44,7 @@ class LogStocFronRegressionModel(StocFronRegressionModel):
 	    predValue_moreThan1439 = pred_value > 1439
 	    print '\t\tPred value is less than 0 for - %d cases ' \
 	        % predValue_moreThan1439.sum()
-            pred_value[predValue_moreThan1439] = 0
-
+            pred_value[predValue_moreThan1439] = 1439
 
 
         if vertex == 'end':
@@ -54,6 +53,10 @@ class LogStocFronRegressionModel(StocFronRegressionModel):
                 % predValue_moreThresholdInd.sum()
             pred_value[predValue_moreThresholdInd] = threshold
 
+	    predValue_lessThanOne = pred_value < 1
+	    print '\t\tPred value is less than 1 for - %d cases ' \
+	        % predValue_lessThanOne.sum()
+            pred_value[predValue_lessThanOne] = 1
 
         _sum = ((pred_value) < 0).sum()
         if _sum > 0:

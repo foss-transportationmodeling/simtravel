@@ -4,7 +4,6 @@ from numpy import array
 
 from openamos.core.models.abstract_random_distribution_model import RandomDistribution
 
-
 class Household(object):
     def __init__(self, hid):
         self.hid = hid
@@ -16,9 +15,7 @@ class Household(object):
 
     def add_person(self, person):
         # person is an object of the Person class
-        #hp.heappush(self.persons, (self.persons.pid, person))
         self.persons[person.pid] = person
-
 
         if person.child_dependency == 1:
             self.dependencyPersonIds.append(person.pid)
@@ -37,7 +34,6 @@ class Household(object):
                 resList.append([self.hid, pid, act.scheduleId,
                                 act.actType, act.startTime, act.endTime,
                                 act.location, act.duration, act.dependentPersonId])
-
         return resList
 
         
@@ -83,15 +79,12 @@ class Household(object):
         
         person.remove_episodes(person.workEpisodes)
 
-                
-
     def remove_school_episodes(self, person):
         #for schEpisode in person.schoolEpisodes:
         print '\tActually REMOVING SCHOOL ACTIVITY; SCHOOL STATUS FOR DAY IS ZERO for pid - ', person.pid
         print '\t', person.schoolEpisodes, '-----------------<<<<<<<<<<<<<<<<'
 
         person.remove_episodes(person.schoolEpisodes)
-
 
     def allocate_dependent_activities(self, seed):
         self.seed = seed
@@ -128,21 +121,17 @@ class Household(object):
 
                     if endAct.actType > 100 and endAct.actType < 200:
                         print '\n\t\t2.1. IH Act: Someone needs to be there'
-                        print endAct
+                        print '\t\t\t', endAct
                         self.allocate_activity(pid, endAct)
 
 
                     if endAct.actType >= 200:
                         print '\n\t\t2.2. OH Act: Pick-up/Drop-off'
                         print '\n\t\t\t START-', stAct
-                        print '\n\t\t\t END-  ', endAct
+                        print '\t\t\t END-  ', endAct
                         self.allocate_pickup_dropoff(pid, stAct, endAct)
-                        #subsqeuentActStartTime, subsequentAct = hp.heappop(person.listoActivityEpisodes)
-                        #self.allocate_pickup_dropoff(endAct, subsequentAct, pickup=False)                       
-                        #hp.heappush(person.listoActivityEpisodes, (subsequentActStartTime, subsequentAct))
-                
+
                     stAct = endAct
-                    #raw_input()
 
                 print '\n\t\t3. End of Day/Start of Day: Someone needs to be there'
                 self.adjust_terminal_activity_episodes(pid, stAct, start=False)                    
@@ -154,8 +143,6 @@ class Household(object):
         for actSt, act in person.listOfActivityEpisodes:
             print '\t\t', act
                     
-
-
     def check_for_terminal_vertex(self, actOfPerson, actOfdepPerson, start):
         if start:
             return actOfdepPerson.endTime >= actOfPerson.endTime
@@ -188,6 +175,8 @@ class Household(object):
         print '\t\t\t\tAdjusting the terminal start-"%s" activity episodes to ensure that the child is taken care of' %(start)
         depPerson = self.persons[depPersonId]
         
+        self.rndGen.shuffle_sequence(self.noDailyFixedActPersonIds)
+
         for pid in self.noDailyFixedActPersonIds:
             person = self.persons[pid]
 
@@ -197,28 +186,10 @@ class Household(object):
                 check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
 
             if check:
-                print 'Person with no fixed activities found'
+                print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
                 return True
 
-            """
-
-
-            actOfPerson = self.find_terminal_vertex(person, start)
-            
-            if self.check_for_terminal_vertex(actOfPerson, actOfdepPerson, start):
-                #hp.heappush(depPerson.listOfActivityEpisodes, (actOfdepPerson.startTime,
-                #                                               actOfdepPerson))
-                actOfPerson.dependentPersonId = depPersonId
-                person.add_episodes([actOfPerson])
-                #hp.heappush(person.listOfActivityEpisodes, (actOfPerson.startTime,
-                #                                            actOfPerson))
-                return True
-            else:
-                #hp.heappush(person.listOfActivityEpisodes, (actOfPerson.startTime,
-                #                                            actOfPerson))
-                person.add_episodes([actOfPerson])                
-
-            """
+        self.rndGen.shuffle_sequence(self.dailyFixedActPersonIds)
 
         for pid in self.dailyFixedActPersonIds:
             person = self.persons[pid]
@@ -230,27 +201,10 @@ class Household(object):
                 check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
 
             if check:
-                print 'Person with fixed activities found'
+                print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
                 return True
 
-            """
 
-            actOfPerson = self.find_terminal_vertex(person, start)
-            
-            if self.check_for_terminal_vertex(actOfPerson, actOfdepPerson, start):
-                #hp.heappush(depPerson.listOfActivityEpisodes, (actOfdepPerson.startTime,
-                #                                               actOfdepPerson))
-                actOfPerson.dependentPersonId = depPersonId
-                person.add_episodes([actOfPerson])
-                #hp.heappush(person.listOfActivityEpisodes, (actOfPerson.startTime,
-                #                                            actOfPerson))
-                return True
-            else:
-                #hp.heappush(person.listOfActivityEpisodes, (actOfPerson.startTime,
-                #                                            actOfPerson))                
-                person.add_episodes([actOfPerson])
-
-            """
         print """ --- > Exception: No person identified that can be with the """\
             """dependent child for the terminal episodes in a day"""\
 
@@ -261,14 +215,14 @@ class Household(object):
         # episode durations so that children are not abandoned
 
         if len(self.noDailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.noDailyFixedActPersonIds))
-            pid = self.noDailyFixedActPersonIds[pidIndex]
+            pid = self.randPersonId(self.noDailyFixedActPersonIds)
 
         elif len(self.dailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.dailyFixedActPersonIds))
-            pid = self.dailyFixedActPersonIds[pidIndex]
+            pid = self.randPersonId(self.dailyFixedActPersonIds)
         else:
-            raise Exception, "--There are no independent adults in the household--"
+            raise Exception, "\t\t\t\t--There are no independent adults in the household--"
+
+        print "\t\t\t\t--Randomly independent adults in the household is selected and id is --", pid
 
         person = self.persons[pid]
         #actOfPerson = self.find_terminal_vertex(person, start)
@@ -278,55 +232,46 @@ class Household(object):
         else:
             person.move_end_of_day(actOfdepPerson.startTime, depPersonId)
 
-        #actOfPerson = self.adjust_terminal_vertex(actOfPerson, actOfdepPerson, start)
-
-        #actOfPerson.dependentPersonId = depPersonId
-
-        #hp.heappush(depPerson.listOfActivityEpisodes, (actOfdepPerson.startTime,
-        #                                               actOfdepPerson))
-        #person = self.persons[pid]
-        #person.add_episodes([actOfPerson])
-
         self.print_activity_list(person)
         return True
-
-        
 
 
     def allocate_activity(self, depPersonId, act):
         # Person without fixed activities
-        print 'Following person without fixed activities is identified - '
+        print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate to the first person with no fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.noDailyFixedActPersonIds)
+
         for pid in self.noDailyFixedActPersonIds:
             person = self.persons[pid]
             act.scheduleId = person.actCount + 1
-            #hp.heappush(person.listOfActivityEpisodes, (act.startTime, act))
             person.add_episodes([act])
             
             if not person._check_for_conflicts():
                 person.remove_episodes([act])
-                #person.actCount -= 1
             else:
+                print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
                 return True
                 
         # Person with fixed activities
-        print 'Following person without fixed activities is identified - '
+        print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate to the first person with fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.dailyFixedActPersonIds)
+
         for pid in self.dailyFixedActPersonIds:
             person = self.persons[pid]
             act.scheduleId = person.actCount + 1            
-            #hp.heappush(person.listOfActivityEpisodes, (act.startTime, act))
-            
             person.add_episodes([act])
 
             if not person._check_for_conflicts():
                 person.remove_episodes([act])
-                #person.listOfActivityEpisodes.remove((act.startTime, act))
-                #person.actCount -= 1
             else:
+                print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
                 return True
 
-        print " --- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
+        print " \t\t\t--- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
 
 
         # Since there are no people that can be identified without causing conflicts
@@ -334,25 +279,28 @@ class Household(object):
         # if there are no persons with 0 fixed activities then we randomly select
         # one person with fixed activity/activities
 
+
         if len(self.noDailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.noDailyFixedActPersonIds))
-            pid = self.noDailyFixedActPersonIds[pidIndex]
+            pid = self.randPersonId(self.noDailyFixedActPersonIds)
 
         elif len(self.dailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.dailyFixedActPersonIds))
-            pid = self.dailyFixedActPersonIds[pidIndex]
+            pid = self.randPersonId(self.dailyFixedActPersonIds)
         else:
-            raise Exception, "--There are no independent adults in the household--"
+            raise Exception, "\t\t\t--There are no independent adults in the household--"
+
+        print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
 
         act.dependentPersonId = depPersonId
-        #hp.heappush(self.persons[pid].listOfActivityEpisodes, (act.startTime, 
-        #                                                       act))
         act.scheduleId = self.persons[pid].actCount + 1
         person = self.persons[pid]
         person.add_episodes([act])
-        person.adjust_activity_schedules(self.seed)
+        #person.adjust_activity_schedules(self.seed)
         return True
 
+
+
+    def allocate_travel_episode(self, depPersonId, stAct, endAct):
+        pass
             
 
 
@@ -360,59 +308,47 @@ class Household(object):
         # Create pickup-dropoff for the front end of the activity
         #if pickup:
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
-        #else:
-        #    dummyActPickUp, dummyActDropoff = self.create_dummy_activity_for_tailend(stAct, endAct)
         
         # Person without fixed activities
-        print '\n\t\tFollowing person without fixed activities is identified - '
+        print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate pickup/dropoff to the first person with no fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.noDailyFixedActPersonIds)
+
         for pid in self.noDailyFixedActPersonIds:
             # Create dummy travel episodes
             person = self.persons[pid]
             
             dummyActPickUp.scheduleId = person.actCount + 1
             dummyActDropOff.scheduleId = person.actCount + 2
-            #hp.heappush(person.listOfActivityEpisodes, (dummyActPickUp.startTime, 
-            #                                            dummyActPickUp))
-            #hp.heappush(person.listOfActivityEpisodes, (dummyActDropOff.startTime, 
-            #                                            dummyActDropOff))
             person.add_episodes([dummyActPickUp,dummyActDropOff])           
  
             if not person._check_for_conflicts():
                 person.remove_episodes([dummyActPickUp,dummyActDropOff])           
-                #person.listOfActivityEpisodes.remove((dummyActPickUp.startTime, 
-                #                                      dummyActPickUp))
-                #person.listOfActivityEpisodes.remove((dummyActDropOff.startTime, 
-                #                                      dummyActDropOff))
-                #person.actCount -= 2
             else:
+                print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
                 return True
                 
         # Person with fixed activities
-        print '\n\t\tFollowing person without fixed activities is identified - '
+        print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate pickup/dropoff to the first person with fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.dailyFixedActPersonIds)
+
         for pid in self.dailyFixedActPersonIds:
             person = self.persons[pid]
 
             dummyActPickUp.scheduleId = person.actCount + 1
             dummyActDropOff.scheduleId = person.actCount + 2            
-            #hp.heappush(person.listOfActivityEpisodes, (dummyActPickUp.startTime, 
-            #                                            dummyActPickUp))
-            #hp.heappush(person.listOfActivityEpisodes, (dummyActDropOff.startTime, 
-            #                                            dummyActDropOff))
             person.add_episodes([dummyActPickUp,dummyActDropOff])
 
             if not person._check_for_conflicts():
                 person.remove_episodes([dummyActPickUp,dummyActDropOff])
-                #person.listOfActivityEpisodes.remove((dummyActPickUp.startTime, 
-                #                                      dummyActPickUp))
-                #person.listOfActivityEpisodes.remove((dummyActDropOff.startTime, 
-                #                                      dummyActDropOff))
-                #person.actCount -= 2
             else:
+                print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
                 return True
 
-        print " --- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
+        print "\t\t\t --- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
 
 
         # Since there are no people that can be identified without causing conflicts
@@ -421,21 +357,15 @@ class Household(object):
         # one person with fixed activity/activities
 
         if len(self.noDailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.noDailyFixedActPersonIds))
-            pid = self.noDailyFixedActPersonIds[pidIndex]
-            print '---- Person Id Selected - %s ----' %(pid)
-            
+            pid = self.randPersonId(self.noDailyFixedActPersonIds)
 
         elif len(self.dailyFixedActPersonIds) > 0:
-            pidIndex = self.randIndex(len(self.dailyFixedActPersonIds))
-            pid = self.dailyFixedActPersonIds[pidIndex]
+            pid = self.randPersonId(self.dailyFixedActPersonIds)
         else:
             raise Exception, "--There are no independent adults in the household--"
 
-        #hp.heappush(self.persons[pid].listOfActivityEpisodes, (dummyActPickUp.startTime, 
-        #                                                       dummyActPickUp))
-        #hp.heappush(self.persons[pid].listOfActivityEpisodes, (dummyActDropOff.startTime, 
-        #                                                       dummyActDropOff))
+
+        print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
 
         person = self.persons[pid]
 
@@ -444,15 +374,17 @@ class Household(object):
 
         person.add_episodes([dummyActPickUp, dummyActDropOff])
 
-        person.adjust_activity_schedules(self.seed)
+        #person.adjust_activity_schedules(self.seed)
         return True
             
 
 
 
-    def randIndex(self, lengthOfList):
+    def randPersonId(self, personIdList):
+        lengthOfList = len(personIdList)
         randNum = self.rndGen.return_random_integers(0, lengthOfList - 1)
-        return randNum 
+        pid = personIdList[randNum]
+        return pid
 
 
             

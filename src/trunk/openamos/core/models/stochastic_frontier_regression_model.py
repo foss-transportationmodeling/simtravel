@@ -85,6 +85,10 @@ class StocFronRegressionModel(AbstractRegressionModel):
         
         pred_value = expected_value.data + err
 
+	print vertex, threshold
+	#raw_input()
+
+
         if vertex == 'start':
             predValue_lessThresholdInd = pred_value < threshold
             print '\t\tPred value is less than START threshold for - %d cases ' \
@@ -94,7 +98,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
 	    predValue_moreThan1439 = pred_value > 1439
 	    print '\t\tPred value is less than 0 for - %d cases ' \
 	        % predValue_moreThan1439.sum()
-            pred_value[predValue_moreThan1439] = 0
+            pred_value[predValue_moreThan1439] = 1439
 
 
 
@@ -104,10 +108,10 @@ class StocFronRegressionModel(AbstractRegressionModel):
                 % predValue_moreThresholdInd.sum()
             pred_value[predValue_moreThresholdInd] = threshold
 
-	    predValue_lessThanZero = pred_value < 0
-	    print '\t\tPred value is less than 0 for - %d cases ' \
-	        % predValue_lessThanZero.sum()
-            pred_value[predValue_lessThanZero] = 0
+	    predValue_lessThanOne = pred_value < 1
+	    print '\t\tPred value is less than 1 for - %d cases ' \
+	        % predValue_lessThanOne.sum()
+            pred_value[predValue_lessThanOne] = 1
 
         _sum = ((pred_value) < 0).sum()
         if _sum > 0:

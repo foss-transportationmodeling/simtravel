@@ -16,7 +16,7 @@ class Person(object):
 	self.scheduleIds = []
 	self.firstEpisode = None
 	self.lastEpisode = None
-
+        self.scheduleConflictIndicator = zeros((1440,0))
 
     def reconcile_activity_schedules(self, seed=1):
         self.reconciledActivityEpisodes = []
@@ -39,13 +39,31 @@ class Person(object):
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
             self.scheduleIds.append(activity.scheduleId)
+            self._update_schedule_conflict_indicator(activity, add=True)
+
 
     def remove_episodes(self, activityEpisodes):
 	for activity in activityEpisodes:
 	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
 	    self.actCount -= 1
 	    self.scheduleIds.remove(activity.scheduleId)
+            self._update_schedule_conflict_indicator(activity, add=True)
 
+    def _update_schedule_conflict_indicator(self, activity, add=True):
+        if add:
+            self.scheduleConflictIndicator[activity.startTime:activity.endTime] += 1
+        else:
+            self.scheduleConflictIndicator[activity.startTime:activity.endTime] -= 1            
+
+        
+    def _check_for_conflicts(self):
+        if (self.scheduleConflictIndicator > 1).sum() > 1:
+            print 'THERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - ', self.pid
+            for recAct in self.listOfActivityEpisodes:
+                print recAct
+            return False
+        return True
+            
     def pop_earliest_activity(self):
 	self.actCount -= 1
 	activityStart, activity = hp.heappop(self.listOfActivityEpisodes)
@@ -182,26 +200,12 @@ class Person(object):
                             actObject.location, actObject.duration])
         return array(resList)
 
-    def _check_for_conflicts(self):
-        checkArray = zeros((1440,))
-        for recAct in self.listOfActivityEpisodes:        
-            actObject = recAct[1]
-            checkArray[actObject.startTime:actObject.endTime] += 1
-        if (checkArray > 1).sum() > 1:
-            for recAct in self.listOfActivityEpisodes:
-                print recAct
-
-            print 'TEHRE ARE STILL CONFLICTS'
-
-            return False
-            
-        return True
     
     def _adjust_first_episode(self, stAct, endAct):
         tt = self._extract_travel_time(stAct.location, endAct.location)
         prismDur = endAct.startTime - stAct.endTime
 
-        adjDenominator = stAct.duration + 0.5*endAct.duration + tt
+        adjDenominator = stAct.duration + 0.5*endAct.duration
 
         if prismDur > tt:
             pass
@@ -304,7 +308,7 @@ class Person(object):
         tt = self._extract_travel_time(stAct.location, endAct.location)
         prismDur = endAct.startTime - stAct.endTime
 
-        adjDenominator = 0.5*stAct.duration + endAct.duration + tt
+        adjDenominator = 0.5*stAct.duration + endAct.duration
 
         if prismDur > tt:
             pass
@@ -348,16 +352,6 @@ class Person(object):
 	    print '\tFIRST ACT OF PRISM - ', stAct
 	    print '\tLAST ACT OF PRISM -  ', endAct
 	
-
-            #if stAct.actType >= 600 and stAct.actType < 700:
-            #    stAct = endAct
-            #    continue
-
-
-            #if endAct.actType >= 600 and endAct.actType < 700:
-            #    stAct = endAct
-            #    continue
-
             if endAct.endTime == 1439 and len(self.listOfActivityEpisodes) > 0:
                 hp.heappush(self.listOfActivityEpisodes, (1439, endAct))
                 continue

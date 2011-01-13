@@ -30,6 +30,9 @@ class RandomDistribution(RandomState):
 	half_norm_vars = abs(norm_vars)
 	return half_norm_vars
 
+    def shuffle_sequence(self, sequence):
+	return self.shuffle(sequence)
+
 
 
 import unittest

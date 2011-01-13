@@ -85,7 +85,8 @@ class ChildDependencyAllocation(Model):
             self.persIndex += pIdsUnique.shape[0]
             countOfHid += 1
 
-        self.personIndicesOfActs = array(personIndicesOfActs, dtype=int)
+
+	self.personIndicesOfActs = array(personIndicesOfActs, dtype=int)
         self.hhldIndicesOfPersons = array(hhldIndicesOfPersons, dtype=int)
                    
 
@@ -149,6 +150,9 @@ class ChildDependencyAllocation(Model):
             print self.colNames
             for i in reconciledSchedules:
                 print i
+
+	    if hhldIndex[0] == 15080:
+		raw_input()	   
 
             #raw_input()
 
