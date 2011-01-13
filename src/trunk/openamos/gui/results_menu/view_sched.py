@@ -29,6 +29,7 @@ class MakeSchedPlot(QDialog):
         QDialog.__init__(self, parent)
 
         self.setMinimumSize(QSize(900,600))
+        self.setWindowTitle("Profile of Activity Travel Pattern")
         self.new_obj = None
         self.project = None        
         self.valid = False
@@ -176,14 +177,17 @@ class MakeSchedPlot(QDialog):
         self.valwidget.setMaximumHeight(200)
         self.varslayout.addWidget(self.valwidget,1,2)        
         
+        buttonwidget1 = QWidget(self)
+        buttonlayout1 = QVBoxLayout()
+        buttonwidget1.setLayout(buttonlayout1)
         self.selbutton1 = QPushButton('>>')
         self.selbutton1.setFixedWidth(60)
-        self.varslayout.addWidget(self.selbutton1,1,3)
+        buttonlayout1.addWidget(self.selbutton1)
+        self.delbutton = QPushButton('<<')
+        self.delbutton.setFixedWidth(60)
+        buttonlayout1.addWidget(self.delbutton)
+        self.varslayout.addWidget(buttonwidget1,1,3)
 
-        self.delbutton = QPushButton('Delete Row')
-        self.delbutton.setFixedWidth(90)
-        self.varslayout.addWidget(self.delbutton,0,4,Qt.AlignLeft)
-              
         self.varstable = QTableWidget(0,2,self)
         self.varstable.setHorizontalHeaderLabels(['Column', 'Value'])
         self.varstable.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -196,17 +200,17 @@ class MakeSchedPlot(QDialog):
         self.varslayout.addWidget(self.varstable,1,4)
 
         self.selbutton2 = QPushButton('Populate')
-        self.selbutton2.setFixedWidth(60)
+        self.selbutton2.setFixedWidth(75)
         self.varslayout.addWidget(self.selbutton2,1,5)
 
-        self.buttonwidget = QWidget(self)
-        buttonlayout = QHBoxLayout()
-        self.buttonwidget.setLayout(buttonlayout)
+        buttonwidget2 = QWidget(self)
+        buttonlayout2 = QHBoxLayout()
+        buttonwidget2.setLayout(buttonlayout2)
         self.personlabel = QLabel('Household ID')
-        buttonlayout.addWidget(self.personlabel)
+        buttonlayout2.addWidget(self.personlabel)
         self.showbutton = QPushButton('Show Chart')
-        buttonlayout.addWidget(self.showbutton)
-        self.varslayout.addWidget(self.buttonwidget,0,6)
+        buttonlayout2.addWidget(self.showbutton)
+        self.varslayout.addWidget(buttonwidget2,0,6)
 
         self.idwidget = QListWidget()
         self.idwidget.setSelectionMode(QAbstractItemView.MultiSelection)
@@ -642,9 +646,9 @@ class MakeSchedPlot(QDialog):
 
 
     def colors(self, index):
-        colorpooldict = {100:'#0000FF',101:'#0000FF',200:'#A9A9A9',300:'#7B68EE',301:'#00FA9A',
-                         411:'#FF9933',412:'#32CD32',415:'#66CCFF',416:'#B88A00',513:'#B8002E',
-                         514:'#FFD700',900:'#000000'}
+        colorpooldict = {100:'#0000FF',101:'#0000FF',200:'#A9A9A9',300:'#7B68EE',411:'#FF9933',
+                         412:'#32CD32',415:'#66CCFF',416:'#B88A00',513:'#B8002E',514:'#FFD700',
+                         600:'#00FA9A',601:'#3CB371',900:'#000000'}
 
         return colorpooldict[index]
 
@@ -654,8 +658,9 @@ class MakeSchedPlot(QDialog):
     def schedule_labels(self, index):
         xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
                   'duration_rec':'Activity Duration (mins)'}
-        activitytype = {100:'In-home',200:'Work',300:'Pick Up',301:'Drop Off',411:'Pers Buss',412:'Shopping',
-                        415:'Meal',416:'Serve Passgr',513:'Social Visit',514:'Sports/Rec',900:'Other'}
+        activitytype = {100:'In-home',200:'Work',300:'School',411:'Pers Buss',412:'Shopping',
+                        415:'Meal',416:'Serve Passgr',513:'Social Visit',514:'Sports/Rec',
+                        600:'Pick Up',601:'Drop Off',900:'Other'}
         strttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
         endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
         duration = {1:'0-10',2:'11-30',3:'31-120',4:'121-240',5:'> 240'}
@@ -714,19 +719,20 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
-            bars.append(barh(0, 1, 1, left=0,color=self.colors(301)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(600)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(601)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
             
             prop = matplotlib.font_manager.FontProperties(size=8)   
-            axes.legend(bars,('In-home','Work','Pick Up','Drop Off','Pers Buss',
+            axes.legend(bars,('In-home','Work','School','Pers Buss',
                               'Shopping','Meal','Srv Passgr','Social',
-                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+                              'Sports/Rec','Pick Up','Drop Off','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             axes.set_xlabel("Time")
             axes.set_ylabel("Persons")
             axes.set_xlim(-1,1441)

@@ -205,8 +205,8 @@ class MainWindow(QMainWindow):
                                             "", "Show activity characteristics", False, True)
         travel_pattern_action = self.createaction("Travel Characteristics", self.results_trips, None,
                                                   None, "Show travel characteristics", False, True)
-        person_schedule_action = self.createaction("Person Schedule", self.results_person, None,
-                                                  None, "Show travel characteristics", False, True)
+        person_schedule_action = self.createaction("Profile of Activity Travel Pattern", self.results_person, None,
+                                                  None, "Show profile of activity travel pattern in persons or households", False, True)
         self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action,person_schedule_action, ))
 
     # Defining help        
