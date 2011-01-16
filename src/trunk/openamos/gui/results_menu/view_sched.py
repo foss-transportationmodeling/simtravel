@@ -19,6 +19,7 @@ from pylab import *
 
 import matplotlib
 import matplotlib.font_manager as plot
+from matplotlib.patches import Patch, Rectangle
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
@@ -38,45 +39,166 @@ class MakeSchedPlot(QDialog):
         self.table = 'households'
         self.data = []
 
-#        self.dpi = 100
-#        self.fig = Figure((5.0, 4.5), dpi=self.dpi)
-#        self.canvas = FigureCanvas(self.fig)
-#        QWidget.setSizePolicy(self.canvas,QSizePolicy.Expanding,QSizePolicy.Expanding)
-#        self.axes = self.fig.add_subplot(111)
-
-        self.makeVarsWidget()
+        self.makeVarsWidget1()
+        self.makeVarsWidget2()
         self.tabs = QTabWidget()
-        self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)         
+        self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
-        
+
+        radiowidget = QWidget(self)
+        radiolayout = QHBoxLayout()
+        radiowidget.setLayout(radiolayout)
+        segment = QGroupBox(self)
+        addsegment = QHBoxLayout()
+        segment.setLayout(addsegment)
+        self.segment1 = QRadioButton("Households")
+        self.segment1.setChecked(True)
+        self.segment2 = QRadioButton("Persons")
+        addsegment.addWidget(self.segment1)
+        addsegment.addWidget(self.segment2)
+        radiolayout.addWidget(segment)
+        basedgroup = QGroupBox(self)
+        basedlayout = QHBoxLayout()
+        basedgroup.setLayout(basedlayout)
+        self.based1 = QRadioButton("Based on Socio-Economics")
+        self.based1.setChecked(True)
+        self.based2 = QRadioButton("Based on ID")
+        basedlayout.addWidget(self.based1)
+        basedlayout.addWidget(self.based2)
+        radiolayout.addWidget(basedgroup)
+
         stablewidget = QWidget(self)
         stablelayout = QHBoxLayout()
         stablewidget.setLayout(stablelayout)
+        substablewidget = QWidget(self)
+        substablelayout = QHBoxLayout()
+        substablewidget.setLayout(substablelayout)
         stablelabel = QLabel('Schedule Type')
-        stablelayout.addWidget(stablelabel)
+        substablelayout.addWidget(stablelabel)
         self.stablecombo = QComboBox()
-#        self.stablecombo.addItems(["Non-reconciled Schedules","Reconciled Schedules for Fixed Activities",
-#                                "Simulation Daily Schedules","Schedules with Child Allocation"])
         self.hasTables()
         self.stablecombo.setFixedWidth(220)
-        stablelayout.addWidget(self.stablecombo)
-        stablelayout.setAlignment(Qt.AlignLeft)
-        
+        substablelayout.addWidget(self.stablecombo)
+        substablelayout.setAlignment(Qt.AlignLeft)
+        stablelayout.addWidget(substablewidget)       
+        self.showbutton = QPushButton('Show Chart')
+        self.showbutton.setFixedWidth(100)
+        stablelayout.addWidget(self.showbutton)
+        stablelayout.setContentsMargins(0,0,0,0)
+
         self.vbox = QVBoxLayout()
+        self.vbox.addWidget(radiowidget)
+        self.vbox.addWidget(self.varswidget1)
+        self.vbox.addWidget(self.varswidget2)
         self.vbox.addWidget(stablewidget)
-        self.vbox.addWidget(self.varswidget)
         self.vbox.addWidget(self.tabs)
         self.vbox.addWidget(self.dialogButtonBox)
-        self.vbox.setStretch(2,1)
+        self.vbox.setStretch(4,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
+        self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
+        self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
+        self.connect(self.based1, SIGNAL("clicked(bool)"), self.showGroupBox)
+        self.connect(self.based2, SIGNAL("clicked(bool)"), self.showGroupBox)
+        self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw1)
         
         if self.stablecombo.count < 1:  
             msg = "There is no simulation output"
             QMessageBox.information(self,"Warning",msg,QMessageBox.Ok)
             self.showbutton.setDisabled(True)
+
+
+    def makeVarsWidget1(self):
+        self.varswidget1 = QGroupBox("")
+        self.varslayout = QGridLayout()
+        self.varswidget1.setLayout(self.varslayout)
+        self.varswidget1.setContentsMargins(0,0,0,0)
+                
+        tableslabel = QLabel('Columns')
+        self.varslayout.addWidget(tableslabel,0,0)
+        
+        self.colswidget = QListWidget()
+        self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        if self.columnName() <> None:
+            self.colswidget.addItems(self.columnName())
+        self.colswidget.setMaximumWidth(180)
+        self.colswidget.setMaximumHeight(150)
+        self.varslayout.addWidget(self.colswidget,1,0)
+        
+        varslabel = QLabel('Values')
+        self.varslayout.addWidget(varslabel,0,1)
+        
+        self.valwidget = QListWidget()
+        self.valwidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.valwidget.setMaximumWidth(180)
+        self.valwidget.setMaximumHeight(150)
+        self.varslayout.addWidget(self.valwidget,1,1)        
+        
+        buttonwidget1 = QWidget(self)
+        buttonlayout1 = QVBoxLayout()
+        buttonwidget1.setLayout(buttonlayout1)
+        self.selbutton1 = QPushButton('>>')
+        self.selbutton1.setFixedWidth(60)
+        buttonlayout1.addWidget(self.selbutton1)
+        self.delbutton = QPushButton('<<')
+        self.delbutton.setFixedWidth(60)
+        buttonlayout1.addWidget(self.delbutton)
+        self.varslayout.addWidget(buttonwidget1,1,2)
+
+        self.varstable = QTableWidget(0,2,self)
+        self.varstable.setHorizontalHeaderLabels(['Column', 'Value'])
+        self.varstable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
+        self.varstable.setSizePolicy(sizePolicy)
+        self.varstable.horizontalHeader().setResizeMode(0,1)
+        self.varstable.horizontalHeader().setResizeMode(1,1)
+        self.varstable.setMaximumWidth(360)
+        self.varstable.setMaximumHeight(150)
+        self.varslayout.addWidget(self.varstable,1,3)
+
+        self.selbutton2 = QPushButton('Populate')
+        self.selbutton2.setFixedWidth(75)
+        self.varslayout.addWidget(self.selbutton2,1,4)
+
+        self.personlabel1 = QLabel('Household ID')
+        self.varslayout.addWidget(self.personlabel1,0,5)
+        self.idwidget = QListWidget()
+        self.idwidget.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.idwidget.setMaximumWidth(180)
+        self.idwidget.setMaximumHeight(150)
+        self.varslayout.addWidget(self.idwidget,1,5)
+        #self.varslayout.setContentsMargins(11,0,11,0)
+
+        self.connect(self.colswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateValues)
+        self.connect(self.selbutton1, SIGNAL("clicked(bool)"), self.selValue)
+        self.connect(self.selbutton2, SIGNAL("clicked(bool)"), self.retrieveID1)
+        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
+
+
+    def makeVarsWidget2(self):
+        self.varswidget2 = QGroupBox("")
+        varslayout = QGridLayout()
+        self.varswidget2.setLayout(varslayout)
+        self.varswidget2.setContentsMargins(0,0,0,0)
+        self.personlabel2 = QLabel('Household ID')
+        varslayout.addWidget(self.personlabel2,0,0)
+        self.idwidget2 = QListWidget()
+        self.idwidget2.setSelectionMode(QAbstractItemView.MultiSelection)
+        self.idwidget2.setMaximumWidth(180)
+        self.idwidget2.setMaximumHeight(150)
+        varslayout.addWidget(self.idwidget2,1,0)
+        varslayout.setAlignment(Qt.AlignLeft)
+        self.varswidget2.setVisible(False)
+        
+        self.resetbutton = QPushButton('Reload ID')
+        self.resetbutton.setFixedWidth(75)
+        varslayout.addWidget(self.resetbutton,1,1)
+        
+        self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.resetID)
+        
+        
 
 
     def hasTables(self):
@@ -114,10 +236,17 @@ class MakeSchedPlot(QDialog):
         vbox = QVBoxLayout()
         vbox.addWidget(chart)
         page1.setLayout(vbox)
-        index = self.tabs.count() + 1
-        chartname = "Chart %s" %(index)
+        chartname = ""
+        index = -1
+        if self.tabs.count() > 0:
+            index = self.tabs.count() - 1
+            tabtitle = self.tabs.tabText(index)
+            numtab = int(tabtitle.split(" ")[1]) + 1
+            chartname = "Chart %s" %(numtab)
+        else:
+            chartname = "Chart 1"
         self.tabs.addTab(page1, chartname)
-        index = index - 1
+        index = index + 1
         self.tabs.setCurrentIndex(index)
 
     def removeTab(self):
@@ -137,98 +266,8 @@ class MakeSchedPlot(QDialog):
         myCanvas.append(sketch)
         myCanvas.append(myaxes)
         return myCanvas
- 
- 
-    def makeVarsWidget(self):
-        
-        #self.varswidget = QWidget(self)
-        self.varswidget = QGroupBox("")
-        self.varslayout = QGridLayout()
-        self.varswidget.setLayout(self.varslayout)
-        self.varswidget.setContentsMargins(0,0,0,0)
-        
-        segment = QGroupBox(self)
-        addsegment = QVBoxLayout()
-        segment.setLayout(addsegment)
-        self.segment1 = QRadioButton("Households")
-        self.segment1.setChecked(True)
-        self.segment2 = QRadioButton("Persons")
-        addsegment.addWidget(self.segment1)
-        addsegment.addWidget(self.segment2)
-        self.varslayout.addWidget(segment,1,0)
-        
-        tableslabel = QLabel('Columns')
-        self.varslayout.addWidget(tableslabel,0,1)
-        
-        self.colswidget = QListWidget()
-        self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        if self.columnName() <> None:
-            self.colswidget.addItems(self.columnName())
-        self.colswidget.setMaximumWidth(180)
-        self.colswidget.setMaximumHeight(200)
-        self.varslayout.addWidget(self.colswidget,1,1)
-        
-        varslabel = QLabel('Values')
-        self.varslayout.addWidget(varslabel,0,2)
-        
-        self.valwidget = QListWidget()
-        self.valwidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.valwidget.setMaximumWidth(180)
-        self.valwidget.setMaximumHeight(200)
-        self.varslayout.addWidget(self.valwidget,1,2)        
-        
-        buttonwidget1 = QWidget(self)
-        buttonlayout1 = QVBoxLayout()
-        buttonwidget1.setLayout(buttonlayout1)
-        self.selbutton1 = QPushButton('>>')
-        self.selbutton1.setFixedWidth(60)
-        buttonlayout1.addWidget(self.selbutton1)
-        self.delbutton = QPushButton('<<')
-        self.delbutton.setFixedWidth(60)
-        buttonlayout1.addWidget(self.delbutton)
-        self.varslayout.addWidget(buttonwidget1,1,3)
 
-        self.varstable = QTableWidget(0,2,self)
-        self.varstable.setHorizontalHeaderLabels(['Column', 'Value'])
-        self.varstable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
-        self.varstable.setSizePolicy(sizePolicy)
-        self.varstable.horizontalHeader().setResizeMode(0,1)
-        self.varstable.horizontalHeader().setResizeMode(1,1)
-        self.varstable.setMaximumWidth(360)
-        self.varstable.setMaximumHeight(200)
-        self.varslayout.addWidget(self.varstable,1,4)
 
-        self.selbutton2 = QPushButton('Populate')
-        self.selbutton2.setFixedWidth(75)
-        self.varslayout.addWidget(self.selbutton2,1,5)
-
-        buttonwidget2 = QWidget(self)
-        buttonlayout2 = QHBoxLayout()
-        buttonwidget2.setLayout(buttonlayout2)
-        self.personlabel = QLabel('Household ID')
-        buttonlayout2.addWidget(self.personlabel)
-        self.showbutton = QPushButton('Show Chart')
-        buttonlayout2.addWidget(self.showbutton)
-        self.varslayout.addWidget(buttonwidget2,0,6)
-
-        self.idwidget = QListWidget()
-        self.idwidget.setSelectionMode(QAbstractItemView.MultiSelection)
-        self.idwidget.setMaximumWidth(180)
-        self.idwidget.setMaximumHeight(200)
-        self.varslayout.addWidget(self.idwidget,1,6)
-        #self.varslayout.setContentsMargins(11,0,11,0)
-
-        self.connect(self.colswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateValues)
-        self.connect(self.selbutton1, SIGNAL("clicked(bool)"), self.selValue)
-        self.connect(self.selbutton2, SIGNAL("clicked(bool)"), self.retrieveID)
-        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
-        self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
-        self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
-        self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw1)
-        
-        
-         
     def connects(self,configobject):
         
         protocol = configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
@@ -323,20 +362,40 @@ class MakeSchedPlot(QDialog):
         if self.segment1.isChecked() and self.table != 'households':
             self.colswidget.clear()
             self.valwidget.clear()
+            self.idwidget.clear()
+            self.idwidget2.clear()
             self.delRow()
             self.table = 'households'
-            self.personlabel.setText("Household ID")
+            self.personlabel1.setText("Household ID")
+            self.personlabel2.setText("Household ID")
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
         if self.segment2.isChecked() and self.table != 'persons':
             self.colswidget.clear()
             self.valwidget.clear()
+            self.idwidget.clear()
+            self.idwidget2.clear()
             self.delRow()
             self.table = 'persons'
-            self.personlabel.setText("Person ID")
+            self.personlabel1.setText("Person ID")
+            self.personlabel2.setText("Person ID")
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
-        
+
+    def showGroupBox(self):
+        if self.based1.isChecked():
+            self.varswidget1.setVisible(True)
+            self.varswidget2.setVisible(False)
+            self.idwidget2.clear()
+        if self.based2.isChecked():
+            self.varswidget1.setVisible(False)
+            self.varswidget2.setVisible(True)
+            self.valwidget.clear()
+            self.delRow()
+            self.idwidget.clear()
+            self.retrieveID2()
+
+
     def delRow(self):
         numrows = self.varstable.rowCount() - 1
         while numrows > -1:
@@ -352,6 +411,9 @@ class MakeSchedPlot(QDialog):
             
         return sdata
 
+    def resetID(self):
+        self.idwidget2.clear()
+        self.retrieveID2()
 #    def on_draw(self):
 #        """ Redraws the figure
 #        """
@@ -481,47 +543,52 @@ class MakeSchedPlot(QDialog):
         
         pid = []
         pid.append("")
-        numrows = self.varstable.rowCount()
-        if numrows > 0:
-            try:
-                self.data = []
-                temp = None
-                
+#        numrows = self.varstable.rowCount()
+#        if numrows > 0:
+        try:
+            self.data = []
+            temp = None
+            
+            sindex = None  #self.idwidget.selectedItems()
+            if self.based1.isChecked():
                 sindex = self.idwidget.selectedItems()
-                for i in sindex:
-                    id = i.text()
-                    SQL = self.stateSQL(id)
-            
-                    if SQL != "" and SQL != None:
-                        self.cursor.execute(SQL)
-                        temp = self.cursor.fetchall()
-                        
-                        prior_id = '0'
-                        aschedule = []
-                        for i in temp:
-                            id = '%s,%s' %(str(i[0]),str(i[1]))
-                                
-                            if prior_id <> id:
-                                if prior_id <> '0':
-                                    self.data.append(aschedule)
-                                prior_id = id
-                                
-                                aschedule = []
-                                pid.append(id)
-                                aschedule.append(i[2])
-                                aschedule.append(i[3])
-                                aschedule.append(i[4])
-                            else:
-                                aschedule.append(i[2])
-                                aschedule.append(i[3])
-                                aschedule.append(i[4])
+            else:
+                sindex = self.idwidget2.selectedItems()
+                
+            for i in sindex:
+                id = i.text()
+                SQL = self.stateSQL(id)
         
-                        self.data.append(aschedule)
+                if SQL != "" and SQL != None:
+                    self.cursor.execute(SQL)
+                    temp = self.cursor.fetchall()
+                    
+                    prior_id = '0'
+                    aschedule = []
+                    for i in temp:
+                        id = '%s,%s' %(str(i[0]),str(i[1]))
+                            
+                        if prior_id <> id:
+                            if prior_id <> '0':
+                                self.data.append(aschedule)
+                            prior_id = id
+                            
+                            aschedule = []
+                            pid.append(id)
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+                        else:
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+    
+                    self.data.append(aschedule)
 
-            
-            except Exception, e:
-                print '\tError while unloading data from the table %s'%self.table
-                print e
+        
+        except Exception, e:
+            print '\tError while unloading data from the table %s'%self.table
+            print e
 
 #        else:
 #            msg = "Please insert a Column and a Value after selecting"
@@ -532,7 +599,7 @@ class MakeSchedPlot(QDialog):
         return pid
             
 
-    def retrieveID(self):
+    def retrieveID1(self):
         
         numrows = self.varstable.rowCount()
         if numrows > 0:
@@ -541,7 +608,8 @@ class MakeSchedPlot(QDialog):
                 self.data = []
                 pid = []
                 temp = None
-                SQL = self.SQL_ID()
+                
+                SQL = self.SQL_ID1()
                 if SQL != "" and SQL != None:
                     #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
                     self.cursor.execute(SQL)
@@ -558,6 +626,7 @@ class MakeSchedPlot(QDialog):
                         
                     self.fixedFifty(pid)
                     self.idwidget.addItems(pid)
+
             
             except Exception, e:
                 print '\tError while unloading data from the table %s'%self.table
@@ -568,6 +637,38 @@ class MakeSchedPlot(QDialog):
             QMessageBox.information(self, "Warning",
                                     msg,
                                     QMessageBox.Ok)
+
+    def retrieveID2(self):
+        
+        try:
+            self.idwidget2.clear()
+            self.data = []
+            pid = []
+            temp = None
+
+            SQL = self.SQL_ID2()  
+            if SQL != "" and SQL != None:
+                #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
+                self.cursor.execute(SQL)
+                temp = self.cursor.fetchall()
+                
+                id = ""
+                for i in temp:
+                    if self.segment1.isChecked():
+                        id = str(i[0])
+                    else:
+                        id = '%s,%s'%(str(i[0]),str(i[1]))
+                    
+                    pid.append(id)
+                    
+                self.fixedFifty(pid)
+                self.idwidget2.addItems(pid)
+        
+        except Exception, e:
+            print '\tError while unloading data from the table %s'%self.table
+            print e
+
+
 
 
     def fixedFifty(self, pid):
@@ -616,7 +717,7 @@ class MakeSchedPlot(QDialog):
         return state
 
 
-    def SQL_ID(self):
+    def SQL_ID1(self):
         tablename = '%s AS A, %s AS B' %(self.schedule_table(),self.table)
         vars = ''
         if self.segment1.isChecked():
@@ -640,6 +741,24 @@ class MakeSchedPlot(QDialog):
         filter = filter + ') AND A.houseid = B.houseid'
         if self.table == 'persons':
             filter = filter + ' AND A.personid = B.personid'
+        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+
+        return state
+
+    def SQL_ID2(self):
+        tablename = '%s AS A' %(self.schedule_table())
+        vars = ''
+        if self.segment1.isChecked():
+            vars = 'A.houseid'
+        else:
+            vars = 'A.houseid, A.personid'
+        filter = 'A.starttime >= 0'
+        order = ''
+        if self.segment1.isChecked():
+            order = 'A.houseid'
+        else:
+            order = 'A.houseid, A.personid'
+        
         state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
 
         return state
@@ -701,7 +820,7 @@ class MakeSchedPlot(QDialog):
             rows = len(self.data) #len(sdata)
             axes.clear()
             ticks = np.arange(rows+1)
-            ind = 1
+            ind = 0.75
             height = 0.4
 
             if self.segment1.isChecked():
@@ -712,7 +831,7 @@ class MakeSchedPlot(QDialog):
             for row in self.data: #sdata:
                 rowlen = len(row)
                 for i in range(2,rowlen,3):
-                    axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
+                    axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]), picker=True)
                 ind = ind + 1
             
             bars=[]
@@ -733,16 +852,10 @@ class MakeSchedPlot(QDialog):
             axes.legend(bars,('In-home','Work','School','Pers Buss',
                               'Shopping','Meal','Srv Passgr','Social',
                               'Sports/Rec','Pick Up','Drop Off','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
-            axes.set_xlabel("Time")
+            axes.set_xlabel("Time (mins)")
             axes.set_ylabel("Persons")
             axes.set_xlim(-1,1441)
-            
-            
-#            sindex = self.idwidget.selectedIndexes()
-#            labels = []
-#            labels.append('')
-#            for i in sindex:
-#                labels.append(self.idwidget.item(i.row()).text())
+
 
             labels = pid                
             axes.set_yticks(ticks)
@@ -754,6 +867,7 @@ class MakeSchedPlot(QDialog):
                 axes.set_yticklabels(labels)
 
             Canvas.draw()
+            Canvas.mpl_connect('pick_event', self.temp)
             self.makeTabs(Canvas)
             
         else:
@@ -761,6 +875,16 @@ class MakeSchedPlot(QDialog):
             QMessageBox.information(self, "Warning",
                                     msg,
                                     QMessageBox.Ok)
+            
+    def temp(self,event):
+        if isinstance(event.artist, Rectangle):
+            patch = event.artist
+            print 'Start: ', patch.get_x()
+            print 'Width: ', patch.get_width()
+
+
+            
+            
 
 
 
