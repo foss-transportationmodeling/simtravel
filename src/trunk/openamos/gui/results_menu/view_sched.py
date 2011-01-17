@@ -702,7 +702,7 @@ class MakeSchedPlot(QDialog):
 
     def stateSQL(self,id):
         tablename = '%s AS A' %(self.schedule_table())
-        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
+        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, (A.endtime - A.starttime)' #A.duration'
         order = 'A.houseid, A.personid, A.starttime'
         filter = 'A.starttime >= 0'
         
