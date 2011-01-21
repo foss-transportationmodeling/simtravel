@@ -167,9 +167,24 @@ class DB(object):
     def returnTableAsMatrix(self, tableName, originColName, destinationColName, skimColName, fillValue=9999):
         tableRef = self.returnTableReference(tableName)
         
+	#print originColName, destinationColName, skimColName, tableName
+	
+	#print 'OLDER IMPLEMENTATION'
         origin = tableRef.col(originColName)
         destination = tableRef.col(destinationColName)
         skims = tableRef.col(skimColName)
+
+	#print origin.shape, destination.shape, skims.shape
+
+	#origin.shape = (origin.shape[0], 1)
+	#destination.shape = (destination.shape[0], 1)
+	#skims.shape = (skims.shape[0], 1)
+
+	#print origin.shape, destination.shape, skims.shape
+	#print origin[0,0], destination[0,0], skims[0,0]
+
+
+	skimsValues = tableRef[0:]
 
         # Initialize matrix
         skimsMatrix = ones((max(origin)+1, max(destination)+1)) * fillValue
@@ -177,7 +192,8 @@ class DB(object):
         # Populate matrix
         skimsMatrix[origin, destination] = skims
 	#skimsMatrix = masked_equal(skimsMatrix, 9999)
-        
+        print skimsMatrix[1226, 896], skimsMatrix[1538, 1562]
+	#raw_input()
         return masked_equal(skimsMatrix, 9999), unique(origin)
 
 

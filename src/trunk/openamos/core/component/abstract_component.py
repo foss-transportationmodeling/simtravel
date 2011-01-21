@@ -314,15 +314,19 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                result = i.simulate_choice(data_subset, choiceset, iteration)
-                print result.data[:,0]
+
+
                 if i.model_type <> 'consistency':
+                    result = i.simulate_choice(data_subset, choiceset, iteration)
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 		else:
+		    result = i.simulate_choice(data_subset, choiceset, iteration, projectSkimsObject)
 		    self.data = result
 		    # Update the filter because the number of rows may have changed in the data
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+	      
+                print 'RESULT', result.data
         
         # Update hte model list for next iteration within the component
 
@@ -726,6 +730,7 @@ class AbstractComponent(object):
                 destinationColName = i.destinationField
                 skimColName = i.skimField
 
+                ti = time.time()
                 if analysisInterval is not None:
                     tableName = projectSkimsObject.lookup_table(analysisInterval)
                 else:
@@ -733,7 +738,7 @@ class AbstractComponent(object):
                 
                 print '\t\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
 
-                ti = time.time()
+
                 skimsMatrix2, uniqueIDs = self.db.returnTableAsMatrix(tableName,
                                                                       originColName,
                                                                       destinationColName,
@@ -742,6 +747,7 @@ class AbstractComponent(object):
 
 
                 print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
+	        #raw_input()
                 if i.countChoices is not None: 
                     print ("""\t\tNeed to sample location choices for the following""" \
                                """model with also location info extracted """)
@@ -784,16 +790,19 @@ class AbstractComponent(object):
             timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
 
+	    k2 = rowsLessThan.sum()
+
+            if k2 > 0:
+                destLocSetInd2[rowsLessThan, zone] = 1
 	    #print zone
 	    #print timeToDest[:,0]
 	    #print timeFromDest[:,0]
 	    #print timeAvailable[:,0]
 	    #print rowsLessThan
+	    #print destLocSetInd2[:,zone]
+	    #raw_input()
 
-	    k2 = rowsLessThan.sum()
 
-            if k2 > 0:
-                destLocSetInd2[rowsLessThan, zone] = 1
 	print timeAvailable
 	print destLocSetInd2
 
@@ -822,7 +831,7 @@ class AbstractComponent(object):
 
         destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
-        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs)+1)]
+        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
 
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
@@ -881,8 +890,9 @@ class AbstractComponent(object):
             skimLocColName = '%s%s' %(colName, i+1)
             data.setcolumn(skimLocColName, vals)
 
-	    #print 'Origin Loc', originLocColVals
-	    #print 'Destination Loc', sampleLocColVals
+	    #print 'Origin Loc', originLocColVals[:,0]
+	    #print 'Selected Loc', sampleLocColVals[:,0]
+	    #print 'skims values', vals
 
 
             # FROM TRAVEL SKIMS
@@ -893,6 +903,13 @@ class AbstractComponent(object):
             vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
             data.setcolumn(destSkimColName, vals)
+
+	    #print 'Selected Loc', sampleLocColVals[:,0]
+	    #print 'Destination Loc', destinationLocColVals[:,0]
+	    #print 'skims values', vals
+
+	    #print '\nMask', rowsEqualsDefault
+	    #raw_input()
 
             # Process Location Information if requested
             if len(spatialconst.locationVariables) > 0:
@@ -920,7 +937,7 @@ class AbstractComponent(object):
 
 
         vals = skimsMatrix2[originLocColVals, destinationLocColVals]
-        
+
         rowsEqualsDefault = vals.mask
         vals[rowsEqualsDefault] = 0
         #vals.shape = (data.rows,1)
@@ -931,13 +948,33 @@ class AbstractComponent(object):
 
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
+	
+	print data.varnames
+
+	print originLocColName, destinationLocColName
+	print 'Origin Loc', originLocColVals[:,0]
+        print 'Destination Loc', destinationLocColVals[:,0]
+       	print 'skims values', vals[:,0]
 
         #print vals[:,0]
-        data.insertcolumn([colName], vals)
+	print 'NEW IMPLEMENTATION'
+        data.setcolumn(colName, vals)
+	print data.columns([colName])
+
+	#print 'OLD IMPLEMENTATION'
+	#data.insertcolumn([colName], vals)
+	#print data.columns([colName])
+
+
+	#raw_input()
 
         return data
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
+        destLocSetInd = destLocSetInd[:,1:]
+	print 'number of choices - ', destLocSetInd.shape
+	print destLocSetInd[:,:100].sum()
+	#raw_input()
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
@@ -964,11 +1001,13 @@ class AbstractComponent(object):
             
             colName = '%s%s' %(sampleVarName, i+1)
             nonZeroRows = where(res.data <> 0)
-            actualLocIds = res.data
-            actualLocIds[nonZeroRows] -= 1
+            actualLocIds = res.data[nonZeroRows]
+            #actualLocIds[nonZeroRows] -= 1
             data.setcolumn(colName, actualLocIds)
-
-	    #print colName
+	    print 'SELECTED LOCATIONS FOR COUNT - ', i+1
+	    print actualLocIds
+	    print data.columns([colName])
+	    #raw_input()
 
             # Retrieving the row indices
             dataCol = data.columns([colName]).data

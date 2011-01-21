@@ -95,7 +95,7 @@ class ChildDependencyAllocation(Model):
 
         #raw_input()
 
-    def resolve_consistency(self, data, seed):
+    def resolve_consistency(self, data, seed, projectSkimsObject):
 
         actList = []
         data.sort([self.activityAttribs.hidName,
@@ -151,7 +151,7 @@ class ChildDependencyAllocation(Model):
             for i in reconciledSchedules:
                 print i
 
-	    if hhldIndex[0] == 15080:
+	    if hhldIndex[0] == 15080 or hhldIndex[0] == 322 or hhldIndex[0] == 42033 or hhldIndex[0] == 650:
 		raw_input()	   
 
             #raw_input()

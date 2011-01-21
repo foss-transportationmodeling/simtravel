@@ -78,7 +78,7 @@ class SubModel(object):
     
         return True
     
-    def simulate_choice(self, data, choiceset, iteration):
+    def simulate_choice(self, data, choiceset, iteration, projectSkimsObject=None):
         # Setting the seed
         #f = open('test', 'a')
         seed = self.seed + iteration
@@ -97,7 +97,7 @@ class SubModel(object):
                     result.data[rows] = self.values[i]
                     
         if self.model_type == 'consistency':
-            result = self.model.resolve_consistency(data, seed)
+            result = self.model.resolve_consistency(data, seed, projectSkimsObject)
             
             
 

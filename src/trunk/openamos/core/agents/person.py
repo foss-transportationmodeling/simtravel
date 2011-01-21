@@ -16,7 +16,7 @@ class Person(object):
 	self.scheduleIds = []
 	self.firstEpisode = None
 	self.lastEpisode = None
-        self.scheduleConflictIndicator = zeros((1440,0))
+        self.scheduleConflictIndicator = zeros((1440,1))
 
     def reconcile_activity_schedules(self, seed=1):
         self.reconciledActivityEpisodes = []
@@ -25,20 +25,26 @@ class Person(object):
         self.rndGen = RandomDistribution(int(self.hid * self.pid + self.seed))
         #self.add_episodes(activityEpisodes)
         self._reconcile_schedule()
+        self.scheduleConflictIndicator = zeros((1440, 1))
         self.listOfActivityEpisodes = copy.deepcopy(self.reconciledActivityEpisodes)
+        for actStart, act in self.listOfActivityEpisodes:
+            self._update_schedule_conflict_indicator(act, add=True)
+        
+
         #results = self._collate_results()
         #return results
         
 
-    def add_episodes(self, activityEpisodes):
+    def add_episodes(self, activityEpisodes, temp=False):
         for activity in activityEpisodes:
-	    if activity.startOfDay:
+            #activity.personid = self.pid
+	    if activity.startOfDay and not temp:
 		self.firstEpisode = activity
-	    if activity.endOfDay:
+	    if activity.endOfDay and not temp:
 	        self.lastEpisode = activity
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
-            self.scheduleIds.append(activity.scheduleId)
+            #self.scheduleIds.append(activity.scheduleId)
             self._update_schedule_conflict_indicator(activity, add=True)
 
 
@@ -46,24 +52,90 @@ class Person(object):
 	for activity in activityEpisodes:
 	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
 	    self.actCount -= 1
-	    self.scheduleIds.remove(activity.scheduleId)
-            self._update_schedule_conflict_indicator(activity, add=True)
+	    #self.scheduleIds.remove(activity.scheduleId)
+            self._update_schedule_conflict_indicator(activity, add=False)
 
     def _update_schedule_conflict_indicator(self, activity, add=True):
         if add:
-            self.scheduleConflictIndicator[activity.startTime:activity.endTime] += 1
+            self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] += 1
         else:
-            self.scheduleConflictIndicator[activity.startTime:activity.endTime] -= 1            
+            self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] -= 1            
 
         
     def _check_for_conflicts(self):
-        if (self.scheduleConflictIndicator > 1).sum() > 1:
-            print 'THERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - ', self.pid
-            for recAct in self.listOfActivityEpisodes:
-                print recAct
+        conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
+        if conflict > 0:
+            print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s' %(self.pid,
+                                                                                                    conflict)
             return False
         return True
+
+    def _check_for_ih_conflicts(self, activity):
+        conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
+        
+        conflictActs = self._identify_conflict_activities([activity])
+        checkConflictActsLocation = self._check_location_match(activity,
+                                                               conflictActs)
+        
+
+        if (conflict == activity.duration) and checkConflictActsLocation:
+            print """\t\t\t\tThere is some person at the current location """\
+                """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
+            for act in conflictActs:
+                act.dependentPersonId = 99
+
+            return True
+        else:
+            return False
+
+
+    def _check_location_match(self, activity, conflictActs):
+        for act in conflictActs:
+            if act.location <> activity.location:
+                return False
+
+        return True
+
             
+    def _check_for_travel_threshold(self):
+        pass
+
+    def _check_for_roundtrip_threshold(self):
+        pass
+
+
+    def _conflict_duration(self):
+        conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
+        return conflict
+
+
+    def _conflict_duration_with_activity(self, activity):
+        stTime = activity.startTime
+        endTime = activity.endTime
+        #print 'stTime - ', stTime, 'endTime', endTime
+        conflict = (self.scheduleConflictIndicator[stTime:endTime, :] > 1).sum()
+        return conflict
+
+    def _identify_conflict_activities(self, activityList):
+        # ONLY IDENTIFIES ACTIVITIES THAT PERFECTLY FIT WITHIN THE SCHEDULE
+        
+        actConflicts = []
+        
+        for act in activityList:
+            actConflict = self._identify_conflict_activity(act)
+            
+            if actConflict is not None:
+                actConflicts.append(actConflict)
+        return actConflicts
+
+
+    def _identify_conflict_activity(self, activity):
+        for stAct, act in self.listOfActivityEpisodes:
+            if (activity.startTime >= act.startTime and 
+                activity.endTime <= act.endTime):
+                return act
+
+
     def pop_earliest_activity(self):
 	self.actCount -= 1
 	activityStart, activity = hp.heappop(self.listOfActivityEpisodes)
@@ -81,37 +153,50 @@ class Person(object):
 		    return i
 	
 
-    def check_start_of_day(self, refEndTime, depPersonId):
+    def check_start_of_day(self, refEndTime):
 	if self.firstEpisode.endTime >= refEndTime:
-	    self.firstEpisode.dependentPersonId = depPersonId
+            #if self.firstEpisode.dependentPersonId == 0:
+            #    self.firstEpisode.dependentPersonId = depPersonId
+            self.firstEpisode.dependentPersonId = 99
 	    return True
 	else:
 	    return False
 	
 	
 
-    def check_end_of_day(self, refStartTime, depPersonId):
+    def check_end_of_day(self, refStartTime):
 	if self.lastEpisode.startTime <= refStartTime:
-	    self.lastEpisode.dependentPersonId = depPersonId
+            #if self.lastEpisode.dependentPersonId == 0:
+            #    self.lastEpisode.dependentPersonId = depPersonId
+            self.lastEpisode.dependentPersonId = 99
 	    return True
 	else:
 	    return False
 
 
 
-    def move_start_of_day(self, refEndTime, depPersonId):
+    def move_start_of_day(self, refEndTime):
+        #print 'MOVED START from - ', self.firstEpisode.endTime, refEndTime, 
+        self.scheduleConflictIndicator[self.firstEpisode.endTime:refEndTime, 
+                                       :] += 1
+
 	self.firstEpisode.endTime = refEndTime 
-        self.firstEpisode.dependentPersonId = depPersonId
+        self.firstEpisode.dependentPersonId = 99
 	self.firstEpisode.duration = (self.firstEpisode.endTime - 
 				      self.firstEpisode.startTime)
+        print 'START MOVED', self.firstEpisode
 
 
-    def move_end_of_day(self, refStartTime, depPersonId):
+    def move_end_of_day(self, refStartTime):
+        #print 'MOVED END from - ', self.lastEpisode.startTime, refStartTime
+        self.scheduleConflictIndicator[refStartTime:self.lastEpisode.startTime, 
+                                       :] += 1
+
 	self.lastEpisode.startTime = refStartTime 
-        self.lastEpisode.dependentPersonId = depPersonId
+        self.lastEpisode.dependentPersonId = 99
 	self.lastEpisode.duration = (self.lastEpisode.endTime -
 				     self.lastEpisode.startTime)
-
+        print 'END MOVED', self.lastEpisode
 
     def add_status_dependency(self, workstatus, schoolstatus, child_dependency):
         self.workstatus = workstatus
@@ -132,7 +217,7 @@ class Person(object):
                 self.schoolEpisodes.append(act)        
 
     def _reconcile_schedule(self):
-        print len(self.listOfActivityEpisodes), len(self.reconciledActivityEpisodes)
+        #print len(self.listOfActivityEpisodes), len(self.reconciledActivityEpisodes)
         #stAct = hp.heappop(self.listOfActivityEpisodes)[1]
         stAct = self._return_start_activity()
 
@@ -143,7 +228,7 @@ class Person(object):
             # then we move its location in the heap to end so that the adjustment
             # for this activity happens at the end after all other activities have been
             # reconciled
-	    print len(self.listOfActivityEpisodes), len(self.reconciledActivityEpisodes)
+	    #print len(self.listOfActivityEpisodes), len(self.reconciledActivityEpisodes)
 	    print '\tFIRST ACT OF PRISM - ', stAct
 	    print '\tLAST ACT OF PRISM -  ', endAct
 	
@@ -388,3 +473,30 @@ class Person(object):
         tt = 30
         return tt
 
+    def extract_skims(self, skimsMatrix):
+        # hstack a column for the skims that need to be extracted for the                                                           
+        # location pair                                                                                                             
+        originLocColName = spatialconst.startConstraint.locationField
+        destinationLocColName = spatialconst.endConstraint.locationField
+
+        originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
+        destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
+
+
+        vals = skimsMatrix2[originLocColVals, destinationLocColVals]
+
+        rowsEqualsDefault = vals.mask
+        vals[rowsEqualsDefault] = 0
+        #vals.shape = (data.rows,1)                                                                                                 
+        if spatialconst.asField:
+            colName = spatialconst.asField
+        else:
+            colName = spatialconst.skimField
+
+        sampleVarDict = {'temp':[colName]}
+        self.append_cols_for_dependent_variables(data, sampleVarDict)
+
+        #print vals[:,0]                                                                                                            
+        data.insertcolumn([colName], vals)
+
+        return data

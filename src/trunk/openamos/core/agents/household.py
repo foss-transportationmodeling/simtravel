@@ -11,7 +11,7 @@ class Household(object):
         self.dependencyPersonIds = []
         self.dailyFixedActPersonIds = []
         self.noDailyFixedActPersonIds = []
-        
+        self.indepPersonIds = []
 
     def add_person(self, person):
         # person is an object of the Person class
@@ -21,9 +21,13 @@ class Household(object):
             self.dependencyPersonIds.append(person.pid)
         elif person.workstatus == 1 or person.schoolstatus == 1:
             self.dailyFixedActPersonIds.append(person.pid)
+            self.indepPersonIds.append(person.pid)
         else:
             self.noDailyFixedActPersonIds.append(person.pid)
+            self.indepPersonIds.append(person.pid)
 
+
+        
         
     def _collate_results(self):
         resList = []
@@ -111,9 +115,17 @@ class Household(object):
                 stActStartTime, stAct = hp.heappop(actsOfDepPerson)
                 #hp.heappop(person.listOfActivityEpisodes)
 
-                print '\n\t\t1. End of Day/Start of Day: Someone needs to be there'
+
+                print '\n\t\t1.1. End of Day/Start of Day: Someone needs to be there'
                 self.adjust_terminal_activity_episodes(pid, stAct, start=True)
                 #raw_input()
+
+                print '\n\t\t1.2. End of Day/Start of Day: Someone needs to be there'
+                endAct = person.lastEpisode
+                self.adjust_terminal_activity_episodes(pid, endAct, start=False)                    
+
+
+
 
                 while (len(actsOfDepPerson) > 0):
                     endActStartTime, endAct = hp.heappop(actsOfDepPerson)
@@ -122,19 +134,16 @@ class Household(object):
                     if endAct.actType > 100 and endAct.actType < 200:
                         print '\n\t\t2.1. IH Act: Someone needs to be there'
                         print '\t\t\t', endAct
-                        self.allocate_activity(pid, endAct)
+                        self.allocate_ih_activity(pid, endAct)
 
 
-                    if endAct.actType >= 200:
+                    if endAct.location <> stAct.location:
                         print '\n\t\t2.2. OH Act: Pick-up/Drop-off'
                         print '\n\t\t\t START-', stAct
                         print '\t\t\t END-  ', endAct
                         self.allocate_pickup_dropoff(pid, stAct, endAct)
 
                     stAct = endAct
-
-                print '\n\t\t3. End of Day/Start of Day: Someone needs to be there'
-                self.adjust_terminal_activity_episodes(pid, stAct, start=False)                    
 
         return self._collate_results()
 
@@ -181,12 +190,13 @@ class Household(object):
             person = self.persons[pid]
 
             if start:
-                check = person.check_start_of_day(actOfdepPerson.endTime, depPersonId)
+                check = person.check_start_of_day(actOfdepPerson.endTime)
             else:
-                check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
+                check = person.check_end_of_day(actOfdepPerson.startTime)
 
             if check:
                 print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
+                self.update_depPersonId_for_terminal_episode(start, depPersonId, pid)
                 return True
 
         self.rndGen.shuffle_sequence(self.dailyFixedActPersonIds)
@@ -196,16 +206,17 @@ class Household(object):
 
 
             if start:
-                check = person.check_start_of_day(actOfdepPerson.endTime, depPersonId)
+                check = person.check_start_of_day(actOfdepPerson.endTime)
             else:
-                check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
+                check = person.check_end_of_day(actOfdepPerson.startTime)
 
             if check:
                 print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
+                self.update_depPersonId_for_terminal_episode(start, depPersonId, pid)
                 return True
 
 
-        print """ --- > Exception: No person identified that can be with the """\
+        print """\t\t\t --- > Exception: No person identified that can be with the """\
             """dependent child for the terminal episodes in a day"""\
 
         # Since there are no people that can be identified without causing conflicts
@@ -214,13 +225,21 @@ class Household(object):
         # one person with fixed activity/activities and  then adjust their terminal 
         # episode durations so that children are not abandoned
 
-        if len(self.noDailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.noDailyFixedActPersonIds)
 
-        elif len(self.dailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.dailyFixedActPersonIds)
+        if start:
+            terminalAct = depPerson.firstEpisode
         else:
-            raise Exception, "\t\t\t\t--There are no independent adults in the household--"
+            terminalAct = depPerson.lastEpisode
+
+
+        pid = self.personId_with_terminal_episode_overlap([terminalAct], 
+                                                          self.indepPersonIds)
+
+        #pid = self.personId_with_least_conflict([terminalAct], 
+        #                                        self.indepPersonIds)
+        if pid is None:
+            raise Exception, "--There are no independent adults in the household--"
+
 
         print "\t\t\t\t--Randomly independent adults in the household is selected and id is --", pid
 
@@ -228,15 +247,65 @@ class Household(object):
         #actOfPerson = self.find_terminal_vertex(person, start)
 
         if start:
-            person.move_start_of_day(actOfdepPerson.endTime, depPersonId)
+            person.move_start_of_day(actOfdepPerson.endTime)
         else:
-            person.move_end_of_day(actOfdepPerson.startTime, depPersonId)
+            person.move_end_of_day(actOfdepPerson.startTime)
 
-        self.print_activity_list(person)
+        person._check_for_conflicts()
+
+        self.update_depPersonId_for_terminal_episode(start, depPersonId, pid)
         return True
 
 
-    def allocate_activity(self, depPersonId, act):
+    def update_depPersonId_for_terminal_episode(self, start, depPersonId, pid):
+        depPerson = self.persons[depPersonId]
+        if start:
+            depPerson.firstEpisode.dependentPersonId = pid
+        else:
+            depPerson.lastEpisode.dependentPersonId = pid            
+
+        
+            
+
+
+    def allocate_ih_activity(self, depPersonId, act):
+        # Changing the activitytype to +50 to assign that as a dependent
+        # activity
+        act = copy.deepcopy(act)
+        act.actType += 50
+        act.dependentPersonId = 99
+        
+        # If there are people already home then that 
+        # person is allocated this particular activity
+        
+        self.rndGen.shuffle_sequence(self.indepPersonIds)
+
+        for pid in self.indepPersonIds:
+            person = self.persons[pid]
+            act.scheduleId = person.actCount + 1
+            person.add_episodes([act], temp=True)
+
+            if person._check_for_ih_conflicts(act):
+                print '\t\t\t\tPerson - %s is already home so he is allocated this activity' %(pid)
+                self.update_depPersonId(act, depPersonId, pid)
+                person.remove_episodes([act])
+                return True
+            else:
+                person.remove_episodes([act])                
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
         # Person without fixed activities
         print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate to the first person with no fixed activities that we find
@@ -246,7 +315,100 @@ class Household(object):
         for pid in self.noDailyFixedActPersonIds:
             person = self.persons[pid]
             act.scheduleId = person.actCount + 1
-            person.add_episodes([act])
+            person.add_episodes([act], temp=True)
+            
+            if not person._check_for_conflicts():
+                person.remove_episodes([act])
+            else:
+                print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
+                self.update_depPersonId(act, depPersonId, pid)
+                return True
+                
+        # Person with fixed activities
+        print '\t\t\tFollowing person without fixed activities is identified - '
+        # We allocate to the first person with fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.dailyFixedActPersonIds)
+
+        for pid in self.dailyFixedActPersonIds:
+            person = self.persons[pid]
+            act.scheduleId = person.actCount + 1            
+            person.add_episodes([act], temp=True)
+
+            if not person._check_for_conflicts():
+                person.remove_episodes([act])
+            else:
+                print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
+                self.update_depPersonId(act, depPersonId, pid)
+                return True
+
+        print " \t\t\t--- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
+
+
+        # Since there are no people that can be identified without causing conflicts
+        # we randomly select either a person with no fixed acts 
+        # if there are no persons with 0 fixed activities then we randomly select
+        # one person with fixed activity/activities
+
+
+        pid = self.personId_with_least_conflict(depPersonId, [act], 
+                                                self.indepPersonIds)
+
+
+
+        if pid is None:
+            print "Exception, --There are no independent adults in the household--"
+            #raw_input()
+            return
+        else:
+            print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
+
+            person = self.persons[pid]
+            act.scheduleId = person.actCount + 1
+            person.add_episodes([act], temp=True)
+            person._check_for_conflicts()            
+
+            self.update_depPersonId(act, depPersonId, pid)
+
+
+        #person.adjust_activity_schedules(self.seed)
+            return True        
+
+    def update_depPersonId(self, activity, depPersonId, pid):
+        depPerson = self.persons[depPersonId]
+
+        for actStart, act in depPerson.listOfActivityEpisodes:
+            if act.startTime == activity.startTime:
+                break
+
+        #indAct = depPerson.listOfActivityEpisodes.index((activity.startTime, activity))
+        #act = depPerson.listOfActivities[indAct]
+        
+        print 'BEFORE ASSIGN', act
+        act.dependentPersonId = pid
+
+        print 'AFTER ASSIGN', act
+        #print pid
+        #raw_input('FOUND THE INDEX')
+
+
+    """
+
+    def allocate_activity(self, depPersonId, act):
+        # Changing the activitytype to +50 to assign that as a dependent
+        # activity
+        act.actType += 50
+
+        # Person without fixed activities
+        print '\t\t\tFollowing person without fixed activities is identified - '
+        # We allocate to the first person with no fixed activities that we find
+
+        self.rndGen.shuffle_sequence(self.noDailyFixedActPersonIds)
+
+        for pid in self.noDailyFixedActPersonIds:
+            person = self.persons[pid]
+            act.scheduleId = person.actCount + 1
+            person.add_episodes([act], temp=True)
             
             if not person._check_for_conflicts():
                 person.remove_episodes([act])
@@ -263,7 +425,7 @@ class Household(object):
         for pid in self.dailyFixedActPersonIds:
             person = self.persons[pid]
             act.scheduleId = person.actCount + 1            
-            person.add_episodes([act])
+            person.add_episodes([act], temp=True)
 
             if not person._check_for_conflicts():
                 person.remove_episodes([act])
@@ -280,35 +442,37 @@ class Household(object):
         # one person with fixed activity/activities
 
 
-        if len(self.noDailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.noDailyFixedActPersonIds)
+        pid = self.personId_with_least_conflict(depPersonId, [act], 
+                                                self.indepPersonIds)
 
-        elif len(self.dailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.dailyFixedActPersonIds)
+
+
+        if pid is None:
+            print "Exception, --There are no independent adults in the household--"
+            #raw_input()
+            return
         else:
-            raise Exception, "\t\t\t--There are no independent adults in the household--"
-
-        print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
-
-        act.dependentPersonId = depPersonId
-        act.scheduleId = self.persons[pid].actCount + 1
-        person = self.persons[pid]
-        person.add_episodes([act])
-        #person.adjust_activity_schedules(self.seed)
-        return True
-
-
-
-    def allocate_travel_episode(self, depPersonId, stAct, endAct):
-        pass
+            print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
             
+            act.dependentPersonId = depPersonId
+            act.scheduleId = self.persons[pid].actCount + 1
+            person = self.persons[pid]
+            person.add_episodes([act])
+            person._check_for_conflicts()            
+        #person.adjust_activity_schedules(self.seed)
+            return True
 
+
+    """
 
     def allocate_pickup_dropoff(self, depPersonId, stAct, endAct):
         # Create pickup-dropoff for the front end of the activity
         #if pickup:
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
-        
+
+        dummyActPickUp.dependentPersonIds = 99
+        dummyActDropOff.dependentPersonIds = 99
+
         # Person without fixed activities
         print '\t\t\tFollowing person without fixed activities is identified - '
         # We allocate pickup/dropoff to the first person with no fixed activities that we find
@@ -318,15 +482,20 @@ class Household(object):
         for pid in self.noDailyFixedActPersonIds:
             # Create dummy travel episodes
             person = self.persons[pid]
-            
+            #self.print_activity_list(person)
+            #print 'THE ACT COUNT BEFORE ADDING', person.actCount, len(person.listOfActivityEpisodes)
             dummyActPickUp.scheduleId = person.actCount + 1
             dummyActDropOff.scheduleId = person.actCount + 2
-            person.add_episodes([dummyActPickUp,dummyActDropOff])           
- 
+            #print dummyActPickUp
+            #print dummyActDropOff
+            person.add_episodes([dummyActPickUp,dummyActDropOff], temp=True)           
+            #print 'THE ACT COUNT AFTER ADDING', person.actCount, len(person.listOfActivityEpisodes)
+            #self.print_activity_list(person)
             if not person._check_for_conflicts():
                 person.remove_episodes([dummyActPickUp,dummyActDropOff])           
             else:
                 print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
+                self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, pid)
                 return True
                 
         # Person with fixed activities
@@ -337,15 +506,20 @@ class Household(object):
 
         for pid in self.dailyFixedActPersonIds:
             person = self.persons[pid]
-
+            #self.print_activity_list(person)
+            #print 'THE ACT COUNT BEFORE ADDING', person.actCount, len(person.listOfActivityEpisodes)
             dummyActPickUp.scheduleId = person.actCount + 1
             dummyActDropOff.scheduleId = person.actCount + 2            
-            person.add_episodes([dummyActPickUp,dummyActDropOff])
-
+            #print dummyActPickUp
+            #print dummyActDropOff
+            person.add_episodes([dummyActPickUp,dummyActDropOff], temp=True)
+            #print 'THE ACT COUNT AFTER ADDING', person.actCount, len(person.listOfActivityEpisodes)
+            #self.print_activity_list(person)
             if not person._check_for_conflicts():
                 person.remove_episodes([dummyActPickUp,dummyActDropOff])
             else:
                 print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
+                self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, pid)
                 return True
 
         print "\t\t\t --- > Exception: No person identified; not possible; the dependent acts cause conflicts < --- "
@@ -356,27 +530,52 @@ class Household(object):
         # if there are no persons with 0 fixed activities then we randomly select
         # one person with fixed activity/activities
 
-        if len(self.noDailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.noDailyFixedActPersonIds)
 
-        elif len(self.dailyFixedActPersonIds) > 0:
-            pid = self.randPersonId(self.dailyFixedActPersonIds)
-        else:
-            raise Exception, "--There are no independent adults in the household--"
+        pid = self.personId_with_least_conflict(depPersonId, 
+                                                [dummyActPickUp, dummyActDropOff], 
+                                                self.indepPersonIds)
 
+        if pid is None:
+            print "Exception, --There are no independent adults in the household--"
+            #raw_input()
+            return
 
         print "\t\t\t\t--Random independent adults in the household is selected and id is --", pid
 
         person = self.persons[pid]
-
+        #self.print_activity_list(person)        
+        #print 'THE ACT COUNT BEFORE ADDING', person.actCount, len(person.listOfActivityEpisodes)
         dummyActPickUp.scheduleId = person.actCount + 1
         dummyActDropOff.scheduleId = person.actCount + 2
-
+        #print dummyActPickUp
+        #print dummyActDropOff
         person.add_episodes([dummyActPickUp, dummyActDropOff])
+        #print 'THE ACT COUNT AFTER ADDING', person.actCount, len(person.listOfActivityEpisodes)
+        #self.print_activity_list(person)
+        person._check_for_conflicts()
 
+        #dummyActPickUp = copy.deepcopy(dummyActPickUp)
+        #dummyActDropOff = copy.deepcopy(dummyActDropOff)
+
+        self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, pid)
         #person.adjust_activity_schedules(self.seed)
         return True
             
+
+    def add_activity_update_depPersonId(self, activityList, depPersonId, pid):
+        depPerson = self.persons[depPersonId]
+
+        activityList = copy.deepcopy(activityList)
+
+        for i in range(len(activityList)):
+            act = activityList[i]
+            act.scheduleId = depPerson.actCount + i + 1
+            act.dependentPersonId = pid
+
+        depPerson.add_episodes(activityList)
+        depPerson._check_for_conflicts()
+        
+
 
 
 
@@ -387,19 +586,104 @@ class Household(object):
         return pid
 
 
+
+    def personId_with_least_conflict(self, depPersonId, activityList, personIdList):
+        personConflict = {}
+        personConflictActs = {}
+        for pid in personIdList:
+            person = self.persons[pid]            
             
-        
+            person.add_episodes(activityList, temp=True)
+            conflict = person._conflict_duration()
+            person.remove_episodes(activityList)
+
+            conflictActs = person._identify_conflict_activities(activityList)
+
+            checkForDependencies = self._check_for_dependencies_for_conflictActivities(depPersonId,
+                                                                                       conflictActs)
+            
+            if not checkForDependencies:
+                continue
+
+            personConflict[pid] = conflict
+            personConflictActs[pid] = conflictActs
+
+        print personConflict
+        print personConflictActs
+
+            #print '\t\t\t\t\tPerson - %s has conflict of duration - %s  for above activity' %(pid, conflict)
+        if len(personConflict) > 0:
+            leastConflict = min(personConflict.values())
+        else:
+            return
+
+        for pid in personConflict.keys():
+            print '\t\t\t\t\tperson - ', pid, 'conflict for person - ', personConflict[pid], 'least conflict', leastConflict
+            if personConflict[pid] == leastConflict:
+                return pid
+
+
+
+    def _check_for_dependencies_for_conflictActivities(self, depPersonId, conflictActs):
+        print '\t\t\t\tCHECKING FOR DEPENDENCIES for dep act of person - ', depPersonId
+
+        for act in conflictActs:
+            print '\t\t\t\t\t', act
+            if (act.dependentPersonId > 0 and act.dependentPersonId <> depPersonId):
+                return False
+        return True
+
+
+    def personId_with_terminal_episode_overlap(self, activityList, personIdList):
+        print activityList
+        personConflict = {}
+
+        for pid in personIdList:
+            person = self.persons[pid]
+
+            person.add_episodes(activityList, temp=True)
+            conflictWithTerminalEpisode = person._conflict_duration_with_activity(person.lastEpisode)
+            conflict = person._conflict_duration()
+            
+            personConflict[pid] = conflict - conflictWithTerminalEpisode
+            person.remove_episodes(activityList)
+
+            #print '\t\t\t\t\tPerson - %s has conflict of duration - %s  for above activity' %(pid, 
+            #                                                                                  (conflict - 
+            #                                                                                   conflictWithTerminalEpisode))
+            #print '\t\t\t\t\tConflict - %s and conflict with last episode - %s' %(conflict,
+            #                                                                      conflictWithTerminalEpisode)
+
+            leastConflict = min(personConflict.values())
+
+        for pid in personConflict.keys():
+            print 'person - ', pid, 'conflict for person - ', personConflict[pid], 'least conflict', leastConflict
+            if personConflict[pid] == leastConflict:
+                print '\t\t\t\tPerson with least conflict with terminal episode is', pid
+                return pid
+                
+                
+            
+            
+            
+
+
+            
+
+            
     def create_dummy_activity(self, depPersonId, stAct, endAct):
         dummyPickUpAct = copy.deepcopy(stAct)
         dummyDropOffAct = copy.deepcopy(endAct)
-        
-        dummyPickUpAct.startTime = dummyPickUpAct.endTime
-        dummyPickUpAct.endTime = dummyPickUpAct.endTime + 1
+
+
+
+        dummyPickUpAct.startTime = dummyPickUpAct.endTime + 1
+        dummyPickUpAct.endTime = dummyPickUpAct.startTime + 1
         dummyPickUpAct.duration = 1
         dummyPickUpAct.actType = 600
         dummyPickUpAct.startOfDay = False
         dummyPickUpAct.endOfDay = False
-        dummyPickUpAct.dependentPersonId = depPersonId
+        dummyPickUpAct.dependentPersonId = 0
 
 
         
@@ -409,28 +693,18 @@ class Household(object):
         dummyDropOffAct.actType = 601
         dummyPickUpAct.startOfDay = False
         dummyPickUpAct.endOfDay = False
+        dummyPickUpAct.dependentPersonId = 0
 
 
-        print '\tPICKUP ACTIVITY - ', dummyPickUpAct
+        print '\n\t\t\tPICKUP ACTIVITY - ', dummyPickUpAct
 
-        print '\tDropOff ACTIVITY -', dummyDropOffAct
+        print '\t\t\tDropOff ACTIVITY -', dummyDropOffAct
 
 
         return dummyPickUpAct, dummyDropOffAct
 
 
         
-    def _extract_travel_time(self, st_loc, end_loc):
-        # Currently assume that the travel time between any two
-        # activity episodes that are not same is 30 mins
-        # TODO: Needs to be replaced with querying the travel skims
-
-        if st_loc == end_loc:
-            tt = 1
-
-        tt = 30
-        return tt
-
 
 
 

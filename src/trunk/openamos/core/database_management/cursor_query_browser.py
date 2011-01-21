@@ -70,7 +70,6 @@ class QueryBrowser(object):
                     cols_list = self.dbcon_obj.get_column_list(table_name)
                 else:
                     cols_list = cols
-                
 
                 data = self.createResultArray(result, cols_list)
 

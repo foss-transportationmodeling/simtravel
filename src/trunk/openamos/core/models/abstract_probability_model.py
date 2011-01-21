@@ -138,11 +138,11 @@ class AbstractProbabilityModel(object):
 
         choice.shape = (self.num_agents, 1)
 
-        alt_text = []
-        for i in choice:
-            alt_text.append(self.choices[int(i[0])-1])
-        alt_text = array(alt_text)
-        alt_text.shape = (self.num_agents, 1)
+        #alt_text = []
+        #for i in choice:
+        #    alt_text.append(self.choices[int(i[0])-1])
+        #alt_text = array(alt_text)
+        #alt_text.shape = (self.num_agents, 1)
 
         #return alt_text
         #print choice
