@@ -139,9 +139,16 @@ class Household(object):
 
                     if endAct.location <> stAct.location:
                         print '\n\t\t2.2. OH Act: Pick-up/Drop-off'
-                        print '\n\t\t\t START-', stAct
+                        print '\t\t\t START-', stAct
                         print '\t\t\t END-  ', endAct
                         self.allocate_pickup_dropoff(pid, stAct, endAct)
+
+
+                    if endAct.actType > 400 and endAct.actType < 500:
+                        print '\n\t\t2.3. OH Act: Terminal activity is a maintenance activity and needs to be allocated'
+                        print '\t\t\t Terminal Activity-', endAct
+
+
 
                     stAct = endAct
 
@@ -470,8 +477,8 @@ class Household(object):
         #if pickup:
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
 
-        dummyActPickUp.dependentPersonIds = 99
-        dummyActDropOff.dependentPersonIds = 99
+        dummyActPickUp.dependentPersonId = 99
+        dummyActDropOff.dependentPersonId = 99
 
         # Person without fixed activities
         print '\t\t\tFollowing person without fixed activities is identified - '
@@ -516,6 +523,8 @@ class Household(object):
             #print 'THE ACT COUNT AFTER ADDING', person.actCount, len(person.listOfActivityEpisodes)
             #self.print_activity_list(person)
             if not person._check_for_conflicts():
+                
+
                 person.remove_episodes([dummyActPickUp,dummyActDropOff])
             else:
                 print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
