@@ -14,7 +14,6 @@
     <LocationVariable var="retail_employment"/>
     <LocationVariable var="industrial_employment"/>
     <LocationVariable var="total_area"/>
-    <LocationVariable var="single_family_dwelling"/>
     <LocationVariable var="institutional_population"/>
   </Locations>
 
@@ -161,7 +160,7 @@
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="0" seed="1">
+      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="1" seed="1">
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -175,7 +174,7 @@
         <Variable table="persons" var="agge65" coeff="17.3172"/>
         <Variable table="persons" var="coled" coeff="22.9651"/>
       </Model>
-      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="0" seed="1">
+      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="1" seed="1">
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -189,7 +188,7 @@
         <Variable table="households" var="inclt35k" coeff="8.6069"/>
         <Variable table="persons" var="driver" coeff="-17.8036"/>
       </Model>
-      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="0" seed="1">
+      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="1" seed="1">
 	<DependentVariable var="endtime"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
 	<Variance value="545.7013"/>
@@ -201,7 +200,7 @@
         <Variable table="households" var="inclt35k" coeff="-6.7488"/>
         <Variable table="persons" var="driver" coeff="-16.7021"/>
       </Model>
-      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="0" seed="1">
+      <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" threshold="1" seed="1">
 	<DependentVariable var="endtime"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
 	<Variance value="1571.7111"/>
@@ -222,7 +221,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -327,7 +326,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -429,7 +428,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -544,7 +543,7 @@
 
 
 
-      <Model name="starttime" formulation="Regression" type="Linear" vertex="start" threshold="155" seed="1">
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -563,7 +562,7 @@
         <Variable table="persons" var="one" coeff="155"/>
       </Model>
 
-      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" threshold="600" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
        <DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
  	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -613,7 +612,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
@@ -723,7 +722,7 @@
 
 
 
-      <Model name="starttime" formulation="Regression" type="Linear" vertex="start" threshold="462" seed="1">
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -742,7 +741,7 @@
         <Variable table="persons" var="one" coeff="462"/>
       </Model>
 
-      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" threshold="900" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
        <DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
  	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -786,7 +785,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
@@ -885,7 +884,7 @@
 
 
 
-      <Model name="starttime" formulation="Regression" type="Linear" vertex="start" threshold="185" seed="1">
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -898,7 +897,7 @@
         <Variable table="persons" var="one" coeff="185"/>
       </Model>
 
-      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" threshold="812" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
        <DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -932,7 +931,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -1040,7 +1039,7 @@
       </Model>
 
 
-      <Model name="starttime" formulation="Regression" type="Linear" vertex="start" threshold="190" seed="1">
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="schstat" condition="equals" value="1"/>
@@ -1055,7 +1054,7 @@
         <Variable table="persons" var="one" coeff="190"/>
       </Model>
 
-      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" threshold="755" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
        <DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="schstat" condition="equals" value="1"/>
@@ -1097,7 +1096,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -1324,6 +1323,12 @@
         <Alternative id="no" value="0">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
+      </Model>
+
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
     </Component>	
@@ -1664,9 +1669,27 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
+      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Linear" vertex="start" threshold="5" seed="1">
+	<DependentVariable var="duration"/>
+	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
+	<Variance value="7135.80"/>
+        <Variable table="persons" var="one" coeff="71.55"/>
+        <Variable table="runtime" var="activitytype_101" coeff="71.64"/>
+        <Variable table="runtime" var="activitytype_411" coeff="37.93"/>
+        <Variable table="runtime" var="activitytype_415" coeff="16.93"/>
+        <Variable table="runtime" var="activitytype_513" coeff="100.35"/>
+        <Variable table="runtime" var="activitytype_514" coeff="79.96"/>
+        <Variable table="persons,runtime" var="wrkr,activitytype_201" coeff="252.66" interaction="True"/>
+        <Variable table="runtime" var="int6t9" coeff="16.76"/>
+        <Variable table="runtime" var="int12t3" coeff="-20.23"/>
+        <Variable table="runtime" var="int3t5" coeff="-40.69"/>
+        <Variable table="runtime" var="int5t7" coeff="-49.41"/>
+        <Variable table="runtime" var="intaft7" coeff="-59.57"/>
+        <Variable table="households" var="noc" coeff="-2.32"/>
+        <Variable table="households" var="urb" coeff="-4.66"/>
+      </Model>
 
-
-      <Model name="AftSchActDuration" formulation="Regression" type="Log Linear" seed="1">
+      <Model1 name="AftSchActDuration" formulation="Regression" type="Log Linear" seed="1">
 	<DependentVariable var="duration"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
 	<Variance value="2.792"/>
@@ -1686,7 +1709,7 @@
 	<Variable table="households" var="noc" coeff="-0.04"/>
 	<Variable table="households" var="urb" coeff="-0.06"/>
 	<Variable table="households" var="drvrcnt" coeff="0.03"/>
-      </Model>
+      </Model1>
 
       <Model name="LocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
@@ -1728,7 +1751,7 @@
       </Model>
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="starttime">
-	<Start table="runtime" location_var="locationid"/>
+	<Start table="runtime" location_var="st_locationid"/>
 	<End table="persons" location_var="htaz"/>
       </DynamicSpatialConstraints>
 
@@ -1757,7 +1780,7 @@
       </Model>
 
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" vertex="start" threshold="240" seed="1">
+      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
@@ -1769,7 +1792,7 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" vertex="start" threshold="240" seed="1">
+      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
@@ -1804,7 +1827,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
@@ -2184,8 +2207,33 @@
       </Model>
 
 
+      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Linear" vertex="start" threshold="5" seed="1">
+	<DependentVariable var="duration"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Variance value="7596.29"/>
+        <Variable table="persons" var="one" coeff="50.89"/>
+        <Variable table="runtime" var="activitytype_101" coeff="72.38"/>
+        <Variable table="runtime" var="activitytype_300" coeff="94.07"/>
+        <Variable table="runtime" var="activitytype_411" coeff="7.19"/>
+        <Variable table="runtime" var="activitytype_412" coeff="-18.95"/>
+        <Variable table="households" var="noc" coeff="-8.03"/>
+        <Variable table="persons" var="fulltim" coeff="-7.20"/>
+        <Variable table="households" var="nwrkcnt" coeff="4.05"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_101" coeff="12.72" interaction="True"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_513" coeff="21.82" interaction="True"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_415" coeff="-11.42" interaction="True"/>
+        <Variable table="households,runtime" var="urb,activitytype_513" coeff="49.44" interaction="True"/>
+        <Variable table="households,runtime" var="urb,activitytype_514" coeff="14.19" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7,activitytype_101" coeff="-55.45" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7,activitytype_513" coeff="16.66" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7,activitytype_514" coeff="17.29" interaction="True"/>
+        <Variable table="runtime" var="int6t9" coeff="16.81"/>
+        <Variable table="runtime" var="intaft7" coeff="-18.41"/>
+      </Model>
 
-      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Log Linear" seed="1">
+      <Model1 name="DynamicNonMandatoryActDuration" formulation="Regression" type="Log Linear" seed="1">
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2212,8 +2260,40 @@
         <Variable table="runtime,runtime" var="int5t7,activitytype_514" coeff=".3954" interaction="True"/>
         <Variable table="runtime" var="int6t9" coeff="-.4385"/>
         <Variable table="runtime" var="intaft7" coeff="-.4723"/>
+      </Model1>
+
+
+
+
+      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Linear" vertex="start" threshold="5" seed="1">
+	<DependentVariable var="duration"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
+	<Variance value="7342.78"/>
+        <Variable table="persons" var="one" coeff="55.10"/>
+        <Variable table="runtime" var="activitytype_101" coeff="115.79"/>
+        <Variable table="runtime" var="activitytype_300" coeff="112.88"/>
+        <Variable table="runtime" var="activitytype_411" coeff="20.70"/>
+        <Variable table="runtime" var="activitytype_513" coeff="74.09"/>
+        <Variable table="runtime" var="activitytype_514" coeff="38.22"/>
+        <Variable table="runtime" var="activitytype_415" coeff="17.19"/>
+        <Variable table="persons" var="coled" coeff="-6.52"/>
+        <Variable table="households" var="noc" coeff="-1.11"/>
+        <Variable table="persons" var="white" coeff="-6.12"/>
+        <Variable table="households,runtime" var="urb,activitytype_412" coeff="-5.53" interaction="True"/>
+        <Variable table="households,runtime" var="urb,activitytype_513" coeff="12.89" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5,activitytype_101" coeff="-43.47" interaction="True"/>
+        <Variable table="runtime" var="int6t9" coeff="18.70"/>
+        <Variable table="runtime" var="int12t3" coeff="-13.66"/>
+        <Variable table="runtime" var="int3t5" coeff="-19.33"/>
+        <Variable table="runtime" var="int5t7" coeff="-23.99"/>
+        <Variable table="runtime" var="intaft7" coeff="-33.45"/>
       </Model>
-      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Log Linear" seed="1">
+
+
+
+      <Model1 name="DynamicNonMandatoryActDuration" formulation="Regression" type="Log Linear" seed="1">
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2240,7 +2320,7 @@
         <Variable table="runtime" var="int3t5" coeff="-.3594"/>
         <Variable table="runtime" var="int5t7" coeff="-.2534"/>
         <Variable table="runtime" var="intaft7" coeff="-.6132"/>
-      </Model>
+      </Model1>
 
 
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
@@ -2316,7 +2396,7 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" vertex="start" threshold="240" seed="1">
+      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2328,7 +2408,7 @@
         <Variable table="travel_skims" var="tt_to" coeff="1"/>
       </Model>
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" vertex="start" threshold="240" seed="1">
+      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2341,7 +2421,7 @@
       </Model>
 
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" vertex="start" threshold="240" seed="1">
+      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
@@ -2371,7 +2451,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
