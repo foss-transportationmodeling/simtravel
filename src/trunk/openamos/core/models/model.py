@@ -97,7 +97,7 @@ class SubModel(object):
                     result.data[rows] = self.values[i]
                     
         if self.model_type == 'consistency':
-            result = self.model.resolve_consistency(data, seed, projectSkimsObject)
+            result = self.model.resolve_consistency(data, seed)
             
             
 

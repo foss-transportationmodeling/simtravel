@@ -973,11 +973,12 @@ class AbstractComponent(object):
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
         destLocSetInd = destLocSetInd[:,1:]
 	print 'number of choices - ', destLocSetInd.shape
-	print destLocSetInd[:,:100].sum()
 	#raw_input()
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
+            print 'Number of choices', destLocSetIndSum
+
 	
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
@@ -1001,12 +1002,13 @@ class AbstractComponent(object):
             
             colName = '%s%s' %(sampleVarName, i+1)
             nonZeroRows = where(res.data <> 0)
-            actualLocIds = res.data[nonZeroRows]
-            #actualLocIds[nonZeroRows] -= 1
-            data.setcolumn(colName, actualLocIds)
 	    print 'SELECTED LOCATIONS FOR COUNT - ', i+1
-	    print actualLocIds
-	    print data.columns([colName])
+            print res.data[:,0]
+            #actualLocIds = res.data[nonZeroRows]
+            #actualLocIds[nonZeroRows] -= 1
+            #print actualLocIds
+            data.setcolumn(colName, res.data)
+	    print data.columns([colName]).data[:,0]
 	    #raw_input()
 
             # Retrieving the row indices
@@ -1014,9 +1016,9 @@ class AbstractComponent(object):
 
             rowIndices = array(xrange(dataCol.shape[0]), int)
 	    rowIndices = 0
-            colIndices = actualLocIds.astype(int)
+            colIndices = res.data.astype(int)
 
-            destLocSetInd.mask[rowIndices, colIndices] = True
+            destLocSetInd.mask[rowIndices, colIndices-1] = True
         print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
 
     def check_sampled_choices(self, data, sampledVarNames):

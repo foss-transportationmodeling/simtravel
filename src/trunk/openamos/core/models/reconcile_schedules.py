@@ -45,7 +45,7 @@ class ReconcileSchedules(Model):
 
         self.indices = array(self.indices)
 
-    def resolve_consistency(self, data, seed, projectSkimsObject):
+    def resolve_consistency(self, data, seed):
 
         data.sort([self.activityAttribs.hidName,
                    self.activityAttribs.pidName,

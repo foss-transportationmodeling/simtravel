@@ -95,7 +95,7 @@ class ChildDependencyAllocation(Model):
 
         #raw_input()
 
-    def resolve_consistency(self, data, seed, projectSkimsObject):
+    def resolve_consistency(self, data, seed):
 
         actList = []
         data.sort([self.activityAttribs.hidName,
