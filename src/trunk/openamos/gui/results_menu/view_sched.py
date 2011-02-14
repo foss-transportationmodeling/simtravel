@@ -196,11 +196,11 @@ class MakeSchedPlot(QDialog):
         varslayout.setAlignment(Qt.AlignLeft)
         self.varswidget2.setVisible(False)
         
-        self.resetbutton = QPushButton('Reload ID')
-        self.resetbutton.setFixedWidth(75)
-        varslayout.addWidget(self.resetbutton,1,1)
-        
-        self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.resetID)
+#        self.resetbutton = QPushButton('Reload ID')
+#        self.resetbutton.setFixedWidth(75)
+#        varslayout.addWidget(self.resetbutton,1,1)
+#        
+#        self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.resetID)
     
     def movebuttons(self):
         buttonwidget = QWidget(self)
@@ -332,6 +332,7 @@ class MakeSchedPlot(QDialog):
             cols = self.new_obj.get_column_list(self.table)
             columns = []
             for col in cols:
+                
                 columns.append(QString(col))
             return columns
         else:
@@ -422,6 +423,12 @@ class MakeSchedPlot(QDialog):
             self.personlabel2.setText("Person ID")
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
+        if self.based2.isChecked():
+            if self.table == 'households':
+                self.retrieveID2()
+            else:
+                self.retrieveID2()
+                
 
     def showGroupBox(self):
         if self.based1.isChecked():
@@ -452,9 +459,9 @@ class MakeSchedPlot(QDialog):
             
         return sdata
 
-    def resetID(self):
-        self.idwidget2.clear()
-        self.retrieveID2()
+#    def resetID(self):
+#        self.idwidget2.clear()
+#        self.retrieveID2()
 #    def on_draw(self):
 #        """ Redraws the figure
 #        """
@@ -702,7 +709,7 @@ class MakeSchedPlot(QDialog):
                     
                     pid.append(id)
                     
-                self.fixedFifty(pid)
+                #self.fixedFifty(pid)
                 self.idwidget2.addItems(pid)
         
         except Exception, e:
