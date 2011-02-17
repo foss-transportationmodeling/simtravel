@@ -159,13 +159,20 @@ class DataBaseConnection(object):
         #before creating the new database check the protocol.
             try:
                 self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
+                self.connection.set_isolation_level(0)
                 self.cursor = self.connection.cursor()
                 self.cursor.execute("create database %s encoding = 'utf8'"%new_database)
                 print '\tDatabase %s created'%new_database
-            except:
-                raise Exception('Error while creating a new database')
+                self.cursor.close()
+                self.connection.close()
+                return 1
+            except Exception, e:
+                print e
+                return 0
+                #raise Exception('Error while creating a new database')
         else:
             print '\tDatabase exists. No need to create a new database'
+            return 1
 
 
     #drops a database
@@ -185,6 +192,7 @@ class DataBaseConnection(object):
         if db_flag:
             try:
                 self.connection = dbapi2.connect("host=%s user=%s password=%s port=5432"%(self.host_name, self.user_name, self.password))
+                self.connection.set_isolation_level(0)
                 self.cursor = self.connection.cursor()
                 self.cursor.execute("drop database %s"%self.database_name)
                 print '\tDatabase dropped'
