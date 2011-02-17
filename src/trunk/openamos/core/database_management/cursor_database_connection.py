@@ -433,6 +433,69 @@ class DataBaseConnection(object):
         else:
             print '\tTable does not exist in the database. Cannot the drop the table'
 
+     ##################### adding 2 new functions #########################
+    #get the list of tables from the database
+    def get_column_types(self, table_name):
+        """
+        This method is used to data types of the columns in table.
+
+        Input:
+        Database configuration object and table name
+
+        Output:
+        List of the column data types in the database.
+        """
+        self.table_name = table_name
+        #before returning the column types check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            try:
+                self.cursor.execute("select data_type from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s'"%table_name)
+                columns = self.cursor.fetchall()
+                cols = [cl[0] for cl in columns]
+                return cols
+            except Exception, e:
+                print 'Error while fetching the data types of columns from the table'
+                print e
+        else:
+            print 'Table %s does not exist. Cannot get the column information'%table_name
+
+
+    #get the keys from the tables
+    def get_table_keys(self, table_name):
+        """
+        This method is used to get the keys of a table.
+
+        Input:
+        Database configuration object and table name
+
+        Output:
+        List of keys in a table.
+        """
+        self.table_name = table_name
+        #before returning the column types check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        sql_str = "SELECT KU.COLUMN_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS \
+                    AS TC INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KU \
+                    ON TC.CONSTRAINT_TYPE = \'PRIMARY KEY\' AND \
+                    TC.CONSTRAINT_NAME = KU.CONSTRAINT_NAME \
+                    WHERE TC.TABLE_NAME = \'%s\' ORDER BY KU.TABLE_NAME, KU.ORDINAL_POSITION"%table_name
+        
+        if table_flag:
+            try:
+                self.cursor.execute(sql_str)
+                keys = self.cursor.fetchall()
+                cols = [cl[0] for cl in keys]
+                return cols
+            except Exception, e:
+                print 'Error while getting the keys of the table'
+                print e
+        else:
+            print 'Table %s does not exist. Cannot get the table keys'%table_name
+    
+    ##################### adding 2 new functions #########################
 
     #temp function prints the values of the database configuration object	
     def temp_function(self):
