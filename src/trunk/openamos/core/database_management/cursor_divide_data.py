@@ -73,7 +73,7 @@ class DivideData(object):
         t1 = time.time()
        
         for each in range(number):
-            db_str = db_name + '_' + str(each)
+            db_str = db_name + '_' + str(each+1)
             self.dbcon_obj.database_name = db_str
             result = self.dbcon_obj.create_database(db_str)
             result = result * result
@@ -168,7 +168,7 @@ class DivideData(object):
         #run a loop the create the new table names
         t1 = time.time()
         for each in range(chunks):
-            db_str = db_name + '_' + str(each)
+            db_str = db_name + '_' + str(each+1)
             self.dbcon_obj.database_name = db_str
 
             #create a new database connection
@@ -343,7 +343,7 @@ class DivideData(object):
         """
         db_name = databasename
         #open a new connection to the required database
-        db_str = db_name + '_' + str(index)
+        db_str = db_name + '_' + str(index+1)
         self.dbcon_obj.database_name = db_str
         
         t1 = time.time()
@@ -400,7 +400,7 @@ class DivideData(object):
         """
         db_name = databasename
         #open a new connection to the required database
-        db_str = db_name + '_' + str(index)
+        db_str = db_name + '_' + str(index+1)
         self.dbcon_obj.database_name = db_str
 
         #create a new database connection
@@ -457,7 +457,7 @@ class DivideData(object):
         db_name = databasename
         
         #open a new connection to the required database
-        db_str = db_name + '_' + str(index)
+        db_str = db_name + '_' + str(index+1)
         #print db_str
         self.dbcon_obj.database_name = db_str
 
