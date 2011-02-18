@@ -254,7 +254,7 @@ class DivideData(object):
            
   
     #select rows based on a selection criteria
-    def get_interval_rows(self, table1, table2, column_name, interval_list, index):
+    def get_interval_rows(self, databasename, table1, table2, column_name, interval_list, index):
         """
         This method is used to get selected rows between the interval 
         from the table in the database.
@@ -265,6 +265,9 @@ class DivideData(object):
         Output:
         Returns the rows that satisfy the selection criteria
         """
+        #create a new database connection
+        self.dbcon_obj.new_connection()
+        
         fin_flag = None
         #check if table exists and then if columns exists
         tab_flag1 = self.dbcon_obj.check_if_table_exists(table1)
@@ -281,6 +284,8 @@ class DivideData(object):
         else:
             low = interval_list[index-1] + 1
             high = interval_list[index]
+            
+        t1 = time.time()
         #get the rows from households table
         sql_string1 = "SELECT * FROM %s WHERE %s BETWEEN %s AND %s"%(table1, column_name, low, high)
         sql_string2 = "SELECT * FROM %s WHERE %s BETWEEN %s AND %s"%(table2, column_name, low, high)
@@ -305,6 +310,9 @@ class DivideData(object):
                     count2 = count2 + 1
                     person_rows.append(each)
                     
+                #close the new database connection
+                self.dbcon_obj.close_connection()
+                
                 if count1 == 0 or count2 == 0:
                     print 'No rows selected.\n'           
                 print 'Select query successful.\n'
@@ -314,36 +322,70 @@ class DivideData(object):
                 print e
         else:
             print 'Table(s) do not belong to the database.'
+            #close the new database connection
+            self.dbcon_obj.close_connection()
+            
+            t2 = time.time()
+            print 'Total time taken to select the required rows %s'%(t2-t1)
             return None    
         
     
     #trial insert query
-    def insert_data(self, arr):
-        table = 'temp_households'
-        cols = 'state, county, tract, htaz, houseid, serialno, \
-                children_r, hhsize_r, income_r, workers_r, age_of_head, \
-                noc, hinc, wif, persons, bldgsz, unittype, tenure, vehicl,\
-                hht, one, homeown, urb, inclt35k, nwrkcnt, numadlts, \
-                lifcycge2, numwrkr, rur, incge35k, incge75k, incge100, drvrcnt, vdratio'        
-        arr_str = [tuple(each) for each in arr]
-        for ea in arr_str:
-            print type(ea)
-        arr_str = str(arr_str)[1:-1]
-        #long(each) for each in arr_str if 
-        #print arr_str
-        #for ea in arr_str:
-        #    print ea
+    def insert_data(self, databasename, arr, table_name, index):
+        """
+        This method is used to insert data into the table
         
-        sql_string = 'insert into %s (%s) values %s'%(table, cols, arr_str)
-        print sql_string
+        Input:
+        Array of the values and the table name
+        
+        Output:
+        Data inserted into the table
+        """
+        db_name = databasename
+        #open a new connection to the required database
+        db_str = db_name + '_' + str(index)
+        self.dbcon_obj.database_name = db_str
+        
+        t1 = time.time()
+        
+        #create a new database connection
+        self.dbcon_obj.new_connection()
+        
+        #table = 'temp_households'
+        cols = self.dbcon_obj.get_column_list(table_name)
+        col_str = ''
+        col_count = 0
+        for i in cols:
+            if col_count < (len(cols)-1):
+                col_str = col_str + i + ', '
+                col_count = col_count + 1
+            else:
+                col_str = col_str + i
 
-        #try:
-        #    self.dbcon_obj.cursor.execute(sql_string)
-        #    self.dbcon_obj.connection.commit()
-        #except Exception, e:
-        #    print e
+        arr_str = [tuple(each) for each in arr]
+        arr_str = str(arr_str)[1:-1]
+        arr_str = arr_str.replace('L', '')
         
-        return 1
+        sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
+
+        t1 = time.time()
+        try:
+            self.dbcon_obj.cursor.execute(sql_string)
+            self.dbcon_obj.connection.commit()
+        except Exception, e:
+            print e
+        
+        t2 = time.time()
+        print 'total taken to insert %s'%(t2-t1)
+        
+        #close the new database connection
+        self.dbcon_obj.close_connection()
+        
+        #assign old database name
+        self.dbcon_obj.database_name = databasename
+        
+        t2 = time.time()
+        print 'Total time taken to insert records %s'%(t2-t1)
         
         
     #copy the data from a csv file
@@ -475,37 +517,67 @@ class DivideData(object):
         Output:
         
         """
+        #declare the lists
+        house_rows = []
+        person_rows = []
+        
         #create the dummy databases
         res = self.dummy_db(self.dbcon_obj.database_name, parts)
+        print '---> dummy databases created'
         
         #open a connection to current database and get the table information
         self.dbcon_obj.new_connection()
-
+        print '----> new connection created'
+        
         #call the get table info to fetch all data and save it
         self.get_table_info()
+        print '---> table info fetched'
         
         #get the interval data
         interval_list = self.divide_rows(parts)
+        print '---> divide rows complete'
         
         #close the connection to the database
         self.dbcon_obj.close_connection()
+        print '---> connection closed'
 
         #create new tables in the databases
         self.create_partitions(self.database_name, parts)
+        print '---> partitions created'
         
+        """
+        To divide the data into chunks and distribute it in the new databases, 
+        use the functions in the pairs as mentioned
+        
+        1) get_interval_rows() and insert_data()
+                            OR
+        2) copy_data() and delete_records()
+        for the copy_data() method the households and persons table have to be 
+        exported as a csv file and the location should be assigned where the 
+        file is located
+        """
         #run a loop to copy data and delete the rows
         print 'Loop starts.'
         t1 = time.time()
         for index in range(parts):
+            #select the required data
+            house_rows, person_rows = self.get_interval_rows(self.database_name, table1, table2, column_name, interval_list, index)
+            
+            #insert the selected data into the required tables
+            self.insert_data(self.database_name, house_rows, table1, index)
+            self.insert_data(self.database_name, person_rows, table2, index)
+            
             #copy all the data into the new data
-            self.copy_data(self.database_name, table1, table2, index, location)
+            #self.copy_data(self.database_name, table1, table2, index, location)
         
             #delete the unwanted rows
-            self.delete_records(self.database_name, table1, table2, column_name, index, interval_list)
+            #self.delete_records(self.database_name, table1, table2, column_name, index, interval_list)
             
         print 'Loop ended'
         t2 = time.time()
         print 'Total time taken by main function %s'%(t2-t1)
+        
+        #return interval_list
         print 'Done'
         
                         
@@ -529,7 +601,6 @@ class TestDivideData(unittest.TestCase):
         newobject = DivideData(dbconf)
         
         print 'Start program'
-        #t1 = time.time()
         
         """ Call main function """
         parts = 4
@@ -537,13 +608,16 @@ class TestDivideData(unittest.TestCase):
         table1 = 'households'
         table2 = 'persons'
         column_name = 'houseid'
-        #print '\t Parts are %s and Database name is %s'%(parts, self.database_name)
-        #print '\t Location is %s'%location
-        #print '\t Table 1 is %s, Table 2 is %s and Column name is %s'%(table1, table2,column_name)
-        newobject.partition_data(parts, location, table1, table2, column_name)
+        index = 0
+        count = 0
+        print '\t Parts are %s and Database name is %s'%(parts, self.database_name)
+        print '\t Location is %s'%location
+        print '\t Table 1 is %s, Table 2 is %s and Column name is %s'%(table1, table2,column_name)
         
-        #t2 = time.time()
-        #print 'total time taken %s'%(t2-t1)
+        #main function to divide and distribute the data
+        newobject.partition_data(parts, location, table1, table2, column_name)
+
+        print 'End of program'
         
 
 if __name__ == '__main__':
