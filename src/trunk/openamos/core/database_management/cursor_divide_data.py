@@ -53,6 +53,17 @@ class DivideData(object):
         self.trips_tab = 'trips_r'
         self.veh_tab = 'vehicles_r'
         self.workers_tab = 'workers_r'
+        
+        #output tables resultset
+        self.child_op = None
+        self.school_op = None
+        self.work_op = None
+        self.veh_count_op = None
+        self.ltrec_op = None
+        self.schedule_op = None
+        self.trips_op = None
+        self.veh_op = None
+        self.workers_op = None
 
 
     #create dummy databases
@@ -175,6 +186,7 @@ class DivideData(object):
             self.dbcon_obj.new_connection()
             
             #create the tables
+            #print 'child keys is %s'%self.child_keys
             self.dbcon_obj.create_table(self.house_tab, self.house_cols, self.house_dt, self.house_keys)
             self.dbcon_obj.create_table(self.persons_tab, self.persons_cols, self.persons_dt, self.persons_keys)
             self.dbcon_obj.create_table(self.child_tab, self.child_cols, self.child_dt, self.child_keys)
@@ -505,7 +517,86 @@ class DivideData(object):
         #assign old database name
         self.dbcon_obj.database_name = databasename
         
+
+    #collate the data from all the output table
+    def collate_results(self, databasename, table_name):
+        """
+        This method collate the results from the output tables
         
+        Input:
+        Database configuration object and number of parts
+        
+        Output:
+        All output tables merge data into main database's output tables
+        """
+        #run a loop and open a connection to individual databases
+        #execute select query and save the results
+        sql_string = "select * from %s"%table_name
+        
+        t1 = time.time()
+        try:
+            self.dbcon_obj.cursor.execute(sql_string)
+            result = self.dbcon_obj.cursor.fetchall()
+        except Exception, e:
+            print 'Select query failed.'
+            print e
+            
+        t2 = time.time()
+        print 'Total time taken to retrieve records %s'%(t2-t1)
+        
+        old_db_name = self.database_config_object.database_name
+        self.database_config_object.database_name = databasename
+        
+        self.new_db_obj = DataBaseConnection(self.database_config_object)
+        self.new_db_obj.new_connection()
+        
+        fin_flag = None
+        #check if table exists and then if columns exists
+        tab_flag = self.new_db_obj.check_if_table_exists(table_name)
+        
+        t1 = time.time()
+        if tab_flag:
+            cols = self.new_db_obj.get_column_list(table_name)
+            col_str = ''
+            col_count = 0
+            for i in cols:
+                if col_count < (len(cols)-1):
+                    col_str = col_str + i + ', '
+                    col_count = col_count + 1
+                else:
+                    col_str = col_str + i
+
+            arr_str = [tuple(each) for each in result]
+            arr_str = str(arr_str)[1:-1]
+            arr_str = arr_str.replace('L', '')
+            
+            sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
+            
+            try:
+                self.new_db_obj.cursor.execute(sql_string)
+                self.new_db_obj.connection.commit()
+            except Exception, e:
+                print e
+        
+            t2 = time.time()
+            print 'Total time taken to insert %s'%(t2-t1)
+            
+        else:
+            print 'Table(s) do not belong to the database.'
+            #close the new database connection
+            self.new_db_obj.close_connection()
+    
+            #assign old database name
+            self.database_config_object.database_name = old_db_name
+        
+        #close the new database connection
+        self.new_db_obj.close_connection()
+        del self.new_db_obj
+
+        #assign old database name
+        self.database_config_object.database_name = old_db_name
+        
+             
     #partition the data in the newly created tables
     def partition_data(self, parts, location, table1, table2, column_name):
         """
@@ -592,7 +683,7 @@ class TestDivideData(unittest.TestCase):
         self.user_name = 'postgres'
         self.password = '1234'
         self.host_name = 'localhost'
-        self.database_name = 'mag_zone'
+        self.database_name = 'mag_zone_1'
 
     
     def testdividedata(self):
@@ -613,10 +704,43 @@ class TestDivideData(unittest.TestCase):
         print '\t Parts are %s and Database name is %s'%(parts, self.database_name)
         print '\t Location is %s'%location
         print '\t Table 1 is %s, Table 2 is %s and Column name is %s'%(table1, table2,column_name)
-        
         #main function to divide and distribute the data
-        newobject.partition_data(parts, location, table1, table2, column_name)
-
+        #newobject.partition_data(parts, location, table1, table2, column_name)
+        
+        table_name = 'child_dependency_r'
+        dbname = 'mag_zone'
+        
+        #open connection
+        newobject.dbcon_obj.new_connection()
+        newobject.collate_results(dbname, table_name)
+        #close connection
+        newobject.dbcon_obj.close_connection()
+        
+        """
+        #   MAG_ZONE_2
+        newobject.dbcon_obj.database_name = 'mag_zone_2'
+        #open connection
+        newobject.dbcon_obj.new_connection()
+        newobject.collate_results(dbname, table_name)
+        #close connection
+        newobject.dbcon_obj.close_connection()
+        
+        #   MAG_ZONE_3
+        newobject.dbcon_obj.database_name = 'mag_zone_3'
+        #open connection
+        newobject.dbcon_obj.new_connection()
+        newobject.collate_results(dbname, table_name)
+        #close connection
+        newobject.dbcon_obj.close_connection()
+        
+        #   MAG_ZONE_4
+        newobject.dbcon_obj.database_name = 'mag_zone_4'
+        #open connection
+        newobject.dbcon_obj.new_connection()
+        newobject.collate_results(dbname, table_name)
+        #close connection
+        newobject.dbcon_obj.close_connection()
+        """
         print 'End of program'
         
 
