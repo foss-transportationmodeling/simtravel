@@ -22,6 +22,8 @@ import matplotlib.font_manager as plot
 from matplotlib.patches import Patch, Rectangle
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
+#from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 from matplotlib.figure import Figure
 
 
@@ -40,6 +42,7 @@ class MakeSchedPlot(QDialog):
         self.data = []
         self.sketches = []
         self.axes = []
+        self.toolbars = []
 
         self.makeVarsWidget1()
         self.makeVarsWidget2()
@@ -71,10 +74,10 @@ class MakeSchedPlot(QDialog):
         radiolayout.addWidget(basedgroup)
 
         stablewidget = QWidget(self)
-        stablelayout = QHBoxLayout()
-        stablewidget.setLayout(stablelayout)
-#        movebuttons = self.movebuttons()
-#        stablelayout.addWidget(movebuttons)
+        self.stablelayout = QHBoxLayout()
+        stablewidget.setLayout(self.stablelayout)
+        movebuttons = self.movebuttons()
+        self.stablelayout.addWidget(movebuttons)
         substablewidget = QWidget(self)
         substablelayout = QHBoxLayout()
         substablewidget.setLayout(substablelayout)
@@ -85,11 +88,11 @@ class MakeSchedPlot(QDialog):
         self.stablecombo.setFixedWidth(250)
         substablelayout.addWidget(self.stablecombo)
         substablelayout.setAlignment(Qt.AlignLeft)
-        stablelayout.addWidget(substablewidget)       
+        self.stablelayout.addWidget(substablewidget)       
         self.showbutton = QPushButton('Show Chart')
         self.showbutton.setFixedWidth(100)
-        stablelayout.addWidget(self.showbutton)
-        stablelayout.setContentsMargins(0,0,0,0)
+        self.stablelayout.addWidget(self.showbutton)
+        self.stablelayout.setContentsMargins(0,0,0,0)
 
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(radiowidget)
@@ -206,32 +209,20 @@ class MakeSchedPlot(QDialog):
         buttonwidget = QWidget(self)
         buttonlayout = QHBoxLayout()
         buttonwidget.setLayout(buttonlayout)
-        self.zinbutton = QPushButton('')
+        self.zinbutton = QPushButton(QIcon('./images/home.png'),"")
         self.zinbutton.setFixedWidth(30)
         buttonlayout.addWidget(self.zinbutton)
-        self.zoutbutton = QPushButton('')
+        self.zoutbutton = QPushButton(QIcon('./images/viewmag+.png'),"")
         self.zoutbutton.setFixedWidth(30)
         buttonlayout.addWidget(self.zoutbutton)
-        self.leftbutton = QPushButton('')
+        self.leftbutton = QPushButton(QIcon('./images/pan.png'),"")
         self.leftbutton.setFixedWidth(30)
         buttonlayout.addWidget(self.leftbutton)
-        self.rightbutton = QPushButton('')
-        self.rightbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.rightbutton)
-        self.upbutton = QPushButton('')
-        self.upbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.upbutton)
-        self.downbutton = QPushButton('')
-        self.downbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.downbutton)
         buttonlayout.setAlignment(Qt.AlignLeft)
         
-        self.connect(self.zinbutton, SIGNAL("clicked(bool)"), self.zoomin)
-        self.connect(self.zoutbutton, SIGNAL("clicked(bool)"), self.zoomout)
-        self.connect(self.leftbutton, SIGNAL("clicked(bool)"), self.moveleft)
-        self.connect(self.rightbutton, SIGNAL("clicked(bool)"), self.moveright)
-        self.connect(self.upbutton, SIGNAL("clicked(bool)"), self.moveup)
-        self.connect(self.downbutton, SIGNAL("clicked(bool)"), self.movedown)
+        self.connect(self.zinbutton, SIGNAL("clicked(bool)"), self.gohome)
+        self.connect(self.zoutbutton, SIGNAL("clicked(bool)"), self.zoom)
+        self.connect(self.leftbutton, SIGNAL("clicked(bool)"), self.panzoom)
         
         return buttonwidget
 
@@ -293,6 +284,7 @@ class MakeSchedPlot(QDialog):
             self.tabs.removeTab(index)
             self.sketches.pop(index)
             self.axes.pop(index)
+            self.toolbars.pop(index)
  
     def createCanvas(self):
         mydpi = 100
@@ -306,8 +298,24 @@ class MakeSchedPlot(QDialog):
         myCanvas.append(myaxes)
         self.sketches.append(sketch)
         self.axes.append(myaxes)
+        
+        tool = NavigationToolbar(sketch,self)
+        self.toolbars.append(tool)
+        
         return myCanvas
 
+#    def get_toolbar(self,canvas):
+#        if not self.navtoolbar:
+#            self.navtoolbar = NavigationToolbar(canvas)
+#            self.navtoolbar.DeleteToolByPos(6)
+#            ID_LASSO_TOOL = wx.NewId()
+#            lasso = self.navtoolbar.InsertSimpleTool(5, ID_LASSO_TOOL,
+#                                                     wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK),
+#                                                     isToggle=True)
+#            self.navtoolbar.Realize()
+#            self.navtoolbar.Bind(wx.EVT_TOOL, self.toggle_lasso_tool, id=ID_LASSO_TOOL)         
+#            return self.navtoolbar
+        
 
     def connects(self,configobject):
         
@@ -937,67 +945,33 @@ class MakeSchedPlot(QDialog):
             QMessageBox.information(self, "Warning",
                                     msg,
                                     QMessageBox.Ok)
-            
-#    def temp(self,event):
-#        if isinstance(event.artist, Rectangle):
-#            patch = event.artist
-#            print 'Start: ', patch.get_x()
-#            print 'Width: ', patch.get_width()
 
 
-    def zoomin(self):
-        #if event.button != 1: return
+    def gohome(self):
         index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        xmin, xmax = axes.get_xlim()
-        ymin, ymax = axes.get_ylim()
-        axes.set_xlim(xmin+10,xmax-10)
-        axes.set_ylim(ymin+0.1,ymax-0.1)
-        Canvas.draw()
+        if index >= 0:
+            tool = self.toolbars[index]
+            tool.home()
 
-    def zoomout(self):
+    def zoom(self):
         index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        xmin, xmax = axes.get_xlim()
-        ymin, ymax = axes.get_ylim()
-        axes.set_xlim(xmin-10,xmax+10)
-        axes.set_ylim(ymin-0.1,ymax+0.1)
-        Canvas.draw()
-        
-    def moveright(self):
-        index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        xmin, xmax = axes.get_xlim()
-        axes.set_xlim(xmin+10,xmax+10)
-        Canvas.draw()
+        if index >= 0:
+            tool = self.toolbars[index]
+            tool.zoom()
 
-    def moveleft(self):
+    def panzoom(self):
         index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        xmin, xmax = axes.get_xlim()
-        axes.set_xlim(xmin-10,xmax-10)
-        Canvas.draw()
+        if index >= 0:
+            tool = self.toolbars[index]
+            tool.pan()
 
-    def moveup(self):
-        index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        ymin, ymax = axes.get_ylim()
-        axes.set_ylim(ymin+0.1,ymax+0.1)
-        Canvas.draw()
-
-    def movedown(self):
-        index = self.tabs.currentIndex()
-        Canvas = self.sketches[index]
-        axes = self.axes[index]
-        ymin, ymax = axes.get_ylim()
-        axes.set_ylim(ymin-0.1,ymax-0.1)
-        Canvas.draw()
-
+#    def movedown(self):
+#        index = self.tabs.currentIndex()
+#        Canvas = self.sketches[index]
+#        axes = self.axes[index]
+#        ymin, ymax = axes.get_ylim()
+#        axes.set_ylim(ymin-0.1,ymax-0.1)
+#        Canvas.draw()
 
 
 
