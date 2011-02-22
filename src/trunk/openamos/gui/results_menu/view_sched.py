@@ -76,8 +76,19 @@ class MakeSchedPlot(QDialog):
         stablewidget = QWidget(self)
         self.stablelayout = QHBoxLayout()
         stablewidget.setLayout(self.stablelayout)
-        movebuttons = self.movebuttons()
-        self.stablelayout.addWidget(movebuttons)
+        
+        tools = QToolBar()
+        tools.setMaximumWidth(150)
+        home_action = self.createaction("Go Home",self.gohome,"home","")
+        zoom_action = self.createaction("Zoom",self.zoom,"viewmag+","")
+        pan_action = self.createaction("Pan",self.panzoom,"pan")
+        tools.addAction(home_action)
+        tools.addAction(zoom_action)
+        tools.addAction(pan_action)
+        self.stablelayout.addWidget(tools)
+
+#        movebuttons = self.movebuttons()
+#        self.stablelayout.addWidget(movebuttons)
         substablewidget = QWidget(self)
         substablelayout = QHBoxLayout()
         substablewidget.setLayout(substablelayout)
@@ -226,6 +237,20 @@ class MakeSchedPlot(QDialog):
         
         return buttonwidget
 
+
+    def createaction(self, text, slot=None, icon=None,
+                     tip=None, signal="triggered()"):
+        action = QAction(text, self)
+        if icon is not None:
+            action.setIcon(QIcon("./images/%s.png" % icon))
+        if tip is not None:
+            action.setToolTip(tip)
+            action.setStatusTip(tip)
+        if slot is not None:
+            self.connect(action, SIGNAL(signal), slot)
+
+        return action
+    
 
     def hasTables(self):
 #        isExist = False
