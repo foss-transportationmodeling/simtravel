@@ -74,8 +74,8 @@ class MakeSchedPlot(QDialog):
         radiolayout.addWidget(basedgroup)
 
         stablewidget = QWidget(self)
-        self.stablelayout = QHBoxLayout()
-        stablewidget.setLayout(self.stablelayout)
+        stablelayout = QHBoxLayout()
+        stablewidget.setLayout(stablelayout)
         
         tools = QToolBar()
         tools.setMaximumWidth(150)
@@ -85,8 +85,7 @@ class MakeSchedPlot(QDialog):
         tools.addAction(home_action)
         tools.addAction(zoom_action)
         tools.addAction(pan_action)
-        self.stablelayout.addWidget(tools)
-
+        stablelayout.addWidget(tools)
 #        movebuttons = self.movebuttons()
 #        self.stablelayout.addWidget(movebuttons)
         substablewidget = QWidget(self)
@@ -99,11 +98,14 @@ class MakeSchedPlot(QDialog):
         self.stablecombo.setFixedWidth(250)
         substablelayout.addWidget(self.stablecombo)
         substablelayout.setAlignment(Qt.AlignLeft)
-        self.stablelayout.addWidget(substablewidget)       
+        stablelayout.addWidget(substablewidget) 
+        self.resetbutton = QPushButton('Reset')
+        self.resetbutton.setFixedWidth(80)
+        stablelayout.addWidget(self.resetbutton)      
         self.showbutton = QPushButton('Show Chart')
-        self.showbutton.setFixedWidth(100)
-        self.stablelayout.addWidget(self.showbutton)
-        self.stablelayout.setContentsMargins(0,0,0,0)
+        self.showbutton.setFixedWidth(80)
+        stablelayout.addWidget(self.showbutton)
+        stablelayout.setContentsMargins(0,0,0,0)
 
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(radiowidget)
@@ -121,6 +123,7 @@ class MakeSchedPlot(QDialog):
         self.connect(self.based1, SIGNAL("clicked(bool)"), self.showGroupBox)
         self.connect(self.based2, SIGNAL("clicked(bool)"), self.showGroupBox)
         self.connect(self.showbutton, SIGNAL("clicked(bool)"), self.on_draw1)
+        self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.reset_all)
         
         if self.stablecombo.count < 1:  
             msg = "There is no simulation output"
@@ -209,33 +212,6 @@ class MakeSchedPlot(QDialog):
         varslayout.addWidget(self.idwidget2,1,0)
         varslayout.setAlignment(Qt.AlignLeft)
         self.varswidget2.setVisible(False)
-        
-#        self.resetbutton = QPushButton('Reload ID')
-#        self.resetbutton.setFixedWidth(75)
-#        varslayout.addWidget(self.resetbutton,1,1)
-#        
-#        self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.resetID)
-    
-    def movebuttons(self):
-        buttonwidget = QWidget(self)
-        buttonlayout = QHBoxLayout()
-        buttonwidget.setLayout(buttonlayout)
-        self.zinbutton = QPushButton(QIcon('./images/home.png'),"")
-        self.zinbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.zinbutton)
-        self.zoutbutton = QPushButton(QIcon('./images/viewmag+.png'),"")
-        self.zoutbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.zoutbutton)
-        self.leftbutton = QPushButton(QIcon('./images/pan.png'),"")
-        self.leftbutton.setFixedWidth(30)
-        buttonlayout.addWidget(self.leftbutton)
-        buttonlayout.setAlignment(Qt.AlignLeft)
-        
-        self.connect(self.zinbutton, SIGNAL("clicked(bool)"), self.gohome)
-        self.connect(self.zoutbutton, SIGNAL("clicked(bool)"), self.zoom)
-        self.connect(self.leftbutton, SIGNAL("clicked(bool)"), self.panzoom)
-        
-        return buttonwidget
 
 
     def createaction(self, text, slot=None, icon=None,
@@ -310,6 +286,27 @@ class MakeSchedPlot(QDialog):
             self.sketches.pop(index)
             self.axes.pop(index)
             self.toolbars.pop(index)
+    
+    def reset_all(self):
+        reply = QMessageBox.information(self,"Warning","Do you really want to remove?",QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.tabs.clear()
+            self.sketches = []
+            self.axes = []
+            self.toolbars = []
+            
+            if self.based2.isChecked():
+                self.idwidget2.clear()
+                self.retrieveID2()
+            else:
+                self.colswidget.clear()
+                self.valwidget.clear()
+                self.idwidget.clear()
+                self.delRow()
+                if self.columnName() <> None:
+                    self.colswidget.addItems(self.columnName())
+                
+        
  
     def createCanvas(self):
         mydpi = 100
@@ -328,18 +325,6 @@ class MakeSchedPlot(QDialog):
         self.toolbars.append(tool)
         
         return myCanvas
-
-#    def get_toolbar(self,canvas):
-#        if not self.navtoolbar:
-#            self.navtoolbar = NavigationToolbar(canvas)
-#            self.navtoolbar.DeleteToolByPos(6)
-#            ID_LASSO_TOOL = wx.NewId()
-#            lasso = self.navtoolbar.InsertSimpleTool(5, ID_LASSO_TOOL,
-#                                                     wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK),
-#                                                     isToggle=True)
-#            self.navtoolbar.Realize()
-#            self.navtoolbar.Bind(wx.EVT_TOOL, self.toggle_lasso_tool, id=ID_LASSO_TOOL)         
-#            return self.navtoolbar
         
 
     def connects(self,configobject):
