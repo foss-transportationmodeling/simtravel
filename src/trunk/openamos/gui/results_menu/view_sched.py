@@ -242,10 +242,14 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Reconciled without Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanfixedactivityschedule_r"):
             tables.append("Schedules: Daily Patterns Including Full Child Episodes")
-        if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
+        if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
             tables.append("Schedules: Reconciled Including Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_dailyallocrec_r"):
-            tables.append("Schedules: Daily Patterns with Child Allocation")
+            tables.append("Schedules: Daily Pattern with Child Allocation")
+        if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
+            tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
+        if self.new_obj.check_if_table_exists("schedule_final_r"):
+            tables.append("Schedules: Final Schedules")
             
         self.stablecombo.addItems(tables)
 
@@ -878,10 +882,15 @@ class MakeSchedPlot(QDialog):
         elif cur_text == "Schedules: Daily Patterns Including Full Child Episodes":
             return "schedule_cleanfixedactivityschedule_r"
         elif cur_text == "Schedules: Reconciled Including Travel Episodes":
+            return "schedule_childreninctravelrec_r"
+        elif cur_text == "Schedules: Daily Pattern with Child Allocation":
+            return "schedule_dailyallocrec_r"
+        elif cur_text == "Schedules: Reconciled Daily Pattern Skeleton with Child Allocation":
             return "schedule_inctravelrec_r"
         else:
-            return "schedule_dailyallocrec_r"
+            return "schedule_final_r"
 
+            
 
     def on_draw1(self):
         """ Redraws the figure
