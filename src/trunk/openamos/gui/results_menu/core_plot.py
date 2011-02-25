@@ -154,7 +154,7 @@ class Matplot(QDialog):
         tables = self.new_obj.get_table_list()
         return tables
     
-    def  checkColumnExists(self, tablename, columnname):
+    def checkColumnExists(self, tablename, columnname):
         columns = self.new_obj.get_column_list(tablename)
         try:
             columns.index(columnname)
@@ -163,12 +163,18 @@ class Matplot(QDialog):
         return True
 
 
-    def fill_variable1(self,pattern):
-        vars = []
-        if pattern == "trips":
-            vars = ["","purpose_rec","strttime_rec","endtime_rec","mode_rec","occupancy_rec","duration_rec","miles_rec"]
+    def fill_variable1(self,tablename):
+        vars = [""]
+        if tablename == "trips_r":
+            temp = ["starttime","endtime","tripmode","miles","occupancy","duration"]
+            for i in temp:
+                if self.checkColumnExists(tablename,i):
+                    vars.append(i)
         else:
-            vars = ["","activitytype","strttime_rec","endtime_rec","duration_rec"] #,"locationid"]
+            temp = ["activitytype","starttime","endtime","duration"]
+            for i in temp:
+                if self.checkColumnExists(tablename,i):
+                    vars.append(i)
             
         self.choicevar1.addItems(vars)
         self.choicevar2.addItems(vars)
