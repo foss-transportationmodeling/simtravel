@@ -500,13 +500,19 @@ class ConfigParser(object):
         vertex = model_element.get('vertex')
 
         # Reading the threshold for the stochastic frontier
-        threshold = model_element.get('threshold')
+        lower_threshold = model_element.get('lower_threshold')
+        upper_threshold = model_element.get('upper_threshold')
 
-	if threshold == None:
-            threshold = 0
+	if lower_threshold == None:
+            lower_threshold = 0
         else:
-            threshold = float(threshold)
+            lower_threshold = float(lower_threshold)
 
+
+	if upper_threshold == None:
+            upper_threshold = 0
+        else:
+            upper_threshold = float(upper_threshold)
         
         # Creating the variance matrix
         model_type = model_element.get('type')
@@ -516,7 +522,9 @@ class ConfigParser(object):
         if model_type in ['Linear', 'Log Linear'] :
             for i in varianceIterator:
                 variance = array([[float(i.get('value'))]])
-            errorSpec = LinearRegErrorSpecification(variance, vertex, threshold)         
+            errorSpec = LinearRegErrorSpecification(variance, vertex, 
+						    lower_threshold,
+						    upper_threshold)         
             if model_type == 'Linear':
                 model = LinearRegressionModel(specification, errorSpec)
             else:
@@ -538,7 +546,9 @@ class ConfigParser(object):
                     half_norm_variance = float(i.get('value'))
                     
             variance = array([[norm_variance, 0],[0, half_norm_variance]])
-            errorSpec = StochasticRegErrorSpecification(variance, vertex, threshold)
+            errorSpec = StochasticRegErrorSpecification(variance, vertex, 
+							lower_threshold,
+							upper_threshold)
 
             if model_type == 'Stochastic Frontier':
                 model = StocFronRegressionModel(specification, errorSpec)                 
