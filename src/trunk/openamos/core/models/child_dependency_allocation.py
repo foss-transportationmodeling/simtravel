@@ -151,8 +151,9 @@ class ChildDependencyAllocation(Model):
             for i in reconciledSchedules:
                 print i
 
-	    if hhldIndex[0] == 15080 or hhldIndex[0] == 322 or hhldIndex[0] == 42033 or hhldIndex[0] == 650:
-		raw_input()	   
+	    #if hhldIndex[0] == 15080 or hhldIndex[0] == 322 or hhldIndex[0] == 42033 or hhldIndex[0] == 650 or hhldIndex[0] == 43160:
+	    #if hhldIndex[0] == 42033 or hhldIndex[0] == 15080 or hhldIndex[0] == 1066 or hhldIndex[0] == 48927 or hhldIndex[0] == 35802:
+	    #	raw_input()	   
 
             #raw_input()
 
