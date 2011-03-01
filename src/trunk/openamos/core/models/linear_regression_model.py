@@ -47,15 +47,33 @@ class LinearRegressionModel(AbstractRegressionModel):
         expected_value = self.calc_expected_value(data)
         variance = self.error_specification.variance[0,0]
 	vertex = self.error_specification.vertex
-	threshold = self.error_specification.threshold
+	#threshold = self.error_specification.threshold
         pred_value = self.calc_errorcomponent(size=(data.rows, 1),
                                               mean=expected_value.data, 
                                               sd=variance**0.5, seed=seed)
 
 
-	print vertex, threshold
+	#print vertex, threshold
 	#raw_input()
 
+
+	if self.error_specification.lower_threshold >0:
+	    threshold = self.error_specification.lower_threshold
+	    predValue_lessThresholdInd = pred_value < threshold
+            print '\t\tPred value is less than START threshold for - %d cases ' \
+                % predValue_lessThresholdInd.sum()
+            pred_value[predValue_lessThresholdInd] = threshold
+
+
+	if self.error_specification.upper_threshold >0:
+	    threshold = self.error_specification.upper_threshold
+	    predValue_moreThresholdInd = pred_value > threshold
+            print '\t\tPred value is greater than END threshold for - %d cases ' \
+                % predValue_moreThresholdInd.sum()
+            pred_value[predValue_moreThresholdInd] = threshold
+	
+
+	"""
 	if vertex == 'start':
 	    predValue_lessThresholdInd = pred_value < threshold
             print '\t\tPred value is less than START threshold for - %d cases ' \
@@ -73,6 +91,7 @@ class LinearRegressionModel(AbstractRegressionModel):
             print '\t\tPred value is greater than END threshold for - %d cases ' \
                 % predValue_moreThresholdInd.sum()
             pred_value[predValue_moreThresholdInd] = threshold
+	"""
 
         return DataArray(pred_value, self.specification.choices)
 
