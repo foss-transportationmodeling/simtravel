@@ -496,6 +496,8 @@ class QueryBrowser(object):
                     final_list.append('stl.%s as st_%s' %('scheduleid', 'scheduleid'))
                     cols_list.append('st_%s' %'scheduleid')
 
+                    final_list.append('stl.%s as st_%s' %('dependentpersonid', 'dependentpersonid'))
+                    cols_list.append('st_%s' %'dependentpersonid')
 
                     #stLocJoinCondition = stLocJoinCondition[:-3]
 
@@ -526,6 +528,10 @@ class QueryBrowser(object):
 
                     final_list.append('enl.%s as en_%s' %('scheduleid', 'scheduleid'))
                     cols_list.append('en_%s' %'scheduleid')
+
+                    final_list.append('enl.%s as en_%s' %('dependentpersonid', 'dependentpersonid'))
+                    cols_list.append('en_%s' %'dependentpersonid')
+
 
                     
                     # TSP consistency check
@@ -597,6 +603,8 @@ class QueryBrowser(object):
             
 
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
+	
+	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
         print 'SQL string for query - ', sql_string
         print cols_list
         
