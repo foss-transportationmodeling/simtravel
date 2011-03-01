@@ -67,7 +67,8 @@ class AbstractComponent(object):
             self.keyCols = self.key[0]
 
     def pre_process(self, queryBrowser, subsample, 
-                    projectSkimsObject, householdStructureObject, db):
+                    skimsMatrix, uniqueIds,
+                    db):
 
         t_d = time.time()
         # process the variable list to exclude double columns, 
@@ -109,7 +110,7 @@ class AbstractComponent(object):
 
         # Process and include spatial query information
         data = self.process_data_for_locs(data, self.spatialConst_list, 
-                                          self.analysisInterval, projectSkimsObject)
+                                          skimsMatrix, uniqueIds)
 
         if data == None or data.rows == 0:
             return None
@@ -133,7 +134,7 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data, projectSkimsObject):
+    def run(self, data, skimsMatrix):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
         #raw_input()
@@ -158,7 +159,7 @@ class AbstractComponent(object):
             print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
-                model_list_duringrun, iteration, projectSkimsObject)   
+                model_list_duringrun, iteration, skimsMatrix)   
 
             data_filter_count = data_filter.sum()
             data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
@@ -282,7 +283,7 @@ class AbstractComponent(object):
 
 
     def iterate_through_the_model_list(self, model_list_duringrun, 
-                                       iteration, projectSkimsObject):
+                                       iteration, skimsMatrix):
         ti = time.time()
         model_list_forlooping = []
         
@@ -295,7 +296,7 @@ class AbstractComponent(object):
                 current_model_name = i.dep_varname
                 
                 self.check_for_dynamic_spatial_queries(prev_model_name, 
-                                                       current_model_name, projectSkimsObject)
+                                                       current_model_name, skimsMatrix)
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
@@ -314,19 +315,21 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-
-
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 		else:
-		    result = i.simulate_choice(data_subset, choiceset, iteration, projectSkimsObject)
+		    result = i.simulate_choice(data_subset, choiceset, iteration)
 		    self.data = result
 		    # Update the filter because the number of rows may have changed in the data
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
                 print 'RESULT', result.data
+
+	    if i.dep_varname == 'tt_from1':
+		raw_input()
+
         
         # Update hte model list for next iteration within the component
 
@@ -354,7 +357,7 @@ class AbstractComponent(object):
         # LOOP, THE SEED IS BEING SET TO THE DEFAULT VALUE
         # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
-    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, projectSkimsObject):
+    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, skimsMatrix):
 	#print self.dynamicspatialConst_list, prev_model_name, current_model_name
 	#raw_input()
         if len(self.dynamicspatialConst_list) > 0:
@@ -362,8 +365,8 @@ class AbstractComponent(object):
                 if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
                     print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
-                    self.process_data_for_locs(self.data, [const], self.analysisInterval,
-                                               projectSkimsObject)
+                    self.process_data_for_locs(self.data, [const], 
+                                               skimsMatrix)
                 
                 
     
@@ -708,7 +711,7 @@ class AbstractComponent(object):
 
 
     def process_data_for_locs(self, data, spatialConst_list, 
-                              analysisInterval, projectSkimsObject):
+                              skimsMatrix, uniqueIds=None):
         """
         This method is called whenever there are location type queries involved as part
         of the model run. Eg. In a Destination Choice Model, if there are N number of 
@@ -730,36 +733,18 @@ class AbstractComponent(object):
                 destinationColName = i.destinationField
                 skimColName = i.skimField
 
-                ti = time.time()
-                if analysisInterval is not None:
-                    tableName = projectSkimsObject.lookup_table(analysisInterval)
-                else:
-                    tableName = projectSkimsObject.tableNamesList[0]
-                
-                print '\t\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
-
-
-                skimsMatrix2, uniqueIDs = self.db.returnTableAsMatrix(tableName,
-                                                                      originColName,
-                                                                      destinationColName,
-                                                                      skimColName)
-
-
-
-                print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
-	        #raw_input()
                 if i.countChoices is not None: 
                     print ("""\t\tNeed to sample location choices for the following""" \
                                """model with also location info extracted """)
-                    data = self.sample_location_choices(data, skimsMatrix2, uniqueIDs, i)
+                    data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i)
                 else:
                     print '\tNeed to extract skims'
-                    data = self.extract_skims(data, skimsMatrix2, i)
+                    data = self.extract_skims(data, skimsMatrix, i)
 
         return data
     
                                         
-    def sample_location_choices(self, data, skimsMatrix2, uniqueIDs, spatialconst):
+    def sample_location_choices(self, data, skimsMatrix2, uniqueIds, spatialconst):
         # extract destinations subject to the spatio-temporal
         # constraints
 
@@ -780,11 +765,11 @@ class AbstractComponent(object):
 
         timeAvailable = destinationTimeColVals - originTimeColVals
 
-        destLocSetInd2 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
+        destLocSetInd2 = zeros((data.rows, max(uniqueIds) + 1), dtype=float)
 
 
 
-        for zone in uniqueIDs:
+        for zone in uniqueIds:
             destZone = zone * ones((data.rows, 1), dtype=int)
             timeToDest = skimsMatrix2[originLocColVals, destZone]
             timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
@@ -831,7 +816,7 @@ class AbstractComponent(object):
 
         destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
-        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
+        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIds))]
 
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
@@ -857,7 +842,7 @@ class AbstractComponent(object):
 
         # Extract the location variables cache
         if len(spatialconst.locationVariables) > 0:
-            locationsTable, uniqueIDs = self.db.returnTable(spatialconst.locationInfoTable, 
+            locationsTable, uniqueIds = self.db.returnTable(spatialconst.locationInfoTable, 
                                                             spatialconst.locationIdVar, 
                                                             spatialconst.locationVariables)
 
