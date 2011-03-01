@@ -52,7 +52,7 @@ class SimulationManager(object):
         self.projectConfigObject = self.configParser.parse_projectAttributes()
         self.projectSkimsObject = self.configParser.parse_skims_tables()
         self.projectLocationsObject = self.configParser.parse_locations_table()
-	self.householdStructureObject = self.configParser.parse_household_structure_info()
+
 
 
     def setup_databaseConnection(self):
@@ -130,6 +130,9 @@ class SimulationManager(object):
 	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
         try:
+            self.lastTableName = None
+            self.skimsMatrix = None
+            self.uniqueIds = None
             for comp in self.componentList:
                 t = time.time()
                 print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
@@ -138,15 +141,22 @@ class SimulationManager(object):
                 if comp.skipFlag:
                     print '\tSkipping the run for this component'
                     continue
+                
+                #Load skims matrix outside so that when there is temporal aggregation
+                # of tod skims then loading happens only so many times
+
+                self.identify_load_skims_matrix(comp)
+
                 data = comp.pre_process(self.queryBrowser, self.subsample, 
                                         #self.tableOrder, self.tableKeys, 
-                                        self.projectSkimsObject, self.householdStructureObject, self.db)
+                                        self.skimsMatrix, self.uniqueIds,
+                                        self.db)
 
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
+                    nRowsProcessed, tripsProcessed = comp.run(data, self.skimsMatrix)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
@@ -166,6 +176,63 @@ class SimulationManager(object):
 
         self.save_configFile()
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
+
+
+    def identify_load_skims_matrix(self, comp):
+        ti = time.time()
+        if len(comp.spatialConst_list) == 0:
+            # When there are no spatial constraints to be processed
+            # return an empty skims object
+            pass
+        else:
+            analysisInterval = comp.analysisInterval
+        
+            if comp.analysisInterval is not None:
+                tableName = self.projectSkimsObject.lookup_table(analysisInterval)
+            else:
+                # Corresponding to the morning peak
+                # currently fixed can be varied as need be
+                tableName = self.projectSkimsObject.lookup_table(240)
+
+            if self.lastTableName == None:
+                # Load the skims matrix
+                skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
+                self.lastTableName = tableName
+                self.skimsMatrix = skimsMatrix
+                self.uniqueIds = uniqueIds
+            elif tableName == self.lastTableName:
+                print """The tod interval for the the previous component is same """\
+                    """as current component. """\
+                    """Therefore the skims matrix need not be reloaded."""
+            else:
+                print """The tod interval for the the previous component is same """\
+                    """as current component. """\
+                    """Therefore the skims matrix should be reloaded."""
+                skimsMatrix, uniqueIds = self.load_matrix(comp, tableName)
+                self.lastTableName = tableName
+                self.skimsMatrix = skimsMatrix
+                self.uniqueIds = uniqueIds
+                raw_input()
+        print '\tSkims Matrix Loaded in - %s' %(time.time()-ti)
+
+
+    def load_skims_matrix(self, comp, tableName):
+        const = comp.spatialConst_list[0]
+        
+        originColName = const.originField
+        destinationColName = const.destinationField
+        skimColName = const.skimField
+
+
+        skimsMatrix, uniqueIds = self.db.returnTableAsMatrix(tableName,
+                                                             originColName,
+                                                             destinationColName,
+                                                             skimColName)
+        return skimsMatrix, uniqueIds
+        
+
+
+
 
 
     def save_configFile(self):
