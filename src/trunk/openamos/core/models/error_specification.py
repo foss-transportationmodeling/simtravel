@@ -41,7 +41,7 @@ class StochasticRegErrorSpecification(ErrorSpecification):
     variance - numeric array (covariance matrix)
     distribution - string (type of distribution)
     """
-    def __init__(self, variance, vertex, threshold=0):
+    def __init__(self, variance, vertex, lower_threshold=0, upper_threshold=0):
         ErrorSpecification.__init__(self, variance, distribution='normal_halfnormal')
         
         if self.num_err_components <> 2:
@@ -62,11 +62,18 @@ class StochasticRegErrorSpecification(ErrorSpecification):
                 """is calculated"""
         self.vertex = vertex.lower()
 
-        if type(threshold) not in [int, float]:
+        if type(lower_threshold) not in [int, float]:
             raise ErrorSpecificationError, """the error specification is invalid, """\
-                """the threshold should take a numeric value. The threshold """\
+                """the threshold should take a numeric value. The LOWER threshold """\
                 """is used to capoff the start and end values."""
-        self.threshold = threshold
+
+        if type(upper_threshold) not in [int, float]:
+            raise ErrorSpecificationError, """the error specification is invalid, """\
+                """the threshold should take a numeric value. The UPPER threshold """\
+                """is used to capoff the start and end values."""
+
+        self.lower_threshold = lower_threshold
+        self.upper_threshold = upper_threshold
 
 class LinearRegErrorSpecification(ErrorSpecification):
     """
@@ -77,7 +84,7 @@ class LinearRegErrorSpecification(ErrorSpecification):
     distribution - string (type of distribution)
     """
     
-    def __init__(self, variance, vertex=None, threshold=0):
+    def __init__(self, variance, vertex=None, lower_threshold=0, upper_threshold=0):
         ErrorSpecification.__init__(self, variance, distribution='normal')
 
         if self.num_err_components > 1:
@@ -94,11 +101,18 @@ class LinearRegErrorSpecification(ErrorSpecification):
 	else:
 	    self.vertex = None
 
-        if type(threshold) not in [int, float]:
+        if type(lower_threshold) not in [int, float]:
             raise ErrorSpecificationError, """the error specification is invalid, """\
-                """the threshold should take a numeric value. The threshold """\
+                """the threshold should take a numeric value. The LOWER threshold """\
                 """is used to capoff the start and end values."""
-        self.threshold = threshold
+
+        if type(upper_threshold) not in [int, float]:
+            raise ErrorSpecificationError, """the error specification is invalid, """\
+                """the threshold should take a numeric value. The UPPER threshold """\
+                """is used to capoff the start and end values."""
+
+        self.lower_threshold = lower_threshold
+        self.upper_threshold = upper_threshold
 
 
 
