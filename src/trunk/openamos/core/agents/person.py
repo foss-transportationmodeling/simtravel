@@ -49,9 +49,14 @@ class Person(object):
 
 
     def remove_episodes(self, activityEpisodes):
+        #print 'CURRENT ACTIVIITES FOR PERSON - ', self.hid, self.pid
+        #for currActivities in self.listOfActivityEpisodes:
+        #    print '\t', currActivities
+
 	for activity in activityEpisodes:
+            print (activity.startTime, activity)
 	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
-	    self.actCount -= 1
+	    #self.actCount -= 1
 	    #self.scheduleIds.remove(activity.scheduleId)
             self._update_schedule_conflict_indicator(activity, add=False)
 
@@ -60,6 +65,174 @@ class Person(object):
             self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] += 1
         else:
             self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] -= 1            
+
+
+    def adjust_child_dependencies(self, activityList):
+        conflictActs = self._identify_conflict_activities(activityList)
+        ownActs, depActs = self.return_own_dep_acts(conflictActs)
+        #minStartTime, maxEndTime = self.return_min_max_time_of_activities(depActs)
+        #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
+        minStartTime = activityList[0].startTime
+        maxEndTime = activityList[-1].endTime
+        print 'DEPENDENT ACTS'
+        for act in depActs:
+            print '\t', act
+
+        print 'OWN ACTIVITIES'
+        for act in ownActs:
+            print '\t', act
+            
+        print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
+
+        if len(ownActs) == 1:
+            print '\tException, Only one activity of the adult that needs to be modified'            
+            self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
+        elif len(ownActs) > 1:
+            print '\tException, More than one activity of the adult person need to be modified/deleted'
+            self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
+        else:
+            raise Exception, 'NO CONFLICTS??'
+
+        """
+        if len(depActs) == 0:
+            self.adjust_merged_own_acts(ownActs, minStartTime, maxEndTime)
+        else:
+            if len(ownActs) == 1:
+                print '\tException, Only one activity of the adult that needs to be modified'            
+                self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
+            elif len(ownActs) > 1:
+                print '\tException, More than one activity of the adult person need to be modified/deleted'
+                self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
+            else:
+                print '\tException, NO CONFLICTS??'
+        """        
+    def adjust_merged_own_acts(self, ownActs, minStartTime, maxEndTime):
+        # Remove completely engulfed own activities that are colliding 
+        # with dependent activities of children
+        newOwnActs = []
+        for act in ownActs:
+            if (act.startTime > minStartTime and act.endTime < maxEndTime):
+                print '\tRemoving activity', act
+                #raw_input()
+                self.remove_episodes([act])
+            else:
+                newOwnActs.append(act)
+
+        newOwnActs = self.sort_acts(newOwnActs)
+        
+        firstAct = newOwnActs[0]
+        
+        for nextActIndex in range(len(newOwnActs) - 1):
+            nextAct = newOwnActs[nextActIndex + 1]
+            print firstAct, nextAct, 'BEFORE'
+
+            #self.remove_episodes([firstAct, nextAct])
+            overlap = self._conflict_duration_with_activity(nextAct)
+            overlapAdj = int(overlap/2)
+
+            firstActRef = firstAct.endTime - overlapAdj
+            self.move_end(firstAct, firstActRef)
+
+            nextActRef = nextAct.startTime + (overlap - overlapAdj) + 1
+            self.move_start(nextAct, nextActRef)
+            print overlap, overlapAdj, firstActRef, nextActRef
+
+            firstAct = nextAct
+
+
+            print firstAct, nextAct, 'AFTER'
+            raw_input()
+
+    def sort_acts(self, actList):
+        actVerticesDict = {}
+
+        for act in actList:
+            actVerticesDict[(act.startTime, act.endTime)] = act
+
+        actVerticesList = actVerticesDict.keys()
+        actVerticesList.sort()
+        actList = [actVerticesDict[(st, end)] for (st, end) in actVerticesList]
+
+        return actList
+        
+
+
+
+    def adjust_one_activity(self, ownAct, minStartTime, maxEndTime):
+        #return
+        # TODO: NEED TO INCLUDE THE NECESSARY TRAVEL TIME LATER
+        # Adjusting start term episode
+        print 'ownAct start - %s and ownAct end - %s' %(ownAct.startTime, ownAct.endTime)
+        if (ownAct.startTime == 0 and ownAct.endTime >= minStartTime):
+            self.move_end(ownAct, minStartTime - 1)
+            return
+
+        # Adjusting end term episode
+        if (ownAct.endTime == 1439 and ownAct.startTime <= maxEndTime):
+            self.move_start(ownAct, maxEndTime + 1)
+            return
+
+        # Own activity is engulfing the travel episode
+        if ownAct.startTime < minStartTime and ownAct.endTime > maxEndTime:
+            if ((minStartTime - ownAct.startTime) > (ownAct.endTime - maxEndTime)):
+                self.move_end(ownAct, minStartTime - 1)
+            else:
+                self.move_start(ownAct, maxEndTime + 1)
+            return 
+
+        if (ownAct.endTime >= minStartTime and ownAct.endTime <= maxEndTime):
+            self.move_end(ownAct, minStartTime - 1)
+            return
+
+        if (ownAct.startTime >= minStartTime and ownAct.startTime <= maxEndTime):
+            self.move_start(ownAct, maxEndTime + 1)
+            return
+
+        print ownAct
+        raise Exception, 'DONE NOTHING'
+    def adjust_and_delete_own_activities(self, ownActs, minStartTime, maxEndTime):
+        #return
+        for act in ownActs:
+            print 'THIS IS WHAT IS BEING ADJUSTED'
+            if (act.startTime == minStartTime and act.endTime == maxEndTime and
+                act.actType == 100):
+                continue
+            if (act.startTime == minStartTime and act.endTime == maxEndTime and 
+                act.actType <> 100):
+                print '\tRemoving activity', act
+                self.remove_episodes([act])
+                continue
+            if (act.startTime >= minStartTime - 1 and act.endTime <= maxEndTime + 1):
+                print '\tRemoving activity', act
+                #raw_input()
+                self.remove_episodes([act])
+            else:
+                
+                self.adjust_one_activity(act, minStartTime, maxEndTime)
+
+
+    def return_min_max_time_of_activities(self, activityList):
+        minStartTime = 1440
+        maxEndTime = 0
+        for act in activityList:
+            if act.startTime < minStartTime:
+                minStartTime = act.startTime
+            if act.endTime > maxEndTime:
+                maxEndTime = act.endTime
+
+        return minStartTime, maxEndTime
+
+    def return_own_dep_acts(self, activityList):
+        ownActsList = []
+        depActsList = []
+        for act in activityList:
+            if act.dependentPersonId <> 99:
+                ownActsList.append(act)
+            elif act.dependentPersonId == 99 and (act.startTime == 0 or act.endTime == 1439):
+                ownActsList.append(act)
+            else:
+                depActsList.append(act)
+        return ownActsList, depActsList
 
         
     def _check_for_conflicts(self):
@@ -70,13 +243,40 @@ class Person(object):
             return False
         return True
 
+    def _check_for_conflicts_with_activity(self, activity):
+        if type(activity) == list:
+            actList = activity
+        else:
+            actList = [activity]
+        conflict = 0
+
+        for activity in actList:
+            stTime = activity.startTime
+            endTime = activity.endTime
+        #print 'stTime - ', stTime, 'endTime', endTime
+            conflictAct = (self.scheduleConflictIndicator[stTime:endTime, :] > 1).sum()
+            conflict += conflictAct
+            
+        if conflict > 0:
+            print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s ' %(self.pid,
+                                                                                                     conflict)
+            return False
+        return True
+
     def _check_for_ih_conflicts(self, activity):
-        conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
+        conflict = self._conflict_duration_with_activity(activity)
         
+        self.remove_episodes([activity])
+
         conflictActs = self._identify_conflict_activities([activity])
         checkConflictActsLocation = self._check_location_match(activity,
                                                                conflictActs)
         
+        #print 'Person Id - ', self.pid
+        #print 'conflictActs', conflictActs
+        
+        #print 'conflict', conflict
+        #print 'Same Location', checkConflictActsLocation
 
         if (conflict == activity.duration) and checkConflictActsLocation:
             print """\t\t\t\tThere is some person at the current location """\
@@ -92,6 +292,7 @@ class Person(object):
     def _check_location_match(self, activity, conflictActs):
         for act in conflictActs:
             if act.location <> activity.location:
+                #print act.location, activity.location
                 return False
 
         return True
@@ -117,23 +318,35 @@ class Person(object):
         return conflict
 
     def _identify_conflict_activities(self, activityList):
-        # ONLY IDENTIFIES ACTIVITIES THAT PERFECTLY FIT WITHIN THE SCHEDULE
+        # conflict with respect to a list of activities including chains
         
         actConflicts = []
-        
         for act in activityList:
             actConflict = self._identify_conflict_activity(act)
             
             if actConflict is not None:
-                actConflicts.append(actConflict)
+                for newConfAct  in actConflict:
+                    if newConfAct not in actConflicts:
+                        actConflicts.append(newConfAct)
+
+        #actConflicts = self.sort_acts(actConflicts)
         return actConflicts
 
 
     def _identify_conflict_activity(self, activity):
+        # conflict wrt one activity
+        actList = []
         for stAct, act in self.listOfActivityEpisodes:
-            if (activity.startTime >= act.startTime and 
-                activity.endTime <= act.endTime):
-                return act
+            #print len(self.listOfActivityEpisodes)
+            #print 'ACTIVITY COORDINATES', activity.startTime, activity.endTime
+            #print 'CONFLICT COORDINATES', act.startTime, act.endTime
+            if ((act.startTime >= activity.startTime and act.startTime <= activity.endTime) 
+                or
+                (act.endTime >= activity.startTime and act.endTime <= activity.endTime)
+                or 
+                (act.endTime > activity.endTime and act.startTime < activity.startTime)):
+                actList.append(act)
+        return actList
 
 
     def pop_earliest_activity(self):
@@ -173,10 +386,36 @@ class Person(object):
 	else:
 	    return False
 
+    def move_start(self, act, value):
+        self.remove_episodes([act])
+        act.startTime = value
+        act.duration = act.endTime - act.startTime
+        if act.duration <= 0:
+            raise Exception, 'Incorrect adjustment - %s' %act
+        self.add_episodes([act])
+
+
+
+    def move_end(self, act, value):
+        self.remove_episodes([act])
+        act.endTime = value
+        act.duration = act.endTime - act.startTime
+        if act.duration <= 0:
+            raise Exception, 'Incorrect adjustment - %s' %act
+        self.add_episodes([act])
+
 
 
     def move_start_of_day(self, refEndTime):
         #print 'MOVED START from - ', self.firstEpisode.endTime, refEndTime, 
+        self.remove_episodes([self.firstEpisode])
+        self.firstEpisode.endTime = refEndTime
+        self.firstEpisode.duration = (self.firstEpisode.endTime - 
+                                      self.firstEpisode.startTime) 
+        
+        self.firstEpisode.dependentPersonId = 99
+        self.add_episodes([self.firstEpisode])
+        """
         self.scheduleConflictIndicator[self.firstEpisode.endTime:refEndTime, 
                                        :] += 1
 
@@ -184,11 +423,20 @@ class Person(object):
         self.firstEpisode.dependentPersonId = 99
 	self.firstEpisode.duration = (self.firstEpisode.endTime - 
 				      self.firstEpisode.startTime)
+        """
         print 'START MOVED', self.firstEpisode
 
 
     def move_end_of_day(self, refStartTime):
         #print 'MOVED END from - ', self.lastEpisode.startTime, refStartTime
+        self.remove_episodes([self.lastEpisode])
+        self.lastEpisode.startTime = refStartTime
+        self.lastEpisode.duration = (self.lastEpisode.endTime - 
+                                      self.lastEpisode.startTime) 
+        
+        self.lastEpisode.dependentPersonId = 99
+        self.add_episodes([self.lastEpisode])
+        """
         self.scheduleConflictIndicator[refStartTime:self.lastEpisode.startTime, 
                                        :] += 1
 
@@ -196,6 +444,7 @@ class Person(object):
         self.lastEpisode.dependentPersonId = 99
 	self.lastEpisode.duration = (self.lastEpisode.endTime -
 				     self.lastEpisode.startTime)
+        """
         print 'END MOVED', self.lastEpisode
 
     def add_status_dependency(self, workstatus, schoolstatus, child_dependency):
@@ -470,33 +719,7 @@ class Person(object):
         # TODO: Needs to be replaced with querying the travel skims
         if st_loc == end_loc:
             tt = 1
-        tt = 30
+        tt = 1
         return tt
 
-    def extract_skims(self, skimsMatrix):
-        # hstack a column for the skims that need to be extracted for the                                                           
-        # location pair                                                                                                             
-        originLocColName = spatialconst.startConstraint.locationField
-        destinationLocColName = spatialconst.endConstraint.locationField
-
-        originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
-        destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
-
-
-        vals = skimsMatrix2[originLocColVals, destinationLocColVals]
-
-        rowsEqualsDefault = vals.mask
-        vals[rowsEqualsDefault] = 0
-        #vals.shape = (data.rows,1)                                                                                                 
-        if spatialconst.asField:
-            colName = spatialconst.asField
-        else:
-            colName = spatialconst.skimField
-
-        sampleVarDict = {'temp':[colName]}
-        self.append_cols_for_dependent_variables(data, sampleVarDict)
-
-        #print vals[:,0]                                                                                                            
-        data.insertcolumn([colName], vals)
-
-        return data
+    
