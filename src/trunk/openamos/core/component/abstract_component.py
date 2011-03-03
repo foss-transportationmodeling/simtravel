@@ -66,7 +66,7 @@ class AbstractComponent(object):
         else:
             self.keyCols = self.key[0]
 
-    def pre_process(self, queryBrowser, subsample, 
+    def pre_process(self, queryBrowser, 
                     skimsMatrix, uniqueIds,
                     db):
 
