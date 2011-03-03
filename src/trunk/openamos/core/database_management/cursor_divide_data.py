@@ -598,7 +598,8 @@ class DivideData(object):
         
              
     #partition the data in the newly created tables
-    def partition_data(self, parts, location, table1, table2, column_name):
+    def partition_data(self, parts, hhld_table, person_table, 
+			column_name, location=None):
         """
         This method runs a loop and divides all the data
         
@@ -652,17 +653,20 @@ class DivideData(object):
         t1 = time.time()
         for index in range(parts):
             #select the required data
-            house_rows, person_rows = self.get_interval_rows(self.database_name, table1, table2, column_name, interval_list, index)
+            house_rows, person_rows = self.get_interval_rows(self.database_name, hhld_table,
+								person_table, column_name,
+								interval_list, index)
             
             #insert the selected data into the required tables
-            self.insert_data(self.database_name, house_rows, table1, index)
-            self.insert_data(self.database_name, person_rows, table2, index)
+            self.insert_data(self.database_name, house_rows, hhld_table, index)
+            self.insert_data(self.database_name, person_rows, person_table, index)
             
             #copy all the data into the new data
             #self.copy_data(self.database_name, table1, table2, index, location)
         
             #delete the unwanted rows
-            #self.delete_records(self.database_name, table1, table2, column_name, index, interval_list)
+            #self.delete_records(self.database_name, table1, table2, 
+ 	    #	                 column_name, index, interval_list)
             
         print 'Loop ended'
         t2 = time.time()
