@@ -85,16 +85,10 @@ class SimulationManager(object):
                                             self.queryBrowser)
 
 
-    def setup_household_structures(self):
-	print "-- Processing Household Structures --"
-	self.db.create
-
-
     def parse_config(self):
         print "-- Parsing components and model specifications --"
         self.componentList = self.configParser.parse_models()
         #TODO: implement subsample runs 
-        self.subsample = self.projectConfigObject.subsample
 
         # Printing models that were parsed
         modelCount = 0
@@ -147,7 +141,7 @@ class SimulationManager(object):
 
                 self.identify_load_skims_matrix(comp)
 
-                data = comp.pre_process(self.queryBrowser, self.subsample, 
+                data = comp.pre_process(self.queryBrowser,  
                                         #self.tableOrder, self.tableKeys, 
                                         self.skimsMatrix, self.uniqueIds,
                                         self.db)
@@ -263,7 +257,7 @@ class SimulationManager(object):
             if comp.skipFlag:
                 print '\tSkipping the run for this component'
                 continue
-            data = comp.pre_process(self.queryBrowser, self.subsample, 
+            data = comp.pre_process(self.queryBrowser, 
                                     #tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.householdStructureObject, self.db)
             if data is not None:
