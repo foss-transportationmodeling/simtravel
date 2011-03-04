@@ -518,7 +518,7 @@ class DivideData(object):
             high = interval_list[index]
         #get the rows from households table
         sql_string1 = "DELETE FROM %s WHERE %s NOT BETWEEN %s AND %s"%(table1, column_name, low, high)
-        sql_string2 = "DELETE FROM %s WHERE %s NOT BETWEEN %s AND %s"%(table2, column_name, low, high)
+        sql_string2 = "DELETE FR        newobject.collate_results(dbname, table_name)OM %s WHERE %s NOT BETWEEN %s AND %s"%(table2, column_name, low, high)
         
         if fin_flag:
             try:
@@ -542,6 +542,21 @@ class DivideData(object):
         self.dbcon_obj.database_name = databasename
         
 
+    def collate_full_results(self, parts):
+	output_tables = ['child_dependency_r', 'daily_school_status_r', 
+			 'daily_work_status_r', 'households_vehicles_count_r', 
+			 'schedule_ltrec_r', 'schedule_r', 
+			 'trips_r', 'vehicles_r', 
+			 'workers_r', 'schedule_childreninctravelrec_r', 
+			 'schedule_cleanfixedactivityschedule_r', 'schedule_conflictrec_r', 
+			 'schedule_dailyallocrec_r', 'schedule_final_r', 'schedule_inctravelrec_r']
+	for i in range(parts):
+	    databasename = '%s_%s' %(self.database_name, i+1)
+	    for table_name in output_tables:	
+		print table_name, databasename
+		self.collate_results(databasename, table_name)
+
+
     #collate the data from all the output table
     def collate_results(self, databasename, table_name):
         """
@@ -556,31 +571,41 @@ class DivideData(object):
         #run a loop and open a connection to individual databases
         #execute select query and save the results
         sql_string = "select * from %s"%table_name
+
+        old_db_name = self.database_config_object.database_name
+
         
         t1 = time.time()
+        self.database_config_object.database_name = databasename	
+	self.dbcon_obj.new_connection()
+
         try:
             self.dbcon_obj.cursor.execute(sql_string)
             result = self.dbcon_obj.cursor.fetchall()
+	    print 'RESULT', result
         except Exception, e:
             print 'Select query failed.'
             print e
             
         t2 = time.time()
         print 'Total time taken to retrieve records %s'%(t2-t1)
+       	self.dbcon_obj.close_connection()
         
-        old_db_name = self.database_config_object.database_name
-        self.database_config_object.database_name = databasename
-        
-        self.new_db_obj = DataBaseConnection(self.database_config_object)
-        self.new_db_obj.new_connection()
+	self.database_config_object.database_name = old_db_name
+
+	self.dbcon_obj.new_connection()
+
+
+        #self.new_db_obj = DataBaseConnection(self.database_config_object)
+        #self.new_db_obj.new_connection()
         
         fin_flag = None
         #check if table exists and then if columns exists
-        tab_flag = self.new_db_obj.check_if_table_exists(table_name)
+        tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         
         t1 = time.time()
         if tab_flag:
-            cols = self.new_db_obj.get_column_list(table_name)
+            cols = self.dbcon_obj.get_column_list(table_name)
             col_str = ''
             col_count = 0
             for i in cols:
@@ -594,11 +619,13 @@ class DivideData(object):
             arr_str = str(arr_str)[1:-1]
             arr_str = arr_str.replace('L', '')
             
+	    print 'EMPTY STRING', arr_str
+
             sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
             
             try:
-                self.new_db_obj.cursor.execute(sql_string)
-                self.new_db_obj.connection.commit()
+                self.dbcon_obj.cursor.execute(sql_string)
+                self.dbcon_db_obj.connection.commit()
             except Exception, e:
                 print e
         
@@ -608,18 +635,10 @@ class DivideData(object):
         else:
             print 'Table(s) do not belong to the database.'
             #close the new database connection
-            self.new_db_obj.close_connection()
-    
-            #assign old database name
-            self.database_config_object.database_name = old_db_name
         
         #close the new database connection
-        self.new_db_obj.close_connection()
-        del self.new_db_obj
+        self.dbcon_obj.close_connection()
 
-        #assign old database name
-        self.database_config_object.database_name = old_db_name
-        
              
     #partition the data in the newly created tables
     def partition_data(self, parts, hhld_table, person_table, 
