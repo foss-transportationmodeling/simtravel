@@ -92,7 +92,7 @@ class AbstractComponent(object):
 
         # Prepare Data
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
-                                 count_keys, subsample)        
+                                 count_keys)        
 
 
         self.db = db
@@ -134,8 +134,9 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data, skimsMatrix):
+    def run(self, data, skimsMatrix, partId=None):
         #TODO: check for validity of data and choiceset TYPES
+        print 'running for part id --------', partId
         self.data = data
         #raw_input()
         #self.db = db
@@ -176,62 +177,12 @@ class AbstractComponent(object):
             nRowsProcessed += valid_data_rows_count
 
             print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
-	    tripsProcessed = self.write_data_to_cache(valid_data_rows)
-        return nRowsProcessed, tripsProcessed
+	    self.write_data_to_cache(valid_data_rows, partId)
+        return nRowsProcessed
 
-    def write_data_to_cache(self, data_filter):
+    def write_data_to_cache(self, data_filter, partId=None):
         # writing to the hdf5 cache
-
-        if data_filter.sum() < 1:
-	    print 'No trips to be loaded in this interval'
-            return
-
-	try:
-	    if self.component_name == 'DynamicNonMandatoryActivities':
-	        tripTableRef = self.db.returnTableReference('trips_r')
-                tripColsTable = tripTableRef.colnames
-            
-                convType = self.db.returnTypeConversion('trips_r')
-	        dtypesInput = tripTableRef.coldtypes
-
-	        # O and D are not same
-	        origins = self.data.columns(['fromzone']).data
-	        destinations = self.data.columns(['tozone']).data
-	        not_trips_filter = origins == destinations
-	        not_trips_filter.shape = (not_trips_filter.shape[0], )
-		trips_filter = copy.deepcopy(data_filter)
-            
-                trips_filter[not_trips_filter] = False
-
-	        trips_data = self.data.columnsOfType(tripColsTable, trips_filter, dtypesInput)
-	
-
-		
-		"""
-		trips_data_array = zeros((trips_filter.sum(), len(tripColsTable)))
-		colnames = trips_data.data.dtype.names
-		for i in range(len(tripColsTable)):
-		    name = colnames[i]
-		    trips_data_array[:,i] = trips_data.data[name]
-		print tripColsTable
-	        print trips_data
-		print trips_data_array
-
-		"""
-
-	        ti = time.time()
-		tripTableRef.append(trips_data.data)
-		tripTableRef.flush()
-	        print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 	
-	        tripsProcessed = trips_filter.sum()
-	    else:
-		tripsProcessed = 0
-	except Exception, e:
-	    print '-- Error -- ', e
-	    tripsProcessed = 0
-	    pass
-
-
+        print 'writing to cache for ----', partId
 
         cacheTableRef = self.db.returnTableReference(self.writeToTable)
         cacheColsTable = cacheTableRef.colnames
@@ -256,8 +207,7 @@ class AbstractComponent(object):
 
         print '\t\t', self.delete_criterion
         print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
-        print '\t\tSize of dataset', self.data.rows
-	return tripsProcessed
+        print '\t\tSize of dataset', self.data.rows	
 
 
     def create_filter(self, data_filter, filter_type):
@@ -493,7 +443,7 @@ class AbstractComponent(object):
         return columnDict
 
     def prepare_data(self, queryBrowser, indepVarDict, depVarDict, 
-                     count_keys=None, subsample=None):
+                     count_keys=None):
         #Get hierarchy of the tables
 
 	print 'INDEPEDNENT VAR DICTS', indepVarDict
@@ -611,8 +561,7 @@ class AbstractComponent(object):
                                         max_dict, 
                                         self.spatialConst_list,
                                         self.analysisInterval,
-                                        self.history_info, 
-                                        subsample)
+                                        self.history_info)
 	if data == None:
 	    return None
 
@@ -630,84 +579,6 @@ class AbstractComponent(object):
                     data.insertcolumn([j], tempValsArr)
         return data
 
-
-
-
-    def process_adult_allocation(self, data, queryBrowser, householdStructureObject):
-
-        structuresDict = householdStructureObject.structuresDict
-
-        for structure in structuresDict:
-            structureVarVal = structuresDict[structure]
-            self.prepare_household_structure_matrix(data, queryBrowser, 
-                                                    structureVarVal, householdStructureObject)
-
-            
-
-
-            
-
-    def prepare_household_structure_matrix(self, data, queryBrowser, varVal, householdStructureObject):
-        tableName = householdStructureObject.tableName
-        houseid = householdStructureObject.houseid
-        personid = householdStructureObject.personid
-        var = varVal[0]
-        val = varVal[1]
-
-        colsToQuery = [houseid, personid, var]
-        
-        personData = queryBrowser.select_all_from_table(tableName, 
-                                                        colsToQuery)
-
-        validRows = personData.columns([var]).data == val
-        validRows.shape = (validRows.shape[0], )
-        personData.deleterows(~validRows)
-
-        householdIds = personData.columns([houseid]).data
-        maxRowId = householdIds.max()
-        personIds = personData.columns([personid]).data
-        maxColId = personIds.max()
-        structureCol = personData.columns([var]).data
-
-        hhldStructure = zeros((maxRowId, maxColId))
-        hhldStructure[householdIds-1, personIds-1] = 1
-        hhldStructure = masked_equal(hhldStructure, 0)
-
-        print hhldStructure.shape
-
-
-        varDict = {'temp':['allocated_adult']}
-
-        # TODO: Extend code
-
-        self.append_cols_for_dependent_variables(data, varDict)
-
-
-        childRows = data.columns(['age']).data < 18
-        childRows.shape = (childRows.shape[0], )
-
-
-        childHhldStructure = hhldStructure[childRows]
-        childHhldStructureSum = childHhldStructure.sum(-1)
-
-        childHhldStructureProb = (childHhldStructure.transpose()/childHhldStructureSum).transpose()
-
-        colLabels = []
-        for i in range(maxColId):
-            colLabels.append('%s%s' %('person', i+1))
-
-        childHhldStructureProbArray = DataArray(childHhldStructureProb, colLabels)
-        
-        print childHhldStructureProb[:5,:]
-        #raw_input()
-
-        # 1 is the seed here
-        probModel = AbstractProbabilityModel(childHhldStructureProbArray, 1)
-        
-        res = probModel.selected_choice()
-        print (res > 0).sum()
-        
-        return data
 
 
     def process_data_for_locs(self, data, spatialConst_list, 
