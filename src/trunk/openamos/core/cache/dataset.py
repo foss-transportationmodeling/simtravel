@@ -7,26 +7,12 @@ from openamos.core.cache.dataset_table_layouts import *
 from openamos.core.data_array import DataArray
 
 class DB(object):
-    def __init__(self, fileLoc, mode='w'):
-        self.fileh = t.openFile("%s/amosdb.h5" %(fileLoc), mode=mode)
+    def __init__(self, fileLoc, partId=None, mode='w'):
+	if partId is None:
+	    self.fileh = t.openFile("%s/amosdb.h5" %(fileLoc), mode=mode)
+	else:
+	    self.fileh = t.openFile("%s/amosdb_part_%s.h5" %(fileLoc, partId), mode=mode)
 
-    """
-        self.groupDict = {'households_r':'households',
-                          'vehicles_r':'households',
-                          'person_r':'persons',
-                          'tsp_r':'persons',
-                          'scehulde_r':'persons',
-                          'trips_r':'persons'}
-
-        # TODO: where do we get the table definitions and relationships from
-        # for now this is static
-        self.tableDefDict = {'households_r':['houseid, numvehs'],
-                             'vehicles_r':['houseid', 'vehid', 'vehtype'],
-                             'person_r':['persons'],
-                             'tsp_r':'persons',
-                             'scehulde_r':'persons',
-                             'trips_r':'persons'}
-    """    
     def create(self, tableName=None):
         # TODO: create output/input tables everytime?
 
