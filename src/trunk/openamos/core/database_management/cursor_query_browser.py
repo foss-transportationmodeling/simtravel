@@ -796,7 +796,7 @@ class QueryBrowser(object):
            print 'Table %s does not exist.'##%table_name 
         self.create_index(table_name, keyCols)
 
-    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc):
+    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc, partId=None):
         """
         self, arr, cols_list, table_name, keyCols, chunkSize=None):
         This method is used to insert rows into the table.
@@ -808,13 +808,16 @@ class QueryBrowser(object):
         Inserts all the rows from data array in the table
         """
         
+	if partId == None:
+	    partId = ""
+
         table_name = table_name.lower()
 
         # Delete index before inserting
         index_cols = self.delete_index(table_name)
 
 
-        self.file_write(arr, loc)
+        self.file_write(arr, loc, partId)
         
         #check if table exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
@@ -829,8 +832,8 @@ class QueryBrowser(object):
             #print 'Table %s exists.'%table_name
             try:
                 ti = time.time()
-                insert_stmt = ("""copy %s %s from '%s/tempData.csv' """
-                               """ delimiters ','""" %(table_name, cols_listStr, loc))
+                insert_stmt = ("""copy %s %s from '%s/tempData_%s.csv' """
+                               """ delimiters ','""" %(table_name, cols_listStr, loc, partId))
                                                                        
                 #print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
@@ -933,7 +936,7 @@ class QueryBrowser(object):
     ########## methods for creating and deleting index##########
 
     ########### file function #################
-    def file_write(self, data_arr, loc):
+    def file_write(self, data_arr, loc, partId):
         """
         This method write the resultset to a file.
         
@@ -945,7 +948,7 @@ class QueryBrowser(object):
         """
         #open the file
         ti = time.time()
-        myfile = open('%s/tempData.csv' %loc, 'w')
+        myfile = open('%s/tempData_%s.csv' %(loc, partId), 'w')
         
         #enter the columns in the file
         #myfile.write(str(cols_list)[1:-1])
