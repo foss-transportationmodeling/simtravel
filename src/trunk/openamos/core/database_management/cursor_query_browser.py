@@ -131,7 +131,7 @@ class QueryBrowser(object):
 
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, 
-                    history_info=None, subsample=None):
+                    history_info=None):
         """
         This method is used to select the join of tables and display them.
         
@@ -159,7 +159,7 @@ class QueryBrowser(object):
         #print
         #print db_dict
 	#print
-        print 'max_dict', max_dict
+        #print 'max_dict', max_dict
 
 
 
@@ -179,8 +179,8 @@ class QueryBrowser(object):
         table_flag = None
         all_tables = table_list + table_names
 
-	print 'table_list', table_list
-	print 'column_names', column_names
+	#print 'table_list', table_list
+	#print 'column_names', column_names
 
         #check if the tables exist in the database.
         for each_tab in all_tables:
@@ -499,6 +499,9 @@ class QueryBrowser(object):
                     final_list.append('stl.%s as st_%s' %('dependentpersonid', 'dependentpersonid'))
                     cols_list.append('st_%s' %'dependentpersonid')
 
+                    final_list.append('stl.%s as st_%s' %('duration', 'duration'))
+                    cols_list.append('st_%s' %'duration')
+
                     #stLocJoinCondition = stLocJoinCondition[:-3]
 
                     # Left join condition for prism end location
@@ -532,6 +535,8 @@ class QueryBrowser(object):
                     final_list.append('enl.%s as en_%s' %('dependentpersonid', 'dependentpersonid'))
                     cols_list.append('en_%s' %'dependentpersonid')
 
+                    final_list.append('enl.%s as en_%s' %('duration', 'duration'))
+                    cols_list.append('en_%s' %'duration')
 
                     
                     # TSP consistency check
