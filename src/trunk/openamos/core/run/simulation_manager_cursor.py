@@ -7,6 +7,7 @@ from numpy import array, ma, ones, zeros, vstack, where
 
 from openamos.core.component.config_parser import ConfigParser
 from openamos.core.database_management.cursor_query_browser import QueryBrowser
+from openamos.core.database_management.cursor_divide_data import DivideData
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
 from openamos.core.cache.dataset import DB
@@ -46,7 +47,7 @@ class SimulationManager(object):
             print e
             raise ConfigurationError, """The path for configuration file was """\
                 """invalid or the file is not a valid configuration file."""
-
+        self.fileLoc = fileLoc
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
         self.projectConfigObject = self.configParser.parse_projectAttributes()
@@ -54,35 +55,57 @@ class SimulationManager(object):
         self.projectLocationsObject = self.configParser.parse_locations_table()
 
 
-
-    def setup_databaseConnection(self):
+    def divide_database(self, numParts):
         dbConfigObject = self.configParser.parse_databaseAttributes()
-        self.queryBrowser = QueryBrowser(dbConfigObject)
-        self.queryBrowser.dbcon_obj.new_connection()
-        #self.queryBrowser.create_mapper_for_all_classes()
-        #print 'Database Connection Established'
+        self.divideDatabaseObj = DivideData(dbConfigObject)
+        self.divideDatabaseObj.partition_data(numParts, 'households', 
+                                              'persons', 'houseid')
 
-    def setup_cacheDatabase(self, mode='w'):
+    def collate_results(self, numParts):
+        self.divideDatabaseObj.collate_full_results(numParts)
+        
+
+    def setup_databaseConnection(self, partId=None):
+        dbConfigObject = self.configParser.parse_databaseAttributes()
+        if partId is not None:
+            dbConfigObject.database_name += '_%s' %(partId)
+        
+        queryBrowser = QueryBrowser(dbConfigObject)
+        queryBrowser.dbcon_obj.new_connection()
+        return queryBrowser
+
+    def setup_cacheDatabase(self, partId=None, mode='w'):
         print "-- Creating a hdf5 cache database --"
         fileLoc = self.projectConfigObject.location
-        self.db = DB(fileLoc, mode)
         if mode == 'w':
+            if partId is not None:
+                self.db = DB(fileLoc, partId)
+            else:
+                self.db = DB(fileLoc)
             self.db.create()
+                
         # placeholders for creating the hdf5 tables 
         # only the network data is read and processed for faster 
         # queries
 
 
-    def setup_tod_skims(self):
+    def open_cacheDatabase(self, partId):
+        fileLoc = self.projectConfigObject.location
+        self.db = DB(fileLoc)
+        self.db.load_input_output_nodes(partId)
+        
+
+
+    def setup_tod_skims(self, queryBrowser):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
             self.db.createSkimsTableFromDatabase(tableInfo,
-                                                 self.queryBrowser)
+                                                 queryBrowser)
 
-    def setup_location_information(self):
+    def setup_location_information(self, queryBrowser):
         print "-- Processing Location Information --"
         self.db.createLocationsTableFromDatabase(self.projectLocationsObject, 
-                                            self.queryBrowser)
+                                                 queryBrowser)
 
 
     def parse_config(self):
@@ -104,7 +127,15 @@ class SimulationManager(object):
         print "\t - Note: Some models/components may have been added because of the way OpenAMOS framework is setup."
         #raw_input()
 
-    def clean_database_tables(self):
+    def clean_database_tables_for_parts(self, numParts):
+        for i in range(numParts):
+            self.clean_database_tables(partId=i+1)
+            
+
+
+    def clean_database_tables(self, partId=None):
+        queryBrowser = self.setup_databaseConnection(partId)
+            
         tableNamesDelete = []
         for comp in self.componentList:
 	    if comp.skipFlag:
@@ -115,18 +146,26 @@ class SimulationManager(object):
             if tableName not in tableNamesDelete:
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
-                self.queryBrowser.delete_all(tableName)                            
-
+                queryBrowser.delete_all(tableName)                            
+        self.close_database_connection(queryBrowser)
         
-    def run_components(self):
+
+    def run_components_for_parts(self, numParts):
+        for i in range(numParts):
+            self.run_components(partId=i+1)        
+
+    def run_components(self, partId=None):
+        configParser = copy.deepcopy(self.configParser)
+
+        queryBrowser = self.setup_databaseConnection(partId)
         t_c = time.time()
         
 	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
         try:
-            self.lastTableName = None
-            self.skimsMatrix = None
-            self.uniqueIds = None
+            lastTableName = None
+            skimsMatrix = None
+            uniqueIds = None
             for comp in self.componentList:
                 t = time.time()
                 print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
@@ -139,26 +178,40 @@ class SimulationManager(object):
                 #Load skims matrix outside so that when there is temporal aggregation
                 # of tod skims then loading happens only so many times
 
-                self.identify_load_skims_matrix(comp)
+                tableName = self.identify_skims_matrix(comp)
+                
+                if tableName <> lastTableName and len(comp.spatialConst_list) > 0:
+                    # Load the skims matrix
+                    print """The tod interval for the the previous component is not same """\
+                        """as current component. """\
+                        """Therefore the skims matrix should be reloaded."""
+                    skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
+                    lastTableName = tableName
 
-                data = comp.pre_process(self.queryBrowser,  
+                elif tableName == lastTableName:
+                    print """The tod interval for the the previous component is same """\
+                        """as current component. """\
+                        """Therefore the skims matrix need not be reloaded."""
+
+                data = comp.pre_process(queryBrowser,  
                                         #self.tableOrder, self.tableKeys, 
-                                        self.skimsMatrix, self.uniqueIds,
+                                        skimsMatrix, uniqueIds,
                                         self.db)
 
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed, tripsProcessed = comp.run(data, self.skimsMatrix)
+                    nRowsProcessed = comp.run(data, skimsMatrix, partId)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
                     # are often dependent on the choices generated in the previous components
                     # run
-                    self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
-
-                self.configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
+                    self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 
+                                           nRowsProcessed, partId)
+                    
+                configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
             
                 print '-- Finished simulating component - %s; time taken %.4f --' %(comp.component_name,
@@ -166,17 +219,18 @@ class SimulationManager(object):
         except Exception, e:
             print 'Exception occurred - %s' %e
             traceback.print_exc(file=sys.stdout)
-            print '_'*80
 
-        self.save_configFile()
+        self.save_configFile(configParser, partId)
+        self.close_database_connection(queryBrowser)
         print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
 
 
-    def identify_load_skims_matrix(self, comp):
+    def identify_skims_matrix(self, comp):
         ti = time.time()
         if len(comp.spatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
+            tableName = None
             pass
         else:
             analysisInterval = comp.analysisInterval
@@ -188,27 +242,9 @@ class SimulationManager(object):
                 # currently fixed can be varied as need be
                 tableName = self.projectSkimsObject.lookup_table(240)
 
-            if self.lastTableName == None:
-                # Load the skims matrix
-                skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
-                self.lastTableName = tableName
-                self.skimsMatrix = skimsMatrix
-                self.uniqueIds = uniqueIds
-            elif tableName == self.lastTableName:
-                print """The tod interval for the the previous component is same """\
-                    """as current component. """\
-                    """Therefore the skims matrix need not be reloaded."""
-            else:
-                print """The tod interval for the the previous component is same """\
-                    """as current component. """\
-                    """Therefore the skims matrix should be reloaded."""
-                skimsMatrix, uniqueIds = self.load_matrix(comp, tableName)
-                self.lastTableName = tableName
-                self.skimsMatrix = skimsMatrix
-                self.uniqueIds = uniqueIds
-                raw_input()
         print '\tSkims Matrix Loaded in - %s' %(time.time()-ti)
 
+        return tableName
 
     def load_skims_matrix(self, comp, tableName):
         const = comp.spatialConst_list[0]
@@ -229,81 +265,18 @@ class SimulationManager(object):
 
 
 
-    def save_configFile(self):
-        configFile = open(self.fileLoc, 'w')
-        self.configParser.configObject.write(configFile, pretty_print=True)
+    def save_configFile(self, configParser, partId):
+        if partId is not None:
+            fileLoc = '%s_par_%s.xml' %(self.fileLoc[:-4], partId)
+        else:
+            fileLoc = self.fileLoc
+        configFile = open(fileLoc, 'w')
+        configParser.configObject.write(configFile, pretty_print=True)
         configFile.close()
 
 
-    def run_selected_components_for_malta(self, analysisInterval):
-	t_c = time.time()
 
-
-	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
-
-
-	# Get the two components one for dynamic activity simulation and another for extracting trips
-	compObjects = []
-        for comp in self.componentList:
-	    if comp.component_name in ['ReconcileLongerTermSchedules', 'AfterSchoolActivities', 'DynamicNonMandatoryActivities']:
-	        compObjects.append(comp)
-
-	for comp in compObjects:
-	    comp.analysisInterval = analysisInterval
-	    t = time.time()
-            print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
-                                                                       comp.analysisInterval)
-
-            if comp.skipFlag:
-                print '\tSkipping the run for this component'
-                continue
-            data = comp.pre_process(self.queryBrowser, 
-                                    #tableOrderDict, tableNamesKeyDict, 
-                                    self.projectSkimsObject, self.householdStructureObject, self.db)
-            if data is not None:
-                # Call the run function to simulate the chocies(models)
-                # as per the specification in the configuration file
-                # data is written to the hdf5 cache because of the faster I/O
-                nRowsProcessed, tripsProcessed = comp.run(data, self.projectSkimsObject)
-
-            # Write the data to the database from the hdf5 results cache
-            # after running each component because the subsequent components
-            # are often dependent on the choices generated in the previous components
-            # run
-                self.reflectToDatabase(comp.writeToTable, comp.keyCols, nRowsProcessed)
-		tripInfo = self.tripInfoToMalta('trips_r', ['houseid', 'personid'], tripsProcessed)
-            print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
-            #raw_input()
-	return tripInfo
-        print '-- TIME TAKEN  TO COMPLETE ALL COMPONENTS - %.4f --' %(time.time()-t_c)
-
-
-
-
-    def tripInfoToMalta(self, tableName, keyCols=[], nRowsProcessed=0):
-        fileLoc = self.projectConfigObject.location
-        table = self.db.returnTableReference(tableName)
-        
-        t = time.time()
-
-        print '\tNumber of rtrips processed  - ', nRowsProcessed
-        if nRowsProcessed == 0:
-            return
-        resArr = table[-nRowsProcessed:]
-
-	colnames = table.colnames
-	trips_data_array = zeros((nRowsProcessed, len(colnames)))
-	for i in range(len(colnames)):
-	    name = colnames[i]
-	    trips_data_array[:,i] = resArr[name]
-
-	print trips_data_array
-
-	print 'THIS IS WHAT WILL BE PASSED OVER TO MALTA'
-	return trips_data_array
-
-
-    def reflectToDatabase(self, tableName, keyCols=[], nRowsProcessed=0):
+    def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
@@ -326,11 +299,13 @@ class SimulationManager(object):
         colsToWrite = table.colnames
 
         #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
-        self.queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc)
+        queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc, partId)
 
-
-    def close_connections(self):
-        self.queryBrowser.dbcon_obj.close_connection()
+        
+    def close_database_connection(self, queryBrowser):
+        queryBrowser.dbcon_obj.close_connection()
+    
+    def close_cache_connection(self):
         self.db.close()
 
 if __name__ == '__main__':
