@@ -61,8 +61,8 @@ class SimulationManager(object):
 
 	self.setup_databaseConnection()
 	self.setup_cacheDatabase()
-	self.setup_location_information()
-	self.setup_tod_skims()
+	#self.setup_location_information()
+	#self.setup_tod_skims()
 	self.parse_config()
 	self.clean_database_tables()
         self.idCount = 0
@@ -162,9 +162,12 @@ class SimulationManager(object):
                 self.queryBrowser.delete_all(tableName)                            
 
 
-    def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals):
+    def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([[]])):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
-        raw_input ('\t Press any key to continue')
+	if tripInfoArrivals.shape[0] > 1:
+	    print 'Following vehicles arrived - '
+	    print tripInfoArrivals
+            #raw_input ('\t Press any key to continue')
 	t_c = time.time()
 
 
@@ -188,7 +191,7 @@ class SimulationManager(object):
                 print '\tSkipping the run for this component'
                 continue
 	    fileLoc = self.projectConfigObject.location
-            data = comp.pre_process(self.queryBrowser, self.subsample, 
+            data = comp.pre_process(self.queryBrowser, 
                                     tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.db, fileLoc)
 
@@ -198,8 +201,17 @@ class SimulationManager(object):
                 # data is written to the hdf5 cache because of the faster I/O
                 tripInfo = comp.run(data, self.projectSkimsObject, tableNamesKeyDict, 
 							self.queryBrowser, fileLoc)
+
+		# Reduce 100 to match TAZ notation of MALTA
                 tripInfo[:,-4] = tripInfo[:,-4] - 100
-                tripInfo[:,-3] = tripInfo[:,-4] - 100
+                tripInfo[:,-3] = tripInfo[:,-3] - 100
+	
+
+		# Reduce 180 to start simulation 3 hours past 4 and index it at zero
+		#tripInfo[:,-2] = tripInfo[:,-2] - 180
+		#tripInfo[:,-1] = tripInfo[:,-1] - 180
+		
+		
 
 	    else:
 		tripInfo = zeros((1,9))
@@ -225,7 +237,7 @@ class SimulationManager(object):
         tripInfo = tripInfo[:,2:]
         tripInfo[:,0] = ids[:,-1]
         
-	print 'RECORDS TO BE PASSED TO MALTA'	
+	#print 'RECORDS TO BE PASSED TO MALTA'	
         print tripInfo
 
 	return tripInfo
@@ -261,6 +273,6 @@ class SimulationManager(object):
 
 if __name__ == '__main__':
     simulationObject = SimulationManager()
-    simulationObject.run_selected_components_for_malta(195, None)
+    simulationObject.run_selected_components_for_malta(195)
 
 

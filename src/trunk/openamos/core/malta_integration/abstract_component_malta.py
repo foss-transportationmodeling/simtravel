@@ -61,7 +61,7 @@ class AbstractComponent(object):
         else:
             self.keyCols = self.key[0]
 
-    def pre_process(self, queryBrowser, subsample, 
+    def pre_process(self, queryBrowser, 
                     tableOrderDict, tableNamesKeyDict,
                     projectSkimsObject, db, fileLoc):
 
@@ -89,7 +89,7 @@ class AbstractComponent(object):
         # Prepare Data
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
                                  tableOrderDict, tableNamesKeyDict, 
-                                 count_keys, subsample)        
+                                 count_keys)        
 
 
 
@@ -234,6 +234,8 @@ class AbstractComponent(object):
 	    trips_data_array = zeros((1,9))
 	    pass
 
+	print trips_data
+	print trips_data._colnames
 	return trips_data_array
 
 
@@ -293,7 +295,7 @@ class AbstractComponent(object):
                 choiceset = None
                     
                 result = i.simulate_choice(data_subset, choiceset, iteration)
-                print result.data[:,0]
+                #print result.data[:,0]
                 self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
@@ -369,7 +371,7 @@ class AbstractComponent(object):
         
 
 	
-	print indep_columnDict
+	#print indep_columnDict
 	#raw_input()
 
         # Needed only when updating to the same table
@@ -458,12 +460,12 @@ class AbstractComponent(object):
 
     def prepare_data(self, queryBrowser, indepVarDict, depVarDict, 
                      tableOrderDict=None, tableNamesKeyDict=None, 
-                     count_keys=None, subsample=None):
+                     count_keys=None):
 
         #Get hierarchy of the tables
 
-	print 'INDEPEDNENT VAR DICTS', indepVarDict
-	print 'DEP VAR DICTS', depVarDict
+	#print 'INDEPEDNENT VAR DICTS', indepVarDict
+	#print 'DEP VAR DICTS', depVarDict
 
         # PROCESSING TO INCLUDE THE APPROPRIATE SPATIAL QUERY ANCHORS
         if self.spatialConst_list is not None:
@@ -550,8 +552,8 @@ class AbstractComponent(object):
                 matchingKey[i] = self.tableKeys[i][0]
                 continue
             else:
-		print self.tableKeys
-		print 'KEY', i
+		#print self.tableKeys
+		#print 'KEY', i
                 matchTableKeys = self.tableKeys[i][0]
             matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
 
@@ -577,8 +579,7 @@ class AbstractComponent(object):
                                         max_dict, 
                                         self.spatialConst_list,
                                         self.analysisInterval,
-                                        self.history_info, 
-                                        subsample)
+                                        self.history_info)
 	if data == None:
 	    return None
 
