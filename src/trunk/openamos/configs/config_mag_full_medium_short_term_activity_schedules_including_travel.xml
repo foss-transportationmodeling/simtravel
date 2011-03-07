@@ -3066,7 +3066,7 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="prismdur" coeff="-1"/>
         <Variable table="runtime" var="tt_to" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable1 table="persons" var="one" coeff="1"/>
       </Model>
 
       <Model1 name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
