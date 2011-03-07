@@ -963,8 +963,8 @@ class Household(object):
         dummyDropOffAct = copy.deepcopy(endAct)
 
 
-
-        dummyPickUpAct.startTime = dummyPickUpAct.endTime + 1
+        # Pickup overlaps with the end of an activity
+        dummyPickUpAct.startTime = dummyPickUpAct.endTime 
         dummyPickUpAct.endTime = dummyPickUpAct.startTime + 1
         dummyPickUpAct.duration = 1
         dummyPickUpAct.actType = 600
@@ -973,8 +973,8 @@ class Household(object):
         dummyPickUpAct.dependentPersonId = 0
 
 
-        
-        dummyDropOffAct.startTime = dummyDropOffAct.startTime - 1 -1
+        # dropoff overlaps with the start of an activity
+        dummyDropOffAct.startTime = dummyDropOffAct.startTime - 1
         dummyDropOffAct.endTime = dummyDropOffAct.startTime + 1
         dummyDropOffAct.duration = 1
         dummyDropOffAct.actType = 601
