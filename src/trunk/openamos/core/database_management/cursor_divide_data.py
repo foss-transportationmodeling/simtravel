@@ -548,7 +548,7 @@ class DivideData(object):
 			 'schedule_ltrec_r', 'schedule_r', 
 			 'trips_r', 'vehicles_r', 
 			 'workers_r', 'schedule_childreninctravelrec_r', 
-			 'schedule_cleanfixedactivityschedule_r', 'schedule_conflictrec_r', 
+			 'schedule_cleanfixedactivityschedule_r',  
 			 'schedule_dailyallocrec_r', 'schedule_final_r', 'schedule_inctravelrec_r']
 	for i in range(parts):
 	    databasename = '%s_%s' %(self.database_name, i+1)
@@ -576,13 +576,14 @@ class DivideData(object):
 
         
         t1 = time.time()
-        self.database_config_object.database_name = databasename	
+	#self.database_config_object.database_name = databasename
+	self.dbcon_obj.database_name = databasename		
 	self.dbcon_obj.new_connection()
 
         try:
             self.dbcon_obj.cursor.execute(sql_string)
             result = self.dbcon_obj.cursor.fetchall()
-	    print 'RESULT', result
+	    #print 'RESULT', result, self.database_config_object.database_name, self.dbcon_obj.connection
         except Exception, e:
             print 'Select query failed.'
             print e
@@ -591,7 +592,7 @@ class DivideData(object):
         print 'Total time taken to retrieve records %s'%(t2-t1)
        	self.dbcon_obj.close_connection()
         
-	self.database_config_object.database_name = old_db_name
+	self.dbcon_obj.database_name = old_db_name
 
 	self.dbcon_obj.new_connection()
 
@@ -619,13 +620,13 @@ class DivideData(object):
             arr_str = str(arr_str)[1:-1]
             arr_str = arr_str.replace('L', '')
             
-	    print 'EMPTY STRING', arr_str
+	    #print 'EMPTY STRING', arr_str
 
             sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
             
             try:
                 self.dbcon_obj.cursor.execute(sql_string)
-                self.dbcon_db_obj.connection.commit()
+                self.dbcon_obj.connection.commit()
             except Exception, e:
                 print e
         
