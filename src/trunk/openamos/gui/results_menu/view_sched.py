@@ -835,10 +835,11 @@ class MakeSchedPlot(QDialog):
 
 
     def colors(self, index):
-        colorpooldict = {100:'#191970',101:'#6495ED',151:'#00FFFF', # Blue Shades
+        colorpooldict = {100:'#191970',101:'#6495ED',150:'#66FFEE', 151:'#00FFFF', # Blue Shades
 			 200:'#B03060',
 			 300:'#7B68EE',
 			 411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
+                         461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
 	                 513:'#FF8000',514:'#B35A00', # Brown shades
                          600:'#006400',601:'#7CFC00', # Green shades
 			 900:'#000000'}
@@ -851,10 +852,11 @@ class MakeSchedPlot(QDialog):
     def schedule_labels(self, index):
         xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
                   'duration_rec':'Activity Duration (mins)'}
-        activitytype = {100:'IH-Sojourn',101:'IH',151:'IH-Dependent',
+        activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn', 151:'IH-Dependent',
 			200:'OH-Work',
 			300:'OH-School',
 			411:'OH-Pers Buss',412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',
+			461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',
 			513:'OH-Social Visit',514:'OH-Sports/Rec',
                         600:'Pick Up',601:'Drop Off',
 			900:'OH-Other'}
@@ -922,6 +924,7 @@ class MakeSchedPlot(QDialog):
             bars=[]
             bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(101)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(150)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(151)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
@@ -929,6 +932,10 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(461)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(462)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(465)))
+            bars.append(barh(0, 1, 1, left=0,color=self.colors(466)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
             bars.append(barh(0, 1, 1, left=0,color=self.colors(600)))
@@ -936,9 +943,10 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
             
             prop = matplotlib.font_manager.FontProperties(size=8)   
-            axes.legend(bars,('IH-Sojourn','IH', 'IH-Dependent', 
+            axes.legend(bars,('IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
 			      'OH-Work','OH-School','OH-Pers Buss',
                               'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
+				'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
                               'OH-Sports/Rec','Pick Up','Drop Off','OH-Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             axes.set_xlabel("Time (mins)")
             axes.set_ylabel("Persons")
