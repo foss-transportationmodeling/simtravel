@@ -933,6 +933,44 @@ class QueryBrowser(object):
                 print 'Error while deleting an index'
                 print e
                 self.dbcon_obj.connection.rollback()
+                
+    #get the index columns
+    def get_index_columns(self, table_name):
+        """
+        This method is used to fetch the columns that form the index for the table
+        
+        Input:
+        Database configuration object and table_name
+        
+        Output:
+        List of columns that form the index
+        """
+        self.table_name = table_name
+        #before returning the column types check if the table exists
+        table_flag = self.dbcon_obj.check_if_table_exists(table_name)
+        sql_string = "SELECT indexdef FROM pg_indexes WHERE tablename = '%s'"%table_name
+        pkey = "CREATE UNIQUE INDEX "
+        
+        if table_flag:
+            try:
+                self.dbcon_obj.cursor.execute(sql_string)
+                columns = self.dbcon_obj.cursor.fetchall()
+                cols = [cl[0] for cl in columns]
+                
+                for each in cols:
+                    if pkey not in each:
+                        index = each
+
+                split_str = index.split("(")
+                sub_str = split_str[1].split(")")[0]
+                ind_str = sub_str.split(", ")
+                return ind_str
+            except Exception, e:
+                print 'Error while fetching the columns from the table'
+                print e
+        else:
+            print 'Table %s does not exist. Cannot get the column list'%table_name
+            
     ########## methods for creating and deleting index##########
 
     ########### file function #################
