@@ -265,6 +265,8 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
+                print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
@@ -737,13 +739,20 @@ class AbstractComponent(object):
             vals = skimsMatrix2[originLocColVals, sampleLocColVals]
             rowsEqualsDefault = vals.mask
             # If OD pair missing for travel to set it to -9999 to make location
-            # unattractive
+	    # unattractive
+
+
             vals[rowsEqualsDefault] = 0
             if spatialconst.asField:
                 colName = spatialconst.asField
             else:
                 colName = spatialconst.skimField
             skimLocColName = '%s%s' %(colName, i+1)
+
+	    # Change the tt_to to 99 if there are only few locations available
+	    sampleLocsZeros = sampleLocColVals == 0
+	    vals[sampleLocsZeros] = 99
+
             data.setcolumn(skimLocColName, vals)
 
 	    #print 'Origin Loc', originLocColVals[:,0]
