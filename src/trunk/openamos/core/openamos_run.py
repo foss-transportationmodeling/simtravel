@@ -39,8 +39,8 @@ def run():
         numParts = int(args[1])
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
         simulationManagerObject.divide_database(numParts)
-        #simulationManagerObject.parse_config()
-        #simulationManagerObject.clean_database_tables()
+        simulationManagerObject.parse_config()
+        simulationManagerObject.clean_database_tables()
         
         """
         #Multiprocessing
