@@ -19,7 +19,8 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			                 Boolean, DateTime
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
-#from data_array import DataArray
+from cursor_query_browser import QueryBrowser
+from data_array import DataArray
 
 class DivideData(object):
     #initialize the class 
@@ -543,18 +544,51 @@ class DivideData(object):
         
 
     def collate_full_results(self, parts):
-	output_tables = ['child_dependency_r', 'daily_school_status_r', 
-			 'daily_work_status_r', 'households_vehicles_count_r', 
-			 'schedule_ltrec_r', 'schedule_r', 
-			 'trips_r', 'vehicles_r', 
-			 'workers_r', 'schedule_childreninctravelrec_r', 
-			 'schedule_cleanfixedactivityschedule_r',  
-			 'schedule_dailyallocrec_r', 'schedule_final_r', 'schedule_inctravelrec_r']
-	for i in range(parts):
-	    databasename = '%s_%s' %(self.database_name, i+1)
-	    for table_name in output_tables:	
-		print table_name, databasename
-		self.collate_results(databasename, table_name)
+        """
+        This method calls the collate data method.
+        Prior to that it deletes the indexes on the tables. 
+        When all the data is put together the indexes are created again.
+        
+        Input:
+        Number of parts
+        
+        Output:
+        Data from all databases is saved in the parent database
+        """
+        output_tables = ['child_dependency_r', 'daily_school_status_r', 
+                        'daily_work_status_r', 'households_vehicles_count_r', 
+                        'schedule_ltrec_r', 'schedule_r', 
+                        'trips_r', 'vehicles_r', 
+                        'workers_r', 'schedule_childreninctravelrec_r', 
+                        'schedule_cleanfixedactivityschedule_r',  
+                        'schedule_dailyallocrec_r', 'schedule_final_r', 'schedule_inctravelrec_r']
+			 
+        index_columns = ''
+        t1 = time.time()
+        #create a new database connection object
+        self.new_qb_obj = QueryBrowser(self.database_config_object)
+    	
+        #open a new object connection
+        self.new_qb_obj.dbcon_obj.new_connection()
+	
+        for table_name in output_tables:
+            #print '\n', table_name
+            index_columns = self.new_qb_obj.get_index_columns(table_name)
+            #print '\t', index_columns
+            print '\tdelete the index'
+            self.new_qb_obj.delete_index(table_name)
+            for i in range(parts):
+                databasename = '%s_%s'%(self.database_name, i+1)
+                #print '\t', databasename
+                self.collate_results(databasename, table_name)
+            print '\tcreate the index again'
+            self.new_qb_obj.create_index(table_name, index_columns)
+	        
+        #close the connection
+        self.new_qb_obj.dbcon_obj.close_connection()
+	
+        t2 = time.time()
+        print 'Total time taken to delete and create all the indexes --> %s'%(t2-t1)
 
 
     #collate the data from all the output table
@@ -731,7 +765,7 @@ class TestDivideData(unittest.TestCase):
         self.user_name = 'postgres'
         self.password = '1234'
         self.host_name = 'localhost'
-        self.database_name = 'mag_zone_1'
+        self.database_name = 'mag_zone'
 
     
     def testdividedata(self):
@@ -742,7 +776,7 @@ class TestDivideData(unittest.TestCase):
         print 'Start program'
         
         """ Call main function """
-        parts = 4
+        parts = 2
         location = '/home/namrata/Documents/threads'
         table1 = 'households'
         table2 = 'persons'
@@ -759,11 +793,11 @@ class TestDivideData(unittest.TestCase):
         dbname = 'mag_zone'
         
         #open connection
-        newobject.dbcon_obj.new_connection()
-        newobject.collate_results(dbname, table_name)
+        #newobject.dbcon_obj.new_connection()
+        #newobject.collate_results(dbname, table_name)
         #close connection
-        newobject.dbcon_obj.close_connection()
-        
+        #newobject.dbcon_obj.close_connection()
+        newobject.collate_full_results(parts)
         """
         #   MAG_ZONE_2
         newobject.dbcon_obj.database_name = 'mag_zone_2'
