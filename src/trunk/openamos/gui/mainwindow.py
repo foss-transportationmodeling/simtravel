@@ -211,9 +211,9 @@ class MainWindow(QMainWindow):
 
     # Defining help        
         self.help_menu = self.menuBar().addMenu("&Help")
-        help_about_action = self.createaction("&About OpenAMOS", None, None, 
-                                            None, "Display software information.")        
-        help_documentation_action = self.createaction("&Documentation", None, None, 
+        help_about_action = self.createaction("&About OpenAMOS", None, None,
+                                            None, "Display software information.")
+        help_documentation_action = self.createaction("&Documentation", None, None,
                                             None, "Quick reference for important parameters.")        
         self.addActions(self.help_menu, (help_documentation_action,None,help_about_action,  ))
  
@@ -397,12 +397,12 @@ class MainWindow(QMainWindow):
     
     def results_schedules(self):
         if self.proconfig <> None:
-            show_plot = MakePlot(self.proconfig,"schedule_r")
+            show_plot = MakePlot(self.proconfig,"schedule_final_r")
             show_plot.exec_()
             
     def results_trips(self):
         if self.proconfig <> None:
-            show_plot = MakePlot(self.proconfig,"trips")
+            show_plot = MakePlot(self.proconfig,"trips_r")
             show_plot.exec_()
             
     def results_person(self):
@@ -429,7 +429,7 @@ class MainWindow(QMainWindow):
         simulationManagerObject.clean_database_tables()
         simulationManagerObject.run_components()
         simulationManagerObject.close_connections()
-        
+
 #        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
 #            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
 #            componentManager.establish_databaseConnection()
@@ -438,9 +438,9 @@ class MainWindow(QMainWindow):
 #            componentManager.db.close()
 #        else:
 #            print "Something Wrong"
-        
-        
-        
+
+
+
 
 def main():
     app = QApplication(sys.argv)
