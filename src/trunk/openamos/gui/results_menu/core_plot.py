@@ -25,6 +25,7 @@ class Matplot(QDialog):
         # Create the mpl Figure and FigCanvas objects.
         # 5x4 inches, 100 dots-per-inch
         #
+        self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.new_obj = None
         self.project = None
         self.dpi = 100

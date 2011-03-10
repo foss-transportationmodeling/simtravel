@@ -33,6 +33,7 @@ class MakeSchedPlot(QDialog):
 
         self.setMinimumSize(QSize(900,600))
         self.setWindowTitle("Profile of Activity Travel Pattern")
+        self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.new_obj = None
         self.project = None        
         self.valid = False
