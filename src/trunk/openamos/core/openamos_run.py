@@ -42,7 +42,7 @@ def run():
         simulationManagerObject.parse_config()
         simulationManagerObject.clean_database_tables()
         
-        """
+        
         #Multiprocessing
         pool = multiprocessing.Pool()
         partsList = range(numParts)
@@ -50,7 +50,7 @@ def run():
         argsParallel = [(fileLoc, i+1) for i in partsList]
         print argsParallel
         pool.map(run_components_in_parallel, argsParallel)
-        """
+        
         simulationManagerObject.collate_results(numParts)
         
 def run_components_in_parallel(args):
