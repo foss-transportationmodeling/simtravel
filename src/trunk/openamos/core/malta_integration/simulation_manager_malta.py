@@ -9,7 +9,7 @@ from openamos.core.malta_integration.config_parser_malta import ConfigParser
 from openamos.core.database_management.cursor_query_browser import QueryBrowser
 from openamos.core.errors import ConfigurationError
 from openamos.core.data_array import DataArray
-from openamos.core.cache.dataset_malta import DB
+from openamos.core.malta_integration.dataset_malta import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 
@@ -61,10 +61,10 @@ class SimulationManager(object):
 
 	self.setup_databaseConnection()
 	self.setup_cacheDatabase()
-	#self.setup_location_information()
-	#self.setup_tod_skims()
+	self.setup_location_information()
+	self.setup_tod_skims()
 	self.parse_config()
-	self.clean_database_tables()
+	#self.clean_database_tables()
         self.idCount = 0
         self.idList = []
 
@@ -171,13 +171,14 @@ class SimulationManager(object):
 	t_c = time.time()
 
 
-	tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
+
 
 
 	# Get the two components one for dynamic activity simulation and another for extracting trips
 	compObjects = []
         for comp in self.componentList:
-	    if comp.component_name in ['ExtractTravelEpisodes']:
+	    if comp.component_name in ['DynamicNonMandatoryActivities', 'FinalReconciliationOfActivityTravelStartAdj', 
+					'FinalReconciliationOfActivityTravelEndAdj', 'ExtractTravelEpisodes']:
 	        compObjects.append(comp)
 
 	tripInfo = zeros((1,9))
@@ -192,55 +193,41 @@ class SimulationManager(object):
                 continue
 	    fileLoc = self.projectConfigObject.location
             data = comp.pre_process(self.queryBrowser, 
-                                    tableOrderDict, tableNamesKeyDict, 
                                     self.projectSkimsObject, self.db, fileLoc)
 
             if data is not None:
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                tripInfo = comp.run(data, self.projectSkimsObject, tableNamesKeyDict, 
-							self.queryBrowser, fileLoc)
-
-		# Reduce 100 to match TAZ notation of MALTA
-                tripInfo[:,-4] = tripInfo[:,-4] - 100
-                tripInfo[:,-3] = tripInfo[:,-3] - 100
-	
-
-		# Reduce 180 to start simulation 3 hours past 4 and index it at zero
-		#tripInfo[:,-2] = tripInfo[:,-2] - 180
-		#tripInfo[:,-1] = tripInfo[:,-1] - 180
-		
-		
+                tripInfo = comp.run(data, self.projectSkimsObject, 
+					self.queryBrowser, fileLoc)
 
 	    else:
 		tripInfo = zeros((1,9))
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #raw_input()
 
+	if comp.component_name == 'ExtractTravelEpisodes':
+	    # Reduce 100 to match TAZ notation of MALTA
+	    tripInfo[:,-4] = tripInfo[:,-4] - 100
+            tripInfo[:,-3] = tripInfo[:,-3] - 100
 
-        #print tripInfo
+	    tripInfo = tripInfo.astype(int)
 
-        tripInfo = tripInfo.astype(int)
-
-
-
-
-        rowC = tripInfo.shape[0]
+	    rowC = tripInfo.shape[0]
         
-        ids = zeros((rowC, 4))
-        ids[:,:-1] = tripInfo[:,:3]
-        ids[:,-1] = array(range(rowC)) + self.idCount + 1
+	    ids = zeros((rowC, 4))
+	    ids[:,:-1] = tripInfo[:,:3]
+	    ids[:,-1] = array(range(rowC)) + self.idCount + 1
 
-        self.idCount += rowC
+	    self.idCount += rowC
 
-        tripInfo = tripInfo[:,2:]
-        tripInfo[:,0] = ids[:,-1]
+	    tripInfo = tripInfo[:,2:]
+	    tripInfo[:,0] = ids[:,-1]
         
-	#print 'RECORDS TO BE PASSED TO MALTA'	
-        print tripInfo
-
-	return tripInfo
+	    print 'RECORDS TO BE PASSED TO MALTA'	
+	    print tripInfo
+	    return tripInfo
 
 
 

@@ -1,5 +1,6 @@
 import copy
 import time
+import traceback, sys
 from numpy import logical_or, logical_and, ones, ma, zeros, where, vstack
 from numpy.ma import masked_equal
 from openamos.core.data_array import DataArray
@@ -21,6 +22,8 @@ class AbstractComponent(object):
                  readFromTable,
                  writeToTable,
                  key,
+		 tableOrder,
+		 tableKeys,
                  spatialConst_list=None,
                  dynamicspatialConst_list=None,
                  analysisInterval=None,
@@ -43,6 +46,8 @@ class AbstractComponent(object):
         self.readFromTable = readFromTable
         self.writeToTable = writeToTable
         self.key = key
+	self.tableOrder = tableOrder
+	self.tableKeys = tableKeys
         self.spatialConst_list = spatialConst_list
         self.dynamicspatialConst_list = dynamicspatialConst_list
         self.analysisInterval = analysisInterval
@@ -62,8 +67,10 @@ class AbstractComponent(object):
             self.keyCols = self.key[0]
 
     def pre_process(self, queryBrowser, 
-                    tableOrderDict, tableNamesKeyDict,
                     projectSkimsObject, db, fileLoc):
+
+        tableOrderDict = self.tableOrder
+	tableNamesKeyDict = self.tableKeys
 
         t_d = time.time()
         # process the variable list to exclude double columns, 
@@ -137,9 +144,10 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data, projectSkimsObject, tableNamesKeyDict, queryBrowser, fileLoc):
+    def run(self, data, projectSkimsObject, queryBrowser, fileLoc):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
+	tableNamesKeyDict = self.tableKeys
         #raw_input()
         #self.db = db
 
@@ -191,8 +199,47 @@ class AbstractComponent(object):
         are using tables in the database which only contain the input tables 
         and hence the need to reflect the run-time caches to the database
         """
-	# Extracting trips
+	# Reflecting the dynamic activity-travel generation to data table and also extracting and passing trips
 	try:
+	    ti = time.time()
+	    tableCols = self.db.returnCols(self.writeToTable)
+            
+            convType = self.db.returnTypeConversion(self.writeToTable)
+	    dtypesInput = self.db.tableColTypes(self.writeToTable)
+
+	    # O and D are not same
+	    data = self.data.columnsOfType(tableCols, valid_data_filter, dtypesInput)
+	
+	    keyCols = tableNamesKeyDict[self.writeToTable][0] 
+
+	    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)
+
+	    if self.component_name == 'ExtractTravelEpisodes':
+	        data_array = zeros((trips_filter.sum(), len(tripColsTable)))
+
+	    	dataTempNames = data.data.dtype.names 
+	        for i in range(len(dataTempNames)):
+		    name = tripDataTempNames[i]
+		    data_array[:,i] = data.data[name]
+	
+	    #queryBrowser.copy_into_table(data, dataTempNames, self.writeToTable, keyCols, fileLoc) 
+
+
+	    print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 
+	    print '\t\tNumber of rows processed - ', valid_data_filter.sum()
+
+	except Exception, e:
+	    print e
+            traceback.print_exc(file=sys.stdout)
+	    data_array = zeros((1, 9))
+
+        if self.component_name == 'ExtractTravelEpisodes':
+	    return data_array
+
+	
+	"""
+	try:
+
 	    if self.component_name == 'ExtractTravelEpisodes':
 	        ti = time.time()
 	        tripColsTable = self.db.returnCols('trips_r')
@@ -201,15 +248,6 @@ class AbstractComponent(object):
 	        dtypesInput = self.db.tableColTypes('trips_r')
 
 	        # O and D are not same
-		"""
-	        origins = self.data.columns(['fromzone']).data
-	        destinations = self.data.columns(['tozone']).data
-	        not_trips_filter = origins == destinations
-	        not_trips_filter.shape = (not_trips_filter.shape[0], )
-		trips_filter = copy.deepcopy(valid_data_filter)
-            
-                trips_filter[not_trips_filter] = False
-		"""
 		trips_filter = valid_data_filter
 	        trips_data = self.data.columnsOfType(tripColsTable, trips_filter, dtypesInput)
 	
@@ -237,7 +275,7 @@ class AbstractComponent(object):
 	print trips_data
 	print trips_data._colnames
 	return trips_data_array
-
+	"""
 
     def create_filter(self, data_filter, filter_type):
         ti = time.time()

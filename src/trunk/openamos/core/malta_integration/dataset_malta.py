@@ -22,9 +22,22 @@ class DB(object):
 			  'households_vehicles_count_r':['houseid', 'vehcount'],
 			  'vehicles_r':['houseid', 'vehid', 'vehtype'],
 			  'schedule_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
-					'endtime', 'duration'],
+					'endtime', 'duration', 'dependentpersonid'],
   			  'schedule_ltrec_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
-					'endtime', 'duration'],
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_cleanfixedactivityschedule_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_childreninctravelrec_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_conflictrec_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_inctravelrec_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_dailyallocrec_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+			  'schedule_final_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid'],
+
 			  'trips_r':['houseid', 'personid', 'tripid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime'],
 			  'workers_r':['houseid', 'personid', 'episodes'], 
 			  'child_dependency_r':['houseid', 'personid', 'dependency'],
@@ -43,7 +56,8 @@ class DB(object):
 			'office_employment_ind':int32, 'industrial_employment_ind':int32, 'other_employment_ind':int32, 
 			'total_area':float32, 'residential_population':int32, 'single_family_dwelling':int32, 
 			'institutional_population':int32, 'multi_family_dwelling':int32, 'vehcount':int32, 
-			'vehtype':int32, 'scheduleid':int32, 'activitytype':int32, 'duration':int32}
+			'vehtype':int32, 'scheduleid':int32, 'activitytype':int32, 'duration':int32, 
+			'dependentpersonid':int32}
 
 	
 
@@ -89,6 +103,7 @@ class DB(object):
 	#print len(uniqueIds)
 
         for i in range(len(colNames)):
+	    print i
 	    table[uniqueIds, i] = data[:,i]
 	
 	#print table

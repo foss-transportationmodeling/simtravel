@@ -27,6 +27,15 @@ from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.models.nested_logit_model_components import NestedChoiceSpecification, NestedSpecification
 from openamos.core.models.error_specification import LinearRegErrorSpecification
 from openamos.core.models.error_specification import StochasticRegErrorSpecification
+from openamos.core.models.schedules_model_components import ReconcileSchedulesSpecification
+from openamos.core.models.schedules_model_components import ActivityAttribsSpecification
+from openamos.core.models.schedules_model_components import DailyStatusAttribsSpecification
+from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
+from openamos.core.models.schedules_model_components import HouseholdSpecification
+from openamos.core.models.reconcile_schedules import ReconcileSchedules
+from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
+from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
+
 from openamos.core.models.model import SubModel
 
 from openamos.core.malta_integration.abstract_component_malta import AbstractComponent
@@ -137,9 +146,9 @@ class ConfigParser(object):
                                                dbname)
         return dbConfigObject
         
-    def parse_tableHierarchy(self):
+    def parse_tableHierarchy(self, component_element):
         print "-- Parse table hierarchy --"
-        dbTables_element = self.configObject.find('DBTables')
+        dbTables_element = component_element.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
         tableNamesKeyDict = {}
@@ -282,11 +291,23 @@ class ConfigParser(object):
 
     
     def create_component(self, component_element):
-        comp_name, comp_read_table, comp_write_table, comp_keys = self.return_component_attribs(component_element)
+        self.model_list = []
+        self.component_variable_list = []
+
+        comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
 	print "Parsing Component - %s" %(comp_name)
+
+
+        tableOrder, tableKeys = self.parse_tableHierarchy(component_element)
+        if comp_write_table is not None:
+            comp_keys = tableKeys[comp_write_table]
+        else:
+            comp_keys = tableKeys[comp_read_table]
+
+
 
         spatialConstIterator = component_element.getiterator("SpatialConstraints")
         spatialConst_list = []
@@ -313,11 +334,9 @@ class ConfigParser(object):
             historyInfoObject = self.return_history_info(historyInfo_element)
         else:
             historyInfoObject = None
-        
 
         modelsIterator = component_element.getiterator("Model")
-        self.model_list = []
-        self.component_variable_list = []
+
         for i in modelsIterator:
             self.create_model_object(i)
             self.create_linear_object_for_locations(i, spatialConst_list)
@@ -350,13 +369,15 @@ class ConfigParser(object):
                                       comp_read_table,
                                       comp_write_table,
                                       comp_keys,
+                                      tableOrder,
+                                      tableKeys,
                                       spatialConst_list,
                                       dynamicSpatialConst_list,
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,
-                                      dependencyAllocationFlag = dependencyAllocationFlag,
-                                      skipFlag = skipFlag)
+                                      dependencyAllocationFlag=dependencyAllocationFlag,
+                                      skipFlag=skipFlag)
         return component
 
 
@@ -419,6 +440,15 @@ class ConfigParser(object):
         if model_formulation == 'Probability Distribution':
             self.create_probability_object(model_element)
 
+        if model_formulation == 'Reconcile Schedules':
+            self.create_reconcile_schedules_object(model_element)
+
+        if model_formulation == 'Clean Fixed Activity Schedule':
+            self.create_clean_fixed_activity_schedule(model_element)
+
+        if model_formulation == 'Child Dependency Allocation':
+            self.create_child_dependency_allocation_object(model_element)
+
 
     def process_seed(self, model_element):
         seed = model_element.get('seed')
@@ -471,13 +501,19 @@ class ConfigParser(object):
         vertex = model_element.get('vertex')
 
         # Reading the threshold for the stochastic frontier
-        threshold = model_element.get('threshold')
+        lower_threshold = model_element.get('lower_threshold')
+        upper_threshold = model_element.get('upper_threshold')
 
-	if threshold == None:
-            threshold = 0
+	if lower_threshold == None:
+            lower_threshold = 0
         else:
-            threshold = float(threshold)
+            lower_threshold = float(lower_threshold)
 
+
+	if upper_threshold == None:
+            upper_threshold = 0
+        else:
+            upper_threshold = float(upper_threshold)
         
         # Creating the variance matrix
         model_type = model_element.get('type')
@@ -487,7 +523,9 @@ class ConfigParser(object):
         if model_type in ['Linear', 'Log Linear'] :
             for i in varianceIterator:
                 variance = array([[float(i.get('value'))]])
-            errorSpec = LinearRegErrorSpecification(variance, vertex, threshold)         
+            errorSpec = LinearRegErrorSpecification(variance, vertex, 
+						    lower_threshold,
+						    upper_threshold)         
             if model_type == 'Linear':
                 model = LinearRegressionModel(specification, errorSpec)
             else:
@@ -509,7 +547,9 @@ class ConfigParser(object):
                     half_norm_variance = float(i.get('value'))
                     
             variance = array([[norm_variance, 0],[0, half_norm_variance]])
-            errorSpec = StochasticRegErrorSpecification(variance, vertex, threshold)
+            errorSpec = StochasticRegErrorSpecification(variance, vertex, 
+							lower_threshold,
+							upper_threshold)
 
             if model_type == 'Stochastic Frontier':
                 model = StocFronRegressionModel(specification, errorSpec)                 
@@ -1136,7 +1176,272 @@ class ConfigParser(object):
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
+    def create_reconcile_schedules_object(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+
+        specification = ReconcileSchedulesSpecification(activityAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = ReconcileSchedules(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+    def create_clean_fixed_activity_schedule(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = CleanFixedActivitySchedule(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
     
+
+
+        
+    def create_child_dependency_allocation_object(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = ChildDependencyAllocation(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        
+
+    def return_daily_status_attribs(self, dailystatus_attribs_element):
+        variable_list = []
+
+        dailySchStatus_element = dailystatus_attribs_element.find('DailySchoolStatus')
+        dailySchStatusParsed = self.return_table_var(dailySchStatus_element)
+        variable_list.append(dailySchStatusParsed)
+
+        dailyWrkStatus_element = dailystatus_attribs_element.find('DailyWorkStatus')
+        dailyWrkStatusParsed = self.return_table_var(dailyWrkStatus_element)
+        variable_list.append(dailyWrkStatusParsed)
+
+        
+        dailyStatusSpec = DailyStatusAttribsSpecification(dailyWrkStatusParsed[1], 
+							  dailySchStatusParsed[1])
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return dailyStatusSpec
+
+    def return_dependency_attribs(self, dependency_attribs_element):
+        variable_list = []
+
+        childDependency_element = dependency_attribs_element.find('ChildDependency')
+        childDependencyParsed = self.return_table_var(childDependency_element)
+        variable_list.append(childDependencyParsed)
+
+
+        """
+        IN THE FUTURE IF WE WANT TO INCLUDE ELDERLY DEPENDENCY AS WELL
+        elderlyDependency_element = dependency_attribs_element.find('ElderlyDependency')
+        elderlyDepedencyParsed = self.return_table_var(elderlyDependency_element)
+        variable_list.append(elderlyDependencyParsed)
+        """
+        
+        dependencySpec = DependencyAttribsSpecification(childDependencyParsed[1], elderlyDependencyName=None)
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return dependencySpec
+
+
+
+
+
+
+    def return_activity_attribs(self, activity_attribs_element):
+        variable_list = []
+
+        householdIdName_element = activity_attribs_element.find('HouseholdIdName')
+        householdIdParsed = self.return_table_var(householdIdName_element)
+        variable_list.append(householdIdParsed)
+
+        personIdName_element = activity_attribs_element.find('PersonIdName')
+        personIdParsed = self.return_table_var(personIdName_element)
+        variable_list.append(personIdParsed)
+
+        scheduleIdName_element = activity_attribs_element.find('ScheduleIdName')
+        scheduleIdParsed = self.return_table_var(scheduleIdName_element)
+        variable_list.append(scheduleIdParsed)
+
+        activityTypeName_element = activity_attribs_element.find('ActivityTypeName')
+        activityTypeParsed = self.return_table_var(activityTypeName_element)
+        variable_list.append(activityTypeParsed)
+
+        startTimeName_element = activity_attribs_element.find('StartTimeName')
+        startTimeParsed = self.return_table_var(startTimeName_element)
+        variable_list.append(startTimeParsed)
+
+        endTimeName_element = activity_attribs_element.find('EndTimeName')
+        endTimeParsed = self.return_table_var(endTimeName_element)
+        variable_list.append(endTimeParsed)
+
+        locationIdName_element = activity_attribs_element.find('LocationIdName')
+        locationIdParsed = self.return_table_var(locationIdName_element)
+        variable_list.append(locationIdParsed)
+
+        durationName_element = activity_attribs_element.find('DurationName')
+        durationParsed = self.return_table_var(durationName_element)
+        variable_list.append(durationParsed)
+
+
+        dependentPersonName_element = activity_attribs_element.find('DependentPersonName')
+        dependentPersonParsed = self.return_table_var(dependentPersonName_element)
+        variable_list.append(dependentPersonParsed)
+
+        actAttribsSpec = ActivityAttribsSpecification(householdIdParsed[1],
+                                                      personIdParsed[1],
+                                                      scheduleIdParsed[1],
+                                                      activityTypeParsed[1],
+                                                      startTimeParsed[1],
+                                                      endTimeParsed[1],
+                                                      locationIdParsed[1],
+                                                      durationParsed[1],
+                                                      dependentPersonParsed[1])        
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return actAttribsSpec
+        
+
+
+
+        
     def return_table_var(self, var_element):
         return var_element.get('table'), var_element.get('var')
         
@@ -1453,17 +1758,19 @@ class ConfigParser(object):
         if writeToTable is None:
             writeToTable = readFromTable
             
-
+        """    
         prim_keys = component_element.get('key')
         if prim_keys is not None:
             prim_keys = re.split('[,]', prim_keys)
         index_keys = component_element.get('count_key')
         if index_keys is not None:
             index_keys = re.split('[,]', index_keys)
-
+        """
         
         #print varname, tablename, [prim_keys, index_keys]
-        return name, readFromTable, writeToTable, [prim_keys, index_keys]
+        #return name, readFromTable, writeToTable, [prim_keys, index_keys]
+        return name, readFromTable, writeToTable
+        
         
                             
 
