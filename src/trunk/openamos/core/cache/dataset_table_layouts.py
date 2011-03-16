@@ -49,7 +49,6 @@ class Tsp_R(t.IsDescription):
 class Schedule_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
-    scheduleid = t.Int32Col()
     activitytype = t.Int32Col()
     locationid = t.Int32Col()
     starttime = t.Int32Col()
@@ -80,7 +79,6 @@ class Workers_R(t.IsDescription):
 class Trips_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
-    tripid = t.Int32Col()
     vehid = t.Int32Col()
     tripmode = t.Int32Col()
     fromzone = t.Int32Col()

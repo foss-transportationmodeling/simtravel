@@ -44,7 +44,6 @@ class Person(object):
 	        self.lastEpisode = activity
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
-            #self.scheduleIds.append(activity.scheduleId)
             self._update_schedule_conflict_indicator(activity, add=True)
 
 
@@ -56,8 +55,6 @@ class Person(object):
 	for activity in activityEpisodes:
             print (activity.startTime, activity)
 	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
-	    #self.actCount -= 1
-	    #self.scheduleIds.remove(activity.scheduleId)
             self._update_schedule_conflict_indicator(activity, add=False)
 
     def _update_schedule_conflict_indicator(self, activity, add=True):
@@ -356,15 +353,6 @@ class Person(object):
 	return activityStart, activity
 
 
-    def new_schedule_id(self):
-	newId = self.actCount + 1
-	if newId not in self.scheduleIds:
-	    return newId
-	else:
-	    for i in range(newId):
-	        if i not in self.scheduleIds:
-		    return i
-	
 
     def check_start_of_day(self, refEndTime):
 	if self.firstEpisode.endTime >= refEndTime:
@@ -513,7 +501,7 @@ class Person(object):
         while (not stActFound):
             act = hp.heappop(self.listOfActivityEpisodes)[1]
         
-            if act.scheduleId == 1:
+            if act.startTime == 0:
                 stActFound = True
             else:
                 if act.startTime == 0:
