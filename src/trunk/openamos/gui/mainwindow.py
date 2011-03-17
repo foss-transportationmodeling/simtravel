@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
                                                 icon="projectsaveas", tip="Save the current OpenAMOS project with a new name.")
 
         project_close_action = self.createaction("&Close Project", self.projectClose, QKeySequence.Close,
-                                                tip="Close the current OpenAMOS project.")
+                                                "close",tip="Close the current OpenAMOS project.")
 
         project_print_action = self.createaction("&Print", None , QKeySequence.Print,
                                                 tip="Print the current OpenAMOS project.")
@@ -165,9 +165,10 @@ class MainWindow(QMainWindow):
 #        component_time_use_utility_calculator_action = self.createaction(COMP_TIMEUSEUTILITY, None, None, 
 #                                            None, None)
 
-        self.modelsComponentSubMenu = self.models_menu.addMenu("&Component")
+        modelsComponentSubMenu = self.models_menu.addMenu("&Component")
+        modelsComponentSubMenu.setIcon(QIcon("./images/component.png"))
 #        self.addActions(self.models_menu, (models_interactive_ui_action, ))
-        self.addActions(self.modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_location_choice_generator_action,
+        self.addActions(modelsComponentSubMenu, (component_long_term_choices_action, component_fixed_activity_location_choice_generator_action,
                                                       component_vehicle_ownership_model_action, component_fixed_activity_prism_generator_action,
                                                        component_child_daily_status_and_allocation_model_action, component_adult_daily_status_model_action,
                                                       component_activity_skeleton_reconciliation_system_action,component_activity_travel_pattern_simulator_action,
@@ -222,7 +223,7 @@ class MainWindow(QMainWindow):
     # Defining help        
         self.help_menu = self.menuBar().addMenu("&Help")
         help_about_action = self.createaction("&About OpenAMOS", None, None,
-                                            None, "Display software information.")
+                                            "help", "Display software information.")
         help_documentation_action = self.createaction("&Documentation", None, None,
                                             "documentation", "Quick reference for important parameters.")        
         self.addActions(self.help_menu, (help_documentation_action,None,help_about_action,  ))
