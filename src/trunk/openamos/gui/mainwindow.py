@@ -9,6 +9,7 @@ from file_menu.newproject import *
 from file_menu.openproject import *
 from file_menu.saveproject import *
 from file_menu.databaseconfig import *
+from results_menu.to_postgis import *
 from results_menu.view_trips import *
 from results_menu.view_sched import *
 from run_menu.simulation_dialog import *
@@ -173,14 +174,23 @@ class MainWindow(QMainWindow):
                                                       component_activity_travel_reconciliation_system_action))#,component_time_use_utility_calculator_action))
 
     # Defining Data
+
+        
         self.data_menu = self.menuBar().addMenu("&Data")
-        data_import_action = self.createaction("Import data", None, None,
-                                            "import", "Import data.")
+#        data_import_action = self.createaction("Import data", None, None,
+#                                            "import", "Import data.")
+        importSubMenu = self.data_menu.addMenu("Import data")
+        importSubMenu.setIcon(QIcon("./images/import.png"))
+        import_shapefile = self.createaction("Import spatial data (.shp)", self.importshape, None, 
+                                    None, None)
+        self.addActions(importSubMenu, (import_shapefile,))
+        
         data_export_action = self.createaction("Export data", None, None,
                                             "export", "Export data.")
         data_dataconfig_action = self.createaction("Database Configuration", self.databaseconfiguration, None,
-                                                 None, "Database Configuration", False, True)
-        self.addActions(self.data_menu, (data_import_action, data_export_action,data_dataconfig_action,))
+                                                 "datasource", "Database Configuration", False, True)
+        self.addActions(self.data_menu, (data_export_action,data_dataconfig_action,))
+
 
     # Defining Display
 #        self.display_menu = self.menuBar().addMenu("D&isplay")
@@ -214,7 +224,7 @@ class MainWindow(QMainWindow):
         help_about_action = self.createaction("&About OpenAMOS", None, None,
                                             None, "Display software information.")
         help_documentation_action = self.createaction("&Documentation", None, None,
-                                            None, "Quick reference for important parameters.")        
+                                            "documentation", "Quick reference for important parameters.")        
         self.addActions(self.help_menu, (help_documentation_action,None,help_about_action,  ))
  
 # Defining toolbar
@@ -389,7 +399,11 @@ class MainWindow(QMainWindow):
         self.models.setConfigObject(self.proconfig)
         self.centralwidget.setEnabled(actpro)
 
-        
+    def importshape(self):
+        if self.proconfig <> None:
+            import_shape = Read_Shape(self.proconfig)
+            import_shape.exec_()
+            
     def databaseconfiguration(self):
         if self.proconfig <> None:
             project_database = DatabaseConfig(self.proconfig)
