@@ -131,7 +131,7 @@ class QueryBrowser(object):
 
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, 
-                    history_info=None):
+                    history_info=None, subsample=None):
         """
         This method is used to select the join of tables and display them.
         
@@ -612,6 +612,7 @@ class QueryBrowser(object):
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
         print 'SQL string for query - ', sql_string
         print cols_list
+	#raw_input()
         
         try:
             self.dbcon_obj.cursor.execute(sql_string)

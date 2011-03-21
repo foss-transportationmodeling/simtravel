@@ -56,7 +56,7 @@ class DivideData(object):
         self.workers_tab = 'workers_r'
 	self.schedule_child_tab = 'schedule_childreninctravelrec_r'
 	self.schedule_clean_tab = 'schedule_cleanfixedactivityschedule_r'
-	self.schedule_conflict_tab = 'schedule_conflictrec_r'
+	#self.schedule_conflict_tab = 'schedule_conflictrec_r'
 	self.schedule_daily_tab = 'schedule_dailyallocrec_r'
 	self.schedule_final_tab = 'schedule_final_r'
 	self.schedule_intravel_tab = 'schedule_inctravelrec_r'
@@ -73,7 +73,7 @@ class DivideData(object):
         self.workers_op = None
 	self.schedule_child_op = None
 	self.schedule_clean_op = None
-	self.schedule_conflict_op = None
+	#self.schedule_conflict_op = None
 	self.schedule_daily_op = None
 	self.schedule_final_op = None
 	self.schedule_intravel_op = None
@@ -129,7 +129,10 @@ class DivideData(object):
         
         #get the data types of the columns
         data_type = self.dbcon_obj.get_column_types(table_name)
-        
+	
+	#get column defaults
+	col_defaults = self.dbcon_obj.get_column_defaults(table_name)        
+
         #get the keys of the table
         keys = self.dbcon_obj.get_table_keys(table_name)
         
@@ -143,7 +146,7 @@ class DivideData(object):
             key_list[index] = 1
         
         #key list created. return the required
-        return cols, data_type, key_list
+        return cols, data_type, col_defaults, key_list
         
 
     #get the columns and then create the list of datatypes and keys
@@ -158,25 +161,25 @@ class DivideData(object):
         """     
         #get info for all tables and store them in variable
         #input tables
-        self.house_cols, self.house_dt, self.house_keys = self.get_tab_structure(self.house_tab)
-        self.persons_cols, self.persons_dt, self.persons_keys = self.get_tab_structure(self.persons_tab)
+        self.house_cols, self.house_dt, self.house_def, self.house_keys = self.get_tab_structure(self.house_tab)
+        self.persons_cols, self.persons_dt, self.persons_def, self.persons_keys = self.get_tab_structure(self.persons_tab)
         
         #output tables
-        self.child_cols, self.child_dt, self.child_keys = self.get_tab_structure(self.child_tab)
-        self.school_cols, self.school_dt, self.school_keys = self.get_tab_structure(self.school_tab)
-        self.work_cols, self.work_dt, self.work_keys = self.get_tab_structure(self.work_tab)
-        self.veh_count_cols, self.veh_count_dt, self.veh_count_keys = self.get_tab_structure(self.veh_count_tab)
-        self.ltrec_cols, self.ltrec_dt, self.ltrec_keys = self.get_tab_structure(self.ltrec_tab)
-        self.schedule_cols, self.schedule_dt, self.schedule_keys = self.get_tab_structure(self.schedule_tab)
-        self.trips_cols, self.trips_dt, self.trips_keys = self.get_tab_structure(self.trips_tab)
-        self.veh_cols, self.veh_dt, self.veh_keys = self.get_tab_structure(self.veh_tab)
-        self.workers_cols, self.workers_dt, self.workers_keys = self.get_tab_structure(self.workers_tab)
-	self.schedule_child_cols, self.schedule_child_dt, self.schedule_child_keys = self.get_tab_structure(self.schedule_child_tab)
-	self.schedule_clean_cols, self.schedule_clean_dt, self.schedule_clean_keys = self.get_tab_structure(self.schedule_clean_tab)
-	self.schedule_conflict_cols, self.schedule_conflict_dt, self.schedule_conflict_keys = self.get_tab_structure(self.schedule_conflict_tab)
-	self.schedule_daily_cols, self.schedule_daily_dt, self.schedule_daily_keys = self.get_tab_structure(self.schedule_daily_tab)
-	self.schedule_final_cols, self.schedule_final_dt, self.schedule_final_keys = self.get_tab_structure(self.schedule_final_tab)
-	self.schedule_intravel_cols, self.schedule_intravel_dt, self.schedule_intravel_keys = self.get_tab_structure(self.schedule_intravel_tab)	
+        self.child_cols, self.child_dt, self.child_def, self.child_keys = self.get_tab_structure(self.child_tab)
+        self.school_cols, self.school_dt, self.school_def, self.school_keys = self.get_tab_structure(self.school_tab)
+        self.work_cols, self.work_dt, self.work_def, self.work_keys = self.get_tab_structure(self.work_tab)
+        self.veh_count_cols, self.veh_count_dt, self.veh_count_def, self.veh_count_keys = self.get_tab_structure(self.veh_count_tab)
+        self.ltrec_cols, self.ltrec_dt, self.ltrec_def, self.ltrec_keys = self.get_tab_structure(self.ltrec_tab)
+        self.schedule_cols, self.schedule_dt, self.schedule_def, self.schedule_keys = self.get_tab_structure(self.schedule_tab)
+        self.trips_cols, self.trips_dt, self.trips_def, self.trips_keys = self.get_tab_structure(self.trips_tab)
+        self.veh_cols, self.veh_dt, self.veh_def, self.veh_keys = self.get_tab_structure(self.veh_tab)
+        self.workers_cols, self.workers_dt, self.workers_def, self.workers_keys = self.get_tab_structure(self.workers_tab)
+	self.schedule_child_cols, self.schedule_child_dt, self.schedule_child_def, self.schedule_child_keys = self.get_tab_structure(self.schedule_child_tab)
+	self.schedule_clean_cols, self.schedule_clean_dt, self.schedule_clean_def, self.schedule_clean_keys = self.get_tab_structure(self.schedule_clean_tab)
+	#self.schedule_conflict_cols, self.schedule_conflict_dt, self.schedule_conflict_keys = self.get_tab_structure(self.schedule_conflict_tab)
+	self.schedule_daily_cols, self.schedule_daily_dt, self.schedule_daily_def, self.schedule_daily_keys = self.get_tab_structure(self.schedule_daily_tab)
+	self.schedule_final_cols, self.schedule_final_dt, self.schedule_final_def, self.schedule_final_keys = self.get_tab_structure(self.schedule_final_tab)
+	self.schedule_intravel_cols, self.schedule_intravel_dt, self.schedule_intravel_def, self.schedule_intravel_keys = self.get_tab_structure(self.schedule_intravel_tab)	
 
 
     #create db and tables based on the parts
@@ -206,23 +209,28 @@ class DivideData(object):
             
             #create the tables
             #print 'child keys is %s'%self.child_keys
-            self.dbcon_obj.create_table(self.house_tab, self.house_cols, self.house_dt, self.house_keys)
-            self.dbcon_obj.create_table(self.persons_tab, self.persons_cols, self.persons_dt, self.persons_keys)
-            self.dbcon_obj.create_table(self.child_tab, self.child_cols, self.child_dt, self.child_keys)
-            self.dbcon_obj.create_table(self.school_tab, self.school_cols, self.school_dt, self.school_keys)
-            self.dbcon_obj.create_table(self.work_tab, self.work_cols, self.work_dt, self.work_keys)
-            self.dbcon_obj.create_table(self.veh_count_tab, self.veh_count_cols, self.veh_count_dt, self.veh_count_keys)
-            self.dbcon_obj.create_table(self.ltrec_tab, self.ltrec_cols, self.ltrec_dt, self.ltrec_keys)
-            self.dbcon_obj.create_table(self.schedule_tab, self.schedule_cols, self.schedule_dt, self.schedule_keys)
-            self.dbcon_obj.create_table(self.trips_tab, self.trips_cols, self.trips_dt, self.trips_keys)
-            self.dbcon_obj.create_table(self.veh_tab, self.veh_cols, self.veh_dt, self.veh_keys)
-            self.dbcon_obj.create_table(self.workers_tab, self.workers_cols, self.workers_dt, self.workers_keys)
-	    self.dbcon_obj.create_table(self.schedule_child_tab, self.schedule_child_cols, self.schedule_child_dt, self.schedule_child_keys)
-	    self.dbcon_obj.create_table(self.schedule_clean_tab, self.schedule_clean_cols, self.schedule_clean_dt, self.schedule_clean_keys)
-	    self.dbcon_obj.create_table(self.schedule_conflict_tab, self.schedule_conflict_cols, self.schedule_conflict_dt, self.schedule_conflict_keys)
-	    self.dbcon_obj.create_table(self.schedule_daily_tab, self.schedule_daily_cols, self.schedule_daily_dt, self.schedule_daily_keys)
-	    self.dbcon_obj.create_table(self.schedule_final_tab, self.schedule_final_cols, self.schedule_final_dt, self.schedule_final_keys)
-	    self.dbcon_obj.create_table(self.schedule_intravel_tab, self.schedule_intravel_cols, self.schedule_intravel_dt,self.schedule_intravel_keys)
+            self.dbcon_obj.create_table(self.house_tab, self.house_cols, self.house_dt, self.house_def, self.house_keys)
+            self.dbcon_obj.create_table(self.persons_tab, self.persons_cols, self.persons_dt, self.persons_def, self.persons_keys)
+            self.dbcon_obj.create_table(self.child_tab, self.child_cols, self.child_dt, self.child_def, self.child_keys)
+            self.dbcon_obj.create_table(self.school_tab, self.school_cols, self.school_dt, self.school_def, self.school_keys)
+            self.dbcon_obj.create_table(self.work_tab, self.work_cols, self.work_dt, self.work_def, self.work_keys)
+            self.dbcon_obj.create_table(self.veh_count_tab, self.veh_count_cols, self.veh_count_dt, self.veh_count_def, self.veh_count_keys)
+            self.dbcon_obj.create_table(self.ltrec_tab, self.ltrec_cols, self.ltrec_dt, self.ltrec_def, self.ltrec_keys)
+            self.dbcon_obj.create_table(self.schedule_tab, self.schedule_cols, self.schedule_dt, self.schedule_def, self.schedule_keys)
+            self.dbcon_obj.create_table(self.trips_tab, self.trips_cols, self.trips_dt, self.trips_def, self.trips_keys)
+            self.dbcon_obj.create_table(self.veh_tab, self.veh_cols, self.veh_dt, self.veh_def, self.veh_keys)
+            self.dbcon_obj.create_table(self.workers_tab, self.workers_cols, self.workers_dt, self.workers_def, self.workers_keys)
+	    self.dbcon_obj.create_table(self.schedule_child_tab, self.schedule_child_cols, self.schedule_child_dt, 
+					self.schedule_child_def, self.schedule_child_keys)
+	    self.dbcon_obj.create_table(self.schedule_clean_tab, self.schedule_clean_cols, self.schedule_clean_dt, 
+					self.schedule_clean_def, self.schedule_clean_keys)
+	    #self.dbcon_obj.create_table(self.schedule_conflict_tab, self.schedule_conflict_cols, self.schedule_conflict_dt, self.schedule_conflict_keys)
+	    self.dbcon_obj.create_table(self.schedule_daily_tab, self.schedule_daily_cols, self.schedule_daily_dt, 
+					self.schedule_daily_def, self.schedule_daily_keys)
+	    self.dbcon_obj.create_table(self.schedule_final_tab, self.schedule_final_cols, self.schedule_final_dt, 
+					self.schedule_final_def, self.schedule_final_keys)
+	    self.dbcon_obj.create_table(self.schedule_intravel_tab, self.schedule_intravel_cols, self.schedule_intravel_dt,
+					self.schedule_intravel_def, self.schedule_intravel_keys)
             
             #close the database connection
             self.dbcon_obj.close_connection()
@@ -787,10 +795,10 @@ class TestDivideData(unittest.TestCase):
         print '\t Location is %s'%location
         print '\t Table 1 is %s, Table 2 is %s and Column name is %s'%(table1, table2,column_name)
         #main function to divide and distribute the data
-        #newobject.partition_data(parts, location, table1, table2, column_name)
+        newobject.partition_data(parts, table1, table2, column_name, location)
         
-        table_name = 'child_dependency_r'
-        dbname = 'mag_zone'
+        #table_name = 'child_dependency_r'
+        #dbname = 'mag_zone'
         
         #open connection
         #newobject.dbcon_obj.new_connection()

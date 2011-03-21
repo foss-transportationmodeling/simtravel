@@ -119,7 +119,7 @@ class DataBaseConnection(object):
                 self.cursor.execute("select datname from pg_database")
                 
                 dbs = [db[0] for db in self.cursor.fetchall()]
-                database_flag = self.database_name.lower() in dbs
+                database_flag = self.database_name in dbs
 
 
                 #set a flag that indicates the existence of the database.
@@ -153,6 +153,7 @@ class DataBaseConnection(object):
         """
 
         db_flag = self.check_if_database_exists()
+	print 'new database is %s'%new_database
         #db_flag = 0
         if not db_flag:
         #since the database does not exist we create a new database.
@@ -318,6 +319,7 @@ class DataBaseConnection(object):
             self.cursor.execute("SELECT table_name FROM INFORMATION_SCHEMA.TABLES where table_schema = 'public'")
             tables = self.cursor.fetchall()
             tbs = [tb[0] for tb in tables]
+	    #print tbs
             table_exists = self.table_name in tbs
             return table_exists
         except Exception, e:
@@ -360,7 +362,7 @@ class DataBaseConnection(object):
         """
         self.table_name = table_name
         #before returning the columns check if the table exists
-        self.table_name = table_name
+        #self.table_name = table_name
         table_flag = self.check_if_table_exists(table_name)
         if table_flag:
             try:
@@ -376,7 +378,7 @@ class DataBaseConnection(object):
 
 
     #creates a new table
-    def create_table(self, table_name, columns, ctypes, keys):
+    def create_table(self, table_name, columns, ctypes, cdefaults, keys):
         """
         This method is used to create new table in the database.
 
@@ -397,9 +399,13 @@ class DataBaseConnection(object):
             #create a new table since it does not exist
             print 'Table does not exist. Create a new table'
             column = ''
-            for col, ctype in zip(columns, ctypes):
-                column = column + col + ' ' + ctype + ', '
-            
+            for col, ctype, cdefault in zip(columns, ctypes, cdefaults):
+		if cdefault is None:
+	            column = column + col + ' ' + ctype + ', ' 
+		elif cdefault[:7] == 'nextval':
+	            column = column + col + ' ' + 'serial NOT NULL' + ', ' 			
+		else:
+	            column = column + col + ' ' + ctype + ' DEFAULT ' + cdefault + ', ' 						
             pkey = ''
             for col, key in zip(columns, keys):
                 if key == '1' or key == 1:
@@ -411,7 +417,7 @@ class DataBaseConnection(object):
             else:
                 pkey = const_str + '(' + pkey[0:-1] + ')'
                 sql_string = 'create table %s ( %s %s )'%(self.table_name, column, pkey)
-            print sql_string
+            #print sql_string
             try:
                 self.cursor.execute(sql_string)
                 self.connection.commit()
@@ -467,6 +473,34 @@ class DataBaseConnection(object):
                 columns = self.cursor.fetchall()
                 cols = [cl[0] for cl in columns]
                 return cols
+            except Exception, e:
+                print 'Error while fetching the data types of columns from the table'
+                print e
+        else:
+            print 'Table %s does not exist. Cannot get the column information'%table_name
+
+
+    #get the list of tables from the database
+    def get_column_defaults(self, table_name):
+        """
+        This method is used to data types of the columns in table.
+
+        Input:
+        Database configuration object and table name
+
+        Output:
+        List of the column data types in the database.
+        """
+        self.table_name = table_name
+        #before returning the column types check if the table exists
+        self.table_name = table_name
+        table_flag = self.check_if_table_exists(table_name)
+        if table_flag:
+            try:
+                self.cursor.execute("select column_default from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s'"%table_name)
+                columns = self.cursor.fetchall()
+                colsDef = [cl[0] for cl in columns]
+                return colsDef
             except Exception, e:
                 print 'Error while fetching the data types of columns from the table'
                 print e
