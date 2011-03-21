@@ -4,7 +4,7 @@ import multiprocessing
 from openamos.core.run.simulation_manager_cursor import SimulationManager
 from openamos.core.errors import ArgumentsError
 
-def run():
+def run(fileLoc=None):
     """
     Runs the OpenAMOS program to simulate the activity-travel choices as 
     indicated by the models and their specifications in the config file.
@@ -12,7 +12,12 @@ def run():
     Please refer to OpenAMOS documentation on www.simtravel.wikispaces.asu.edu
     for guidance on setting up the configuration file.
     """
-    args = sys.argv[1:]
+    print 'File location is %s'%fileLoc
+    
+    if fileLoc is not None:
+	args = [fileLoc]
+    else:
+	args = sys.argv[1:]
 
     
     if len(args) < 1 or len(args) > 2:
@@ -69,6 +74,7 @@ def run_components_in_parallel(args):
     simulationManagerObject.clean_database_tables(partId)
     simulationManagerObject.run_components(partId)
     simulationManagerObject.close_cache_connection()
+    
 
 
 if __name__ == "__main__":
