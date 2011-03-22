@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta.xml'
+	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_seq.xml'
 	configObject = None
 
 
@@ -64,7 +64,7 @@ class SimulationManager(object):
 	self.setup_location_information()
 	self.setup_tod_skims()
 	self.parse_config()
-	#self.clean_database_tables()
+	self.clean_database_tables()
         self.idCount = 0
         self.idList = []
 
@@ -103,7 +103,35 @@ class SimulationManager(object):
     def setup_tod_skims(self):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
+	    if tableInfo.importFlag == "True":
+		self.import_tod_skims(tableInfo)
+            
             self.createSkimsTableFromDatabase(tableInfo)
+
+
+    def import_tod_skims(self, tableInfo):
+	table_name = tableInfo.tableName
+	# Delete contents
+	self.queryBrowser.delete_all(table_name)                            
+
+	# Insert records
+	cols_listStr = "(%s, %s, %s)" %(tableInfo.origin_var,
+					tableInfo.destination_var,
+					tableInfo.skims_var)
+
+	loc = tableInfo.fileLocation
+	delimiter = tableInfo.delimiter
+
+        try:
+            ti = time.time()
+    	    insert_stmt = ("""copy %s %s from '%s' """
+                           """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
+	                                          delimiter))
+	    print insert_stmt                                                                       
+            result = self.queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
+            self.queryBrowser.dbcon_obj.connection.commit()
+        except Exception, e:
+            print e
 
 
     def createLocationsTableFromDatabase(self, tableInfo):
@@ -177,8 +205,16 @@ class SimulationManager(object):
 	# Get the two components one for dynamic activity simulation and another for extracting trips
 	compObjects = []
         for comp in self.componentList:
+	    # Integrated application
+	    """
 	    if comp.component_name in ['DynamicNonMandatoryActivities', 'FinalReconciliationOfActivityTravelStartAdj', 
-					'FinalReconciliationOfActivityTravelEndAdj', 'ExtractTravelEpisodes']:
+					'FinalReconciliationOfActivityTravelEndAdj', 'ExtractTravelEpisodes', 
+					'ExtractBackgroundTravelEpisode', 'ExtractAllTravelEpisodes']:
+	    """
+	    # Sequential application
+	    if comp.component_name in ['ExtractTravelEpisodes', 
+					'ExtractBackgroundTravelEpisodes', 'ExtractAllTravelEpisodes']:
+
 	        compObjects.append(comp)
 
 	tripInfo = zeros((1,9))
@@ -207,27 +243,22 @@ class SimulationManager(object):
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
             #raw_input()
 
-	if comp.component_name == 'ExtractTravelEpisodes':
+	if comp.component_name == 'ExtractAllTravelEpisodes':
 	    # Reduce 100 to match TAZ notation of MALTA
+	    tripInfo = tripInfo.astype(int)
+
+	    #print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
+	    #print tripInfo
+
 	    tripInfo[:,-4] = tripInfo[:,-4] - 100
             tripInfo[:,-3] = tripInfo[:,-3] - 100
 
-	    tripInfo = tripInfo.astype(int)
 
-	    rowC = tripInfo.shape[0]
-        
-	    ids = zeros((rowC, 4))
-	    ids[:,:-1] = tripInfo[:,:3]
-	    ids[:,-1] = array(range(rowC)) + self.idCount + 1
 
-	    self.idCount += rowC
-
-	    tripInfo = tripInfo[:,2:]
-	    tripInfo[:,0] = ids[:,-1]
-        
-	    print 'RECORDS TO BE PASSED TO MALTA'	
+	    print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
 	    print tripInfo
-	    return tripInfo
+
+	return tripInfo
 
 
 
@@ -260,6 +291,6 @@ class SimulationManager(object):
 
 if __name__ == '__main__':
     simulationObject = SimulationManager()
-    simulationObject.run_selected_components_for_malta(195)
+    simulationObject.run_selected_components_for_malta(151)
 
 

@@ -38,7 +38,8 @@ class DB(object):
 			  'schedule_final_r':['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime',
 					'endtime', 'duration', 'dependentpersonid'],
 
-			  'trips_r':['houseid', 'personid', 'tripid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime'],
+			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime'],
+			  'trips_final_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime'],
 			  'workers_r':['houseid', 'personid', 'episodes'], 
 			  'child_dependency_r':['houseid', 'personid', 'dependency'],
 			  'daily_school_status_r':['houseid', 'personid', 'schdailystatus'],

@@ -189,13 +189,24 @@ class ConfigParser(object):
             skim_var = period_element.get("skim_var")
             interval_start = int(period_element.get("intervalStart"))
             interval_end = int(period_element.get("intervalEnd"))
+	    importFlag = period_element.get("import")
+	    if importFlag is not None:	
+	   	fileLocation = period_element.get('fileLocation')
+		delimiter = period_element.get('delimiter')
+	    else:
+		fileLocation = None
+		delimiter = None
+
 
             travelSkimsLookup.add_tableInfoToList(tablename, origin_var,
                                                   destination_var,
                                                   skim_var,
                                                   interval_start,
                                                   interval_end,
-                                                  target_tablename)
+                                                  target_tablename,
+						  import_flag=importFlag,
+						  file_location=fileLocation,
+						  delimiter=delimiter)
                                                   
         return travelSkimsLookup
 
@@ -262,12 +273,20 @@ class ConfigParser(object):
 
             repeatComponent = self.create_component(component_element)
 
+	    repeatComponentList = [repeatComponent] * (endInterval - startInterval)
+	
+	    """
             for i in range(endInterval - startInterval):
                 tempComponent = copy.deepcopy(repeatComponent)
                 for model in tempComponent.model_list:
                     model.seed +=  i 
                 tempComponent.analysisInterval = startInterval + i
                 componentList.append(tempComponent)
+	    """
+	    for i in range(endInterval - startInterval):
+		repeatComponentList[i].analysisInterval = startInterval + i
+
+	    componentList += repeatComponentList
 
         else:
             component = self.create_component(component_element)
@@ -293,6 +312,13 @@ class ConfigParser(object):
     def create_component(self, component_element):
         self.model_list = []
         self.component_variable_list = []
+
+	analysisIntervalFilter_element = component_element.find('AnalysisIntervalFilter')
+	if analysisIntervalFilter_element is not None:
+	    analysisIntervalFilter = self.return_table_var(analysisIntervalFilter_element)
+	else:
+	    analysisIntervalFilter = None
+
 
         comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
 
@@ -373,6 +399,7 @@ class ConfigParser(object):
                                       tableKeys,
                                       spatialConst_list,
                                       dynamicSpatialConst_list,
+				      analysisIntervalFilter = analysisIntervalFilter,				      
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,

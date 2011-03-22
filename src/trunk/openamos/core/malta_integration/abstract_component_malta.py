@@ -27,6 +27,7 @@ class AbstractComponent(object):
                  spatialConst_list=None,
                  dynamicspatialConst_list=None,
                  analysisInterval=None,
+		 analysisIntervalFilter=None,
                  history_info=None,
                  post_run_filter=None,
                  delete_criterion=None,
@@ -51,6 +52,7 @@ class AbstractComponent(object):
         self.spatialConst_list = spatialConst_list
         self.dynamicspatialConst_list = dynamicspatialConst_list
         self.analysisInterval = analysisInterval
+        self.analysisIntervalFilter = analysisIntervalFilter
         self.post_run_filter = post_run_filter
         self.delete_criterion = delete_criterion
         self.history_info = history_info
@@ -167,7 +169,7 @@ class AbstractComponent(object):
         
             model_st = copy.deepcopy(model_list_duringrun)
             iteration += 1
-            print '\n\tIteration - ', iteration
+            #print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
                 model_list_duringrun, iteration, projectSkimsObject, fileLoc)   
@@ -186,7 +188,7 @@ class AbstractComponent(object):
                                                             self.post_run_filter)
             nRowsProcessed += valid_data_rows_count
 
-            print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
+            #print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
 	    trips = self.reflectToDatabase(valid_data_rows, tableNamesKeyDict, queryBrowser, fileLoc)
         return trips
 
@@ -214,18 +216,18 @@ class AbstractComponent(object):
 
 	    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)
 
-	    if self.component_name == 'ExtractTravelEpisodes':
-	        data_array = zeros((trips_filter.sum(), len(tripColsTable)))
+	    if self.component_name == 'ExtractAllTravelEpisodes':
+	        data_array = zeros((valid_data_filter.sum(), len(tableCols)))
 
 	    	dataTempNames = data.data.dtype.names 
 	        for i in range(len(dataTempNames)):
-		    name = tripDataTempNames[i]
+		    name = dataTempNames[i]
 		    data_array[:,i] = data.data[name]
 	
 	    #queryBrowser.copy_into_table(data, dataTempNames, self.writeToTable, keyCols, fileLoc) 
 
 
-	    print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 
+	    #print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 
 	    print '\t\tNumber of rows processed - ', valid_data_filter.sum()
 
 	except Exception, e:
@@ -233,7 +235,7 @@ class AbstractComponent(object):
             traceback.print_exc(file=sys.stdout)
 	    data_array = zeros((1, 9))
 
-        if self.component_name == 'ExtractTravelEpisodes':
+        if self.component_name == 'ExtractAllTravelEpisodes':
 	    return data_array
 
 	
@@ -306,8 +308,8 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
-            print '\t\tChecking for dynamic spatial queries'
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
                 current_model_name = i.dep_varname
@@ -323,8 +325,8 @@ class AbstractComponent(object):
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                                                                              time.time()-tiii)
+                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                #                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 choiceset_shape = (data_subset.rows,
@@ -617,6 +619,7 @@ class AbstractComponent(object):
                                         max_dict, 
                                         self.spatialConst_list,
                                         self.analysisInterval,
+					self.analysisIntervalFilter,
                                         self.history_info)
 	if data == None:
 	    return None
