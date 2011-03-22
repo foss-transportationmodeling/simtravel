@@ -18,13 +18,13 @@ from pylab import *
 #from core_plot import *
 
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.font_manager as plot
 from matplotlib.patches import Patch, Rectangle
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-#from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
-#from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
-from matplotlib.figure import Figure
+#from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 
 class MakeSchedPlot(QDialog):
@@ -41,6 +41,7 @@ class MakeSchedPlot(QDialog):
         self.cursor = self.new_obj.cursor
         self.table = 'households'
         self.data = []
+        self.figs = []
         self.sketches = []
         self.axes = []
         self.toolbars = []
@@ -259,11 +260,21 @@ class MakeSchedPlot(QDialog):
         menubar = QMenu(self)
         one = menubar.addAction("Show Chart")
         two = menubar.addAction("Remove Current Tab")
+        three = menubar.addAction("Save Plot as PNG")
+        
         if self.stablecombo.count() > 0: 
             self.connect(one, SIGNAL("triggered()"),self.on_draw1)
         self.connect(two, SIGNAL("triggered()"),self.removeTab)
+        self.connect(three,SIGNAL("triggered()"),self.saveimg)
         menubar.popup(self.tabs.mapToGlobal(point))
 
+    def saveimg(self):
+        dialog = QFileDialog()
+        filename = dialog.getSaveFileName(self,"Save Image","","PNG image (*.png)")
+        if str(filename) != "":
+            index = self.tabs.currentIndex()
+            fig = self.figs[index]
+            fig.savefig(str(filename))
 
     def makeTabs(self,chart):
         page1 = QWidget()
@@ -288,6 +299,7 @@ class MakeSchedPlot(QDialog):
         reply = QMessageBox.information(self,"Warning","Do you really want to remove?",QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.tabs.removeTab(index)
+            self.figs.pop(index)
             self.sketches.pop(index)
             self.axes.pop(index)
             self.toolbars.pop(index)
@@ -296,6 +308,7 @@ class MakeSchedPlot(QDialog):
         reply = QMessageBox.information(self,"Warning","Do you really want to remove?",QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.tabs.clear()
+            self.figs = []
             self.sketches = []
             self.axes = []
             self.toolbars = []
@@ -314,8 +327,10 @@ class MakeSchedPlot(QDialog):
         
  
     def createCanvas(self):
-        mydpi = 100
-        myfig = Figure((5.0, 4.5), dpi=mydpi)
+#        mydpi = 100
+#        myfig = Figure((5.0, 4.5), dpi=mydpi)
+        myfig = plt.figure()
+        self.figs.append(myfig)
         sketch = FigureCanvas(myfig)
         QWidget.setSizePolicy(sketch,QSizePolicy.Expanding,QSizePolicy.Expanding)
         myaxes = myfig.add_subplot(111)
