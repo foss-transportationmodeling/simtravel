@@ -10,6 +10,7 @@ import time
 import sqlalchemy
 import psycopg2 as dbapi2
 import numpy as na
+import re
 from cursor_database_connection import DataBaseConnection
 from psycopg2 import extensions
 from sqlalchemy.types import Integer, SmallInteger, \
@@ -743,6 +744,9 @@ class QueryBrowser(object):
                 print '\t - Error retrieving the information. Query failed.'
         else:
             print '\t - Table %s does not exist.'%table_name
+        #after deleting all the data reset the sequences
+        seqlist = self.find_sequence(table_name)
+        self.reset_sequence(seqlist)
             
     ########## methods for delete query end ##########
 
@@ -1131,9 +1135,90 @@ class QueryBrowser(object):
 
         return new_data_types
     ###########################################################
+    def find_sequence(self, table_name=None):
+        """
+        This method is used to find the sequences in the database
+            
+        Input:
+        Database configuration object and table name.
+        If no table name is provided then find sequences for all tables
+            
+        Output:
+        Reset sequence to 1
+        """
+        if table_name == None:
+            seq_flag = 1
+        else:
+            seq_flag = 0
 
+        if seq_flag:
+            #find sequences for all tables and save in a list
+            sql_query = "SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE column_default LIKE 'nextval%'"
+            try:
+                self.dbcon_obj.cursor.execute(sql_query)
+                col_default = self.dbcon_obj.cursor.fetchall()
+            except Exception, e:
+                print 'Query execution failed. Failed to find sequences'
+                print e
+        else:
+            #find sequences for the specified table and save in a list
+            sql_query = "SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s'"%table_name
+                         #AND column_default LIKE 'nextval%'"
+            try:
+                self.dbcon_obj.cursor.execute(sql_query)
+                col_default = self.dbcon_obj.cursor.fetchall()
+            except Exception, e:
+                print 'Query execution failed. Failed to find sequences'
+                print e
 
+        seq_list = []
+        sequence = []
+        #create a list that has only the tuples with the sequence name in it
+        for each in col_default:
+            off_set = str(each).find("'")
+            if off_set is not -1:
+                 seq_list.append(each)
+        #find the indexes for the sequence, extract the substring from the tuple 
+        #and save in a new list
+        for each in seq_list:
+            each = str(each)
+            sub_str = [match.start() for match in re.finditer(re.escape("'"), each)]
+            start = sub_str[0] + 1
+            end = sub_str[1]
+            seq = each[start:end]
+            sequence.append(seq)
+        #return the list with all the sequences
+        return sequence
+                         
 
+    def reset_sequence(self, sequence_list):
+        """
+        This method is used to reset the sequence
+        
+        Input:
+        Database configuration object and sequence list
+        
+        Output:
+        Sequence is reset to 1
+        """
+        #run a loop to reset the sequences
+        if not sequence_list:
+            print 'No sequences present'
+            return False
+            
+        for each in sequence_list:
+            sql_string = "alter sequence %s restart with 1"%each
+            print sql_string
+            try:
+                self.dbcon_obj.cursor.execute(sql_string)
+                self.dbcon_obj.connection.commit()
+                return True
+            except Exception, e:
+                print 'Query execution failed. Failed to reset sequences'
+                print e
+                return False
+                         
+                         
 #unit test to test the code
 import unittest
 
@@ -1145,7 +1230,7 @@ class TestMainClass(unittest.TestCase):
         self.user_name = 'postgres'
         self.password = '1234'
         self.host_name = 'localhost'
-        self.database_name = 'postgres'
+        self.database_name = 'mag_zone_upto_afterschoolacts_5percent'
 
     
     def testMainClass(self):
@@ -1154,7 +1239,7 @@ class TestMainClass(unittest.TestCase):
 
         """ create a connection to the database """
         newobject.dbcon_obj.new_connection()
-        
+        """
         table_name = 'temp_table1'
         column_name = 'role_id'
         value = '1'
@@ -1193,6 +1278,20 @@ class TestMainClass(unittest.TestCase):
         newobject.file_write(temp, columns)
         print '\n-----------------> insert into table'
         #newobject.insert_into_table()
+        """
+        table_name = 'temp'
+        #newobject.delete_all(table_name)
+        seqlist = newobject.find_sequence()
+        print seqlist
+        #seql = []
+        #newobject.reset_sequence(seql)
+        #for each in seqlist:
+        #    #print each
+        #    print str(each)[str(each).find("'")+1:str(each).find("'")]
+        #    print type(each)
+        #index_columns = newobject.get_index_columns(table_name)
+        #for each in index_columns:
+        #    print each
         """ close the connection to the database """
         newobject.dbcon_obj.close_connection()
 
