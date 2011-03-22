@@ -23,7 +23,7 @@
 
   <ModelConfig>
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -753,7 +753,7 @@
 
     </Component>
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -988,7 +988,7 @@
      
     </Component>
 
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -1275,14 +1275,15 @@
 
 
 
-    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" location="True" skip="False" completed="True">
-
+    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
-        <Table table="persons" key="houseid,personid" order="1"/>
-        <Table table="trips_r" key="houseid,personid" count_key="tripid"/>
-        <Table table="schedule_final_r" key="houseid,personid" count_key="scheduleid"/>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="trips_r" key="houseid,personid"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
 
+      <AnalysisInterval start="195" end="196" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
@@ -1348,8 +1349,7 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-
-      <Model1 name="validtrip" formulation="Regression" type="Linear" seed="1">
+      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
@@ -1357,30 +1357,125 @@
 	<Filter table="runtime" var="duration" condition="greater than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
-
-
-      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
-      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-	<Filter table="runtime" var="en_locationid" condition="equals" value="0"/>
+
+
+      <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="adulttrips"/>
+	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
       </Model>
+
+    </Component>
+
+
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_r" key="houseid,personid"/>
+   	<Table table="background_trips" key="houseid,personid" order="1"/>
+      </DBTables>
+
+      <AnalysisInterval start="195" end="196" step="1"/>
+      <AnalysisIntervalFilter table="background_trips" var="start_min"/>
+
+
+      <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="vehid"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="vehid" coeff="1"/>
+      </Model>
+
+      <Model name="ModeChoice" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripmode"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="mode" coeff="1"/>
+      </Model>
+
+      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="fromzone"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="origin_taz" coeff="1"/>
+      </Model>
+
+      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tozone"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="destination_taz" coeff="1"/>
+      </Model>
+
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="start_min" coeff="1"/>
+      </Model>
+
+      <Model name="endtime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="endtime"/>
+        <FilterSet type="and"/>
+	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
+	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
+
+	<Variance value="0"/>
+        <Variable table="background_trips" var="arrive_min" coeff="1"/>
+      </Model>
+
+    </Component>
+
+    <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_final_r" key="houseid,personid" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid"/>
+    	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="trips_final_r" key="houseid,personid"/>
+      </DBTables>
+
+      <AnalysisInterval start="195" end="196" step="1"/>
+      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
 
 
       <Model name="TripID" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripid"/>
-	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
+	<DependentVariable var="vehid"/>
 	<Variance value="0"/>
-        <Variable table="runtime" var="max_tripid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="trips_r" var="tripid" coeff="1"/>
+      </Model>
+
+
+      <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="vehid"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="vehid" coeff="1"/>
+      </Model>
+
+      <Model name="ModeChoice" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripmode"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="tripmode" coeff="1"/>
+      </Model>
+
+      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="fromzone"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="fromzone" coeff="1"/>
+      </Model>
+
+      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tozone"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="tozone" coeff="1"/>
+      </Model>
+
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="starttime" coeff="1"/>
+      </Model>
+
+      <Model name="endtime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="endtime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="endtime" coeff="1"/>
       </Model>
 
     </Component>
@@ -1390,5 +1485,3 @@
 
   </ModelConfig>
 </ProjectConfig>
-
-
