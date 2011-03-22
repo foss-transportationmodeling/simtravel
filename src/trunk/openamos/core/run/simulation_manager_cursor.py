@@ -99,8 +99,36 @@ class SimulationManager(object):
     def setup_tod_skims(self, queryBrowser):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
+	    if tableInfo.importFlag == "True":
+		self.import_tod_skims(tableInfo, queryBrowser)
+            
             self.db.createSkimsTableFromDatabase(tableInfo,
                                                  queryBrowser)
+
+    def import_tod_skims(self, tableInfo, queryBrowser):
+	table_name = tableInfo.tableName
+	# Delete contents
+	queryBrowser.delete_all(table_name)                            
+
+	# Insert records
+	cols_listStr = "(%s, %s, %s)" %(tableInfo.origin_var,
+					tableInfo.destination_var,
+					tableInfo.skims_var)
+
+	loc = tableInfo.fileLocation
+	delimiter = tableInfo.delimiter
+
+        try:
+            ti = time.time()
+    	    insert_stmt = ("""copy %s %s from '%s' """
+                           """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
+	                                          delimiter))
+	    print insert_stmt                                                                       
+            result = queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
+            queryBrowser.dbcon_obj.connection.commit()
+        except Exception, e:
+            print e
+
 
     def setup_location_information(self, queryBrowser):
         print "-- Processing Location Information --"
@@ -194,7 +222,6 @@ class SimulationManager(object):
                         """Therefore the skims matrix need not be reloaded."""
 
                 data = comp.pre_process(queryBrowser,  
-                                        #self.tableOrder, self.tableKeys, 
                                         skimsMatrix, uniqueIds,
                                         self.db)
 
