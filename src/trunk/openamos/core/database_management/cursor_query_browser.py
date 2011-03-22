@@ -131,7 +131,8 @@ class QueryBrowser(object):
 
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, 
-                    history_info=None, subsample=None):
+		    analysisIntervalFilter=None,
+                    history_info=None):
         """
         This method is used to select the join of tables and display them.
         
@@ -399,7 +400,7 @@ class QueryBrowser(object):
 
 
         # Spatial TSP identification
-        if spatialConst_list is not None:
+        if len(spatialConst_list) > 0:
             for i in spatialConst_list:
                 #if i.countChoices is not None:
                 if i.startConstraint.table == i.endConstraint.table:
@@ -594,6 +595,15 @@ class QueryBrowser(object):
                     # there cannot be two TSP's in the same component
                     break
 
+	if analysisIntervalFilter is not None:
+	    final_list.append('%s.%s as %s_%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1],
+						analysisIntervalFilter[0], analysisIntervalFilter[1]))
+	    cols_list.append('%s.%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1]))
+	
+	    if len(spatialConst_list) < 1:
+		joinStrList.append(' where %s.%s = %s' %(analysisIntervalFilter[0], 
+							 analysisIntervalFilter[1],
+							 analysisInterval))
                                          
         # Generating the col list
         colStr = ''
@@ -610,8 +620,8 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        print 'SQL string for query - ', sql_string
-        print cols_list
+        #print 'SQL string for query - ', sql_string
+        #print cols_list
 	#raw_input()
         
         try:
@@ -797,7 +807,7 @@ class QueryBrowser(object):
            print 'Table %s does not exist.'##%table_name 
         self.create_index(table_name, keyCols)
 
-    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc, partId=None):
+    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc, partId=None, delimiter=','):
         """
         self, arr, cols_list, table_name, keyCols, chunkSize=None):
         This method is used to insert rows into the table.
@@ -834,7 +844,8 @@ class QueryBrowser(object):
             try:
                 ti = time.time()
                 insert_stmt = ("""copy %s %s from '%s/tempData_%s.csv' """
-                               """ delimiters ','""" %(table_name, cols_listStr, loc, partId))
+                               """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
+						       partId, delimiter))
                                                                        
                 #print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
@@ -929,7 +940,7 @@ class QueryBrowser(object):
             try:
                 self.dbcon_obj.cursor.execute("drop index %s"%index_name)
                 self.dbcon_obj.connection.commit()
-                print '\t\tIndex %s deleted'%index_name
+                #print '\t\tIndex %s deleted'%index_name
             except Exception, e:
                 print 'Error while deleting an index'
                 print e
