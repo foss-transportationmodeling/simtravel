@@ -98,12 +98,15 @@ class SimulationManager(object):
 
     def setup_tod_skims(self, queryBrowser):
         print "-- Processing Travel Skims --"
+	ti = time.time()
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
 	    if tableInfo.importFlag == "True":
 		self.import_tod_skims(tableInfo, queryBrowser)
             
             self.db.createSkimsTableFromDatabase(tableInfo,
-                                                 queryBrowser)
+                       	                         queryBrowser)
+
+	print "-- Caching and importing took a total of - %.4f" %(time.time()-ti)
 
     def import_tod_skims(self, tableInfo, queryBrowser):
 	table_name = tableInfo.tableName
@@ -126,6 +129,7 @@ class SimulationManager(object):
 	    print insert_stmt                                                                       
             result = queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
             queryBrowser.dbcon_obj.connection.commit()
+	    print "\t Time taken to insert skims into table - %s was 0.4f " %(table_name, time.time()-ti)
         except Exception, e:
             print e
 

@@ -271,9 +271,7 @@ class ConfigParser(object):
 
 
             repeatComponent = self.create_component(component_element)
-
-	    repeatComponentList = [repeatComponent] * (endInterval - startInterval)
-	    """
+	    
             for i in range(endInterval - startInterval):
                 tempComponent = copy.deepcopy(repeatComponent)
                 for model in tempComponent.model_list:
@@ -281,10 +279,12 @@ class ConfigParser(object):
                 tempComponent.analysisInterval = startInterval + i
                 componentList.append(tempComponent)
 	    """
+	    repeatComponentList = [repeatComponent] * (endInterval - startInterval)
 	    for i in range(endInterval - startInterval):
 		repeatComponentList[i].analysisInterval = startInterval + i
-	
 	    componentList += repeatComponentList
+	    """	
+	    
         else:
             component = self.create_component(component_element)
             componentList.append(component)
