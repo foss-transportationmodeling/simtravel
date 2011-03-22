@@ -36,12 +36,38 @@ class DB(object):
         self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
         self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
+        self.fileh.createTable(output_grp, "trips_final_r", Trips_Final_R)
 
 
 
         #Input Tables - Creatign the table
         self.fileh.createTable(input_grp, "travel_skims_peak", Travel_Skims)
         self.fileh.createTable(input_grp, "travel_skims_offpeak", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_0", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_1", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_2", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_3", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_4", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_5", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_6", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_7", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_8", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_9", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_10", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_11", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_12", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_13", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_14", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_15", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_16", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_17", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_18", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_19", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_20", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_21", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_22", Travel_Skims)
+        self.fileh.createTable(input_grp, "travel_skims_23", Travel_Skims)
+
         self.fileh.createTable(input_grp, "locations", Locations)
 
 

@@ -87,6 +87,14 @@ class Trips_R(t.IsDescription):
     endtime = t.Int32Col()
 
 
-
-
+class Trips_Final_R(t.IsDescription):
+    tripid = t.Int64Col()
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    vehid = t.Int32Col()
+    tripmode = t.Int32Col()
+    fromzone = t.Int32Col()
+    tozone = t.Int32Col()
+    starttime = t.Int32Col()
+    endtime = t.Int32Col()
 
