@@ -27,6 +27,7 @@ class AbstractComponent(object):
                  spatialConst_list=None,
                  dynamicspatialConst_list=None,
                  analysisInterval=None,
+		 analysisIntervalFilter=None,
                  history_info=None,
                  post_run_filter=None,
                  delete_criterion=None,
@@ -51,6 +52,7 @@ class AbstractComponent(object):
         self.spatialConst_list = spatialConst_list
         self.dynamicspatialConst_list = dynamicspatialConst_list
         self.analysisInterval = analysisInterval
+	self.analysisIntervalFilter = analysisIntervalFilter
         self.post_run_filter = post_run_filter
         self.delete_criterion = delete_criterion
         self.history_info = history_info
@@ -563,6 +565,7 @@ class AbstractComponent(object):
                                         max_dict, 
                                         self.spatialConst_list,
                                         self.analysisInterval,
+					self.analysisIntervalFilter,
                                         self.history_info)
 	if data == None:
 	    return None
