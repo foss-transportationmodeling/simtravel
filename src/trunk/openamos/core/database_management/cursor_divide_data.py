@@ -711,14 +711,13 @@ class DivideData(object):
             arr_str = arr_str.replace('L', '')
             
 	    #print 'EMPTY STRING', arr_str
-
             sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
-            
-            try:
-                self.dbcon_obj.cursor.execute(sql_string)
-                self.dbcon_obj.connection.commit()
-            except Exception, e:
-                print e
+            if not arr_str:
+                try:
+                    self.dbcon_obj.cursor.execute(sql_string)
+                    self.dbcon_obj.connection.commit()
+                except Exception, e:
+                    print e
         
             t2 = time.time()
             print 'Total time taken to insert %s'%(t2-t1)
