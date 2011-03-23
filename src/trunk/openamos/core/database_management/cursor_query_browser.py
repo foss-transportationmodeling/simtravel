@@ -942,15 +942,20 @@ class QueryBrowser(object):
         #check if table exists and then if columns exists
         tab_flag = self.dbcon_obj.check_if_table_exists(table_name)
         if tab_flag:
-            index_name = table_name + '_index'
-            try:
-                self.dbcon_obj.cursor.execute("drop index %s"%index_name)
-                self.dbcon_obj.connection.commit()
-                #print '\t\tIndex %s deleted'%index_name
-            except Exception, e:
-                print 'Error while deleting an index'
-                print e
-                self.dbcon_obj.connection.rollback()
+            #check if index exits
+            ind_cols = self.get_index_columns(table_name)
+            if not ind_cols:
+                index_name = table_name + '_index'
+                try:
+                    self.dbcon_obj.cursor.execute("drop index %s"%index_name)
+                    self.dbcon_obj.connection.commit()
+                    #print '\t\tIndex %s deleted'%index_name
+                except Exception, e:
+                    print 'Error while deleting an index'
+                    print e
+                    self.dbcon_obj.connection.rollback()
+            else:
+                print 'Index does not exists so cannot be deleted.'
                 
     #get the index columns
     def get_index_columns(self, table_name):
