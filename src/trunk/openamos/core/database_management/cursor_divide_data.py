@@ -38,7 +38,9 @@ class DivideData(object):
         self.database_name = dbconfig.database_name
         self.database_config_object = dbconfig
         self.dbcon_obj = DataBaseConnection(dbconfig)
+        self.qb_obj = QueryBrowser(dbconfig)
         print self.dbcon_obj
+        print self.qb_obj
         
         #input table names
         self.house_tab = 'households'
@@ -599,6 +601,50 @@ class DivideData(object):
         print 'Total time taken to delete and create all the indexes --> %s'%(t2-t1)
 
 
+    #new method to check for sequences and the create the sql_string
+    def check_sequences(self, table_name):
+        """
+        This method calls the find sequence method of
+        query browser and checks for sequences. it create the sql string 
+        based on the output of the method
+        
+        Input:
+        Table name
+        
+        Output:
+        SQL string and column name
+        """
+        sql_string = ''
+        col_name = ''
+        #open a new connection
+        self.qb_obj.dbcon_obj.new_connection()
+        
+        #find the sequences present in the table
+        seq_list, ser_column = self.qb_obj.find_sequence(table_name)
+
+        if not seq_list:
+            #seq_list is empty. no sequence present
+            sql_string = "SELECT * FROM %s"%table_name
+        else:
+            #sequence list is not empty. create sql string
+            cols = self.dbcon_obj.get_column_list(table_name)
+            col_str = ''
+            col_count = 0
+            for i in cols:
+                if i not in ser_column:
+                    if col_count < (len(cols)-(len(ser_column)+1)):
+                        col_str = col_str + i + ', '
+                        col_count = col_count + 1
+                    else:
+                        col_str = col_str + i
+            sql_string = "SELECT " + col_str + " FROM %s"%table_name
+        
+        #close connection
+        self.qb_obj.dbcon_obj.close_connection()
+
+        return sql_string, ser_column
+        
+        
     #collate the data from all the output table
     def collate_results(self, databasename, table_name):
         """
@@ -610,9 +656,10 @@ class DivideData(object):
         Output:
         All output tables merge data into main database's output tables
         """
+        sql_string, ser_column = self.check_sequences(table_name)
         #run a loop and open a connection to individual databases
         #execute select query and save the results
-        sql_string = "select * from %s"%table_name
+        #sql_string = "select * from %s"%table_name
 
         old_db_name = self.database_config_object.database_name
 
@@ -652,11 +699,12 @@ class DivideData(object):
             col_str = ''
             col_count = 0
             for i in cols:
-                if col_count < (len(cols)-1):
-                    col_str = col_str + i + ', '
-                    col_count = col_count + 1
-                else:
-                    col_str = col_str + i
+                if i not in ser_column:
+                    if col_count < (len(cols)-(len(ser_column)+1)):
+                        col_str = col_str + i + ', '
+                        col_count = col_count + 1
+                    else:
+                        col_str = col_str + i
 
             arr_str = [tuple(each) for each in result]
             arr_str = str(arr_str)[1:-1]
