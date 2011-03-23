@@ -12,6 +12,7 @@ from file_menu.databaseconfig import *
 from results_menu.to_postgis import *
 from results_menu.view_trips import *
 from results_menu.view_sched import *
+from results_menu.view_plot import *
 from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
@@ -212,13 +213,13 @@ class MainWindow(QMainWindow):
         
     # Defining Results
         self.result_menu = self.menuBar().addMenu("R&esults")
-        activity_pattern_action = self.createaction("Activity Characteristics", self.results_schedules, None,
-                                            "", "Show activity characteristics", False, True)
-        travel_pattern_action = self.createaction("Travel Characteristics", self.results_trips, None,
-                                                  None, "Show travel characteristics", False, True)
+        activity_pattern_action = self.createaction("Travel or Activity Characteristics", self.results_schedules, None,
+                                            "", "Show travel or activity characteristics", False, True)
+#        travel_pattern_action = self.createaction("Travel Characteristics", self.results_trips, None,
+#                                                  None, "Show travel characteristics", False, True)
         person_schedule_action = self.createaction("Profile of Activity Travel Pattern", self.results_person, None,
                                                   None, "Show profile of activity travel pattern in persons or households", False, True)
-        self.addActions(self.result_menu, (activity_pattern_action,travel_pattern_action,person_schedule_action, ))
+        self.addActions(self.result_menu, (activity_pattern_action,person_schedule_action, ))
 
     # Defining help        
         self.help_menu = self.menuBar().addMenu("&Help")
@@ -313,7 +314,7 @@ class MainWindow(QMainWindow):
             self.run_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
-            self.result_menu.actions()[2].setEnabled(True)
+
             
 
     def projectopen(self):
@@ -347,7 +348,7 @@ class MainWindow(QMainWindow):
             self.run_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
-            self.result_menu.actions()[2].setEnabled(True)
+
 
             
 
@@ -381,7 +382,7 @@ class MainWindow(QMainWindow):
         self.data_menu.actions()[2].setDisabled(True)
         self.result_menu.actions()[0].setDisabled(True)
         self.result_menu.actions()[1].setDisabled(True)
-        self.result_menu.actions()[2].setDisabled(True)
+
         
 
     def projectQuit(self):
@@ -412,13 +413,13 @@ class MainWindow(QMainWindow):
     
     def results_schedules(self):
         if self.proconfig <> None:
-            show_plot = MakePlot(self.proconfig,"schedule_final_r")
+            show_plot = MakeResultPlot(self.proconfig) #MakePlot(self.proconfig,"schedule_final_r")
             show_plot.exec_()
             
-    def results_trips(self):
-        if self.proconfig <> None:
-            show_plot = MakePlot(self.proconfig,"trips_r")
-            show_plot.exec_()
+#    def results_trips(self):
+#        if self.proconfig <> None:
+#            show_plot = MakeResultPlot(self.proconfig)
+#            show_plot.exec_()
             
     def results_person(self):
         if self.proconfig <> None:
