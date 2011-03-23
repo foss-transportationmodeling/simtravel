@@ -944,7 +944,7 @@ class QueryBrowser(object):
         if tab_flag:
             #check if index exits
             ind_cols = self.get_index_columns(table_name)
-            if not ind_cols:
+            if ind_cols:
                 index_name = table_name + '_index'
                 try:
                     self.dbcon_obj.cursor.execute("drop index %s"%index_name)
@@ -973,7 +973,7 @@ class QueryBrowser(object):
         table_flag = self.dbcon_obj.check_if_table_exists(table_name)
         sql_string = "SELECT indexdef FROM pg_indexes WHERE tablename = '%s'"%table_name
         pkey = "CREATE UNIQUE INDEX "
-        
+        index = ''
         if table_flag:
             try:
                 self.dbcon_obj.cursor.execute(sql_string)
@@ -983,11 +983,13 @@ class QueryBrowser(object):
                 for each in cols:
                     if pkey not in each:
                         index = each
-
-                split_str = index.split("(")
-                sub_str = split_str[1].split(")")[0]
-                ind_str = sub_str.split(", ")
-                return ind_str
+                if index != '':
+                    split_str = index.split("(")
+                    sub_str = split_str[1].split(")")[0]
+                    ind_str = sub_str.split(", ")
+                    return ind_str
+                else:
+                    return None
             except Exception, e:
                 print 'Error while fetching the columns from the table'
                 print e
