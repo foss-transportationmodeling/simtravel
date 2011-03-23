@@ -36,7 +36,6 @@ class SimulationManager(object):
             print ConfigurationError, """The configuration object input is not a valid """\
                 """etree.Element object. Trying to load the object from the configuration"""\
                 """ file."""
-
         try:
             fileLoc = fileLoc.lower()
             self.fileLoc = fileLoc
@@ -47,6 +46,7 @@ class SimulationManager(object):
             print e
             raise ConfigurationError, """The path for configuration file was """\
                 """invalid or the file is not a valid configuration file."""
+
         self.fileLoc = fileLoc
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
@@ -62,6 +62,8 @@ class SimulationManager(object):
                                               'persons', 'houseid')
 
     def collate_results(self, numParts):
+        dbConfigObject = self.configParser.parse_databaseAttributes()
+        self.divideDatabaseObj = DivideData(dbConfigObject)
         self.divideDatabaseObj.collate_full_results(numParts)
         
 
@@ -78,11 +80,25 @@ class SimulationManager(object):
         print "-- Creating a hdf5 cache database --"
         fileLoc = self.projectConfigObject.location
         if mode == 'w':
+            self.db = DB(fileLoc)
+            """
             if partId is not None:
                 self.db = DB(fileLoc, partId)
             else:
                 self.db = DB(fileLoc)
-            self.db.create()
+            #self.db.create()
+            """
+
+    def read_cacheDatabase(self):
+        fileLoc = self.projectConfigObject.location
+        self.db = DB(fileLoc, mode='a')
+
+    def setup_inputCacheTables(self):
+        self.db.create_inputCache()
+
+    def setup_outputCacheTables(self, partId=None):
+        self.db.create_outputCache(partId)
+
                 
         # placeholders for creating the hdf5 tables 
         # only the network data is read and processed for faster 
@@ -317,7 +333,7 @@ class SimulationManager(object):
         """
 
         fileLoc = self.projectConfigObject.location
-        table = self.db.returnTableReference(tableName)
+        table = self.db.returnTableReference(tableName, partId)
         
         t = time.time()
 

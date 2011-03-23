@@ -43,17 +43,34 @@ def run(fileLoc=None):
     else:
         numParts = int(args[1])
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
-        simulationManagerObject.divide_database(numParts)
+        #simulationManagerObject.divide_database(numParts)
         simulationManagerObject.parse_config()
         simulationManagerObject.clean_database_tables()
-        
-        
+	
+	
+	simulationManagerObject.setup_cacheDatabase()
+	simulationManagerObject.setup_inputCacheTables()
+    	queryBrowser = simulationManagerObject.setup_databaseConnection()
+	simulationManagerObject.setup_tod_skims(queryBrowser)
+    	simulationManagerObject.setup_location_information(queryBrowser)
+    	simulationManagerObject.close_database_connection(queryBrowser)    
+	
+
+	# Everything related to parts from here on ....
+        partsList = range(numParts)
+
+	# Creating the output cache branches
+	for partId in partsList:
+            simulationManagerObject.setup_outputCacheTables(partId+1)
+	    simulationManagerObject.clean_database_tables(partId+1)
+
+       
         #Multiprocessing
         pool = multiprocessing.Pool()
-        partsList = range(numParts)
         print partsList
         argsParallel = [(fileLoc, i+1) for i in partsList]
         print argsParallel
+
         pool.map(run_components_in_parallel, argsParallel)
         
         simulationManagerObject.collate_results(numParts)
@@ -63,15 +80,9 @@ def run_components_in_parallel(args):
     
     fileLoc = args[0]
     partId = args[1]
-    
     simulationManagerObject = SimulationManager(fileLoc = fileLoc)
-    simulationManagerObject.setup_cacheDatabase(partId)
-    queryBrowser = simulationManagerObject.setup_databaseConnection()
-    simulationManagerObject.setup_tod_skims(queryBrowser)
-    simulationManagerObject.setup_location_information(queryBrowser)
-    simulationManagerObject.close_database_connection(queryBrowser)    
+    simulationManagerObject.read_cacheDatabase()
     simulationManagerObject.parse_config()
-    simulationManagerObject.clean_database_tables(partId)
     simulationManagerObject.run_components(partId)
     simulationManagerObject.close_cache_connection()
     

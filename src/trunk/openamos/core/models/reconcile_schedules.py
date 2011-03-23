@@ -95,7 +95,7 @@ class ReconcileSchedules(Model):
         print self.indices[:20, :]
         print self.indices[-20:, :]
         
-        raw_input('New implementation of indics -')
+        #raw_input('New implementation of indics -')
 
 
 

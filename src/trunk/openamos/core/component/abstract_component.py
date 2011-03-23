@@ -186,11 +186,11 @@ class AbstractComponent(object):
         # writing to the hdf5 cache
         print 'writing to cache for ----', partId
 
-        cacheTableRef = self.db.returnTableReference(self.writeToTable)
+        cacheTableRef = self.db.returnTableReference(self.writeToTable, partId)
         cacheColsTable = cacheTableRef.colnames
 
         t = time.time()
-        convType = self.db.returnTypeConversion(self.writeToTable)
+        convType = self.db.returnTypeConversion(self.writeToTable, partId)
         dtypesInput = cacheTableRef.coldtypes
         data_to_write = self.data.columnsOfType(cacheColsTable, data_filter, dtypesInput)
         print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 

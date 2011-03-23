@@ -61,8 +61,8 @@ class SimulationManager(object):
 
 	self.setup_databaseConnection()
 	self.setup_cacheDatabase()
-	self.setup_location_information()
-	self.setup_tod_skims()
+	#self.setup_location_information()
+	#self.setup_tod_skims()
 	self.parse_config()
 	self.clean_database_tables()
         self.idCount = 0
