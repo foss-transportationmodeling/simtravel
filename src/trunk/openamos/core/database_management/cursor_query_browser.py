@@ -621,15 +621,17 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        #print 'SQL string for query - ', sql_string
+        print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
         try:
+	    ti = time.time()
             self.dbcon_obj.cursor.execute(sql_string)
             result = self.dbcon_obj.cursor.fetchall()
+	    print '\t Retrieved from the database in %.4f' %(time.time()-ti)
             data = self.createResultArray(result, cols_list)
-
+	    print '\t Retrieved from the database and processed to remove "None" values in %.4f' %(time.time()-ti)	   
             #print cols_list
             #print primCols
             # Sort with respect to primary columns
@@ -1153,7 +1155,7 @@ class QueryBrowser(object):
 
         if seq_flag:
             #find sequences for all tables and save in a list
-            sql_query = "SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE column_default LIKE 'nextval%'"
+            sql_query = ("SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE column_default LIKE 'nextval%'")
             try:
                 self.dbcon_obj.cursor.execute(sql_query)
                 col_default = self.dbcon_obj.cursor.fetchall()
@@ -1162,7 +1164,8 @@ class QueryBrowser(object):
                 print e
         else:
             #find sequences for the specified table and save in a list
-            sql_query = "SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s'"%table_name
+            sql_query = ("SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s'" %table_name
+			 + " and column_default LIKE 'nextval%'")
                          #AND column_default LIKE 'nextval%'"
             try:
                 self.dbcon_obj.cursor.execute(sql_query)
@@ -1192,7 +1195,7 @@ class QueryBrowser(object):
                          
 
     def reset_sequence(self, sequence_list):
-        """
+	"""
         This method is used to reset the sequence
         
         Input:
