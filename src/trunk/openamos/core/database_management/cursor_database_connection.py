@@ -3,6 +3,7 @@
  
 
 #include all the import 
+import traceback
 import sys
 import os
 import exceptions
@@ -325,6 +326,7 @@ class DataBaseConnection(object):
         except Exception, e:
             print 'Error when checking for existing tables'
             print e
+            traceback.print_exc(file=sys.stdout)
             raise Exception
 
 

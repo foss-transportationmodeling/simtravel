@@ -20,7 +20,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
 from cursor_query_browser import QueryBrowser
-from data_array import DataArray
+from openamos.core.data_array import DataArray
 
 class DivideData(object):
     #initialize the class 
@@ -583,7 +583,9 @@ class DivideData(object):
 	
         for table_name in output_tables:
             #print '\n', table_name
+	    print 'Getting index columns for table - %s' %(table_name)
             index_columns = self.new_qb_obj.get_index_columns(table_name)
+	    print '\tIndex columns for table -', index_columns
             #print '\t', index_columns
             print '\tdelete the index'
             self.new_qb_obj.delete_index(table_name)
@@ -614,6 +616,7 @@ class DivideData(object):
         Output:
         SQL string and column name
         """
+	print '-- Starting to check sequences for - ', table_name
         sql_string = ''
         col_name = ''
         #open a new connection
@@ -627,7 +630,11 @@ class DivideData(object):
             sql_string = "SELECT * FROM %s"%table_name
         else:
             #sequence list is not empty. create sql string
-            cols = self.dbcon_obj.get_column_list(table_name)
+	    print table_name, '---<<<Inside else for the following table_name'
+	    print self.qb_obj.dbcon_obj.connection
+	    print self.qb_obj.dbcon_obj.cursor
+		
+            cols = self.qb_obj.dbcon_obj.get_column_list(table_name)
             col_str = ''
             col_count = 0
             for i in cols:
@@ -656,7 +663,9 @@ class DivideData(object):
         Output:
         All output tables merge data into main database's output tables
         """
+	print '-- Starting to collate results for db - %s and tablename - %s' %(databasename, table_name)
         sql_string, ser_column = self.check_sequences(table_name)
+	print sql_string
         #run a loop and open a connection to individual databases
         #execute select query and save the results
         #sql_string = "select * from %s"%table_name
@@ -668,6 +677,7 @@ class DivideData(object):
 	#self.database_config_object.database_name = databasename
 	self.dbcon_obj.database_name = databasename		
 	self.dbcon_obj.new_connection()
+	print '-- database connection after starting to collate results', self.dbcon_obj.connection
 
         try:
             self.dbcon_obj.cursor.execute(sql_string)
@@ -711,8 +721,9 @@ class DivideData(object):
             arr_str = arr_str.replace('L', '')
             
 	    #print 'EMPTY STRING', arr_str
+	    print '-- This is where inserting needs to happen'
             sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
-            if not arr_str:
+            if len(arr_str) > 0:
                 try:
                     self.dbcon_obj.cursor.execute(sql_string)
                     self.dbcon_obj.connection.commit()
