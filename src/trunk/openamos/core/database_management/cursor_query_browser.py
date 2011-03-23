@@ -747,7 +747,7 @@ class QueryBrowser(object):
         else:
             print '\t - Table %s does not exist.'%table_name
         #after deleting all the data reset the sequences
-        seqlist = self.find_sequence(table_name)
+        seqlist, ser_column = self.find_sequence(table_name)
         self.reset_sequence(seqlist)
             
     ########## methods for delete query end ##########
@@ -1155,7 +1155,7 @@ class QueryBrowser(object):
 
         if seq_flag:
             #find sequences for all tables and save in a list
-            sql_query = ("SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE column_default LIKE 'nextval%'")
+            sql_query = ("SELECT column_name, column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE column_default LIKE 'nextval%'")
             try:
                 self.dbcon_obj.cursor.execute(sql_query)
                 col_default = self.dbcon_obj.cursor.fetchall()
@@ -1164,7 +1164,7 @@ class QueryBrowser(object):
                 print e
         else:
             #find sequences for the specified table and save in a list
-            sql_query = ("SELECT column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s'" %table_name
+            sql_query = ("SELECT column_name, column_default FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s'" %table_name
 			 + " and column_default LIKE 'nextval%'")
                          #AND column_default LIKE 'nextval%'"
             try:
@@ -1176,11 +1176,14 @@ class QueryBrowser(object):
 
         seq_list = []
         sequence = []
+        serial_column = []
         #create a list that has only the tuples with the sequence name in it
         for each in col_default:
-            off_set = str(each).find("'")
+            off_set = str(each[1]).find("'")
             if off_set is not -1:
-                 seq_list.append(each)
+                 seq_list.append(each[1])
+                 serial_column.append(each[0])
+                 
         #find the indexes for the sequence, extract the substring from the tuple 
         #and save in a new list
         for each in seq_list:
@@ -1191,7 +1194,7 @@ class QueryBrowser(object):
             seq = each[start:end]
             sequence.append(seq)
         #return the list with all the sequences
-        return sequence
+        return sequence, serial_column
                          
 
     def reset_sequence(self, sequence_list):
