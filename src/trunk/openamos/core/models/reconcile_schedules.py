@@ -2,7 +2,10 @@ from openamos.core.agents.person import Person
 from openamos.core.agents.activity import ActivityEpisode
 from openamos.core.models.abstract_model import Model
 
-from numpy import array, logical_and
+from numpy import array, logical_and, zeros, histogram
+
+import time
+
 
 class ReconcileSchedules(Model):
     def __init__(self, specification):
@@ -10,7 +13,7 @@ class ReconcileSchedules(Model):
         self.specification = specification
         self.activityAttribs = self.specification.activityAttribs
 
-    def create_indices(self, data):
+    def create_indices1(self, data):
         houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
                                                  return_inverse=True)
 
@@ -44,15 +47,68 @@ class ReconcileSchedules(Model):
 
 
         self.indices = array(self.indices)
+    
+    def create_indices(self, data):
+        idCols = data.columns([self.activityAttribs.hidName, 
+                               self.activityAttribs.pidName]).data
+        combId = idCols[:,0]*100 + idCols[:,1]
+        
+        print idCols[:20,:]
+        print 'comid', combId[:20]
+        print 'comid', combId[-20:]
+
+        comIdUnique, comId_reverse_indices = unique(combId, return_inverse=True)
+
+        print 'unique', comIdUnique[:20]
+        print 'unique records', comIdUnique.shape
+        print 'reverse indices', comId_reverse_indices[:20]
+        print 'reverse indices', comId_reverse_indices[-20:]
+
+
+        binsIndices = array(range(comId_reverse_indices.max()+2))
+        
+        histIndices = histogram(comId_reverse_indices, bins=binsIndices)
+        print histIndices[0][:20]
+        print histIndices[0][-20:]
+        
+        indicesRowCount = histIndices[0]
+        
+        indicesRow = indicesRowCount.cumsum()
+        print 'Row Count', indicesRowCount[:20]
+        print 'Row Index Low', indicesRow[:20]
+        #print 'Row Index Hig', indicesRowHigh[:20]
+
+
+        self.indices = zeros((comIdUnique.shape[0], 4), dtype=int)
+
+        print self.indices.shape
+        print idCols.shape
+        print indicesRow.shape
+        print binsIndices.shape
+
+        self.indices[:,0] = comIdUnique/100
+        self.indices[:,1] = comIdUnique - self.indices[:,0]*100
+
+        self.indices[1:,2] = indicesRow[:-1]
+        self.indices[:,3] = indicesRow
+        
+        print self.indices[:20, :]
+        print self.indices[-20:, :]
+        
+        raw_input('New implementation of indics -')
+
+
 
     def resolve_consistency(self, data, seed):
 
         data.sort([self.activityAttribs.hidName,
                    self.activityAttribs.pidName,
                    self.activityAttribs.scheduleidName])
-
+        ti = time.time()
         # Create Index Matrix
         self.create_indices(data)
+
+        print 'Indices created in %.4f' %(time.time()-ti)
 
         schidCol = data._colnames[self.activityAttribs.scheduleidName]
         actTypeCol = data._colnames[self.activityAttribs.activitytypeName]

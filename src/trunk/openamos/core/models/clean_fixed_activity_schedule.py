@@ -3,7 +3,7 @@ from openamos.core.agents.household import Household
 from openamos.core.agents.activity import ActivityEpisode
 from openamos.core.models.abstract_model import Model
 
-from numpy import array, logical_and
+from numpy import array, logical_and, histogram, zeros
 
 class CleanFixedActivitySchedule(Model):
     def __init__(self, specification):
@@ -46,7 +46,7 @@ class CleanFixedActivitySchedule(Model):
         
 
 
-    def create_indices(self, data):
+    def create_indices1(self, data):
         houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
                                                  return_inverse=True)
 
@@ -93,6 +93,65 @@ class CleanFixedActivitySchedule(Model):
         #print self.hhldIndicesOfPersons
 
         #raw_input()
+
+    def create_indices(self, data):
+        idCols = data.columns([self.activityAttribs.hidName,
+                               self.activityAttribs.pidName]).data
+        combId = idCols[:,0]*100 + idCols[:,1]
+        comIdUnique, comId_reverse_indices = unique(combId, return_inverse=True)
+
+        binsIndices = array(range(comId_reverse_indices.max()+2))
+        histIndices = histogram(comId_reverse_indices, bins=binsIndices)
+
+        indicesRowCount = histIndices[0]
+        indicesRow = indicesRowCount.cumsum()
+
+
+        self.personIndicesOfActs = zeros((comIdUnique.shape[0], 4), dtype=int)
+
+        self.personIndicesOfActs[:,0] = comIdUnique/100
+        self.personIndicesOfActs[:,1] = comIdUnique - self.personIndicesOfActs[:,0]*100
+        self.personIndicesOfActs[1:,2] = indicesRow[:-1]
+        self.personIndicesOfActs[:,3] = indicesRow
+
+        print self.personIndicesOfActs[:20, :]
+        print self.personIndicesOfActs[-20:, :]
+
+
+
+        hid = self.personIndicesOfActs[:,0]
+        
+        hidUnique, hid_reverse_indices = unique(hid, return_inverse=True)
+
+        binsHidIndices = array(range(hid_reverse_indices.max()+2))
+        histHidIndices = histogram(hid_reverse_indices, bins=binsHidIndices)
+        
+        indicesHidRowCount = histHidIndices[0]
+        indicesHidRow = indicesHidRowCount.cumsum()
+
+        self.hhldIndicesOfPersons = zeros((hidUnique.shape[0], 3))
+
+        self.hhldIndicesOfPersons[:,0] = hidUnique
+        self.hhldIndicesOfPersons[1:,1] = indicesHidRow[:-1]
+        self.hhldIndicesOfPersons[:,2] = indicesHidRow
+
+        print idCols[:30,:]
+        print self.hhldIndicesOfPersons[:20,:]
+        print self.personIndicesOfActs[:20,:]
+
+        print idCols[-30:,:]
+        print self.hhldIndicesOfPersons[-20:,:]
+        print self.personIndicesOfActs[-20:,:]
+
+
+
+        raw_input('new implementation of indices')
+
+
+
+
+
+
 
     def resolve_consistency(self, data, seed):
 
