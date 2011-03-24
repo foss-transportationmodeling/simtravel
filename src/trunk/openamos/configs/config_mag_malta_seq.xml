@@ -1,5 +1,5 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone" location="/workspace/projects/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims reference_tablename="travel_skims" indb="True">
@@ -80,13 +80,15 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="en_starttime" coeff="1"/>
       </Model>
-
-      <Model name="duration" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="duration"/>
+      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurpose"/>
 	<Variance value="0"/>
-        <Variable table="runtime" var="starttime" coeff="-1"/>
-        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="en_activitytype" coeff="1"/>
       </Model>
+
+
+
+
 
       <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
@@ -151,6 +153,12 @@
         <Variable table="background_trips" var="destination_taz" coeff="1"/>
       </Model>
 
+      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurpose"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="purpose" coeff="1"/>
+      </Model>
+
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
 	<Variance value="0"/>
@@ -209,6 +217,20 @@
 	<DependentVariable var="tozone"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="tozone" coeff="1"/>
+      </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
+
+      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurpose"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="trippurpose" coeff="1"/>
       </Model>
 
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
