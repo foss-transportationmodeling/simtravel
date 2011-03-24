@@ -33,6 +33,8 @@ def run(fileLoc=None):
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
         queryBrowser = simulationManagerObject.setup_databaseConnection()
         simulationManagerObject.setup_cacheDatabase()
+	simulationManagerObject.setup_inputCacheTables()
+	simulationManagerObject.setup_outputCacheTables()
         simulationManagerObject.setup_tod_skims(queryBrowser)
         simulationManagerObject.setup_location_information(queryBrowser)
         simulationManagerObject.close_database_connection(queryBrowser)
@@ -43,7 +45,7 @@ def run(fileLoc=None):
     else:
         numParts = int(args[1])
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
-        #simulationManagerObject.divide_database(numParts)
+        simulationManagerObject.divide_database(numParts)
         simulationManagerObject.parse_config()
         simulationManagerObject.clean_database_tables()
 	

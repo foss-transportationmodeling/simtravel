@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_seq.xml'
+	fileLoc = '/workspace/openamos/configs/config_mag_malta_seq.xml'
 	configObject = None
 
 
