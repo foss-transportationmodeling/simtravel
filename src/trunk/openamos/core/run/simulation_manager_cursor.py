@@ -255,8 +255,23 @@ class SimulationManager(object):
                     # after running each component because the subsequent components
                     # are often dependent on the choices generated in the previous components
                     # run
+	    
+		    if (comp.readFromTable <> comp.writeToTable):
+			if comp.analysisInterval == 1439:
+			    createIndex = True
+			elif comp.analysisInterval == None:
+			    createIndex = True
+			else:
+			    createIndex = False
+		    else:
+		        createIndex = True
+
+		    deleteIndex = True
+					    
+			
+
                     self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 
-                                           nRowsProcessed, partId)
+                                           nRowsProcessed, partId, createIndex, deleteIndex)
                     
                 configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
@@ -323,7 +338,7 @@ class SimulationManager(object):
 
 
 
-    def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None):
+    def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None, createIndex=True, deleteIndex=True):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
@@ -332,10 +347,14 @@ class SimulationManager(object):
         and hence the need to reflect the run-time caches to the database
         """
 
+	
+
         fileLoc = self.projectConfigObject.location
         table = self.db.returnTableReference(tableName, partId)
         
         t = time.time()
+
+	print 'Create index - %s and Delete Index - %s' %(createIndex, deleteIndex)
 
         print '\tNumber of rows processed for this component - ', nRowsProcessed
         if nRowsProcessed == 0:
@@ -346,7 +365,7 @@ class SimulationManager(object):
         colsToWrite = table.colnames
 
         #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
-        queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc, partId)
+        queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc, partId, createIndex, deleteIndex)
 
         
     def close_database_connection(self, queryBrowser):
