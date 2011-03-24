@@ -301,7 +301,7 @@ class DivideData(object):
            
   
     #select rows based on a selection criteria
-    def get_interval_rows(self, databasename, table1, table2, column_name, interval_list, index):
+    def get_interval_rows(self, databasename, each_table, column_name, interval_list, index):
         """
         This method is used to get selected rows between the interval 
         from the table in the database.
@@ -311,18 +311,14 @@ class DivideData(object):
 
         Output:
         Returns the rows that satisfy the selection criteria
-        """
+        """   
         #create a new database connection
         self.dbcon_obj.new_connection()
         
         fin_flag = None
-        #check if table exists and then if columns exists
-        tab_flag1 = self.dbcon_obj.check_if_table_exists(table1)
-        tab_flag2 = self.dbcon_obj.check_if_table_exists(table2)
-        if tab_flag1 == tab_flag2:
-            fin_flag = True
-        else:
-            fin_flag = False
+        
+        #check if table exists
+        fin_flag = self.dbcon_obj.check_if_table_exists(each_table)
 
         #declare the interval
         if index == 0:
@@ -331,39 +327,42 @@ class DivideData(object):
         else:
             low = interval_list[index-1] + 1
             high = interval_list[index]
-            
+        
         t1 = time.time()
-        #get the rows from households table
-        sql_string1 = "SELECT * FROM %s WHERE %s BETWEEN %s AND %s"%(table1, column_name, low, high)
-        sql_string2 = "SELECT * FROM %s WHERE %s BETWEEN %s AND %s"%(table2, column_name, low, high)
+        #create a sql query for the table
+        sql_string = "SELECT * FROM %s WHERE %s BETWEEN %s AND %s"%(each_table, column_name, low, high)
+
+        #print 'sql query is %s and index --> %s'%(sql_string, index)
         
         if fin_flag:
             try:
-                self.dbcon_obj.cursor.execute(sql_string1)
-                house_data = self.dbcon_obj.cursor.fetchall()
-    
-                self.dbcon_obj.cursor.execute(sql_string2)
-                person_data = self.dbcon_obj.cursor.fetchall()
-                
-                house_rows = []
-                person_rows = []
-                count1 = 0
-                count2 = 0
-                
-                for each in house_data:
-                    count1 = count1 + 1
-                    house_rows.append(each)
-                for each in person_data:
-                    count2 = count2 + 1
-                    person_rows.append(each)
-                    
+                self.dbcon_obj.cursor.execute(sql_string)
+                table_data = self.dbcon_obj.cursor.fetchall()
+
+                table_rows = []
+                count = 0
+                new_rows = []
+                for each in table_data:
+                    count = count + 1
+                    table_rows.append(each)
+                    if None in each:
+                        each = list(each)
+                        loc = each.index(None)
+                        each[loc] = 0
+                        new_rows.append(each)
+                        #print 'None present'
+
                 #close the new database connection
                 self.dbcon_obj.close_connection()
-                
-                if count1 == 0 or count2 == 0:
+
+                if count == 0:
                     print 'No rows selected.\n'           
                 print 'Select query successful.\n'
-                return house_rows, person_rows
+                if len(new_rows) == 0:
+                    return table_rows
+                else:
+                    return new_rows
+                
             except Exception, e:
                 print 'Error retrieving the information. Query failed.\n'
                 print e
@@ -388,6 +387,8 @@ class DivideData(object):
         Output:
         Data inserted into the table
         """
+        sqlstr, ser_col = self.check_sequences(table_name)
+        print 'sequence chk successful. seq col is ', ser_col
         db_name = databasename
         #open a new connection to the required database
         db_str = db_name + '_' + str(index+1)
@@ -403,16 +404,20 @@ class DivideData(object):
         col_str = ''
         col_count = 0
         for i in cols:
-            if col_count < (len(cols)-1):
-                col_str = col_str + i + ', '
-                col_count = col_count + 1
-            else:
-                col_str = col_str + i
+            if i not in ser_col:
+                if col_count < (len(cols)-(len(ser_col)+1)):
+                    col_str = col_str + i + ', '
+                    col_count = col_count + 1
+                else:
+                    col_str = col_str + i
+
+        if len(arr) < 1:
+            return None
 
         arr_str = [tuple(each) for each in arr]
         arr_str = str(arr_str)[1:-1]
         arr_str = arr_str.replace('L', '')
-        
+                    
         sql_string = 'insert into %s (%s) values %s'%(table_name, col_str, arr_str)
 
         t1 = time.time()
@@ -529,7 +534,7 @@ class DivideData(object):
             high = interval_list[index]
         #get the rows from households table
         sql_string1 = "DELETE FROM %s WHERE %s NOT BETWEEN %s AND %s"%(table1, column_name, low, high)
-        sql_string2 = "DELETE FR        newobject.collate_results(dbname, table_name)OM %s WHERE %s NOT BETWEEN %s AND %s"%(table2, column_name, low, high)
+        #sql_string2 = "DELETE FROM %s WHERE %s NOT BETWEEN %s AND %s"%(table2, column_name, low, high)
         
         if fin_flag:
             try:
@@ -565,6 +570,7 @@ class DivideData(object):
         Output:
         Data from all databases is saved in the parent database
         """
+
         output_tables = ['child_dependency_r', 'daily_school_status_r', 
                         'daily_work_status_r', 'households_vehicles_count_r', 
                         'schedule_ltrec_r', 'schedule_r', 
@@ -572,7 +578,7 @@ class DivideData(object):
                         'workers_r', 'schedule_childreninctravelrec_r', 
                         'schedule_cleanfixedactivityschedule_r',  
                         'schedule_dailyallocrec_r', 'schedule_final_r', 'schedule_inctravelrec_r']
-			 
+                        	 
         index_columns = ''
         t1 = time.time()
         #create a new database connection object
@@ -742,7 +748,7 @@ class DivideData(object):
 
              
     #partition the data in the newly created tables
-    def partition_data(self, parts, hhld_table, person_table, 
+    def partition_data(self, parts, table_list, 
 			column_name, location=None):
         """
         This method runs a loop and divides all the data
@@ -753,9 +759,12 @@ class DivideData(object):
         Output:
         
         """
+        print 'Start'
+
         #declare the lists
         house_rows = []
         person_rows = []
+        table_rows = []
         
         #create the dummy databases
         res = self.dummy_db(self.dbcon_obj.database_name, parts)
@@ -776,7 +785,7 @@ class DivideData(object):
         #close the connection to the database
         self.dbcon_obj.close_connection()
         print '---> connection closed'
-
+        
         #create new tables in the databases
         self.create_partitions(self.database_name, parts)
         print '---> partitions created'
@@ -792,18 +801,20 @@ class DivideData(object):
         exported as a csv file and the location should be assigned where the 
         file is located
         """
+        
         #run a loop to copy data and delete the rows
         print 'Loop starts.'
         t1 = time.time()
         for index in range(parts):
-            #select the required data
-            house_rows, person_rows = self.get_interval_rows(self.database_name, hhld_table,
-								person_table, column_name,
-								interval_list, index)
-            
-            #insert the selected data into the required tables
-            self.insert_data(self.database_name, house_rows, hhld_table, index)
-            self.insert_data(self.database_name, person_rows, person_table, index)
+            #run a loop for every table in the table list
+            for each_table in table_list:
+                #select the required data
+                table_rows = self.get_interval_rows(self.database_name, each_table, column_name, interval_list, index)
+                print '---> Data selected based on the houseid'
+                
+                #insert the selected data into the required tables
+                insert = self.insert_data(self.database_name, table_rows, each_table, index)
+                print '---> Data inserted in the respective table'
             
             #copy all the data into the new data
             #self.copy_data(self.database_name, table1, table2, index, location)
@@ -811,7 +822,7 @@ class DivideData(object):
             #delete the unwanted rows
             #self.delete_records(self.database_name, table1, table2, 
  	    #	                 column_name, index, interval_list)
-            
+           
         print 'Loop ended'
         t2 = time.time()
         print 'Total time taken by main function %s'%(t2-t1)
@@ -842,7 +853,7 @@ class TestDivideData(unittest.TestCase):
         print 'Start program'
         
         """ Call main function """
-        parts = 2
+        parts = 3
         location = '/home/namrata/Documents/threads'
         table1 = 'households'
         table2 = 'persons'
@@ -853,8 +864,10 @@ class TestDivideData(unittest.TestCase):
         print '\t Location is %s'%location
         print '\t Table 1 is %s, Table 2 is %s and Column name is %s'%(table1, table2,column_name)
         #main function to divide and distribute the data
-        newobject.partition_data(parts, table1, table2, column_name, location)
-        
+        table_list = ['persons', 'households', 'schedule_r']
+        #table_list = ['schedule_r']
+        newobject.partition_data(parts, table_list, column_name)
+
         #table_name = 'child_dependency_r'
         #dbname = 'mag_zone'
         
@@ -863,7 +876,7 @@ class TestDivideData(unittest.TestCase):
         #newobject.collate_results(dbname, table_name)
         #close connection
         #newobject.dbcon_obj.close_connection()
-        newobject.collate_full_results(parts)
+        #newobject.collate_full_results(parts)
         """
         #   MAG_ZONE_2
         newobject.dbcon_obj.database_name = 'mag_zone_2'
