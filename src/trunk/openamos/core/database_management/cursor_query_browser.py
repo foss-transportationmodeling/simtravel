@@ -813,7 +813,7 @@ class QueryBrowser(object):
            print 'Table %s does not exist.'##%table_name 
         self.create_index(table_name, keyCols)
 
-    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc, partId=None, delimiter=','):
+    def copy_into_table(self, arr, cols_list, table_name, keyCols, loc, partId=None, createIndex=True, deleteIndex=True, delimiter=','):
         """
         self, arr, cols_list, table_name, keyCols, chunkSize=None):
         This method is used to insert rows into the table.
@@ -830,8 +830,9 @@ class QueryBrowser(object):
 
         table_name = table_name.lower()
 
-        # Delete index before inserting
-        index_cols = self.delete_index(table_name)
+	if deleteIndex:
+            # Delete index before inserting
+            index_cols = self.delete_index(table_name)
 
 
         self.file_write(arr, loc, partId)
@@ -862,7 +863,8 @@ class QueryBrowser(object):
                 print e
         else:
            print 'Table %s does not exist.'##%table_name 
-        self.create_index(table_name, keyCols)
+	if createIndex:
+            self.create_index(table_name, keyCols)
         
         
     def insert_nrows(self, table_name, cols_listStr, arr):
