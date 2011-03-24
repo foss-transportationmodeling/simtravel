@@ -1,5 +1,5 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/workspace/projects/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims reference_tablename="travel_skims" indb="True">
@@ -22,6 +22,27 @@
 
 
   <ModelConfig>
+
+    <Component name="ArrivalTimeInformation" read_from_table="trips_arrival_from_malta_r" key="houseid,personid" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
+      </DBTables>
+
+      <Model1 name="TripID" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripid"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="tripid" coeff="1"/>
+      </Model1>
+
+      <Model name="ArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="arrivaltime"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="arrivaltime" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
 
     <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
@@ -87,7 +108,12 @@
       </Model>
 
 
-
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
 
 
       <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -126,7 +152,7 @@
    	<Table table="background_trips" key="houseid,personid" order="1"/>
       </DBTables>
 
-      <AnalysisIntervalFilter table="background_trips" var="start_min"/>
+      <AnalysisIntervalFilter table="background_trips" var="start_min_indexedat4am"/>
 
 
       <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
@@ -162,7 +188,7 @@
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
 	<Variance value="0"/>
-        <Variable table="background_trips" var="start_min" coeff="1"/>
+        <Variable table="background_trips" var="start_min_indexedat4am" coeff="1"/>
       </Model>
 
       <Model name="endtime" formulation="Regression" type="Linear" seed="1">
@@ -174,16 +200,15 @@
 	<Filter table="background_trips" var="destination_taz" condition="less than" value="3000"/>
 
 	<Variance value="0"/>
-        <Variable table="background_trips" var="arrive_min" coeff="1"/>
+        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
       </Model>
 
     </Component>
-
-    <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_final_r" key="houseid,personid" skip="False" completed="True">
+p
+    <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_to_malta_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
-    	<Table table="persons" key="houseid,personid"/>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
-    	<Table table="trips_final_r" key="houseid,personid"/>
+    	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
 
       <AnalysisIntervalFilter table="trips_r" var="starttime"/>

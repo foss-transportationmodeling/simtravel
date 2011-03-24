@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone_fulldata" location="/workspace/projects/mag_zone_fulldata/" seed="10" subsample="40000"/>
+  <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_fulldata" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119"/>
     <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
