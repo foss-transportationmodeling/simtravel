@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/workspace/openamos/configs/config_mag_malta_seq.xml'
+	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_seq.xml'
 	configObject = None
 
 
@@ -190,58 +190,76 @@ class SimulationManager(object):
                 self.queryBrowser.delete_all(tableName)                            
 
 
-    def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([[]])):
+    def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([])):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
-	if tripInfoArrivals.shape[0] > 1:
-	    print 'Following vehicles arrived - '
-	    print tripInfoArrivals
+        
+        # To test python simulation_manager_cursor.py use dummy arrival info
+        #tripInfoArrivals = array([1,2,3])
+
+	if tripInfoArrivals <> array([]):
+            dataVals = zeros((tripInfoArrivals.shape[0], 2))
+            dataVals[:,0] = tripInfoArrivals
+            dataVals[:,1] = analysisInterval - 1
+
+            data = DataArray(dataVals, ['tripid', 'arrivaltime'])
+            
+	    print 'Following vehicles arrived and the corresponding arrival interval - '
+	    print data
+        else:
+            data = None
             #raw_input ('\t Press any key to continue')
 	t_c = time.time()
 
-
-
-
+        # The analysis interval returned is the end of the analysis interval
+        # In openamos everything is referenced to the start of the analysis Interval
+        # openamos analysisInterval = above_analysisInterval - 1
 
 	# Get the two components one for dynamic activity simulation and another for extracting trips
 	compObjects = []
         for comp in self.componentList:
 	    # Integrated application
+
 	    """
 	    if comp.component_name in ['DynamicNonMandatoryActivities', 'FinalReconciliationOfActivityTravelStartAdj', 
 					'FinalReconciliationOfActivityTravelEndAdj', 'ExtractTravelEpisodes', 
 					'ExtractBackgroundTravelEpisode', 'ExtractAllTravelEpisodes']:
 	    """
 	    # Sequential application
-	    if comp.component_name in ['ExtractTravelEpisodes', 
+	    if comp.component_name in ['ArrivalTimeInformation', 'ExtractTravelEpisodes', 
 					'ExtractBackgroundTravelEpisodes', 'ExtractAllTravelEpisodes']:
 
 	        compObjects.append(comp)
 
-	tripInfo = zeros((1,9))
+        fileLoc = self.projectConfigObject.location
 	for comp in compObjects:
-	    comp.analysisInterval = analysisInterval
-	    t = time.time()
+            t = time.time()
+            comp.analysisInterval = analysisInterval - 1
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
 
-            if comp.skipFlag:
-                print '\tSkipping the run for this component'
-                continue
-	    fileLoc = self.projectConfigObject.location
-            data = comp.pre_process(self.queryBrowser, 
-                                    self.projectSkimsObject, self.db, fileLoc)
+                
+            if comp.component_name == 'ArrivalTimeInformation':
+                comp.db = self.db
+            
+            else:
+                if comp.skipFlag:
+                    print '\tSkipping the run for this component'
+                    continue
+
+                data = comp.pre_process(self.queryBrowser, 
+                                        self.projectSkimsObject, self.db, fileLoc)
 
             if data is not None:
+                print 'inside here for component - ', comp.component_name
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
                 tripInfo = comp.run(data, self.projectSkimsObject, 
-					self.queryBrowser, fileLoc)
+                                    self.queryBrowser, fileLoc)
 
-	    else:
-		tripInfo = zeros((1,9))
+            else:
+                tripInfo = zeros((1,9))
             print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
-            #raw_input()
 
 	if comp.component_name == 'ExtractAllTravelEpisodes':
 	    # Reduce 100 to match TAZ notation of MALTA
@@ -250,13 +268,15 @@ class SimulationManager(object):
 	    #print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
 	    #print tripInfo
 
-	    tripInfo[:,-4] = tripInfo[:,-4] - 100
-            tripInfo[:,-3] = tripInfo[:,-3] - 100
+	    tripInfo[:,-5] = tripInfo[:,-5] - 100
+            tripInfo[:,-4] = tripInfo[:,-4] - 100
 
 
 
 	    print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
-	    print tripInfo
+	    print tripInfo.shape
+            print tripInfo[:, [0, -5, -4]]
+            #raw_input('This is the shape --')
 
 	return tripInfo
 
