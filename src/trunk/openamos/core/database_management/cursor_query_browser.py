@@ -884,7 +884,7 @@ class QueryBrowser(object):
 
     ########## methods for creating and deleting index##########
     #create an index
-    def create_index(self, table_name, col_list):
+    def create_index(self, table_name, col_list, index_name=None):
         """
         This method creates an index on the table
         
@@ -912,7 +912,8 @@ class QueryBrowser(object):
             index_stmt = ''
             columns = ''
             count = 0
-            index_name = table_name + '_index'
+            if not index_name:
+                index_name = table_name + '_index'
 
             for i in col_list:
                 if count < (len(col_list)-1):
@@ -931,7 +932,7 @@ class QueryBrowser(object):
                 self.dbcon_obj.connection.rollback()
 
     #delete an index
-    def delete_index(self, table_name):
+    def delete_index(self, table_name, index_name=None):
         """
         This method deletes an index on the table
         
@@ -947,7 +948,8 @@ class QueryBrowser(object):
             #check if index exits
             ind_cols = self.get_index_columns(table_name)
             if ind_cols:
-                index_name = table_name + '_index'
+                if not index_name:
+                    index_name = table_name + '_index'
                 try:
                     self.dbcon_obj.cursor.execute("drop index %s"%index_name)
                     self.dbcon_obj.connection.commit()
@@ -1232,6 +1234,35 @@ class QueryBrowser(object):
                 print 'Query execution failed. Failed to reset sequences'
                 print e
                 return False
+                
+    """
+    def copy_table(self, cols_list, table_name, partId = None, delimiter=','):
+        tab_flag = True
+        if partId == None:
+	        partId = ""
+        cols_listStr = ""
+        for i in cols_list:
+            cols_listStr += "%s,"%i
+        cols_listStr = "(%s)" %cols_listStr[:-1]
+        loc = "/home/namrata/Documents/data/temp_data.csv"
+        if tab_flag:
+            #print 'Table %s exists.'%table_name
+            try:
+                insert_stmt = (""copy %s %s from '%s' ""
+                               "" with delimiter as '%s' csv header"" %(table_name, cols_listStr, loc, 
+						       delimiter))
+                                                                       
+                #print '\t\t', insert_stmt
+                #print table_name, cols_listStr, loc, partId, delimiter
+                result = self.dbcon_obj.cursor.execute(insert_stmt)
+                self.dbcon_obj.connection.commit()
+                #print '\t\tTime after insert query - %.4f' %(time.time() - ti)
+                #print '\t\tTime to insert - %.4f' %(time.time()-ti)
+            except Exception, e:
+                print e
+        else:
+           print 'Table %s does not exist.'##%table_name 
+    """
                          
                          
 #unit test to test the code
@@ -1295,9 +1326,28 @@ class TestMainClass(unittest.TestCase):
         #newobject.insert_into_table()
         """
         table_name = 'temp'
+        #cols = newobject.dbcon_obj.get_column_list(table_name)
+        cols = ['aa', 'bb']
+        cols_list = ['aa']
+        #print cols
+        total = 2
+        index_name = 'index_1'
+        for i in range(total):
+            print '--> %s'%i
+            t1 = time.time()
+            #print 'delete index'
+            #newobject.delete_index(table_name)
+            #newobject.copy_table(cols, table_name, delimiter=',')
+            #print 'create index'
+            #newobject.create_index(table_name, cols_list)
+            t2 = time.time()
+            print 'Time ---> %s'%(t2-t1)
+            
+        #newobject.create_index(table_name, cols_list, index_name)
+        newobject.delete_index(table_name, index_name)
         #newobject.delete_all(table_name)
-        seqlist = newobject.find_sequence()
-        print seqlist
+        #seqlist = newobject.find_sequence()
+        #print seqlist
         #seql = []
         #newobject.reset_sequence(seql)
         #for each in seqlist:
