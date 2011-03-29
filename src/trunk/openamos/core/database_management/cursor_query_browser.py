@@ -19,7 +19,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
-from openamos.core.data_array import DataArray
+#from openamos.core.data_array import DataArray
 
 class QueryBrowser(object):
     #initialize the class 
@@ -37,7 +37,7 @@ class QueryBrowser(object):
         self.database_name = dbconfig.database_name
         self.database_config_object = dbconfig
         self.dbcon_obj = DataBaseConnection(dbconfig)
-        #print self.dbcon_obj
+        print 'inside query browser ', self.dbcon_obj
 
     ########## methods for select query  ##########
     #select all rows from the table
@@ -1263,6 +1263,28 @@ class QueryBrowser(object):
         else:
            print 'Table %s does not exist.'##%table_name 
     """
+    def cluster_index(self, table_name, index_name):
+        """
+        This method is used to create a clustered index
+        
+        Input:
+        Table name and index name
+        
+        Output:
+        The index created is clustered
+        """
+        print 'table name --> %s and index name --> %s'%(table_name, index_name)
+        cluster_index = "ALTER TABLE %s CLUSTER ON %s"%(table_name, index_name)
+        print cluster_index
+        try:
+            self.dbcon_obj.cursor.execute(cluster_index)
+            self.dbcon_obj.connection.commit()
+            return True
+        except Exception, e:
+            print 'Error while creating an index'
+            print e
+        return False
+            
                          
                          
 #unit test to test the code
@@ -1328,7 +1350,7 @@ class TestMainClass(unittest.TestCase):
         table_name = 'temp'
         #cols = newobject.dbcon_obj.get_column_list(table_name)
         cols = ['aa', 'bb']
-        cols_list = ['aa']
+        cols_list = ['bb']
         #print cols
         total = 2
         index_name = 'index_1'
@@ -1344,7 +1366,9 @@ class TestMainClass(unittest.TestCase):
             print 'Time ---> %s'%(t2-t1)
             
         #newobject.create_index(table_name, cols_list, index_name)
-        newobject.delete_index(table_name, index_name)
+        res = newobject.cluster_index(table_name, index_name)
+        print 'cluster index result --> %s'%res
+        #newobject.delete_index(table_name, index_name)
         #newobject.delete_all(table_name)
         #seqlist = newobject.find_sequence()
         #print seqlist
