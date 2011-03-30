@@ -232,7 +232,7 @@ class MakeResultPlot(QDialog):
     def on_context_menu(self,point):
         menubar = QMenu(self)
         one = menubar.addAction("Show Plot")
-        two = menubar.addAction("Remove Current Tab")
+        two = menubar.addAction("Remove Plot")
         three = menubar.addAction("Save Plot as PNG")
 
         self.connect(one,SIGNAL("triggered()"),self.draw_plot)
@@ -245,6 +245,7 @@ class MakeResultPlot(QDialog):
         filename = dialog.getSaveFileName(self,"Save Image","","PNG image (*.png)")
         if str(filename) != "":
             index = self.tabs.currentIndex()
+            index = index//2
             fig = self.figs[index]
             fig.savefig(str(filename))
              
@@ -358,6 +359,11 @@ class MakeResultPlot(QDialog):
         self.new_obj = DataBaseConnection(self.database_config_object)
         self.qb_obj = QueryBrowser(self.database_config_object)
         self.new_obj.new_connection()
+ 
+        #assigning the connection and cursor to the qb_obj
+        self.qb_obj.dbcon_obj.connection = self.new_obj.connection
+        self.qb_obj.dbcon_obj.cursor = self.new_obj.cursor
+
 
         
     def disconnects(self):
@@ -601,17 +607,27 @@ class MakeResultPlot(QDialog):
             vars = 'houseid, personid'
         
         filter = ''
+        col_list = []
         numrows = self.varstable.rowCount()
         if numrows < 1:
             return ""
         
         for i in range(numrows):
             column = str((self.varstable.item(i,0)).text())
+            col = str(column)
+            col_list.append(col)
             value = str((self.varstable.item(i,1)).text())
             filter = filter + "%s = '%s' AND " %(column,value)
         filter = filter[0:len(filter)-5]
         state = ", (SELECT DISTINCT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
 
+        #create an index on the col lit
+        index_name = 'socio_sql_index'
+        print col_list
+        t1 = time.time()
+        #self.qb_obj.create_index(table1, col_list, index_name)
+        t2 = time.time()
+        print 'time taken to create index --> %s'%(t2-t1)
         return state
 
 
@@ -656,62 +672,7 @@ class MakeResultPlot(QDialog):
 #        if index == 4:
 #            return duration
 
-    def checkColumnExists(self, tablename, columnname):
-        columns = self.new_obj.get_column_list(tablename)
-        try:
-            columns.index(columnname)
-        except:
-            return False
-        return True
-        
-    def retrieveResult(self):
-        tablename = ""
-        if self.tripradio.isChecked():
-            tablename = "trips_r"
-        else:
-            tablename = "schedule_final_r"
-        
-        column = self.choicevar1.currentText()
-        if column == "":
-            return False
-        
-        try:
-            total = 0.0
-            cond = self.time_categroy(column)
-            for key in cond.keys():
-                lowhigh = cond[key]
-                
-                filter = ""
-                socio = str(self.socio_sql())
-                if socio != "": 
-                    if self.segment1.isChecked():
-                        filter = " AND A.houseid = B.houseid"
-                    else:
-                        filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
-                    
-                sql = ""   
-                if len(lowhigh) > 1:
-                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
-                else:
-                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
-                
-                self.cursor.execute(sql)
-                data = self.cursor.fetchall()
-                for j in data:
-                    self.err1.append(key)
-                    self.err2.append(j[0])
-                    total = total + j[0]
-                
-            if self.percent.isChecked():
-                for i in range(len(self.err1)):
-                    self.err2[i] = 100*float(self.err2[i])/total
 
-            return True
-        except Exception, e:
-            print '\tError while fetching the columns from the table'
-            print e
-            
-        return False
     
     def time_categroy(self,column):
         #time = {1:[0,120],2:[120,300],3:[300,480],4:[480,660],5:[660,900],6:[900,1440]}
@@ -777,6 +738,85 @@ class MakeResultPlot(QDialog):
         if column == "miles":
             return miles
 
+    def checkColumnExists(self, tablename, columnname):
+        columns = self.new_obj.get_column_list(tablename)
+        try:
+            columns.index(columnname)
+        except:
+            return False
+        return True
+        
+    def retrieveResult(self):
+        tablename = ""
+        if self.tripradio.isChecked():
+            tablename = "trips_r"
+        else:
+            tablename = "schedule_final_r"
+        
+        column = self.choicevar1.currentText()
+        if column == "":
+            return False
+        
+        t1 = time.time()
+        filter = ""
+        socio = str(self.socio_sql())
+        if socio != "": 
+            if self.segment1.isChecked():
+                filter = " AND A.houseid = B.houseid"
+            else:
+                filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
+                        
+        try:
+            total = 0.0
+            col_list = []
+            cond = self.time_categroy(column)
+                        
+            #convert the column into list
+            col = str(column)
+            col_list.append(col)
+            
+            #create index name
+            index_name = col + '_index'
+            
+            #create an index on the column
+            ts = time.time() 
+            #self.qb_obj.create_index(tablename, col_list, index_name)
+            te = time.time()
+            print 'time taken to create second index --> %s'%(te-ts)
+            #create the cluster on index
+            
+            
+            for key in cond.keys():
+                lowhigh = cond[key]
+                    
+                sql = ""   
+                if len(lowhigh) > 1:
+                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
+                else:
+                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
+                
+                self.cursor.execute(sql)
+                data = self.cursor.fetchall()
+                for j in data:
+                    self.err1.append(key)
+                    self.err2.append(j[0])
+                    total = total + j[0]
+                
+            if self.percent.isChecked():
+                for i in range(len(self.err1)):
+                    self.err2[i] = round(100*float(self.err2[i])/total,2)
+            #self.qb_obj.delete_index(tablename, index_name)
+            index_name1 = 'socio_sql_index'
+            #self.qb_obj.delete_index('households', index_name1)
+            t2 = time.time()
+            print 'time taken --> %s'%(t2-t1)
+            return True
+        except Exception, e:
+            print '\tError while fetching the columns from the table'
+            print e
+            
+        return False
+
     def on_draw1(self):
         """ Redraws the figure
         """     
@@ -832,12 +872,14 @@ class MakeResultPlot(QDialog):
         vtable = CustomTable(self)
         #vtable.setSelectionMode(QAbstractItemView.MultiSelection)
         vtable.setColumnCount(2)
+        header = QTableWidgetItem(str(self.choicevar1.currentText()))
+        vtable.setHorizontalHeaderItem(0,header)
         if self.freq.isChecked():
             header = QTableWidgetItem(str("Frequency"))
-            vtable.setHorizontalHeaderItem(0,header)
+            vtable.setHorizontalHeaderItem(1,header)
         else:
             header = QTableWidgetItem(str("Percent(%)"))
-            vtable.setHorizontalHeaderItem(0,header)                
+            vtable.setHorizontalHeaderItem(1,header)                
         vtable.setRowCount(len(self.err2))
         for i in range(len(self.err2)):
             temp = self.err1[i]
@@ -904,8 +946,17 @@ class MakeResultPlot(QDialog):
                 for j in range(len(category2)):
                     cumulate.append(0)
             
+            filter = ""
+            socio = str(self.socio_sql())
+            if socio != "": 
+                if self.segment1.isChecked():
+                    filter = " AND A.houseid = B.houseid"
+                else:
+                    filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
+                            
             yvalue = []
             previous = []  
+            t1 = time.time()
             for key in category1.keys():
                 
                 lowhigh1 = category1[key]
@@ -914,15 +965,7 @@ class MakeResultPlot(QDialog):
                     xvalue.append(0)
                     
                 try:
-
-                    filter = ""
-                    socio = str(self.socio_sql())
-                    if socio != "": 
-                        if self.segment1.isChecked():
-                            filter = " AND A.houseid = B.houseid"
-                        else:
-                            filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
-                    
+                   
                     sql = ""
                     if len(lowhigh1) > 1:
                         sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s >= %d AND A.%s < %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter,column2,column2)
@@ -960,7 +1003,8 @@ class MakeResultPlot(QDialog):
                     print '\tError while fetching the columns from the table'
                     print e
 
-
+            t2 = time.time()
+            print 'time taken is ---> %s'%(t2-t1)
             if isExchange:
                 cum = []
                 N=len(yvalue)
@@ -1005,13 +1049,6 @@ class MakeResultPlot(QDialog):
 
             
             prop = matplotlib.font_manager.FontProperties(size=8)
-#            labelsdict = self.trip_labels(str(self.choicevar2.currentText()))
-#            labelkeys = labelsdict.keys()
-#            labelkeys.sort()
-#            labels = []
-#            for label in labelkeys:
-#                labels.append(labelsdict[label])
-
             labels = []
             if isExchange:
                 labels = self.plot_legend(category1.keys(),str(self.choicevar2.currentText()))
@@ -1069,7 +1106,7 @@ class MakeResultPlot(QDialog):
                         else:
                             header = QTableWidgetItem(str(legendlabel[i]))
                             vtable.setVerticalHeaderItem(i,header)                        
-                    value = QTableWidgetItem(str(temp))
+                    value = QTableWidgetItem(str(round(temp,2)))
                     vtable.setItem(i,j,value)
                 
             self.makeTableTab(vtable)
@@ -1121,21 +1158,23 @@ class CustomTable(QTableWidget):
         if parent:
             self.parent = parent
         self.__initActions__()
+        self.__initContextMenus__()
 
     def __initActions__(self):
-        self.pasteAction = QAction("Paste",  self) 
-        self.pasteAction.setShortcut("Ctrl+V") 
-        self.addAction(self.pasteAction) 
-        self.connect(self.pasteAction, SIGNAL("triggered()"), self.pasteClip) 
-        
         self.copyAction = QAction("Copy",  self) 
         self.copyAction.setShortcut("Ctrl+C") 
         self.addAction(self.copyAction) 
         self.connect(self.copyAction, SIGNAL("triggered()"), self.copyCells) 
 
-    def pasteClip(self):
-        print ""
+    def __initContextMenus__(self): 
+        self.setContextMenuPolicy(Qt.CustomContextMenu) 
+        self.connect(self, SIGNAL("customContextMenuRequested(QPoint)"), self.tableWidgetContext) 
 
+    def tableWidgetContext(self, point): 
+        '''Create a menu for the tableWidget and associated actions''' 
+        tw_menu = QMenu("Menu", self)  
+        tw_menu.addAction(self.copyAction) 
+        tw_menu.exec_(self.mapToGlobal(point)) 
         
     def copyCells(self):
         selRange  = self.selectedRanges()[0]#just take the first range 
