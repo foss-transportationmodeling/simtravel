@@ -445,7 +445,7 @@ class MakeResultPlot(QDialog):
             tablename = self.table
             order = str(item.text())
             
-            self.cursor.execute("""SELECT DISTINCT %s FROM %s ORDER BY %s"""%(vars,tablename,order))
+            self.cursor.execute("""SELECT %s FROM %s GROUP BY %s ORDER BY %s"""%(vars,tablename,order,order))
             temp = self.cursor.fetchall()
             
             for i in temp:
@@ -610,6 +610,8 @@ class MakeResultPlot(QDialog):
         col_list = []
         numrows = self.varstable.rowCount()
         if numrows < 1:
+#            filter = "age < 18"
+#            state = ", (SELECT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
             return ""
         
         for i in range(numrows):
@@ -619,7 +621,8 @@ class MakeResultPlot(QDialog):
             value = str((self.varstable.item(i,1)).text())
             filter = filter + "%s = '%s' AND " %(column,value)
         filter = filter[0:len(filter)-5]
-        state = ", (SELECT DISTINCT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
+        #filter = "wrkr = 1 AND age >= 18"
+        state = ", (SELECT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
 
         #create an index on the col lit
         index_name = 'socio_sql_index'
@@ -785,8 +788,9 @@ class MakeResultPlot(QDialog):
             print 'time taken to create second index --> %s'%(te-ts)
             #create the cluster on index
             
-            
-            for key in cond.keys():
+            temp = cond.keys()
+            temp.sort()
+            for key in temp: #cond.keys():
                 lowhigh = cond[key]
                     
                 sql = ""   
@@ -795,6 +799,7 @@ class MakeResultPlot(QDialog):
                 else:
                     sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
                 
+                print sql
                 self.cursor.execute(sql)
                 data = self.cursor.fetchall()
                 for j in data:
@@ -972,7 +977,7 @@ class MakeResultPlot(QDialog):
                     else:
                         sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s = %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],filter,column2,column2)                             
                     
-                    #print sql
+                    print sql
                     #index_name = column1 + '_index'
                     #print index_name, list(column1)
                     #self.qb_obj.dbcon_obj.connection = self.new_obj.connection
