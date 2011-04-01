@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone_fulldata" location="/home/kkonduri/simtravel/test/mag_zone_fulldata/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_fulldata" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119"/>
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
@@ -101,18 +101,16 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="en_starttime" coeff="1"/>
       </Model>
-      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="trippurpose"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_activitytype" coeff="1"/>
-      </Model>
-
-
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="duration"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurpose"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_activitytype" coeff="1"/>
       </Model>
 
 
@@ -133,10 +131,18 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-
+      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripind"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="fromzone" condition="equals" value="106"/>
+	<Filter table="runtime" var="tozone" condition="equals" value="1240"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
 
       <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="adulttrips"/>
+        <FilterSet type="and"/>
 	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
@@ -146,7 +152,7 @@
     </Component>
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="background_trips" key="houseid,personid" order="1"/>
