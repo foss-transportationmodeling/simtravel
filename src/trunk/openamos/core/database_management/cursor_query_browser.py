@@ -1283,6 +1283,7 @@ class QueryBrowser(object):
         except Exception, e:
             print 'Error while creating an index'
             print e
+            self.dbcon_obj.connection.rollback()
         return False
             
                          
