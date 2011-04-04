@@ -34,20 +34,25 @@ class MakeResultPlot(QDialog):
     def __init__(self, config, parent=None):
         QDialog.__init__(self, parent)
 
+        self.trips_r_temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
+        self.schedule_r_temp = ["activitytype","starttime","endtime","duration"]
+
         self.setMinimumSize(QSize(900,600))
         self.setWindowTitle("Profile of Activity Travel Pattern")
         self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
-        self.new_obj = None
-        self.project = None        
-        self.valid = False
-        self.connects(config)
-        self.cursor = self.new_obj.cursor
+
         self.table = 'households'
         self.data = []
         self.figs = []
         self.sketches = []
         self.axes = []
         self.toolbars = []
+        
+        self.new_obj = None
+        self.project = None        
+        self.valid = False
+        self.connects(config)
+        self.cursor = self.new_obj.cursor
 
         self.makeVarsWidget1()
         self.tabs = QTabWidget()
@@ -149,6 +154,8 @@ class MakeResultPlot(QDialog):
         self.connect(self.choicevar1, SIGNAL("currentIndexChanged(int)"), self.manage_combo)
         self.connect(self.choicevar2, SIGNAL("currentIndexChanged(int)"), self.set_disable)
 
+
+        
 
     def makeVarsWidget1(self):
         
@@ -360,28 +367,71 @@ class MakeResultPlot(QDialog):
         self.qb_obj = QueryBrowser(self.database_config_object)
         self.new_obj.new_connection()
  
-        #assigning the connection and cursor to the qb_obj
-        self.qb_obj.dbcon_obj.connection = self.new_obj.connection
-        self.qb_obj.dbcon_obj.cursor = self.new_obj.cursor
-
+#        #assigning the connection and cursor to the qb_obj
+#        self.qb_obj.dbcon_obj.connection = self.new_obj.connection
+#        self.qb_obj.dbcon_obj.cursor = self.new_obj.cursor
+#
+#        table_list = ['trips_r', 'schedule_final_r']
+#        #create indexes on all the variables
+#        t1 = time.time()
+#        #for trip_r
+#        table_name = 'trips_r'
+#        for each in self.trips_r_temp:
+#            col_name = []
+#            index_name = 'plot'
+#            col_name.append(each)
+#            index_name = index_name + '_' + each + '_' + table_name
+#            self.qb_obj.create_index(table_name, col_name, index_name)
+#            result = self.qb_obj.cluster_index(table_name, index_name)
+#        
+#        #for schedule_final_r
+#        table_name = 'schedule_final_r'
+#        for each in self.schedule_r_temp:
+#            col_name = []
+#            index_name = 'plot'
+#            col_name.append(each)
+#            index_name = index_name + '_' + each + '_' + table_name
+#            self.qb_obj.create_index(table_name, col_name, index_name)
+#            result = self.qb_obj.cluster_index(table_name, index_name)
+#        t2 = time.time()
+#        print 'Time taken to create all indexes --> %s'%(t2-t1)
 
         
     def disconnects(self):
+#        #delete all indexes
+#        t1 = time.time()
+#        #for trip_r
+#        table_name = 'trips_r'
+#        for each in self.trips_r_temp:
+#            index_name = 'plot'
+#            index_name = index_name + '_' + each + '_' + table_name
+#            self.qb_obj.delete_index(table_name, index_name)
+#        
+#        #for schedule_final_r
+#        table_name = 'schedule_final_r'
+#        for each in self.schedule_r_temp:
+#            index_name = 'plot'
+#            index_name = index_name + '_' + each + '_' + table_name
+#            self.qb_obj.delete_index(table_name, index_name)
+#        t2 = time.time()
+#        print 'Time taken to create all indexes --> %s'%(t2-t1)
+        
         self.new_obj.close_connection()
         self.close()
+        
 
     def fill_vari(self):
         self.choicevar1.clear()
         self.choicevar2.clear()
         vars = [""]
         if self.tripradio.isChecked():
-            temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
-            for i in temp:
-                if self.checkColumnExists("trips_r",i):
+            #temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
+            for i in self.trips_r_temp:
+                if self.checkColumnExists("trips_r",i) or i == "duration":
                     vars.append(i)
         else:
-            temp = ["activitytype","starttime","endtime","duration"]
-            for i in temp:
+            #temp = ["activitytype","starttime","endtime","duration"]
+            for i in self.schedule_r_temp:
                 if self.checkColumnExists("schedule_final_r",i):
                     vars.append(i)
 
@@ -395,7 +445,7 @@ class MakeResultPlot(QDialog):
             if text == "trippurpose":
                 temp = ["tripmode","starttime","endtime","miles","occupancy","duration"]
                 for i in temp:
-                    if self.checkColumnExists("trips_r",i):
+                    if self.checkColumnExists("trips_r",i) or i == "duration":
                         vars.append(i)
             elif text != "trippurpose" and text != "":
                 temp = ["trippurpose"]
@@ -575,22 +625,6 @@ class MakeResultPlot(QDialog):
                 title = title + xtitle_acti[column2]
         
         return title
-    
-#    def stateSQL(self,id):
-#        tablename = '%s AS A' %(self.schedule_table())
-#        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, (A.endtime - A.starttime)' #A.duration'
-#        order = 'A.houseid, A.personid, A.starttime'
-#        filter = 'A.starttime >= 0'
-#        
-#        if self.segment1.isChecked():
-#            filter = filter + " AND A.houseid = '%s'" %(id)
-#        else:
-#            ids = id.split(',')
-#            filter = filter + " AND A.houseid = '%s' AND A.personid = '%s'" %(ids[0],ids[1])
-#            
-#        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
-#
-#        return state
 
 
     def socio_sql(self):
@@ -610,9 +644,10 @@ class MakeResultPlot(QDialog):
         col_list = []
         numrows = self.varstable.rowCount()
         if numrows < 1:
+            return ""
 #            filter = "age < 18"
 #            state = ", (SELECT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
-            return ""
+#            return state
         
         for i in range(numrows):
             column = str((self.varstable.item(i,0)).text())
@@ -621,59 +656,9 @@ class MakeResultPlot(QDialog):
             value = str((self.varstable.item(i,1)).text())
             filter = filter + "%s = '%s' AND " %(column,value)
         filter = filter[0:len(filter)-5]
-        #filter = "wrkr = 1 AND age >= 18"
         state = ", (SELECT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
 
-        #create an index on the col lit
-        index_name = 'socio_sql_index'
-        print col_list
-        t1 = time.time()
-        #self.qb_obj.create_index(table1, col_list, index_name)
-        t2 = time.time()
-        print 'time taken to create index --> %s'%(t2-t1)
         return state
-
-
-#    def colors(self, index):
-#        colorpooldict = {100:'#191970',101:'#6495ED',150:'#66FFEE', 151:'#00FFFF', # Blue Shades
-#             200:'#B03060',
-#             300:'#7B68EE',
-#             411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
-#                         461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
-#                     513:'#FF8000',514:'#B35A00', # Brown shades
-#                         600:'#006400',601:'#7CFC00', # Green shades
-#             900:'#000000'}
-#
-#        return colorpooldict[index]
-
-
-
-
-#    def schedule_labels(self, index):
-#        xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
-#                  'duration_rec':'Activity Duration (mins)'}
-#        activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn', 151:'IH-Dependent',
-#            200:'OH-Work',
-#            300:'OH-School',
-#            411:'OH-Pers Buss',412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',
-#            461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',
-#            513:'OH-Social Visit',514:'OH-Sports/Rec',
-#                        600:'Pick Up',601:'Drop Off',
-#            900:'OH-Other'}
-#        strttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-#        endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-#        duration = {1:'0-10',2:'11-30',3:'31-120',4:'121-240',5:'> 240'}
-#
-#        if index == 0:
-#            return xtitle
-#        if index == 1:
-#            return activitytype
-#        if index == 2:
-#            return strttime
-#        if index == 3:
-#            return endtime
-#        if index == 4:
-#            return duration
 
 
     
@@ -793,13 +778,17 @@ class MakeResultPlot(QDialog):
             for key in temp: #cond.keys():
                 lowhigh = cond[key]
                     
-                sql = ""   
-                if len(lowhigh) > 1:
-                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
+                sql = "" 
+                if column == "duration" and self.tripradio.isChecked():
+                    if len(lowhigh) > 1:
+                        sql = "SELECT count(*) FROM %s AS A %sWHERE A.endtime - A.starttime >= %d AND A.endtime - A.starttime < %d%s" %(tablename,socio,lowhigh[0],lowhigh[1],filter)
                 else:
-                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
+                    if len(lowhigh) > 1:
+                        sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
+                    else:
+                        sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
                 
-                print sql
+                #print sql
                 self.cursor.execute(sql)
                 data = self.cursor.fetchall()
                 for j in data:
@@ -972,12 +961,17 @@ class MakeResultPlot(QDialog):
                 try:
                    
                     sql = ""
-                    if len(lowhigh1) > 1:
-                        sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s >= %d AND A.%s < %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter,column2,column2)
-                    else:
-                        sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s = %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],filter,column2,column2)                             
                     
-                    print sql
+                    if column1 == "duration" and self.tripradio.isChecked():
+                        if len(lowhigh1) > 1:
+                            sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.endtime - A.starttime >= %d AND A.endtime - A.starttime < %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,lowhigh1[0],lowhigh1[1],filter,column2,column2)
+                    else:
+                        if len(lowhigh1) > 1:
+                            sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s >= %d AND A.%s < %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter,column2,column2)
+                        else:
+                            sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s = %d)%s GROUP BY A.%s ORDER BY A.%s" %(column2,table,socio,column1,lowhigh1[0],filter,column2,column2)                             
+                        
+                    #print sql
                     #index_name = column1 + '_index'
                     #print index_name, list(column1)
                     #self.qb_obj.dbcon_obj.connection = self.new_obj.connection
@@ -1084,35 +1078,45 @@ class MakeResultPlot(QDialog):
             
             vtable = CustomTable(self)
             #vtable.setSelectionMode(QAbstractItemView.MultiSelection)
-            vtable.setColumnCount(len(yvalue[0]))               
-            vtable.setRowCount(len(yvalue))
-            for i in range(len(yvalue)):
-                xvalue = yvalue[i]
-                for j in range(len(xvalue)):
-                    temp = 0.0
-                    if isExchange:
+            if isExchange:
+                vtable.setColumnCount(len(yvalue))               
+                vtable.setRowCount(len(yvalue[0]))
+                for i in range(len(yvalue)):
+                    xvalue = yvalue[i]
+                    for j in range(len(xvalue)):
+                        temp = 0.0
                         if cumulate[i] != 0:
                             temp = 100.0*xvalue[j]/cumulate[i]
                         else:
                             temp = 0.0
-                    else:
-                        temp = xvalue[j]
-                    if i==0:
-                        if isExchange:
+
+                        if i==0:
                             header = QTableWidgetItem(str(legendlabel[j]))
-                            vtable.setHorizontalHeaderItem(j,header)
-                        else:
+                            vtable.setVerticalHeaderItem(j,header)
+
+                        if j==0:
+                            header = QTableWidgetItem(str(labels[i]))
+                            vtable.setHorizontalHeaderItem(i,header)
+                                                   
+                        value = QTableWidgetItem(str(round(temp,2)))
+                        vtable.setItem(j,i,value)
+            else:                
+                vtable.setColumnCount(len(yvalue[0]))               
+                vtable.setRowCount(len(yvalue))
+                for i in range(len(yvalue)):
+                    xvalue = yvalue[i]
+                    for j in range(len(xvalue)):
+                        temp = xvalue[j]
+                        if i==0:
                             header = QTableWidgetItem(str(labels[j]))
                             vtable.setHorizontalHeaderItem(j,header)
-                    if j==0:
-                        if isExchange:
-                            header = QTableWidgetItem(str(labels[i]))
-                            vtable.setVerticalHeaderItem(i,header)
-                        else:
+                            
+                        if j==0:
                             header = QTableWidgetItem(str(legendlabel[i]))
                             vtable.setVerticalHeaderItem(i,header)                        
-                    value = QTableWidgetItem(str(round(temp,2)))
-                    vtable.setItem(i,j,value)
+                        
+                        value = QTableWidgetItem(str(round(temp,2)))
+                        vtable.setItem(i,j,value)
                 
             self.makeTableTab(vtable)
         
