@@ -24,11 +24,12 @@ class kml_trips(QDialog):
     classdocs
     '''
     
-    def __init__(self, parent = None):
+    def __init__(self, config, parent = None):
         QDialog.__init__(self, parent)
         '''
         Constructor
         '''
+        self.configobject = config
         self.setMinimumSize(QSize(400,350))
         self.setWindowTitle("Save Activity Frequencies as KML")
         
@@ -115,11 +116,16 @@ class kml_trips(QDialog):
 
 
     def connects(self):
-        protocol = 'postgres'        
-        user_name = 'postgres'
-        password = ''
-        host_name = 'localhost'
-        database_name = 'mag_zone'
+#        protocol = 'postgres'        
+#        user_name = 'postgres'
+#        password = 'Dyou65221'
+#        host_name = 'localhost'
+#        database_name = 'mag_zone'
+        protocol = self.configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
+        user_name = self.configobject.getConfigElement(DB_CONFIG,DB_USER)
+        password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
+        host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
+        database_name = self.configobject.getConfigElement(DB_CONFIG,DB_NAME)
         
         self.database_config_object = DataBaseConfiguration(protocol, user_name, password, host_name, database_name)
         self.new_obj = DataBaseConnection(self.database_config_object)
@@ -303,14 +309,14 @@ class kml_trips(QDialog):
         style.text = "#colors"
         
         
-        extend = etree.SubElement(place,"ExtendedData")
-        schema = etree.SubElement(extend,"SchemaData")
-        schema.set("schemaUrl","#TAZs_Project_Feature")
-
-        for j in range(len(self.fieldname)):
-            Simple = etree.SubElement(schema,"SimpleData")
-            Simple.set("name",str(self.fieldname[j]))
-            Simple.text = str(i[j+3])
+#        extend = etree.SubElement(place,"ExtendedData")
+#        schema = etree.SubElement(extend,"SchemaData")
+#        schema.set("schemaUrl","#TAZs_Project_Feature")
+#
+#        for j in range(len(self.fieldname)):
+#            Simple = etree.SubElement(schema,"SimpleData")
+#            Simple.set("name",str(self.fieldname[j]))
+#            Simple.text = str(i[j+3])
         
         
         poly = etree.SubElement(place,"Polygon")
