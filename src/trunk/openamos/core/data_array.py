@@ -67,8 +67,12 @@ class DataArray(object):
 
         cols = []
         for i in columnames:
-            colnum = self._colnames[i]
-            cols.append(self.data[:,colnum])
+	    try:
+                colnum = self._colnames[i]
+                cols.append(self.data[:,colnum])
+	    except KeyError, e:
+		print 'Column %s does not exist; not sorted' % i
+		return 0	
 
         cols = tuple(cols)
 
