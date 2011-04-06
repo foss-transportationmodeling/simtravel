@@ -186,10 +186,21 @@ class kml_trips(QDialog):
                 for i in range(index):
                     self.draw_line_poly(docu,i)
                     
-                folder = etree.SubElement(docu,"Folder")
-                name_fold = etree.SubElement(folder,"name")
-                name_fold.text = "Activity_Frequencies_Zones"
-                self.putschema(folder)
+                folder1 = etree.SubElement(docu,"Folder")
+                name_fold1 = etree.SubElement(folder1,"name")
+                if self.tripradio.isChecked():
+                    name_fold1.text = "Trip_Zones"
+                else:
+                    name_fold1.text = "Activity_Zones"
+                self.putschema(folder1)
+                self.place_boundary(folder1)
+                  
+                folder2 = etree.SubElement(docu,"Folder")
+                name_fold2 = etree.SubElement(folder2,"name")
+                if self.tripradio.isChecked():
+                    name_fold2.text = "Trip_Frequencies_Zones"
+                else:
+                    name_fold2.text = "Activity_Frequencies_Zones"
                 
                 self.table = ""
                 self.zoneid = ""
@@ -206,7 +217,7 @@ class kml_trips(QDialog):
                 for i in range(48):
                     start = i*30
                     end = i*30 + 30
-                    self.place_icon(folder,start,end)
+                    self.place_icon(folder2,start,end)
                   
                 newkml = etree.ElementTree(xhtml)
                 newkml.write(filename,pretty_print=True) 
@@ -230,6 +241,7 @@ class kml_trips(QDialog):
             print e
 
         self.progresslabel.setText("")
+        self.repaint()
         self.disconnects()
         QDialog.accept(self)
 
@@ -247,6 +259,20 @@ class kml_trips(QDialog):
         poly = etree.SubElement(style,"PolyStyle")
         col_poly = etree.SubElement(poly,"color")
         col_poly.text = str(selcolor[1])
+        
+        style = etree.SubElement(docu, "Style")
+        style.set("id","boundary")
+        line = etree.SubElement(style, "LineStyle")
+        col_line = etree.SubElement(line, "color")
+        col_line.text = str("ff0000ff")
+        width = etree.SubElement(line, "width")
+        width.text = '1'
+        
+        poly = etree.SubElement(style,"PolyStyle")
+        fill = etree.SubElement(poly,"fill")
+        fill.text = "0"
+        col_poly = etree.SubElement(poly,"color")
+        col_poly.text = str("ff0000ff")
 
 
     def place_icon(self,folder,start,end):
@@ -410,6 +436,49 @@ class kml_trips(QDialog):
                 field.text = ""
                 self.fieldname.append(name)
 
+
+    def place_boundary(self,folder):
+        SQL = "SELECT AsKML(A.the_geom), A.* FROM shape_zone AS A"
+        self.cursor.execute(SQL)
+        tazdata = self.cursor.fetchall()
+
+        for i in tazdata:
+            place = etree.SubElement(folder,"Placemark")        
+            name = etree.SubElement(place,"name")
+            name.text = " "
+    
+            points = str(i[0])
+            points = points.replace("<MultiGeometry>","")
+            points = points.replace("</MultiGeometry>","")
+            points = points.replace("<Polygon>","")
+            points = points.replace("</Polygon>","")
+            points = points.replace("<outerBoundaryIs>","")
+            points = points.replace("</outerBoundaryIs>","")
+            points = points.replace("<LinearRing>","")
+            points = points.replace("</LinearRing>","")
+            points = points.replace("<coordinates>","")
+            points = points.replace("</coordinates>","")
+    
+            style = etree.SubElement(place,"styleUrl")
+            style.text = "#boundary"
+            
+            extend = etree.SubElement(place,"ExtendedData")
+            schema = etree.SubElement(extend,"SchemaData")
+            schema.set("schemaUrl","#TAZs_Project_Feature")
+    
+            for j in range(len(self.fieldname)):
+                Simple = etree.SubElement(schema,"SimpleData")
+                Simple.set("name",str(self.fieldname[j]))
+                Simple.text = str(i[j+1])
+            
+            poly = etree.SubElement(place,"Polygon")
+            outer = etree.SubElement(poly,"outerBoundaryIs")
+            linering = etree.SubElement(outer,"LinearRing")
+            coord = etree.SubElement(linering,"coordinates")
+            
+            coords = "%s" %(points)
+            coord.text = coords
+            
         
     def choosecolor(self):
         color = ["colors"]
@@ -421,7 +490,7 @@ class kml_trips(QDialog):
         
         i = 0
         if len(self.activitieswidget.selectedItems()) > 1:
-            i = random.randint(0,39)
+            i = random.randint(0,38)
         else:
             i = self.activitieswidget.selectedIndexes()[0].row()
 
