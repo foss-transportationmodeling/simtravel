@@ -31,7 +31,8 @@ class kml_trips(QDialog):
         '''
         self.configobject = config
         self.setMinimumSize(QSize(400,350))
-        self.setWindowTitle("Save Activity Frequencies as KML")
+        self.setWindowTitle("Save Travel or Activity Characteristics in KML")
+        self.setWindowIcon(QIcon("./images/run.png"))
         
         pagelayout = QVBoxLayout()
         self.setLayout(pagelayout)
@@ -181,6 +182,7 @@ class kml_trips(QDialog):
                 docu = etree.SubElement(xhtml, "Document")
                 name = etree.SubElement(docu, "name")
                 name.text = str(self.kml_name(filename))
+                self.overlay(docu)
         
                 index = 1
                 for i in range(index):
@@ -245,6 +247,77 @@ class kml_trips(QDialog):
         self.disconnects()
         QDialog.accept(self)
 
+
+    def overlay(self,docu):
+        figures = self.time_png()
+        for i in range(24):
+            begin = i*60
+            end = begin+60
+            soverlay = etree.SubElement(docu,"ScreenOverlay")
+            name = etree.SubElement(soverlay,"name")
+            name.text = ""
+            timespan = etree.SubElement(soverlay,"TimeSpan")
+            time_begin = etree.SubElement(timespan,"begin")
+            time_begin.text = "%d"%(begin)
+            time_end = etree.SubElement(timespan,"end")
+            time_end.text = "%d"%(end)
+            icon = etree.SubElement(soverlay,"Icon")
+            href = etree.SubElement(icon,"href")
+            href.text = str(figures[i])
+            overxy = etree.SubElement(soverlay,"overlayXY")
+            overxy.set("x","1")
+            overxy.set("y","0.13")
+            overxy.set("xunits","fraction")
+            overxy.set("yunits","fraction")
+            screenxy = etree.SubElement(soverlay,"screenXY")
+            screenxy.set("x","1")
+            screenxy.set("y","0.13")
+            screenxy.set("xunits","fraction")
+            screenxy.set("yunits","fraction")
+            rotationxy = etree.SubElement(soverlay,"rotationXY")
+            rotationxy.set("x","0")
+            rotationxy.set("y","0")
+            rotationxy.set("xunits","fraction")
+            rotationxy.set("yunits","fraction")
+            size = etree.SubElement(soverlay,"size")
+            size.set("x","0")
+            size.set("y","0")
+            size.set("xunits","fraction")
+            size.set("yunits","fraction")
+
+    def time_png(self):
+        path = str(os.getcwd())
+        isFind = path.find("/")
+        parse = ""
+        if isFind > -1:
+            parse = "/"
+        else:
+            parse = "\\"
+        fig_path = ["%s%simages%s4am.jpg"%(path,parse,parse),
+                    "%s%simages%s5am.jpg"%(path,parse,parse),
+                    "%s%simages%s6am.jpg"%(path,parse,parse),
+                    "%s%simages%s7am.jpg"%(path,parse,parse),
+                    "%s%simages%s8am.jpg"%(path,parse,parse),
+                    "%s%simages%s9am.jpg"%(path,parse,parse),
+                    "%s%simages%s10am.jpg"%(path,parse,parse),
+                    "%s%simages%s11am.jpg"%(path,parse,parse),
+                    "%s%simages%s12pm.jpg"%(path,parse,parse),
+                    "%s%simages%s1pm.jpg"%(path,parse,parse),
+                    "%s%simages%s2pm.jpg"%(path,parse,parse),
+                    "%s%simages%s3pm.jpg"%(path,parse,parse),
+                    "%s%simages%s4pm.jpg"%(path,parse,parse),
+                    "%s%simages%s5pm.jpg"%(path,parse,parse),
+                    "%s%simages%s6pm.jpg"%(path,parse,parse),
+                    "%s%simages%s7pm.jpg"%(path,parse,parse),
+                    "%s%simages%s8pm.jpg"%(path,parse,parse),
+                    "%s%simages%s9pm.jpg"%(path,parse,parse),
+                    "%s%simages%s10pm.jpg"%(path,parse,parse),
+                    "%s%simages%s11pm.jpg"%(path,parse,parse),
+                    "%s%simages%s12am.jpg"%(path,parse,parse),
+                    "%s%simages%s1am.jpg"%(path,parse,parse),
+                    "%s%simages%s2am.jpg"%(path,parse,parse),
+                    "%s%simages%s3am.jpg"%(path,parse,parse)]
+        return fig_path
 
     def draw_line_poly(self,docu,i):
         selcolor = self.choosecolor()
