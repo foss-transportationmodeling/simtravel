@@ -69,7 +69,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
         self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
-        self.fileh.createTable(output_grp, "trips_final_r", Trips_Final_R)
+        self.fileh.createTable(output_grp, "trips_malta_r", Trips_Final_R)
 
 
 
@@ -96,7 +96,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
         self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
-        self.fileh.createTable(output_grp, "trips_final_r", Trips_Final_R)
+        self.fileh.createTable(output_grp, "trips_malta_r", Trips_Final_R)
 
 
 
