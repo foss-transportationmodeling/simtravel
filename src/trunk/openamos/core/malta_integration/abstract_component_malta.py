@@ -32,7 +32,8 @@ class AbstractComponent(object):
                  post_run_filter=None,
                  delete_criterion=None,
                  dependencyAllocationFlag = False,
-                 skipFlag=False):
+                 skipFlag=False,
+		 deleteAppendFlag=False):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -57,6 +58,8 @@ class AbstractComponent(object):
         self.delete_criterion = delete_criterion
         self.history_info = history_info
         self.skipFlag = skipFlag
+	self.delete_append_flag = deleteAppendFlag
+
         self.keyColsList()
         #self.dependencyAllocationFlag = dependencyAllocationFlag
     #TODO: check for names in the variable list
@@ -329,14 +332,25 @@ class AbstractComponent(object):
                 #                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
-                choiceset_shape = (data_subset.rows,
-                                   i.model.specification.number_choices)
-                choicenames = i.model.specification.choices
+                #choiceset_shape = (data_subset.rows,
+                #                   i.model.specification.number_choices)
+                #choicenames = i.model.specification.choices
                 choiceset = None
-                    
-                result = i.simulate_choice(data_subset, choiceset, iteration)
+
+                if i.model_type <> 'consistency':
+                    result = i.simulate_choice(data_subset, choiceset, iteration)
+                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+		else:
+		    result = i.simulate_choice(data_subset, choiceset, iteration)
+		    self.data = result
+		    # Update the filter because the number of rows may have changed in the data
+		    # for eg. remove work activties from schedules when daily work status is zero
+		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+
+		                    
+                #result = i.simulate_choice(data_subset, choiceset, iteration)
                 #print result.data[:,0]
-                self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+                #self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
 
@@ -367,7 +381,7 @@ class AbstractComponent(object):
     def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, projectSkimsObject, fileLoc):
         if len(self.dynamicspatialConst_list) > 0:
             for const in self.dynamicspatialConst_list:
-                if prev_model_name == const.beforeModel and current_model_name == const.afterModel:
+                if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
                     print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], self.analysisInterval,
@@ -376,7 +390,14 @@ class AbstractComponent(object):
                 
     
     def prepare_vars(self):
-        #print variableList                                                                                      
+        #print variableList
+	if self.analysisIntervalFilter is not None:
+	    filtVar = (self.analysisIntervalFilter[0], 
+		       self.analysisIntervalFilter[1])
+	    if filtVar not in self.variable_list:
+		self.variable_list.append(filtVar)
+		
+		
         indep_columnDict = self.prepare_vars_independent()
         
         tempdep_columnDict = {'temp':[]}
@@ -833,7 +854,8 @@ class AbstractComponent(object):
 
         destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
-        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs)+1)]
+	print max(uniqueIDs), 'unique ids---------------'
+        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
 
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
@@ -889,8 +911,11 @@ class AbstractComponent(object):
             else:
                 colName = spatialconst.skimField
             skimLocColName = '%s%s' %(colName, i+1)
-            data.setcolumn(skimLocColName, vals)
 
+	    sampleLocsZeros = sampleLocColVals == 0
+	    vals[sampleLocsZeros] = 99
+            data.setcolumn(skimLocColName, vals)
+	    #print 'TO VALS', skimLocColName, vals
 
             # FROM TRAVEL SKIMS
             vals = skimsMatrix2[sampleLocColVals, destinationLocColVals]
@@ -900,15 +925,18 @@ class AbstractComponent(object):
             vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
             data.setcolumn(destSkimColName, vals)
+	    #print 'FROM VALS', destSkimColName, vals
 
             # Process Location Information if requested
             if len(spatialconst.locationVariables) > 0:
                 for j in spatialconst.locationVariables:
-                    #print j
+                    #print 'location var', j
                     locationVarName = '%s%s' %(j, i+1)
                     locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
                     data.setcolumn(locationVarName, locVarVals)
-                    #print locVarVals
+		    #print sampleLocColVals[:5]
+                    #print 'vals', locVarVals[:5].astype(int)
+		    #print locationsTable.varnames
         #raw_input()
 
         colsInTable = sampleVarDict['temp']
@@ -940,16 +968,33 @@ class AbstractComponent(object):
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
         #print vals[:,0]
-        data.insertcolumn([colName], vals)
+	#print originLocColName, destinationLocColName
+	#print 'Origin Loc', originLocColVals[:,0]
+        #print 'Destination Loc', destinationLocColVals[:,0]
+       	#print 'skims values', vals[:,0]
+
+        #print vals[:,0]
+	#print 'NEW IMPLEMENTATION'
+        data.setcolumn(colName, vals)
+	#print data.columns([colName])
 
         return data
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
+        destLocSetInd = destLocSetInd[:,1:]
+	print 'number of choices - ', destLocSetInd.shape
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
+            print 'Number of choices', destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
+	    zeroChoices = destLocSetIndSum.mask
+
+	    if (~zeroChoices).sum() == 0:
+		continue
+
+	    print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
@@ -963,17 +1008,21 @@ class AbstractComponent(object):
             
             colName = '%s%s' %(sampleVarName, i+1)
             nonZeroRows = where(res.data <> 0)
-            actualLocIds = res.data
-            actualLocIds[nonZeroRows] -= 1
-            data.setcolumn(colName, actualLocIds)
+	    print 'SELECTED LOCATIONS FOR COUNT - ', i+1
+            print res.data[:,0]
+
+            #actualLocIds = res.data
+            #actualLocIds[nonZeroRows] -= 1
+            data.setcolumn(colName, res.data)
+	    #print data.columns([colName]).data[:,0]
 
             # Retrieving the row indices
             dataCol = data.columns([colName]).data
 
             rowIndices = array(xrange(dataCol.shape[0]), int)
-            colIndices = actualLocIds.astype(int)
+            colIndices = res.data.astype(int)
 
-            destLocSetInd.mask[rowIndices, colIndices] = True
+            destLocSetInd.mask[rowIndices, colIndices-1] = True
         print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
 
     def check_sampled_choices(self, data, sampledVarNames):
