@@ -3473,5 +3473,35 @@
 
     </Component>
 
+    <Component name="OD_OutputTable" read_from_table="trips_r" write_to_table="od_r_output" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="od_r_output" key=""/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="trips_r" var="fromzone"/>
+	<Variable table="trips_r" var="tozone"/>
+	<Variable table="child_dependency_r" var="dependency"/>
+      </Aggregate>
+    </Component>
+
+    <Component name="ODT_OutputTable" read_from_table="trips_r" write_to_table="od_r_output" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="odt_r_output" key=""/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="trips_r" var="fromzone"/>
+	<Variable table="trips_r" var="tozone"/>
+	<Variable table="trips_r" var="starttime"/>
+	<Variable table="child_dependency_r" var="dependency"/>
+      </Aggregate>
+    </Component>
+
+
+
+
   </ModelConfig>
 </ProjectConfig>
