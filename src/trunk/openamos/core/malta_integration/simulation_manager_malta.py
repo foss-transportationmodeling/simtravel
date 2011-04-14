@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_seq.xml'
+	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
 	configObject = None
 
 
@@ -179,7 +179,9 @@ class SimulationManager(object):
     def clean_database_tables(self):
         tableNamesDelete = []
         for comp in self.componentList:
-	    if comp.skipFlag:
+	    #if comp.skipFlag or comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_arrived_r':
+            #    continue
+	    if comp.skipFlag or comp.writeToTable == 'schedule_final_r':
                 continue
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
@@ -225,7 +227,8 @@ class SimulationManager(object):
 					'ExtractBackgroundTravelEpisode', 'ExtractAllTravelEpisodes']:
 	    """
 	    # Sequential application
-	    if comp.component_name in ['ArrivalTimeInformation', 'ExtractTravelEpisodes', 
+	    if comp.component_name in ['ArrivalTimeInformation', 'PersonsArrived', 'ArrivalTimeProcessing', 
+					'DynamicNonMandatoryActivities', 'ExtractTravelEpisodes', 
 					'ExtractBackgroundTravelEpisodes', 'ExtractAllTravelEpisodes']:
 
 	        compObjects.append(comp)
@@ -275,7 +278,7 @@ class SimulationManager(object):
 
 	    print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
 	    print tripInfo.shape
-            print tripInfo[:, [0, -5, -4]]
+            print tripInfo[-3:, [0, -5, -4]]
             #raw_input('This is the shape --')
 
 	return tripInfo
@@ -311,6 +314,8 @@ class SimulationManager(object):
 
 if __name__ == '__main__':
     simulationObject = SimulationManager()
-    simulationObject.run_selected_components_for_malta(151)
+    simulationObject.run_selected_components_for_malta(190)
+    simulationObject.run_selected_components_for_malta(191)
+    simulationObject.run_selected_components_for_malta(192)
 
 
