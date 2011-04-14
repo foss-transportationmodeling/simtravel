@@ -20,30 +20,37 @@ def run(fileLoc=None):
 	args = sys.argv[1:]
 
     
-    if len(args) < 1 or len(args) > 2:
+    if len(args) < 1 or len(args) > 3:
         raise ArgumentsError, """The module accepts """\
             """only two arguments which are the location of the configuration """\
             """ file . e.g. /home/config.xml (linux machine) """\
             """or c:/testproject/config.xml (windows machine) and """\
-            """and the number of parts to run in parallel """\
+            """skims flag and the number of parts to run in parallel """\
 
     fileLoc = args[0]
 
-    if len(args) == 1:
+    if len(args) < 3:
+	if len(args) == 2:
+	    skipSettingSkimsLoc = int(args[1])
+	else:
+	    skipSettingSkimsLoc = 0	
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
-        queryBrowser = simulationManagerObject.setup_databaseConnection()
-        simulationManagerObject.setup_cacheDatabase()
-	simulationManagerObject.setup_inputCacheTables()
-	simulationManagerObject.setup_outputCacheTables()
-        simulationManagerObject.setup_tod_skims(queryBrowser)
-        simulationManagerObject.setup_location_information(queryBrowser)
-        simulationManagerObject.close_database_connection(queryBrowser)
+	if skipSettingSkimsLoc == 0:
+            queryBrowser = simulationManagerObject.setup_databaseConnection()
+            simulationManagerObject.setup_cacheDatabase()
+	    simulationManagerObject.setup_inputCacheTables()
+	    simulationManagerObject.setup_outputCacheTables()
+            simulationManagerObject.setup_tod_skims(queryBrowser)
+            simulationManagerObject.setup_location_information(queryBrowser)
+            simulationManagerObject.close_database_connection(queryBrowser)
+	else:
+	    simulationManagerObject.read_cacheDatabase()
         simulationManagerObject.parse_config()
         simulationManagerObject.clean_database_tables()
         simulationManagerObject.run_components()
         simulationManagerObject.close_cache_connection()
     else:
-        numParts = int(args[1])
+        numParts = int(args[2])
         simulationManagerObject = SimulationManager(fileLoc = fileLoc)
         simulationManagerObject.divide_database(numParts)
         simulationManagerObject.parse_config()
