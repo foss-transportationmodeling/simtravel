@@ -86,6 +86,7 @@ class Trips_R(t.IsDescription):
     starttime = t.Int32Col()
     endtime = t.Int32Col()
     trippurpose = t.Int32Col()
+    duration = t.Int32Col()
 
 
 class Trips_Final_R(t.IsDescription):
