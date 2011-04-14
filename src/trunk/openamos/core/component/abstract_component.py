@@ -32,7 +32,8 @@ class AbstractComponent(object):
                  post_run_filter=None,
                  delete_criterion=None,
                  dependencyAllocationFlag = False,
-                 skipFlag=False):
+                 skipFlag=False,
+		 aggregate_variable_dict={}):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -59,6 +60,7 @@ class AbstractComponent(object):
         self.skipFlag = skipFlag
         self.keyColsList()
         self.dependencyAllocationFlag = dependencyAllocationFlag
+	self.aggregate_variable_dict = aggregate_variable_dict
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
@@ -81,15 +83,17 @@ class AbstractComponent(object):
         print self.variable_list
 
 
+	print 'count keys before', count_keys
 	for table in vars_dict:
 	    try:
 	        keys = self.tableKeys[table]
+		print 'TABLE, KEYS - ', table, keys
 	        if len(keys[1]) > 0:
 	            count_keys[table] = keys[1]
 	    except Exception, e:
 		pass
-
-
+	print 'count keys after', count_keys
+	#raw_input()
 
 
         # Prepare Data
@@ -280,10 +284,10 @@ class AbstractComponent(object):
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
                 print 'RESULT', result.data
-
+	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
-
+	    """
         
         # Update hte model list for next iteration within the component
 
@@ -344,20 +348,23 @@ class AbstractComponent(object):
             if len(self.key[1]) > 0:
                 count_keys[depVarTable] = self.key[1]
                 tempdep_columnDict['temp'] += self.key[1]
+	print 'FIRST INSTANCE PROCESSING OF COUNT KEY', count_keys, prim_keys, indep_columnDict
 	
-	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable]:
+	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable] and len(self.aggregate_variable_dict) == 0 :
 	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
 	    prim_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][0]
 	    count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
 	    prim_keys[depVarTable] = self.tableKeys[depVarTable][0]
 	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
-	
+	print 'SECOND INSTANCE'	, count_keys, prim_keys, indep_columnDict
         indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
         indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
 
+	indep_columnDict = self.update_dictionary(indep_columnDict, self.aggregate_variable_dict)
+
         #dep_columnDict = self.update_dictionary(dep_columnDict, count_keys)
-        
+	print 'THIRD INSTANCE'	, count_keys, prim_keys, indep_columnDict	        
 
 	
 	print indep_columnDict
@@ -566,7 +573,8 @@ class AbstractComponent(object):
                                         self.spatialConst_list,
                                         self.analysisInterval,
 					self.analysisIntervalFilter,
-                                        self.history_info)
+                                        self.history_info,
+					self.aggregate_variable_dict)
 	if data == None:
 	    return None
 
@@ -651,9 +659,8 @@ class AbstractComponent(object):
             timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
             rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
 
-	    k2 = rowsLessThan.sum()
 
-            if k2 > 0:
+            if rowsLessThan.sum() > 0:
                 destLocSetInd2[rowsLessThan, zone] = 1
 	    #print zone
 	    #print timeToDest[:,0]
@@ -664,8 +671,8 @@ class AbstractComponent(object):
 	    #raw_input()
 
 
-	print timeAvailable
-	print destLocSetInd2
+	#print timeAvailable
+	#print destLocSetInd2
 
         rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
         print """\t\t%s records were deleted because there """\
@@ -856,7 +863,7 @@ class AbstractComponent(object):
                 continue
 
 	    #probLocSet = probLocSet[zeroChoices,:]
-
+	    print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
@@ -883,7 +890,7 @@ class AbstractComponent(object):
             dataCol = data.columns([colName]).data
 
             rowIndices = array(xrange(dataCol.shape[0]), int)
-	    rowIndices = 0
+	    #rowIndices = 0
             colIndices = res.data.astype(int)
 
             destLocSetInd.mask[rowIndices, colIndices-1] = True
