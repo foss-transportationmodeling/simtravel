@@ -33,6 +33,7 @@ from openamos.core.models.schedules_model_components import DailyStatusAttribsSp
 from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
 from openamos.core.models.schedules_model_components import HouseholdSpecification
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
+from openamos.core.models.adjust_schedules import AdjustSchedules
 from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 
@@ -386,6 +387,12 @@ class ConfigParser(object):
         else:
             skipFlag = False
 
+	deleteAppendFlag = component_element.get("delete_and_append")
+	if deleteAppendFlag == "True":
+	    deleteAppendFlag = True
+	else:
+	    deleteAppendFlag = False
+
 
         self.component_variable_list = list(set(self.component_variable_list))
         component = AbstractComponent(comp_name, self.model_list, 
@@ -402,7 +409,8 @@ class ConfigParser(object):
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,
                                       dependencyAllocationFlag=dependencyAllocationFlag,
-                                      skipFlag=skipFlag)
+                                      skipFlag=skipFlag,
+				      deleteAppendFlag =deleteAppendFlag)
         return component
 
 
@@ -474,6 +482,8 @@ class ConfigParser(object):
         if model_formulation == 'Child Dependency Allocation':
             self.create_child_dependency_allocation_object(model_element)
 
+	if model_formulation == 'Arrival Time Schedule Adjustment':
+	    self.create_schedule_adjustment_arrival_processing_object(model_element)
 
     def process_seed(self, model_element):
         seed = model_element.get('seed')
@@ -1362,7 +1372,84 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+    def create_schedule_adjustment_arrival_processing_object(self, model_element):
+        #variable_list_required for running the model
         
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+
+        specification = ReconcileSchedulesSpecification(activityAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = AdjustSchedules(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	"""
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = ChildDependencyAllocation(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+	"""
 
     def return_daily_status_attribs(self, dailystatus_attribs_element):
         variable_list = []
