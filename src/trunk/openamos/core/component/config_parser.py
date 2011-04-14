@@ -257,6 +257,10 @@ class ConfigParser(object):
                                                               structuresDict)
         return householdStructureInfoObject
 
+
+
+
+
     def parse_analysis_interval_and_create_component(self, component_element):
         ti = time.time()
         interval_element = component_element.find("AnalysisInterval")
@@ -292,6 +296,7 @@ class ConfigParser(object):
 
         return componentList
 
+   
     def return_delete_records_criterion(self, component_element):
         delete_records_element = component_element.find("DeleteRecords")
         if delete_records_element is not None:
@@ -385,6 +390,8 @@ class ConfigParser(object):
         else:
             skipFlag = False
 
+	agg_vars_dict = self.parse_aggregate_output(component_element)
+
 
         self.component_variable_list = list(set(self.component_variable_list))
         component = AbstractComponent(comp_name, self.model_list, 
@@ -401,8 +408,29 @@ class ConfigParser(object):
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,
                                       dependencyAllocationFlag = dependencyAllocationFlag,
-                                      skipFlag = skipFlag)
+                                      skipFlag = skipFlag, 
+				      aggregate_variable_dict = agg_vars_dict)
         return component
+
+
+    def parse_aggregate_output(self, component_element):
+	vars_dict = {}
+
+	agg_output_element = component_element.find("Aggregate")
+	if agg_output_element is None:
+	    return vars_dict	
+
+        variableIterator = agg_output_element.getiterator('Variable')
+
+
+	for var_element in variableIterator:
+            table, var = self.return_table_var(var_element)
+	    if table in vars_dict:
+		vars_dict[table] += [var]
+	    else:
+		vars_dict[table] = [var]
+		
+	return vars_dict
 
 
 
