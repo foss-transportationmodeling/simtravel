@@ -65,7 +65,7 @@ class AbstractProbabilityModel(object):
         diff_from_unity = abs(cumsum_across_rows - 1)
         #print self.probabilities
         #print diff_from_unity
-        print diff_from_unity
+        #print diff_from_unity
         if not ma.all(diff_from_unity < 1e-6):
             raise ProbabilityError, """probability values do not add up """ \
                 """to one across rows"""    
