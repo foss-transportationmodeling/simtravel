@@ -31,9 +31,10 @@ class Person(object):
             self._update_schedule_conflict_indicator(act, add=True)
         
 
-        #results = self._collate_results()
-        #return results
-        
+
+    def adjust_schedules(self, seed=1):
+	print '\tNeed to adjust activity schedules here -- '
+	pass
 
     def add_episodes(self, activityEpisodes, temp=False):
         for activity in activityEpisodes:
@@ -378,7 +379,7 @@ class Person(object):
         self.remove_episodes([act])
         act.startTime = value
         act.duration = act.endTime - act.startTime
-        if act.duration <= 0:
+        if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
         self.add_episodes([act])
 
@@ -388,7 +389,7 @@ class Person(object):
         self.remove_episodes([act])
         act.endTime = value
         act.duration = act.endTime - act.startTime
-        if act.duration <= 0:
+        if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
         self.add_episodes([act])
 
@@ -489,9 +490,16 @@ class Person(object):
                 continue
 
             # intermediate acts
-            stAct = self._move_episode(stAct, endAct)
-    	    print '\tMOVEDD EPISODE -', stAct            
+	    intAct = self._move_episode(stAct, endAct) 
+	    if intAct.endTime > 1439:
+	        print("cannot be adjusted within the day")	
+	    else:
+		stAct = intAct
+
+    	    print '\tMOVED EPISODE -', stAct            
             
+	    print 'RECONCILED SCHEDULES', self.reconciledActivityEpisodes
+
         hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
 
 
@@ -521,6 +529,18 @@ class Person(object):
                             actObject.actType, actObject.startTime, actObject.endTime,
                             actObject.location, actObject.duration])
         return array(resList)
+
+
+    def _collate_results_aslist(self):
+        #print self.listOfActivityEpisodes
+        #print self.reconciledActivityEpisodes
+        resList = []
+        for recAct in self.listOfActivityEpisodes:
+            actObject = recAct[1]
+            resList.append([self.hid, self.pid, actObject.scheduleId, 
+                            actObject.actType, actObject.startTime, actObject.endTime,
+                            actObject.location, actObject.duration, actObject.dependentPersonId])
+        return resList
 
     
     def _adjust_first_episode(self, stAct, endAct):
@@ -601,6 +621,7 @@ class Person(object):
         prismDur = endAct.startTime - stAct.endTime
         
         if prismDur > tt:
+	    hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
             pass
         else:
             print "\t\t-- MOVING WITHIN DAY FIXED ACTIVITY --"
@@ -618,12 +639,22 @@ class Person(object):
             if endAct.endTime < endAct.startTime:
                 rndNum = self.rndGen.return_random_variables()
                 endAct.endTime = endAct.startTime + rndNum * endAct.duration
+		
+    	    print 'End activity before limiting to 1439- ', endAct
 
+	    if (endAct.endTime > 1439 and endAct.startTime < 1438) or (endAct.endTime < 1439):
+		# i.e even by limiting the endtime we are doing OK because the starttime is still < 1438
+		# in the other case where starttime >= 1438 we try to leave out the activity since it 
+		# cannot be accommodated within the schedule
+
+		endAct.endTime = 1438
+		print("endtime less than starttime random * duration being added")
+		hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
+	     
 
             #Update duration
             endAct.duration = endAct.endTime - endAct.startTime
             
-        hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
         return endAct
 
     def _adjust_last_episode(self, stAct, endAct):
