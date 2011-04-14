@@ -100,7 +100,7 @@ class ReconcileSchedules(Model):
 
 
     def resolve_consistency(self, data, seed):
-
+        actList = []
         data.sort([self.activityAttribs.hidName,
                    self.activityAttribs.pidName,
                    self.activityAttribs.scheduleidName])
@@ -117,12 +117,15 @@ class ReconcileSchedules(Model):
         endtimeCol = data._colnames[self.activityAttribs.endtimeName]
         durCol = data._colnames[self.activityAttribs.durationName]
 
-        colNames = [self.activityAttribs.scheduleidName, 
+        colNames = [self.activityAttribs.hidName,
+		    self.activityAttribs.pidName,
+		    self.activityAttribs.scheduleidName, 
                     self.activityAttribs.activitytypeName,
                     self.activityAttribs.starttimeName,
                     self.activityAttribs.endtimeName,
                     self.activityAttribs.locationidName,
-                    self.activityAttribs.durationName]
+                    self.activityAttribs.durationName,
+		    self.activityAttribs.dependentPersonName]
 
 
 
@@ -130,7 +133,8 @@ class ReconcileSchedules(Model):
         
         for perIndex in self.indices:
             schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
-            #print schedulesForPerson.data.astype(int)
+	    print data.varnames
+            print schedulesForPerson.data.astype(int)
             #raw_input()
 
             activityList = []
@@ -149,23 +153,33 @@ class ReconcileSchedules(Model):
             personObject = Person(perIndex[0], perIndex[1])
             personObject.add_episodes(activityList)
             personObject.reconcile_activity_schedules(seed)
+	    reconciledSchedules = personObject._collate_results_aslist()
+	    print 'RECONCILED SCHEDULE'
+            print reconciledSchedules		
 	    if not personObject._check_for_conflicts():
                 raise Exception, "THE SCHEDULES ARE STILL MESSED UP"    
-	    reconciledSchedules = personObject._collate_results()
+
+
             #reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
-                
+
+	    actList += reconciledSchedules
+             
+	    """   
             i = 0
             for colN in colNames:
                 data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
                 i += 1
-                                  
+	    
+	    if (perIndex[0] == 100708 and perIndex[1] == 2) or (perIndex[0] == 107 and perIndex[1] == 2) or (perIndex[0] == 100708 and perIndex[1] == 2):
+		raw_input()
+            """                      
             #print 'MODIFIED DATA'
             #print data.rowsof(recsInd).data.astype(int)
             #print reconciledSchedules.astype(int)
             #print data.data.shape
             #raw_input()
                 
-        return data
+        return DataArray(actList, colNames)
 
 import unittest
 from numpy import genfromtxt, unique
