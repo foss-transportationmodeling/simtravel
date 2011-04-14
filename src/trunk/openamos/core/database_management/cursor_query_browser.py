@@ -19,7 +19,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Boolean, DateTime
 from numpy import array, ma
 from database_configuration import DataBaseConfiguration
-#from openamos.core.data_array import DataArray
+from openamos.core.data_array import DataArray
 
 class QueryBrowser(object):
     #initialize the class 
@@ -133,7 +133,8 @@ class QueryBrowser(object):
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, 
 		    analysisIntervalFilter=None,
-                    history_info=None):
+                    history_info=None,
+		    aggregate_variable_dict={}):
         """
         This method is used to select the join of tables and display them.
         
@@ -159,14 +160,9 @@ class QueryBrowser(object):
         #raw_input()
 
         #print
-        #print db_dict
+        #print 'db dict', db_dict
 	#print
         #print 'max_dict', max_dict
-
-
-
-
-
 
         #initialize the variables
         final_list = []
@@ -178,14 +174,31 @@ class QueryBrowser(object):
         final_col_list = db_dict.values()
         table_list = db_dict.keys() 
 
+	    
+
+	#print 'table list - ', table_list
+	#raw_input()
+
         table_flag = None
         all_tables = table_list + table_names
 
+	all_tables = list(set(all_tables))
+
 	#print 'table_list', table_list
 	#print 'column_names', column_names
+	#print 'MAX DICT', max_dict
 
         #check if the tables exist in the database.
         for each_tab in all_tables:
+	    #print 'Checking for table name - ', each_tab
+	    if column_names[each_tab] == ['']:
+		#print 'before', db_dict, column_names, table_names
+		db_dict.pop(each_tab)
+		column_names.pop(each_tab)
+		table_list.remove(each_tab)
+		table_names.remove(each_tab)
+		#print 'after', db_dict, column_names, table_names
+		continue
             table_flag = self.dbcon_obj.check_if_table_exists(each_tab)
             if table_flag:
                 pass
@@ -243,6 +256,8 @@ class QueryBrowser(object):
         for i in column_names:
             primCols += column_names[i]
         primCols = list(set(primCols))
+
+	#print primCols, 'PRIMARY COLS'
 
         joinStrList = []
         table_list.remove(mainTable)
@@ -599,13 +614,32 @@ class QueryBrowser(object):
 	if analysisIntervalFilter is not None:
 	    final_list.append('%s.%s as %s_%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1],
 						analysisIntervalFilter[0], analysisIntervalFilter[1]))
-	    cols_list.append('%s.%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1]))
+	    cols_list.append('%s_%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1]))
 	
 	    if len(spatialConst_list) < 1:
 		joinStrList.append(' where %s.%s = %s' %(analysisIntervalFilter[0], 
 							 analysisIntervalFilter[1],
 							 analysisInterval))
                                          
+	# Creating the select command with aggregates for OUTPUT tables
+	if len(aggregate_variable_dict) > 0:
+
+	
+	    aggStr = " group by "
+	    for tab in aggregate_variable_dict:
+		cols = aggregate_variable_dict[tab]
+		for col in cols:	
+	  	    aggStr += "%s.%s," %(tab, col)
+		
+		    #final_list.append("%s.%s as %s_%s" %(tab, col, tab, col))		
+		    #cols_list.append("%s_%s" %(tab, col))
+
+	    final_list.append('count(*) as frequency')
+	    cols_list.append('frequency')
+	    aggStr = aggStr[:-1]	
+	else:
+	    aggStr = ""
+
         # Generating the col list
         colStr = ''
         for i in final_list:
@@ -618,13 +652,17 @@ class QueryBrowser(object):
             allJoinStr = allJoinStr + '%s' %i
             
 
-        sql_string = 'select %s from %s %s' %(colStr, mainTable, allJoinStr)
+        sql_string = 'select %s from %s %s %s' %(colStr, mainTable, allJoinStr, aggStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
         print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
+
+	
+	
+
         try:
 	    ti = time.time()
             self.dbcon_obj.cursor.execute(sql_string)
@@ -636,6 +674,7 @@ class QueryBrowser(object):
             #print primCols
             # Sort with respect to primary columns
             data.sort(primCols)
+	    
 	    #print primCols
 	    #raw_input()
             return data
