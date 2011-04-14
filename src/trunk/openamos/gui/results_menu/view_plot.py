@@ -40,7 +40,7 @@ class MakeResultPlot(QDialog):
         self.setMinimumSize(QSize(900,800))
         self.setWindowTitle("Profile of Activity Travel Pattern")
         self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
-        self.setWindowIcon(QIcon("./images/plot.png"))
+        self.setWindowIcon(QIcon("./images/run.png"))
 
         self.table = 'households'
         self.data = []
@@ -420,7 +420,7 @@ class MakeResultPlot(QDialog):
         myfig = plt.figure()
         self.figs.append(myfig)
         sketch = FigureCanvas(myfig)
-        QWidget.setSizePolicy(sketch,QSizePolicy.Expanding,QSizePolicy.Expanding)
+        myfig.subplots_adjust(left=0.08,right=0.85)
         myaxes = myfig.add_subplot(111)
         
         myCanvas = []
@@ -1005,7 +1005,7 @@ class MakeResultPlot(QDialog):
                 
                 if self.where_trip() != "":
                     sql = sql + " AND " +self.where_trip()
-                print sql
+                #print sql
                 self.cursor.execute(sql)
                 data = self.cursor.fetchall()
                 for j in data:
@@ -1196,15 +1196,9 @@ class MakeResultPlot(QDialog):
                     else:
                         sql = "%s GROUP BY A.%s ORDER BY A.%s"%(sql,column2,column2)
                     
-                    print sql
-                    #index_name = column1 + '_index'
-                    #print index_name, list(column1)
-                    #self.qb_obj.dbcon_obj.connection = self.new_obj.connection
-                    #self.qb_obj.dbcon_obj.cursor = self.new_obj.cursor
-                    #self.qb_obj.create_index(table, column1, index_name)
+                    #print sql
                     self.cursor.execute(sql)
                     data = self.cursor.fetchall()
-                    #self.qb_obj.delete_index(table, index_name)
                     if isExchange:
                         total = 0
                         for t in data:

@@ -214,11 +214,11 @@ class MainWindow(QMainWindow):
     # Defining Results
         self.result_menu = self.menuBar().addMenu("R&esults")
         activity_pattern_action = self.createaction("Travel or Activity Characteristics", self.results_schedules, None,
-                                            "", "Show travel or activity characteristics", False, True)
+                                            "plot", "Show travel or activity characteristics", False, True)
         person_schedule_action = self.createaction("Profile of Activity Travel Pattern", self.results_person, None,
-                                                  None, "Show profile of activity travel pattern in persons or households", False, True)
-        kml_tirps_action = self.createaction("Travel or Activity Frequencies in KML", self.create_kml, None,
-                                                  None, "Show travel characteristics", False, True)
+                                                  "schedule", "Show profile of activity travel pattern in persons or households", False, True)
+        kml_tirps_action = self.createaction("Travel or Activity Characteristics in KML", self.create_kml, None,
+                                                  "earth", "Show travel characteristics", False, True)
         self.addActions(self.result_menu, (activity_pattern_action,person_schedule_action,kml_tirps_action, ))
 
     # Defining help        
