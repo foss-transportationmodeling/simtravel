@@ -145,7 +145,7 @@ class CleanFixedActivitySchedule(Model):
 
 
 
-        raw_input('new implementation of indices')
+        #raw_input('new implementation of indices')
 
 
 
