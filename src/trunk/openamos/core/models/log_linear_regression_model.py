@@ -13,8 +13,8 @@ class LogLinearRegressionModel(LinearRegressionModel):
     
     def __init__(self, specification, error_specification):
         LinearRegressionModel.__init__(self, specification, error_specification)
-        
-        
+
+
     def calc_predvalue(self, data, seed=1):
         """                                                     
         The method returns the predicted value for the different 
@@ -39,48 +39,33 @@ class LogLinearRegressionModel(LinearRegressionModel):
 	if self.error_specification.lower_threshold >0:
 	    threshold = self.error_specification.lower_threshold
 	    predValue_lessThresholdInd = pred_value < threshold
+	    numRows = predValue_lessThresholdInd.sum()
             print '\t\tPred value is less than START threshold for - %d cases ' \
-                % predValue_lessThresholdInd.sum()
+                % numRows
+	    
             pred_value[predValue_lessThresholdInd] = threshold
+	    print 'Lower; Before', pred_value[predValue_lessThresholdInd]
+	    size = (numRows, )
+	    smoothingErr = self.calc_halfnormal_error(threshold, 1, seed, size)
+	    print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
+	    pred_value[predValue_lessThresholdInd] -= smoothingErr
+	    print 'Lower; After', pred_value[predValue_lessThresholdInd]
 
 
 	if self.error_specification.upper_threshold >0:
 	    threshold = self.error_specification.upper_threshold
 	    predValue_moreThresholdInd = pred_value > threshold
+	    numRows = predValue_moreThresholdInd.sum()
             print '\t\tPred value is greater than END threshold for - %d cases ' \
-                % predValue_moreThresholdInd.sum()
+                % numRows
+		
             pred_value[predValue_moreThresholdInd] = threshold
-
-	"""
-
-        if vertex == 'start':
-            predValue_lessThresholdInd = pred_value < threshold
-            print '\t\tPred value is less than START threshold for - %d cases ' \
-                % predValue_lessThresholdInd.sum()
-            pred_value[predValue_lessThresholdInd] = threshold
-
-	    predValue_moreThan1439 = pred_value > 1439
-	    print '\t\tPred value is less than 0 for - %d cases ' \
-	        % predValue_moreThan1439.sum()
-            pred_value[predValue_moreThan1439] = 1439
-
-
-        if vertex == 'end':
-            predValue_moreThresholdInd = pred_value > threshold
-            print '\t\tPred value is greater than END threshold for - %d cases ' \
-                % predValue_moreThresholdInd.sum()
-            pred_value[predValue_moreThresholdInd] = threshold
-
-	    predValue_lessThanOne = pred_value < 1
-	    print '\t\tPred value is less than 1 for - %d cases ' \
-	        % predValue_lessThanOne.sum()
-            pred_value[predValue_lessThanOne] = 1
-
-        _sum = ((pred_value) < 0).sum()
-        if _sum > 0:
-            print '\t\t -- SUM LESS THAN ZERO --', _sum
-
-	"""
+	    print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
+	    size = (numRows, )
+	    smoothingErr = self.calc_halfnormal_error(threshold, 1438, seed, size)
+	    print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
+	    pred_value[predValue_moreThresholdInd] += smoothingErr
+	    print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
 
         return DataArray(pred_value, self.specification.choices)
 

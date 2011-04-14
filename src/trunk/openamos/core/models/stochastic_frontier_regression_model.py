@@ -32,24 +32,8 @@ class StocFronRegressionModel(AbstractRegressionModel):
         vertex - string (the vertext to predict -- start/end)
         size - numeric value (number of rows)
 
-        random.seed(seed=seed)
-        err_norm = norm.rvs(loc=0, scale=variance_norm**0.5, size=size)
-        err = norm.rvs(size=size)
-        f = open('test_res', 'a')
-        f.write('stochastic - %s\n' %seed)
-        f.write(str(list(err[:3,:])))
-        f.write('\n')
-        f.close()
-        #raw_input()
-        f = open('test_res', a)
-        f.write('stochastic')x
-        f.write(str(list(err_norm[:3,:])))
-        f.write('\n')
-        f.close()
-        random.seed(seed=seed)
-        #err_halfnorm = halfnorm.rvs(scale=variance_halfnorm**0.5, size=size)
-
         """
+
         dist = RandomDistribution(seed=seed)
 	err_halfnorm = dist.return_half_normal_variables(location=0, scale=variance_halfnorm**0.5, size=size)
 
@@ -61,6 +45,25 @@ class StocFronRegressionModel(AbstractRegressionModel):
 
         if vertex == 'end':
             return err_norm - err_halfnorm
+
+    def calc_halfnormal_error(self, threshold, limit, seed, size):
+	"""
+	A draw from a half normal distribution with 3 s.d. = abs(threshold - limit)
+	For smoothing about the boundaries
+
+	"""
+
+	dist = RandomDistribution(seed=seed)
+
+	assu_scale = abs(threshold-limit)/3.0
+	err_halfnorm = dist.return_half_normal_variables(location=0, scale=assu_scale, size=size)
+
+	chkRowsMore = err_halfnorm > abs(threshold-limit)
+	err_halfnorm[chkRowsMore] = abs(threshold-limit)
+	
+	return err_halfnorm
+	
+
 
     def calc_predvalue(self, data, seed=1):
         """
@@ -92,50 +95,33 @@ class StocFronRegressionModel(AbstractRegressionModel):
 	if self.error_specification.lower_threshold >0:
 	    threshold = self.error_specification.lower_threshold
 	    predValue_lessThresholdInd = pred_value < threshold
+	    numRows = predValue_lessThresholdInd.sum()
             print '\t\tPred value is less than START threshold for - %d cases ' \
-                % predValue_lessThresholdInd.sum()
+                % numRows
+	    
             pred_value[predValue_lessThresholdInd] = threshold
+	    print 'Lower; Before', pred_value[predValue_lessThresholdInd]
+	    size = (numRows, )
+	    smoothingErr = self.calc_halfnormal_error(threshold, 1, seed, size)
+	    print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
+	    pred_value[predValue_lessThresholdInd] -= smoothingErr
+	    print 'Lower; After', pred_value[predValue_lessThresholdInd]
 
 
 	if self.error_specification.upper_threshold >0:
 	    threshold = self.error_specification.upper_threshold
 	    predValue_moreThresholdInd = pred_value > threshold
+	    numRows = predValue_moreThresholdInd.sum()
             print '\t\tPred value is greater than END threshold for - %d cases ' \
-                % predValue_moreThresholdInd.sum()
+                % numRows
+		
             pred_value[predValue_moreThresholdInd] = threshold
-
-	"""
-
-        if vertex == 'start':
-            predValue_lessThresholdInd = pred_value < threshold
-            print '\t\tPred value is less than START threshold for - %d cases ' \
-                % predValue_lessThresholdInd.sum()
-            pred_value[predValue_lessThresholdInd] = threshold
-
-	    predValue_moreThan1439 = pred_value > 1439
-	    print '\t\tPred value is less than 0 for - %d cases ' \
-	        % predValue_moreThan1439.sum()
-            pred_value[predValue_moreThan1439] = 1439
-
-
-
-        if vertex == 'end':
-            predValue_moreThresholdInd = pred_value > threshold
-            print '\t\tPred value is greater than END threshold for - %d cases ' \
-                % predValue_moreThresholdInd.sum()
-            pred_value[predValue_moreThresholdInd] = threshold
-
-	    predValue_lessThanOne = pred_value < 1
-	    print '\t\tPred value is less than 1 for - %d cases ' \
-	        % predValue_lessThanOne.sum()
-            pred_value[predValue_lessThanOne] = 1
-
-        _sum = ((pred_value) < 0).sum()
-        if _sum > 0:
-            print '\t\t -- SUM LESS THAN ZERO --', _sum
-
-	"""
-
+	    print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
+	    size = (numRows, )
+	    smoothingErr = self.calc_halfnormal_error(threshold, 1438, seed, size)
+	    print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
+	    pred_value[predValue_moreThresholdInd] += smoothingErr
+	    print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
         return DataArray(pred_value, self.specification.choices)
 
     
