@@ -1904,6 +1904,11 @@
 	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
       </SpatialConstraints>
 
+      <ConsistencyChecks name="DynamicNonMandatoryChecks">
+	<Filter table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+      </ConsistencyChecks>
+
+
       <Model name="FirstActivityType" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
 	<Filter table="runtime" var="st_starttime" condition="equals" value="0"/>
@@ -2110,7 +2115,7 @@
 
 
 
-    <Component name="ChildDependencyAllocation" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
