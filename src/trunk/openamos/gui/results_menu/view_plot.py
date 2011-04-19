@@ -433,8 +433,15 @@ class MakeResultPlot(QDialog):
         self.toolbars.append(tool)
         
         return myCanvas
-        
+    
+    # Put a label on the bottom and right corner of the plot to show the sample size    
+    def fig_text(self,total):
+        sample = "Sample Size: %d"%(total)
+        fig = self.figs[len(self.figs)-1]
+        fig.text(0.98,0.03,sample,fontsize=11,ha='right',va='bottom')
 
+            
+            
     def connects(self,configobject):
         
         protocol = configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
@@ -984,7 +991,7 @@ class MakeResultPlot(QDialog):
                 filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
                         
         try:
-            total = 0.0
+            self.total = 0.0
             cond = self.time_categroy(column)
 
             
@@ -1011,17 +1018,15 @@ class MakeResultPlot(QDialog):
                 for j in data:
                     self.err1.append(key)
                     self.err2.append(j[0])
-                    total = total + j[0]
+                    self.total = self.total + j[0]
                 
             if self.percent.isChecked():
                 for i in range(len(self.err1)):
-                    if total > 0.0:
-                        self.err2[i] = round(100*float(self.err2[i])/total,2)
+                    if self.total > 0.0:
+                        self.err2[i] = round(100*float(self.err2[i])/self.total,2)
                     else:
                         self.err2[i] = 0.0
-            #self.qb_obj.delete_index(tablename, index_name)
-            #index_name1 = 'socio_sql_index'
-            #self.qb_obj.delete_index('households', index_name1)
+            
             t2 = time.time()
             print 'time taken --> %s'%(t2-t1)
             return True
@@ -1080,6 +1085,8 @@ class MakeResultPlot(QDialog):
             
             Canvas.draw()
             self.makePlotTab(Canvas)
+            self.fig_text(self.total)
+            
             
         vtable = CustomTable(self)
         #vtable.setSelectionMode(QAbstractItemView.MultiSelection)
@@ -1223,6 +1230,7 @@ class MakeResultPlot(QDialog):
 
             t2 = time.time()
             print 'time taken is ---> %s'%(t2-t1)
+            self.total = 0
             if isExchange:
                 cum = []
                 N=len(yvalue)
@@ -1248,6 +1256,9 @@ class MakeResultPlot(QDialog):
                     else:
                         temp = axes.bar(ind, xvalue, 0.5, color=colors, align='center', bottom=temp)
                         bars.append(temp[0])
+
+                for j in range(len(yvalue)):
+                        self.total = self.total+cumulate[j]
             else:
                 N=len(yvalue[0])
                 ind = np.arange(N)
@@ -1264,6 +1275,9 @@ class MakeResultPlot(QDialog):
                     else:
                         temp = axes.bar(ind, yvalue[i], 0.5, color=colors, align='center', bottom=previous[i-1])
                         bars.append(temp[0])
+
+                for j in range(len(yvalue[i])):
+                        self.total = self.total+cumulate[j]
 
             
             prop = matplotlib.font_manager.FontProperties(size=8)
@@ -1294,6 +1308,7 @@ class MakeResultPlot(QDialog):
                     
             Canvas.draw()
             self.makePlotTab(Canvas)
+            self.fig_text(self.total)
             
             vtable = CustomTable(self)
             #vtable.setSelectionMode(QAbstractItemView.MultiSelection)
