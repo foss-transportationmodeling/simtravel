@@ -40,32 +40,32 @@ class LogLinearRegressionModel(LinearRegressionModel):
 	    threshold = self.error_specification.lower_threshold
 	    predValue_lessThresholdInd = pred_value < threshold
 	    numRows = predValue_lessThresholdInd.sum()
-            print '\t\tPred value is less than START threshold for - %d cases ' \
-                % numRows
+            #print '\t\tPred value is less than START threshold for - %d cases ' \
+            #    % numRows
 	    
             pred_value[predValue_lessThresholdInd] = threshold
-	    print 'Lower; Before', pred_value[predValue_lessThresholdInd]
+	    #print 'Lower; Before', pred_value[predValue_lessThresholdInd]
 	    size = (numRows, )
 	    smoothingErr = self.calc_halfnormal_error(threshold, 1, seed, size)
-	    print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
+	    #print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
 	    pred_value[predValue_lessThresholdInd] -= smoothingErr
-	    print 'Lower; After', pred_value[predValue_lessThresholdInd]
+	    #print 'Lower; After', pred_value[predValue_lessThresholdInd]
 
 
 	if self.error_specification.upper_threshold >0:
 	    threshold = self.error_specification.upper_threshold
 	    predValue_moreThresholdInd = pred_value > threshold
 	    numRows = predValue_moreThresholdInd.sum()
-            print '\t\tPred value is greater than END threshold for - %d cases ' \
-                % numRows
+            #print '\t\tPred value is greater than END threshold for - %d cases ' \
+            #    % numRows
 		
             pred_value[predValue_moreThresholdInd] = threshold
-	    print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
+	    #print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
 	    size = (numRows, )
 	    smoothingErr = self.calc_halfnormal_error(threshold, 1438, seed, size)
-	    print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
+	    #print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
 	    pred_value[predValue_moreThresholdInd] += smoothingErr
-	    print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
+	    #print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
 
         return DataArray(pred_value, self.specification.choices)
 
