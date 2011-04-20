@@ -8,11 +8,12 @@ class ReconcileSchedulesSpecification(object):
         self.coefficients = None
 
 class HouseholdSpecification(object):
-    def __init__(self, activityAttribs, dailyStatusAttribs,
-                 dependencyAttribs):
+    def __init__(self, activityAttribs, dailyStatusAttribs=None,
+                 dependencyAttribs=None, arrivalInfoAttribs=None):
 	self.activityAttribs = activityAttribs
 	self.dailyStatusAttribs = dailyStatusAttribs
 	self.dependencyAttribs = dependencyAttribs
+	self.arrivalInfoAttribs = arrivalInfoAttribs
 
 	self.choices = None
 	self.coefficients = None
@@ -31,6 +32,11 @@ class ActivityAttribsSpecification(object):
         self.endtimeName = endtimeName
         self.durationName = durationName
         self.dependentPersonName = dependentPersonName
+
+class ArrivalInfoSpecification(object):
+    def __init__(self, actualArrivalName, expectedArrivalName):
+	self.actualArrivalName = actualArrivalName
+	self.expectedArrivalName = expectedArrivalName
 
 class DailyStatusAttribsSpecification(object):
     def __init__(self, workStatusName, schoolStatusName):
