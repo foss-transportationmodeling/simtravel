@@ -655,7 +655,7 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s %s' %(colStr, mainTable, allJoinStr, aggStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        print 'SQL string for query - ', sql_string
+        #print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
@@ -667,9 +667,9 @@ class QueryBrowser(object):
 	    ti = time.time()
             self.dbcon_obj.cursor.execute(sql_string)
             result = self.dbcon_obj.cursor.fetchall()
-	    print '\t Retrieved from the database in %.4f' %(time.time()-ti)
+	    #print '\t Retrieved from the database in %.4f' %(time.time()-ti)
             data = self.createResultArray(result, cols_list)
-	    print '\t Retrieved from the database and processed to remove "None" values in %.4f' %(time.time()-ti)	   
+	    #print '\t Retrieved from the database and processed to remove "None" values in %.4f' %(time.time()-ti)	   
             #print cols_list
             #print primCols
             # Sort with respect to primary columns
@@ -1259,7 +1259,7 @@ class QueryBrowser(object):
         """
         #run a loop to reset the sequences
         if not sequence_list:
-            print 'No sequences present'
+            #print 'No sequences present'
             return False
             
         for each in sequence_list:
