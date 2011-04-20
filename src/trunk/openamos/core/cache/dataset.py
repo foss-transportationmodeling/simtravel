@@ -242,7 +242,7 @@ class DB(object):
         for i in range(len(colNames)):
 	    table[uniqueIds, i] = tableRef.col(colNames[i])
 	
-	print table
+	#print table
 	return DataArray(table, colNames), uniqueIds
 
 
@@ -263,7 +263,7 @@ class DB(object):
         # Populate matrix
         skimsMatrix[origin, destination] = skims
 	#skimsMatrix = masked_equal(skimsMatrix, 9999)
-        print skimsMatrix[1226, 896], skimsMatrix[1538, 1562]
+        print 'Skims Values for O,D pair (1226, 896) and (1538, 1562)- ', skimsMatrix[1226, 896], skimsMatrix[1538, 1562]
 	#raw_input()
         return masked_equal(skimsMatrix, 9999), unique(origin)
 
