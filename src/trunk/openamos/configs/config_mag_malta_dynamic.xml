@@ -31,9 +31,9 @@
   </TravelSkims1>
   <TravelSkims reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119"/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659"/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899"/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899"/>
     <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439"/>
   </TravelSkims>
 
@@ -108,7 +108,7 @@
    </Component>
 
 
-    <Component name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
+    <Component name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_r" key="houseid,personid"/>
@@ -143,6 +143,12 @@
 	<Dependency1>
 	  <ChildDependency table="child_dependency_r" var="dependency"/>
 	</Dependency1>
+	
+	<ArrivalTime>
+	  <Actual table="persons_arrived_r" var="actualarrivaltime"/>
+	  <Expected table="persons_arrived_r" var="expectedarrivaltime"/>
+	</ArrivalTime>
+
 
       </Model>
 
@@ -167,7 +173,7 @@
 
 
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -216,19 +222,11 @@
       </HistoryInformation>
 
 
-      <ConsistencyChecks name="DynamicNonMandatoryChecks">
+      <ConsistencyChecks1 name="DynamicNonMandatoryChecks">
 	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
-      </ConsistencyChecks>
-
-      <Model name="TestModel" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int6t9"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_arrivaltime" coeff="1"/>
-      </Model>
-
-
+      </ConsistencyChecks1>
 
       <Model name="TODInd6to9" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="int6t9"/>
@@ -870,19 +868,6 @@
         <Variable table="runtime" var="duration" coeff="1"/>
       </Model>
 
-      <Model name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<FilterSet type="and"/>
-	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dependentpersonid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
 	<FilterSet type="and"/>
@@ -891,6 +876,13 @@
         <Variable table="runtime" var="en_starttime" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="-1"/>
         <Variable table="persons" var="one" coeff="-1"/>
+      </Model>
+
+      <Model name="DependentPersonId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
       <Model name="TempActivityTravelEnd" formulation="Regression" type="Linear" seed="1">
@@ -902,6 +894,82 @@
         <Variable table="runtime" var="tt_from" coeff="1"/>
         <Variable table="persons" var="one" coeff="-1"/>
       </Model>
+
+
+      <Model name="AdjustActivityTravelChoice" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="adjustactivitytravelind"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
+	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
+	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="-1"/>
+      </Model>
+
+
+      <Model name="ActivityTypeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="activitytype"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="1"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_activitytype" coeff="1"/>
+        <Variable table="persons" var="one" coeff="25"/>	
+      </Model>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to_next_location" origin_var="origin" destination_var="destination" after_model="activitytype" before_model="starttime">
+	<Start table="runtime" location_var="st_locationid"/>
+	<End table="households" location_var="htaz"/>
+      </DynamicSpatialConstraints>
+
+      <Model name="StartTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime" var="tt_to_next_location" coeff="1"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+      <Model name="EndTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="endtime"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_endtime" coeff="1"/>
+        <Variable table="persons" var="one" coeff="-1"/>
+      </Model>
+
+      <Model name="DurationInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+      </Model>
+
+      <Model name="DependentPersonIdInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_dependentpersonid" coeff="-1"/>
+      </Model>
+
+      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="prismduration" condition="greater than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
 
     </Component>
 
