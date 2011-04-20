@@ -32,6 +32,7 @@ from openamos.core.models.schedules_model_components import ActivityAttribsSpeci
 from openamos.core.models.schedules_model_components import DailyStatusAttribsSpecification
 from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
 from openamos.core.models.schedules_model_components import HouseholdSpecification
+from openamos.core.models.schedules_model_components import ArrivalInfoSpecification
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
 from openamos.core.models.adjust_schedules import AdjustSchedules
 from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
@@ -82,26 +83,26 @@ class ConfigParser(object):
         for compElement in self.iterator:
             if compElement.get('name') == component_name:
                 if analysisInterval is None:
-                    print 'OLD FLAG _ ', compElement.get('completed')
+                    #print 'OLD FLAG _ ', compElement.get('completed')
                     compElement.set('completed', "True")
                     compElement.set('skip', "True")
-                    print 'NEW FLAG _ ', compElement.get('completed')
+                    #print 'NEW FLAG _ ', compElement.get('completed')
 
 
                 if analysisInterval is not None:
                     analysisIntervalElement = compElement.find('AnalysisInterval')
-                    print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    #print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
                     analysisIntervalElement.set('start', str(analysisInterval + 1))
-                    print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
-                    print dir(analysisIntervalElement)
+                    #print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    #print dir(analysisIntervalElement)
                 
                     endIntervalValue = int(analysisIntervalElement.get('end'))
                     
                     if endIntervalValue == analysisInterval + 1:
-                        print 'OLD FLAG _ ', compElement.get('completed')
+                        #print 'OLD FLAG _ ', compElement.get('completed')
                         compElement.set('completed', "True")
                         compElement.set('skip', "True")
-                        print 'NEW FLAG _ ', compElement.get('completed')                    
+                        #print 'NEW FLAG _ ', compElement.get('completed')                    
 
 
     def parse_models(self):
@@ -148,7 +149,7 @@ class ConfigParser(object):
         return dbConfigObject
         
     def parse_tableHierarchy(self, component_element):
-        print "-- Parse table hierarchy --"
+        #print "-- Parse table hierarchy --"
         dbTables_element = component_element.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
@@ -449,7 +450,7 @@ class ConfigParser(object):
 
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
-	print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
+	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
         
         if model_formulation == 'Regression':
@@ -1397,11 +1398,13 @@ class ConfigParser(object):
             run_filter_type = None
 
         activity_attribs_element = model_element.find('ActivityAttributes')
-
         activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
 
+        arrival_info_element = model_element.find('ArrivalTime')
+        arrivalInfoAttribsSpec = self.return_arrival_info_attribs(arrival_info_element)
 
-        specification = ReconcileSchedulesSpecification(activityAttribsSpec)
+        specification = HouseholdSpecification(activityAttribsSpec, 
+					       arrivalInfoAttribs=arrivalInfoAttribsSpec)
                                                         
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
@@ -1491,8 +1494,25 @@ class ConfigParser(object):
 
         return dependencySpec
 
+ 
 
+    def return_arrival_info_attribs(self, arrival_info_element):
+	variable_list = []
+	
+	actualArrival_element = arrival_info_element.find('Actual')
+	actualArrivalParsed = self.return_table_var(actualArrival_element)
+	variable_list.append(actualArrivalParsed)
 
+	expectedArrival_element = arrival_info_element.find('Expected')
+	expectedArrivalParsed = self.return_table_var(expectedArrival_element)
+	variable_list.append(expectedArrivalParsed)
+	
+	arrivalInfoSpec = ArrivalInfoSpecification(actualArrivalParsed[1],
+						   expectedArrivalParsed[1])
+
+	self.component_variable_list = self.component_variable_list + variable_list
+
+	return arrivalInfoSpec
 
 
 

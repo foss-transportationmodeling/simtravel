@@ -236,7 +236,7 @@ class AbstractComponent(object):
 	except Exception, e:
 	    print e
             traceback.print_exc(file=sys.stdout)
-	    data_array = zeros((1, 9))
+	    data_array = zeros((1, 10))
 
         if self.component_name == 'ExtractAllTravelEpisodes':
 	    return data_array
@@ -349,7 +349,7 @@ class AbstractComponent(object):
 
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
-                #print result.data[:,0]
+                #print result.data
                 #self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
@@ -382,7 +382,7 @@ class AbstractComponent(object):
         if len(self.dynamicspatialConst_list) > 0:
             for const in self.dynamicspatialConst_list:
                 if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
-                    print 'FOUND DYNAMICS SPATIAL QUERY'
+                    #print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], self.analysisInterval,
                                                projectSkimsObject, fileLoc)
@@ -781,11 +781,11 @@ class AbstractComponent(object):
 
                 print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
                 if i.countChoices is not None: 
-                    print ("""\t\tNeed to sample location choices for the following""" \
-                               """model with also location info extracted """)
+                    #print ("""\t\tNeed to sample location choices for the following""" \
+                    #           """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix2, uniqueIDs, i, fileLoc)
                 else:
-                    print '\tNeed to extract skims'
+                    #print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix2, i)
 
         return data
@@ -830,10 +830,11 @@ class AbstractComponent(object):
             #    k2 = rowsLessThan.sum()
 
         rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
-        print """\t\t%s records were deleted because there """\
-            """were no location reachable given the spatial/temporal """\
-            """constraints""" %(rowsZeroChoices.sum())
-
+	if rowsZeroChoices.sum() == 0:
+	    print """\t\t%s records were deleted because there """\
+            	   """were no location reachable given the spatial/temporal """\
+                   """constraints""" %(rowsZeroChoices.sum())
+	    #raw_input()
 
         # Deleting records for zero choices
         data.deleterows(~rowsZeroChoices)
@@ -847,14 +848,14 @@ class AbstractComponent(object):
         destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
 
 
-        print """\t\tResulting records in the dataset - %s """%(data.rows)
+        #print """\t\tResulting records in the dataset - %s """%(data.rows)
 
         if data.rows == 0:
             return
 
         destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
-	print max(uniqueIDs), 'unique ids---------------'
+	#print max(uniqueIDs), 'unique ids---------------'
         zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
 
         sampleVarDict = {'temp':[]}
@@ -872,7 +873,7 @@ class AbstractComponent(object):
         count = spatialconst.countChoices
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
-            print '\t\tSampling Locations'
+            #print '\t\tSampling Locations'
             self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
             sampledVarNames = sampleVarDict['temp']
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
@@ -982,11 +983,11 @@ class AbstractComponent(object):
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
         destLocSetInd = destLocSetInd[:,1:]
-	print 'number of choices - ', destLocSetInd.shape
+	#print 'number of choices - ', destLocSetInd.shape
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
-            print 'Number of choices', destLocSetIndSum
+            #print 'Number of choices', destLocSetIndSum
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
 
 	    zeroChoices = destLocSetIndSum.mask
@@ -994,7 +995,7 @@ class AbstractComponent(object):
 	    if (~zeroChoices).sum() == 0:
 		continue
 
-	    print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
+	    #print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
@@ -1008,8 +1009,8 @@ class AbstractComponent(object):
             
             colName = '%s%s' %(sampleVarName, i+1)
             nonZeroRows = where(res.data <> 0)
-	    print 'SELECTED LOCATIONS FOR COUNT - ', i+1
-            print res.data[:,0]
+	    #print 'SELECTED LOCATIONS FOR COUNT - ', i+1
+            #print res.data[:,0]
 
             #actualLocIds = res.data
             #actualLocIds[nonZeroRows] -= 1

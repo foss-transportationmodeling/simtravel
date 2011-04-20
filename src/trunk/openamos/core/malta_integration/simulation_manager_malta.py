@@ -127,7 +127,7 @@ class SimulationManager(object):
     	    insert_stmt = ("""copy %s %s from '%s' """
                            """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
 	                                          delimiter))
-	    print insert_stmt                                                                       
+	    #print insert_stmt                                                                       
             result = self.queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
             self.queryBrowser.dbcon_obj.connection.commit()
         except Exception, e:
@@ -165,11 +165,11 @@ class SimulationManager(object):
         # Printing models that were parsed
         modelCount = 0
         for comp in self.componentList:
-            print '\n\tFor component - %s ' %(comp.component_name)
-            print "\t -- Model list including model formulation and data filters if any  -- "
-            print '\tPost Run Filters - ', comp.post_run_filter
+            #print '\n\tFor component - %s ' %(comp.component_name)
+            #print "\t -- Model list including model formulation and data filters if any  -- "
+            #print '\tPost Run Filters - ', comp.post_run_filter
             for mod in comp.model_list:
-                print "\t\t - name:", mod.dep_varname, ",formulation:", mod.model_type, ",filter:", mod.data_filter
+                #print "\t\t - name:", mod.dep_varname, ",formulation:", mod.model_type, ",filter:", mod.data_filter
                 modelCount += 1
 
         print "\tTotal of %s components and %s models will be processed" %(len(self.componentList), modelCount)
@@ -253,7 +253,7 @@ class SimulationManager(object):
                                         self.projectSkimsObject, self.db, fileLoc)
 
             if data is not None:
-                print 'inside here for component - ', comp.component_name
+                #print 'inside here for component - ', comp.component_name
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
@@ -261,8 +261,8 @@ class SimulationManager(object):
                                     self.queryBrowser, fileLoc)
 
             else:
-                tripInfo = zeros((1,9))
-            print '-- Finished simulating component; time taken %.4f --' %(time.time()-t)
+                tripInfo = zeros((1,10))
+            print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
 	if comp.component_name == 'ExtractAllTravelEpisodes':
 	    # Reduce 100 to match TAZ notation of MALTA
@@ -314,8 +314,9 @@ class SimulationManager(object):
 
 if __name__ == '__main__':
     simulationObject = SimulationManager()
-    simulationObject.run_selected_components_for_malta(190)
-    simulationObject.run_selected_components_for_malta(191)
-    simulationObject.run_selected_components_for_malta(192)
+
+    simulationObject.run_selected_components_for_malta(0)
+    simulationObject.run_selected_components_for_malta(1)
+    simulationObject.run_selected_components_for_malta(2)
 
 
