@@ -80,19 +80,19 @@ class AbstractComponent(object):
         # the independent variable dictionary and dependent variables dictionary
         vars_dict, depvars_dict, prim_keys, count_keys = self.prepare_vars()
 
-        print self.variable_list
+        #print self.variable_list
 
 
-	print 'count keys before', count_keys
+	#print 'count keys before', count_keys
 	for table in vars_dict:
 	    try:
 	        keys = self.tableKeys[table]
-		print 'TABLE, KEYS - ', table, keys
+		#print 'TABLE, KEYS - ', table, keys
 	        if len(keys[1]) > 0:
 	            count_keys[table] = keys[1]
 	    except Exception, e:
 		pass
-	print 'count keys after', count_keys
+	#print 'count keys after', count_keys
 	#raw_input()
 
 
@@ -122,14 +122,14 @@ class AbstractComponent(object):
             return None
 
 
-        print 'processing dependencies', self.dependencyAllocationFlag
+        #print 'processing dependencies', self.dependencyAllocationFlag
 
-        if self.dependencyAllocationFlag:
-            self.process_adult_allocation(data, queryBrowser, householdStructureObject)
+        #if self.dependencyAllocationFlag:
+        #    self.process_adult_allocation(data, queryBrowser, householdStructureObject)
         
-
+	print '-- Time taken to retrieve data - %.4f --' %(time.time()-t_d)
         return data
-        print '-- Time taken to retrieve data - %.4f --' %(time.time()-t_d)
+        
 
     def create_choiceset(self, shape, criterion, names):
         #TODO: Should setup a system to generate the choicesets dynamically
@@ -142,7 +142,7 @@ class AbstractComponent(object):
 
     def run(self, data, skimsMatrix, partId=None):
         #TODO: check for validity of data and choiceset TYPES
-        print 'running for part id --------', partId
+        #print 'running for part id --------', partId
         self.data = data
         #raw_input()
         #self.db = db
@@ -163,7 +163,7 @@ class AbstractComponent(object):
         
             model_st = copy.deepcopy(model_list_duringrun)
             iteration += 1
-            print '\n\tIteration - ', iteration
+            #print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
                 model_list_duringrun, iteration, skimsMatrix)   
@@ -188,7 +188,7 @@ class AbstractComponent(object):
 
     def write_data_to_cache(self, data_filter, partId=None):
         # writing to the hdf5 cache
-        print 'writing to cache for ----', partId
+        #print 'writing to cache for ----', partId
 
         cacheTableRef = self.db.returnTableReference(self.writeToTable, partId)
         cacheColsTable = cacheTableRef.colnames
@@ -197,12 +197,12 @@ class AbstractComponent(object):
         convType = self.db.returnTypeConversion(self.writeToTable, partId)
         dtypesInput = cacheTableRef.coldtypes
         data_to_write = self.data.columnsOfType(cacheColsTable, data_filter, dtypesInput)
-        print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 
+        #print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 
 
         ti = time.time()
         cacheTableRef.append(data_to_write.data)
         cacheTableRef.flush()
-        print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
+        #print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
 
         ti = time.time()
         if self.delete_criterion is not None:
@@ -211,9 +211,9 @@ class AbstractComponent(object):
             else:
                 self.data.deleterows(data_filter)          
 
-        print '\t\t', self.delete_criterion
-        print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
-        print '\t\tSize of dataset', self.data.rows	
+        #print '\t\t', self.delete_criterion
+        #print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
+        #print '\t\tSize of dataset', self.data.rows	
 
 
     def create_filter(self, data_filter, filter_type):
@@ -245,8 +245,8 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
-            print '\t\tChecking for dynamic spatial queries'
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
                 current_model_name = i.dep_varname
@@ -258,12 +258,14 @@ class AbstractComponent(object):
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 
             tiii = time.time()
-
+		
+	    #print '\t\tFILTER'
+	    #print '\t\t', i.data_filter
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                                                                              time.time()-tiii)
+                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                #                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 #choiceset_shape = (data_subset.rows,
@@ -271,7 +273,7 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+                #print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -283,7 +285,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
-                print 'RESULT', result.data
+                #print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -321,7 +323,7 @@ class AbstractComponent(object):
         if len(self.dynamicspatialConst_list) > 0:
             for const in self.dynamicspatialConst_list:
                 if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
-                    print 'FOUND DYNAMICS SPATIAL QUERY'
+                    #print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], 
                                                skimsMatrix)
@@ -348,7 +350,7 @@ class AbstractComponent(object):
             if len(self.key[1]) > 0:
                 count_keys[depVarTable] = self.key[1]
                 tempdep_columnDict['temp'] += self.key[1]
-	print 'FIRST INSTANCE PROCESSING OF COUNT KEY', count_keys, prim_keys, indep_columnDict
+	#print 'FIRST INSTANCE PROCESSING OF COUNT KEY', count_keys, prim_keys, indep_columnDict
 	
 	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable] and len(self.aggregate_variable_dict) == 0 :
 	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
@@ -357,17 +359,17 @@ class AbstractComponent(object):
 	    prim_keys[depVarTable] = self.tableKeys[depVarTable][0]
 	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
-	print 'SECOND INSTANCE'	, count_keys, prim_keys, indep_columnDict
+	#print 'SECOND INSTANCE'	, count_keys, prim_keys, indep_columnDict
         indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
         indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
 
 	indep_columnDict = self.update_dictionary(indep_columnDict, self.aggregate_variable_dict)
 
         #dep_columnDict = self.update_dictionary(dep_columnDict, count_keys)
-	print 'THIRD INSTANCE'	, count_keys, prim_keys, indep_columnDict	        
+	#print 'THIRD INSTANCE'	, count_keys, prim_keys, indep_columnDict	        
 
 	
-	print indep_columnDict
+	#print indep_columnDict
 	#raw_input()
 
         # Needed only when updating to the same table
@@ -457,8 +459,8 @@ class AbstractComponent(object):
                      count_keys=None):
         #Get hierarchy of the tables
 
-	print 'INDEPEDNENT VAR DICTS', indepVarDict
-	print 'DEP VAR DICTS', depVarDict
+	#print 'INDEPEDNENT VAR DICTS', indepVarDict
+	#print 'DEP VAR DICTS', depVarDict
 
         # PROCESSING TO INCLUDE THE APPROPRIATE SPATIAL QUERY ANCHORS
         if self.spatialConst_list is not None:
@@ -545,8 +547,8 @@ class AbstractComponent(object):
                 matchingKey[i] = self.tableKeys[i][0]
                 continue
             else:
-		print self.tableKeys
-		print 'KEY', i
+		#print self.tableKeys
+		#print 'KEY', i
                 matchTableKeys = self.tableKeys[i][0]
             matchingKey[i] = list((set(mainTableKeys) and set(matchTableKeys)))
 
@@ -610,7 +612,7 @@ class AbstractComponent(object):
 
         if spatialConst_list is not None:
             for i in spatialConst_list:
-                print '\n\tProcessing spatial queries'
+                #print '\n\tProcessing spatial queries'
 
                 tableName = i.table
                 originColName = i.originField
@@ -618,11 +620,11 @@ class AbstractComponent(object):
                 skimColName = i.skimField
 
                 if i.countChoices is not None: 
-                    print ("""\t\tNeed to sample location choices for the following""" \
-                               """model with also location info extracted """)
+                    #print ("""\t\tNeed to sample location choices for the following""" \
+                    #           """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i)
                 else:
-                    print '\tNeed to extract skims'
+                    #print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
 
         return data
@@ -692,7 +694,7 @@ class AbstractComponent(object):
         destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
 
 
-        print """\t\tResulting records in the dataset - %s """%(data.rows)
+        #print """\t\tResulting records in the dataset - %s """%(data.rows)
 
         if data.rows == 0:
             return
@@ -716,7 +718,7 @@ class AbstractComponent(object):
         count = spatialconst.countChoices
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
-            print '\t\tSampling Locations'
+            #print '\t\tSampling Locations'
             self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
             sampledVarNames = sampleVarDict['temp']
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
@@ -824,17 +826,17 @@ class AbstractComponent(object):
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 	
-	print data.varnames
+	#print data.varnames
 
-	print originLocColName, destinationLocColName
-	print 'Origin Loc', originLocColVals[:,0]
-        print 'Destination Loc', destinationLocColVals[:,0]
-       	print 'skims values', vals[:,0]
+	#print originLocColName, destinationLocColName
+	#print 'Origin Loc', originLocColVals[:,0]
+        #print 'Destination Loc', destinationLocColVals[:,0]
+       	#print 'skims values', vals[:,0]
 
         #print vals[:,0]
-	print 'NEW IMPLEMENTATION'
+	#print 'NEW IMPLEMENTATION'
         data.setcolumn(colName, vals)
-	print data.columns([colName])
+	#print data.columns([colName])
 
 	#print 'OLD IMPLEMENTATION'
 	#data.insertcolumn([colName], vals)
@@ -847,12 +849,12 @@ class AbstractComponent(object):
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
         destLocSetInd = destLocSetInd[:,1:]
-	print 'number of choices - ', destLocSetInd.shape
+	#print 'number of choices - ', destLocSetInd.shape
 	#raw_input()
         ti = time.time()
         for i in range(count):
             destLocSetIndSum = destLocSetInd.sum(-1)
-            print 'Number of choices', destLocSetIndSum
+            #print 'Number of choices', destLocSetIndSum
 
 	
             probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
@@ -863,7 +865,7 @@ class AbstractComponent(object):
                 continue
 
 	    #probLocSet = probLocSet[zeroChoices,:]
-	    print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
+	    #print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
@@ -877,13 +879,13 @@ class AbstractComponent(object):
             
             colName = '%s%s' %(sampleVarName, i+1)
             nonZeroRows = where(res.data <> 0)
-	    print 'SELECTED LOCATIONS FOR COUNT - ', i+1
-            print res.data[:,0]
+	    #print 'SELECTED LOCATIONS FOR COUNT - ', i+1
+            #print res.data[:,0]
             #actualLocIds = res.data[nonZeroRows]
             #actualLocIds[nonZeroRows] -= 1
             #print actualLocIds
             data.setcolumn(colName, res.data)
-	    print data.columns([colName]).data[:,0]
+	    #print data.columns([colName]).data[:,0]
 	    #raw_input()
 
             # Retrieving the row indices
@@ -894,7 +896,7 @@ class AbstractComponent(object):
             colIndices = res.data.astype(int)
 
             destLocSetInd.mask[rowIndices, colIndices-1] = True
-        print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
+        #print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
 
     def check_sampled_choices(self, data, sampledVarNames):
         for i in range(len(sampledVarNames)):

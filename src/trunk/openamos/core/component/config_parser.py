@@ -147,7 +147,7 @@ class ConfigParser(object):
         return dbConfigObject
         
     def parse_tableHierarchy(self, component_element):
-        print "-- Parse table hierarchy --"
+        #print "-- Parse table hierarchy --"
         dbTables_element = component_element.find('DBTables')
         tableIterator = dbTables_element.getiterator("Table")
         tableOrderDict = {}
