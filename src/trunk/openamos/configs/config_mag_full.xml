@@ -1573,7 +1573,7 @@
 	  <Variable table="runtime" var="int5t7" coeff="2.627"/>
 	  <Variable table="households" var="inclt35k" coeff="-0.552"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -1646,7 +1646,7 @@
 	  <Variable table="runtime" var="int5t7" coeff="2.627"/>
 	  <Variable table="households" var="inclt35k" coeff="-0.552"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -2321,7 +2321,7 @@
 	  <Variable table="runtime" var="int3t5" coeff="-.5026"/>
 	  <Variable table="runtime" var="intaft7" coeff=".6915"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -2393,7 +2393,7 @@
 	  <Variable table="runtime" var="int3t5" coeff="-.5026"/>
 	  <Variable table="runtime" var="intaft7" coeff=".6915"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -2465,7 +2465,7 @@
 	  <Variable table="runtime" var="int3t5" coeff="-1.7553"/>
 	  <Variable table="runtime" var="intaft7" coeff="-.6604"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -2547,7 +2547,7 @@
 	  <Variable table="runtime" var="int3t5" coeff="-1.7553"/>
 	  <Variable table="runtime" var="intaft7" coeff="-.6604"/>
         </Alternative>
-        <Alternative id="other" value="900">
+        <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
@@ -3289,6 +3289,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
 	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="200"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<Filter table="runtime" var="adjustment" condition="greater than" value="0"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
@@ -3317,7 +3318,7 @@
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
-      <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="adjustment"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="400"/>
@@ -3326,7 +3327,7 @@
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model>
+      </Model1>
 
       <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="adjustment"/>
