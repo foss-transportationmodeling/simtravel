@@ -81,26 +81,26 @@ class ConfigParser(object):
         for compElement in self.iterator:
             if compElement.get('name') == component_name:
                 if analysisInterval is None:
-                    print 'OLD FLAG _ ', compElement.get('completed')
+                    #print 'OLD FLAG _ ', compElement.get('completed')
                     compElement.set('completed', "True")
                     compElement.set('skip', "True")
-                    print 'NEW FLAG _ ', compElement.get('completed')
+                    #print 'NEW FLAG _ ', compElement.get('completed')
 
 
                 if analysisInterval is not None:
                     analysisIntervalElement = compElement.find('AnalysisInterval')
-                    print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    #print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
                     analysisIntervalElement.set('start', str(analysisInterval + 1))
-                    print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
-                    print dir(analysisIntervalElement)
+                    #print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
+                    #print dir(analysisIntervalElement)
                 
                     endIntervalValue = int(analysisIntervalElement.get('end'))
                     
                     if endIntervalValue == analysisInterval + 1:
-                        print 'OLD FLAG _ ', compElement.get('completed')
+                        #print 'OLD FLAG _ ', compElement.get('completed')
                         compElement.set('completed', "True")
                         compElement.set('skip', "True")
-                        print 'NEW FLAG _ ', compElement.get('completed')                    
+                        #print 'NEW FLAG _ ', compElement.get('completed')                    
 
 
     def parse_models(self):
@@ -468,7 +468,7 @@ class ConfigParser(object):
 
     def create_model_object(self, model_element):
         model_formulation = model_element.attrib['formulation']
-	print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
+	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
         
         if model_formulation == 'Regression':
