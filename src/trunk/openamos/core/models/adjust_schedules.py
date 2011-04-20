@@ -1,16 +1,28 @@
 from openamos.core.agents.person import Person
 from openamos.core.agents.activity import ActivityEpisode
-from openamos.core.models.reconcile_schedules import ReconcileSchedules
+from openamos.core.models.abstract_model import Model
  
 from numpy import array, logical_and, zeros, histogram
 
 import time
 
 
-class AdjustSchedules(ReconcileSchedules):
+class AdjustSchedules(Model):
     def __init__(self, specification):
-        ReconcileSchedules.__init__(self, specification)
+        Model.__init__(self, specification)
+	self.specification = specification
+	self.activityAttribs = self.specification.activityAttribs
+	self.arrivalInfoAttribs = self.specification.arrivalInfoAttribs
 
+	self.colNames = [self.activityAttribs.hidName,
+                         self.activityAttribs.pidName,
+                         self.activityAttribs.scheduleidName, 
+                         self.activityAttribs.activitytypeName,
+                         self.activityAttribs.starttimeName,
+                         self.activityAttribs.endtimeName,
+                         self.activityAttribs.locationidName,
+                         self.activityAttribs.durationName,
+                         self.activityAttribs.dependentPersonName]
 
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName, 
@@ -59,36 +71,37 @@ class AdjustSchedules(ReconcileSchedules):
         print self.indices[:20, :]
         print self.indices[-20:, :]
         
-        #raw_input('New implementation of indics -')
+    def create_col_numbers(self, colNamesDict):
+        self.schidCol = colNamesDict[self.activityAttribs.scheduleidName]
+        self.actTypeCol = colNamesDict[self.activityAttribs.activitytypeName]
+        self.locidCol = colNamesDict[self.activityAttribs.locationidName]
+        self.sttimeCol = colNamesDict[self.activityAttribs.starttimeName]
+        self.endtimeCol = colNamesDict[self.activityAttribs.endtimeName]
+        self.durCol = colNamesDict[self.activityAttribs.durationName]
+	self.depPersonCol = colNamesDict[self.activityAttribs.dependentPersonName]
 
+	self.actualArrivalCol = colNamesDict[self.arrivalInfoAttribs.actualArrivalName]
+	self.expectedArrivalCol = colNamesDict[self.arrivalInfoAttribs.expectedArrivalName]
+
+    def return_arrival_info(self, schedulesForPerson):
+	actualArrival = schedulesForPerson.data[0,self.actualArrivalCol]
+	expectedArrival = schedulesForPerson.data[0,self.expectedArrivalCol]
+	
+	print 'Actual Arrival - %s and Expected Arrival - %s ' %(actualArrival, expectedArrival)
+	return actualArrival, expectedArrival
 
 
     def resolve_consistency(self, data, seed):
-
+	actList = []
         data.sort([self.activityAttribs.hidName,
                    self.activityAttribs.pidName,
                    self.activityAttribs.scheduleidName])
         ti = time.time()
         # Create Index Matrix
         self.create_indices(data)
+	self.create_col_numbers(data._colnames)
 
         print 'Indices created in %.4f' %(time.time()-ti)
-
-        schidCol = data._colnames[self.activityAttribs.scheduleidName]
-        actTypeCol = data._colnames[self.activityAttribs.activitytypeName]
-        locidCol = data._colnames[self.activityAttribs.locationidName]
-        sttimeCol = data._colnames[self.activityAttribs.starttimeName]
-        endtimeCol = data._colnames[self.activityAttribs.endtimeName]
-        durCol = data._colnames[self.activityAttribs.durationName]
-
-        colNames = [self.activityAttribs.scheduleidName, 
-                    self.activityAttribs.activitytypeName,
-                    self.activityAttribs.starttimeName,
-                    self.activityAttribs.endtimeName,
-                    self.activityAttribs.locationidName,
-                    self.activityAttribs.durationName]
-
-
 
         row = 0
         
@@ -99,31 +112,41 @@ class AdjustSchedules(ReconcileSchedules):
 
             activityList = []
             for sched in schedulesForPerson.data:
-                scheduleid = sched[schidCol]
-                activitytype = sched[actTypeCol]
-                locationid = sched[locidCol]
-                starttime = sched[sttimeCol]
-                endtime = sched[endtimeCol]
-                duration = sched[durCol]
-                
+                scheduleid = sched[self.schidCol]
+                activitytype = sched[self.actTypeCol]
+                locationid = sched[self.locidCol]
+                starttime = sched[self.sttimeCol]
+                endtime = sched[self.endtimeCol]
+                duration = sched[self.durCol]
+		depPers = sched[self.depPersonCol]                
+	
                 actepisode = ActivityEpisode(scheduleid, activitytype, locationid, 
-                                             starttime, endtime, duration)
+                                             starttime, endtime, duration, depPers)
                 activityList.append(actepisode)
 
+	    
             personObject = Person(perIndex[0], perIndex[1])
             personObject.add_episodes(activityList)
+	    actualArrival, expectedArrival = self.return_arrival_info(schedulesForPerson)
+	    personObject.add_arrival_status(actualArrival, expectedArrival)
 	    print 'person indices', perIndex
 	    print 'activity list', activityList
-            personObject.adjust_schedules(seed)
+            personObject.adjust_schedules_given_arrival_info(seed)
+	    reconciledSchedules = personObject._collate_results_aslist()
 	    if not personObject._check_for_conflicts():
+	    	print self.colNames
+	    	for i in reconciledSchedules:
+		    print i
                 raise Exception, "THE SCHEDULES ARE STILL MESSED UP"    
-	    reconciledSchedules = personObject._collate_results()
             #reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
-                
-            i = 0
-            for colN in colNames:
-                data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-                i += 1
+             
+	    actList += reconciledSchedules
+
+   
+            #i = 0
+            #for colN in self.colNames:
+            #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
+            #    i += 1
                                   
             #print 'MODIFIED DATA'
             #print data.rowsof(recsInd).data.astype(int)
