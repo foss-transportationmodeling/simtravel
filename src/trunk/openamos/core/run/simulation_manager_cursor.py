@@ -230,14 +230,14 @@ class SimulationManager(object):
                 
                 if tableName <> lastTableName and len(comp.spatialConst_list) > 0:
                     # Load the skims matrix
-                    print """The tod interval for the the previous component is not same """\
+                    print """\tThe tod interval for the the previous component is not same """\
                         """as current component. """\
                         """Therefore the skims matrix should be reloaded."""
                     skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
                     lastTableName = tableName
 
                 elif tableName == lastTableName:
-                    print """The tod interval for the the previous component is same """\
+                    print """\tThe tod interval for the the previous component is same """\
                         """as current component. """\
                         """Therefore the skims matrix need not be reloaded."""
 
@@ -272,7 +272,8 @@ class SimulationManager(object):
 
                     self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 
                                            nRowsProcessed, partId, createIndex, deleteIndex)
-                    
+                    #if nRowsProcessed > 0:
+		    # 	raw_input()
                 configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
             
@@ -354,7 +355,7 @@ class SimulationManager(object):
         
         t = time.time()
 
-	print 'Create index - %s and Delete Index - %s' %(createIndex, deleteIndex)
+	#print 'Create index - %s and Delete Index - %s' %(createIndex, deleteIndex)
 
         print '\tNumber of rows processed for this component - ', nRowsProcessed
         if nRowsProcessed == 0:
