@@ -32,8 +32,21 @@ class Person(object):
         
 
 
-    def adjust_schedules(self, seed=1):
-	print '\tNeed to adjust activity schedules here -- '
+    def adjust_schedules_given_arrival_info(self, seed=1):
+	if self.destAct.startTime >= self.actualArrival:
+	    print '\t\t-- Arrived earlier than expected; minor adjustment for subsequent activity --'
+	    print '\t\t-- No adjustments necessary; the activity-travel generation components will take care'
+
+	if self.destAct.startTime < self.actualArrival:
+	    print '\t\t-- Arrived later than expected; adjustment for activities needs to happen here --'
+	    
+	    """	
+	    print '\t\t-- Destination Act - ', destAct
+	    self.move_start(destAct, self.actualArrival+1)
+	    print '\t\t-- Destination Act after adjustment - ', destAct
+	    """
+        #raw_input()
+
 	pass
 
     def add_episodes(self, activityEpisodes, temp=False):
@@ -54,7 +67,7 @@ class Person(object):
         #    print '\t', currActivities
 
 	for activity in activityEpisodes:
-            print (activity.startTime, activity)
+            #print (activity.startTime, activity)
 	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
             self._update_schedule_conflict_indicator(activity, add=False)
 
@@ -444,6 +457,40 @@ class Person(object):
         self.extract_work_episodes()
         self.extract_school_episodes()
         
+    def add_arrival_status(self, actualArrival, expectedArrival):
+	self.actualArrival = actualArrival
+	self.expectedArrival = expectedArrival
+	self.extract_destination_episode()
+
+    def extract_destination_episode(self):
+	self.expectedActivities = []
+	self.actualActivities = []
+	
+	for startTime, destAct in self.listOfActivityEpisodes:
+	    if destAct.startTime == self.expectedArrival:
+		break
+
+
+	print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
+	tempActList = copy.deepcopy(self.listOfActivityEpisodes)
+	for actIndex in range(len(tempActList)):
+	    startTime, act = hp.heappop(tempActList)
+	    if act.startTime >= self.expectedArrival:
+		self.expectedActivities.append(act)
+		print '\t', act
+		   	
+
+	print 'Activities after actual arrival of %s - ' %(self.actualArrival)
+	tempActList = copy.deepcopy(self.listOfActivityEpisodes)
+	for actIndex in range(len(tempActList)):
+	    startTime, act = hp.heappop(tempActList)
+	    if act.startTime >= self.actualArrival:
+		self.actualActivities.append(act)
+		print '\t', act
+
+	self.destAct = destAct
+
+
     def extract_work_episodes(self):
         for startTime, act in self.listOfActivityEpisodes:
             if act.actType > 199 and act.actType < 300:
