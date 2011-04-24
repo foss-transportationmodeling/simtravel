@@ -65,6 +65,7 @@ class MakeResultPlot(QDialog):
         radiolayout = QHBoxLayout()
         radiowidget.setLayout(radiolayout)
         segment = QGroupBox(self)
+        #segment.setStyleSheet("border:0px;")
         addsegment = QHBoxLayout()
         segment.setLayout(addsegment)
         self.tripradio = QRadioButton("Travel Characteristics")
@@ -75,6 +76,7 @@ class MakeResultPlot(QDialog):
         radiolayout.addWidget(segment)
         
         filter = QGroupBox(self)
+        #filter.setStyleSheet("border:0px;")
         addfilter = QHBoxLayout()
         filter.setLayout(addfilter)
         var1 = QLabel("Variable 1")
@@ -138,14 +140,44 @@ class MakeResultPlot(QDialog):
         progresslayout.addWidget(self.dialogButtonBox)
         progresslayout.setContentsMargins(0,0,0,0)
 
+        filter_widget = QWidget(self)
+        filterlayout = QVBoxLayout()
+        filter_widget.setLayout(filterlayout)
+        filterlayout.addWidget(radiowidget)
+        filterlayout.addWidget(self.socio)
+        filterlayout.addWidget(self.tripfilter)
+        #filterlayout.setContentsMargins(0,0,0,0)
+        
+        scrollArea = QScrollArea()
+        scrollArea.setWidget(filter_widget)
+        scrollArea.setMaximumHeight(550)
+        scrollArea.setWidgetResizable(True)
+        
+        tempwidget = QWidget(self)
+        templayout = QVBoxLayout()
+        tempwidget.setLayout(templayout)
+        templayout.addWidget(stablewidget)
+        templayout.addWidget(self.tabs)
+        templayout.addWidget(progresswidget)
+        templayout.setStretch(1,1)
+        
+        
+        splitter = QSplitter(Qt.Vertical)
+        splitter.addWidget(scrollArea)
+        splitter.addWidget(tempwidget)
+        splitter.setSizes([350,450])
+        
+        
         self.vbox = QVBoxLayout()
-        self.vbox.addWidget(radiowidget)
-        self.vbox.addWidget(self.socio)
-        self.vbox.addWidget(self.tripfilter)
-        self.vbox.addWidget(stablewidget)
-        self.vbox.addWidget(self.tabs)
-        self.vbox.addWidget(progresswidget)
-        self.vbox.setStretch(4,1)
+#        self.vbox.addWidget(radiowidget)
+#        self.vbox.addWidget(scrollArea)
+#        self.vbox.addWidget(self.socio)
+#        self.vbox.addWidget(self.tripfilter)
+#        self.vbox.addWidget(stablewidget)
+        self.vbox.addWidget(splitter)
+#        self.vbox.addWidget(progresswidget)
+#        self.vbox.setStretch(0,1)
+#        self.vbox.setStretch(2,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
@@ -163,11 +195,10 @@ class MakeResultPlot(QDialog):
         
         self.socio = QGroupBox("")
         varslayout = QGridLayout()
-        #varslayout.setAlignment(Qt.AlignLeft)
         self.socio.setLayout(varslayout)
-        self.socio.setContentsMargins(0,0,0,0)
 
         segment = QGroupBox(self)
+        segment.setStyleSheet("border:0px;")
         addsegment = QVBoxLayout()
         segment.setLayout(addsegment)
         self.segment1 = QRadioButton("Households")
@@ -185,7 +216,7 @@ class MakeResultPlot(QDialog):
         if self.columnName() <> None:
             self.colswidget.addItems(self.columnName())
         self.colswidget.setMaximumWidth(160)
-        self.colswidget.setMaximumHeight(110)
+        self.colswidget.setMinimumHeight(150)
         varslayout.addWidget(self.colswidget,1,1)
         
         varslabel = QLabel('Values')
@@ -193,7 +224,7 @@ class MakeResultPlot(QDialog):
         self.valwidget = QListWidget()
         self.valwidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.valwidget.setMaximumWidth(160)
-        self.valwidget.setMaximumHeight(110)
+        self.valwidget.setMinimumHeight(150)
         varslayout.addWidget(self.valwidget,1,2)        
         
         buttonwidget1 = QWidget(self)
@@ -215,58 +246,50 @@ class MakeResultPlot(QDialog):
         self.varstable.horizontalHeader().setResizeMode(0,1)
         self.varstable.horizontalHeader().setResizeMode(1,1)
         self.varstable.setMaximumWidth(360)
-        self.varstable.setMaximumHeight(110)
+        self.varstable.setMinimumHeight(150)
         varslayout.addWidget(self.varstable,1,4)
         
         
         self.tripfilter = QGroupBox("")
         tripfilterlayout = QGridLayout()
-        #tripfilterlayout.setAlignment(Qt.AlignLeft)
         self.tripfilter.setLayout(tripfilterlayout)
-        self.tripfilter.setContentsMargins(0,0,0,0)
         
         self.activitylabel = QLabel("Trip Purpose")
         self.activitychoice = QListWidget()
         self.activitychoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.activitychoice.setFixedWidth(170)
-        self.activitychoice.setFixedHeight(110)
-#        self.activitychoice = QComboBox()
-#        self.activitychoice.setMinimumWidth(150)
+        self.activitychoice.setMinimumHeight(150)
+
         startlabel = QLabel("Start Time")
         self.startchoice = QListWidget()
         self.startchoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.startchoice.setFixedWidth(140)
-        self.startchoice.setFixedHeight(110)
-#        self.startchoice = QComboBox()
-#        self.startchoice.setMinimumWidth(150)
+        self.startchoice.setMinimumHeight(150)
+
         endlabel = QLabel("End Time")
         self.endchoice = QListWidget()
         self.endchoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.endchoice.setFixedWidth(140)
-        self.endchoice.setFixedHeight(110)
-#        self.endchoice = QComboBox()
-#        self.endchoice.setMinimumWidth(150)
+        self.endchoice.setMinimumHeight(150)
+
         duralabel = QLabel("Duration")
         self.durachoice = QListWidget()
         self.durachoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.durachoice.setFixedWidth(140)
-        self.durachoice.setFixedHeight(110)
-#        self.durachoice = QComboBox()
-#        self.durachoice.setMinimumWidth(150)
+        self.durachoice.setMinimumHeight(150)
+
         self.modelabel = QLabel("Trip Mode")
         self.modechoice = QListWidget()
         self.modechoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.modechoice.setFixedWidth(140)
-        self.modechoice.setFixedHeight(110)
-#        self.modechoice = QComboBox()
-#        self.modechoice.setMinimumWidth(150)
+        self.modechoice.setMinimumHeight(150)
+
         self.occuplabel = QLabel("Occupancy")
         self.occupchoice = QListWidget()
         self.occupchoice.setSelectionMode(QAbstractItemView.MultiSelection)
         self.occupchoice.setFixedWidth(140)
-        self.occupchoice.setFixedHeight(110)
-#        self.occupchoice = QComboBox()
-#        self.occupchoice.setMinimumWidth(150)
+        self.occupchoice.setMinimumHeight(150)
+
         
         self.fill_item2(1,self.trip_labels("trippurpose"))
         self.fill_item2(2,self.trip_labels("starttime"))
@@ -287,7 +310,7 @@ class MakeResultPlot(QDialog):
         tripfilterlayout.addWidget(self.modechoice,1,4)
         tripfilterlayout.addWidget(self.occuplabel,0,5)
         tripfilterlayout.addWidget(self.occupchoice,1,5)
-
+        
         self.connect(self.colswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateValues)
         self.connect(self.selbutton1, SIGNAL("clicked(bool)"), self.selValue)
         self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delValue)
@@ -338,8 +361,8 @@ class MakeResultPlot(QDialog):
     def makePlotTab(self,chart):
         page1 = QWidget()
         vbox = QVBoxLayout()
-        vbox.addWidget(chart)
         page1.setLayout(vbox)
+        vbox.addWidget(chart)
         chartname = ""
         index = -1
         if self.tabs.count() > 0:
@@ -356,8 +379,8 @@ class MakeResultPlot(QDialog):
     def makeTableTab(self,stable):
         page1 = QWidget()
         vbox = QVBoxLayout()
-        vbox.addWidget(stable)
         page1.setLayout(vbox)
+        vbox.addWidget(stable)
         chartname = ""
         index = -1
         if self.tabs.count() > 0:
@@ -368,8 +391,8 @@ class MakeResultPlot(QDialog):
         else:
             chartname = "Table 1"
         self.tabs.addTab(page1, chartname)
-        index = index + 1
-        self.tabs.setCurrentIndex(index)
+        #index = index + 1
+        #self.tabs.setCurrentIndex(index)
 
     def removeTab(self):
         index = self.tabs.currentIndex()
@@ -438,7 +461,7 @@ class MakeResultPlot(QDialog):
     def fig_text(self,total):
         sample = "Sample Size: %d"%(total)
         fig = self.figs[len(self.figs)-1]
-        fig.text(0.98,0.03,sample,fontsize=11,ha='right',va='bottom')
+        fig.text(0.863,0.03,sample,fontsize=11,ha='left',va='bottom')
 
             
             
@@ -932,42 +955,7 @@ class MakeResultPlot(QDialog):
                 filter = filter5
                 
         return filter
-#        if index2 >= 1:
-#            value = setime[index2]
-#            if filter == "":
-#                filter = "A.starttime >= %s AND A.starttime < %s"%(value[0],value[1])
-#            else:
-#                filter = filter + " AND A.starttime >= %s AND A.starttime < %s"%(value[0],value[1])
-#        if index3 >= 1:
-#            value = setime[index3]
-#            if filter == "":
-#                filter = "A.endtime >= %s AND A.endtime < %s"%(value[0],value[1])
-#            else:
-#                filter = filter + " AND A.endtime >= %s AND A.endtime < %s"%(value[0],value[1])
-#        if index4 >= 1:
-#            value = duration[index4]
-#            if filter == "":
-#                filter = "A.endtime - A.starttime >= %s AND A.endtime - A.starttime < %s"%(value[0],value[1])
-#            else:
-#                filter = filter + " AND A.endtime - A.starttime >= %s AND A.endtime - A.starttime < %s"%(value[0],value[1])
-#        if index5 >= 1:
-#            value = tripmode[index5]
-#            if filter == "":
-#                filter = "A.tripmode = %s"%(value[0])
-#            else:
-#                filter = filter + " AND A.tripmode = %s"%(value[0])
-#        if index6 >= 1:
-#            value = occup[index6]
-#            if index6 == 6:
-#                if filter == "":
-#                    filter = "A.occupancy >= %s AND A.occupancy < %s"%(value[0],value[1])
-#                else:
-#                    filter = filter + " AND A.occupancy >= %s AND A.occupancy < %s"%(value[0],value[1])
-#            else:
-#                if filter == "":
-#                    filter = " A.occupancy = %s"%(value[0])
-#                else:
-#                    filter = filter + " AND A.occupancy = %s"%(value[0])                
+             
 
          
     def retrieveResult(self):
@@ -989,7 +977,7 @@ class MakeResultPlot(QDialog):
                 filter = " AND A.houseid = B.houseid"
             else:
                 filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
-                        
+        
         try:
             self.total = 0.0
             cond = self.time_categroy(column)
@@ -1083,8 +1071,9 @@ class MakeResultPlot(QDialog):
             else:
                 axes.set_xticklabels(labels)
             
-            Canvas.draw()
+            
             self.makePlotTab(Canvas)
+            Canvas.draw()
             self.fig_text(self.total)
             
             
@@ -1306,10 +1295,17 @@ class MakeResultPlot(QDialog):
             axes.set_ylabel("Percent (%)")
             axes.set_ylim(0,100)
                     
-            Canvas.draw()
-            self.makePlotTab(Canvas)
-            self.fig_text(self.total)
             
+            self.makePlotTab(Canvas)
+            Canvas.draw()
+            self.fig_text(self.total)
+        
+        self.create_table(isExchange,yvalue,cumulate,labels,legendlabel)
+        self.progresslabel.setText("")
+        self.repaint()
+
+
+    def create_table(self,isExchange,yvalue,cumulate,labels,legendlabel):
             vtable = CustomTable(self)
             #vtable.setSelectionMode(QAbstractItemView.MultiSelection)
             if isExchange:
@@ -1353,10 +1349,7 @@ class MakeResultPlot(QDialog):
                         vtable.setItem(i,j,value)
                 
             self.makeTableTab(vtable)
-        
-            
-        self.progresslabel.setText("")
-        self.repaint()
+
 
     def plot_legend(self,category,column):
         legenddict = self.trip_labels(str(column))

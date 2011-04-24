@@ -76,6 +76,7 @@ class MakeSchedPlot(QDialog):
         basedlayout.addWidget(self.based1)
         basedlayout.addWidget(self.based2)
         radiolayout.addWidget(basedgroup)
+        radiolayout.setContentsMargins(0,0,0,0)
 
         stablewidget = QWidget(self)
         stablelayout = QHBoxLayout()
@@ -110,15 +111,27 @@ class MakeSchedPlot(QDialog):
         self.showbutton.setFixedWidth(80)
         stablelayout.addWidget(self.showbutton)
         stablelayout.setContentsMargins(0,0,0,0)
-
+        
+        filter_widget = QWidget(self)
+        filterlayout = QVBoxLayout()
+        filter_widget.setLayout(filterlayout)
+        filterlayout.addWidget(radiowidget)
+        filterlayout.addWidget(self.varswidget1)
+        filterlayout.addWidget(self.varswidget2)
+        
+        scrollArea = QScrollArea()
+        scrollArea.setWidget(filter_widget)
+        scrollArea.setWidgetResizable(True)
+        
         self.vbox = QVBoxLayout()
-        self.vbox.addWidget(radiowidget)
-        self.vbox.addWidget(self.varswidget1)
-        self.vbox.addWidget(self.varswidget2)
+#        self.vbox.addWidget(radiowidget)
+#        self.vbox.addWidget(self.varswidget1)
+#        self.vbox.addWidget(self.varswidget2)
+        self.vbox.addWidget(scrollArea)
         self.vbox.addWidget(stablewidget)
         self.vbox.addWidget(self.tabs)
         self.vbox.addWidget(self.dialogButtonBox)
-        self.vbox.setStretch(4,1)
+        self.vbox.setStretch(2,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
@@ -501,133 +514,6 @@ class MakeSchedPlot(QDialog):
             
         return sdata
 
-#    def resetID(self):
-#        self.idwidget2.clear()
-#        self.retrieveID2()
-#    def on_draw(self):
-#        """ Redraws the figure
-#        """
-#        
-##        data = [[100,0,395,300,396,332,100,729,710],
-##                [100,0,325,300,326,213,415,568,34,100,669,770],
-##                [100,0,149,513,159,18,101,182,5,300,258,484,100,743,696],
-##                [100,0,172,101,173,1,513,199,20,416,266,49,300,367,388,412,797,41,100,885,554],
-##                [100,0,302,300,303,435,101,742,10,514,775,61,101,840,0,101,841,1,100,897,542],
-##                [100,0,285,300,286,312,101,602,51,101,654,59,101,714,2,412,732,68,100,879,560],
-##                [100,0,158,300,237,518,101,759,0,514,799,15,412,839,15,415,887,3,100,906,533]
-##                ]
-#        
-#        sdata = self.selectedResults()
-#        if sdata != None:
-#            rows = len(sdata)
-#            self.axes.clear()
-#            ticks = np.arange(rows+1)
-#            ind = 1
-#            height = 0.4
-#
-#
-#            for row in sdata:
-#                rowlen = len(row)
-#                for i in range(2,rowlen,3):
-#                    self.axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]))
-#                ind = ind + 1
-#            
-#            bars=[]
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(100)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(200)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(300)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(411)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(412)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(415)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(416)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(513)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(514)))
-#            bars.append(barh(0, 1, 1, left=0,color=self.colors(900)))
-#            
-#            prop = matplotlib.font_manager.FontProperties(size=8)   
-#            self.axes.legend(bars,('In-home','Work','School','Pers Buss',
-#                              'Shopping','Meal','Srv Passgr','Social',
-#                              'Sports/Rec','Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
-#            self.axes.set_xlabel("Time")
-#            self.axes.set_ylabel("Persons")
-#            self.axes.set_xlim(0,1440)
-#            
-#            
-#            sindex = self.idwidget.selectedIndexes()
-#            labels = []
-#            labels.append('')
-#            for i in sindex:
-#                labels.append(self.idwidget.item(i.row()).text())
-#                
-#            self.axes.set_yticks(ticks)
-#            if len(labels) >= 13:
-#                self.axes.set_yticklabels(labels, size='xx-small')
-#            elif (len(labels) >= 7):
-#                self.axes.set_yticklabels(labels, size='x-small')
-#            else:
-#                self.axes.set_yticklabels(labels)
-#
-#            self.canvas.draw()
-
-
-#    def retrieveResults(self):
-#        
-#        numrows = self.varstable.rowCount()
-#        if numrows > 0:
-#            try:
-#                self.idwidget.clear()
-#                self.data = []
-#                pid = []
-#                temp = None
-#                SQL = self.stateSQL()
-#                if SQL != "" and SQL != None:
-#                    #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
-#                    self.cursor.execute(SQL)
-#                    temp = self.cursor.fetchall()
-#                    
-#                    prior_id = '0'
-#                    id = ""
-#                    aschedule = []
-#                    for i in temp:
-#                        if self.segment1.isChecked():
-#                            id = str(i[0])
-#                        else:
-#                            id = '%s,%s'%(str(i[0]),str(i[1]))
-#                            
-#                        if prior_id <> id:
-#                            prior_id = id
-#                            
-#                            self.data.append(aschedule)
-#                            
-#                            aschedule = []
-#                            pid.append(id)
-#                            aschedule.append(i[2])
-#                            aschedule.append(i[3])
-#                            aschedule.append(i[4])
-#                        else:
-#                            aschedule.append(i[2])
-#                            aschedule.append(i[3])
-#                            aschedule.append(i[4])
-#    
-#                    self.data.append(aschedule)
-#                    self.data.pop(0)
-#                    self.fixedFifty(pid)
-#                    self.idwidget.addItems(pid)
-#    
-#                #return data
-#            
-#            except Exception, e:
-#                print '\tError while unloading data from the table %s'%self.table
-#                print e
-#                #return None
-#            
-#            #return None
-#        else:
-#            msg = "Please insert a Column and a Value after selecting"
-#            QMessageBox.information(self, "Warning",
-#                                    msg,
-#                                    QMessageBox.Ok)
-
 
     def retrieveResults(self):
         
@@ -705,16 +591,23 @@ class MakeSchedPlot(QDialog):
                     self.cursor.execute(SQL)
                     temp = self.cursor.fetchall()
                     
-                    id = ""
-                    for i in temp:
+                    tid = ""
+                    index = 0
+                    i = 0
+                    if len(temp) > 50:
+                        index = randint(0, len(temp)-50)
+                       
+                    for id in temp:
                         if self.segment1.isChecked():
-                            id = str(i[0])
+                            tid = str(id[0])
                         else:
-                            id = '%s,%s'%(str(i[0]),str(i[1]))
+                            tid = '%s,%s'%(str(id[0]),str(id[1]))
                         
-                        pid.append(id)
+                        if i >= index and i < index+50:
+                            pid.append(tid)
                         
-                    self.fixedFifty(pid)
+                        i = i+1
+                    #self.fixedFifty(pid)
                     self.idwidget.addItems(pid)
 
             
@@ -766,8 +659,7 @@ class MakeSchedPlot(QDialog):
         while length > 50:
             index = randint(0, length-1)
             pid.pop(index)
-            #self.data.pop(index)
-            length = len(pid) #len(self.data)
+            length = len(pid)
         
 
 #    def stateSQL1(self):
@@ -831,7 +723,8 @@ class MakeSchedPlot(QDialog):
         filter = filter + ') AND A.houseid = B.houseid'
         if self.table == 'persons':
             filter = filter + ' AND A.personid = B.personid'
-        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+        #state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+        state = """SELECT DISTINCT %s FROM %s WHERE %s"""%(vars,tablename,filter)
 
         return state
 
@@ -869,31 +762,31 @@ class MakeSchedPlot(QDialog):
 
 
 
-    def schedule_labels(self, index):
-        xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
-                  'duration_rec':'Activity Duration (mins)'}
-        activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn', 151:'IH-Dependent',
-			200:'OH-Work',201:'Work',
-			300:'OH-School',301:'School',
-			411:'OH-Pers Buss',412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',
-			461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',
-			513:'OH-Social Visit',514:'OH-Sports/Rec',
-                        600:'Pick Up',601:'Drop Off',
-			900:'OH-Other'}
-        starttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-        endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-        duration = {1:'0-10',2:'11-30',3:'31-120',4:'121-240',5:'> 240'}
-
-        if index == 0:
-            return xtitle
-        if index == 1:
-            return activitytype
-        if index == 2:
-            return starttime
-        if index == 3:
-            return endtime
-        if index == 4:
-            return duration
+#    def schedule_labels(self, index):
+#        xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
+#                  'duration_rec':'Activity Duration (mins)'}
+#        activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn', 151:'IH-Dependent',
+#			200:'OH-Work',201:'Work',
+#			300:'OH-School',301:'School',
+#			411:'OH-Pers Buss',412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',
+#			461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',
+#			513:'OH-Social Visit',514:'OH-Sports/Rec',
+#                        600:'Pick Up',601:'Drop Off',
+#			900:'OH-Other'}
+#        starttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
+#        endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
+#        duration = {1:'0-10',2:'11-30',3:'31-120',4:'121-240',5:'> 240'}
+#
+#        if index == 0:
+#            return xtitle
+#        if index == 1:
+#            return activitytype
+#        if index == 2:
+#            return starttime
+#        if index == 3:
+#            return endtime
+#        if index == 4:
+#            return duration
         
     def schedule_table(self):
         cur_text = self.stablecombo.currentText()
