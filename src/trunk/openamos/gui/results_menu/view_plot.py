@@ -76,7 +76,6 @@ class MakeResultPlot(QDialog):
         radiolayout.addWidget(segment)
         
         filter = QGroupBox(self)
-        #filter.setStyleSheet("border:0px;")
         addfilter = QHBoxLayout()
         filter.setLayout(addfilter)
         var1 = QLabel("Variable 1")
@@ -146,7 +145,6 @@ class MakeResultPlot(QDialog):
         filterlayout.addWidget(radiowidget)
         filterlayout.addWidget(self.socio)
         filterlayout.addWidget(self.tripfilter)
-        #filterlayout.setContentsMargins(0,0,0,0)
         
         scrollArea = QScrollArea()
         scrollArea.setWidget(filter_widget)
@@ -161,23 +159,14 @@ class MakeResultPlot(QDialog):
         templayout.addWidget(progresswidget)
         templayout.setStretch(1,1)
         
-        
         splitter = QSplitter(Qt.Vertical)
         splitter.addWidget(scrollArea)
         splitter.addWidget(tempwidget)
         splitter.setSizes([350,450])
         
-        
         self.vbox = QVBoxLayout()
-#        self.vbox.addWidget(radiowidget)
-#        self.vbox.addWidget(scrollArea)
-#        self.vbox.addWidget(self.socio)
-#        self.vbox.addWidget(self.tripfilter)
-#        self.vbox.addWidget(stablewidget)
         self.vbox.addWidget(splitter)
-#        self.vbox.addWidget(progresswidget)
 #        self.vbox.setStretch(0,1)
-#        self.vbox.setStretch(2,1)
         self.setLayout(self.vbox)
         
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
@@ -187,7 +176,6 @@ class MakeResultPlot(QDialog):
         self.connect(self.actiradio, SIGNAL("clicked(bool)"), self.fill_item1)
         self.connect(self.choicevar1, SIGNAL("currentIndexChanged(int)"), self.manage_combo)
         self.connect(self.choicevar2, SIGNAL("currentIndexChanged(int)"), self.set_disable)
-
 
         
 
@@ -434,7 +422,7 @@ class MakeResultPlot(QDialog):
             self.fill_item2(3,self.trip_labels("endtime"))
             self.fill_item2(4,self.trip_labels("duration"))
             self.fill_item2(5,self.trip_labels("tripmode"))
-            self.fill_item2(6,self.trip_labels("occupancy"))
+            self.fill_item2(6,self.trip_labels("occupancy"))     
         
  
     def createCanvas(self):
@@ -462,8 +450,12 @@ class MakeResultPlot(QDialog):
         sample = "Sample Size: %d"%(total)
         fig = self.figs[len(self.figs)-1]
         fig.text(0.863,0.03,sample,fontsize=11,ha='left',va='bottom')
-
-            
+       
+#    def mousePressEvent(self, ev):
+#        QApplication.restoreOverrideCursor()
+        
+    def onleave(self,ev):
+        QApplication.restoreOverrideCursor()
             
     def connects(self,configobject):
         
@@ -828,7 +820,7 @@ class MakeResultPlot(QDialog):
         occupancy = {1:[0],2:[1],3:[2],4:[3],5:[4],6:[5,30000]}
         activitytype = {100:[100],101:[101],150:[150],151:[151],200:[200],201:[201],300:[300],301:[301],411:[411],
                         412:[412],415:[415],416:[416],461:[461],462:[462],465:[465],466:[466],513:[513],514:[514],
-                        900:[900],600:[600],601:[601]}
+                        597:[597],598:[598],600:[600],601:[601],900:[900]}
 
         if column == "starttime" or column == "endtime": 
             return time
@@ -848,8 +840,8 @@ class MakeResultPlot(QDialog):
         activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn',151:'IH-Dependent',200:'OH-Work',201:'Work',300:'OH-School',
                         301:'Shcool',411:'OH-Pers Buss',
                         412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',
-                        465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',513:'OH-Social Visit',514:'OH-Sports/Rec',900:'Other',
-                        600:'Pick-up',601:'Drop-off'}                
+                        465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',513:'OH-Social Visit',514:'OH-Sports/Rec',597:'Filler',
+                        598:'Anchor',600:'Pick-up',601:'Drop-off',900:'Other'}                
         modedict = {1:'Car',2:'Van',3:'SUV',4:'Pickup Truck',5:'Bus',6:'Train',7:'School Bus',8:'Bike',9:'Walk',
                     10:'Taxi',11:'Other'}
         starttime = {1:'4am-5am',2:'5am-6am',3:'6am-7am',4:'7am-8am',5:'8am-9am',6:'9am-10am',
@@ -906,7 +898,7 @@ class MakeResultPlot(QDialog):
     def where_trip(self):
         trippurpose = {1:[100],2:[101],3:[150],4:[151],5:[200],6:[201],7:[300],8:[301],9:[411],
                         10:[412],11:[415],12:[416],13:[461],14:[462],15:[465],16:[466],17:[513],18:[514],
-                        19:[900],20:[600],21:[601]}
+                        19:[597],20:[598],21:[600],20:[601],21:[900]}
         setime = self.time_categroy("starttime")
         duration = self.time_categroy("duration")
         tripmode = self.time_categroy("tripmode")
@@ -1074,6 +1066,7 @@ class MakeResultPlot(QDialog):
             
             self.makePlotTab(Canvas)
             Canvas.draw()
+            Canvas.mpl_connect('figure_enter_event', self.onleave)
             self.fig_text(self.total)
             
             
@@ -1104,8 +1097,8 @@ class MakeResultPlot(QDialog):
     def colors(self, index):
         colorpool = ['#0000FF','#FFFF00','#7B68EE','#FF4500','#1E90FF','#F0E68C','#87CEFA','#FFFACD',
                      '#FFD700','#4169E1','#FFA500','#6495ED','#BDB76B','#00BFFF','#FF6347','#B0E0E6',
-                     '#ADFF2F','#808080','#32CD32','#C0C0C0','#00FA9A','#DCDCDC','#228B22','#006400',
-                     '#696969','#00FF00','#A9A9A9','#98FB98','#D3D3D3','#3CB371']
+                     '#F4A460','#808080','#32CD32','#CD853F','#00FA9A','#DCDCDC','#228B22','#006400',
+                     '#696969','#00FF00','#A9A9A9','#98FB98','#D3D3D3','#3CB371','#C0C0C0','#ADFF2F']
         return colorpool[index]
         
 
@@ -1298,6 +1291,7 @@ class MakeResultPlot(QDialog):
             
             self.makePlotTab(Canvas)
             Canvas.draw()
+            Canvas.mpl_connect('figure_enter_event', self.onleave)
             self.fig_text(self.total)
         
         self.create_table(isExchange,yvalue,cumulate,labels,legendlabel)
