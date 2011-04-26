@@ -362,7 +362,9 @@ class MakeSchedPlot(QDialog):
         self.toolbars.append(tool)
         
         return myCanvas
-        
+      
+    def onleave(self,ev):
+        QApplication.restoreOverrideCursor()
 
     def connects(self,configobject):
         
@@ -753,7 +755,7 @@ class MakeSchedPlot(QDialog):
 			 300:'#7B68EE',301:'#B0A4EB',
 			 411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
              461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
-	         513:'#FF8000',514:'#B35A00', # Brown shades
+	         513:'#FF8000',514:'#B35A00',597:'#F4A460',598:'#CD853F', # Brown shades
              600:'#006400',601:'#7CFC00', # Green shades
 			 900:'#000000'}
 
@@ -853,6 +855,8 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 0, 0, left=0,color=self.colors(466)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(513)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(514)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(597)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(598)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(600)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(601)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(900)))
@@ -862,7 +866,7 @@ class MakeSchedPlot(QDialog):
 			                  'OH-Work','Work','OH-School','School','OH-Pers Buss',
                               'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
 				              'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
-                              'OH-Sports/Rec','Pick Up','Drop Off','OH-Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+                              'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             axes.set_xlabel("Time (mins)")
             axes.set_ylabel("Persons")
             axes.set_xlim(-1,1441)
@@ -878,6 +882,7 @@ class MakeSchedPlot(QDialog):
                 axes.set_yticklabels(labels)
 
             Canvas.draw()
+            Canvas.mpl_connect('figure_enter_event', self.onleave)
 #            Canvas.mpl_connect('pick_event', self.temp)
 #            Canvas.mpl_connect('button_press_event', self.zooming)
             self.makeTabs(Canvas)
