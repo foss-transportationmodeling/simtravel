@@ -898,7 +898,7 @@ class MakeResultPlot(QDialog):
     def where_trip(self):
         trippurpose = {1:[100],2:[101],3:[150],4:[151],5:[200],6:[201],7:[300],8:[301],9:[411],
                         10:[412],11:[415],12:[416],13:[461],14:[462],15:[465],16:[466],17:[513],18:[514],
-                        19:[597],20:[598],21:[600],20:[601],21:[900]}
+                        19:[597],20:[598],21:[600],22:[601],23:[900]}
         setime = self.time_categroy("starttime")
         duration = self.time_categroy("duration")
         tripmode = self.time_categroy("tripmode")
