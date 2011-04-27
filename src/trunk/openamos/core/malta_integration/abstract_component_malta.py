@@ -33,7 +33,8 @@ class AbstractComponent(object):
                  delete_criterion=None,
                  dependencyAllocationFlag = False,
                  skipFlag=False,
-		 deleteAppendFlag=False):
+		 aggregate_variable_dict={},
+		 delete_dict={}):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -58,7 +59,8 @@ class AbstractComponent(object):
         self.delete_criterion = delete_criterion
         self.history_info = history_info
         self.skipFlag = skipFlag
-	self.delete_append_flag = deleteAppendFlag
+	self.aggregate_variable_dict = aggregate_variable_dict
+	self.delete_dict = delete_dict
 
         self.keyColsList()
         #self.dependencyAllocationFlag = dependencyAllocationFlag
@@ -72,7 +74,7 @@ class AbstractComponent(object):
             self.keyCols = self.key[0]
 
     def pre_process(self, queryBrowser, 
-                    projectSkimsObject, db, fileLoc):
+                    skimsMatrix, uniqueIds, db, fileLoc):
 
         tableOrderDict = self.tableOrder
 	tableNamesKeyDict = self.tableKeys
@@ -125,7 +127,8 @@ class AbstractComponent(object):
 
         # Process and include spatial query information
         data = self.process_data_for_locs(data, self.spatialConst_list, 
-                                          self.analysisInterval, projectSkimsObject, fileLoc)
+                                          self.analysisInterval, 
+					  skimsMatrix, uniqueIds, fileLoc)
 
         if data == None or data.rows == 0:
             return None
@@ -149,7 +152,7 @@ class AbstractComponent(object):
         choiceset = ones(shape)
         return DataArray(choiceset, names)
 
-    def run(self, data, projectSkimsObject, queryBrowser, fileLoc):
+    def run(self, data, queryBrowser, skimsMatrix, uniqueIds, fileLoc):
         #TODO: check for validity of data and choiceset TYPES
         self.data = data
 	tableNamesKeyDict = self.tableKeys
@@ -175,7 +178,7 @@ class AbstractComponent(object):
             #print '\n\tIteration - ', iteration
             #print model_list_duringrun
             model_list_duringrun, data_filter = self.iterate_through_the_model_list(
-                model_list_duringrun, iteration, projectSkimsObject, fileLoc)   
+                model_list_duringrun, iteration, skimsMatrix, uniqueIds, fileLoc)   
 
             data_filter_count = data_filter.sum()
             data_post_run_filter = self.create_filter(self.post_run_filter, 'and')
@@ -189,6 +192,12 @@ class AbstractComponent(object):
                 print """\tSome rows (%s) are not valid; they do not """\
                     """satisfy consistency checks - %s""" %(count_invalid_rows, 
                                                             self.post_run_filter)
+	    """	
+            try:
+		print valid_data_rows
+	    except Exception, e:
+		print 'Error - e'
+	    """
             nRowsProcessed += valid_data_rows_count
 
             #print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
@@ -217,7 +226,13 @@ class AbstractComponent(object):
 	
 	    keyCols = tableNamesKeyDict[self.writeToTable][0] 
 
-	    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)
+	    print '--> here are the keyCols for this component', keyCols
+	    #raw_input()
+	
+	    if self.component_name == 'ExtractTravelEpisodes' or self.component_name == 'ExtractBackgroundTravelEpisodes':
+ 	    	queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=True)
+	    else:
+ 	    	queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)		
 
 	    if self.component_name == 'ExtractAllTravelEpisodes':
 	        data_array = zeros((valid_data_filter.sum(), len(tableCols)))
@@ -227,16 +242,12 @@ class AbstractComponent(object):
 		    name = dataTempNames[i]
 		    data_array[:,i] = data.data[name]
 	
-	    #queryBrowser.copy_into_table(data, dataTempNames, self.writeToTable, keyCols, fileLoc) 
-
-
-	    #print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 
 	    print '\t\tNumber of rows processed - ', valid_data_filter.sum()
 
 	except Exception, e:
 	    print e
             traceback.print_exc(file=sys.stdout)
-	    data_array = zeros((1, 10))
+	    data_array = zeros((1, 11))
 
         if self.component_name == 'ExtractAllTravelEpisodes':
 	    return data_array
@@ -305,20 +316,20 @@ class AbstractComponent(object):
 
 
     def iterate_through_the_model_list(self, model_list_duringrun, 
-                                       iteration, projectSkimsObject, fileLoc):
+                                       iteration, skimsMatrix, uniqueIds, fileLoc):
         ti = time.time()
         model_list_forlooping = []
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
                 current_model_name = i.dep_varname
                 
                 self.check_for_dynamic_spatial_queries(prev_model_name, 
-                                                       current_model_name, projectSkimsObject, fileLoc)
+                                                       current_model_name, skimsMatrix, uniqueIds, fileLoc)
 
             # Creating the subset filter
             data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
@@ -349,7 +360,7 @@ class AbstractComponent(object):
 
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
-                #print result.data
+                print result.data
                 #self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
@@ -378,14 +389,14 @@ class AbstractComponent(object):
         # LOOP, THE SEED IS BEING SET TO THE DEFAULT VALUE
         # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
-    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, projectSkimsObject, fileLoc):
+    def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, skimsMatrix, uniqueIds, fileLoc):
         if len(self.dynamicspatialConst_list) > 0:
             for const in self.dynamicspatialConst_list:
                 if prev_model_name == const.afterModel and current_model_name == const.beforeModel:
                     #print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], self.analysisInterval,
-                                               projectSkimsObject, fileLoc)
+                                               skimsMatrix, uniqueIds, fileLoc)
                 
                 
     
@@ -641,7 +652,9 @@ class AbstractComponent(object):
                                         self.spatialConst_list,
                                         self.analysisInterval,
 					self.analysisIntervalFilter,
-                                        self.history_info)
+                                        self.history_info,
+					self.aggregate_variable_dict,
+					self.delete_dict)
 	if data == None:
 	    return None
 
@@ -742,7 +755,7 @@ class AbstractComponent(object):
 
 
     def process_data_for_locs(self, data, spatialConst_list, 
-                              analysisInterval, projectSkimsObject, fileLoc):
+                              analysisInterval, skimsMatrix, uniqueIds, fileLoc):
         """
         This method is called whenever there are location type queries involved as part
         of the model run. Eg. In a Destination Choice Model, if there are N number of 
@@ -757,6 +770,8 @@ class AbstractComponent(object):
 
         if spatialConst_list is not None:
             for i in spatialConst_list:
+	
+		"""
                 print '\n\tProcessing spatial queries'
 
                 tableName = i.table
@@ -780,13 +795,14 @@ class AbstractComponent(object):
 
 
                 print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
+		"""
                 if i.countChoices is not None: 
                     #print ("""\t\tNeed to sample location choices for the following""" \
                     #           """model with also location info extracted """)
-                    data = self.sample_location_choices(data, skimsMatrix2, uniqueIDs, i, fileLoc)
+                    data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i, fileLoc)
                 else:
                     #print '\tNeed to extract skims'
-                    data = self.extract_skims(data, skimsMatrix2, i)
+                    data = self.extract_skims(data, skimsMatrix, i)
 
         return data
     
