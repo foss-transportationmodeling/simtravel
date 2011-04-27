@@ -33,7 +33,8 @@ class AbstractComponent(object):
                  delete_criterion=None,
                  dependencyAllocationFlag = False,
                  skipFlag=False,
-		 aggregate_variable_dict={}):
+		 aggregate_variable_dict={},
+		 delete_dict={}):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -61,6 +62,7 @@ class AbstractComponent(object):
         self.keyColsList()
         self.dependencyAllocationFlag = dependencyAllocationFlag
 	self.aggregate_variable_dict = aggregate_variable_dict
+	self.delete_dict = delete_dict
     #TODO: check for names in the variable list
     #TODO: check for varnames in model specs and in the data
 
@@ -576,7 +578,8 @@ class AbstractComponent(object):
                                         self.analysisInterval,
 					self.analysisIntervalFilter,
                                         self.history_info,
-					self.aggregate_variable_dict)
+					self.aggregate_variable_dict,
+					self.delete_dict)
 	if data == None:
 	    return None
 
