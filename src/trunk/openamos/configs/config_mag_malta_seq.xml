@@ -241,14 +241,20 @@
 
       <Model name="endtime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="endtime"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+      </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="origin_taz" condition="less than" value="3000"/>
 	<Filter table="background_trips" var="destination_taz" condition="less than" value="3000"/>
-
 	<Variance value="0"/>
-        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
 
     </Component>
@@ -292,14 +298,6 @@
         <Variable table="trips_r" var="tozone" coeff="1"/>
       </Model>
 
-      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="duration"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="endtime" coeff="1"/>
-        <Variable table="runtime" var="starttime" coeff="-1"/>
-      </Model>
-
-
       <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="trippurpose"/>
 	<Variance value="0"/>
@@ -317,6 +315,14 @@
 	<Variance value="0"/>
         <Variable table="trips_r" var="endtime" coeff="1"/>
       </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
 
     </Component>
 
