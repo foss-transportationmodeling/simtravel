@@ -67,6 +67,9 @@ class SimulationManager(object):
 	self.clean_database_tables()
         self.idCount = 0
         self.idList = []
+        self.lastTableName = None
+        self.skimsMatrix = None
+        self.uniqueIds = None
 
 
 
@@ -195,6 +198,9 @@ class SimulationManager(object):
     def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([])):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
         
+	bkgTrips = zeros((1,11))
+	studyRegionTrips = zeros((1,11))
+
         # To test python simulation_manager_cursor.py use dummy arrival info
         #tripInfoArrivals = array([1,2,3])
 
@@ -229,9 +235,10 @@ class SimulationManager(object):
 	    # Sequential application
 	    if comp.component_name in ['ArrivalTimeInformation', 'PersonsArrived', 'ArrivalTimeProcessing', 
 					'DynamicNonMandatoryActivities', 'ExtractTravelEpisodes', 
-					'ExtractBackgroundTravelEpisodes', 'ExtractAllTravelEpisodes']:
+					'ExtractBackgroundTravelEpisodes',  'ExtractAllTravelEpisodes']:
 
 	        compObjects.append(comp)
+
 
         fileLoc = self.projectConfigObject.location
 	for comp in compObjects:
@@ -249,44 +256,119 @@ class SimulationManager(object):
                     print '\tSkipping the run for this component'
                     continue
 
+		t_sk = time.time()
+                tableName = self.identify_skims_matrix(comp)
+                
+                if tableName <> self.lastTableName and len(comp.spatialConst_list) > 0:
+                    # Load the skims matrix
+                    print """\tThe tod interval for the the previous component is not same """\
+                    	"""as current component. """\
+                        """Therefore the skims matrix should be reloaded."""
+                    self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
+                    self.lastTableName = tableName
+
+                elif tableName == self.lastTableName:
+                    print """\tThe tod interval for the the previous component is same """\
+                        """as current component. """\
+                        """Therefore the skims matrix need not be reloaded."""
+		print 'Skims identified in %.2f' %(time.time()-t_sk)
+		#raw_input('New skims implemnetation, press any key to proceed ...')
+
                 data = comp.pre_process(self.queryBrowser, 
-                                        self.projectSkimsObject, self.db, fileLoc)
+                                        self.skimsMatrix, self.uniqueIds, self.db, fileLoc)
 
             if data is not None:
                 #print 'inside here for component - ', comp.component_name
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                tripInfo = comp.run(data, self.projectSkimsObject, 
-                                    self.queryBrowser, fileLoc)
+                tripInfo = comp.run(data, self.queryBrowser, 
+				    self.skimsMatrix, self.uniqueIds, fileLoc)
 
             else:
-                tripInfo = zeros((1,10))
+                tripInfo = zeros((1,11))
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
-	if comp.component_name == 'ExtractAllTravelEpisodes':
-	    # Reduce 100 to match TAZ notation of MALTA
-	    tripInfo = tripInfo.astype(int)
 
-	    #print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
-	    #print tripInfo
+	"""
+	    if comp.component_name == 'ExtractTravelEpisodes':
+	    	studyRegionTrips = tripInfo
 
-	    tripInfo[:,-5] = tripInfo[:,-5] - 100
-            tripInfo[:,-4] = tripInfo[:,-4] - 100
+	    if comp.component_name == 'ExtractBackgrounTravelEpisodes':
+	    	bkgTrips = tripInfo
+
+	print ('\nTrip info returned...')
+	if (studyRegionTrips == 0).all():
+	    print '\tNo study region trips returned'
+	    if (bkgTrips == 0).all():
+		print '\tNo background trips returned'
+		tripInfo = zeros((1,11))
+	    else:
+		print '\tBackground trips returned'
+		tripInfo = bkgTrips
+	else:
+	    print '\tStudy region trips returned'
+	    if (bkgTrips == 0).all():
+		tripInfo = studyRegionTrips
+	    else:
+		tripInfo = vstack((studyRegionTrips, bkgTrips))
+	"""	
+
+	# Reduce 100 to match TAZ notation of MALTA
+	tripInfo = tripInfo.astype(int)
+
+	#print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
+	#print tripInfo
+
+	tripInfo[:,-6] = tripInfo[:,-6] - 100
+        tripInfo[:,-5] = tripInfo[:,-5] - 100
 
 
-
-	    print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
-	    print tripInfo.shape
-            print tripInfo[-3:, [0, -5, -4]]
-            #raw_input('This is the shape --')
+	print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
+	print tripInfo.shape
+        print tripInfo[-3:, [0, -6, -5]]
+        #raw_input('This is the shape --')
 
 	return tripInfo
 
 
+    def identify_skims_matrix(self, comp):
+        ti = time.time()
+        if len(comp.spatialConst_list) == 0:
+            # When there are no spatial constraints to be processed
+            # return an empty skims object
+            tableName = None
+            pass
+        else:
+            analysisInterval = comp.analysisInterval
+        
+            if comp.analysisInterval is not None:
+                tableName = self.projectSkimsObject.lookup_table(analysisInterval)
+            else:
+                # Corresponding to the morning peak
+                # currently fixed can be varied as need be
+                tableName = self.projectSkimsObject.lookup_table(240)
 
+        print '\tSkims Matrix Loaded in - %s' %(time.time()-ti)
 
+        return tableName
 
+    def load_skims_matrix(self, comp, tableName):
+        const = comp.spatialConst_list[0]
+        
+        originColName = const.originField
+        destinationColName = const.destinationField
+        skimColName = const.skimField
+
+        fileLoc = self.projectConfigObject.location
+        skimsMatrix, uniqueIds = self.db.returnTableAsMatrix(tableName,
+                                                             originColName,
+                                                             destinationColName,
+                                                             skimColName, 
+							     fileLoc)
+        return skimsMatrix, uniqueIds
+
+    """
     def tripInfoToMalta(self, tableName, keyCols=[], nRowsProcessed=0):
         fileLoc = self.projectConfigObject.location
         table = self.db.returnTableReference(tableName)
@@ -307,6 +389,7 @@ class SimulationManager(object):
 	print 'THIS IS WHAT WILL BE PASSED OVER TO MALTA'
 	print trips_data_array
 	return trips_data_array
+    """
 
     def close_connections(self):
         self.queryBrowser.dbcon_obj.close_connection()
@@ -315,8 +398,10 @@ class SimulationManager(object):
 if __name__ == '__main__':
     simulationObject = SimulationManager()
 
-    simulationObject.run_selected_components_for_malta(0)
-    simulationObject.run_selected_components_for_malta(1)
-    simulationObject.run_selected_components_for_malta(2)
-
+    simulationObject.run_selected_components_for_malta(39)
+    #raw_input()
+    #simulationObject.run_selected_components_for_malta(191)
+    #raw_input()
+    #simulationObject.run_selected_components_for_malta(192)
+    #raw_input()
 
