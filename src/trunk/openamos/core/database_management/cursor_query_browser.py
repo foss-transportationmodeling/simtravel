@@ -134,7 +134,8 @@ class QueryBrowser(object):
                     spatialConst_list=None, analysisInterval=None, 
 		    analysisIntervalFilter=None,
                     history_info=None,
-		    aggregate_variable_dict={}):
+		    aggregate_variable_dict={},
+		    delete_dict={}):
         """
         This method is used to select the join of tables and display them.
         
@@ -317,6 +318,9 @@ class QueryBrowser(object):
 
                 final_list.append('temp_%s.max_%s'%(maxTable, maxColumn))
                 cols_list.append('max_%s'%maxColumn)
+
+		final_list.append('%s.%s' %(maxTable, maxColumn))
+		cols_list.append('%s' %(maxColumn))
 
             	#print 'NEW FINAL LIST -->', final_list
 
@@ -655,12 +659,12 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s %s' %(colStr, mainTable, allJoinStr, aggStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        #print 'SQL string for query - ', sql_string
+        print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
 
-	
+	 
 	
 
         try:
@@ -677,7 +681,7 @@ class QueryBrowser(object):
 	    
 	    #print primCols
 	    #raw_input()
-            return data
+
 	except AttributeError, e:
 	    #print '\t\tQuery returned None since no records were found. Hence, nothing to sort'
 	    pass
@@ -686,6 +690,25 @@ class QueryBrowser(object):
             print 'Error retrieving the information. Query failed.'
         
 
+
+
+	if len(delete_dict) > 0:
+	    table = delete_dict.keys()[0]
+	    var = delete_dict[table]
+		
+	    delete_sql_string = ('delete from %s where %s in (select %s from (%s) as foo)' 
+				 %(table, var, var, sql_string))
+	    print 'Delete string - ', delete_sql_string
+
+	    print 'delete records after select'
+
+	    try:
+		ti = time.time()
+		self.dbcon_obj.cursor.execute(delete_sql_string)
+	    except Exception, e:
+		print 'Error deleting records. Query failed - ', e
+
+        return data
 
     def createResultArray(self, result, cols_list, fillValue=0):
         t = time.time()
@@ -871,7 +894,9 @@ class QueryBrowser(object):
 
 	if deleteIndex:
             # Delete index before inserting
+	    t_d = time.time()
             index_cols = self.delete_index(table_name)
+	    print '\t\tDeleting index took - %.2f' %(time.time()-t_d)
 
 
         self.file_write(arr, loc, partId)
@@ -896,15 +921,16 @@ class QueryBrowser(object):
                 #print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                #print '\t\tTime after insert query - %.4f' %(time.time() - ti)
+                print '\t\tTime after insert query - %.4f' %(time.time() - ti)
                 #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
            print 'Table %s does not exist.'##%table_name 
 	if createIndex:
+	    t_c = time.time()
             self.create_index(table_name, keyCols)
-        
+      	    print '\t\tCreating index took - %.2f' %(time.time()-t_c)
         
     def insert_nrows(self, table_name, cols_listStr, arr):
         arr_str = [tuple(each) for each in arr]
