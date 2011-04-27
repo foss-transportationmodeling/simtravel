@@ -1,7 +1,7 @@
 <ProjectConfig>
   <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
 
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" import="True" fileLocation="/workspace/projects/mag_zone_fulldata/skimOutput/skim0.dat" delimiter=","/>
@@ -2590,7 +2590,7 @@
      
     </Component>
 
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2600,7 +2600,7 @@
     	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
