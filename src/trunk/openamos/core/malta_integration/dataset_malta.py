@@ -35,8 +35,8 @@ class DB(object):
 			  'schedule_final_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
 					'endtime', 'duration', 'dependentpersonid'],
 
-			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose'],
-			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose'],
+			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration'],
+			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration'],
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
 					       'expectedarrivaltime', 'actualarrivaltime'],
