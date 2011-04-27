@@ -58,8 +58,8 @@ class SimulationManager(object):
     def divide_database(self, numParts):
         dbConfigObject = self.configParser.parse_databaseAttributes()
         self.divideDatabaseObj = DivideData(dbConfigObject)
-        self.divideDatabaseObj.partition_data(numParts, 'households', 
-                                              'persons', 'houseid')
+        self.divideDatabaseObj.partition_data(numParts, ['households', 
+                                              'persons'], 'houseid')
 
     def collate_results(self, numParts):
         dbConfigObject = self.configParser.parse_databaseAttributes()
