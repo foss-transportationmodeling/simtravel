@@ -1,7 +1,7 @@
 <ProjectConfig>
   <Project name="mag_zone" location="/home/kkonduri/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" import="True" fileLocation="/workspace/projects/mag_zone_fulldata/skimOutput/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" import="True" fileLocation="/workspace/projects/mag_zone_fulldata/skimOutput/skim1.dat" delimiter=","/>
@@ -50,7 +50,7 @@
 
   <ModelConfig>
 
-    <Component name="ArrivalTimeInformation" read_from_table="trips_arrival_from_malta_r" key="tripid" skip="True" completed="True">
+    <Component name="ArrivalTimeInformation" read_from_table="trips_arrival_from_malta_r" key="tripid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_malta_r" key="tripid"/>
       </DBTables>
@@ -64,14 +64,16 @@
 
    </Component>
 
-    <Component name="PersonsArrived" read_from_table="trips_arrival_from_malta_r" write_to_table="persons_arrived_r" key="tripid" skip="True" completed="True">
+    <Component name="PersonsArrived" read_from_table="trips_arrival_from_malta_r" write_to_table="persons_arrived_r" key="tripid" skip="False" completed="True">
       <DBTables>
-    	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
-	<Table table="trips_to_malta_r" key="tripid"/>
+	<Table table="trips_to_malta_r" key="tripid" order="1"/>
+    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
     	<Table table="persons_arrived_r" key="tripid"/>
+
 
       </DBTables>
 
+      <DeleteBasedOn table="trips_to_malta_r" var="tripid"/>
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
       <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
@@ -118,6 +120,8 @@
       </DBTables>
 
       <AnalysisIntervalFilter table="persons_arrived_r" var="actualarrivaltime"/>
+	
+      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
 
 
       <Model name="ArrivalInformationProcessing" formulation="Arrival Time Schedule Adjustment" seed="1">
@@ -152,20 +156,6 @@
 
       </Model>
 
-      <Model1 name="TestActualArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="testactualarrivaltime"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="actualarrivaltime" coeff="1"/>
-      </Model1>
-
-      <Model name="TestModel" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="testtripid"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="tripid" coeff="1"/>
-      </Model>
-
-
-
     </Component>
 
 
@@ -173,7 +163,7 @@
 
 
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -181,7 +171,8 @@
     	<Table table="workers_r" key="houseid,personid"/>		
     	<Table table="schedule_final_r" key="houseid,personid" />
     	<Table table="child_dependency_r" key="houseid,personid"/>
-	<Table table="persons_arrived_r" key="houseid,personid"/>
+	<Table1 table="persons_arrived_r" key="houseid,personid" count_key="actualarrivaltime"/>
+	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
@@ -220,7 +211,6 @@
 	  <Aggregate condition_var="activitytype" value="514"/>
 	</HistoryVar>
       </HistoryInformation>
-
 
       <ConsistencyChecks1 name="DynamicNonMandatoryChecks">
 	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
@@ -908,19 +898,41 @@
 
 
       <Model name="ActivityTypeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="locationid"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_locationid" coeff="1"/>
+      </Model>
+
+
+      <Model name="ActivityTypeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="1"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="runtime" var="en_activitytype" coeff="1"/>
-        <Variable table="persons" var="one" coeff="25"/>	
+        <Variable1 table="runtime" var="en_activitytype" coeff="1"/>
+        <Variable table="persons" var="one" coeff="597"/>	
       </Model>
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to_next_location" origin_var="origin" destination_var="destination" after_model="activitytype" before_model="starttime">
 	<Start table="runtime" location_var="st_locationid"/>
-	<End table="households" location_var="htaz"/>
+	<End table="runtime" location_var="en_locationid"/>
       </DynamicSpatialConstraints>
+
+
+      <Model name="TravelTimeToLocRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to_next_location"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
 
       <Model name="StartTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
@@ -929,8 +941,8 @@
 	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="runtime" var="tt_to_next_location" coeff="1"/>
         <Variable table="persons" var="one" coeff="1"/>
+	<Variable table="runtime" var="tt_to_next_location" coeff="1"/>
       </Model>
 
       <Model name="EndTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
@@ -939,7 +951,7 @@
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="runtime" var="en_endtime" coeff="1"/>
+        <Variable table="runtime" var="en_starttime" coeff="1"/>
         <Variable table="persons" var="one" coeff="-1"/>
       </Model>
 
@@ -959,13 +971,43 @@
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="runtime" var="en_dependentpersonid" coeff="-1"/>
+        <Variable table="runtime" var="en_dependentpersonid" coeff="1"/>
       </Model>
+
+
+
+      <Model1 name="DummyActualArrival" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummyactualarrival"/>
+        <Filter table="persons_arrived_r" var="actualarrivaltime" condition="greater than equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="max_actualarrivaltime" coeff="0"/>
+      </Model1>
+
+      <Model1 name="ValidPersonInd" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="validpersontrip"/>
+	<FilterSet type="and"/>
+        <Filter table="runtime" var="st_starttime" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model1>
+
+      <Model1 name="ValidPersonInd" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="validpersontrip"/>
+	<FilterSet type="and"/>
+        <Filter table="runtime" var="st_starttime" condition="greater than" value="0"/>
+        <Filter table="runtime" var="max_actualarrivaltime" condition="greater than" value="0"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model1>
+
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="prismduration" condition="greater than equals" value="2"/>
+	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
+	<Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -974,12 +1016,13 @@
     </Component>
 
 
-    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="trips_r" key="houseid,personid"/>
     	<Table table="child_dependency_r" key="houseid,personid"/>
     	<Table table="schedule_final_r" key="houseid,personid"/>
+    	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
@@ -1056,10 +1099,30 @@
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="200"/>
+	<Filter table="runtime" var="en_activitytype" condition="less than" value="600"/>
 	<Filter table="runtime" var="duration" condition="greater than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
+
+      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripind"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="597"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripind"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
 
       <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
@@ -1070,11 +1133,14 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
+
+
       <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="adulttrips"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1129,19 +1195,31 @@
 
       <Model name="endtime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="endtime"/>
+	<Variance value="0"/>
+        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+      </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
+      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurpose"/>
         <FilterSet type="and"/>
 	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="origin_taz" condition="less than" value="3000"/>
 	<Filter table="background_trips" var="destination_taz" condition="less than" value="3000"/>
-
 	<Variance value="0"/>
-        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+        <Variable table="trips_r" var="trippurpose" coeff="1"/>
       </Model>
 
     </Component>
 
-    <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_to_malta_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_to_malta_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="trips_to_malta_r" key="houseid,personid"/>
@@ -1180,14 +1258,6 @@
         <Variable table="trips_r" var="tozone" coeff="1"/>
       </Model>
 
-      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="duration"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="endtime" coeff="1"/>
-        <Variable table="runtime" var="starttime" coeff="-1"/>
-      </Model>
-
-
       <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="trippurpose"/>
 	<Variance value="0"/>
@@ -1205,6 +1275,14 @@
 	<Variance value="0"/>
         <Variable table="trips_r" var="endtime" coeff="1"/>
       </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="duration"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
 
     </Component>
 
