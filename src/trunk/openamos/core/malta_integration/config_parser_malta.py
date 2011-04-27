@@ -388,12 +388,9 @@ class ConfigParser(object):
         else:
             skipFlag = False
 
-	deleteAppendFlag = component_element.get("delete_and_append")
-	if deleteAppendFlag == "True":
-	    deleteAppendFlag = True
-	else:
-	    deleteAppendFlag = False
+	agg_vars_dict = self.parse_aggregate_output(component_element)
 
+	delete_dict = self.parse_delete_dict(component_element)
 
         self.component_variable_list = list(set(self.component_variable_list))
         component = AbstractComponent(comp_name, self.model_list, 
@@ -411,9 +408,43 @@ class ConfigParser(object):
                                       delete_criterion=deleteCriterion,
                                       dependencyAllocationFlag=dependencyAllocationFlag,
                                       skipFlag=skipFlag,
-				      deleteAppendFlag =deleteAppendFlag)
+				      aggregate_variable_dict=agg_vars_dict,
+				      delete_dict=delete_dict)
         return component
 
+
+    def parse_delete_dict(self, component_element):
+	delete_dict = {}
+
+	delete_element = component_element.find("DeleteBasedOn")
+	if delete_element is None:
+	    return delete_dict
+
+	table = delete_element.get('table')
+	var = delete_element.get('var')
+	
+	delete_dict[table] = var
+	
+	return delete_dict
+
+    def parse_aggregate_output(self, component_element):
+	vars_dict = {}
+
+	agg_output_element = component_element.find("Aggregate")
+	if agg_output_element is None:
+	    return vars_dict	
+
+        variableIterator = agg_output_element.getiterator('Variable')
+
+
+	for var_element in variableIterator:
+            table, var = self.return_table_var(var_element)
+	    if table in vars_dict:
+		vars_dict[table] += [var]
+	    else:
+		vars_dict[table] = [var]
+		
+	return vars_dict
 
 
         
