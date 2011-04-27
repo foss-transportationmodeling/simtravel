@@ -130,29 +130,31 @@ class AdjustSchedules(Model):
 	    actualArrival, expectedArrival = self.return_arrival_info(schedulesForPerson)
 	    personObject.add_arrival_status(actualArrival, expectedArrival)
 	    print 'person indices', perIndex
-	    print 'activity list', activityList
+	    print 'Activity list before adjustment'
+	    
+	    oriList = activityList
+	    oriList = personObject.sort_acts(oriList)
+
+	    for x in oriList:
+		print '\t', x
             personObject.adjust_schedules_given_arrival_info(seed)
 	    reconciledSchedules = personObject._collate_results_aslist()
+
+	    print 'Activity list after adjustment'
+	    #modList = personObject.listOfActivityEpisodes
+	    #modList = personObject.sort_acts(modList)
+
+	    for x in reconciledSchedules:
+		print '\t', x
+
+
 	    if not personObject._check_for_conflicts():
-	    	print self.colNames
-	    	for i in reconciledSchedules:
-		    print i
                 raise Exception, "THE SCHEDULES ARE STILL MESSED UP"    
             #reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
-             
+	    #raw_input('Person schedules processed')             
 	    actList += reconciledSchedules
 
-   
-            #i = 0
-            #for colN in self.colNames:
-            #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-            #    i += 1
-                                  
-            #print 'MODIFIED DATA'
-            #print data.rowsof(recsInd).data.astype(int)
-            #print reconciledSchedules.astype(int)
-            #print data.data.shape
-            #raw_input()
+        return DataArray(actList, self.colNames)
                 
         #return data
 
