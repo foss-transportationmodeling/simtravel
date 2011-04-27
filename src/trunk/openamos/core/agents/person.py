@@ -16,7 +16,7 @@ class Person(object):
 	self.scheduleIds = []
 	self.firstEpisode = None
 	self.lastEpisode = None
-        self.scheduleConflictIndicator = zeros((1440,1))
+        self.scheduleConflictIndicator = zeros((2880,1))
 
     def reconcile_activity_schedules(self, seed=1):
         self.reconciledActivityEpisodes = []
@@ -25,7 +25,7 @@ class Person(object):
         self.rndGen = RandomDistribution(int(self.hid * self.pid + self.seed))
         #self.add_episodes(activityEpisodes)
         self._reconcile_schedule()
-        self.scheduleConflictIndicator = zeros((1440, 1))
+        self.scheduleConflictIndicator = zeros((2880, 1))
         self.listOfActivityEpisodes = copy.deepcopy(self.reconciledActivityEpisodes)
         for actStart, act in self.listOfActivityEpisodes:
             self._update_schedule_conflict_indicator(act, add=True)
@@ -33,23 +33,75 @@ class Person(object):
 
 
     def adjust_schedules_given_arrival_info(self, seed=1):
-	if self.destAct.startTime >= self.actualArrival:
-	    print '\t\t-- Arrived earlier than expected; minor adjustment for subsequent activity --'
-	    print '\t\t-- No adjustments necessary; the activity-travel generation components will take care'
+	if self.destAct.startTime == self.actualArrival:
+	    print '\n-- Arrived as expected; nothing needs to be done --'
+
+	if self.destAct.startTime > self.actualArrival:
+	    print '\n-- Arrived earlier than expected; minor adjustment needed for start of the subsequent activity --'
+	    self.add_anchor_activity()
 
 	if self.destAct.startTime < self.actualArrival:
-	    print '\t\t-- Arrived later than expected; adjustment for activities needs to happen here --'
-	    
-	    """	
-	    print '\t\t-- Destination Act - ', destAct
-	    self.move_start(destAct, self.actualArrival+1)
-	    print '\t\t-- Destination Act after adjustment - ', destAct
-	    """
-        #raw_input()
+	    print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
+	    self.adjust_push_subsequent_activities()
 
-	pass
+    def add_anchor_activity(self):
+	anchorAct = self.destAct
+	#anchorAct.actType += 25
+	anchorAct.actType = 598
+	anchorAct.startTime = self.actualArrival
+	anchorAct.endTime = self.actualArrival	
+	anchorAct.duration = 0
+	self.add_episodes([anchorAct])
+	print 'Dest Act - ', self.destAct
+	print 'Anchor Act - ', anchorAct
+	#raw_input('adding an anchor activity')	
+
+
+    def adjust_push_subsequent_activities(self):
+	#raw_input('adjusting and pushing subsequent activities')
+
+	self.add_anchor_activity()	    
+	
+
+	# Adjusting if only the first activity is affected
+	firstExpActAfterArrival = self.expectedActivities[0]
+	
+	if firstExpActAfterArrival.startTime < self.actualArrival and firstExpActAfterArrival.endTime > self.actualArrival:
+	    self.move_start(firstExpActAfterArrival, self.actualArrival + 1)
+	    print ('Only first activity needs to be adjusted')
+	    return
+
+	# Adjusting when more than one activity is affected: Push all activities
+	missedActsStillToPursue = []
+	actsToPursue = []
+	for act in self.expectedActivities:
+	    if (act.endTime < self.actualArrival and act.dependentPersonId > 0):
+		missedActsStillToPursue.append(act)
+	    else:
+	        actsToPursue.append(act)
+
+	print 'Missed Activities'
+	for act in missedActsStillToPursue:
+	    print '\t', act
+
+	print 'Activities to Pursue'
+	for act in actsToPursue:
+	    print '\t', act
+
+	actEnd = self.actualArrival
+	for act in missedActsStillToPursue + actsToPursue:
+	    print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+	    if actEnd-act.startTime > 0:
+		moveByValue = copy.deepcopy(actEnd-act.startTime)
+		self.move_start_end(act, moveByValue)
+	    actEnd = copy.deepcopy(act.endTime)
+	
+	print('Push all dependent activities that were missed and subsequent activities')
+
+
 
     def add_episodes(self, activityEpisodes, temp=False):
+	print 'Before adding: Number of acts - ', len(self.listOfActivityEpisodes)
         for activity in activityEpisodes:
             #activity.personid = self.pid
 	    if activity.startOfDay and not temp:
@@ -59,7 +111,7 @@ class Person(object):
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
             self._update_schedule_conflict_indicator(activity, add=True)
-
+	print 'After adding: Number of acts - ', len(self.listOfActivityEpisodes)
 
     def remove_episodes(self, activityEpisodes):
         #print 'CURRENT ACTIVIITES FOR PERSON - ', self.hid, self.pid
@@ -68,7 +120,13 @@ class Person(object):
 
 	for activity in activityEpisodes:
             #print (activity.startTime, activity)
-	    self.listOfActivityEpisodes.remove((activity.startTime, activity))
+	    try:
+	        self.listOfActivityEpisodes.remove((activity.startTime, activity))
+	    except ValueError, e:
+		print 'Warning: Trying to remove a copy of the activityObject: %s' %e
+		raise ValueError, 'Warning: Trying to remove a copy of the activityObject: %s' %e
+		
+	
             self._update_schedule_conflict_indicator(activity, add=False)
 
     def _update_schedule_conflict_indicator(self, activity, add=True):
@@ -388,6 +446,17 @@ class Person(object):
 	else:
 	    return False
 
+
+    def move_start_end(self, act, moveByValue):
+	print '\tRemoving episode - ', act
+	self.remove_episodes([act])
+	act.startTime += moveByValue + 1
+	act.endTime += moveByValue + 1
+	print '\tAdding episode - ', act
+	self.add_episodes([act])
+	
+
+
     def move_start(self, act, value):
         self.remove_episodes([act])
         act.startTime = value
@@ -472,23 +541,27 @@ class Person(object):
 
 
 	print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
-	tempActList = copy.deepcopy(self.listOfActivityEpisodes)
-	for actIndex in range(len(tempActList)):
-	    startTime, act = hp.heappop(tempActList)
+	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
+	tempActList = []
+	for actIndex in range(len(self.listOfActivityEpisodes)):
+	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
 	    if act.startTime >= self.expectedArrival:
 		self.expectedActivities.append(act)
 		print '\t', act
-		   	
+	    hp.heappush(tempActList, (startTime, act))
 
+	self.listOfActivityEpisodes = tempActList
+	tempActList = []
 	print 'Activities after actual arrival of %s - ' %(self.actualArrival)
-	tempActList = copy.deepcopy(self.listOfActivityEpisodes)
-	for actIndex in range(len(tempActList)):
-	    startTime, act = hp.heappop(tempActList)
+	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
+	for actIndex in range(len(self.listOfActivityEpisodes)):
+	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
 	    if act.startTime >= self.actualArrival:
 		self.actualActivities.append(act)
 		print '\t', act
-
-	self.destAct = destAct
+	    hp.heappush(tempActList, (startTime, act))
+	self.listOfActivityEpisodes = tempActList
+	self.destAct = copy.deepcopy(destAct)
 
 
     def extract_work_episodes(self):
@@ -581,6 +654,7 @@ class Person(object):
     def _collate_results_aslist(self):
         #print self.listOfActivityEpisodes
         #print self.reconciledActivityEpisodes
+	print 'Length before collaing results - ', len(self.listOfActivityEpisodes)
         resList = []
         for recAct in self.listOfActivityEpisodes:
             actObject = recAct[1]
