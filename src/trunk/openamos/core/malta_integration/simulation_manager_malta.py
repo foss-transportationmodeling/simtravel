@@ -28,7 +28,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/kkonduri/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
 	configObject = None
 
 
@@ -162,6 +162,14 @@ class SimulationManager(object):
     def parse_config(self):
         print "-- Parsing components and model specifications --"
         self.componentList = self.configParser.parse_models()
+
+	# Store original seed to replicate the same as stand-alone OpenAMOS run
+	self.modSeedDict = {}
+	for comp in self.componentList:
+	    for mod in comp.model_list:
+	    	self.modSeedDict[(comp.component_name, mod.dep_varname)] = copy.deepcopy(mod.seed)
+
+
         #TODO: implement subsample runs 
         self.subsample = self.projectConfigObject.subsample
 
@@ -197,6 +205,9 @@ class SimulationManager(object):
 
     def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([])):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
+	print 'These are trips that arrived - '
+	print tripInfoArrivals
+	#raw_input('Press any key to continue ...')
         
 	bkgTrips = zeros((1,11))
 	studyRegionTrips = zeros((1,11))
@@ -241,6 +252,9 @@ class SimulationManager(object):
 
 
         fileLoc = self.projectConfigObject.location
+
+
+
 	for comp in compObjects:
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
@@ -256,6 +270,10 @@ class SimulationManager(object):
                     print '\tSkipping the run for this component'
                     continue
 
+		# Reset seed 
+		for mod in comp.model_list:
+		    mod.seed = self.modSeedDict[(comp.component_name, mod.dep_varname)] + analysisInterval - 1
+		
 		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
                 
@@ -320,8 +338,8 @@ class SimulationManager(object):
 	#print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
 	#print tripInfo
 
-	tripInfo[:,-6] = tripInfo[:,-6] - 100
-        tripInfo[:,-5] = tripInfo[:,-5] - 100
+	#tripInfo[:,-6] = tripInfo[:,-6] - 100
+        #tripInfo[:,-5] = tripInfo[:,-5] - 100
 
 
 	print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
@@ -398,7 +416,8 @@ class SimulationManager(object):
 if __name__ == '__main__':
     simulationObject = SimulationManager()
 
-    simulationObject.run_selected_components_for_malta(39)
+    for i in range(2):
+    	simulationObject.run_selected_components_for_malta(83 + i)
     #raw_input()
     #simulationObject.run_selected_components_for_malta(191)
     #raw_input()
