@@ -109,7 +109,7 @@ class AbstractComponent(object):
 
 
 
-
+	print 'Basic Query complete'
 
 
         self.db = db
@@ -125,6 +125,8 @@ class AbstractComponent(object):
         if data == None or data.rows == 0:
             return None
 
+	print 'Additional Columns added'
+
         # Process and include spatial query information
         data = self.process_data_for_locs(data, self.spatialConst_list, 
                                           self.analysisInterval, 
@@ -133,6 +135,7 @@ class AbstractComponent(object):
         if data == None or data.rows == 0:
             return None
 
+	print 'Location processed'
 
         #print 'processing dependencies', self.dependencyAllocationFlag
 	"""
@@ -339,8 +342,8 @@ class AbstractComponent(object):
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                #                                                              time.time()-tiii)
+                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 #choiceset_shape = (data_subset.rows,
@@ -357,6 +360,7 @@ class AbstractComponent(object):
 		    # Update the filter because the number of rows may have changed in the data
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+
 
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -830,50 +834,12 @@ class AbstractComponent(object):
 
         destLocSetInd2 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
 
-        for zone in uniqueIDs:
-            destZone = zone * ones((data.rows, 1), dtype=int)
-            timeToDest = skimsMatrix2[originLocColVals, destZone]
-            timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
-            rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
 
-            
-            if rowsLessThan.sum() > 0:
-                destLocSetInd2[rowsLessThan, zone] = 1
-            
-
-            #if ma.any(rowsLessThan.mask):
-            #    destLocSetInd2[~rowsLessThan.mask, zone] = 1
-            #    k2 = rowsLessThan.sum()
-
-        rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
-	if rowsZeroChoices.sum() == 0:
-	    print """\t\t%s records were deleted because there """\
-            	   """were no location reachable given the spatial/temporal """\
-                   """constraints""" %(rowsZeroChoices.sum())
-	    #raw_input()
-
-        # Deleting records for zero choices
-        data.deleterows(~rowsZeroChoices)
-
-        originLocColVals = originLocColVals[~rowsZeroChoices, :]
-        destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
-
-        originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
-        destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
-
-        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
-
-
-        #print """\t\tResulting records in the dataset - %s """%(data.rows)
-
-        if data.rows == 0:
-            return
-
-        destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
-
-	#print max(uniqueIDs), 'unique ids---------------'
+   	#print max(uniqueIDs), 'unique ids---------------'
         zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
 
+
+	# prepping the data matrix to add columns as needed
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
 
@@ -885,12 +851,70 @@ class AbstractComponent(object):
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
 
+        for zone in uniqueIDs:
+            destZone = zone * ones((data.rows, 1), dtype=int)
+            timeToDest = skimsMatrix2[originLocColVals, destZone]
+            timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
+            rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
+
+
+
+            if rowsLessThan.sum() > 0:
+                destLocSetInd2[rowsLessThan, zone] = 1
+            
+
+        print 'Time Available', timeAvailable[:,0]
+
+            #if ma.any(rowsLessThan.mask):
+            #    destLocSetInd2[~rowsLessThan.mask, zone] = 1
+            #    k2 = rowsLessThan.sum()
+
+        rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
+	print """\t\t%s records were deleted because there """\
+        	"""were no location reachable given the spatial/temporal """\
+                """constraints""" %(rowsZeroChoices.sum())
+
+
+	# Prepping up spatial constraint column for the valid records/agents
+        originLocColVals = originLocColVals[~rowsZeroChoices, :]
+        destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
+
+        originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
+        destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
+
+        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
+
+
+	print 'data before', data.data[:5,:5].astype(int)
+
+	dataRowsValid = data.rowsof(~rowsZeroChoices)
+	print 'validDataRows - ', dataRowsValid.data[:5,:5].astype(int)
+	print 'data after', data.data[:5,:5].astype(int)
+	print 'data subset after', dataRowsValid.data[:,:5].astype(int)
+	#raw_input()
+
+
+
+
+
+	# If there are no locations accessible then don't sample locations
+        if dataRowsValid.rows == 0:
+	    print 'no sampling of locations'
+	    return data
+
+
+
+
+
+	# If locations are accessible then sample locations
+	destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
+
         seed = spatialconst.seed
         count = spatialconst.countChoices
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
             #print '\t\tSampling Locations'
-            self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
+            self.sample_choices(dataRowsValid, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
             sampledVarNames = sampleVarDict['temp']
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
             sampledChoicesCheck = False
@@ -907,10 +931,10 @@ class AbstractComponent(object):
 
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
-            sampleLocColVals = array(data.columns([sampleLocColName]).data, dtype=int)
+            sampleLocColVals = array(dataRowsValid.columns([sampleLocColName]).data, dtype=int)
 
 
-            
+            print 'sampled locations - ', dataRowsValid.columns([sampleLocColName]).data[:,0]
             #print originLocColVals[:,0], sampleLocColVals[:,0]
             # the default missing value for skim was 9999 but that was causing problems with
             # calculation as aresult it is changed to a small number so that the alternative
@@ -931,7 +955,7 @@ class AbstractComponent(object):
 
 	    sampleLocsZeros = sampleLocColVals == 0
 	    vals[sampleLocsZeros] = 99
-            data.setcolumn(skimLocColName, vals)
+            dataRowsValid.setcolumn(skimLocColName, vals)
 	    #print 'TO VALS', skimLocColName, vals
 
             # FROM TRAVEL SKIMS
@@ -941,24 +965,25 @@ class AbstractComponent(object):
             # If OD pair missing for travel from then set it zero
             vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
-            data.setcolumn(destSkimColName, vals)
+            dataRowsValid.setcolumn(destSkimColName, vals)
 	    #print 'FROM VALS', destSkimColName, vals
 
+	    print 'LOCATION ATTRIBUTES'
             # Process Location Information if requested
             if len(spatialconst.locationVariables) > 0:
                 for j in spatialconst.locationVariables:
                     #print 'location var', j
                     locationVarName = '%s%s' %(j, i+1)
                     locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
-                    data.setcolumn(locationVarName, locVarVals)
+                    dataRowsValid.setcolumn(locationVarName, locVarVals)
 		    #print sampleLocColVals[:5]
-                    #print 'vals', locVarVals[:5].astype(int)
+                    print 'loc variable', locationVarName, 'vals', locVarVals[:5].astype(int)
 		    #print locationsTable.varnames
         #raw_input()
 
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
-
+	print ('spatial constraints processed')
         return data
             
     def extract_skims(self, data, skimsMatrix2, spatialconst):
@@ -1009,6 +1034,7 @@ class AbstractComponent(object):
 	    zeroChoices = destLocSetIndSum.mask
 
 	    if (~zeroChoices).sum() == 0:
+		print 'Zero Choices for some or all cases'
 		continue
 
 	    #print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
