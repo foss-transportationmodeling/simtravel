@@ -515,66 +515,6 @@ class MakeSchedPlot(QDialog):
             sdata.append(temp)
             
         return sdata
-
-
-    def retrieveResults(self):
-        
-        pid = []
-        pid.append("")
-#        numrows = self.varstable.rowCount()
-#        if numrows > 0:
-        try:
-            self.data = []
-            temp = None
-            
-            sindex = None  #self.idwidget.selectedItems()
-            if self.based1.isChecked():
-                sindex = self.idwidget.selectedItems()
-            else:
-                sindex = self.idwidget2.selectedItems()
-                
-            for i in sindex:
-                id = i.text()
-                SQL = self.stateSQL(id)
-        
-                if SQL != "" and SQL != None:
-                    self.cursor.execute(SQL)
-                    temp = self.cursor.fetchall()
-                    
-                    prior_id = '0'
-                    aschedule = []
-                    for i in temp:
-                        id = '%s,%s' %(str(i[0]),str(i[1]))
-                            
-                        if prior_id <> id:
-                            if prior_id <> '0':
-                                self.data.append(aschedule)
-                            prior_id = id
-                            
-                            aschedule = []
-                            pid.append(id)
-                            aschedule.append(i[2])
-                            aschedule.append(i[3])
-                            aschedule.append(i[4])
-                        else:
-                            aschedule.append(i[2])
-                            aschedule.append(i[3])
-                            aschedule.append(i[4])
-    
-                    self.data.append(aschedule)
-
-        
-        except Exception, e:
-            print '\tError while unloading data from the table %s'%self.table
-            print e
-
-#        else:
-#            msg = "Please insert a Column and a Value after selecting"
-#            QMessageBox.information(self, "Warning",
-#                                    msg,
-#                                    QMessageBox.Ok)
-        
-        return pid
             
 
     def retrieveID1(self):
@@ -662,29 +602,8 @@ class MakeSchedPlot(QDialog):
             index = randint(0, length-1)
             pid.pop(index)
             length = len(pid)
-        
 
-#    def stateSQL1(self):
-#        tablename = 'schedule_r AS A, %s AS B' %(self.table)
-#        vars = 'A.houseid, A.personid, A.activitytype, A.starttime, A.duration'
-#        filter = '(A.starttime >= 0'
-#        order = 'A.houseid, A.personid, A.starttime'
-#        
-#        numrows = self.varstable.rowCount()
-#        for i in range(numrows):
-#            filter = filter + " AND "
-#            column = str((self.varstable.item(i,0)).text())
-#            value = str((self.varstable.item(i,1)).text())
-#            filter = filter + "B.%s = '%s'" %(column,value)
-#            
-#        filter = filter + ') AND A.houseid = B.houseid'
-#        if self.table == 'persons':
-#            filter = filter + ' AND A.personid = B.personid'
-#        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
-#
-#        return state
-
-    def stateSQL(self,id):
+    def sched_sql(self,id):
         tablename = '%s AS A' %(self.schedule_table())
         vars = 'A.houseid, A.personid, A.activitytype, A.starttime, (A.endtime - A.starttime)' #A.duration'
         order = 'A.houseid, A.personid, A.starttime'
@@ -701,6 +620,95 @@ class MakeSchedPlot(QDialog):
         return state
 
 
+    def trip_sql(self,id):
+        tablename = 'persons_arrived_r AS A'
+        vars = 'A.houseid, A.personid, A.expectedstarttime, (A.expectedarrivaltime - A.expectedstarttime), A.actualarrivaltime'
+        order = 'A.houseid, A.personid, A.expectedstarttime'
+        filter = 'A.expectedstarttime >= 0'
+        
+        ids = id.split(',')
+        filter = filter + " AND A.houseid = '%s' AND A.personid = '%s'" %(ids[0],ids[1])
+        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+
+        return state
+
+    def retrieve_sched(self):
+        
+        pid = []
+        try:
+            self.data = []
+            temp = None
+            
+            sindex = None  #self.idwidget.selectedItems()
+            if self.based1.isChecked():
+                sindex = self.idwidget.selectedItems()
+            else:
+                sindex = self.idwidget2.selectedItems()
+                
+            for id1 in sindex:
+                id = id1.text()
+                SQL = self.sched_sql(id)
+        
+                if SQL != "" and SQL != None:
+                    self.cursor.execute(SQL)
+                    temp = self.cursor.fetchall()
+                    
+                    prior_id = '0'
+                    aschedule = []
+                    for i in temp:
+                        id = '%s,%s' %(str(i[0]),str(i[1]))
+                            
+                        if prior_id <> id:
+                            if prior_id <> '0':
+                                self.data.append(aschedule)
+                            prior_id = id
+                            
+                            aschedule = []
+                            pid.append(id)
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+                        else:
+                            aschedule.append(i[2])
+                            aschedule.append(i[3])
+                            aschedule.append(i[4])
+    
+                    self.data.append(aschedule)
+
+        
+        except Exception, e:
+            print '\tError while unloading data from the table %s'%self.table
+            print e
+        
+        return pid
+   
+    def retrieve_trip(self, pid):
+
+        try:
+            trips = []
+            temp = None
+            
+            for id1 in pid:
+                SQL = self.trip_sql(id1)
+        
+                if SQL != "" and SQL != None:
+                    self.cursor.execute(SQL)
+                    temp = self.cursor.fetchall()
+            
+                    aschedule = []
+                    for i in temp:
+                        aschedule.append(i[2])
+                        aschedule.append(i[3])
+                        aschedule.append(i[4])
+                    trips.append(aschedule)
+        
+        except Exception, e:
+            print '\tError while unloading data from the table %s'%self.table
+            print e
+            
+        return trips
+    
+    
     def SQL_ID1(self):
         tablename = '%s AS A, %s AS B' %(self.schedule_table(),self.table)
         vars = ''
@@ -709,11 +717,11 @@ class MakeSchedPlot(QDialog):
         else:
             vars = 'A.houseid, A.personid'
         filter = '(A.starttime >= 0'
-        order = ''
-        if self.segment1.isChecked():
-            order = 'A.houseid'
-        else:
-            order = 'A.houseid, A.personid'
+#        order = ''
+#        if self.segment1.isChecked():
+#            order = 'A.houseid'
+#        else:
+#            order = 'A.houseid, A.personid'
         
         numrows = self.varstable.rowCount()
         for i in range(numrows):
@@ -757,38 +765,10 @@ class MakeSchedPlot(QDialog):
              461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
 	         513:'#FF8000',514:'#B35A00',597:'#F4A460',598:'#CD853F', # Brown shades
              600:'#006400',601:'#7CFC00', # Green shades
-			 900:'#000000'}
+			 900:'#000000',599:'#000000',1000:'#FBB117',1001:'#817339'}
 
         return colorpooldict[index]
 
-
-
-
-#    def schedule_labels(self, index):
-#        xtitle = {'activitytype':'Activity Type','strttime_rec':'Start Time','endtime_rec':'End Time',
-#                  'duration_rec':'Activity Duration (mins)'}
-#        activitytype = {100:'IH-Sojourn',101:'IH',150:'IH-Dependent Sojourn', 151:'IH-Dependent',
-#			200:'OH-Work',201:'Work',
-#			300:'OH-School',301:'School',
-#			411:'OH-Pers Buss',412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',
-#			461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',
-#			513:'OH-Social Visit',514:'OH-Sports/Rec',
-#                        600:'Pick Up',601:'Drop Off',
-#			900:'OH-Other'}
-#        starttime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-#        endtime = {1:'4am-6am',2:'6am-9am',3:'9am-12pm',4:'12pm-3pm',5:'3pm-7pm',6:'after 7pm'}
-#        duration = {1:'0-10',2:'11-30',3:'31-120',4:'121-240',5:'> 240'}
-#
-#        if index == 0:
-#            return xtitle
-#        if index == 1:
-#            return activitytype
-#        if index == 2:
-#            return starttime
-#        if index == 3:
-#            return endtime
-#        if index == 4:
-#            return duration
         
     def schedule_table(self):
         cur_text = self.stablecombo.currentText()
@@ -814,7 +794,7 @@ class MakeSchedPlot(QDialog):
         """
         
         #sdata = self.selectedResults()
-        pid = self.retrieveResults()
+        pid = self.retrieve_sched()
         if len(self.data) > 0 : #len(sdata) > 0:
             Sketch = self.createCanvas()
             Canvas = Sketch[0]
@@ -822,9 +802,12 @@ class MakeSchedPlot(QDialog):
             rows = len(self.data) #len(sdata)
             #axes.clear()
             ticks = np.arange(rows+1)
+            
             ind = 0.75
             height = 0.4
-
+            if self.stablecombo.currentText() == "Schedules: Final Schedules": 
+                ind = 1.0
+            
             if self.segment1.isChecked():
                 axes.set_title("Household Schedule")
             else:
@@ -835,6 +818,18 @@ class MakeSchedPlot(QDialog):
                 for i in range(2,rowlen,3):
                     axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]), picker=True)
                 ind = ind + 1
+                
+
+            if self.stablecombo.currentText() == "Schedules: Final Schedules":
+                ind1 = 0.6
+                trip_time = self.retrieve_trip(pid)
+                for row in trip_time:
+                    rowlen = len(row)
+                    for i in range(2,rowlen,3):
+                        axes.barh(ind1, row[i-1], height, left=row[i-2],color=self.colors(1000), picker=True)
+                        axes.barh(ind1, 2, height, left=row[i],color=self.colors(1001), picker=True)
+                    ind1 = ind1 + 1
+                    
             
             bars=[]
             bars.append(barh(0, 0, 0, left=0,color=self.colors(100)))
@@ -859,19 +854,27 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 0, 0, left=0,color=self.colors(598)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(600)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(601)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(900)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(599)))
             
+            bar_names = ['IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
+                        'OH-Work','Work','OH-School','School','OH-Pers Buss',
+                        'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
+                        'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
+                        'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other']
+            
+            if self.stablecombo.currentText() == "Schedules: Final Schedules":
+                bars.append(barh(0, 0, 0, left=0,color=self.colors(1000)))
+                bars.append(barh(0, 0, 0, left=0,color=self.colors(1001)))
+                bar_names.append('Expected Start Time')
+                bar_names.append('Actual Arrival Time')
+                
             prop = matplotlib.font_manager.FontProperties(size=8)   
-            axes.legend(bars,('IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
-			                  'OH-Work','Work','OH-School','School','OH-Pers Buss',
-                              'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
-				              'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
-                              'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other'),prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+            axes.legend(bars,bar_names,prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
             axes.set_xlabel("Time (mins)")
             axes.set_ylabel("Persons")
             axes.set_xlim(-1,1441)
 
-
+            pid.insert(0,"")
             labels = pid                
             axes.set_yticks(ticks)
             if len(labels) >= 13:
