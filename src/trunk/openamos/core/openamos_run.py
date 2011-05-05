@@ -40,7 +40,8 @@ def run(fileLoc=None):
             simulationManagerObject.setup_cacheDatabase()
 	    simulationManagerObject.setup_inputCacheTables()
 	    simulationManagerObject.setup_outputCacheTables()
-            simulationManagerObject.setup_tod_skims(queryBrowser)
+            #simulationManagerObject.setup_tod_skims(queryBrowser)
+	    simulationManagerObject.setup_tod_skims()	
             simulationManagerObject.setup_location_information(queryBrowser)
             simulationManagerObject.close_database_connection(queryBrowser)
 	else:
@@ -60,7 +61,8 @@ def run(fileLoc=None):
 	simulationManagerObject.setup_cacheDatabase()
 	simulationManagerObject.setup_inputCacheTables()
     	queryBrowser = simulationManagerObject.setup_databaseConnection()
-	simulationManagerObject.setup_tod_skims(queryBrowser)
+	#simulationManagerObject.setup_tod_skims(queryBrowser)
+	simulationManagerObject.setup_tod_skims()
     	simulationManagerObject.setup_location_information(queryBrowser)
     	simulationManagerObject.close_database_connection(queryBrowser)    
 	
