@@ -26,6 +26,7 @@
     	<Table table="households_vehicles_count_r" key="houseid"/>
       </DBTables>
       <Model name="VehCount" formulation="Ordered" type="Probit" seed="1">
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<DependentVariable var="vehcount"/>
         <Alternative id="Alt 0" value="0"/>
         <Alternative id="Alt 1" value="1" threshold="0"/>
@@ -82,6 +83,7 @@
 	<FilterSet type="and"/>
 	<Filter table="households_vehicles_count_r" var="vehcount" condition="greater than" value="0"/>
 	<Filter table="runtime" var="vehid" condition="less than" valuetable="households_vehicles_count_r" valuevar="vehcount"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilCondition table="runtime" var="vehid" condition="less than" valuetable="households_vehicles_count_r" valuevar="vehcount"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="max_vehid" coeff="1"/>
@@ -101,6 +103,7 @@
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter table="persons" var="houseid" condition="greater than" value="0"/>
         <Alternative id="One" value="1">
 	  <Variable table="persons" var="one" coeff="0.75"/>
         </Alternative>
@@ -200,6 +203,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -299,6 +303,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -484,6 +489,7 @@
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
@@ -491,7 +497,7 @@
 	<RunUntilCondition table="workers_r" var="episodes" condition="equals" value="1"/>
 	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -664,6 +670,7 @@
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
@@ -671,6 +678,7 @@
 	<RunUntilCondition table="workers_r" var="episodes" condition="equals" value="2"/>
 	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -841,6 +849,7 @@
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
@@ -848,7 +857,7 @@
 	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
 	<RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -986,12 +995,13 @@
  	<Filter table="persons" var="presch" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
  	<RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -1152,13 +1162,14 @@
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
 	<Filter table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
  	<RunUntilCondition table="persons" var="schstat" condition="equals" value="1"/>
 	<RunUntilCondition table="persons" var="nadlt" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
@@ -1262,6 +1273,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1300,6 +1312,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1343,6 +1356,7 @@
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
