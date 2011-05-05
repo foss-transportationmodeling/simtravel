@@ -177,6 +177,25 @@ class DB(object):
 
         
 
+    def createSkimsCache(self, tableName, data):
+        t = time.time()
+        cols = data.varnames
+        colIndices = range(data.cols)
+        
+        tableRef = self.returnTableReference(tableName)
+        tableRow = tableRef.row
+
+
+        for i in data.data:
+            for j in colIndices:
+                #if i[j] is not None:
+                #    tableRow[cols[j]] = i[j]
+                tableRow[cols[j]] = i[j]
+            tableRow.append()
+        tableRef.flush()
+        print '\tTime taken to write to hdf5 format %.4f' %(time.time()-t)
+	
+
     def createSkimsTableFromDatabase(self, tableInfo, queryBrowser):
         t = time.time()
 

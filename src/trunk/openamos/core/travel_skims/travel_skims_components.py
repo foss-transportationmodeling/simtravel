@@ -5,14 +5,15 @@
 class TravelSkimsPeriodDBInfo(object):
     def __init__(self, tableName, origin_var, destination_var, 	
                  skims_var, intervalStart, intervalEnd,
-		 import_flag=None, file_location=None, delimiter=None):
+		 #import_flag=None, 
+		 file_location=None, delimiter=None):
         self.tableName = tableName
         self.origin_var = origin_var
         self.destination_var = destination_var
         self.skims_var = skims_var
         self.intervalStart = intervalStart
         self.intervalEnd = intervalEnd
-	self.importFlag = import_flag
+	#self.importFlag = import_flag
 	self.fileLocation = file_location
 	self.delimiter = delimiter
 
@@ -43,14 +44,15 @@ class TravelSkimsInfo(object):
         
     def add_tableInfoToList(self, tableName, origin_var, destination_var,
                             skims_var, intervalStart, intervalEnd, targetTableName,
-			    import_flag=None, file_location=None, delimiter=None):
+			    #import_flag=None, 
+			    file_location=None, delimiter=None):
         if tableName not in self.tableNamesList:
             dbInfoObject = TravelSkimsPeriodDBInfo(tableName, origin_var,
                                                    destination_var, 
                                                    skims_var,
                                                    intervalStart,
                                                    intervalEnd,
-						   import_flag,
+						   #import_flag,
 						   file_location,
 						   delimiter)
             print dbInfoObject

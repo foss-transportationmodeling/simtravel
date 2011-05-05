@@ -2,6 +2,7 @@ print '-- INSIDE OPENAMOS --'
 import copy
 import time
 import os
+import csv
 from lxml import etree
 from numpy import array, ma, ones, zeros, vstack, where, save, load
 
@@ -84,26 +85,7 @@ class SimulationManager(object):
     def setup_cacheDatabase(self):
 	self.db = DB()
 
-    def createSkimsTableFromDatabase(self, tableInfo):
-        t = time.time()
-
-	tableName = tableInfo.tableName
-
-	colsList = []
-	colsList.append(tableInfo.origin_var)
-	colsList.append(tableInfo.destination_var)
-	colsList.append(tableInfo.skims_var)
-
-        data = self.queryBrowser.select_all_from_table(tableName, colsList)
-        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
-
-	fileLoc = self.projectConfigObject.location
-	save('%s/%s.npy' %(fileLoc, tableName), data.data)
-
-        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
-
-
-    def setup_tod_skims(self):
+    def setup_tod_skims1(self):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
 	    if tableInfo.importFlag == "True":
@@ -111,7 +93,7 @@ class SimulationManager(object):
             
             self.createSkimsTableFromDatabase(tableInfo)
 
-
+    """
     def import_tod_skims(self, tableInfo):
 	table_name = tableInfo.tableName
 	# Delete contents
@@ -136,6 +118,63 @@ class SimulationManager(object):
         except Exception, e:
             print e
 
+    def createSkimsTableFromDatabase(self, tableInfo):
+        t = time.time()
+
+	tableName = tableInfo.tableName
+
+	colsList = []
+	colsList.append(tableInfo.origin_var)
+	colsList.append(tableInfo.destination_var)
+	colsList.append(tableInfo.skims_var)
+
+        data = self.queryBrowser.select_all_from_table(tableName, colsList)
+        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
+
+	fileLoc = self.projectConfigObject.location
+	save('%s/%s.npy' %(fileLoc, tableName), data.data)
+
+        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
+
+
+    def setup_tod_skims(self):
+        print "-- Processing Travel Skims --"
+        for tableInfo in self.projectSkimsObject.tableDBInfoList:
+	    colsList = []
+	    colsList.append(tableInfo.origin_var)
+	    colsList.append(tableInfo.destination_var)
+	    colsList.append(tableInfo.skims_var)
+
+	    fileLocation = tableInfo.fileLocation
+	    data = self.import_skims_from_flatfile(fileLocation, colsList)
+            tableName = tableInfo.tableName
+            self.createSkimsCache(tableName, data)
+
+    """
+    def import_skims_from_flatfile(self, fileLocation, colsList):
+	print 'Parsing csv text file and returning a DataArray object'
+	ti = time.time()	
+	f = open(fileLocation, 'r')
+	
+	reader = csv.reader(f)
+	
+	data = []
+	for row in reader:
+	    data.append(map(float, row))
+	
+	f.close()
+        print '\tTime taken to import from flatfile %.4f' %(time.time()-t)
+	
+	return DataArray(data, colsList)
+
+
+    def createSkimsCache(self, tableName, data):
+	ti = time.time()
+	fileLoc = self.projectConfigObject.location
+	save('%s/%s.npy' %(fileLoc, tableName), data.data)
+
+        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-ti)
+	
 
     def createLocationsTableFromDatabase(self, tableInfo):
         t = time.time()
