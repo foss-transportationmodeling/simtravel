@@ -4,39 +4,39 @@
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
 
   <TravelSkims reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
-    <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
-    <Period tablename="travel_skims_2" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="179" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim2.dat" delimiter=","/>
-    <Period tablename="travel_skims_3" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="180" intervalEnd="239" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim3.dat" delimiter=","/>
-    <Period tablename="travel_skims_4" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="240" intervalEnd="299" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim4.dat" delimiter=","/>
-    <Period tablename="travel_skims_5" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="359" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim5.dat" delimiter=","/>
-    <Period tablename="travel_skims_6" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="360" intervalEnd="419" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim6.dat" delimiter=","/>
-    <Period tablename="travel_skims_7" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="420" intervalEnd="479" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim7.dat" delimiter=","/>
-    <Period tablename="travel_skims_8" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="480" intervalEnd="539" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim8.dat" delimiter=","/>
-    <Period tablename="travel_skims_9" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="540" intervalEnd="599" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim9.dat" delimiter=","/>
-    <Period tablename="travel_skims_10" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="600" intervalEnd="659" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim10.dat" delimiter=","/>
-    <Period tablename="travel_skims_11" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="719" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim11.dat" delimiter=","/>
-    <Period tablename="travel_skims_12" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="720" intervalEnd="779" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim12.dat" delimiter=","/>
-    <Period tablename="travel_skims_13" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="780" intervalEnd="839" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim13.dat" delimiter=","/>
-    <Period tablename="travel_skims_14" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="840" intervalEnd="899" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim14.dat" delimiter=","/>
-    <Period tablename="travel_skims_15" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="959" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim15.dat" delimiter=","/>
-    <Period tablename="travel_skims_16" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="960" intervalEnd="1019" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim16.dat" delimiter=","/>
-    <Period tablename="travel_skims_17" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1020" intervalEnd="1079" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim17.dat" delimiter=","/>
-    <Period tablename="travel_skims_18" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1080" intervalEnd="1139" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim18.dat" delimiter=","/>
-    <Period tablename="travel_skims_19" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1140" intervalEnd="1199" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim19.dat" delimiter=","/>
-    <Period tablename="travel_skims_20" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1200" intervalEnd="1259" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim20.dat" delimiter=","/>
-    <Period tablename="travel_skims_21" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1260" intervalEnd="1319" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim21.dat" delimiter=","/>
-    <Period tablename="travel_skims_22" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1320" intervalEnd="1379" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim22.dat" delimiter=","/>
-    <Period tablename="travel_skims_23" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1380" intervalEnd="1439" import="True" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim23.dat" delimiter=","/>
+    <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
+    <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
+    <Period tablename="travel_skims_2" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="179" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim2.dat" delimiter=","/>
+    <Period tablename="travel_skims_3" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="180" intervalEnd="239" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim3.dat" delimiter=","/>
+    <Period tablename="travel_skims_4" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="240" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim4.dat" delimiter=","/>
+    <Period tablename="travel_skims_5" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="359" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim5.dat" delimiter=","/>
+    <Period tablename="travel_skims_6" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="360" intervalEnd="419" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim6.dat" delimiter=","/>
+    <Period tablename="travel_skims_7" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="420" intervalEnd="479" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim7.dat" delimiter=","/>
+    <Period tablename="travel_skims_8" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="480" intervalEnd="539" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim8.dat" delimiter=","/>
+    <Period tablename="travel_skims_9" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="540" intervalEnd="599" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim9.dat" delimiter=","/>
+    <Period tablename="travel_skims_10" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="600" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim10.dat" delimiter=","/>
+    <Period tablename="travel_skims_11" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="719" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim11.dat" delimiter=","/>
+    <Period tablename="travel_skims_12" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="720" intervalEnd="779" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim12.dat" delimiter=","/>
+    <Period tablename="travel_skims_13" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="780" intervalEnd="839" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim13.dat" delimiter=","/>
+    <Period tablename="travel_skims_14" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="840" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim14.dat" delimiter=","/>
+    <Period tablename="travel_skims_15" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="959" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim15.dat" delimiter=","/>
+    <Period tablename="travel_skims_16" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="960" intervalEnd="1019" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim16.dat" delimiter=","/>
+    <Period tablename="travel_skims_17" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1020" intervalEnd="1079" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim17.dat" delimiter=","/>
+    <Period tablename="travel_skims_18" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1080" intervalEnd="1139" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim18.dat" delimiter=","/>
+    <Period tablename="travel_skims_19" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1140" intervalEnd="1199" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim19.dat" delimiter=","/>
+    <Period tablename="travel_skims_20" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1200" intervalEnd="1259" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim20.dat" delimiter=","/>
+    <Period tablename="travel_skims_21" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1260" intervalEnd="1319" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim21.dat" delimiter=","/>
+    <Period tablename="travel_skims_22" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1320" intervalEnd="1379" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim22.dat" delimiter=","/>
+    <Period tablename="travel_skims_23" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1380" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim23.dat" delimiter=","/>
 
   </TravelSkims>
 
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119"/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299"/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659"/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899"/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439"/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak.dat" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_peak" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak" delimiter=","/>
   </TravelSkims1>
 
 
@@ -57,6 +57,7 @@
       </DBTables>
       <Model name="VehCount" formulation="Ordered" type="Probit" seed="1">
 	<DependentVariable var="vehcount"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
         <Alternative id="Alt 0" value="0"/>
         <Alternative id="Alt 1" value="1" threshold="0"/>
         <Alternative id="Alt 2" value="2" threshold="2.36"/>
@@ -112,6 +113,7 @@
 	<FilterSet type="and"/>
 	<Filter table="households_vehicles_count_r" var="vehcount" condition="greater than" value="0"/>
 	<Filter table="runtime" var="vehid" condition="less than" valuetable="households_vehicles_count_r" valuevar="vehcount"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilCondition table="runtime" var="vehid" condition="less than" valuetable="households_vehicles_count_r" valuevar="vehcount"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="max_vehid" coeff="1"/>
@@ -131,6 +133,7 @@
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter table="persons" var="houseid" condition="greater than" value="0"/>
         <Alternative id="One" value="1">
 	  <Variable table="persons" var="one" coeff="0.75"/>
         </Alternative>
@@ -230,15 +233,10 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
     </Component>
 
     <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
@@ -335,15 +333,10 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
     </Component>
 
     <Component name="FixedActivityEpisodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
@@ -737,6 +730,7 @@
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
@@ -744,30 +738,12 @@
 	<RunUntilCondition table="workers_r" var="episodes" condition="equals" value="2"/>
 	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
 
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<FilterSet type="and"/>
- 	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
-	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
- 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
-	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
-	<RunUntilConditionSet type="and"/>
-	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
-	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
-	<RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
-	<RunUntilCondition table="workers_r" var="episodes" condition="equals" value="2"/>
-	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
-	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
     </Component>
 
 
@@ -942,6 +918,7 @@
  	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
@@ -949,31 +926,10 @@
 	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
 	<RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-
-
-
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<FilterSet type="and"/>
- 	<Filter table="workers_r" var="episodes" condition="equals" value="2"/>
-	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
- 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
-	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
-	<RunUntilConditionSet type="and"/>
-	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
-	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
-	<RunUntilCondition table="workers_r" var="episodes" condition="equals" value="2"/>
-	<RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
-	<RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
-	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
 
 
     </Component>
@@ -1115,33 +1071,16 @@
  	<Filter table="persons" var="presch" condition="equals" value="1"/>
 	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
  	<RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-
-
-
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<FilterSet type="and"/>
- 	<Filter table="persons" var="presch" condition="equals" value="1"/>
-	<Filter1 table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
-	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
-	<RunUntilConditionSet type="and"/>
-	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
-	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
- 	<RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
-	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
-
 
 
     </Component>
@@ -1307,35 +1246,17 @@
 	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
 	<Filter table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
 	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<RunUntilConditionSet type="and"/>
 	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
 	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
  	<RunUntilCondition table="persons" var="schstat" condition="equals" value="1"/>
 	<RunUntilCondition table="persons" var="nadlt" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
+	<RunUntilCondition table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-
-
-
-      <Model1 name="UpdateConditionVariable" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="scheduleid"/>
-	<FilterSet type="and"/>
- 	<Filter table="persons" var="schstat" condition="equals" value="1"/>
-	<Filter table="persons" var="nadlt" condition="equals" value="1"/>
-	<Filter table="runtime" var="endtime" condition="greater than" valuetable="runtime" valuevar="starttime"/>
-	<Filter table="runtime" var="duration" condition="greater than" value="1"/>
-	<RunUntilConditionSet type="and"/>
-	<RunUntilCondition1 table="runtime" var="endtime" condition="less than equals" valuetable="runtime" valuevar="starttime"/>
-	<RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
- 	<RunUntilCondition table="persons" var="schstat" condition="equals" value="1"/>
-	<RunUntilCondition table="persons" var="nadlt" condition="equals" value="1"/>
-	<RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="max_scheduleid" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model1>
 
     </Component>
 
@@ -1436,6 +1357,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1474,6 +1396,7 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1517,6 +1440,7 @@
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
