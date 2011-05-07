@@ -827,7 +827,6 @@ class MakeSchedPlot(QDialog):
                     rowlen = len(row)
                     for i in range(2,rowlen,3):
                         axes.barh(ind1, row[i-1], height, left=row[i-2],color=self.colors(1000), picker=True)
-                        axes.barh(ind1, 2, height, left=row[i],color=self.colors(1001), picker=True)
                     ind1 = ind1 + 1
                     
             
@@ -864,9 +863,7 @@ class MakeSchedPlot(QDialog):
             
             if self.stablecombo.currentText() == "Schedules: Final Schedules":
                 bars.append(barh(0, 0, 0, left=0,color=self.colors(1000)))
-                bars.append(barh(0, 0, 0, left=0,color=self.colors(1001)))
                 bar_names.append('Expected Start Time')
-                bar_names.append('Actual Arrival Time')
                 
             prop = matplotlib.font_manager.FontProperties(size=8)   
             axes.legend(bars,bar_names,prop=prop,bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
