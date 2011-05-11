@@ -758,14 +758,43 @@ class MakeSchedPlot(QDialog):
 
 
     def colors(self, index):
-        colorpooldict = {100:'#191970',101:'#6495ED',150:'#66FFEE', 151:'#00FFFF', # Blue Shades
-			 200:'#B03060',201:'#B5718A',
-			 300:'#7B68EE',301:'#B0A4EB',
-			 411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
-             461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
-	         513:'#FF8000',514:'#B35A00',597:'#F4A460',598:'#CD853F', # Brown shades
+#        colorpooldict = {100:'#191970',101:'#6495ED',150:'#66FFEE', 151:'#00FFFF', # Blue Shades
+#             200:'#B03060',201:'#B5718A',
+#             300:'#7B68EE',301:'#B0A4EB',
+#             411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
+#             461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
+#             513:'#FF8000',514:'#B35A00',597:'#F4A460',598:'#CD853F', # Brown shades
+#             600:'#006400',601:'#7CFC00', # Green shades
+#             900:'#000000',599:'#000000',1000:'#FBB117',1001:'#817339'}
+
+        if index >= 101 and index < 150:
+            index = 101
+        elif index >= 150 and index < 200:
+            index = 150
+        elif index >= 200 and index < 300:
+            index = 200
+        elif index >= 300 and index < 400:
+            index = 300
+        elif index >= 400 and index < 450:
+            index = 400
+        elif index >= 450 and index < 500:
+            index = 450
+        elif index >= 500 and index < 550:
+            index = 500
+        elif index >= 550 and index < 597:
+            index = 550
+        elif index >= 597 and index <=598:
+            index = 597
+
+               
+        colorpooldict = {100:'#191970',101:'#6495ED',150:'#00FFFF', # Blue Shades
+             200:'#B03060',
+             300:'#7B68EE',
+             400:'#FF0000',450:'#FF8080', # Red Shades
+             500:'#696969',550:'#bebebe',
+             597:'#B35A00', # Brown shades
              600:'#006400',601:'#7CFC00', # Green shades
-			 900:'#000000',599:'#000000',1000:'#FBB117',1001:'#817339'}
+             599:'#000000',1000:'#FBB117',1001:'#817339'}
 
         return colorpooldict[index]
 
@@ -834,32 +863,37 @@ class MakeSchedPlot(QDialog):
             bars.append(barh(0, 0, 0, left=0,color=self.colors(100)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(101)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(150)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(151)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(200)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(201)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(300)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(301)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(411)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(412)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(415)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(416)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(461)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(462)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(465)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(466)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(513)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(514)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(400)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(450)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(500)))
+            bars.append(barh(0, 0, 0, left=0,color=self.colors(550)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(597)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(598)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(600)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(601)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(599)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(151)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(201)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(301)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(412)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(415)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(416)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(462)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(465)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(466)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(598)))
             
-            bar_names = ['IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
-                        'OH-Work','Work','OH-School','School','OH-Pers Buss',
-                        'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
-                        'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
-                        'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other']
+#            bar_names = ['IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
+#                        'OH-Work','Work','OH-School','School','OH-Pers Buss',
+#                        'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
+#                        'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
+#                        'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other']
+            
+            bar_names = ['Home','In-Home','In-Home Dependent',
+                        'Work','School',
+                        'Maintenance','Dependent Maintenance','Discretionary','Dependent Discretionary',
+                        'Filler','Pick Up','Drop Off','OH-Other']
             
             if self.stablecombo.currentText() == "Schedules: Final Schedules":
                 bars.append(barh(0, 0, 0, left=0,color=self.colors(1000)))
