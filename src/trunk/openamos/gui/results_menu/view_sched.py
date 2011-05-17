@@ -100,7 +100,7 @@ class MakeSchedPlot(QDialog):
         substablelayout.addWidget(stablelabel)
         self.stablecombo = QComboBox()
         self.hasTables()
-        self.stablecombo.setFixedWidth(250)
+        self.stablecombo.setMinimumWidth(250)
         substablelayout.addWidget(self.stablecombo)
         substablelayout.setAlignment(Qt.AlignLeft)
         stablelayout.addWidget(substablewidget) 
@@ -261,6 +261,8 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Daily Patterns Including Full Child Episodes")
         if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
             tables.append("Schedules: Reconciled Including Travel Episodes")
+        if self.new_obj.check_if_table_exists("schedule_cleanaggregateactivityschedule_r"):
+            tables.append("Schedules: Aggregated in Home Schedule for Children")
         if self.new_obj.check_if_table_exists("schedule_dailyallocrec_r"):
             tables.append("Schedules: Daily Pattern with Child Allocation")
         if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
@@ -809,6 +811,8 @@ class MakeSchedPlot(QDialog):
             return "schedule_cleanfixedactivityschedule_r"
         elif cur_text == "Schedules: Reconciled Including Travel Episodes":
             return "schedule_childreninctravelrec_r"
+        elif cur_text == "Schedules: Aggregated in Home Schedule for Children":
+            return "schedule_cleanaggregateactivityschedule_r"
         elif cur_text == "Schedules: Daily Pattern with Child Allocation":
             return "schedule_dailyallocrec_r"
         elif cur_text == "Schedules: Reconciled Daily Pattern Skeleton with Child Allocation":
