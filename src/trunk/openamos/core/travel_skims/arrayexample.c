@@ -9,6 +9,8 @@
 //declare the files
 static const char file_name_1[] = "temp_data_copy.csv";
 static const char file_name_2[] = "skim1.dat";
+char *node_file_name;
+char *graph_file_name;
 
 //dynamic array
 float **org_graph;
@@ -42,6 +44,37 @@ void create_array(float a[], int n)
 /*********************************************/
 
 
+/* String Functions */
+/*********************************************/
+void set_file(char *s, int length, int flag){
+   //if flag is 1 then nodes of the graph were not provided
+   //set the file name to the node_file_name(function needs to be called twice)
+   //if flag is 0 nodes are already known 
+   //set the file name to the graph_file_name
+   if(flag == 1)
+   {
+        node_file_name = (char *)malloc(length*sizeof(char));
+        node_file_name = s;
+        //printf("node file name --> %s\n", node_file_name);
+   }
+   else
+   {
+        graph_file_name = (char *)malloc(length*sizeof(char));
+        graph_file_name = s;
+        //printf("graph_file name --> %s\n", graph_file_name);
+   }
+}
+
+
+void print_string()
+{
+    printf("printing the file names\n");
+    printf("node file name:  %s\n", node_file_name);
+    printf("graph file name:  %s\n", graph_file_name);
+}
+/*********************************************/
+
+
 /* Main functions */
 /*********************************************/
 /*
@@ -52,10 +85,11 @@ int get_nodes()
 {
     //open the file
     printf("C--> Opening the file\n");
-    FILE *file = fopen(file_name_1, "r");
+    printf("C--> Node File: %s\n", node_file_name);
+    FILE *file = fopen(node_file_name, "r");
     
     //process till end of file
-    if( file_name_1 != NULL )
+    if( node_file_name != NULL )
     {
         //find the nodes and edges
         printf("C--> Reading from the file\n");
@@ -73,7 +107,7 @@ int get_nodes()
     {
         //error if file is null
         printf("C--> Error reading the file.\n");
-        perror(file_name_1);
+        perror(node_file_name);
         return 0;
     }
 }
@@ -86,7 +120,8 @@ It allocates memory to the array/graph based on the number of nodes.
 void initialize_array(int nodes)
 {
     int x;
-    
+    printf("C--> Nodes are %d\n", nodes);
+    edges = nodes * nodes;
     printf("C--> Initializing the graph\n");
     //initialize the 2D array to the size of the number of nodes
     org_graph = (float *)malloc(nodes*sizeof(float));
@@ -112,10 +147,11 @@ void set_array(int offset)
 
     //open the file to read data
     printf("C--> Opening the file\n");
-    FILE *file = fopen(file_name_2, "r");
+    printf("C--> Graph File: %s\n", graph_file_name);
+    FILE *file = fopen(graph_file_name, "r");
 
     //process till end of file
-    if( file_name_2 != NULL )
+    if( graph_file_name != NULL )
     {
         //read the file and initialize the edges 
         for(i = 0; i < edges; i++)
@@ -138,7 +174,7 @@ void set_array(int offset)
     {
         //error if file is null
         printf("Error reading the file.\n");
-        perror(file_name_2);
+        perror(graph_file_name);
     }
     printf("C--> Graph created with new values\n");
 }
@@ -165,9 +201,11 @@ void get_tt(float org[], float dest[], float tt[], int arr_len, int offset )
     {
         st = org[i];
         en = dest[i];
-        //printf("i is %d st is %d en is %d\n", i, st, en);
+        //printf("C--> i is %d st is %d en is %d node1 is %d node2 is %d\n", i, st, en, (st-offset), (en-offset));
         temp = org_graph[st-offset][en-offset];
+        //printf("C--> temp: %f\n", temp);
         tt[i] = temp;
+        //printf("C--> org: %g dest: %g tt: %g\n", org[i], dest[i], tt[i]);
         /*if ( count%10 == 0 )
         {
             printf("%f ", temp);
@@ -208,13 +246,13 @@ void delete_array()
 /* Print functions */
 /*********************************************/
 /* Print the travel times array */
-void print_tt_array(float org[], float dest[], int len)
+void print_tt_array(float org[], float dest[], float tt[], int len)
 {
     int i;
 
     for(i = 0; i < len; i++)
     {
-        printf("%g %g %f\n", org[i], dest[i]);
+        printf("%g %g %g\n", org[i], dest[i], tt[i]);
     }
 }
 
