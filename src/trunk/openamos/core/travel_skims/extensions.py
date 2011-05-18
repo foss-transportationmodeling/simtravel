@@ -49,8 +49,12 @@ class Extensions(object):
         """
         print 'Starting graph creation'
         t1 = time.time()
-        #get the nodes and edges
-        nodes, edges = self.get_graph_nodes()
+        if self.nodes == 0:
+            #get the nodes and edges
+            nodes, edges = self.get_graph_nodes()
+        else:
+            nodes = self.nodes
+            edges = self.nodes * self.nodes
         
         #initialize the graph
         arrayexample.initialize_array(nodes)
