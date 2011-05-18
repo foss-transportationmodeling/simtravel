@@ -12,9 +12,11 @@ from openamos.core.database_management.cursor_database_connection import *
 from openamos.core.database_management.database_configuration import *
 
 from openamos.gui.misc.basic_widgets import *
-import sys,codecs,unicodedata 
+import sys,codecs,unicodedata,string 
 from shapefile import *
 #from pyproj import Proj, transform
+from osgeo import osr
+from copy import deepcopy
 
 
 class Read_Shape(QDialog):
@@ -74,11 +76,38 @@ class Read_Shape(QDialog):
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.create_sql)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), self.disconnects)
 
+    def get_EPSG(self,shppath):
+        path = deepcopy(shppath)
+        path = path[0:len(path)-3]
+        path = path + "prj"
+        prj_file = open(path,'r')
+        prj_lines = prj_file.readlines()
+        prj_file.close()
+        
+        for i in range(len(prj_lines)):
+            prj_lines[i] = string.rstrip(prj_lines[i])
+            
+        prj = osr.SpatialReference()
+        prj.ImportFromESRI(prj_lines)
+        prj.from_esri = True        
+        prj.AutoIdentifyEPSG()
+        
+        srid = ''
+        if prj.IsGeographic():
+            srid = str(prj.GetAuthorityCode('GEOGCS'))
+        else:
+            if prj.GetAuthorityCode('PROJCS') == None:
+                srid = str(prj.GetAuthorityCode('GEOGCS'))
+            else:
+                srid = str(prj.GetAuthorityCode('PROJCS'))
+        self.epsg.setText(srid)
+        
 
     def open_folder(self):
         dialog = QFileDialog()
         temp = dialog.getOpenFileName(self,"Browse to select a project configuration file","","Shape File (*.shp)")
         self.shapename.setText(temp)
+        self.get_EPSG(temp)
         sf = Reader(str(temp))
         for i in sf.fields:
             self.polyID.addItem(i[0])
