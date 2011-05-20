@@ -269,6 +269,8 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
         if self.new_obj.check_if_table_exists("schedule_final_r"):
             tables.append("Schedules: Final Schedules")
+        if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
+            tables.append("Schedules: Aggregated in Home Final Schedules")
             
         self.stablecombo.addItems(tables)
 
@@ -817,6 +819,8 @@ class MakeSchedPlot(QDialog):
             return "schedule_dailyallocrec_r"
         elif cur_text == "Schedules: Reconciled Daily Pattern Skeleton with Child Allocation":
             return "schedule_inctravelrec_r"
+        elif cur_text == "Schedules: Aggregated in Home Final Schedules":
+            return "schedule_aggregatefinal_r"
         else:
             return "schedule_final_r"
 
@@ -838,7 +842,7 @@ class MakeSchedPlot(QDialog):
             
             ind = 0.75
             height = 0.4
-            if self.stablecombo.currentText() == "Schedules: Final Schedules": 
+            if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules": 
                 ind = 1.0
             
             if self.segment1.isChecked():
@@ -853,7 +857,7 @@ class MakeSchedPlot(QDialog):
                 ind = ind + 1
                 
 
-            if self.stablecombo.currentText() == "Schedules: Final Schedules":
+            if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules":
                 ind1 = 0.6
                 trip_time = self.retrieve_trip(pid)
                 for row in trip_time:
@@ -899,7 +903,7 @@ class MakeSchedPlot(QDialog):
                         'Maintenance','Dependent Maintenance','Discretionary','Dependent Discretionary',
                         'Filler','Pick Up','Drop Off','OH-Other']
             
-            if self.stablecombo.currentText() == "Schedules: Final Schedules":
+            if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules":
                 bars.append(barh(0, 0, 0, left=0,color=self.colors(1000)))
                 bar_names.append('Expected Start Time')
                 
