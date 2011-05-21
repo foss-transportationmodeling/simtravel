@@ -87,7 +87,7 @@ class Extensions(object):
         This method converts the numpy array to a carray
         
         Input:
-        Numpy array
+        Numpy array, array length and data type (to differentiate between float and int)
         
         Output:
         Carray
@@ -115,7 +115,7 @@ class Extensions(object):
         This method converts carray to numpy
         
         Input:
-        Carray
+        Carray, array length and data type (to differentiate between float and int)
         
         Output:
         Numpy Array
