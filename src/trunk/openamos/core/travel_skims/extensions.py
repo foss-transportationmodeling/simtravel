@@ -22,7 +22,7 @@ class Extensions(object):
         print 'Testing extension'
 
 
-    def create_carray(self):
+    def create_carray(self, num):
         """
         This method is used to create the origin and destination carrays.
         
@@ -31,9 +31,9 @@ class Extensions(object):
         Output: Origin and destination carrays
         """
         print 'testing carray creation'
-        p = arrayexample.new_floatArray(10)
-        arrayexample.create_array(p, 10)
-        arrayexample.print_array(p, 10)
+        p = arrayexample.new_intArray(num)
+        arrayexample.create_array(p, num)
+        arrayexample.print_array(p, num)
         return p
         
     
@@ -82,7 +82,7 @@ class Extensions(object):
         return self.nodes, self.edges
         
         
-    def numpy_to_carray(self, numpy_arr, arr_len):
+    def numpy_to_carray(self, numpy_arr, arr_len, data_type):
         """
         This method converts the numpy array to a carray
         
@@ -92,17 +92,25 @@ class Extensions(object):
         Output:
         Carray
         """
-        new_carr = arrayexample.new_floatArray(arr_len)
-        i = 0
+        if data_type == 1:
+            new_carr = arrayexample.new_floatArray(arr_len)
+            i = 0
 
-        for each in numpy_arr:
-            arrayexample.floatArray_setitem(new_carr, i, float(each))
-            i = i + 1
-
+            for each in numpy_arr:
+                arrayexample.floatArray_setitem(new_carr, i, float(each))
+                i = i + 1
+        else:
+            new_carr = arrayexample.new_intArray(arr_len)
+            i = 0
+            
+            for each in numpy_arr:
+                arrayexample.intArray_setitem(new_carr, i, int(each))
+                i = i + 1
+                
         return new_carr
 
         
-    def carray_to_numpy(self, carray, arr_len):
+    def carray_to_numpy(self, carray, arr_len, data_type):
         """
         This method converts carray to numpy
         
@@ -113,15 +121,18 @@ class Extensions(object):
         Numpy Array
         """
         numpy_arr = zeros(arr_len)
-
-        for i in range(arr_len):
-            numpy_arr[i] = arrayexample.floatArray_getitem(carray,i)
-            numpy_arr[i]
-
+        if data_type == 1:
+            for i in range(arr_len):
+                numpy_arr[i] = arrayexample.floatArray_getitem(carray,i)
+                #numpy_arr[i]
+        else:
+            for i in range(arr_len):
+                numpy_arr[i] = arrayexample.intArray_getitem(carray,i)
+                
         return numpy_arr
         
     
-    def get_travel_times(self, origin, destination, tt, arr_len):
+    def get_travel_times(self, org_arr, dest_arr, tt_arr, arr_len):
         """
         This method is used to get the travel times
         
@@ -131,42 +142,53 @@ class Extensions(object):
         Output:
         Returns an array with travel times
         """         
-        #convert the arrays to carrays
-        print 'starting conversion from numpy to carray'
-        t1 = time.time()
-        org_arr = self.numpy_to_carray(origin, arr_len)
-        dest_arr = self.numpy_to_carray(destination, arr_len)
-        tt_arr = self.numpy_to_carray(tt, arr_len)
-        t2 = time.time()
-        print '\t\tTime taken %s'%(t2-t1)
-               
         print 'Starting travel times computation'
         t1 = time.time()
         arrayexample.get_tt(org_arr, dest_arr, tt_arr, arr_len, self.offset)
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
-
-        print 'deleting origin and destination carrays'
+        
+        #return the carray
+        #return tt_arr
+        
+   
+    def create_location_array(self, arr_len):
+        """
+        This method initializes the location array and the temporary location 
+        array. It also sets the arrays to zero
+        
+        Input:
+        
+        Output:
+        """
+        print 'Starting location array initialization'
         t1 = time.time()
-        self.delete_carray(org_arr)
-        self.delete_carray(dest_arr)
+        arrayexample.initialize_location_array(arr_len)
+        arrayexample.set_location_array_to_zero(arr_len)
+        arrayexample.set_temp_location_array()
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
-
-        print 'Starting conversion from carray to numpy'
+    
+    
+    def get_location_choices(self, org_arr, dest_arr, tt_arr, locations, arr_len, offset, num_of_locations):
+        """
+        This method gets the locations choices. it internally calls 
+        the generate random locations method.
+        
+        Input:
+        Origin, Destination, Trave times and Locations array, array length and offset
+        
+        Output:
+        Location array
+        """
+        print 'Starting location choices computation'
         t1 = time.time()
-        new_tt = self.carray_to_numpy(tt_arr, arr_len)
+        arrayexample.get_location_choices(org_arr, dest_arr, tt_arr, locations, arr_len, offset, num_of_locations)
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
+    
         
-        print 'Delete the tt carray'
-        self.delete_carray(tt_arr)
-        
-        #return the numpy array
-        return new_tt
-        
-        
-    def delete_carray(self, carray):
+    def delete_carray(self, carray, data_type):
         """
         This method is used to delete the carrays
         
@@ -176,7 +198,10 @@ class Extensions(object):
         Output:
         Carrays deleted
         """
-        arrayexample.delete_floatArray(carray)
+        if data_type == 1:
+            arrayexample.delete_floatArray(carray)
+        else:
+            arrayexample.delete_intArray(carray)
         print 'Carray deleted.'
         
         
@@ -194,12 +219,27 @@ class Extensions(object):
         arrayexample.delete_array()
         print 'Dynamic arrays deleted'
         
+    
+    def delete_location(self):
+        """
+        This method deletes the locations array in the C program
+        
+        Input:
+        None
+        
+        Output:
+        Dynamic array deleted
+        """
+        arrayexample.delete_location_array()
+        print 'Dynamic location array deleted'
+        
+        
     def set_string(self, file_path, flag):
         """
+        This method is used to assign the file names
         """
         arrayexample.set_file(file_path, 1, flag)
         arrayexample.print_string()
-
 
 
 
@@ -218,41 +258,31 @@ class TestExtensions(unittest.TestCase):
         
         node_path = "/home/namrata/Documents/swig/arr_sample/temp_data_copy.csv"
         graph_path = "/home/namrata/Documents/swig/arr_sample/skim1.dat"
+
         flag = 1
         ext_obj.set_string(node_path, flag)
         flag = 0
         ext_obj.set_string(graph_path, flag)
-
+        
+        print 'creating the graph'
+        t1 = time.time()
         n, e = ext_obj.create_graph()
         print 'n: %s e: %s'%(n, e)
-        #arrayexample.print_org_array(self.offset)
-        #for small sample
-        """
-        origin = array([1,2,3,4,5,6,7,8,9,10])
-        destination = array([10,9,8,7,6,5,4,3,2,1])
-        arr_len = origin.size
-        tt = zeros(arr_len)
-        
-        origin = zeros(10)
-        destination = zeros(10)
-        arr_len = origin.size
-        tt = zeros(arr_len)
-        i = 0
-        j = 10
-        offset = 1
-        for i in range(0,10):
-            origin[i] = i + offset
-            destination[i] = j
-            j = j - 1
-        """
-        
+        t2 = time.time()
+        print '\t\t\tTime taken %s'%(t2-t1)
+
         #for full data
+        num_of_locations = 60
         #create origin and destination arrays
         origin = zeros(10000)
         destination = zeros(10000)
         arr_len = origin.size
         tt = zeros(arr_len)
-        print '\t\t\t', arr_len
+        loc_len = arr_len * num_of_locations
+        print '\t\t\tarray length', arr_len
+        print '\t\t\tlocation length', loc_len
+        #create locations array
+        locations = zeros(loc_len)
         i = 0
         j = 1000
         offset = 1
@@ -326,28 +356,63 @@ class TestExtensions(unittest.TestCase):
             destination[i] = j
             j = j -1
         
-        
+        #convert the arrays to carrays
+        print 'starting conversion from numpy to carray'
+        t1 = time.time()
+        org_arr = ext_obj.numpy_to_carray(origin, arr_len, 0)
+        dest_arr = ext_obj.numpy_to_carray(destination, arr_len, 0)
+        tt_arr = ext_obj.numpy_to_carray(tt, arr_len, 1)
+        loc_arr = ext_obj.numpy_to_carray(locations, loc_len, 0)
+        t2 = time.time()
+        print '\t\t\tTime taken %s'%(t2-t1)
+               
+        #origin destination arrays created. get travel times
         print 'travel times'
         print '\t\t\t\t', time.time()
-        new_tt = ext_obj.get_travel_times(origin, destination, tt, arr_len)
+        ext_obj.get_travel_times(org_arr, dest_arr, tt_arr, arr_len)
         print '\t\t\t\t', time.time()
-                
-        print 'array size ', new_tt.size
-        """
-        #for each in new_tt:
-        #    print each
-        org = ext_obj.numpy_to_carray(origin, arr_len)
-        dest = ext_obj.numpy_to_carray(destination, arr_len)
-        tt_arr = ext_obj.numpy_to_carray(new_tt, arr_len)
-        arrayexample.print_tt_array(org, dest, tt_arr, arr_len)
-        """
-        for i in range(0, 100):
-            print new_tt[i]
-        
-        ext_obj.delete_graph()
-        
-        
 
+        #initialize the location array
+        print 'creating location graph'
+        t1 = time.time()
+        ext_obj.create_location_array(arr_len)
+        t2 = time.time()
+        print '\t\t\t\t', time.time()
+        
+        
+        #get location choices
+        print 'location choices'
+        t1 = time.time()
+        ext_obj.get_location_choices(org_arr, dest_arr, tt_arr, loc_arr, arr_len, offset, num_of_locations)
+        t2 = time.time()
+        print '\t\t\t\t', time.time()
+
+        print 'Starting conversion from carray to numpy'
+        t1 = time.time()
+        new_tt = ext_obj.carray_to_numpy(tt_arr, arr_len, 1)
+        new_loc = ext_obj.carray_to_numpy(loc_arr, loc_len, 0)
+        t2 = time.time()
+        print '\t\tTime taken %s'%(t2-t1)
+        
+        print 'deleting all the carrays'
+        t1 = time.time()
+        ext_obj.delete_carray(org_arr, 0)
+        ext_obj.delete_carray(dest_arr, 0)
+        ext_obj.delete_carray(tt_arr, 1)
+        ext_obj.delete_carray(loc_arr, 0)
+        t2 = time.time()
+        print '\t\tTime taken %s'%(t2-t1)
+
+        #delete all the arrays in the C program
+        print 'deleting graph'
+        t1 = time.time()
+        ext_obj.delete_graph()
+        ext_obj.delete_location()
+        t2 = time.time()
+        print '\t\tTime taken %s'%(t2-t1)
+
+        
+        
 if __name__ == '__main__':
     unittest.main()
         
