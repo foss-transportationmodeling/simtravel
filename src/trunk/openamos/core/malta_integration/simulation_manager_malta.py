@@ -29,7 +29,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic_copy.xml'
 	configObject = None
 
 
@@ -84,7 +84,7 @@ class SimulationManager(object):
 
     def setup_cacheDatabase(self):
 	self.db = DB()
-
+    """
     def setup_tod_skims1(self):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
@@ -93,7 +93,7 @@ class SimulationManager(object):
             
             self.createSkimsTableFromDatabase(tableInfo)
 
-    """
+
     def import_tod_skims(self, tableInfo):
 	table_name = tableInfo.tableName
 	# Delete contents
@@ -109,8 +109,8 @@ class SimulationManager(object):
 
         try:
             ti = time.time()
-    	    insert_stmt = ("""copy %s %s from '%s' """
-                           """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
+    	    insert_stmt = ("copy %s %s from '%s' "
+                           " delimiters '%s'" %(table_name, cols_listStr, loc, 
 	                                          delimiter))
 	    #print insert_stmt                                                                       
             result = self.queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
@@ -136,7 +136,7 @@ class SimulationManager(object):
 
         print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
 
-
+    """
     def setup_tod_skims(self):
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
@@ -150,9 +150,9 @@ class SimulationManager(object):
             tableName = tableInfo.tableName
             self.createSkimsCache(tableName, data)
 
-    """
+
     def import_skims_from_flatfile(self, fileLocation, colsList):
-	print 'Parsing csv text file and returning a DataArray object'
+	print '\tParsing csv text file and returning a DataArray object'
 	ti = time.time()	
 	f = open(fileLocation, 'r')
 	
@@ -163,7 +163,17 @@ class SimulationManager(object):
 	    data.append(map(float, row))
 	
 	f.close()
-        print '\tTime taken to import from flatfile %.4f' %(time.time()-t)
+
+	data = array(data)
+	print '\tShape of the file - ', data.shape
+	print data[:10,:]
+
+	minTtInd = data[:,-1] < 2
+	if minTtInd.sum() > 0:
+	    print '\tSome OD pairs have tt less than 2. Correcting those travel times'
+	    data[minTtInd,-1] = 2
+
+        print '\tTime taken to import from flatfile %.4f' %(time.time()-ti)
 	
 	return DataArray(data, colsList)
 
@@ -263,6 +273,8 @@ class SimulationManager(object):
             
 	    print 'Following vehicles arrived and the corresponding arrival interval - '
 	    print data
+	    if analysisInterval == 634:
+	 	print('Press any key to continue; break introduced for debugging')
         else:
             data = None
             #raw_input ('\t Press any key to continue')
@@ -284,7 +296,12 @@ class SimulationManager(object):
 	    """
 	    # Sequential application
 	    if comp.component_name in ['ArrivalTimeInformation', 'PersonsArrived', 'ArrivalTimeProcessing', 
-					'DynamicNonMandatoryActivities', 'ExtractTravelEpisodes', 
+					'DynamicNonMandatoryActivities', 
+					'PersonPrismActivityInformation',
+					'AdjustPrismEndsForInsufficientPrisms',
+					'PersonPrismActivitiesOrigDelete',
+					'DeleteScheduleIdsFromPersonsPrism',
+					'ExtractTravelEpisodes', 
 					'ExtractBackgroundTravelEpisodes',  'ExtractAllTravelEpisodes']:
 
 	        compObjects.append(comp)
@@ -293,13 +310,16 @@ class SimulationManager(object):
         fileLoc = self.projectConfigObject.location
 
 
-
+	print ('Starting to process...')
 	for comp in compObjects:
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
 
+
+            if comp.component_name in ['AdjustPrismEndsForInsufficientPrisms', 'ExtractTravelEpisodes']:
+		print ('Just finished processing - %s' %comp.component_name)
                 
             if comp.component_name == 'ArrivalTimeInformation':
                 comp.db = self.db
@@ -456,7 +476,7 @@ if __name__ == '__main__':
     simulationObject = SimulationManager()
 
     for i in range(2):
-    	simulationObject.run_selected_components_for_malta(83 + i)
+    	simulationObject.run_selected_components_for_malta(500 + i)
     #raw_input()
     #simulationObject.run_selected_components_for_malta(191)
     #raw_input()
