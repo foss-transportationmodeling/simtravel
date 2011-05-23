@@ -40,6 +40,7 @@ class DB(object):
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
 					       'expectedarrivaltime', 'actualarrivaltime'],
+			  'persons_prism_activities_r':['scheduleid', 'houseid', 'personid'],
 			  'workers_r':['houseid', 'personid', 'episodes'], 
 			  'child_dependency_r':['houseid', 'personid', 'dependency'],
 			  'daily_school_status_r':['houseid', 'personid', 'schdailystatus'],
