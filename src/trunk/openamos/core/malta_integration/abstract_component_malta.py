@@ -244,6 +244,14 @@ class AbstractComponent(object):
 	        for i in range(len(dataTempNames)):
 		    name = dataTempNames[i]
 		    data_array[:,i] = data.data[name]
+
+
+            if self.delete_criterion is not None:
+            	if self.delete_criterion:
+                    self.data.deleterows(~valid_data_filter)
+            	else:
+                    self.data.deleterows(valid_data_filter)          
+
 	
 	    print '\t\tNumber of rows processed - ', valid_data_filter.sum()
 
@@ -326,6 +334,7 @@ class AbstractComponent(object):
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
             print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+	    print i.data_filter
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -375,6 +384,7 @@ class AbstractComponent(object):
             if self.data.rows > 0 and len(i.run_until_condition) > 0:
                 run_subset_filter = self.create_filter(i.run_until_condition, 
                                                        i.run_filter_type)
+		#print 'Filter subset sum - ',  run_subset_filter.sum()
                 if run_subset_filter.sum() > 0:
                     model_list_forlooping.append(i)
 
@@ -695,69 +705,6 @@ class AbstractComponent(object):
 
             
 
-    def prepare_household_structure_matrix(self, data, queryBrowser, varVal, householdStructureObject):
-        tableName = householdStructureObject.tableName
-        houseid = householdStructureObject.houseid
-        personid = householdStructureObject.personid
-        var = varVal[0]
-        val = varVal[1]
-
-        colsToQuery = [houseid, personid, var]
-        
-        personData = queryBrowser.select_all_from_table(tableName, 
-                                                        colsToQuery)
-
-        validRows = personData.columns([var]).data == val
-        validRows.shape = (validRows.shape[0], )
-        personData.deleterows(~validRows)
-
-        householdIds = personData.columns([houseid]).data
-        maxRowId = householdIds.max()
-        personIds = personData.columns([personid]).data
-        maxColId = personIds.max()
-        structureCol = personData.columns([var]).data
-
-        hhldStructure = zeros((maxRowId, maxColId))
-        hhldStructure[householdIds-1, personIds-1] = 1
-        hhldStructure = masked_equal(hhldStructure, 0)
-
-        #print hhldStructure.shape
-
-
-        varDict = {'temp':['allocated_adult']}
-
-        # TODO: Extend code
-
-        self.append_cols_for_dependent_variables(data, varDict)
-
-
-        childRows = data.columns(['age']).data < 18
-        childRows.shape = (childRows.shape[0], )
-
-
-        childHhldStructure = hhldStructure[childRows]
-        childHhldStructureSum = childHhldStructure.sum(-1)
-
-        childHhldStructureProb = (childHhldStructure.transpose()/childHhldStructureSum).transpose()
-
-        colLabels = []
-        for i in range(maxColId):
-            colLabels.append('%s%s' %('person', i+1))
-
-        childHhldStructureProbArray = DataArray(childHhldStructureProb, colLabels)
-        
-        #print childHhldStructureProb[:5,:]
-        #raw_input()
-
-        # 1 is the seed here
-        probModel = AbstractProbabilityModel(childHhldStructureProbArray, 1)
-        
-        res = probModel.selected_choice()
-        #print (res > 0).sum()
-        
-        return data
-
-
     def process_data_for_locs(self, data, spatialConst_list, 
                               analysisInterval, skimsMatrix, uniqueIds, fileLoc):
         """
@@ -775,31 +722,6 @@ class AbstractComponent(object):
         if spatialConst_list is not None:
             for i in spatialConst_list:
 	
-		"""
-                print '\n\tProcessing spatial queries'
-
-                tableName = i.table
-                originColName = i.originField
-                destinationColName = i.destinationField
-                skimColName = i.skimField
-
-                if analysisInterval is not None:
-                    tableName = projectSkimsObject.lookup_table(analysisInterval)
-                else:
-                    tableName = projectSkimsObject.tableNamesList[0]
-                
-                print '\t\tAnalysis Interval - %s, Skims table name - %s ' %(analysisInterval, tableName)
-
-                ti = time.time()
-                skimsMatrix2, uniqueIDs = self.db.returnTableAsMatrix(tableName,
-                                                                      originColName,
-                                                                      destinationColName,
-                                                                      skimColName, fileLoc)
-
-
-
-                print '\t\tSkims Matrix Extracted in %.4f s' %(time.time()-ti)
-		"""
                 if i.countChoices is not None: 
                     #print ("""\t\tNeed to sample location choices for the following""" \
                     #           """model with also location info extracted """)
@@ -876,29 +798,31 @@ class AbstractComponent(object):
 
 
 	# Prepping up spatial constraint column for the valid records/agents
+	"""
+
+        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
+
+
+	print 'data before', data.data[:5,:5].astype(int)
+	
+	dataRowsValid = data.rowsof(~rowsZeroChoices)
+	print 'validDataRows - ', dataRowsValid.data[:5,:5].astype(int)
+	print 'data after', data.data[:5,:5].astype(int)
+	print 'data subset after', dataRowsValid.data[:,:5].astype(int)
+	#raw_input()
+	"""
+
         originLocColVals = originLocColVals[~rowsZeroChoices, :]
         destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
 
         originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
         destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
 
-        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
-
-
-	print 'data before', data.data[:5,:5].astype(int)
-
-	dataRowsValid = data.rowsof(~rowsZeroChoices)
-	print 'validDataRows - ', dataRowsValid.data[:5,:5].astype(int)
-	print 'data after', data.data[:5,:5].astype(int)
-	print 'data subset after', dataRowsValid.data[:,:5].astype(int)
-	#raw_input()
-
-
-
 
 
 	# If there are no locations accessible then don't sample locations
-        if dataRowsValid.rows == 0:
+        #if dataRowsValid.rows == 0:
+        if ~rowsZeroChoices.sum() == 0:
 	    print 'no sampling of locations'
 	    return data
 
@@ -914,7 +838,9 @@ class AbstractComponent(object):
         sampledChoicesCheck = True
         while (sampledChoicesCheck):
             #print '\t\tSampling Locations'
-            self.sample_choices(dataRowsValid, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
+            #self.sample_choices(dataRowsValid, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
+            self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed, rowsZeroChoices)
+
             sampledVarNames = sampleVarDict['temp']
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
             sampledChoicesCheck = False
@@ -931,10 +857,12 @@ class AbstractComponent(object):
 
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
-            sampleLocColVals = array(dataRowsValid.columns([sampleLocColName]).data, dtype=int)
+            #sampleLocColVals = array(dataRowsValid.columns([sampleLocColName]).data, dtype=int)
+	    sampleLocColVals = array(data.columns([sampleLocColName], ~rowsZeroChoices).data, dtype=int)
 
 
-            print 'sampled locations - ', dataRowsValid.columns([sampleLocColName]).data[:,0]
+            #print 'sampled locations - ', dataRowsValid.columns([sampleLocColName]).data[:,0]
+            print 'sampled locations - ', data.columns([sampleLocColName], ~rowsZeroChoices).data[:,0]
             #print originLocColVals[:,0], sampleLocColVals[:,0]
             # the default missing value for skim was 9999 but that was causing problems with
             # calculation as aresult it is changed to a small number so that the alternative
@@ -955,7 +883,8 @@ class AbstractComponent(object):
 
 	    sampleLocsZeros = sampleLocColVals == 0
 	    vals[sampleLocsZeros] = 99
-            dataRowsValid.setcolumn(skimLocColName, vals)
+            #dataRowsValid.setcolumn(skimLocColName, vals)
+            data.setcolumn(skimLocColName, vals, ~rowsZeroChoices)
 	    #print 'TO VALS', skimLocColName, vals
 
             # FROM TRAVEL SKIMS
@@ -965,7 +894,8 @@ class AbstractComponent(object):
             # If OD pair missing for travel from then set it zero
             vals[rowsEqualsDefault] = 0            
             destSkimColName = 'tt_from%s' %(i+1)
-            dataRowsValid.setcolumn(destSkimColName, vals)
+            #dataRowsValid.setcolumn(destSkimColName, vals)
+	    data.setcolumn(destSkimColName, vals, ~rowsZeroChoices)
 	    #print 'FROM VALS', destSkimColName, vals
 
 	    print 'LOCATION ATTRIBUTES'
@@ -975,20 +905,31 @@ class AbstractComponent(object):
                     #print 'location var', j
                     locationVarName = '%s%s' %(j, i+1)
                     locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
-                    dataRowsValid.setcolumn(locationVarName, locVarVals)
+                    #dataRowsValid.setcolumn(locationVarName, locVarVals)
+                    data.setcolumn(locationVarName, locVarVals, ~rowsZeroChoices)
 		    #print sampleLocColVals[:5]
                     print 'loc variable', locationVarName, 'vals', locVarVals[:5].astype(int)
 		    #print locationsTable.varnames
         #raw_input()
 
+
+	try:
+	    print data.columns(['destination1', 'destination2', 'destination3']).data.astype(int)
+	    #print dataRowsValid.columns(['destination1', 'destination2', 'destination3']).data.astype(int)
+	except Exception, e:
+	    print 'Error occurred printing: ', e
+	    
+		
+	#print data.varnames
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
-	print ('spatial constraints processed')
+	#raw_input('spatial constraints processed')
         return data
             
     def extract_skims(self, data, skimsMatrix2, spatialconst):
         # hstack a column for the skims that need to be extracted for the
         # location pair
+	print 'processing spatial constraint', spatialconst
         originLocColName = spatialconst.startConstraint.locationField
         destinationLocColName = spatialconst.endConstraint.locationField
         
@@ -1022,7 +963,7 @@ class AbstractComponent(object):
 
         return data
 
-    def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
+    def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed, rowsZeroChoices):
         destLocSetInd = destLocSetInd[:,1:]
 	#print 'number of choices - ', destLocSetInd.shape
         ti = time.time()
@@ -1056,6 +997,8 @@ class AbstractComponent(object):
 
             #actualLocIds = res.data
             #actualLocIds[nonZeroRows] -= 1
+	    print 'data shape', data.data.shape
+	    print 'result', res.data	
             data.setcolumn(colName, res.data)
 	    #print data.columns([colName]).data[:,0]
 
@@ -1063,8 +1006,16 @@ class AbstractComponent(object):
             dataCol = data.columns([colName]).data
 
             rowIndices = array(xrange(dataCol.shape[0]), int)
+	    rowIndices = rowIndices[~rowsZeroChoices]
             colIndices = res.data.astype(int)
+	    colIndices = colIndices[~rowsZeroChoices]
 
+	    print 'rowIndices', rowIndices
+	    #print 'rowIndices', rowIndices[~rowsZeroChoices]
+
+	    print 'colIndices', colIndices
+
+	    print destLocSetInd.shape
             destLocSetInd.mask[rowIndices, colIndices-1] = True
         print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
 
