@@ -37,7 +37,8 @@ class Person(object):
 	    print '\n-- Arrived as expected; nothing needs to be done --'
 
 	if self.destAct.startTime > self.actualArrival:
-	    print '\n-- Arrived earlier than expected; minor adjustment needed for start of the subsequent activity --'
+	    print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
+	    self.push_destination_activity_to_earlier()
 	    self.add_anchor_activity()
 
 	if self.destAct.startTime < self.actualArrival:
@@ -45,7 +46,7 @@ class Person(object):
 	    self.adjust_push_subsequent_activities()
 
     def add_anchor_activity(self):
-	anchorAct = self.destAct
+	anchorAct = copy.deepcopy(self.destAct)
 	#anchorAct.actType += 25
 	anchorAct.actType = 598
 	anchorAct.startTime = self.actualArrival
@@ -56,6 +57,13 @@ class Person(object):
 	print 'Anchor Act - ', anchorAct
 	#raw_input('adding an anchor activity')	
 
+
+    def push_destination_activity_to_earlier(self):
+	if self.destAct.actType <> 100 or self.destAct.actType <> 600:
+	    moveByValue = self.actualArrival - self.destAct.startTime
+	    self.move_start_end(self.destAct, moveByValue)
+	else:
+	    print '\tThe dest act was of type - %s hence cannot be moved' % self.destAct.actType
 
     def adjust_push_subsequent_activities(self):
 	#raw_input('adjusting and pushing subsequent activities')
@@ -259,6 +267,7 @@ class Person(object):
 
         print ownAct
         raise Exception, 'DONE NOTHING'
+
     def adjust_and_delete_own_activities(self, ownActs, minStartTime, maxEndTime):
         #return
         for act in ownActs:
@@ -302,6 +311,54 @@ class Person(object):
             else:
                 depActsList.append(act)
         return ownActsList, depActsList
+
+
+    def clean_schedules_for_in_home_episodes(self, actType=101, inHomeActThreshold=1440):
+
+	consequentInHomeActs = []
+	lengthOfConseqActs = 0
+
+	print 'Original Acts List'
+	for i in self.listOfActivityEpisodes:
+	    print i
+
+	newActsList = []
+
+	for i in range(len(self.listOfActivityEpisodes)):
+	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
+	    if act.actType == actType and lengthOfConseqActs < inHomeActThreshold:
+		consequentInHomeActs.append(act)
+		lengthOfConseqActs += act.duration
+	    else:
+		if len(consequentInHomeActs) > 0:
+		    newIHAct = self.createNewInHomeAct(consequentInHomeActs)			
+		    hp.heappush(newActsList, (newIHAct.startTime, newIHAct))
+
+		if act.actType == actType:
+		    consequentInHomeActs = [act]
+		    lengthOfConseqActs = act.duration
+		else:
+		    hp.heappush(newActsList, (act.startTime, act))
+		    consequentInHomeActs = []		
+		    lengthOfConseqActs = 0
+
+	print 'New Acts List'
+	for i in newActsList:
+	    print i
+
+	self.listOfActivityEpisodes = newActsList
+	    
+	#raw_input ('Inside aggregating acts')
+
+    def createNewInHomeAct(self, consequentInHomeActs):
+	print ('\tAggregating all in-home acts between subsequent OH acts')
+	minStartTime, maxEndTime = self.return_min_max_time_of_activities(consequentInHomeActs)
+
+	act = copy.deepcopy(consequentInHomeActs[0])
+	act.startTime = minStartTime
+	act.endTime = maxEndTime
+	
+	return act
 
         
     def _check_for_conflicts(self):
@@ -561,8 +618,8 @@ class Person(object):
 		print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
 	self.listOfActivityEpisodes = tempActList
-	self.destAct = copy.deepcopy(destAct)
-
+	#self.destAct = copy.deepcopy(destAct)
+	self.destAct = destAct
 
     def extract_work_episodes(self):
         for startTime, act in self.listOfActivityEpisodes:
