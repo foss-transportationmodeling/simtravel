@@ -705,6 +705,7 @@ class QueryBrowser(object):
 	    try:
 		ti = time.time()
 		self.dbcon_obj.cursor.execute(delete_sql_string)
+                self.dbcon_obj.connection.commit()
 	    except Exception, e:
 		print 'Error deleting records. Query failed - ', e
 
