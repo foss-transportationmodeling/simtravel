@@ -35,6 +35,7 @@ from openamos.core.models.schedules_model_components import HouseholdSpecificati
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
 from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
+from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
 
 from openamos.core.models.model import SubModel
 
@@ -514,6 +515,9 @@ class ConfigParser(object):
 
         if model_formulation == 'Clean Fixed Activity Schedule':
             self.create_clean_fixed_activity_schedule(model_element)
+
+	if model_formulation == 'Clean Aggregate Activity Schedule':
+            self.create_clean_aggregate_activity_schedule(model_element)
 
         if model_formulation == 'Child Dependency Allocation':
             self.create_child_dependency_allocation_object(model_element)
@@ -1348,7 +1352,60 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
     
+    def create_clean_aggregate_activity_schedule(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
 
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        dailystatus_attribs_element = model_element.find('DailyStatus')
+        dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
+
+        dependency_attribs_element = model_element.find('Dependency')
+        dependencyAttribsSpec = self.return_dependency_attribs(dependency_attribs_element)
+
+
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+                                               dailyStatusAttribsSpec,
+                                               dependencyAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = CleanAggregateActivitySchedule(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
 
         
     def create_child_dependency_allocation_object(self, model_element):
