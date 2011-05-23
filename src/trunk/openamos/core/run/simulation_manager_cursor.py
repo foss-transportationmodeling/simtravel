@@ -141,6 +141,12 @@ class SimulationManager(object):
 	print '\tShape of the file - ', data.shape
 	print data[:10,:]
 
+	minTtInd = data[:,-1] < 2
+	if minTtInd.sum() > 0:
+	    print '\tSome OD pairs have tt less than 2. Correcting those travel times'
+	    data[minTtInd,-1] = 2
+	
+
         print '\tTime taken to import from flatfile %.4f' %(time.time()-ti)
 	
 	return DataArray(data, colsList)
