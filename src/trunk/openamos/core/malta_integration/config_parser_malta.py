@@ -191,13 +191,13 @@ class ConfigParser(object):
             skim_var = period_element.get("skim_var")
             interval_start = int(period_element.get("intervalStart"))
             interval_end = int(period_element.get("intervalEnd"))
-	    importFlag = period_element.get("import")
-	    if importFlag is not None:	
-	   	fileLocation = period_element.get('fileLocation')
-		delimiter = period_element.get('delimiter')
-	    else:
-		fileLocation = None
-		delimiter = None
+	    #importFlag = period_element.get("import")
+	    #if importFlag is not None:	
+	    fileLocation = period_element.get('fileLocation')
+	    delimiter = period_element.get('delimiter')
+	    #else:
+	    #fileLocation = None
+	    #delimiter = None
 
 
             travelSkimsLookup.add_tableInfoToList(tablename, origin_var,
@@ -206,7 +206,7 @@ class ConfigParser(object):
                                                   interval_start,
                                                   interval_end,
                                                   target_tablename,
-						  import_flag=importFlag,
+						  #import_flag=importFlag,
 						  file_location=fileLocation,
 						  delimiter=delimiter)
                                                   
