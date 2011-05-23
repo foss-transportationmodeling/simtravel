@@ -58,6 +58,17 @@ class Household(object):
         else:
             return False
 
+	
+    def clean_schedules_for_in_home_episodes(self, seed):
+        self.personIds = self.persons.keys()
+        self.personIds.sort()
+
+	for pid in self.personIds:
+	    person = self.persons[pid]
+	    person.clean_schedules_for_in_home_episodes()
+
+	return self._collate_results()
+
 
     def clean_schedules(self, seed):
         print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
