@@ -599,9 +599,9 @@ class QueryBrowser(object):
                                     %(enTable, 'enl', enLocJoinCondition))
 
         
-                    joinStrList.append(spatialJoinStr)
-                    joinStrList.append(stLocJoinStr)
-                    joinStrList.append(enLocJoinStr)
+                    joinStrList.insert(0, spatialJoinStr)
+                    joinStrList.insert(1, stLocJoinStr)
+                    joinStrList.insert(2, enLocJoinStr)
                     
                     joinStrList.append(' where enl.%s > stl.%s ' %(i.endConstraint.timeField, 
                                                                    i.endConstraint.timeField))
@@ -887,6 +887,8 @@ class QueryBrowser(object):
         Output:
         Inserts all the rows from data array in the table
         """
+
+	print 'Table Name - %s, creating index - %s and deleting index - %s'  %(table_name , createIndex, deleteIndex)
         
 	if partId == None:
 	    partId = ""
@@ -898,7 +900,6 @@ class QueryBrowser(object):
 	    t_d = time.time()
             index_cols = self.delete_index(table_name)
 	    print '\t\tDeleting index took - %.2f' %(time.time()-t_d)
-
 
         self.file_write(arr, loc, partId)
         
@@ -923,7 +924,7 @@ class QueryBrowser(object):
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
                 print '\t\tTime after insert query - %.4f' %(time.time() - ti)
-                #print '\t\tTime to insert - %.4f' %(time.time()-ti)
+                print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
@@ -988,6 +989,7 @@ class QueryBrowser(object):
                 else:
                     columns = columns + i
             index_stmt = 'create index %s on %s (%s)'%(index_name, table_name, columns)
+	    print 'Index Statement - %s' %(index_stmt)
             try:
                 self.dbcon_obj.cursor.execute(index_stmt)
                 self.dbcon_obj.connection.commit()

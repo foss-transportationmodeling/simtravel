@@ -400,6 +400,7 @@ class DivideData(object):
         self.dbcon_obj.new_connection()
         
         #table = 'temp_households'
+	print table_name
         cols = self.dbcon_obj.get_column_list(table_name)
         col_str = ''
         col_count = 0
@@ -807,6 +808,8 @@ class DivideData(object):
         t1 = time.time()
         for index in range(parts):
             #run a loop for every table in the table list
+	    print 'Table list', table_list
+	    #raw_input()
             for each_table in table_list:
                 #select the required data
                 table_rows = self.get_interval_rows(self.database_name, each_table, column_name, interval_list, index)
