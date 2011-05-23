@@ -920,134 +920,527 @@
       </Model>
 
 
-      <Model name="ActivityTypeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="locationid"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_locationid" coeff="1"/>
-      </Model>
-
-
-      <Model name="ActivityTypeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="activitytype"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable1 table="runtime" var="en_activitytype" coeff="1"/>
-        <Variable table="persons" var="one" coeff="597"/>	
-      </Model>
-
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to_next_location" origin_var="origin" destination_var="destination" after_model="activitytype" before_model="tt_to_next_location">
-	<Start table="runtime" location_var="st_locationid"/>
-	<End table="runtime" location_var="en_locationid"/>
-      </DynamicSpatialConstraints>
-
-
-      <Model name="TravelTimeToLocRecode" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tt_to_next_location"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_activitytype" condition="less than" value="200"/>
-	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
-
-      <Model name="TravelTimeToLocRecode" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tt_to_next_location"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="600"/>
-	<Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
-      <Model name="TravelTimeToLocRecode" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tt_to_next_location"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-
-	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
-	<Filter table="runtime" var="activitytype" condition="equals" value="597"/>
-
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
-
-
-      <Model name="StartTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="starttime"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
-	<Variable table="runtime" var="tt_to_next_location" coeff="1"/>
-      </Model>
-
-      <Model name="EndTimeInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="endtime"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_starttime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="-1"/>
-      </Model>
-
-      <Model name="DurationInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="duration"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="starttime" coeff="-1"/>
-        <Variable table="runtime" var="endtime" coeff="1"/>
-      </Model>
-
-      <Model name="DependentPersonIdInsufficientPrism" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dependentpersonid"/>
-	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_dependentpersonid" coeff="1"/>
-      </Model>
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
 	<FilterSet type="and"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="prismduration" condition="greater than equals" value="2"/>
 	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
-	<Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
+	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="-1"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
+
+    </Component>
+
+
+	
+
+
+    <Component name="PersonPrismActivityInformation" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="houseid,personid" location="True" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="persons_prism_activities_r" key="houseid,personid"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_final_r" key="houseid,personid"/>
+	<Table table="trips_to_malta_r" key="houseid,personid"/>
+      </DBTables>
+	
+      <DeleteRecords value="False"/>	
+
+      <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
+	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_final_r" location_var="locationid" time_var="starttime"/>
+      </SpatialConstraints>
+
+
+
+      <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="repeat"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+      <Model name="FirstScheduleId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="scheduleid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="1"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_scheduleid" coeff="1"/>
+      </Model>
+
+
+      <Model name="SecondScheduleId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="scheduleid"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_scheduleid" coeff="1"/>
+      </Model>
+
+      <Model name="DummyLocationId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="locationid"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+
+      <Model name="UpdateRepeat" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="repeat"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="runtime" var="repeat" coeff="1"/>
+      </Model>
+
+
+    </Component>
+
+    <Component name="AdjustPrismEndsForInsufficientPrisms" read_from_table="schedule_final_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons" key="houseid,personid" order="1"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_final_r" key="houseid,personid"/>
+	<Table table="trips_to_malta_r" key="houseid,personid"/>
+      </DBTables>
+      <DeleteRecords value="False"/>	
+
+      <DeleteBasedOn1 table="schedule_final_r" var="scheduleid"/>
+
+      <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
+	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_final_r" location_var="locationid" time_var="starttime"/>
+      </SpatialConstraints>
+
+      <ConsistencyChecks name="DynamicNonMandatoryChecks">
+	<Filter table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+      </ConsistencyChecks>
+
+
+      <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="repeat"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" after_model="repeat" before_model="prismdur">
+	<Start table="runtime" location_var="st_locationid"/>
+	<End table="runtime" location_var="en_locationid"/>
+      </DynamicSpatialConstraints>
+
+
+      <Model name="PrismDuration" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="prismdur"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="-1"/>
+        <Variable table="runtime" var="en_starttime" coeff="1"/>
+      </Model>
+
+
+      <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="less than" value="200"/>
+	<Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="601"/>
+	<Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="less than" value="200"/>
+	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tt_to"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="601"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+
+
+
+      <Model name="RandomAdjustmentFactor" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="adjfactor"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0.5"/>
+      </Model>
+
+
+      <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Recode the adjustment factor -->
+	<!-- Filter Description: Start activity is anything but the dummy anchor and end is a pick-up and drop-off act -->
+	<DependentVariable var="adjfactor"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="less than equals" value="597"/>
+	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+      <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Recode the adjustment factor -->
+	<!-- Filter Description: Start activity is of type OTHER and end is a pick-up and drop-off act -->
+	<DependentVariable var="adjfactor"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="599"/>
+	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+
+      <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Recode the adjustment factor -->
+	<!-- Filter Description: Start activity is a dummy anchor so only extend the subsequent activity -->
+	<DependentVariable var="adjfactor"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+
+
+
+      <Model name="RandomAdjustmentFactor" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Amount of adjustment to fill the insufficient prism -->
+	<!-- Filter Description: Only apply this when the prism duration greater than the travel time to next activity -->
+	<DependentVariable var="adjustment"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="prismdur" coeff="1"/>
+        <Variable table="runtime" var="tt_to" coeff="-1"/>
+      </Model>
+
+
+      <Model name="AdjustFirstActEndTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Adjust the end of the first anchor activity of the prism -->
+	<!-- Filter Description:?? -->
+	<DependentVariable var="st_endtime"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="tt_to" condition="equals" value="0"/>
+	<Filter table="runtime" var="adjfactor" condition="equals" value="1"/>
+	<Filter table="runtime" var="prismdur" condition="less than" value="1"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+      </Model>
+
+
+      <Model name="AdjustFirstActEndTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Adjust the end of the first anchor activity of the prism -->
+	<!-- Filter Description: Only apply this when the prism duration greater than the travel time to next activity -->
+	<DependentVariable var="st_endtime"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime,runtime" var="adjustment,adjfactor" coeff="1" interaction="True"/>
+      </Model>
+
+
+      <Model name="AdjustFirstActEndTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Adjust the end of the first anchor activity of the prism -->
+	<!-- Filter Description: ?? -->
+	<DependentVariable var="st_endtime"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="tt_to" condition="equals" value="0"/>
+	<Filter table="runtime" var="adjfactor" condition="equals" value="1"/>
+	<Filter table="runtime" var="prismdur" condition="greater than equals" value="1"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="persons" var="one" coeff="-1"/>
+      </Model>
+
+
+
+
+      <Model name="AdjustSecondActStartTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Adjust the start of the first anchor activity of the prism -->
+	<!-- Filter Description: Only apply this when the prism duration greater than the travel time to next activity; also when the tt_to is greater than one-->
+	<!-- 			 else the st_endtime and en_starttime become the same causing issues in the prism extraction step -->
+	<DependentVariable var="en_starttime"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Filter table="runtime" var="tt_to" condition="greater than" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime" var="tt_to" coeff="1"/>
+      </Model>
+
+      <Model name="AdjustSecondActStartTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Adjust the start of the first anchor activity of the prism -->
+	<!-- Filter Description: Only apply this when the prism duration greater than the travel time to next activity; also when the tt_to is greater than one-->
+	<!-- 			 else the st_endtime and en_starttime become the same causing issues in the prism extraction step -->
+	<DependentVariable var="en_starttime"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Filter table="runtime" var="tt_to" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+
+
+
+
+      <Model name="FirstActivityType" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the activittype of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="activitytype"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_activitytype" coeff="1"/>
+      </Model>
+      <Model name="FirstLocationID" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the locationid of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="locationid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_locationid" coeff="1"/>
+      </Model>
+      <Model name="Firststarttime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the starttime of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="starttime"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_starttime" coeff="1"/>
+      </Model>
+      <Model name="FirstEndtime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the endtime of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="endtime"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+      </Model>
+      <Model name="FirstDuration" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the duration of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="duration"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="FirstDependentPersonid" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the dependentpersonid of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="dependentpersonid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_dependentpersonid" coeff="1"/>
+      </Model>
+      <Model name="FirstScheduleId" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the scheduleid of the start anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored -->
+	<DependentVariable var="scheduleid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_scheduleid" coeff="1"/>
+      </Model>
+
+      <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; updates the counter for storing the end anchor act of the prism in the next pass -->
+	<!-- Filter Description: In the first pass repeat=0, only the start anchor act attributes are stored-->
+	<DependentVariable var="repeat"/>
+	<FilterSet type="or"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+
+
+
+      <Model name="SecondActivityType" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the activitytype of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="activitytype"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_activitytype" coeff="1"/>
+      </Model>
+      <Model name="FirstLocationID" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the locationid of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="locationid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_locationid" coeff="1"/>
+      </Model>
+      <Model name="SecondStarttime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the starttime of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="starttime"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_starttime" coeff="1"/>
+      </Model>
+      <Model name="SecondEndtime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the endtime of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="endtime"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_endtime" coeff="1"/>
+      </Model>
+      <Model name="SecondDuration" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the duration of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="duration"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="SecondScheduleId" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the scheduleid of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="scheduleid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_scheduleid" coeff="1"/>
+      </Model>
+      <Model name="SecondEpisodeDependentPersonId" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; stores the dependentpersonid of the end anchor act of the prism -->
+	<!-- Filter Description: In the first pass repeat=2, only the end anchor act attributes are stored -->
+	<DependentVariable var="dependentpersonid"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_dependentpersonid" coeff="1"/>
+      </Model>
+
+
+
+      <Model name="UpdateRepeat" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; updates the counter for storing the start/end anchor act of the prism in subsequent passes of the component -->
+	<!-- Filter Description: Only adult info is processed and also only those that are not in the network-->
+	<DependentVariable var="repeat"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="runtime" var="repeat" coeff="1"/>
+      </Model>
+
+    </Component>
+
+    <Component name="PersonPrismActivitiesOrigDelete" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="scheduleid" skip="False" completed="True">
+      <DBTables>
+	<Table table="schedule_final_r" key="scheduleid"/>
+    	<Table table="persons_prism_activities_r" key="scheduleid" order="1"/>
+      </DBTables>
+
+      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="schedule_final_r" var="houseid" coeff="1"/>
+      </Model>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Variance value="0"/>
+        <Variable table="schedule_final_r" var="personid" coeff="1"/>
+      </Model>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="scheduleid"/>
+	<Filter table="runtime" var="houseid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="persons_prism_activities_r" var="scheduleid" coeff="1"/>
+      </Model>
+
+    </Component>
+
+
+    <Component name="DeleteScheduleIdsFromPersonsPrism" read_from_table="persons_prism_activities_r" key="scheduleid" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_prism_activities_r" key="scheduleid" order="1"/>
+      </DBTables>
+
+      <DeleteBasedOn table="persons_prism_activities_r" var="scheduleid"/>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="persons_prism_activities_r" var="houseid" coeff="1"/>
+      </Model>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Variance value="0"/>
+        <Variable table="persons_prism_activities_r" var="personid" coeff="1"/>
+      </Model>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="scheduleid"/>
+	<Filter table="runtime" var="houseid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="persons_prism_activities_r" var="scheduleid" coeff="1"/>
+      </Model>
 
     </Component>
 
@@ -1122,7 +1515,6 @@
         <Variable table="runtime" var="en_activitytype" coeff="1"/>
       </Model>
 
-
       <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="runtime" valuevar="en_locationid"/>
@@ -1135,41 +1527,31 @@
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="200"/>
-	<Filter table="runtime" var="en_activitytype" condition="less than" value="600"/>
 	<Filter table="runtime" var="duration" condition="greater than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
-      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
+      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="st_activitytype" condition="equals" value="597"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="601"/>
+	<Filter table="runtime" var="en_activitytype" condition="equals" value="600"/>
+	<Filter table="runtime" var="duration" condition="greater than equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
       </Model>
-
-      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="en_activitytype" condition="equals" value="597"/>
-	<Filter table="runtime" var="duration" condition="less than" value="2"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
 
       <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="fromzone" condition="equals" value="106"/>
-	<Filter table="runtime" var="tozone" condition="equals" value="1240"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="600"/>
+	<Filter table="runtime" var="en_activitytype" condition="equals" value="601"/>
+	<Filter1 table="runtime" var="duration" condition="greater than equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
-
 
 
       <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
@@ -1178,139 +1560,6 @@
 	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="trips_to_malta_r" var="tripid" condition="equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-    </Component>
-
-    <Component name="ExtractTravelEpisodesIncludingExpected" read_from_table="schedule_final_r" write_to_table="trips_inc_expected_to_malta_r" key="houseid,personid" skip="True" completed="True">
-      <DBTables>
-    	<Table table="persons" key="houseid,personid" order="1"/>
-    	<Table table="trips_r" key="houseid,personid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="schedule_final_r" key="houseid,personid"/>
-    	<Table table="trips_inc_expected_to_malta_r" key="houseid,personid"/>
-      </DBTables>
-
-      <AnalysisInterval start="1440" end="1440" step="1"/>
-
-      <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
-	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
-	<End table="schedule_final_r" location_var="locationid" time_var="starttime"/>
-      </SpatialConstraints>
-
-      <Model name="DummyLocationId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="locationid"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="locationid" coeff="1"/>
-      </Model>
-
-      <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="vehid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-      <Model name="ModeChoice" formulation="Probability Distribution" seed="1">
-        <DependentVariable var="tripmode"/>
-
-        <Alternative id="SOV" value="1">
-          <Variable table="persons" var="one" coeff="0.0"/>
-        </Alternative>
-        <Alternative id="HOVD" value="2">
-          <Variable table="persons" var="one" coeff="0.0"/>
-        </Alternative>
-        <Alternative id="HOVP" value="3">
-          <Variable table="persons" var="one" coeff="1.0"/>
-        </Alternative>
-      </Model>
-      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="fromzone"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="st_locationid" coeff="1"/>
-      </Model>
-      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tozone"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_locationid" coeff="1"/>
-      </Model>
-      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="starttime"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-      </Model>
-      <Model name="endtime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="endtime"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_starttime" coeff="1"/>
-      </Model>
-      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="duration"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="endtime" coeff="1"/>
-        <Variable table="runtime" var="starttime" coeff="-1"/>
-      </Model>
-      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="trippurpose"/>
-	<Variance value="0"/>
-        <Variable table="runtime" var="en_activitytype" coeff="1"/>
-      </Model>
-
-
-      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="200"/>
-	<Filter table="runtime" var="en_activitytype" condition="less than" value="600"/>
-	<Filter table="runtime" var="duration" condition="greater than equals" value="2"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="st_activitytype" condition="equals" value="597"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
-      <Model name="actTypeDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="en_activitytype" condition="equals" value="597"/>
-	<Filter table="runtime" var="duration" condition="less than" value="2"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
-      </Model>
-
-
-      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripind"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="fromzone" condition="equals" value="106"/>
-	<Filter table="runtime" var="tozone" condition="equals" value="1240"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-
-
-      <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="adulttrips"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="tripind" condition="equals" value="1"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
@@ -1463,3 +1712,4 @@
 
   </ModelConfig>
 </ProjectConfig>
+
