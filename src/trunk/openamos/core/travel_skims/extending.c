@@ -82,9 +82,9 @@ void set_file(char *s, int length, int flag){
 
 void print_string()
 {
-    printf("C--> printing the file names\n");
-    printf("C--> node file name:  %s\n", node_file_name);
-    printf("C--> graph file name:  %s\n", graph_file_name);
+    //printf("C--> printing the file names\n");
+    //printf("C--> node file name:  %s\n", node_file_name);
+    //printf("C--> graph file name:  %s\n", graph_file_name);
 }
 /*********************************************/
 
@@ -251,10 +251,18 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
     {
         st = org[i];
         en = dest[i];
+
+	if (st == 0 || en == 0) 
+	{
+	tt[i] = 0;
+	}
+	else
+	{
         //printf("C--> i is %d st is %d en is %d node1 is %d node2 is %d\n", i, st, en, (st-offset), (en-offset));
         temp = org_graph[st-offset][en-offset];
         //printf("C--> temp: %f\n", temp);
         tt[i] = temp;
+	}
         //printf("C--> org: %g dest: %g tt: %g\n", org[i], dest[i], tt[i]);
         /*if ( count%10 == 0 )
         {
@@ -262,7 +270,7 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
         }
         count++;*/
     }
-    printf("C--> Travel times retrieved\n");
+    //printf("C--> Travel times retrieved\n");
 }
 
 
@@ -554,7 +562,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         }
         
         //write all the locations to the file
-        write_locations(i);
+        //write_locations(i);
         //after copying the locations, reset temp locations
         set_temp_location_array();
     }
@@ -566,13 +574,15 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
 This function is used to delete the location choices array 
 and free memory.
 */
-void delete_location_array()
+void delete_location_array(int arr_len)
 {
     int i;
-    
+    //printf("C--> Starting to delete location array\n");    
+    //printf("Nodes-%d\n", nodes);
     //delete all the rows
-    for ( i = 0; i < nodes; i++ )
+    for ( i = 0; i < arr_len; i++ )
     {
+	//printf("Counter-%d\n", i);
         free(location_choices[i]);
     }
     
@@ -581,7 +591,7 @@ void delete_location_array()
     
     //set the pointer to NULL to avoid any memory access
     location_choices = NULL;
-    //printf("C--> Location array deleted\n");
+    printf("C--> Location array deleted\n");
 }
 /*********************************************/
 

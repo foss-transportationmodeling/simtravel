@@ -240,7 +240,7 @@ class Extensions(object):
 
         #print 'deleting graph'
         #t1 = time.time()
-        self.delete_location()
+        self.delete_location(arr_len)
         #t2 = time.time()
         #print '\t\tTime taken %s'%(t2-t1)
         
@@ -295,7 +295,7 @@ class Extensions(object):
         #print 'Dynamic arrays deleted'
         
     
-    def delete_location(self):
+    def delete_location(self, arr_len):
         """
         This method deletes the locations array in the C program
         
@@ -305,7 +305,7 @@ class Extensions(object):
         Output:
         Dynamic array deleted
         """
-        extending.delete_location_array()
+        extending.delete_location_array(arr_len)
         #print 'Dynamic location array deleted'
         
         
@@ -331,23 +331,24 @@ class TestExtensions(unittest.TestCase):
     def testEx(self):
         ext_obj = Extensions(self.offset, self.nodes)
         
-        origin = zeros(10000)
-        destination = zeros(10000)
+        origin = zeros(100)
+        destination = zeros(100)
         arr_len = origin.size
 
         num_of_locations = 60        
         #loc_len = arr_len * num_of_locations
         
         i = 0
-        j = 1000
+        j = 995
         offset = 1
 
         # 1st thousand
-        for i in range(0, 1000):
+        for i in range(0, 100):
             origin[i] = i+offset
             destination[i] = j*2
             j = j - 1
           
+	"""
         # 2nd thousand
         j = 1000
         for i in range(1000, 2000):
@@ -356,7 +357,7 @@ class TestExtensions(unittest.TestCase):
             j = j -1
         
         #3rd thousand
-        j = 2000
+        j = 1995
         for i in range(2000, 3000):
             origin[i] = i/10
             destination[i] = j
@@ -410,15 +411,15 @@ class TestExtensions(unittest.TestCase):
             origin[i] = i/10
             destination[i] = j
             j = j -1
-        
+        """
         #origin destination arrays created
         
         """
         To get travel times
         """
         #pass file paths to the C program
-        node_path = "/home/namrata/Documents/swig/arr_sample/temp_data_copy.csv"
-        graph_path = "/home/namrata/Documents/swig/arr_sample/skim1.dat"
+        node_path = "/home/karthik/simtravel/openamos/core/travel_skims/temp_data_copy.csv"
+        graph_path = "/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat"
 
         flag = 1
         ext_obj.set_string(node_path, flag)
@@ -426,20 +427,25 @@ class TestExtensions(unittest.TestCase):
         ext_obj.set_string(graph_path, flag)
         
         #create the travel times graph
-        print 'creating the graph'
+        #print 'creating the graph'
         t1 = time.time()
         n, e = ext_obj.create_graph()
         print 'n: %s e: %s'%(n, e)
         t2 = time.time()
-        print '\t\t\tTime taken %s'%(t2-t1)
+        print '\tTime taken to create the graph - %.4f'%(t2-t1)
         
         #origin destination arrays created. get travel times
-        print 'travel times'
+        #print 'travel times'
         t1 = time.time()
+	print 'Origin - ', origin.astype(int)
+	print 'Destination - ', destination.astype(int)
+        origin = zeros(100)
         new_tt = ext_obj.get_travel_times(origin, destination)
         t2 = time.time()
-        print '\t\t\tTime taken %s'%(t2-t1)
-        
+	print 'Travel Time - ', new_tt[:5]
+
+        print '\tTime taken to retrieve travel times %.4f'%(t2-t1)
+        raw_input('')
         #the numpy array new_tt has the travel times.
         
         
@@ -447,28 +453,42 @@ class TestExtensions(unittest.TestCase):
         For location choices
         """
         #initialize the location array
-        print 'creating location graph'
+        #print 'creating location graph'
         t1 = time.time()
         ext_obj.create_location_array(arr_len)
         t2 = time.time()
-        print '\t\t\tTime taken %s'%(t2-t1)
+        print '\tTime taken to create location array - %.4f'%(t2-t1)
         
         #get location choices
-        print 'location choices'
+        #print 'Location choices'
         t1 = time.time()
+	print 'Origin - ', origin[:5].astype(int)
+	print 'Destination - ', destination[:5].astype(int)
+	print 'Travel Time - ', new_tt[:5]
+	new_tt *= 5
+	print 'New Duration - ', new_tt[:5]
         new_loc = ext_obj.get_location_choices(origin, destination, new_tt, num_of_locations)
+
+	for i in range(num_of_locations):
+	    print origin
+    	    print new_loc[:,i]
+	    tt =  ext_obj.get_travel_times(origin, new_loc[:,i])
+	    print tt
+
+	print new_loc[:5, :].astype(int)
         t2 = time.time()
-        print '\t\t\tTime taken %s'%(t2-t1)
+        print '\tTime taken to retrieve location choices %.4f'%(t2-t1)
         
         #the numpy array new_loc has all the location choices
         
         #after all computations are done delete all the arrays in the C program
-        print 'deleting graph'
+        #print 'deleting graph'
         t1 = time.time()
         ext_obj.delete_graph()
         t2 = time.time()
-        print '\t\t\tTime taken %s'%(t2-t1)
+        print '\tTime taken to delete graph %.4f'%(t2-t1)
         
+	"""
         print 'tt array is new_tt'
         print new_tt.size
         print new_tt[100]
@@ -477,8 +497,8 @@ class TestExtensions(unittest.TestCase):
         print new_loc.size
         print new_loc.ndim
         print new_loc[4][5]
+	"""
 
-        
         
 if __name__ == '__main__':
     unittest.main()
