@@ -3,7 +3,7 @@ import traceback
 import os, sys
 import time
 import exceptions
-import arrayexample
+import extending
 from numpy import *
 
 #class to define the database connection along with other functions
@@ -31,9 +31,9 @@ class Extensions(object):
         Output: Origin and destination carrays
         """
         print 'testing carray creation'
-        p = arrayexample.new_intArray(num)
-        arrayexample.create_array(p, num)
-        arrayexample.print_array(p, num)
+        p = extending.new_intArray(num)
+        extending.create_array(p, num)
+        extending.print_array(p, num)
         return p
         
     
@@ -57,10 +57,10 @@ class Extensions(object):
             edges = self.nodes * self.nodes
         
         #initialize the graph
-        arrayexample.initialize_array(nodes)
+        extending.initialize_array(nodes)
         
         #assign all values to the graph
-        arrayexample.set_array(self.offset)
+        extending.set_array(self.offset)
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
         
@@ -77,7 +77,7 @@ class Extensions(object):
         Output:
         Nodes and edges
         """
-        self.nodes = arrayexample.get_nodes()
+        self.nodes = extending.get_nodes()
         self.edges = self.nodes*self.nodes
         return self.nodes, self.edges
         
@@ -93,18 +93,18 @@ class Extensions(object):
         Carray
         """
         if data_type == 1:
-            new_carr = arrayexample.new_floatArray(arr_len)
+            new_carr = extending.new_floatArray(arr_len)
             i = 0
 
             for each in numpy_arr:
-                arrayexample.floatArray_setitem(new_carr, i, float(each))
+                extending.floatArray_setitem(new_carr, i, float(each))
                 i = i + 1
         else:
-            new_carr = arrayexample.new_intArray(arr_len)
+            new_carr = extending.new_intArray(arr_len)
             i = 0
             
             for each in numpy_arr:
-                arrayexample.intArray_setitem(new_carr, i, int(each))
+                extending.intArray_setitem(new_carr, i, int(each))
                 i = i + 1
                 
         return new_carr
@@ -123,11 +123,11 @@ class Extensions(object):
         numpy_arr = zeros(arr_len)
         if data_type == 1:
             for i in range(arr_len):
-                numpy_arr[i] = arrayexample.floatArray_getitem(carray,i)
+                numpy_arr[i] = extending.floatArray_getitem(carray,i)
                 #numpy_arr[i]
         else:
             for i in range(arr_len):
-                numpy_arr[i] = arrayexample.intArray_getitem(carray,i)
+                numpy_arr[i] = extending.intArray_getitem(carray,i)
                 
         return numpy_arr
         
@@ -156,7 +156,7 @@ class Extensions(object):
         
         print 'Starting travel times computation'
         t1 = time.time()
-        arrayexample.get_tt(org_arr, dest_arr, tt_arr, arr_len, self.offset)
+        extending.get_tt(org_arr, dest_arr, tt_arr, arr_len, self.offset)
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
         
@@ -191,9 +191,9 @@ class Extensions(object):
         """
         print 'Starting location array initialization'
         t1 = time.time()
-        arrayexample.initialize_location_array(arr_len)
-        arrayexample.set_location_array_to_zero(arr_len)
-        arrayexample.set_temp_location_array()
+        extending.initialize_location_array(arr_len)
+        extending.set_location_array_to_zero(arr_len)
+        extending.set_temp_location_array()
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
     
@@ -226,7 +226,7 @@ class Extensions(object):
                
         print 'Starting location choices computation'
         t1 = time.time()
-        arrayexample.get_location_choices(org_arr, dest_arr, tt_arr, loc_arr, arr_len, self.offset, num_of_locations)
+        extending.get_location_choices(org_arr, dest_arr, tt_arr, loc_arr, arr_len, self.offset, num_of_locations)
         t2 = time.time()
         print '\t\tTime taken %s'%(t2-t1)
         
@@ -274,9 +274,9 @@ class Extensions(object):
         Carrays deleted
         """
         if data_type == 1:
-            arrayexample.delete_floatArray(carray)
+            extending.delete_floatArray(carray)
         else:
-            arrayexample.delete_intArray(carray)
+            extending.delete_intArray(carray)
         print 'Carray deleted.'
         
         
@@ -291,7 +291,7 @@ class Extensions(object):
         Output:
         Dynamic Arrays deleted
         """
-        arrayexample.delete_array()
+        extending.delete_array()
         print 'Dynamic arrays deleted'
         
     
@@ -305,7 +305,7 @@ class Extensions(object):
         Output:
         Dynamic array deleted
         """
-        arrayexample.delete_location_array()
+        extending.delete_location_array()
         print 'Dynamic location array deleted'
         
         
@@ -313,8 +313,8 @@ class Extensions(object):
         """
         This method is used to assign the file names
         """
-        arrayexample.set_file(file_path, 1, flag)
-        arrayexample.print_string()
+        extending.set_file(file_path, 1, flag)
+        extending.print_string()
 
 
 
