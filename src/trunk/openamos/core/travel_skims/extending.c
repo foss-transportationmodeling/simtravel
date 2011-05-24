@@ -252,17 +252,17 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
         st = org[i];
         en = dest[i];
 
-	if (st == 0 || en == 0) 
-	{
-	tt[i] = 0;
-	}
-	else
-	{
-        //printf("C--> i is %d st is %d en is %d node1 is %d node2 is %d\n", i, st, en, (st-offset), (en-offset));
-        temp = org_graph[st-offset][en-offset];
-        //printf("C--> temp: %f\n", temp);
-        tt[i] = temp;
-	}
+        if (st == 0 || en == 0) 
+        {
+            tt[i] = 0;
+        }
+        else
+        {
+            //printf("C--> i is %d st is %d en is %d node1 is %d node2 is %d\n", i, st, en, (st-offset), (en-offset));
+            temp = org_graph[st-offset][en-offset];
+            //printf("C--> temp: %f\n", temp);
+            tt[i] = temp;
+        }
         //printf("C--> org: %g dest: %g tt: %g\n", org[i], dest[i], tt[i]);
         /*if ( count%10 == 0 )
         {
@@ -515,56 +515,76 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         org = origin[i];
         dest = destination[i];
         tt = travel_time[i];
-        //printf("org: %d dest: %d tt:%f\n", org, dest, tt);
-        //run a loop over all the nodes to get the locations accessible
-        for(j = 0; j < nodes; j++)
+        if( org == 0 || dest == 0)
         {
-            temp_tt = org_graph[org-offset][j] + org_graph[j][dest-offset];
-            //check if the travel time is less than travel time of OD pair
-            if(temp_tt <= tt)
+            //invalid origin or destination. set all the locations to zero
+            //copy the locations into location choices
+            for(k = 0; k < no_of_locations; k++)
             {
-                //save the node to temp locations
-                location_choices[i][j] = 1;
-
-                /*if(org == 1752 && dest == 249)
+                if(i == 0)
                 {
-                    printf("org: %d dest: %d tt:%f graph[%d][%d] + graph[%d][%d] ", org, dest, tt, org, (j+1), (j+1), dest);
-                    printf(" = %f + %f ", org_graph[org-offset][j], org_graph[j][dest-offset]);
-                    printf("loc_choice[%d][%d]\n", i, j);
-                }*/    
-                //count will help determine the length of temp_locations
-                count++;
-                final_count++;
+                    locations[k] = 0;
+                }
+                else
+                {
+                    counter = i * no_of_locations + k;
+                    locations[counter] = 0;
+                }
             }
         }
-        //generate random locations
-        /*if(org == 1752 && dest == 249)
+        else
         {
-            //printf("%d\t", j);
+            //printf("org: %d dest: %d tt:%f\n", org, dest, tt);
+            //run a loop over all the nodes to get the locations accessible
+            for(j = 0; j < nodes; j++)
+            {
+                temp_tt = org_graph[org-offset][j] + org_graph[j][dest-offset];
+                //check if the travel time is less than travel time of OD pair
+                if(temp_tt <= tt)
+                {
+                    //save the node to temp locations
+                    location_choices[i][j] = 1;
+
+                    /*if(org == 1752 && dest == 249)
+                    {
+                        printf("org: %d dest: %d tt:%f graph[%d][%d] + graph[%d][%d] ", org, dest, tt, org, (j+1), (j+1), dest);
+                        printf(" = %f + %f ", org_graph[org-offset][j], org_graph[j][dest-offset]);
+                        printf("loc_choice[%d][%d]\n", i, j);
+                    }*/    
+                    //count will help determine the length of temp_locations
+                    count++;
+                    final_count++;
+                }
+            }
+            //generate random locations
+            /*if(org == 1752 && dest == 249)
+            {
+                //printf("%d\t", j);
+                generate_random_locations(count, no_of_locations, i);
+            }
+            //printf("\n");*/
+            //generate randome locations
             generate_random_locations(count, no_of_locations, i);
-        }
-        //printf("\n");*/
-        //generate randome locations
-        generate_random_locations(count, no_of_locations, i);
         
-        //copy the locations into location choices
-        for(k = 0; k < no_of_locations; k++)
-        {
-            if(i == 0)
+            //copy the locations into location choices
+            for(k = 0; k < no_of_locations; k++)
             {
-                locations[k] = temp_locations[k];
+                if(i == 0)
+                {
+                    locations[k] = temp_locations[k];
+                }
+                else
+                {
+                    counter = i * no_of_locations + k;
+                    locations[counter] = temp_locations[k];
+                }
             }
-            else
-            {
-                counter = i * no_of_locations + k;
-                locations[counter] = temp_locations[k];
-            }
-        }
         
-        //write all the locations to the file
-        //write_locations(i);
-        //after copying the locations, reset temp locations
-        set_temp_location_array();
+            //write all the locations to the file
+            //write_locations(i);
+            //after copying the locations, reset temp locations
+            set_temp_location_array();
+        }
     }
     //printf("C--> final count: %d\n", final_count);
 }
