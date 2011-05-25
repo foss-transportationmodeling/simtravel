@@ -18,7 +18,7 @@ void create_array(int a[], int n);
 void write_locations(int index);
 
 int get_nodes();
-void initialize_array(int nodes);
+void initialize_array(int nodes_temp);
 void set_array(int offset);
 void get_tt(int org[], int dest[], float tt[], int arr_len, int offset );
 void delete_array();

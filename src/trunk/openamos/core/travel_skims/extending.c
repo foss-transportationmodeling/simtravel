@@ -167,12 +167,13 @@ int get_nodes()
 This function initializes the dynamic array/graph.
 It allocates memory to the array/graph based on the number of nodes.
 */
-void initialize_array(int nodes)
+void initialize_array(int nodes_temp)
 {
     int x;
-    printf("C--> Nodes are %d\n", nodes);
+    nodes = nodes_temp;
+    //printf("C--> Nodes are %d\n", nodes);
     edges = nodes * nodes;
-    printf("C--> Initializing the graph\n");
+    //printf("C--> Initializing the graph\n");
     //initialize the 2D array to the size of the number of nodes
     org_graph = (float **)malloc(nodes*sizeof(float));
     //org_graph = malloc(nodes * sizeof(float *));
@@ -349,7 +350,7 @@ void initialize_location_array(int arr_len)
     {
         location_choices[x] = (int *)malloc(nodes*sizeof(int));
     }
-    printf("\n");
+    //printf("Nodes - %d\n", nodes);
 }
 
 
@@ -421,7 +422,7 @@ void generate_random_locations(int loc_length, int no_of_loc, int index)
     int i, j, limit, random_num, count;
     i = 0;
     count = 0;
-    //if(index % 1000 == 0)
+    //if(index % 10 == 0)
     //{
     //    printf("locations obtained %d locations required %d ongoing index of OD pair %d\n", loc_length, no_of_loc, index);
     //}
@@ -446,7 +447,7 @@ void generate_random_locations(int loc_length, int no_of_loc, int index)
                     printf("temp_locations[%d] = %d\n", count, temp_locations[count]);
                 }*/
                 //printf("2nd if %d\n", count);
-                //random location found save to temp locations
+                //printf("random location found save to temp locations\n");
                 count++;
             }
         }
@@ -519,6 +520,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         {
             //invalid origin or destination. set all the locations to zero
             //copy the locations into location choices
+	    //printf("Origin or destination are zeros - %d\n", i);
             for(k = 0; k < no_of_locations; k++)
             {
                 if(i == 0)
@@ -534,16 +536,20 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         }
         else
         {
+            //printf("Origin or destination are NOT zeros - %d\n", i);
             //printf("org: %d dest: %d tt:%f\n", org, dest, tt);
+	    //printf("Count of nodes - %d\n", nodes);
             //run a loop over all the nodes to get the locations accessible
             for(j = 0; j < nodes; j++)
             {
                 temp_tt = org_graph[org-offset][j] + org_graph[j][dest-offset];
+		//printf("(%d, %f, %d)\t",j, temp_tt, nodes);
                 //check if the travel time is less than travel time of OD pair
                 if(temp_tt <= tt)
                 {
                     //save the node to temp locations
                     location_choices[i][j] = 1;
+   	            //printf("\tIdentified location - %d\n", i);
 
                     /*if(org == 1752 && dest == 249)
                     {

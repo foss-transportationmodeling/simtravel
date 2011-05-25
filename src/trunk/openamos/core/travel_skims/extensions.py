@@ -238,12 +238,7 @@ class Extensions(object):
         #t2 = time.time()
         #print '\t\tTime taken %s'%(t2-t1)
 
-        #print 'deleting graph'
-        #t1 = time.time()
-        self.delete_location(arr_len)
-        #t2 = time.time()
-        #print '\t\tTime taken %s'%(t2-t1)
-        
+       
         #print 'Starting conversion from carray to numpy'
         #t1 = time.time()
         new_loc = self.carray_to_numpy(loc_arr, loc_len, 0)
@@ -260,6 +255,13 @@ class Extensions(object):
         #change the dimensions of the new_loc numpy array
         new_loc.shape = (arr_len, num_of_locations)
         #return the locations numpy array
+
+        #print 'deleting graph'
+        #t1 = time.time()
+        self.delete_location(arr_len)
+        #t2 = time.time()
+        #print '\t\tTime taken %s'%(t2-t1)
+
         return new_loc
             
         
@@ -448,7 +450,6 @@ class TestExtensions(unittest.TestCase):
 	print 'Travel Time - ', new_tt[:5]
 
         print '\tTime taken to retrieve travel times %.4f'%(t2-t1)
-        raw_input('')
         #the numpy array new_tt has the travel times.
         
         
