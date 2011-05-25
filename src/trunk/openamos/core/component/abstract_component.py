@@ -102,11 +102,8 @@ class AbstractComponent(object):
 	#print 'count keys after', count_keys
 	#raw_input()
 
-	print skimsMatrix
-	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix)
 
         # Prepare Data
-	print '\tInside the pre processor; just before prepare_data refcount is - ', sys.getrefcount(skimsMatrix)
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
                                  count_keys)        
 
@@ -129,7 +126,7 @@ class AbstractComponent(object):
 	print '\tReached point where skims are used'
         data = self.process_data_for_locs(data, self.spatialConst_list, 
                                           skimsMatrix, uniqueIds)
-	raw_input('Time taken to process spatial constraints - %.4f' %(time.time()-t))
+	print ('Time taken to process spatial constraints - %.4f' %(time.time()-t))
         if data == None or data.rows == 0:
             return None
 
@@ -257,7 +254,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -297,7 +294,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
-                print 'RESULT', result.data
+                #print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -619,7 +616,6 @@ class AbstractComponent(object):
         to the N random location choices.
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
-        
 
         t = time.time()
 
@@ -754,12 +750,62 @@ class AbstractComponent(object):
 	#print 'count', count
 	
 	# Create location array
-	skimsMatrix.create_location_array(data.rows)
 
-	locationChoices = skimsMatrix.get_location_choices(originLocColVals, destinationLocColVals, 
-					  		   timeAvailable, spatialconst.countChoices)
 
+	print 'Origin - ', originLocColVals[:,0]
+	print 'Destination - ', destinationLocColVals[:,0]
+	timeAvailable = timeAvailable.astype(float)
+	print 'Time Available - ', timeAvailable[:,0]	
+
+	#tt = skimsMatrix2.get_travel_times(originLocColVals[:,0], destinationLocColVals[:,0])
+	#print tt
+
+
+	print spatialconst.countChoices, data.rows
+	skimsMatrix2.create_location_array(data.rows)
+	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
+					  		    timeAvailable[:,0], spatialconst.countChoices)
+
+	print locationChoices.sum(-1)
+	#print locationChoices
 	
+
+	for i in range(spatialconst.countChoices):
+	    sampleLocColVals = locationChoices[:,i].astype(int)
+
+	    tt_to = skimsMatrix2.get_travel_times(originLocColVals[:,0], sampleLocColVals)
+	    tt_from = skimsMatrix2.get_travel_times(sampleLocColVals, destinationLocColVals[:,0])
+	
+	    #print 'Sampled locations - ', sampleLocColVals
+	    #print 'Travel time to - ', tt_to
+	    #print 'Travel time from - ', tt_from
+
+	    # Also updating skim values for sampled locations: here the travel time TO sampled location is updated
+            if spatialconst.asField:
+                colName = spatialconst.asField
+            else:
+                colName = spatialconst.skimField
+            skimLocColName = '%s%s' %(colName, i+1)
+	
+            data.setcolumn(skimLocColName, tt_to)
+
+
+	    # Also updating skim values for sampled locations: here the travel time FROM sampled location is updated
+            destSkimColName = 'tt_from%s' %(i+1)
+            data.setcolumn(destSkimColName, tt_from)
+
+
+	    # Also updating location attributes for sampled locations
+            if len(spatialconst.locationVariables) > 0:
+                for j in spatialconst.locationVariables:
+                    #print j
+                    locationVarName = '%s%s' %(j, i+1)
+                    locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
+                    data.setcolumn(locationVarName, locVarVals)
+                    #print locVarVals
+
+
+
 	"""
 
         for i in range(count):
@@ -820,15 +866,17 @@ class AbstractComponent(object):
                 for j in spatialconst.locationVariables:
                     #print j
                     locationVarName = '%s%s' %(j, i+1)
-                    locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
+                    locVarVals = locationsTable.columns([j]).data
+[sampleLocColVals]
                     data.setcolumn(locationVarName, locVarVals)
                     #print locVarVals
-        #raw_input()
+        raw_input()
 
 
-	"""
+
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
+	"""
 
         return data
             
@@ -840,6 +888,23 @@ class AbstractComponent(object):
         
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
+
+	tt = skimsMatrix2.get_travel_times(originLocColVals, destinationLocColVals)
+        if spatialconst.asField:
+            colName = spatialconst.asField
+        else:
+            colName = spatialconst.skimField
+
+        sampleVarDict = {'temp':[colName]}
+        self.append_cols_for_dependent_variables(data, sampleVarDict)
+        data.setcolumn(colName, tt)	
+
+	print originLocColVals[:,0]
+	print destinationLocColVals[:,0]
+	print tt
+
+
+	"""	
 
 
         vals = skimsMatrix2[originLocColVals, destinationLocColVals]
@@ -873,7 +938,7 @@ class AbstractComponent(object):
 
 
 	#raw_input()
-
+	"""
         return data
 
     def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed):
