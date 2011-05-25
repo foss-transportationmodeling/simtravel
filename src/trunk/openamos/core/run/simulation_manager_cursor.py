@@ -14,7 +14,7 @@ from openamos.core.data_array import DataArray
 from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
-from openamos.core.travel_skims.extensions import Extensions
+from openamos.core.travel_skims.extensions import Extensions as SkimsProcessor
 
 from multiprocessing import Process
 
@@ -258,7 +258,7 @@ class SimulationManager(object):
 
         try:
             lastTableName = None
-            self.skimsMatrix = None
+            skimsMatrix = None
             uniqueIds = None
             for comp in self.componentList:
                 t = time.time()
@@ -280,21 +280,8 @@ class SimulationManager(object):
                     print """\tThe tod interval for the the previous component is not same """\
                         """as current component. """\
                         """Therefore the skims matrix should be reloaded."""
-	   	    print '\tBefore creating instance', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
-		    self.skimsMatrix = Extensions(1, 1995)
 
-	   	    print '\tAfter creating instance', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
-		    # Not sure what the flag does?SkimsProcessor
-		    self.skimsMatrix.set_string(tableName, 0)
-		    print '\tTable location - ', tableName
-
-	   	    print '\tAfter set string', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
-		    # Creating graph and passing the skimsMatrix
-		    n, e = self.skimsMatrix.create_graph()
-		    print '\tN - %s, E - %s' %(n, e)
-
-	   	    print '\tAfter create graph', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
-                    #skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
+                    skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
                     lastTableName = tableName
 
                 elif tableName == lastTableName:
@@ -303,21 +290,31 @@ class SimulationManager(object):
                         """Therefore the skims matrix need not be reloaded."""
 
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
-		raw_input('\tPress any key to continue')
+		#raw_input('\tPress any key to continue')
 
+		#origin = ones(5)
+		#destination = ones(5) + array(range(5))
+		#print origin, destination
+		#raw_input()
+		#print skimsMatrix.get_travel_times(origin,destination)
+		"""
+		raw_input('before skims function')
+		tt = skimsMatrix.get_travel_times(ones(99),ones(99))
+		print 'TT retrieved - ', sys.getrefcount(tt)	
+		print type(tt)
+		raw_input('waiting for skims')
 
-		print self.skimsMatrix.get_travel_times(ones(99),ones(99))
-		print '\tBefore passing it to abstract component', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
-        
+		raw_input('\tBefore passing it to abstract component - %s, %s' %(sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)))
+		"""
 	        data = comp.pre_process(queryBrowser,  
-                                        self.skimsMatrix, uniqueIds,
+                                        skimsMatrix, uniqueIds,
                                         self.db)
 		
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed = comp.run(data, self.skimsMatrix, partId)
+                    nRowsProcessed = comp.run(data, skimsMatrix, partId)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
@@ -407,11 +404,10 @@ class SimulationManager(object):
 
 	# Not sure what the flag does?SkimsProcessor
 	skimsMatrix.set_string(tableLocation, 0)
-	print tableLocation
 
 	# Creating graph and passing the skimsMatrix
 	n, e = skimsMatrix.create_graph()
-
+	
 	uniqueIds = None
 	#return origin, origin
         return skimsMatrix, uniqueIds
