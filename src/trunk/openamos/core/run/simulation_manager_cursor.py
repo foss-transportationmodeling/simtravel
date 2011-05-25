@@ -14,6 +14,7 @@ from openamos.core.data_array import DataArray
 from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
+from openamos.core.travel_skims.extensions import Extensions
 
 from multiprocessing import Process
 
@@ -112,6 +113,8 @@ class SimulationManager(object):
         self.db.load_input_output_nodes(partId)
         
     def setup_tod_skims(self):
+	return
+	"""
         print "-- Processing Travel Skims --"
         for tableInfo in self.projectSkimsObject.tableDBInfoList:
 	    colsList = []
@@ -123,8 +126,9 @@ class SimulationManager(object):
 	    data = self.import_skims_from_flatfile(fileLocation, colsList)
             tableName = tableInfo.tableName
             self.db.createSkimsCache(tableName, data)
+	"""
 
-
+    """
     def import_skims_from_flatfile(self, fileLocation, colsList):
 	print 'Parsing csv text file - %s and returning a DataArray object' %(fileLocation)
 	ti = time.time()	
@@ -151,6 +155,7 @@ class SimulationManager(object):
 	
 	return DataArray(data, colsList)
  
+    """
     """
     def setup_tod_skims1(self, queryBrowser):
         print "-- Processing Travel Skims --"
@@ -253,7 +258,7 @@ class SimulationManager(object):
 
         try:
             lastTableName = None
-            skimsMatrix = None
+            self.skimsMatrix = None
             uniqueIds = None
             for comp in self.componentList:
                 t = time.time()
@@ -266,7 +271,8 @@ class SimulationManager(object):
                 
                 #Load skims matrix outside so that when there is temporal aggregation
                 # of tod skims then loading happens only so many times
-
+		
+		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
                 
                 if tableName <> lastTableName and len(comp.spatialConst_list) > 0:
@@ -274,7 +280,21 @@ class SimulationManager(object):
                     print """\tThe tod interval for the the previous component is not same """\
                         """as current component. """\
                         """Therefore the skims matrix should be reloaded."""
-                    skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
+	   	    print '\tBefore creating instance', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
+		    self.skimsMatrix = Extensions(1, 1995)
+
+	   	    print '\tAfter creating instance', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
+		    # Not sure what the flag does?SkimsProcessor
+		    self.skimsMatrix.set_string(tableName, 0)
+		    print '\tTable location - ', tableName
+
+	   	    print '\tAfter set string', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
+		    # Creating graph and passing the skimsMatrix
+		    n, e = self.skimsMatrix.create_graph()
+		    print '\tN - %s, E - %s' %(n, e)
+
+	   	    print '\tAfter create graph', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
+                    #skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
                     lastTableName = tableName
 
                 elif tableName == lastTableName:
@@ -282,15 +302,22 @@ class SimulationManager(object):
                         """as current component. """\
                         """Therefore the skims matrix need not be reloaded."""
 
-                data = comp.pre_process(queryBrowser,  
-                                        skimsMatrix, uniqueIds,
-                                        self.db)
+		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
+		raw_input('\tPress any key to continue')
 
+
+		print self.skimsMatrix.get_travel_times(ones(99),ones(99))
+		print '\tBefore passing it to abstract component', sys.getrefcount(self.skimsMatrix), sys.getsizeof(self.skimsMatrix)
+        
+	        data = comp.pre_process(queryBrowser,  
+                                        self.skimsMatrix, uniqueIds,
+                                        self.db)
+		
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed = comp.run(data, skimsMatrix, partId)
+                    nRowsProcessed = comp.run(data, self.skimsMatrix, partId)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
@@ -334,6 +361,27 @@ class SimulationManager(object):
         if len(comp.spatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
+            tableLocation = None
+            pass
+        else:
+            analysisInterval = comp.analysisInterval
+        
+            if comp.analysisInterval is not None:
+                tableLocation = self.projectSkimsObject.lookup_tableLocation(analysisInterval)
+            else:
+                # Corresponding to the morning peak
+                # currently fixed can be varied as need be
+                tableLocation = self.projectSkimsObject.lookup_tableLocation(240)
+
+        print '\tSkims Matrix Identified in - %.4f' %(time.time()-ti)
+        return tableLocation
+
+
+    def identify_skims_matrix1(self, comp):
+        ti = time.time()
+        if len(comp.spatialConst_list) == 0:
+            # When there are no spatial constraints to be processed
+            # return an empty skims object
             tableName = None
             pass
         else:
@@ -346,11 +394,32 @@ class SimulationManager(object):
                 # currently fixed can be varied as need be
                 tableName = self.projectSkimsObject.lookup_table(240)
 
-        print '\tSkims Matrix Loaded in - %s' %(time.time()-ti)
-
+        print '\tSkims Matrix Loaded in - %.4f' %(time.time()-ti)
         return tableName
 
-    def load_skims_matrix(self, comp, tableName):
+
+    def load_skims_matrix(self, comp, tableLocation):
+
+	# the first argument is an offset and the second one is the count of nodes
+	# note that the taz id's should be indexed at the offset and be in increments
+	# of 1 for every subsequent taz id
+	skimsMatrix = SkimsProcessor(1, 1995)
+
+	# Not sure what the flag does?SkimsProcessor
+	skimsMatrix.set_string(tableLocation, 0)
+	print tableLocation
+
+	# Creating graph and passing the skimsMatrix
+	n, e = skimsMatrix.create_graph()
+
+	uniqueIds = None
+	#return origin, origin
+        return skimsMatrix, uniqueIds
+
+
+
+
+    def load_skims_matrix1(self, comp, tableName):
         const = comp.spatialConst_list[0]
         
         originColName = const.originField

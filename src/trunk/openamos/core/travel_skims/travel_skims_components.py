@@ -34,6 +34,7 @@ class TravelSkimsInfo(object):
             
         self.indb_flag = indb_flag
         self.table_lookup = {}
+        self.table_locationLookup = {}
         self.tableDBInfoList = []
         self.tableNamesList = []
 
@@ -42,6 +43,12 @@ class TravelSkimsInfo(object):
         print '\tSkims table name - %s applies for interval starting at %s and ending at %s' %(tableName, intervalStart,
                                                               intervalEnd)
         
+    def add_tableLocationLookup(self, intervalStart, intervalEnd, file_location):
+        self.table_locationLookup[(intervalStart, intervalEnd)] = file_location
+        print '\tSkims file location - %s applies for interval starting at %s and ending at %s' %(file_location, intervalStart,
+                                                              					  intervalEnd)
+
+
     def add_tableInfoToList(self, tableName, origin_var, destination_var,
                             skims_var, intervalStart, intervalEnd, targetTableName,
 			    #import_flag=None, 
@@ -59,7 +66,7 @@ class TravelSkimsInfo(object):
             self.tableDBInfoList.append(dbInfoObject)
             self.tableNamesList.append(tableName)
         self.add_tableLookup(intervalStart, intervalEnd, tableName)
-
+	self.add_tableLocationLookup(intervalStart, intervalEnd, file_location)
 
     def lookup_table(self, period):
         period_boundaries = self.table_lookup.keys()
@@ -72,6 +79,17 @@ class TravelSkimsInfo(object):
 
         return None
 
+
+    def lookup_tableLocation(self, period):
+        period_boundaries = self.table_locationLookup.keys()
+        period_boundaries.sort()
+        
+
+        for boundary in period_boundaries:
+            if period >= boundary[0] and period <= boundary[1]:
+                return self.table_locationLookup[boundary]
+
+        return None
 
             
                  

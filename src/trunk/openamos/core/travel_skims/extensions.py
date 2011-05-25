@@ -317,6 +317,9 @@ class Extensions(object):
         extending.print_string()
 
 
+    def __del__(self):
+	print 'object is deleted'
+
 
 #unit test to test the code
 import unittest
@@ -484,6 +487,7 @@ class TestExtensions(unittest.TestCase):
         #after all computations are done delete all the arrays in the C program
         #print 'deleting graph'
         t1 = time.time()
+	#ext_obj.delete_location_array()
         ext_obj.delete_graph()
         t2 = time.time()
         print '\tTime taken to delete graph %.4f'%(t2-t1)

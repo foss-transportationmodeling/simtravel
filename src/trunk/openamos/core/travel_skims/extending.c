@@ -170,9 +170,9 @@ It allocates memory to the array/graph based on the number of nodes.
 void initialize_array(int nodes)
 {
     int x;
-    //printf("C--> Nodes are %d\n", nodes);
+    printf("C--> Nodes are %d\n", nodes);
     edges = nodes * nodes;
-    //printf("C--> Initializing the graph\n");
+    printf("C--> Initializing the graph\n");
     //initialize the 2D array to the size of the number of nodes
     org_graph = (float **)malloc(nodes*sizeof(float));
     //org_graph = malloc(nodes * sizeof(float *));
@@ -183,7 +183,7 @@ void initialize_array(int nodes)
         org_graph[x] = (float *)malloc(nodes*sizeof(float));
         //org_graph[x] = malloc(nodes * sizeof(float));
     }
-    //printf("C--> Graph created\n");
+    printf("C--> Graph created\n");
 }
 
 
@@ -196,8 +196,8 @@ void set_array(int offset)
     int i;
 
     //open the file to read data
-    //printf("C--> Opening the file\n");
-    //printf("C--> Graph File: %s\n", graph_file_name);
+    printf("C--> Opening the file\n");
+    printf("C--> Graph File: %s\n", graph_file_name);
     FILE *file = fopen(graph_file_name, "r");
 
     //process till end of file
@@ -217,7 +217,7 @@ void set_array(int offset)
         }
         
         //close the file
-        //printf("C--> Closing the file\n");
+        printf("C--> Closing the file\n");
         fclose(file);
     }
     else
@@ -226,7 +226,7 @@ void set_array(int offset)
         printf("C--> Error reading the file.\n");
         perror(graph_file_name);
     }
-    //printf("C--> Graph created with new values\n");
+    printf("C--> Graph created with new values\n");
 }
 
 

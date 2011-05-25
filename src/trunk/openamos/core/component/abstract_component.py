@@ -1,4 +1,4 @@
-
+import sys
 import copy
 import time
 from numpy import logical_or, logical_and, ones, ma, zeros, where, vstack
@@ -76,6 +76,11 @@ class AbstractComponent(object):
                     skimsMatrix, uniqueIds,
                     db):
 
+
+	print skimsMatrix
+	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)
+
+
         t_d = time.time()
         # process the variable list to exclude double columns, 
         # return the primary keys, the county keys, 
@@ -97,8 +102,11 @@ class AbstractComponent(object):
 	#print 'count keys after', count_keys
 	#raw_input()
 
+	print skimsMatrix
+	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix)
 
         # Prepare Data
+	print '\tInside the pre processor; just before prepare_data refcount is - ', sys.getrefcount(skimsMatrix)
         data = self.prepare_data(queryBrowser, vars_dict, depvars_dict, 
                                  count_keys)        
 
@@ -117,9 +125,11 @@ class AbstractComponent(object):
             return None
 
         # Process and include spatial query information
+	t = time.time()
+	print '\tReached point where skims are used'
         data = self.process_data_for_locs(data, self.spatialConst_list, 
                                           skimsMatrix, uniqueIds)
-
+	raw_input('Time taken to process spatial constraints - %.4f' %(time.time()-t))
         if data == None or data.rows == 0:
             return None
 
@@ -623,11 +633,11 @@ class AbstractComponent(object):
                 skimColName = i.skimField
 
                 if i.countChoices is not None: 
-                    #print ("""\t\tNeed to sample location choices for the following""" \
-                    #           """model with also location info extracted """)
+                    print ("""\t\tNeed to sample location choices for the following""" \
+                               """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i)
                 else:
-                    #print '\tNeed to extract skims'
+                    print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
 
         return data
@@ -654,6 +664,8 @@ class AbstractComponent(object):
 
         timeAvailable = destinationTimeColVals - originTimeColVals
 
+	"""
+
         destLocSetInd2 = zeros((data.rows, max(uniqueIds) + 1), dtype=float)
 
 
@@ -679,22 +691,24 @@ class AbstractComponent(object):
 	#print timeAvailable
 	#print destLocSetInd2
 
-        rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
-        print """\t\t%s records were deleted because there """\
-            """were no location reachable given the spatial/temporal """\
-            """constraints""" %(rowsZeroChoices.sum())
+	"""
+
+        #rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
+        #print """\t\t%s records were deleted because there """\
+        #    """were no location reachable given the spatial/temporal """\
+        #    """constraints""" %(rowsZeroChoices.sum())
 
 
         # Deleting records for zero choices
-        data.deleterows(~rowsZeroChoices)
+        #data.deleterows(~rowsZeroChoices)
 
-        originLocColVals = originLocColVals[~rowsZeroChoices, :]
-        destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
+        #originLocColVals = originLocColVals[~rowsZeroChoices, :]
+        #destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
 
-        originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
-        destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
+        #originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
+        #destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
 
-        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
+        #destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
 
 
         #print """\t\tResulting records in the dataset - %s """%(data.rows)
@@ -702,9 +716,9 @@ class AbstractComponent(object):
         if data.rows == 0:
             return
 
-        destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
+        #destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
 
-        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIds))]
+        #zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIds))]
 
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
@@ -716,7 +730,7 @@ class AbstractComponent(object):
 
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
-
+	"""
         seed = spatialconst.seed
         count = spatialconst.countChoices
         sampledChoicesCheck = True
@@ -727,6 +741,7 @@ class AbstractComponent(object):
             #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
             sampledChoicesCheck = False
             seed = seed + 1
+	"""
 
         # Extract the location variables cache
         if len(spatialconst.locationVariables) > 0:
@@ -737,6 +752,15 @@ class AbstractComponent(object):
 
 
 	#print 'count', count
+	
+	# Create location array
+	skimsMatrix.create_location_array(data.rows)
+
+	locationChoices = skimsMatrix.get_location_choices(originLocColVals, destinationLocColVals, 
+					  		   timeAvailable, spatialconst.countChoices)
+
+	
+	"""
 
         for i in range(count):
             sampleLocColName = '%s%s' %(sampleVarName, i+1)
@@ -801,6 +825,8 @@ class AbstractComponent(object):
                     #print locVarVals
         #raw_input()
 
+
+	"""
         colsInTable = sampleVarDict['temp']
         colsInTable.sort()
 

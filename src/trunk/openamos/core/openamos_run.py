@@ -47,7 +47,7 @@ def run(fileLoc=None):
 	else:
 	    simulationManagerObject.read_cacheDatabase()
         simulationManagerObject.parse_config()
-        simulationManagerObject.clean_database_tables()
+        #simulationManagerObject.clean_database_tables()
         simulationManagerObject.run_components()
         simulationManagerObject.close_cache_connection()
     else:
