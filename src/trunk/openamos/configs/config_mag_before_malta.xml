@@ -42,8 +42,11 @@
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
     <LocationVariable var="retail_employment"/>
-    <LocationVariable var="industrial_employment"/>
+    <LocationVariable var="public_employment"/>
+    <LocationVariable var="residential_population"/>
     <LocationVariable var="total_area"/>
+    <LocationVariable var="multi_family_dwelling"/>
+    <LocationVariable var="single_family_dwelling"/>
     <LocationVariable var="institutional_population"/>
   </Locations>
 

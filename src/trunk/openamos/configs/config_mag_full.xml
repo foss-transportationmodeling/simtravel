@@ -1,9 +1,9 @@
 <ProjectConfig>
   <Project name="mag_zone" location="/home/karthik/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_seq" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
 
-  <TravelSkims reference_tablename="travel_skims" indb="True">
+  <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim1.dat" delimiter=","/>
     <Period tablename="travel_skims_2" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="179" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim2.dat" delimiter=","/>
@@ -29,22 +29,25 @@
     <Period tablename="travel_skims_22" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1320" intervalEnd="1379" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim22.dat" delimiter=","/>
     <Period tablename="travel_skims_23" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1380" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim23.dat" delimiter=","/>
 
-  </TravelSkims>
-
-  <TravelSkims1 reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/travel_skims_offpeak.dat" delimiter=","/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/travel_skims_offpeak" delimiter=","/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/travel_skims_peak" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/travel_skims_offpeak" delimiter=","/>
   </TravelSkims1>
+
+  <TravelSkims reference_tablename="travel_skims" indb="True">
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+  </TravelSkims>
 
 
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
     <LocationVariable var="retail_employment"/>
-    <LocationVariable var="industrial_employment"/>
+    <LocationVariable var="public_employment"/>
+    <LocationVariable var="residential_population"/>
     <LocationVariable var="total_area"/>
+    <LocationVariable var="multi_family_dwelling"/>
+    <LocationVariable var="single_family_dwelling"/>
     <LocationVariable var="institutional_population"/>
   </Locations>
 
@@ -1422,7 +1425,7 @@
      
     </Component>
 
-    <Component name="CleanDailyFixedActivitySchedule" read_from_table="schedule_ltrec_r" write_to_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="CleanDailyFixedActivitySchedule" read_from_table="schedule_ltrec_r" write_to_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -1462,7 +1465,7 @@
      
     </Component>	
 
-    <Component name="AfterSchoolActivities" read_from_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="AfterSchoolActivities" read_from_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -1474,9 +1477,9 @@
     	<Table table="child_dependency_r" key="houseid,personid"/>
       </DBTables>
 
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
-      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
+      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="30" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
@@ -1513,6 +1516,7 @@
 
 	
       <ConsistencyChecks name="AfterSchoolActivityChecks">
+	<Filter table="runtime" var="locationid" condition="greater than" value="0"/>
 	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
@@ -1809,7 +1813,7 @@
       </Model>
 
       <Model name="locationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="3"/>
+        <AlternativeSet count="30"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -1935,7 +1939,7 @@
 
     </Component>
 
-    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_cleanfixedactivityschedule_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_cleanfixedactivityschedule_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -1945,7 +1949,7 @@
     	<Table table="schedule_childreninctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
@@ -2166,7 +2170,7 @@
     </Component>	
 
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_cleanaggregateactivityschedule_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_cleanaggregateactivityschedule_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -2209,7 +2213,7 @@
 
 
 
-    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -2251,7 +2255,7 @@
      
    </Component>	
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -2262,7 +2266,7 @@
     	<Table table="child_dependency_r" key="houseid,personid"/>
       </DBTables>
 
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
@@ -2995,7 +2999,7 @@
 
     </Component>
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -3005,7 +3009,7 @@
     	<Table table="schedule_inctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_dailyallocrec_r" location_var="locationid" time_var="endtime"/>
@@ -3250,7 +3254,7 @@
      
     </Component>
 
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -3260,7 +3264,7 @@
     	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
@@ -3542,14 +3546,14 @@
 
 
 
-    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="trips_r" key="houseid,personid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>True
     	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
@@ -3663,7 +3667,7 @@
 
     </Component>
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
