@@ -4,6 +4,7 @@
 #include<malloc.h>
 #include<math.h>
 #include<string.h>
+#include "skimsquery.h"
 
 #define MAX 100
 
