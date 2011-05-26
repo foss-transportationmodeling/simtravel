@@ -2,6 +2,10 @@
 
 %module skimsquery
 
+%{
+#include "skimsquery.h"
+%}
+
 %include "carrays.i"
 %array_functions(float, floatArray);
 %array_functions(int, intArray);
