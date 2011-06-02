@@ -820,7 +820,7 @@ class MakeResultPlot(QDialog):
         occupancy = {1:[0],2:[1],3:[2],4:[3],5:[4],6:[5,30000]}
         activitytype = {100:[100],101:[101],150:[150],151:[151],200:[200],201:[201],300:[300],301:[301],411:[411],
                         412:[412],415:[415],416:[416],461:[461],462:[462],465:[465],466:[466],513:[513],514:[514],
-                        597:[597],598:[598],600:[600],601:[601],900:[900]}
+                        597:[597],598:[598],600:[600],601:[601],599:[599]}
 
         if column == "starttime" or column == "endtime": 
             return time
@@ -841,7 +841,7 @@ class MakeResultPlot(QDialog):
                         301:'Shcool',411:'OH-Pers Buss',
                         412:'OH-Shopping',415:'OH-Meal',416:'OH-Serve Passgr',461:'OH-Dependent Pers Buss',462:'OH-Dependent Shopping',
                         465:'OH-Dependent Meal',466:'OH-Dependent Serve Passgr',513:'OH-Social Visit',514:'OH-Sports/Rec',597:'Filler',
-                        598:'Anchor',600:'Pick-up',601:'Drop-off',900:'Other'}                
+                        598:'Anchor',600:'Pick-up',601:'Drop-off',599:'Other'}                
         modedict = {1:'Car',2:'Van',3:'SUV',4:'Pickup Truck',5:'Bus',6:'Train',7:'School Bus',8:'Bike',9:'Walk',
                     10:'Taxi',11:'Other'}
         starttime = {1:'4am-5am',2:'5am-6am',3:'6am-7am',4:'7am-8am',5:'8am-9am',6:'9am-10am',
@@ -898,7 +898,7 @@ class MakeResultPlot(QDialog):
     def where_trip(self):
         trippurpose = {1:[100],2:[101],3:[150],4:[151],5:[200],6:[201],7:[300],8:[301],9:[411],
                         10:[412],11:[415],12:[416],13:[461],14:[462],15:[465],16:[466],17:[513],18:[514],
-                        19:[597],20:[598],21:[600],22:[601],23:[900]}
+                        19:[597],20:[598],21:[600],22:[601],23:[599]}
         setime = self.time_categroy("starttime")
         duration = self.time_categroy("duration")
         tripmode = self.time_categroy("tripmode")
