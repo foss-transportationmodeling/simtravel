@@ -13,10 +13,10 @@ from results_menu.to_postgis import *
 from results_menu.view_sched import *
 from results_menu.view_plot import *
 from results_menu.kml_num_trips import *
-from run_menu.simulation_dialog import *
+#from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
-from openamos.core.run.simulation_manager_cursor import SimulationManager
+#from openamos.core.run.simulation_manager_cursor import SimulationManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -97,10 +97,27 @@ class MainWindow(QMainWindow):
         self.data_management.headerItem().setText(0, "Data Management")
         self.data_management.setMinimumSize(50,50)
 
+        buttonwidget = QWidget(self)
+        buttonwidget.setMaximumHeight(32)
+        buttonlayout = QHBoxLayout()
+        buttonwidget.setLayout(buttonlayout)
+        buttonlayout.setContentsMargins(0,0,0,0)
+        
+        tools = QToolBar()
+        #tools.setMaximumWidth(70)
+        up_action = self.createaction("",self.getup,"","arrow_up","Move up an element in the tree.")
+        down_action = self.createaction("",self.getdown,"","arrow_down","Move down an element in the tree.")
+        tools.addAction(up_action)
+        tools.addAction(down_action)
+        buttonlayout.addWidget(tools)
+
 
         # Adding model_management and data_management to all_manager_dock_widget
+        splitter.addWidget(buttonwidget)
         splitter.addWidget(self.model_management)
         splitter.addWidget(self.data_management)
+        
+
 
 
         # Call the class Models
@@ -204,13 +221,13 @@ class MainWindow(QMainWindow):
 
     # Defining Run
         self.run_menu = self.menuBar().addMenu("&Run")
-        run_simulation_action = self.createaction("&Simulation", self.run_simulation, None, 
-                                            "run", "Implement the model.", False, True)        
-#        setting_preference_action = self.createaction("&Preference", None, None, 
-#                                            "preferences", "Make a configuration.")        
+        run_simulation_action = self.createaction("&Simulation", self.run_simulation, None,
+                                            "run", "Implement the model.", False, True)
+#        setting_preference_action = self.createaction("&Preference", None, None,
+#                                            "preferences", "Make a configuration.")
 #        self.addActions(self.run_menu, (setting_preference_action, ))
         self.addActions(self.run_menu, (run_simulation_action, ))
-        
+
     # Defining Results
         self.result_menu = self.menuBar().addMenu("R&esults")
         activity_pattern_action = self.createaction("Travel or Activity Characteristics", self.results_schedules, None,
@@ -221,12 +238,12 @@ class MainWindow(QMainWindow):
                                                   "earth", "Show travel characteristics", False, True)
         self.addActions(self.result_menu, (activity_pattern_action,person_schedule_action,kml_tirps_action, ))
 
-    # Defining help        
+    # Defining help
         self.help_menu = self.menuBar().addMenu("&Help")
         help_about_action = self.createaction("&About OpenAMOS", None, None,
                                             "help", "Display software information.")
         help_documentation_action = self.createaction("&Documentation", None, None,
-                                            "documentation", "Quick reference for important parameters.")        
+                                            "documentation", "Quick reference for important parameters.")
         self.addActions(self.help_menu, (help_documentation_action,None,help_about_action,  ))
  
 # Defining toolbar
@@ -238,6 +255,15 @@ class MainWindow(QMainWindow):
         self.addActions(self.fileToolBar, (project_new_action, project_open_action,
                                            project_save_action,))
 
+
+    def getup(self):
+        if self.proconfig != None:
+            self.model_management.moveup()
+        
+    def getdown(self):
+        if self.proconfig != None:
+            self.model_management.movedown()
+        
 # Define Action
     def createaction(self, text, slot=None, shortcut=None, icon=None,
                      tip=None, checkable=False, disabled = None, signal="triggered()"):

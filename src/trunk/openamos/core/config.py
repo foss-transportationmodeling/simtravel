@@ -24,7 +24,7 @@ class ConfigObject(object):
             
         # Approach to the default configuration file
         parser = etree.XMLParser(remove_blank_text=True)
-        self.default = etree.parse('../configs/config_mag_full.xml',parser)        
+        self.default = etree.parse('../configs/config_mag.xml',parser)        
 
 
     def getConfigElement(self, elt, prop='text' ):
@@ -108,23 +108,85 @@ class ConfigObject(object):
             if compname.lower() == comp.get(NAME).lower():
                 return comp
         return None
+
+    def getCompIndex(self,index):
+        compelt = self.protree.find(MODELCONFIG)
+        comp = compelt.getchildren()
+        child = comp[index]
+        return child
     
-#    def modelSpecInConfig(self,modelkey):
-#        compname = self.getCompName(modelkey)
-#        modelconfigelt = self.protree.find(MODELCONFIG)
-#        if modelconfigelt != None:
-#            modelfound = None
-#            for comp in modelconfigelt.getiterator(COMP):
-#                if compname == comp.get(NAME):
-#                    for model in comp.getiterator(MODEL): 
-#                        if modelkey == model.get(NAME):
-#                            modelfound = deepcopy(model)
-#            return modelfound
-#        else:
-#            return None
+    def getComponents(self):
+        compelt = self.protree.find(MODELCONFIG)
+        compelts = compelt.getiterator(COMP)
+        return compelts
+    
+    def getElement(self,index):
+        father = self.protree.find(MODELCONFIG)
+        childs = father.getchildren()
+        child = childs[index[0]]
+        
+        for i in range(len(index)-1):
+            father = child
+            childs = father.getchildren()
+#            index[i+1] = index[i+1]-1
+            child = childs[index[i+1]]
+            
+        return child
+    
+    def getElements(self,key):
+        compelt = self.protree.find(MODELCONFIG)
+        elements = []
+        for comp in compelt.getiterator(key):
+
+            elements.append(comp)
+            
+        return elements
+
+    def removeElement(self,index):
+        father = self.protree.find(MODELCONFIG)
+        childs = father.getchildren()
+        child = childs[index[0]]
+        
+        for i in range(len(index)-1):
+            father = child
+            childs = father.getchildren()
+#            index[i+1] = index[i+1]-1
+            child = childs[index[i+1]]
+            
+        father.remove(child)
+    
+    def moveup(self,index):
+        father = self.protree.find(MODELCONFIG)
+        childs = father.getchildren()
+        child = childs[index[0]]
+        count = len(index)
+        
+        for i in range(count-1):
+            father = child
+            childs = father.getchildren()
+#            index[i+1] = index[i+1]-1
+            child = childs[index[i+1]]
+
+        father.remove(child)
+        father.insert(index[count-1]-1, child)
+        
+        
+    def movedown(self,index):
+        father = self.protree.find(MODELCONFIG)
+        childs = father.getchildren()
+        child = childs[index[0]]
+        count = len(index)
+        
+        for i in range(count-1):
+            father = child
+            childs = father.getchildren()
+#            index[i+1] = index[i+1]-1
+            child = childs[index[i+1]]
+
+        father.remove(child)
+        father.insert(index[count-1]+1, child)
 
             
-                    
     def addModelElement(self,modelelt):
         compname = self.getCompName(modelelt.get(NAME))
         modelconfigelt = self.protree.find(MODELCONFIG)

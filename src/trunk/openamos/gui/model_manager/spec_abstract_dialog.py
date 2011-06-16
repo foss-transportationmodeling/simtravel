@@ -23,91 +23,159 @@ class AbtractSpecDialog(QDialog):
     classdocs
     '''
 
-    def __init__(self, configobject, key, title = '', parent=None):
+    def __init__(self, configobject, key, title = '', model=None, parent=None):
         super(AbtractSpecDialog, self).__init__(parent)
         
         self.setWindowTitle(title)
-        
-        self.glayout = QGridLayout()
-        self.setLayout(self.glayout)
-        
-        self.modeltypegb = QGroupBox("Model Type")
-        modeltypegblayout = QVBoxLayout()
-        self.modeltypegb.setLayout(modeltypegblayout)
-        self.modeltypecb = QComboBox()
-        self.modeltypecb.addItems([QString(PROB_MODEL), QString(COUNT_MODEL),
-                                   QString(SF_MODEL), QString(LOGREG_MODEL),
-                                   QString(GC_MNL_MODEL), QString(MNL_MODEL),
-                                   QString(ORD_MODEL),QString(NL_MODEL), QString(LOGSF_MODEL)])
-        modeltypegblayout.addWidget(self.modeltypecb)
-        self.glayout.addWidget(self.modeltypegb,0,0)
+        self.setMinimumSize(800,550)
         
         self.configobject = configobject
         self.modelkey = key
+        self.themodel = model
         self.populateFromDatabase()
-        #print key
         
+        wholelayout = QVBoxLayout()
+        self.setLayout(wholelayout)
+#        wholewidget = QWidget()
+#        self.glayout = QGridLayout()
+#        wholewidget.setLayout(self.glayout)
         
-        self.subpopgb = QGroupBox("Sub-Population")
-        self.subpopgb.setCheckable(True)
-        self.subpopgb.setVisible(False)
-        subpoplayout = QGridLayout()
-        self.subpopgb.setLayout(subpoplayout)
-        self.logical = QComboBox()
-        self.logical.addItems([QString(OP_AND), QString(OP_OR)])
-        subpoplayout.addWidget(self.logical,0,0)
+        self.modeltypegb = QGroupBox("") #"Model Type")
+        modeltypegblayout = QGridLayout()
+        self.modeltypegb.setMaximumHeight(60)
+        self.modeltypegb.setLayout(modeltypegblayout)
+        modeltypelb = QLabel("Model Type: ")
+        self.modeltypecb = QComboBox()
+        self.modeltypecb.addItems([QString(PROB_MODEL), QString(COUNT_MODEL),
+                                   QString(LINEAR_MODEL),QString(SF_MODEL), QString(LOGREG_MODEL),
+                                   QString(GC_MNL_MODEL), QString(MNL_MODEL),
+                                   QString(ORD_MODEL),QString(NL_MODEL), QString(LOGSF_MODEL),
+                                   QString("Other")])
+        dependentlb = QLabel("Dependent Variable: ")
+        self.dependentcb = QComboBox()
+        self.dependentcb.addItems(self.dependents())
+        modeltypegblayout.addWidget(modeltypelb,0,0)
+        modeltypegblayout.addWidget(self.modeltypecb,1,0)
+        modeltypegblayout.addWidget(dependentlb,0,1)
+        modeltypegblayout.addWidget(self.dependentcb,1,1)
         
+#        self.glayout.addWidget(self.modeltypegb,0,0)
         
-        addfilter = QWidget(self)
-        addfilterlayout = QHBoxLayout()
-        addfilter.setLayout(addfilterlayout)
-        self.addbutton = QPushButton('Add')
-        addfilterlayout.addWidget(self.addbutton)
-        self.delbutton = QPushButton('Delete')
-        addfilterlayout.addWidget(self.delbutton)
-        subpoplayout.addWidget(addfilter,0,1)
 
+        
+#        tool1 = QToolBar()
+#        tool1.setMaximumHeight(30)
+#        show_action1 = self.createaction("",self.showgb1,"arrow","")
+#        tool1.addAction(show_action1)
+#        self.glayout.addWidget(tool1,1,0)
+        
+        self.attributegb = QGroupBox("")
+        attributegblayout = QGridLayout() #QHBoxLayout()
+        self.attributegb.setLayout(attributegblayout)
+        self.attributegb.setVisible(False)
+        
+        attriwidget1 = QWidget()
+        attrilayout1 = QGridLayout()
+        attriwidget1.setLayout(attrilayout1)
+        namelb = QLabel("Model Name: ")
+        vertexlb = QLabel("Vertex: ")
+        lowerlb = QLabel("Lower Threshold: ")
+        upperlb = QLabel("Upper Threshold: ")
+        attributegblayout.addWidget(namelb,0,0)
+        attributegblayout.addWidget(vertexlb,1,0)
+        attributegblayout.addWidget(lowerlb,2,0)
+        attributegblayout.addWidget(upperlb,3,0)
+
+        self.nametxt = LineEdit()
+        self.vertexcb = QComboBox()
+        self.lowertxt = LineEdit()
+        self.uppertxt = LineEdit()
+        self.nametxt.setMaximumWidth(250)
+        self.vertexcb.setMaximumWidth(250)
+        self.lowertxt.setMaximumWidth(250)
+        self.uppertxt.setMaximumWidth(250)
                 
-        tablelabel = QLabel("Table")
-        subpoplayout.addWidget(tablelabel,1,0)
+        attributegblayout.addWidget(self.nametxt,0,1)
+        attributegblayout.addWidget(self.vertexcb,1,1)
+        attributegblayout.addWidget(self.lowertxt,2,1)
+        attributegblayout.addWidget(self.uppertxt,3,1)
         
-        self.subpoptab = QComboBox()
-        self.filter1 = []
-        self.filter2 = []
-        self.filter3 = []
-        self.filter4 = []
-        self.filter1.append(self.subpoptab)
-        self.subpoptab.addItems(self.tablelist)
-        subpoplayout.addWidget(self.subpoptab,2,0)
-        varlabel = QLabel("Column")
-        subpoplayout.addWidget(varlabel,1,1)
-        self.subpopvar = QComboBox()
-        self.filter2.append(self.subpopvar)
-        subpoplayout.addWidget(self.subpopvar,2,1)
-        oplabel = QLabel("Operator")
-        subpoplayout.addWidget(oplabel,1,2)          
-        self.subpopop = QComboBox()
-        self.filter3.append(self.subpopop)
-        self.subpopop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
-                                QString(OP_GT), QString(OP_LT),
-                                QString(OP_GTE), QString(OP_LTE)])
-        subpoplayout.addWidget(self.subpopop,2,2)
-        vallabel = QLabel("Value")  
-        subpoplayout.addWidget(vallabel,1,3)          
-        self.subpopval = LineEdit()
-        self.filter4.append(self.subpopval)
-        subpoplayout.addWidget(self.subpopval,2,3)
-        subpoplayout.setColumnStretch(0,1)
-        subpoplayout.setColumnStretch(1,1)
-        subpoplayout.setColumnStretch(2,1)
-        subpoplayout.setColumnStretch(3,1)
-        self.glayout.addWidget(self.subpopgb,1,0)
+#        self.attrinamecb = QComboBox()
+#        attrilayout1.addWidget(attriname,0,0)
+#        attrilayout1.addWidget(self.attrinamecb,0,1)
+#        
+#        selectvalue = QLabel("Select Attribute Value: ")
+#        self.attrivaluecb = QComboBox()
+#        entervalue = QLabel("or Enter Attribute Value: ")
+#        self.attrivaluetxt = LineEdit()
+#        attrilayout1.addWidget(selectvalue,1,0)
+#        attrilayout1.addWidget(self.attrivaluecb,1,1)
+#        attrilayout1.addWidget(entervalue,2,0)
+#        attrilayout1.addWidget(self.attrivaluetxt,2,1)
+#        
+#        attriwidget2 = QWidget()
+#        attrilayout2 = QVBoxLayout()
+#        attriwidget2.setLayout(attrilayout2)    
+#        self.addbutton = QPushButton('>>')
+#        self.addbutton.setMaximumWidth(80)
+#        attrilayout2.addWidget(self.addbutton)
+#        self.delbutton = QPushButton('<<')
+#        self.delbutton.setMaximumWidth(80)
+#        attrilayout2.addWidget(self.delbutton)
+#
+#        self.attritable = QTableWidget(self)
+#        self.attritable.setRowCount(0)
+#        self.attritable.setColumnCount(2)
+#        self.attritable.setHorizontalHeaderLabels(['Attribute', 'Value'])
+#        #self.choicetable.setSelectionBehavior(QAbstractItemView.SelectRows)
+#        self.attritable.setSelectionMode(QAbstractItemView.SingleSelection)
+#        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
+#        self.attritable.setSizePolicy(sizePolicy)
+#        self.attritable.horizontalHeader().setResizeMode(0,1)
+#        self.attritable.horizontalHeader().setResizeMode(1,1)
+#
+#        attributegblayout.addWidget(attriwidget1)
+#        attributegblayout.addWidget(attriwidget2)
+#        attributegblayout.addWidget(self.attritable)
+#        self.glayout.addWidget(self.attributegb,2,0)
+        self.fill_attribute(model)
+        
 
+#        tool2 = QToolBar()
+#        tool2.setMaximumHeight(30)
+#        show_action2 = self.createaction("",self.showgb2,"arrow","")
+#        tool2.addAction(show_action2)
+#        self.glayout.addWidget(tool2,3,0)
+        
+        self.filters = FilterWidget("Sub-Population",self)
+        self.filters.setVisible(False)
+#        self.glayout.addWidget(self.filters,4,0)
 
+        tool3 = QToolBar()
+        tool3.setMaximumHeight(30)
+        show_action3 = self.createaction("",self.showgb3,"arrow","")
+        tool3.addAction(show_action3)
+#        self.glayout.addWidget(tool3,5,0)
+        
+        self.untilcondition = FilterWidget("Run Condition",self)
+        self.untilcondition.setVisible(False)
+#        self.glayout.addWidget(self.untilcondition,6,0)
+
+#        tool4 = QToolBar()
+#        tool4.setMaximumHeight(30)
+#        show_action4 = self.createaction("",self.showgb4,"arrow","")
+#        tool4.addAction(show_action4)
+#        self.glayout.addWidget(tool4,7,0)
+        
         self.modwidget = QWidget()
-        self.glayout.addWidget(self.modwidget,2,0)
+#        self.glayout.addWidget(self.modwidget,8,0)
         
 
+#        scrollArea = QScrollArea()
+#        scrollArea.setWidget(wholewidget)
+#        scrollArea.setMaximumHeight(550)
+#        scrollArea.setWidgetResizable(True)
+        
         buttonwidget = QWidget(self)
         buttonlayout = QHBoxLayout()
         buttonlayout.setContentsMargins(0,11,0,11)
@@ -116,86 +184,167 @@ class AbtractSpecDialog(QDialog):
         buttonlayout.addWidget(self.defaultbutton)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttonlayout.addWidget(self.dialogButtonBox)
-        self.glayout.addWidget(buttonwidget,3,0)
+
         
+        self.tabwidget = QTabWidget()
+        self.tabwidget.addTab(self.attributegb,"Model Attributes")
+        self.tabwidget.addTab(self.filters,"Sub-Population")
+        self.tabwidget.addTab(self.untilcondition,"Run Conditions")
         
-#        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-#        self.glayout.addWidget(self.dialogButtonBox,3,0)
-        
+#        wholelayout.addWidget(scrollArea)
+        wholelayout.addWidget(self.modeltypegb)
+        wholelayout.addWidget(self.tabwidget)
+        wholelayout.addWidget(buttonwidget)
+ 
         self.connect(self.modeltypecb, SIGNAL("currentIndexChanged(int)"), self.changeModelWidget)
-        self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.storeSpec)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
-        
-        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addFiter)
-        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
         self.connect(self.defaultbutton, SIGNAL("clicked(bool)"), self.defaultModel)
-        
-        self.loadFromConfigObject1()
-        
+#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addAttribute)
+#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delAttribute)
+#        self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
+#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addFiter)
+#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
+#        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+#        self.glayout.addWidget(self.dialogButtonBox,3,0)
+
+        if model.tag != COMP:
+            self.loadFromConfigObject2(model)
+        else:
+            self.modeltypecb.setCurrentIndex(0)
+            self.changeModelWidget()
+            
         self.models = [] # In order to compare between previous and current model
         
-        
-    def addFiter(self):
-        temp = QGridLayout()
-        temp = self.subpopgb.layout()
-        
-        numrow = temp.rowCount()
-        subpoptab = QComboBox()
-        self.filter1.append(subpoptab)
-        subpoptab.addItems(self.tablelist)
-        temp.addWidget(subpoptab,numrow,0)
-        
-        subpopvar = QComboBox()
-        self.filter2.append(subpopvar)
-        temp.addWidget(subpopvar,numrow,1)
-                
-        subpopop = QComboBox()
-        self.filter3.append(subpopop)
-        subpopop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
-                                QString(OP_GT), QString(OP_LT),
-                                QString(OP_GTE), QString(OP_LTE)])
-        temp.addWidget(subpopop,numrow,2)
-               
-        subpopval = LineEdit()
-        self.filter4.append(subpopval)
-        temp.addWidget(subpopval,numrow,3)
-    
-        
-    def deleteFiter(self):
-        temp = QGridLayout()
-        temp = self.subpopgb.layout()        
-        numrow = len(self.filter1)
-        
-        if numrow > 1:
-            temp.removeWidget(self.filter1[numrow - 1])
-            temp.removeWidget(self.filter2[numrow - 1])
-            temp.removeWidget(self.filter3[numrow - 1])
-            temp.removeWidget(self.filter4[numrow - 1])
-            f1 = QComboBox()
-            f2 = QComboBox()
-            f3 = QComboBox()
-            f4 = LineEdit()
-            f1 = self.filter1.pop(numrow - 1)
-            f2 = self.filter2.pop(numrow - 1)
-            f3 = self.filter3.pop(numrow - 1)
-            f4 = self.filter4.pop(numrow - 1)
-            f1.hide()
-            f1.clear()
-            f1.destroy()
-            f2.hide()
-            f2.clear()
-            f2.destroy()
-            f3.hide()
-            f3.clear()
-            f3.destroy()
-            f4.hide()
-            f4.clear()
-            f4.destroy()
-        
-        temp.update()
-        self.update()
 
+    def fill_attribute(self,model):
+        elements = self.configobject.getElements("Model")
+        values = []
+        values.append("")
+        for elt in elements:
+            for key in elt.keys():
+                if key == VERTEX:
+                    value = str(elt.get(key)).lower()
+                    if value not in values:
+                        values.append(value)
+        
+        self.vertexcb.addItems(values)
+        
+        if model.tag != COMP:
+            self.nametxt.setText(str(model.get(NAME)))
+            if VERTEX in model.keys():
+                value = str(model.get(VERTEX))
+                ind = self.vertexcb.findText(value)
+                self.vertexcb.setCurrentIndex(ind)
+            if "lower_threshold" in model.keys():
+                self.lowertxt.setText(str(model.get("lower_threshold")))
+            if "upper_threshold" in model.keys():
+                self.uppertxt.setText(str(model.get("upper_threshold")))
+
+
+#    def fill_attribute(self,model):
+#        elements = self.configobject.getElements("Model")
+#        names = []
+#        values = []
+#        names.append("name")
+#        values.append("")
+#        for elt in elements:
+#            for key in elt.keys():
+#                if key != "name":
+#                    value = str(elt.get(key))
+#                    if key not in names:
+#                        names.append(key)
+#                    if value not in values:
+#                        values.append(value)
+#        
+#        names.sort()
+#        values.sort()
+#        self.attrinamecb.addItems(names)
+#        self.attrivaluecb.addItems(values)
+#        
+#        if model.tag != COMP:
+#            for key in model.keys():
+#                value = str(model.get(key))
+#                
+#                self.attritable.insertRow(self.attritable.rowCount())
+#                attritem = QTableWidgetItem()
+#                attritem.setText(str(key))
+#                attritem.setFlags(attritem.flags() & ~Qt.ItemIsEditable)
+#                self.attritable.setItem(self.attritable.rowCount()-1, 0, attritem)
+#                
+#                varitem = QTableWidgetItem()
+#                varitem.setText(value)
+#                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+#                self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)  
+
+#    def addAttribute(self):
+#        name = str(self.attrinamecb.currentText())
+#        value = str(self.attrivaluecb.currentText())
+#        if value == "":
+#            value = str(self.attrivaluetxt.text())
+#
+#        if (name != "") & (value != ""):
+#            self.attritable.insertRow(self.attritable.rowCount())
+#            tableitem = QTableWidgetItem()
+#            tableitem.setText(name)
+#            tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
+#            self.attritable.setItem(self.attritable.rowCount()-1, 0, tableitem)
+#            
+#            varitem = QTableWidgetItem()
+#            varitem.setText(value)
+#            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+#            self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)   
+#
+#   
+#    def delAttribute(self):
+#        self.attritable.removeRow(self.attritable.currentRow())
+
+    def dependents(self):
+        elements = self.configobject.getElements(DEPVARIABLE)
+        items = []
+        for elt in elements:
+            value = elt.get(COLUMN)
+            if value not in items:
+                items.append(value)
+              
+        return items        
+
+    def createaction(self, text, slot=None, icon=None,
+                     tip=None, signal="triggered()"):
+        action = QAction(text, self)
+        if icon is not None:
+            action.setIcon(QIcon("./images/%s.png" % icon))
+        if tip is not None:
+            action.setToolTip(tip)
+            action.setStatusTip(tip)
+        if slot is not None:
+            self.connect(action, SIGNAL(signal), slot)
+
+        return action
+    
+    def showgb1(self):
+        self.attributegb.setVisible(True)
+        self.filters.setVisible(False)
+        self.untilcondition.setVisible(False)
+        self.modwidget.setVisible(False)
+    
+    def showgb2(self):
+        self.attributegb.setVisible(False)
+        self.filters.setVisible(True)
+        self.untilcondition.setVisible(False)
+        self.modwidget.setVisible(False)
+
+    def showgb3(self):
+        self.attributegb.setVisible(False)
+        self.filters.setVisible(False)
+        self.untilcondition.setVisible(True)
+        self.modwidget.setVisible(False)
+        
+    def showgb4(self):
+        self.attributegb.setVisible(False)
+        self.filters.setVisible(False)
+        self.untilcondition.setVisible(False)
+        self.modwidget.setVisible(True)        
 
     def loadFromConfigObject1(self):
         modelspecified = self.configobject.modelSpecInConfig(self.modelkey)
@@ -213,6 +362,8 @@ class AbtractSpecDialog(QDialog):
                     modtxt = LOGREG_MODEL
                 elif type == LOGSF_MODEL:
                     modtxt = LOGSF_MODEL
+                elif type == LINEAR_MODEL:
+                    modtxt = LINEAR_MODEL
             elif form == MODELFORM_CNT:
                 modtxt = MODELFORM_CNT
                 type = modelspecified.get(MODELTYPE)
@@ -229,18 +380,21 @@ class AbtractSpecDialog(QDialog):
                 modtxt = NL_MODEL
             elif form == MODELFORM_PD:
                 modtxt = PROB_MODEL
-                            
+            elif form.find("Schedule") >= 0 or form.find("Allocation") >= 0:
+                modtxt = "Other"
+#            elif form == "Child Dependency Allocation" or form == "Clean Aggregate Activity Schedule" or form == "Clean Fixed Activity Schedule":
+#                modtxt = "Other"
+
             ind = self.modeltypecb.findText(modtxt)
             self.modeltypecb.setCurrentIndex(ind)
 
-            
-        self.changeModelWidget()
-        self.populateColumns()
-        
+#        self.changeModelWidget()
+#        self.populateColumns()
         
         if modelspecified is not None:
-            #self.populateRununtilWidget(modelspecified)
-            #self.populateFilterWidget(modelspecified)
+            self.populateDependent(modelspecified)
+            self.populateRununtilWidget(modelspecified)
+            self.populateFilterWidget(modelspecified)
             seed = int(modelspecified.get(SEED))
             self.modwidget.seedline.setValue(seed)
             
@@ -261,7 +415,7 @@ class AbtractSpecDialog(QDialog):
                         self.modwidget.varianceuline.setText(varianceelt.get(VALUE))
                     else:
                         self.modwidget.variancevline.setText(varianceelt.get(VALUE))
-            if self.modeltypecb.currentText() == LOGREG_MODEL:
+            if self.modeltypecb.currentText() == LOGREG_MODEL or self.modeltypecb.currentText() == LINEAR_MODEL:
                 self.populateVarsWidget(modelspecified)
                 for varianceelt in modelspecified.getiterator(VARIANCE):
                     self.modwidget.variancevline.setText(varianceelt.get(VALUE))
@@ -324,41 +478,157 @@ class AbtractSpecDialog(QDialog):
                     nescoeff = QTableWidgetItem()
                     nescoeff.setText(neselt.get(COEFF))
                     nestable.setItem(nestable.rowCount()-1, 1, nescoeff)
+            if self.modeltypecb.currentText() == "Other":
+                #self.modwidget.specs = {}
+                i = 0
+                for altelt in modelspecified.getchildren():
+                    if altelt.tag != "DependentVariable":
+                        if altelt.tag == "ActivityAttributes":
+                            key = "Activity Attributes"
+                        elif altelt.tag == "DailyStatus":
+                            key = "Daily Status"
+                        else:
+                            key = str(altelt.tag)
+                            
+                        altspecs = []
+                        for varelt in altelt.getchildren():
+                            varspec = []
+                            varspec.append(str(varelt.tag))
+                            varspec.append(varelt.get(TABLE))
+                            varspec.append(varelt.get(COLUMN))
+                            altspecs.append(varspec)
+                        self.modwidget.specs[key] = altspecs
+                        i = i+1
+                        
+#                if "Activity Attributes" not in self.modwidget.specs.keys():
+#                    varspec = [["HouseholdIdName","",""],["PersonIdName","",""],["ScheduleIdName","",""],["ActivityTypeName","",""],
+#                               ["LocationIdName","",""],["StartTimeName","",""],["EndTimeName","",""],["DurationName","",""],
+#                               ["DependentPersonName","",""]]
+#                    self.modwidget.specs["Activity Attributes"] = varspec                
+#                if "Daily Status" not in self.modwidget.specs.keys():
+#                    varspec = [["DailySchoolStatus","",""],["DailyWorkStatus","",""]]
+#                    self.modwidget.specs["Daily Status"] = varspec
+#                if "Dependency" not in self.modwidget.specs.keys():
+#                    varspec = [["ChildDependency","",""]]
+#                    self.modwidget.specs["Dependency"] = varspec
+                    
+
+    def populateDependent(self,modelelt):
+        set = modelelt.find(DEPVARIABLE)
+        if set <> None:
+            value = str(set.get(COLUMN))
+            ind = self.dependentcb.findText(value)
+            self.dependentcb.setCurrentIndex(ind)
+
                     
     def populateRununtilWidget(self,modelelt):
-        temp = modelelt.find(RUNUNTIL)
-        if temp <> None:
-            for rununtil in modelelt.getiterator(RUNUNTIL):
-                self.runtable = rununtil.get(TABLE)
-                self.runvar = rununtil.get(COLUMN)
-                self.runcond = rununtil.get(COND)
-                self.runtablev = rununtil.get(VTABLE)
-                self.runvarv = rununtil.get(VCOLUMN)
+        set = modelelt.find(RUNUNTILSET)
+        if set <> None:
+            if set.get(MODELTYPE) == 'and':
+                self.untilcondition.logical.setCurrentIndex(0)
+            else:
+                self.untilcondition.logical.setCurrentIndex(1)
+
+        conditions = modelelt.findall(RUNUNTIL)
+        if len(conditions) > 0:
+            for i in range(len(conditions) - 1):
+                self.untilcondition.addFiter()
+            i = 0
+            for filt in modelelt.getiterator(RUNUNTIL):
+                tempkey = filt.keys()
+                ind = self.untilcondition.conditions[i].subpoptab.findText(filt.get(TABLE))
+                self.untilcondition.conditions[i].subpoptab.setCurrentIndex(ind)
+                if str(filt.get(TABLE)) != "runtime": 
+                    self.untilcondition.conditions[i].subpopvartext.setDisabled(True)
+                    self.untilcondition.conditions[i].subpopvartext.setVisible(False)
+                    self.untilcondition.conditions[i].subpopvar.setDisabled(False)
+                    self.untilcondition.conditions[i].subpopvar.setVisible(True)
+                    ind = self.untilcondition.conditions[i].subpopvar.findText(filt.get(COLUMN))
+                    self.untilcondition.conditions[i].subpopvar.setCurrentIndex(ind)
+                else:
+                    self.untilcondition.conditions[i].subpopvartext.setDisabled(False)
+                    self.untilcondition.conditions[i].subpopvartext.setVisible(True)
+                    self.untilcondition.conditions[i].subpopvar.setDisabled(True)
+                    self.untilcondition.conditions[i].subpopvar.setVisible(False)
+                    self.untilcondition.conditions[i].subpopvartext.setText(filt.get(COLUMN)) 
+                ind = self.untilcondition.conditions[i].subpopop.findText(filt.get(COND))
+                self.untilcondition.conditions[i].subpopop.setCurrentIndex(ind)
+                if VALUE in tempkey:              
+                    self.untilcondition.conditions[i].subpopval.setText(filt.get(VALUE))
+                else:
+                    ind = self.untilcondition.conditions[i].subpopvtab.findText(filt.get(VTABLE))
+                    self.untilcondition.conditions[i].subpopvtab.setCurrentIndex(ind)
+                    if str(filt.get(VTABLE)) != "runtime": 
+                        self.untilcondition.conditions[i].subpopvalvartext.setDisabled(True)
+                        self.untilcondition.conditions[i].subpopvalvartext.setVisible(False)
+                        self.untilcondition.conditions[i].subpopvalvar.setDisabled(False)
+                        self.untilcondition.conditions[i].subpopvalvar.setVisible(True)
+                        ind = self.untilcondition.conditions[i].subpopvalvar.findText(filt.get(VCOLUMN))
+                        self.untilcondition.conditions[i].subpopvalvar.setCurrentIndex(ind)
+                    else:
+                        self.untilcondition.conditions[i].subpopvalvartext.setDisabled(False)
+                        self.untilcondition.conditions[i].subpopvalvartext.setVisible(True)
+                        self.untilcondition.conditions[i].subpopvalvar.setDisabled(True)
+                        self.untilcondition.conditions[i].subpopvalvar.setVisible(False)
+                        self.untilcondition.conditions[i].subpopvalvartext.setText(filt.get(VCOLUMN))
+                i = i + 1
+        else:
+            self.untilcondition.setChecked(False)
+  
 
     def populateFilterWidget(self,modelelt):
         set = modelelt.find(FILTERSET)
         if set <> None:
             if set.get(MODELTYPE) == 'and':
-                self.logical.setCurrentIndex(0)
+                self.filters.logical.setCurrentIndex(0)
             else:
-                self.logical.setCurrentIndex(1)
+                self.filters.logical.setCurrentIndex(1)
             
         filters = modelelt.findall(FILTER)
         if len(filters) > 0:
-            for index in range(len(filters) - 1):
-                self.addFiter()
+            for i in range(len(filters) - 1):
+                self.filters.addFiter()
             i = 0
             for filt in modelelt.getiterator(FILTER):
-                ind = self.filter1[i].findText(filt.get(TABLE))
-                self.filter1[i].setCurrentIndex(ind)
-                ind = self.filter2[i].findText(filt.get(COLUMN))
-                self.filter2[i].setCurrentIndex(ind)
-                ind = self.filter3[i].findText(filt.get(COND))
-                self.filter3[i].setCurrentIndex(ind)                
-                self.filter4[i].setText(filt.get(VALUE))
+                tempkey = filt.keys()
+                ind = self.filters.conditions[i].subpoptab.findText(filt.get(TABLE))
+                self.filters.conditions[i].subpoptab.setCurrentIndex(ind)
+                if str(filt.get(TABLE)) != "runtime": 
+                    self.filters.conditions[i].subpopvartext.setDisabled(True)
+                    self.filters.conditions[i].subpopvartext.setVisible(False)
+                    self.filters.conditions[i].subpopvar.setDisabled(False)
+                    self.filters.conditions[i].subpopvar.setVisible(True)
+                    ind = self.filters.conditions[i].subpopvar.findText(filt.get(COLUMN))
+                    self.filters.conditions[i].subpopvar.setCurrentIndex(ind)
+                else:
+                    self.filters.conditions[i].subpopvartext.setDisabled(False)
+                    self.filters.conditions[i].subpopvartext.setVisible(True)
+                    self.filters.conditions[i].subpopvar.setDisabled(True)
+                    self.filters.conditions[i].subpopvar.setVisible(False)
+                    self.filters.conditions[i].subpopvartext.setText(filt.get(COLUMN))                   
+                ind = self.filters.conditions[i].subpopop.findText(filt.get(COND))
+                self.filters.conditions[i].subpopop.setCurrentIndex(ind)                
+                if VALUE in tempkey:              
+                    self.filters.conditions[i].subpopval.setText(filt.get(VALUE))
+                else:
+                    ind = self.filters.conditions[i].subpopvtab.findText(filt.get(VTABLE))
+                    self.filters.conditions[i].subpopvtab.setCurrentIndex(ind)
+                    if str(filt.get(VTABLE)) != "runtime": 
+                        self.filters.conditions[i].subpopvalvartext.setDisabled(True)
+                        self.filters.conditions[i].subpopvalvartext.setVisible(False)
+                        self.filters.conditions[i].subpopvalvar.setDisabled(False)
+                        self.filters.conditions[i].subpopvalvar.setVisible(True)
+                        ind = self.filters.conditions[i].subpopvalvar.findText(filt.get(VCOLUMN))
+                        self.filters.conditions[i].subpopvalvar.setCurrentIndex(ind)
+                    else:
+                        self.filters.conditions[i].subpopvalvartext.setDisabled(False)
+                        self.filters.conditions[i].subpopvalvartext.setVisible(True)
+                        self.filters.conditions[i].subpopvalvar.setDisabled(True)
+                        self.filters.conditions[i].subpopvalvar.setVisible(False)
+                        self.filters.conditions[i].subpopvalvartext.setText(filt.get(VCOLUMN))
                 i = i + 1
         else:
-            self.subpopgb.setChecked(False)
+            self.filters.setChecked(False)
                    
 #    def populateFilterWidget(self,modelelt):
 #        temp = modelelt.find(FILTER)
@@ -428,12 +698,10 @@ class AbtractSpecDialog(QDialog):
                 disableitem.setFlags(disableitem.flags() & ~Qt.ItemIsEnabled)
                 disableitem.setBackgroundColor(Qt.darkGray)
             i = i+1
-            
     
     def changeModelWidget(self, idx=0):
-        self.subpoptab.setCurrentIndex(0)
-        self.subpopop.setCurrentIndex(0)
-        self.subpopval.clear()  
+        self.filters.reset()
+        self.untilcondition.reset() 
           
         self.modwidget.setParent(None)
         if self.modeltypecb.currentText() == PROB_MODEL:
@@ -448,56 +716,57 @@ class AbtractSpecDialog(QDialog):
             self.modwidget = SFModWidget(self)
         elif self.modeltypecb.currentText() == LOGSF_MODEL:
             self.modwidget = SFModWidget(self)
-        elif self.modeltypecb.currentText() == LOGREG_MODEL:
+        elif self.modeltypecb.currentText() == LOGREG_MODEL or self.modeltypecb.currentText() == LINEAR_MODEL:
             self.modwidget = LogRegModWidget(self)
         elif self.modeltypecb.currentText() == ORD_MODEL:
             self.modwidget = OrderedModWidget(self)
         elif self.modeltypecb.currentText() == NL_MODEL:
             self.modwidget = NLogitModWidget(self)
+        elif self.modeltypecb.currentText() == "Other":
+            self.modwidget = SchduleModWidget(self)
         
-        self.glayout.addWidget(self.modwidget,2,0)
+#        self.glayout.addWidget(self.modwidget,8,0)
+        self.tabwidget.tabRemoved(3)
+        self.tabwidget.addTab(self.modwidget,"Model Specification")
+        self.tabwidget.setCurrentIndex(3)
         self.update()
 
 
-    def populateColumns(self, idx=0):
-        self.subpopvar.clear()
-        seltab = str(self.subpoptab.currentText())
-        self.subpopvar.addItems(self.coldict[seltab])
+#    def populateColumns(self, idx=0):
+#        self.subpopvar.clear()
+#        seltab = str(self.subpoptab.currentText())
+#        self.subpopvar.addItems(self.coldict[seltab])
         
         
     
     def storeSpec(self):
         if self.checkInputs():
-            modelmap = MODELMAP[self.modelkey]
+            #modelmap = MODELMAP[self.modelkey]
             #modelkey = modelmap[1]
             #modelkey = self.modelkey
     
-            modelelt = None
-            model = self.configobject.modelSpecInConfig(self.modelkey)
+            #modelelt = None
+            #model = self.configobject.modelSpecInConfig(self.modelkey)
             
-            tempmodel = deepcopy(model)
+            if self.themodel.tag == COMP:
+                model = etree.SubElement(self.themodel,MODEL)
+            else:
+                model = self.themodel
+                
+#            self.setModelAttribute(model)
+            self.addDepVarToElt(model)
+            self.setFilterToElt(model)
+            self.setRununtilToElt(model)         
+            #tempmodel = deepcopy(model)
             
             if self.modeltypecb.currentText() == SF_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,SF_MODEL)
+                self.setVariance2(model)
                 self.saveVariables(model)
-#                modelform = MODELFORM_REG
-#                otherattr = None
-#                if modelkey == MODELKEY_DAYSTART:
-#                    otherattr = VERTEX,START
-#                if modelkey == MODELKEY_DAYEND:
-#                    otherattr = VERTEX,END
-#                modelelt = self.createModelElement(modelkey,modelform,SF_MODEL,otherattr)
-#                self.addDepVarToElt(modelelt, modelkey)
-#                #self.addFiltToElt(modelelt)
-#                variancevelt = etree.SubElement(modelelt, VARIANCE)
-#                variancevelt.set(VALUE,str(self.modwidget.variancevline.text()))
-#                varianceuelt = etree.SubElement(modelelt, VARIANCE)
-#                varianceuelt.set(VALUE,str(self.modwidget.varianceuline.text()))
-#                varianceuelt.set(MODELTYPE,'Half Normal')
-#                self.addVariables(modelelt)
 
             elif self.modeltypecb.currentText() == LOGSF_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,LOGSF_MODEL)
+                self.setVariance2(model)
                 self.saveVariables(model)
                 
             elif self.modeltypecb.currentText() == COUNT_MODEL:
@@ -511,23 +780,7 @@ class AbtractSpecDialog(QDialog):
                     variance = model.find(VARIANCE)
                     variance.set(VALUE,str(self.modwidget.odline.text()))
                     variance.set(MODELTYPE,'Overdispersion')
-                self.saveVariables(model)
-                
-#                modelform = MODELFORM_CNT
-#                type = ""
-#                if self.modwidget.nbradio.isChecked():
-#                    type = NEGBIN_MODEL
-#                else:
-#                    type = POI_MODEL
-#                modelelt = self.createModelElement(modelkey,modelform,type)
-#                self.addDepVarToElt(modelelt, modelkey)
-#                self.addFiltToElt(modelelt)
-#                if type == NEGBIN_MODEL:
-#                    varianceelt = etree.SubElement(modelelt, VARIANCE)
-#                    varianceelt.set(VALUE,str(self.modwidget.odline.text()))
-#                    varianceelt.set(MODELTYPE,'Overdispersion') 
-#                self.addAlternatives(modelelt)
-#                self.addVariables(modelelt) 
+                self.saveVariables(model) 
     
             elif self.modeltypecb.currentText() == ORD_MODEL:
                 if self.modwidget.probradio.isChecked():
@@ -536,36 +789,9 @@ class AbtractSpecDialog(QDialog):
                     self.setModeltoElt(model,MODELFORM_ORD,LOGIT)
                 self.saveAlternatives(model)
                 self.saveVariables(model)
-#                modelform = MODELFORM_ORD
-#                type = ""
-#                if self.modwidget.logradio.isChecked():
-#                    type = LOGIT
-#                else:
-#                    type = PROBIT
-#                modelelt = self.createModelElement(modelkey,modelform,type)
-#                self.addDepVarToElt(modelelt,modelkey)
-#                self.addFiltToElt(modelelt)
-#                #Add ordered choice alternatives with thresholds
-#                numrows = self.modwidget.choicetable.rowCount()
-#                for i in range(numrows):
-#                    altname = (self.modwidget.choicetable.item(i,0)).text()
-#                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
-#                    altelt.set(ID,str(altname))
-#                    altvalue = (self.modwidget.choicetable.item(i,1)).text()
-#                    altelt.set(VALUE,str(altvalue))
-#                    if i > 0:
-#                        threshval = (self.modwidget.choicetable.item(i,2)).text()
-#                        altelt.set(THRESHOLD,str(threshval))
-#                
-#                self.addVariables(modelelt) 
     
             elif self.modeltypecb.currentText() == GC_MNL_MODEL:
                 self.saveVariables(model)
-                
-#                modelform = MODELFORM_MNL
-#                modelelt = self.createModelElement(modelkey,modelform,'')
-#                self.addDepVarToElt(modelelt,modelkey)
-#                self.addVariables(modelelt)
             
             elif self.modeltypecb.currentText() == MNL_MODEL:
                 self.modwidget.storeVarsTable(self.modwidget.choicetable.currentRow())
@@ -587,29 +813,7 @@ class AbtractSpecDialog(QDialog):
                     for j in range(numvars):
                         specrow = altspecs[j]
                         self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
-                    model.append(altelt) 
-#                self.modwidget.storeVarsTable(self.modwidget.choicetable.currentRow()) #self.modwidget.choicetable.currentItem())
-#                modelform = MODELFORM_MNL
-#                type = ALTSPEC
-#                modelelt = self.createModelElement(modelkey,modelform,type)
-#                self.addDepVarToElt(modelelt,modelkey)
-#                self.addFiltToElt(modelelt)
-#                
-#                numrows = self.modwidget.choicetable.rowCount()
-#                specs = self.modwidget.specs
-#                for i in range(numrows):
-#                    altname = str((self.modwidget.choicetable.item(i,0)).text())
-#                    altvalue = str((self.modwidget.choicetable.item(i,1)).text())
-#                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
-#                    altelt.set(ID,altname)
-#                    altelt.set(VALUE,altvalue)
-#                    altspecs = specs[altname]
-#                    numvars = len(altspecs)
-#                    for i in range(numvars):
-#                        specrow = altspecs[i]
-#                        self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
-#                    modelelt.append(altelt)   
-                
+                    model.append(altelt)  
             
             elif self.modeltypecb.currentText() == NL_MODEL:
                 self.modwidget.storeVarsTable(self.modwidget.choicetable.currentItem())
@@ -654,7 +858,7 @@ class AbtractSpecDialog(QDialog):
                     model.append(neselt)
                     
 #                modelform = MODELFORM_NL
-#                modelelt = self.createModelElement(modelkey,modelform,'')
+#                modelelt = self.setModelAttribute(modelkey,modelform,'')
 #                
 #                numrows = self.modwidget.choicetable.rowCount()
 #                specs = self.modwidget.specs
@@ -688,13 +892,14 @@ class AbtractSpecDialog(QDialog):
                                       
             elif self.modeltypecb.currentText() == LOGREG_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,LOGREG_MODEL)
+                self.setVariance(model)
                 self.saveVariables(model)
-#                modelform = MODELFORM_REG
-#                modelelt = self.createModelElement(modelkey,modelform,'')
-#                self.addDepVarToElt(modelelt,modelkey)
-#                self.addFiltToElt(modelelt)
-#                self.addVariables(modelelt)
-            
+
+            elif self.modeltypecb.currentText() == LINEAR_MODEL:
+                self.setModeltoElt(model,MODELFORM_REG,LINEAR_MODEL)
+                self.setVariance(model)
+                self.saveVariables(model)
+                        
             elif self.modeltypecb.currentText() == PROB_MODEL:
                 self.setModeltoElt(model,PROB_MODEL)
                 for alter in model.findall(ALTERNATIVE):
@@ -714,32 +919,80 @@ class AbtractSpecDialog(QDialog):
                     self.addVariabletoElt(altelt,valtable,valname,valcoff)
                     model.append(altelt)
                     
+            elif self.modeltypecb.currentText() == "Other":
+                
+                for elt in model.getchildren():
+                    if elt.tag == "ActivityAttributes" or elt.tag == "DailyStatus" or elt.tag == "Dependency":
+                        model.remove(elt)
+                
+                self.modwidget.storeVarsTable(self.modwidget.choicelist.currentItem())
+                numrows = self.modwidget.choicelist.count()
+                specs = self.modwidget.specs
+                keys = ["Activity Attributes","Daily Status","Dependency"]
+                for key in keys:
+                    alter = str(key)
+                    if key == "Activity Attributes":
+                        alter = "ActivityAttributes"
+                    elif key == "Daily Status":
+                        alter = "DailyStatus"
+        
+                    
+                    isPut = False
+                    altelt = etree.Element(alter)
+                    catagories = specs[key]
+                    for item in catagories:
+                        title = str(item[0])
+                        table = str(item[1])
+                        column = str(item[2])
+                        subelt = etree.SubElement(altelt,title)
+                        subelt.set(TABLE,table)
+                        subelt.set(COLUMN,column)
+                        if table != "" and column != "":
+                            isPut = True
+
+                    if isPut:
+                        model.append(altelt)
+                        
+            if self.themodel.tag == COMP:
+                father = self.parent()
+                item = father.currentItem()
+                element_term = QTreeWidgetItem(item)
+                element_term.setText(0, MODEL)
+                                        
             if not self.configobject.comparemodels(self.modelkey):
-            #if not self.comparemodels(tempmodel, model):
                 print 'Successful to change'
                 model.set(DMODEL,'True')
             
-            QDialog.accept(self)
-            
-        #else:
-            #msg = self.modwidget.errmsg
-            #QMessageBox.information(self, "Warning", msg, QMessageBox.Ok)
-            #QMessageBox.warning(self, "Warning", "The value must be numeric, or greater than or equal to zero in the Sub-Population.")            
+            QDialog.accept(self)          
 
     
-    def createModelElement(self,name,formulation,type,otherattr=None):
-        elt = etree.Element(MODEL)
-        elt.set(NAME,name)
-        elt.set(FORMULATION,formulation)
-        if type != '':
-            elt.set(MODELTYPE,type)
-        if otherattr != None:
-            elt.set(otherattr[0],otherattr[1])
-        elt.set(SEED,'1')
-        return elt
+#    def setModelAttribute(self,model): #(self,name,formulation,type,otherattr=None):
+#        keys = model.keys()
+#        numrows = self.attritable.rowCount()
+#        for i in range(numrows):
+#            key = str((self.attritable.item(i,0)).text())
+#            value = str((self.attritable.item(i,1)).text())
+#            model.set(key,value)
+#            if key in keys:
+#                keys.remove(key)
+#            
+#        for i in keys:
+#            del model.attrib[i]
+
+#        elt = etree.Element(MODEL)
+#        elt.set(NAME,name)
+#        elt.set(FORMULATION,formulation)
+#        if type != '':
+#            elt.set(MODELTYPE,type)
+#        if otherattr != None:
+#            elt.set(otherattr[0],otherattr[1])
+#        elt.set(SEED,'1')
+#        return elt
+
 
     def setModeltoElt(self,elt,formular,type='',thresh=''):
-        
+        keys = elt.keys()
+        elt.set(NAME,str(self.nametxt.text()))
         elt.set(FORMULATION,str(formular))
         if type != '':
             elt.set(MODELTYPE,str(type))
@@ -747,8 +1000,30 @@ class AbtractSpecDialog(QDialog):
             if elt.get(MODELTYPE) != None:
                 elt.set(MODELTYPE,'')
         
-        seed = self.modwidget.seedline.value()
-        elt.set(SEED,str(seed))
+        value = str(self.vertexcb.currentText())
+        if value == "":
+            if VERTEX in keys:
+                del elt.attrib[VERTEX]
+        else:
+            elt.set(VERTEX,value)
+
+        value = str(self.lowertxt.text())
+        if value == "":
+            if "lower_threshold" in keys:
+                del elt.attrib["lower_threshold"]            
+        else:
+            elt.set("lower_threshold",value)
+        
+        value = str(self.uppertxt.text())
+        if value == "":
+            if "upper_threshold" in keys:
+                del elt.attrib["upper_threshold"]            
+        else:
+            elt.set("upper_threshold",value)        
+        
+        value = str(self.modwidget.seedline.value())
+        elt.set(SEED,value)
+        
 #        seed = str(elt.get(SEED))
 #        user = str(elt.get(DMODEL))
 #        del elt.attrib[SEED]
@@ -758,9 +1033,14 @@ class AbtractSpecDialog(QDialog):
 #        elt.set(DMODEL,user)
 
         
-    def addDepVarToElt(self,model,col):
+    def addDepVarToElt(self,model):
+        value = str(self.dependentcb.currentText())
         depend = model.find(DEPVARIABLE)
-        depend.set(COLUMN, col)
+        if depend <> None:
+            depend.set(COLUMN, value)
+        else:
+            elt = etree.SubElement(model,DEPVARIABLE)
+            elt.set(COLUMN, value)
 #        depvarelt = etree.SubElement(elt,DEPVARIABLE)
 ##        if col in PERSON_TABLE_MODELS:
 ##            tab = TABLE_PER
@@ -768,16 +1048,112 @@ class AbtractSpecDialog(QDialog):
 ##            tab = TABLE_HH
 ##        depvarelt.set(TABLE,tab)
 #        depvarelt.set(COLUMN,col.lower())
+
+    def setFilterToElt(self,model):
+        for elt in model.getchildren():
+            if elt.tag == FILTER or elt.tag == FILTERSET:
+                model.remove(elt)
+                
+        if self.filters.isChecked():
+            if len(self.filters.conditions) > 1:
+                self.subFilterset(model)
+                self.subFilter(model)
+            else:
+                self.subFilter(model)
+
+
+    def subFilterset(self,model):
+        runelt = etree.SubElement(model,FILTERSET)
+        runelt.set(MODELTYPE,str(self.filters.logical.currentText()).lower())
+
+    def subFilter(self,model):
+        for i in range(len(self.filters.conditions)):
+            runelt = etree.SubElement(model,FILTER)
+            table = str(self.filters.conditions[i].subpoptab.currentText())
+            runelt.set(TABLE,table)
+            if table != "runtime":
+                runelt.set(COLUMN,str(self.filters.conditions[i].subpopvar.currentText()))
+            else:
+                runelt.set(COLUMN,str(self.filters.conditions[i].subpopvartext.text()))
+            runelt.set(COND,str(self.filters.conditions[i].subpopop.currentText()))
+            
+            value = str(self.filters.conditions[i].subpopval.text())
+            if value != "":
+                runelt.set(VALUE,value)
+            else:
+                vtable = str(self.filters.conditions[i].subpopvtab.currentText())
+                runelt.set(VTABLE,vtable)
+                if vtable != "runtime":
+                    vcolumn = str(self.filters.conditions[i].subpopvalvar.currentText())
+                    runelt.set(VCOLUMN,vcolumn)
+                else:
+                    vcolumn = str(self.filters.conditions[i].subpopvalvartext.text())
+                    runelt.set(VCOLUMN,vcolumn)
+                    
+     
+    def setRununtilToElt(self,model):
+        for elt in model.getchildren():
+            if elt.tag == RUNUNTIL or elt.tag == RUNUNTILSET:
+                model.remove(elt)
+                
+        if self.untilcondition.isChecked():
+            if len(self.untilcondition.conditions) > 1:
+                self.subRununtilset(model)
+                self.subRununtil(model)
+            else:
+                self.subRununtil(model)
+
+
+    def subRununtilset(self,model):
+        runelt = etree.SubElement(model,RUNUNTILSET)
+        runelt.set(MODELTYPE,str(self.untilcondition.logical.currentText()).lower())
+
+    def subRununtil(self,model):
+        for i in range(len(self.untilcondition.conditions)):
+            runelt = etree.SubElement(model,RUNUNTIL)
+            table = str(self.untilcondition.conditions[i].subpoptab.currentText())
+            runelt.set(TABLE,table)
+            if table != "runtime":
+                runelt.set(COLUMN,str(self.untilcondition.conditions[i].subpopvar.currentText()))
+            else:
+                runelt.set(COLUMN,str(self.untilcondition.conditions[i].subpopvartext.text()))
+            runelt.set(COND,str(self.untilcondition.conditions[i].subpopop.currentText()))
+            
+            value = str(self.untilcondition.conditions[i].subpopval.text())
+            if value != "":
+                runelt.set(VALUE,value)
+            else:
+                vtable = str(self.untilcondition.conditions[i].subpopvtab.currentText())
+                runelt.set(VTABLE,vtable)
+                if vtable != "runtime":
+                    vcolumn = str(self.untilcondition.conditions[i].subpopvalvar.currentText())
+                    runelt.set(VCOLUMN,vcolumn)
+                else:
+                    vcolumn = str(self.untilcondition.conditions[i].subpopvalvartext.text())
+                    runelt.set(VCOLUMN,vcolumn)
+
+    def setVariance(self,model):
+        for elt in model.getchildren():
+            if elt.tag == VARIANCE:
+                model.remove(elt)
+                
+        elt = etree.SubElement(model,VARIANCE)
+        value = str(self.modwidget.variancevline.text())
+        elt.set(VALUE,value)
+
+    def setVariance2(self,model):
+        for elt in model.getchildren():
+            if elt.tag == VARIANCE:
+                model.remove(elt)
+                
+        elt = etree.SubElement(model,VARIANCE)
+        value = str(self.modwidget.variancevline.text())
+        elt.set(VALUE,value)
         
-#    def addRununtilToElt(self,elt):
-#        if self.runtable <> "" and self.runtable <> None:
-#            runelt = etree.SubElement(elt,RUNUNTIL)
-#            runelt.set(TABLE,str(self.runtable))
-#            runelt.set(COLUMN,str(self.runvar))
-#            runelt.set(COND,str(self.runcond))
-#            runelt.set(VTABLE,str(self.runtablev))
-#            runelt.set(VCOLUMN,str(self.runvarv))
-    
+        elt = etree.SubElement(model,VARIANCE)
+        value = str(self.modwidget.varianceuline.text())
+        elt.set(VALUE,value)
+        elt.set(MODELTYPE,"Half Normal")                       
 #    def addFiltToElt(self,elt):
 #        for set in elt.findall(FILTERSET):
 #            elt.remove(set)
@@ -858,10 +1234,11 @@ class AbtractSpecDialog(QDialog):
             self.tablelist.append(QString(table))
             cols = new_obj.get_column_list(table)
             varlist = []
-            for col in cols:
-                varlist.append(QString(col))
-            self.coldict[table] = varlist
-
+            if cols is not None:
+                for col in cols:
+                    varlist.append(QString(col))
+                self.coldict[table] = varlist
+        self.tablelist.append("runtime")
 
     def defaultModel(self):
         modelspecified = self.configobject.modelSpecInDefault(self.modelkey)
@@ -920,18 +1297,37 @@ class AbtractSpecDialog(QDialog):
     
     
     def checkInputs(self):
-        
         res = True
         
-#        if self.subpopgb.isChecked():
-#            subvalue = unicode(self.subpopval.text())
-#            if not self.checkFloat(subvalue):
-#                QMessageBox.warning(self, "Warning", "The value must be numeric in the Sub-Population.")
-#                return False
-#            else:
-#                if float(subvalue) < 0.0:
-#                    QMessageBox.warning(self, "Warning", "The value must be positive in the Sub-Population.")
-#                    return False
+        if self.filters.isChecked():
+            for i in range(len(self.filters.conditions)):
+                value = str(self.filters.conditions[i].subpopval.text())
+                if value != "":
+                    if not self.checkFloat(value):
+                        QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")            
+                        return False
+                else:
+                    vtable = str(self.filters.conditions[i].subpopvtab.currentText())
+                    vcolumn1 = str(self.filters.conditions[i].subpopvalvar.currentText())
+                    vcolumn2 = str(self.filters.conditions[i].subpopvalvartext.text())
+                    if vtable == "" or (vcolumn1 == "" and vcolumn2 == ""):
+                        QMessageBox.warning(self, "Warning", "Value Table and Value Variable should be filled in Sub-Population.")
+                        return False
+                
+        if self.untilcondition.isChecked():
+            for i in range(len(self.untilcondition.conditions)):
+                value = str(self.untilcondition.conditions[i].subpopval.text())
+                if value != "":
+                    if not self.checkFloat(value):
+                        QMessageBox.warning(self, "Warning", "The value of an alternative must be numeric.")            
+                        return False
+                else:
+                    vtable = str(self.untilcondition.conditions[i].subpopvtab.currentText())
+                    vcolumn1 = str(self.untilcondition.conditions[i].subpopvalvar.currentText())
+                    vcolumn2 = str(self.untilcondition.conditions[i].subpopvalvartext.text())
+                    if vtable == "" or (vcolumn1 == "" and vcolumn2 == ""):
+                        QMessageBox.warning(self, "Warning", "Value Table and Value Variable should be filled in Run Condition.")
+                        return False
 
                 
         if self.modeltypecb.currentText() == PROB_MODEL:
@@ -1091,6 +1487,189 @@ class AbtractSpecDialog(QDialog):
 #        if self.modwidget.checkInputs():
 #            res = True
 #        return res
+class FilterWidget(QGroupBox):
+    '''
+    classdocs
+    '''
+    def __init__(self,title,parent=None):
+        super(FilterWidget, self).__init__(parent)
+        self.father = self.parent()
+#        self.tablelist = father.tablelist
+#        self.coldict = father.coldict
+        
+        self.setTitle(title)
+        self.setCheckable(True)
+        self.setVisible(True)
+        subpoplayout = QVBoxLayout()
+        self.setLayout(subpoplayout)
+        
+        upwidget = QWidget(self)
+        upwidgetlayout = QHBoxLayout()
+        upwidget.setLayout(upwidgetlayout)
+        self.logical = QComboBox()
+        self.logical.addItems([QString(OP_AND), QString(OP_OR)])
+        upwidgetlayout.addWidget(self.logical)
+        
+        btnwidget = QWidget(self)
+        btnwidgetlayout = QHBoxLayout()
+        btnwidget.setLayout(btnwidgetlayout)
+        self.addbutton = QPushButton('Add')
+        btnwidgetlayout.addWidget(self.addbutton)
+        self.delbutton = QPushButton('Delete')
+        btnwidgetlayout.addWidget(self.delbutton)
+        upwidgetlayout.addWidget(btnwidget)
+        
+        dummylabel1 = QLabel("")
+        upwidgetlayout.addWidget(dummylabel1)
+        dummylabel2 = QLabel("")
+        upwidgetlayout.addWidget(dummylabel2)
+        subpoplayout.addWidget(upwidget)
+        
+        self.conditions = []
+        condition = ConditionWidget(self)
+        self.conditions.append(condition)
+        subpoplayout.addWidget(condition)
+
+        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addFiter)
+        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
+        
+        
+    def addFiter(self):
+        temp = QVBoxLayout()
+        temp = self.layout()
+        
+        numrow = temp.count()
+        condition = ConditionWidget(self)
+        self.conditions.append(condition)
+        temp.addWidget(condition)
+    
+        
+    def deleteFiter(self):
+        temp = QVBoxLayout()
+        temp = self.layout()        
+        numrow = len(self.conditions)
+        
+        if numrow > 1:
+            temp.removeWidget(self.conditions[numrow - 1])
+            f1 = self.conditions.pop(numrow - 1)
+            f1.hide()
+            f1.destroy()
+        
+        temp.update()
+        
+    def reset(self):
+        self.logical.setCurrentIndex(0)
+        for i in range(len(self.conditions)):
+            self.conditions[i].reset()
+
+
+class ConditionWidget(QWidget):
+    '''
+    classdocs
+    '''
+    def __init__(self,parent=None):
+        super(ConditionWidget, self).__init__(parent)
+        
+        father = self.parent().father
+        conditionlayout = QGridLayout()
+        self.setLayout(conditionlayout)
+        
+        tablelabel = QLabel("Table")
+        conditionlayout.addWidget(tablelabel,1,0)
+        self.subpoptab = QComboBox()
+        self.subpoptab.addItems(father.tablelist)
+        conditionlayout.addWidget(self.subpoptab,2,0)
+        
+        varlabel = QLabel("Column")
+        conditionlayout.addWidget(varlabel,1,1)
+        self.subpopvar = QComboBox()
+        conditionlayout.addWidget(self.subpopvar,2,1)
+        self.subpopvartext = LineEdit()
+        self.subpopvartext.setDisabled(True)
+        self.subpopvartext.setVisible(False)
+        conditionlayout.addWidget(self.subpopvartext,2,1)
+        
+        oplabel = QLabel("Operator")
+        conditionlayout.addWidget(oplabel,1,2)          
+        self.subpopop = QComboBox()
+        self.subpopop.addItems([QString(OP_EQUAL), QString(OP_NOTEQUAL),
+                                QString(OP_GT), QString(OP_LT),
+                                QString(OP_GTE), QString(OP_LTE)])
+        conditionlayout.addWidget(self.subpopop,2,2)
+        
+        vallabel = QLabel("Value")  
+        conditionlayout.addWidget(vallabel,1,3)          
+        self.subpopval = LineEdit()
+        conditionlayout.addWidget(self.subpopval,2,3)
+        
+        vtablelabel = QLabel("Value Table")  
+        conditionlayout.addWidget(vtablelabel,1,4)          
+        self.subpopvtab = QComboBox()
+        self.subpopvtab.addItem("")
+        self.subpopvtab.addItems(father.tablelist)
+        conditionlayout.addWidget(self.subpopvtab,2,4)
+        
+        valvarlabel = QLabel("Value Variable")  
+        conditionlayout.addWidget(valvarlabel,1,5)          
+        self.subpopvalvar = QComboBox()
+        conditionlayout.addWidget(self.subpopvalvar,2,5)
+        self.subpopvalvartext = LineEdit()
+        self.subpopvalvartext.setDisabled(True)
+        self.subpopvalvartext.setVisible(False)
+        conditionlayout.addWidget(self.subpopvalvartext,2,5)
+                
+        conditionlayout.setColumnStretch(0,1)
+        conditionlayout.setColumnStretch(1,1)
+        conditionlayout.setColumnStretch(2,1)
+        conditionlayout.setColumnStretch(3,1)
+        conditionlayout.setColumnStretch(4,1)
+        conditionlayout.setColumnStretch(5,1)
+
+        
+        self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns1)
+        self.connect(self.subpopvtab, SIGNAL("currentIndexChanged(int)"), self.populateColumns2)
+        
+    def populateColumns1(self, idx=0):
+#        father = self.parent()
+        self.subpopvar.clear()
+        seltab = str(self.subpoptab.currentText())
+        if seltab != "" and seltab != "runtime":
+            self.subpopvartext.setDisabled(True)
+            self.subpopvartext.setVisible(False)
+            self.subpopvar.setDisabled(False)
+            self.subpopvar.setVisible(True)
+            fatherdialog = self.parent().father
+            self.subpopvar.addItems(fatherdialog.coldict[seltab])
+        else:
+            self.subpopvartext.setDisabled(False)
+            self.subpopvartext.setVisible(True)
+            self.subpopvar.setDisabled(True)
+            self.subpopvar.setVisible(False)
+                    
+    def populateColumns2(self, idx=0):
+#        father = self.parent()
+        self.subpopvalvar.clear()
+        seltab = str(self.subpopvtab.currentText())
+        if seltab != "" and seltab != "runtime":
+            self.subpopvalvartext.setDisabled(True)
+            self.subpopvalvartext.setVisible(False)
+            self.subpopvalvar.setDisabled(False)
+            self.subpopvalvar.setVisible(True)
+            fatherdialog = self.parent().father
+            self.subpopvalvar.addItems(fatherdialog.coldict[seltab])
+        else:
+            self.subpopvalvartext.setDisabled(False)
+            self.subpopvalvartext.setVisible(True)
+            self.subpopvalvar.setDisabled(True)
+            self.subpopvalvar.setVisible(False)
+        
+    def reset(self):
+        self.subpoptab.setCurrentIndex(0)
+        self.subpopvar.clear()
+        self.subpopop.setCurrentIndex(0)
+        self.subpopval.clear()
+        self.subpopvtab.setCurrentIndex(0)
+        self.subpopvalvar.clear()
 
 class buttonColor:
     def __init__(self, configobject, parent=None):
