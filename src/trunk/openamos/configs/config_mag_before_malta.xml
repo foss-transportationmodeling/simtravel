@@ -3,7 +3,7 @@
   <DTAConnection value="True"/>
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
 
-  <TravelSkims reference_tablename="travel_skims" indb="True">
+  <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
     <Period tablename="travel_skims_2" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="179" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim2.dat" delimiter=","/>
@@ -29,15 +29,15 @@
     <Period tablename="travel_skims_22" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1320" intervalEnd="1379" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim22.dat" delimiter=","/>
     <Period tablename="travel_skims_23" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1380" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim23.dat" delimiter=","/>
 
-  </TravelSkims>
-
-  <TravelSkims1 reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak.dat" delimiter=","/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak" delimiter=","/>
-    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_peak" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/travel_skims_offpeak" delimiter=","/>
   </TravelSkims1>
+
+  <TravelSkims reference_tablename="travel_skims" indb="True">
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+  </TravelSkims>
 
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
@@ -1551,6 +1551,15 @@
 	  <LocationVariable var="total_area"/>
 	  <LocationVariable var="single_family_dwelling"/>
 	  <LocationVariable var="institutional_population"/>
+
+          <FilterSet type="or"/>
+	  <Filter1 table="runtime" var="locationid" condition="greater than" value="0"/>
+	  <Filter1 table="runtime" var="locationid" condition="less than equals" value="1995"/>
+	  <Filter table="runtime" var="retail_employment" condition="greater than" value="0"/>
+	  <Filter table="runtime" var="public_employment" condition="greater than" value="0"/>
+	  <Filter table="runtime" var="office_employment" condition="greater than" value="0"/>
+	  <Filter table="runtime" var="industrial_employment" condition="greater than" value="0"/>
+	  <Filter table="runtime" var="other_employment" condition="greater than" value="0"/>
 	</ExtractLocationInformation>
       </SpatialConstraints>
 
@@ -1577,6 +1586,7 @@
 
 	
       <ConsistencyChecks name="AfterSchoolActivityChecks">
+	<Filter table="runtime" var="locationid" condition="greater than" value="0"/>
 	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
@@ -1921,6 +1931,18 @@
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
 
+      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="starttime"/>
+	<FilterSet type="and"/>
+ 	<Filter table="persons" var="age" condition="less than" value="18"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
+	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
+	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
+ 	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime" var="tt_to" coeff="1"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
 
       <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
