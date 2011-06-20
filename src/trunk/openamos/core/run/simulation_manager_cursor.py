@@ -14,7 +14,7 @@ from openamos.core.data_array import DataArray
 from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
-from openamos.core.travel_skims.extensions import Extensions as SkimsProcessor
+from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
 
 from multiprocessing import Process
 
@@ -105,6 +105,13 @@ class SimulationManager(object):
         # placeholders for creating the hdf5 tables 
         # only the network data is read and processed for faster 
         # queries
+        """
+            if partId is not None:
+                self.db = DB(fileLoc, partId)
+            else:
+                self.db = DB(fileLoc)
+            #self.db.create()
+        """
 
 
     def open_cacheDatabase(self, partId):
@@ -114,87 +121,6 @@ class SimulationManager(object):
         
     def setup_tod_skims(self):
 	return
-	"""
-        print "-- Processing Travel Skims --"
-        for tableInfo in self.projectSkimsObject.tableDBInfoList:
-	    colsList = []
-	    colsList.append(tableInfo.origin_var)
-	    colsList.append(tableInfo.destination_var)
-	    colsList.append(tableInfo.skims_var)
-
-	    fileLocation = tableInfo.fileLocation
-	    data = self.import_skims_from_flatfile(fileLocation, colsList)
-            tableName = tableInfo.tableName
-            self.db.createSkimsCache(tableName, data)
-	"""
-
-    """
-    def import_skims_from_flatfile(self, fileLocation, colsList):
-	print 'Parsing csv text file - %s and returning a DataArray object' %(fileLocation)
-	ti = time.time()	
-	f = open(fileLocation, 'r')
-	
-	reader = csv.reader(f)
-	
-	data = []
-	for row in reader:
-	    data.append(map(float, row))
-	f.close()
-
-	data = array(data)
-	print '\tShape of the file - ', data.shape
-	print data[:10,:]
-
-	minTtInd = data[:,-1] < 2
-	if minTtInd.sum() > 0:
-	    print '\tSome OD pairs have tt less than 2. Correcting those travel times'
-	    data[minTtInd,-1] = 2
-	
-
-        print '\tTime taken to import from flatfile %.4f' %(time.time()-ti)
-	
-	return DataArray(data, colsList)
- 
-    """
-    """
-    def setup_tod_skims1(self, queryBrowser):
-        print "-- Processing Travel Skims --"
-	ti = time.time()
-        for tableInfo in self.projectSkimsObject.tableDBInfoList:
-	    if tableInfo.importFlag == "True":
-		self.import_tod_skims(tableInfo, queryBrowser)
-            
-            self.db.createSkimsTableFromDatabase(tableInfo,
-                       	                         queryBrowser)
-
-	print "-- Caching and importing took a total of - %.4f" %(time.time()-ti)
-
-    def import_tod_skims(self, tableInfo, queryBrowser):
-	table_name = tableInfo.tableName
-	# Delete contents
-	queryBrowser.delete_all(table_name)                            
-
-	# Insert records
-	cols_listStr = "(%s, %s, %s)" %(tableInfo.origin_var,
-					tableInfo.destination_var,
-					tableInfo.skims_var)
-
-	loc = tableInfo.fileLocation
-	delimiter = tableInfo.delimiter
-
-        try:
-            ti = time.time()
-    	    insert_stmt = ("copy %s %s from '%s' "
-                           " delimiters '%s'" %(table_name, cols_listStr, loc, 
-	                                          delimiter))
-	    print insert_stmt                                                                       
-            result = queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
-            queryBrowser.dbcon_obj.connection.commit()
-	    print "\t Time taken to insert skims into table - %s was %0.4f " %(table_name, time.time()-ti)
-        except Exception, e:
-            print 'Exception:', e
-
-    """
     def setup_location_information(self, queryBrowser):
         print "-- Processing Location Information --"
         self.db.createLocationsTableFromDatabase(self.projectLocationsObject, 
@@ -222,7 +148,15 @@ class SimulationManager(object):
 
     def clean_database_tables_for_parts(self, numParts):
         for i in range(numParts):
-            self.clean_database_tables(partId=i+1)
+            self.clean_database_tables(partId=i+1)            
+	    """
+            if partId is not None:
+                self.db = DB(fileLoc, partId)
+            else:
+                self.db = DB(fileLoc)
+            #self.db.create()
+            """
+
             
 
 
@@ -292,20 +226,6 @@ class SimulationManager(object):
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
 		#raw_input('\tPress any key to continue')
 
-		#origin = ones(5)
-		#destination = ones(5) + array(range(5))
-		#print origin, destination
-		#raw_input()
-		#print skimsMatrix.get_travel_times(origin,destination)
-		"""
-		raw_input('before skims function')
-		tt = skimsMatrix.get_travel_times(ones(99),ones(99))
-		print 'TT retrieved - ', sys.getrefcount(tt)	
-		print type(tt)
-		raw_input('waiting for skims')
-
-		raw_input('\tBefore passing it to abstract component - %s, %s' %(sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)))
-		"""
 	        data = comp.pre_process(queryBrowser,  
                                         skimsMatrix, uniqueIds,
                                         self.db)
@@ -403,6 +323,7 @@ class SimulationManager(object):
 	skimsMatrix = SkimsProcessor(1, 1995)
 
 	# Not sure what the flag does?SkimsProcessor
+	print 'table Location - ', tableLocation
 	skimsMatrix.set_string(tableLocation, 0)
 
 	# Creating graph and passing the skimsMatrix
