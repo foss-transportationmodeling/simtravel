@@ -275,10 +275,11 @@ class ConfigParser(object):
 
 
 
-            repeatComponent = self.create_component(component_element)
+            #repeatComponent = self.create_component(component_element)
 	    
             for i in range(endInterval - startInterval):
-                tempComponent = copy.deepcopy(repeatComponent)
+                #tempComponent = copy.deepcopy(repeatComponent)
+		tempComponent = self.create_component(component_element)
                 for model in tempComponent.model_list:
                     model.seed +=  i 
                 tempComponent.analysisInterval = startInterval + i
@@ -1746,6 +1747,17 @@ class ConfigParser(object):
         beforeModel = spatial_query_element.get('before_model')
         afterModel = spatial_query_element.get('after_model')
 
+
+	locationFilterList = []
+	locationFilterType = "or"
+	
+
+	if locationInformationElement is not None:
+	    locationFilterList = self.return_filter_condition_list(locationInformationElement)
+	    locationFilterTypeElement = locationInformationElement.find('FilterSet')
+	    if locationFilterTypeElement is not None:
+	    	locationFilterType = locationFilterTypeElement.get('type')
+
         prismConstraint = PrismConstraints(table, skimField, 
                                            originField, destinationField, 
                                            startConstraint, endConstraint, 
@@ -1755,8 +1767,12 @@ class ConfigParser(object):
                                            afterModel, beforeModel,
                                            locationInfoTable,
                                            locationIdVar,
-                                           locationVariables)
-        #print prismConstraint
+                                           locationVariables, 
+					   locationFilterList,
+					   locationFilterType)
+	
+
+	#print prismConstraint
         return prismConstraint
 
     def return_spatio_temporal_constraint(self, constraint_element):
