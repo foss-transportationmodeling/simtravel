@@ -69,19 +69,24 @@ class Person(object):
 	#raw_input('adjusting and pushing subsequent activities')
 
 	self.add_anchor_activity()	    
+	missedActsStillToPursue = []
+	actsToPursue = []
 	
 
 	# Adjusting if only the first activity is affected
 	firstExpActAfterArrival = self.expectedActivities[0]
 	
 	if firstExpActAfterArrival.startTime < self.actualArrival and firstExpActAfterArrival.endTime > self.actualArrival:
-	    self.move_start(firstExpActAfterArrival, self.actualArrival + 1)
-	    print ('Only first activity needs to be adjusted')
-	    return
+	    if firstExpActAfterArrival.endTime == self.actualArrival + 1:
+		#firstExpActAfterArrival.startTime = self.actualArrival
+		self.move_start(firstExpActAfterArrival, self.actualArrival)
+		print ('Only first activity needs to be adjusted; however move start to actual arrival and then move the whole episode to avoid prism extraction errors')
+	    else:
+		self.move_start(firstExpActAfterArrival, self.actualArrival + 1)
+	    	print ('Only first activity needs to be adjusted')
+	    	return
 
 	# Adjusting when more than one activity is affected: Push all activities
-	missedActsStillToPursue = []
-	actsToPursue = []
 	for act in self.expectedActivities:
 	    if (act.endTime < self.actualArrival and act.dependentPersonId > 0):
 		missedActsStillToPursue.append(act)
@@ -99,7 +104,7 @@ class Person(object):
 	actEnd = self.actualArrival
 	for act in missedActsStillToPursue + actsToPursue:
 	    print '-->This ', act, ' is being moved by ', actEnd-act.startTime
-	    if actEnd-act.startTime > 0:
+	    if actEnd-act.startTime >= 0:
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
 		self.move_start_end(act, moveByValue)
 	    actEnd = copy.deepcopy(act.endTime)
