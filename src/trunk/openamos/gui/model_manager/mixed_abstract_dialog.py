@@ -11,7 +11,7 @@ from PyQt4.QtCore import *
 from lxml import etree
 
 from openamos.gui.env import *
-from mixed_widgets import *
+#from mixed_widgets import *
 
 from openamos.gui.misc.basic_widgets import *
 from openamos.gui.env import *

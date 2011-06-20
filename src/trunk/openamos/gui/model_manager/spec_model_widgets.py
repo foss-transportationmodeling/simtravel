@@ -162,7 +162,8 @@ class AbstractModWidget(QGroupBox):
         self.colswidget.clear()
         seltab = str(item.text())
 #        parentdialog = self.parent()
-        self.colswidget.addItems(self.fatherdialog.coldict[seltab]) # parentdialog.coldict[seltab])
+        if seltab != "runtime":
+            self.colswidget.addItems(self.fatherdialog.coldict[seltab]) # parentdialog.coldict[seltab])
 
     def addVariable(self):     
         if (self.tableswidget.currentItem() != None) & (self.colswidget.currentItem() != None):
@@ -179,10 +180,21 @@ class AbstractModWidget(QGroupBox):
             varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
             self.varstable.setItem(self.varstable.rowCount()-1, 1, varitem)
         else:
-            msg = "Please select a Table and a Column"
-            QMessageBox.information(self, "Warning",
-                                    msg,
-                                    QMessageBox.Ok)            
+            if (self.tableswidget.currentItem() != None):
+                item = self.tableswidget.currentItem()
+                if item.text() == "runtime":
+                    self.varstable.insertRow(self.varstable.rowCount())
+                    currtable = (self.tableswidget.currentItem()).text()
+                    tableitem = QTableWidgetItem()
+                    tableitem.setText(currtable)
+                    tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
+                    self.varstable.setItem(self.varstable.rowCount()-1, 0, tableitem)
+                    
+            else:
+                msg = "Please select a Table and a Column"
+                QMessageBox.information(self, "Warning",
+                                        msg,
+                                        QMessageBox.Ok)            
 
     def delVariable(self):
         self.varstable.removeRow(self.varstable.currentRow())

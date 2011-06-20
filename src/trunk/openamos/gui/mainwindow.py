@@ -391,15 +391,27 @@ class MainWindow(QMainWindow):
                                                              "XML File (*.xml)")
         
         file = re.split("[/.]", file)
+        location = ""
+        for i in range(len(file)-3):
+            location = location + file[i] + '/'
+        location =  location + file[len(file)-3]
+            
         filename = file[-2]
         if not filename.isEmpty():
             reply = QMessageBox.warning(self, "Save Existing Project As...",
                                         QString("""Would you like to continue?"""), 
                                         QMessageBox.Yes| QMessageBox.No)
             if reply == QMessageBox.Yes:
-                self.project.filename = filename
-                self.project.save()
-                self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.project.name)
+                print "%s, %s"%(location,filename)
+                elt = self.proconfig.getConfigElt(PROJECT)
+                elt.set(PROJECT_NAME,str(filename))
+                elt.set(PROJECT_HOME,str(location))
+                self.proconfig.write()
+                self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %str(filename))
+                
+#                self.project.filename = filename
+#                self.project.save()
+#                self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.project.name)
 
     
     def projectClose(self):
@@ -424,10 +436,11 @@ class MainWindow(QMainWindow):
             
     def checkProject(self):
         actpro = bool(self.proconfig)
+        self.model_management.clear()
         if actpro:
             self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %self.proconfig.getConfigElement(PROJECT,NAME))
             self.model_management.setConfigObject(self.proconfig)
-        self.models.setConfigObject(self.proconfig)
+            self.models.setConfigObject(self.proconfig)
         self.centralwidget.setEnabled(actpro)
 
     def importshape(self):

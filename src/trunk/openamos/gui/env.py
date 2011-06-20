@@ -67,6 +67,10 @@ NEGBIN_MODEL = 'Negative Binomial'
 POI_MODEL = 'Poisson'
 LOGIT = 'Logit'
 PROBIT = 'Probit'
+RECON_SCHEDULE = "Reconcile Schedules"
+FIXEDACT_SCHEDULE = "Clean Fixed Activity Schedule"
+AGGACT_SCHEDULE = "Clean Aggregate Activity Schedule"
+CHILD_ALLOCAT = "Child Dependency Allocation"
 
 MODELFORM_REG = 'Regression'
 MODELFORM_ORD = 'Ordered'

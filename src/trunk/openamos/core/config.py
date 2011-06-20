@@ -237,7 +237,7 @@ class ConfigObject(object):
         if not os.path.exists(configpath):
             os.mkdir(configpath)
         configfileloc = projecthome + '/' + projectname + '.xml'
-        print configfileloc
+
         configfile = open(configfileloc, 'w')
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
