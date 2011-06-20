@@ -14,6 +14,7 @@ class DB(object):
 
 	self.tableCols = {'travel_skims':['origin', 'destination', 'tt'], 
 			  'locations':['locationid', 'retail_employment', 'public_employment', 
+				       'office_employment', 'industrial_employment', 'other_employment',
 				       'residential_population', 'total_area', 'multi_family_dwelling', 
 				       'single_family_dwelling', 'institutional_population'],
 			  'households_vehicles_count_r':['houseid', 'vehcount'],

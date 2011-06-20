@@ -13,6 +13,7 @@ from openamos.core.data_array import DataArray
 from openamos.core.malta_integration.dataset_malta import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
+from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
 
 #from multiprocessing import Process
 
@@ -29,7 +30,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic_copy.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
 	configObject = None
 
 
@@ -62,14 +63,13 @@ class SimulationManager(object):
 
 	self.setup_databaseConnection()
 	self.setup_cacheDatabase()
-	#self.setup_location_information()
-	#self.setup_tod_skims()
+	self.setup_location_information()
 	self.parse_config()
 	self.clean_database_tables()
         self.idCount = 0
         self.idList = []
         self.lastTableName = None
-        self.skimsMatrix = None
+	self.skimsMatrix = None
         self.uniqueIds = None
 
 
@@ -84,107 +84,7 @@ class SimulationManager(object):
 
     def setup_cacheDatabase(self):
 	self.db = DB()
-    """
-    def setup_tod_skims1(self):
-        print "-- Processing Travel Skims --"
-        for tableInfo in self.projectSkimsObject.tableDBInfoList:
-	    if tableInfo.importFlag == "True":
-		self.import_tod_skims(tableInfo)
-            
-            self.createSkimsTableFromDatabase(tableInfo)
 
-
-    def import_tod_skims(self, tableInfo):
-	table_name = tableInfo.tableName
-	# Delete contents
-	self.queryBrowser.delete_all(table_name)                            
-
-	# Insert records
-	cols_listStr = "(%s, %s, %s)" %(tableInfo.origin_var,
-					tableInfo.destination_var,
-					tableInfo.skims_var)
-
-	loc = tableInfo.fileLocation
-	delimiter = tableInfo.delimiter
-
-        try:
-            ti = time.time()
-    	    insert_stmt = ("copy %s %s from '%s' "
-                           " delimiters '%s'" %(table_name, cols_listStr, loc, 
-	                                          delimiter))
-	    #print insert_stmt                                                                       
-            result = self.queryBrowser.dbcon_obj.cursor.execute(insert_stmt)
-            self.queryBrowser.dbcon_obj.connection.commit()
-        except Exception, e:
-            print e
-
-    def createSkimsTableFromDatabase(self, tableInfo):
-        t = time.time()
-
-	tableName = tableInfo.tableName
-
-	colsList = []
-	colsList.append(tableInfo.origin_var)
-	colsList.append(tableInfo.destination_var)
-	colsList.append(tableInfo.skims_var)
-
-        data = self.queryBrowser.select_all_from_table(tableName, colsList)
-        print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
-
-	fileLoc = self.projectConfigObject.location
-	save('%s/%s.npy' %(fileLoc, tableName), data.data)
-
-        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
-
-    """
-    def setup_tod_skims(self):
-        print "-- Processing Travel Skims --"
-        for tableInfo in self.projectSkimsObject.tableDBInfoList:
-	    colsList = []
-	    colsList.append(tableInfo.origin_var)
-	    colsList.append(tableInfo.destination_var)
-	    colsList.append(tableInfo.skims_var)
-
-	    fileLocation = tableInfo.fileLocation
-	    data = self.import_skims_from_flatfile(fileLocation, colsList)
-            tableName = tableInfo.tableName
-            self.createSkimsCache(tableName, data)
-
-
-    def import_skims_from_flatfile(self, fileLocation, colsList):
-	print '\tParsing csv text file and returning a DataArray object'
-	ti = time.time()	
-	f = open(fileLocation, 'r')
-	
-	reader = csv.reader(f)
-	
-	data = []
-	for row in reader:
-	    data.append(map(float, row))
-	
-	f.close()
-
-	data = array(data)
-	print '\tShape of the file - ', data.shape
-	print data[:10,:]
-
-	minTtInd = data[:,-1] < 2
-	if minTtInd.sum() > 0:
-	    print '\tSome OD pairs have tt less than 2. Correcting those travel times'
-	    data[minTtInd,-1] = 2
-
-        print '\tTime taken to import from flatfile %.4f' %(time.time()-ti)
-	
-	return DataArray(data, colsList)
-
-
-    def createSkimsCache(self, tableName, data):
-	ti = time.time()
-	fileLoc = self.projectConfigObject.location
-	save('%s/%s.npy' %(fileLoc, tableName), data.data)
-
-        print '\tTime taken to write to numpy cache format %.4f' %(time.time()-ti)
-	
 
     def createLocationsTableFromDatabase(self, tableInfo):
         t = time.time()
@@ -273,8 +173,6 @@ class SimulationManager(object):
             
 	    print 'Following vehicles arrived and the corresponding arrival interval - '
 	    print data
-	    if analysisInterval == 634:
-	 	print('Press any key to continue; break introduced for debugging')
         else:
             data = None
             #raw_input ('\t Press any key to continue')
@@ -311,7 +209,9 @@ class SimulationManager(object):
 
 
 	print ('Starting to process...')
+
 	for comp in compObjects:
+
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
@@ -332,6 +232,9 @@ class SimulationManager(object):
 		# Reset seed 
 		for mod in comp.model_list:
 		    mod.seed = self.modSeedDict[(comp.component_name, mod.dep_varname)] + analysisInterval - 1
+
+                #Load skims matrix outside so that when there is temporal aggregation
+                # of tod skims then loading happens only so many times
 		
 		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
@@ -339,8 +242,10 @@ class SimulationManager(object):
                 if tableName <> self.lastTableName and len(comp.spatialConst_list) > 0:
                     # Load the skims matrix
                     print """\tThe tod interval for the the previous component is not same """\
-                    	"""as current component. """\
-                        """Therefore the skims matrix should be reloaded."""
+                        """as current component. """\
+                        """Therefore the skims matrix should be reloaded.\n"""\
+			"""Last one - %s and this one - %s """ %(self.lastTableName, tableName)
+		    #raw_input()
                     self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
                     self.lastTableName = tableName
 
@@ -348,9 +253,9 @@ class SimulationManager(object):
                     print """\tThe tod interval for the the previous component is same """\
                         """as current component. """\
                         """Therefore the skims matrix need not be reloaded."""
-		print 'Skims identified in %.2f' %(time.time()-t_sk)
-		#raw_input('New skims implemnetation, press any key to proceed ...')
 
+		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
+		
                 data = comp.pre_process(self.queryBrowser, 
                                         self.skimsMatrix, self.uniqueIds, self.db, fileLoc)
 
@@ -367,39 +272,8 @@ class SimulationManager(object):
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
 
-	"""
-	    if comp.component_name == 'ExtractTravelEpisodes':
-	    	studyRegionTrips = tripInfo
-
-	    if comp.component_name == 'ExtractBackgrounTravelEpisodes':
-	    	bkgTrips = tripInfo
-
-	print ('\nTrip info returned...')
-	if (studyRegionTrips == 0).all():
-	    print '\tNo study region trips returned'
-	    if (bkgTrips == 0).all():
-		print '\tNo background trips returned'
-		tripInfo = zeros((1,11))
-	    else:
-		print '\tBackground trips returned'
-		tripInfo = bkgTrips
-	else:
-	    print '\tStudy region trips returned'
-	    if (bkgTrips == 0).all():
-		tripInfo = studyRegionTrips
-	    else:
-		tripInfo = vstack((studyRegionTrips, bkgTrips))
-	"""	
-
-	# Reduce 100 to match TAZ notation of MALTA
+	# Reduce 100 to match TAZ notatiosample_locn of MALTA
 	tripInfo = tripInfo.astype(int)
-
-	#print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT WITHOUT ALTERING THE TAZ IDs- ',  comp.component_name
-	#print tripInfo
-
-	#tripInfo[:,-6] = tripInfo[:,-6] - 100
-        #tripInfo[:,-5] = tripInfo[:,-5] - 100
-
 
 	print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
 	print tripInfo.shape
@@ -408,65 +282,44 @@ class SimulationManager(object):
 
 	return tripInfo
 
-
     def identify_skims_matrix(self, comp):
         ti = time.time()
         if len(comp.spatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
-            tableName = None
+            tableLocation = None
             pass
         else:
             analysisInterval = comp.analysisInterval
         
             if comp.analysisInterval is not None:
-                tableName = self.projectSkimsObject.lookup_table(analysisInterval)
+                tableLocation = self.projectSkimsObject.lookup_tableLocation(analysisInterval)
             else:
                 # Corresponding to the morning peak
                 # currently fixed can be varied as need be
-                tableName = self.projectSkimsObject.lookup_table(240)
+                tableLocation = self.projectSkimsObject.lookup_tableLocation(240)
 
-        print '\tSkims Matrix Loaded in - %s' %(time.time()-ti)
+        print '\tSkims Matrix Identified in - %.4f' %(time.time()-ti)
+        return tableLocation
 
-        return tableName
 
-    def load_skims_matrix(self, comp, tableName):
-        const = comp.spatialConst_list[0]
-        
-        originColName = const.originField
-        destinationColName = const.destinationField
-        skimColName = const.skimField
+    def load_skims_matrix(self, comp, tableLocation):
 
-        fileLoc = self.projectConfigObject.location
-        skimsMatrix, uniqueIds = self.db.returnTableAsMatrix(tableName,
-                                                             originColName,
-                                                             destinationColName,
-                                                             skimColName, 
-							     fileLoc)
+	# the first argument is an offset and the second one is the count of nodes
+	# note that the taz id's should be indexed at the offset and be in increments
+	# of 1 for every subsequent taz id
+	skimsMatrix = SkimsProcessor(1, 1995)
+
+	# Not sure what the flag does?SkimsProcessor
+	print 'tableLocation - ', tableLocation
+	skimsMatrix.set_string(tableLocation, 0)
+
+	# Creating graph and passing the skimsMatrix
+	n, e = skimsMatrix.create_graph()
+	
+	uniqueIds = None
+	#return origin, origin
         return skimsMatrix, uniqueIds
-
-    """
-    def tripInfoToMalta(self, tableName, keyCols=[], nRowsProcessed=0):
-        fileLoc = self.projectConfigObject.location
-        table = self.db.returnTableReference(tableName)
-        
-        t = time.time()
-
-        print '\tNumber of trips processed  - ', nRowsProcessed
-        if nRowsProcessed == 0:
-            return
-        resArr = table[-nRowsProcessed:]
-
-	colnames = table.colnames
-	trips_data_array = zeros((nRowsProcessed, len(colnames)))
-	for i in range(len(colnames)):
-	    name = colnames[i]
-	    trips_data_array[:,i] = resArr[name]
-
-	print 'THIS IS WHAT WILL BE PASSED OVER TO MALTA'
-	print trips_data_array
-	return trips_data_array
-    """
 
     def close_connections(self):
         self.queryBrowser.dbcon_obj.close_connection()

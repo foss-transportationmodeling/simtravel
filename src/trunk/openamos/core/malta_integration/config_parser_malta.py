@@ -1783,6 +1783,17 @@ class ConfigParser(object):
         beforeModel = spatial_query_element.get('before_model')
         afterModel = spatial_query_element.get('after_model')
 
+	locationFilterList = []
+	locationFilterType = "or"
+	
+
+	if locationInformationElement is not None:
+	    locationFilterList = self.return_filter_condition_list(locationInformationElement)
+	    locationFilterTypeElement = locationInformationElement.find('FilterSet')
+	    if locationFilterTypeElement is not None:
+	    	locationFilterType = locationFilterTypeElement.get('type')
+
+
         prismConstraint = PrismConstraints(table, skimField, 
                                            originField, destinationField, 
                                            startConstraint, endConstraint, 
@@ -1792,7 +1803,9 @@ class ConfigParser(object):
                                            afterModel, beforeModel,
                                            locationInfoTable,
                                            locationIdVar,
-                                           locationVariables)
+                                           locationVariables,
+					   locationFilterList,
+					   locationFilterType)
         #print prismConstraint
         return prismConstraint
 

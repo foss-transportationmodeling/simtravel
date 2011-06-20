@@ -715,7 +715,8 @@ class AbstractComponent(object):
         to the N random location choices.
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
-        
+        	
+	print 'Type of skims Matrix - ', type(skimsMatrix)
 
         t = time.time()
 
@@ -723,15 +724,37 @@ class AbstractComponent(object):
             for i in spatialConst_list:
 	
                 if i.countChoices is not None: 
-                    #print ("""\t\tNeed to sample location choices for the following""" \
-                    #           """model with also location info extracted """)
+                    print ("""\t\tNeed to sample location choices for the following""" \
+                               """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i, fileLoc)
                 else:
-                    #print '\tNeed to extract skims'
+                    print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
 
         return data
     
+    def create_location_filter(self, location_filter, location_filter_type, locations):
+        ti = time.time()
+	if location_filter is None:
+	    location_filter = []
+        if len(location_filter) > 0:
+	    if location_filter_type == "and":
+	        location_filter_method = logical_and
+	        location_subset_filter = array([True]*locations.rows)
+	    else:
+	        location_filter_method = logical_or
+		location_subset_filter = array([False]*locations.rows)
+	
+
+            for locFilter in location_filter:
+                condition_filter = locFilter.compare(locations)
+		location_subset_filter = location_filter_method(location_subset_filter, condition_filter)
+	else:
+	    location_subset_filter = array([True]*locations)
+
+        return location_subset_filter
+
+
                                         
     def sample_location_choices(self, data, skimsMatrix2, uniqueIDs, spatialconst, fileLoc):
         # extract destinations subject to the spatio-temporal
@@ -754,14 +777,7 @@ class AbstractComponent(object):
 
         timeAvailable = destinationTimeColVals - originTimeColVals
 
-        destLocSetInd2 = zeros((data.rows, max(uniqueIDs) + 1), dtype=float)
 
-
-   	#print max(uniqueIDs), 'unique ids---------------'
-        zoneLabels = ['geo-%s'%(i+1) for i in range(max(uniqueIDs))]
-
-
-	# prepping the data matrix to add columns as needed
         sampleVarDict = {'temp':[]}
         sampleVarName = spatialconst.sampleField
 
@@ -772,176 +788,105 @@ class AbstractComponent(object):
 
         self.append_cols_for_dependent_variables(data, sampleVarDict)
 
-
-        for zone in uniqueIDs:
-            destZone = zone * ones((data.rows, 1), dtype=int)
-            timeToDest = skimsMatrix2[originLocColVals, destZone]
-            timeFromDest = skimsMatrix2[destZone, destinationLocColVals]
-            rowsLessThan = (timeToDest + timeFromDest < timeAvailable)[:,0]
-
-
-
-            if rowsLessThan.sum() > 0:
-                destLocSetInd2[rowsLessThan, zone] = 1
-            
-
-        print 'Time Available', timeAvailable[:,0]
-
-            #if ma.any(rowsLessThan.mask):
-            #    destLocSetInd2[~rowsLessThan.mask, zone] = 1
-            #    k2 = rowsLessThan.sum()
-
-        rowsZeroChoices = destLocSetInd2.sum(axis=1) == 0
-	print """\t\t%s records were deleted because there """\
-        	"""were no location reachable given the spatial/temporal """\
-                """constraints""" %(rowsZeroChoices.sum())
-
-
-	# Prepping up spatial constraint column for the valid records/agents
-	"""
-
-        destLocSetInd2 = destLocSetInd2[~rowsZeroChoices, :]
-
-
-	print 'data before', data.data[:5,:5].astype(int)
-	
-	dataRowsValid = data.rowsof(~rowsZeroChoices)
-	print 'validDataRows - ', dataRowsValid.data[:5,:5].astype(int)
-	print 'data after', data.data[:5,:5].astype(int)
-	print 'data subset after', dataRowsValid.data[:,:5].astype(int)
-	#raw_input()
-	"""
-
-        originLocColVals = originLocColVals[~rowsZeroChoices, :]
-        destinationLocColVals = destinationLocColVals[~rowsZeroChoices, :]
-
-        originTimeColVals = originTimeColVals[~rowsZeroChoices, :]
-        destinationTimeColVals = destinationTimeColVals[~rowsZeroChoices, :]
-
-
-
-	# If there are no locations accessible then don't sample locations
-        #if dataRowsValid.rows == 0:
-        if ~rowsZeroChoices.sum() == 0:
-	    print 'no sampling of locations'
-	    return data
-
-
-
-
-
-	# If locations are accessible then sample locations
-	destLocSetInd2 = ma.masked_equal(destLocSetInd2, 0)
-
-        seed = spatialconst.seed
-        count = spatialconst.countChoices
-        sampledChoicesCheck = True
-        while (sampledChoicesCheck):
-            #print '\t\tSampling Locations'
-            #self.sample_choices(dataRowsValid, destLocSetInd2, zoneLabels, count, sampleVarName, seed)
-            self.sample_choices(data, destLocSetInd2, zoneLabels, count, sampleVarName, seed, rowsZeroChoices)
-
-            sampledVarNames = sampleVarDict['temp']
-            #sampledChoicesCheck = self.check_sampled_choices(data, sampledVarNames)
-            sampledChoicesCheck = False
-            seed = seed + 1
-
         # Extract the location variables cache
         if len(spatialconst.locationVariables) > 0:
-            locationsTable, uniqueIDs = self.db.returnTable(spatialconst.locationInfoTable, 
+	    locVariables = []
+	    locVariables += spatialconst.locationVariables
+	    if len(spatialconst.locationFilterList) > 0:
+		for locFilter in spatialconst.locationFilterList:
+		    if locFilter.varname not in locVariables:
+		    	locVariables.append(locFilter.varname)	
+	
+
+            locationsTable, uniqueIds = self.db.returnTable(spatialconst.locationInfoTable, 
                                                             spatialconst.locationIdVar, 
-                                                            spatialconst.locationVariables, 
+                                                            locVariables,
 							    fileLoc)
 
+	    print locationsTable.varnames
+	# Universe of possible locations; to allow for smart sampling
+
+	print 'shape of uniqueIds', uniqueIds.shape
 
 
-        for i in range(count):
-            sampleLocColName = '%s%s' %(sampleVarName, i+1)
-            #sampleLocColVals = array(dataRowsValid.columns([sampleLocColName]).data, dtype=int)
-	    sampleLocColVals = array(data.columns([sampleLocColName], ~rowsZeroChoices).data, dtype=int)
+	if len(spatialconst.locationVariables) > 0:
+	    if len(spatialconst.locationFilterList) > 0:
+		location_subset_filter = self.create_location_filter(spatialconst.locationFilterList, 
+								     spatialconst.locationFilterType, 
+								     locationsTable)
+		print 'Only so many possible locations - ', location_subset_filter.sum()
+		print 'shape of filter', location_subset_filter.shape
+		uniqueIds = uniqueIds[location_subset_filter]
+	
 
 
-            #print 'sampled locations - ', dataRowsValid.columns([sampleLocColName]).data[:,0]
-            print 'sampled locations - ', data.columns([sampleLocColName], ~rowsZeroChoices).data[:,0]
-            #print originLocColVals[:,0], sampleLocColVals[:,0]
-            # the default missing value for skim was 9999 but that was causing problems with
-            # calculation as aresult it is changed to a small number so that the alternative
-            # corresponding to that is very negative. This is for those cases where the number
-            # of choices is less than the minimum number of choices to be sampled
+	print 'Origin - ', originLocColVals[:,0]
+	print 'Destination - ', destinationLocColVals[:,0]
+	timeAvailable = timeAvailable.astype(float)
+	print 'Time Available - ', timeAvailable[:,0]	
+	
 
-            # TO TRAVEL SKIMS
-            vals = skimsMatrix2[originLocColVals, sampleLocColVals]
-            rowsEqualsDefault = vals.mask
-            # If OD pair missing for travel to set it to -9999 to make location
-            # unattractive
-            vals[rowsEqualsDefault] = 0
+	print spatialconst.countChoices, data.rows
+	skimsMatrix2.create_location_array(data.rows)
+	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
+					  		    timeAvailable[:,0], spatialconst.countChoices,
+							    uniqueIds)
+
+	print locationChoices.sum(-1)
+	#print locationChoices
+	
+	for i in range(spatialconst.countChoices):
+	    sampleLocColVals = locationChoices[:,i].astype(int)
+
+	    tt_to = skimsMatrix2.get_travel_times(originLocColVals[:,0], sampleLocColVals)
+	    tt_from = skimsMatrix2.get_travel_times(sampleLocColVals, destinationLocColVals[:,0])
+	
+	    #print 'Sampled locations - ', sampleLocColVals
+	    #print 'Travel time to - ', tt_to
+	    #print 'Travel time from - ', tt_from
+
+	    # Updating the location columns
+            colName = '%s%s' %(sampleVarName, i+1)
+            data.setcolumn(colName, sampleLocColVals)
+
+
+	    # Also updating skim values for sampled locations: here the travel time TO sampled location is updated
             if spatialconst.asField:
                 colName = spatialconst.asField
             else:
                 colName = spatialconst.skimField
             skimLocColName = '%s%s' %(colName, i+1)
+	
+            data.setcolumn(skimLocColName, tt_to)
 
-	    sampleLocsZeros = sampleLocColVals == 0
-	    vals[sampleLocsZeros] = 99
-            #dataRowsValid.setcolumn(skimLocColName, vals)
-            data.setcolumn(skimLocColName, vals, ~rowsZeroChoices)
-	    #print 'TO VALS', skimLocColName, vals
 
-            # FROM TRAVEL SKIMS
-            vals = skimsMatrix2[sampleLocColVals, destinationLocColVals]
-
-            rowsEqualsDefault = vals.mask
-            # If OD pair missing for travel from then set it zero
-            vals[rowsEqualsDefault] = 0            
+	    # Also updating skim values for sampled locations: here the travel time FROM sampled location is updated
             destSkimColName = 'tt_from%s' %(i+1)
-            #dataRowsValid.setcolumn(destSkimColName, vals)
-	    data.setcolumn(destSkimColName, vals, ~rowsZeroChoices)
-	    #print 'FROM VALS', destSkimColName, vals
+            data.setcolumn(destSkimColName, tt_from)
 
-	    print 'LOCATION ATTRIBUTES'
-            # Process Location Information if requested
+
+	    # Also updating location attributes for sampled locations
             if len(spatialconst.locationVariables) > 0:
                 for j in spatialconst.locationVariables:
-                    #print 'location var', j
+                    #print j
                     locationVarName = '%s%s' %(j, i+1)
                     locVarVals = locationsTable.columns([j]).data[sampleLocColVals]
-                    #dataRowsValid.setcolumn(locationVarName, locVarVals)
-                    data.setcolumn(locationVarName, locVarVals, ~rowsZeroChoices)
-		    #print sampleLocColVals[:5]
-                    print 'loc variable', locationVarName, 'vals', locVarVals[:5].astype(int)
-		    #print locationsTable.varnames
-        #raw_input()
+                    data.setcolumn(locationVarName, locVarVals)
+                    #print locVarVals
 
 
-	try:
-	    print data.columns(['destination1', 'destination2', 'destination3']).data.astype(int)
-	    #print dataRowsValid.columns(['destination1', 'destination2', 'destination3']).data.astype(int)
-	except Exception, e:
-	    print 'Error occurred printing: ', e
-	    
-		
-	#print data.varnames
-        colsInTable = sampleVarDict['temp']
-        colsInTable.sort()
-	#raw_input('spatial constraints processed')
         return data
             
     def extract_skims(self, data, skimsMatrix2, spatialconst):
         # hstack a column for the skims that need to be extracted for the
         # location pair
-	print 'processing spatial constraint', spatialconst
         originLocColName = spatialconst.startConstraint.locationField
         destinationLocColName = spatialconst.endConstraint.locationField
         
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
 
-
-        vals = skimsMatrix2[originLocColVals, destinationLocColVals]
-        
-        rowsEqualsDefault = vals.mask
-        vals[rowsEqualsDefault] = 0
-        #vals.shape = (data.rows,1)
+	tt = skimsMatrix2.get_travel_times(originLocColVals[:,0], destinationLocColVals[:,0])
         if spatialconst.asField:
             colName = spatialconst.asField
         else:
@@ -949,91 +894,13 @@ class AbstractComponent(object):
 
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
+        data.setcolumn(colName, tt)	
 
-        #print vals[:,0]
-	#print originLocColName, destinationLocColName
-	#print 'Origin Loc', originLocColVals[:,0]
-        #print 'Destination Loc', destinationLocColVals[:,0]
-       	#print 'skims values', vals[:,0]
-
-        #print vals[:,0]
-	#print 'NEW IMPLEMENTATION'
-        data.setcolumn(colName, vals)
-	#print data.columns([colName])
+	print originLocColVals[:,0]
+	print destinationLocColVals[:,0]
+	print tt
 
         return data
-
-    def sample_choices(self, data, destLocSetInd, zoneLabels, count, sampleVarName, seed, rowsZeroChoices):
-        destLocSetInd = destLocSetInd[:,1:]
-	#print 'number of choices - ', destLocSetInd.shape
-        ti = time.time()
-        for i in range(count):
-            destLocSetIndSum = destLocSetInd.sum(-1)
-            #print 'Number of choices', destLocSetIndSum
-            probLocSet = (destLocSetInd.transpose()/destLocSetIndSum).transpose()
-
-	    zeroChoices = destLocSetIndSum.mask
-
-	    if (~zeroChoices).sum() == 0:
-		print 'Zero Choices for some or all cases'
-		continue
-
-	    #print probLocSet.shape, len(zoneLabels), 'SHAPES -- <<'
-            probDataArray = DataArray(probLocSet, zoneLabels)
-
-            # seed is the count of the sampled destination starting with 1
-            probModel = AbstractProbabilityModel(probDataArray, seed+i)
-            res = probModel.selected_choice()
-            
-            # Assigning the destination
-            # We subtract -1 from the results that were returned because the 
-            # abstract probability model returns results indexed at 1
-            # actual location id = choice returned - 1
-            
-            colName = '%s%s' %(sampleVarName, i+1)
-            nonZeroRows = where(res.data <> 0)
-	    #print 'SELECTED LOCATIONS FOR COUNT - ', i+1
-            #print res.data[:,0]
-
-            #actualLocIds = res.data
-            #actualLocIds[nonZeroRows] -= 1
-	    print 'data shape', data.data.shape
-	    print 'result', res.data	
-            data.setcolumn(colName, res.data)
-	    #print data.columns([colName]).data[:,0]
-
-            # Retrieving the row indices
-            dataCol = data.columns([colName]).data
-
-            rowIndices = array(xrange(dataCol.shape[0]), int)
-	    rowIndices = rowIndices[~rowsZeroChoices]
-            colIndices = res.data.astype(int)
-	    colIndices = colIndices[~rowsZeroChoices]
-
-	    print 'rowIndices', rowIndices
-	    #print 'rowIndices', rowIndices[~rowsZeroChoices]
-
-	    print 'colIndices', colIndices
-
-	    print destLocSetInd.shape
-            destLocSetInd.mask[rowIndices, colIndices-1] = True
-        print "\t\t -- Sampling choices took - %.4f" %(time.time()-ti)
-
-    def check_sampled_choices(self, data, sampledVarNames):
-        for i in range(len(sampledVarNames)):
-            varName = sampledVarNames[i]
-            checkAgainstVarNames = sampledVarNames[i+1:]
-            for j in checkAgainstVarNames:
-                columnI = data.columns([varName]).data
-                columnJ = data.columns([j]).data
-                check = data.data[where(columnI[where(columnI == columnJ)] <> 0)]
-                if check.shape[0] > 0:
-                    print '\t -- Warning:Choices are repeated; Repeating location sampling step --'
-                    return True
-
-        print '\t -- Choices are not repeated --'
-        return False
-
 
 
 
