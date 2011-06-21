@@ -181,7 +181,7 @@ void initialize_array(int nodes_temp)
     printf("C--> Initializing the graph\n");
     
     //initialize the 2D array to the size of the number of nodes
-    org_graph = (float **)malloc(nodes*sizeof(float));
+    org_graph = (float **)malloc(nodes*sizeof(float *));
     //org_graph = malloc(nodes * sizeof(float *));
         
     //create all the nodes
@@ -343,7 +343,7 @@ void initialize_location_array(int arr_len)
     printf("C--> Initializing locations graph\n");
     
     //initialize the 2D array to the size of the number of nodes
-    location_choices = (int **)malloc(rows*sizeof(int));
+    location_choices = (int **)malloc(rows*sizeof(int *));
 
     //create all the nodes
     for(x = 0; x < rows; x++)
