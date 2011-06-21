@@ -264,6 +264,8 @@ class ConfigParser(object):
 
     def parse_analysis_interval_and_create_component(self, component_element):
         ti = time.time()
+        comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
+	print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
         if interval_element is not None:
@@ -328,7 +330,7 @@ class ConfigParser(object):
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
-	print "Parsing Component - %s" %(comp_name)
+
 
 
         tableOrder, tableKeys = self.parse_tableHierarchy(component_element)
