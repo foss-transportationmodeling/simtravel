@@ -77,7 +77,7 @@ class AbstractComponent(object):
                     db):
 
 
-	print skimsMatrix
+	#print skimsMatrix
 	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)
 
 
@@ -123,10 +123,10 @@ class AbstractComponent(object):
 
         # Process and include spatial query information
 	t = time.time()
-	print '\tReached point where skims are used'
+	#print '\tReached point where skims are used'
         data = self.process_data_for_locs(data, self.spatialConst_list, 
                                           skimsMatrix, uniqueIds)
-	print ('Time taken to process spatial constraints - %.4f' %(time.time()-t))
+	print ('\tTime taken to process spatial constraints - %.4f' %(time.time()-t))
         if data == None or data.rows == 0:
             return None
 
@@ -136,7 +136,7 @@ class AbstractComponent(object):
         #if self.dependencyAllocationFlag:
         #    self.process_adult_allocation(data, queryBrowser, householdStructureObject)
         
-	print '-- Time taken to retrieve data - %.4f --' %(time.time()-t_d)
+	print '\tTime taken to retrieve data - %.4f --' %(time.time()-t_d)
         return data
         
 
@@ -186,12 +186,12 @@ class AbstractComponent(object):
             count_invalid_rows = data_filter_count - valid_data_rows_count
 
             if count_invalid_rows > 0:
-                print """\tSome rows (%s) are not valid; they do not """\
+                print """\t\tSome rows (%s) are not valid; they do not """\
                     """satisfy consistency checks - %s""" %(count_invalid_rows, 
                                                             self.post_run_filter)
             nRowsProcessed += valid_data_rows_count
 
-            print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
+            print "\t\tWriting to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
 	    self.write_data_to_cache(valid_data_rows, partId)
         return nRowsProcessed
 
@@ -254,7 +254,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -282,7 +282,7 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+                #print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -294,7 +294,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
-                print 'RESULT', result.data
+                #print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -629,11 +629,11 @@ class AbstractComponent(object):
                 skimColName = i.skimField
 
                 if i.countChoices is not None: 
-                    print ("""\t\tNeed to sample location choices for the following""" \
-                               """model with also location info extracted """)
+                    #print ("""\t\tNeed to sample location choices for the following""" \
+                    #           """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i)
                 else:
-                    print '\tNeed to extract skims'
+                    #print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
 
         return data
@@ -704,10 +704,10 @@ class AbstractComponent(object):
                                                             spatialconst.locationIdVar, 
                                                             locVariables)
 
-	    print locationsTable.varnames
+	    #print locationsTable.varnames
 	# Universe of possible locations; to allow for smart sampling
 
-	print 'shape of uniqueIds', uniqueIds.shape
+	#print 'shape of uniqueIds', uniqueIds.shape
 
 
 	if len(spatialconst.locationVariables) > 0:
@@ -715,25 +715,25 @@ class AbstractComponent(object):
 		location_subset_filter = self.create_location_filter(spatialconst.locationFilterList, 
 								     spatialconst.locationFilterType, 
 								     locationsTable)
-		print 'Only so many possible locations - ', location_subset_filter.sum()
-		print 'shape of filter', location_subset_filter.shape
+		#print 'Only so many possible locations - ', location_subset_filter.sum()
+		#print 'shape of filter', location_subset_filter.shape
 		uniqueIds = uniqueIds[location_subset_filter]
 	
 
 
-	print 'Origin - ', originLocColVals[:,0]
-	print 'Destination - ', destinationLocColVals[:,0]
+	#print 'Origin - ', originLocColVals[:,0]
+	#print 'Destination - ', destinationLocColVals[:,0]
 	timeAvailable = timeAvailable.astype(float)
-	print 'Time Available - ', timeAvailable[:,0]	
+	#print 'Time Available - ', timeAvailable[:,0]	
 	
 
-	print spatialconst.countChoices, data.rows
+	#print spatialconst.countChoices, data.rows
 	skimsMatrix2.create_location_array(data.rows)
 	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
 					  		    timeAvailable[:,0], spatialconst.countChoices,
 							    uniqueIds)
 
-	print locationChoices.sum(-1)
+	#print locationChoices.sum(-1)
 	#print locationChoices
 	
 	for i in range(spatialconst.countChoices):
@@ -797,9 +797,9 @@ class AbstractComponent(object):
         self.append_cols_for_dependent_variables(data, sampleVarDict)
         data.setcolumn(colName, tt)	
 
-	print originLocColVals[:,0]
-	print destinationLocColVals[:,0]
-	print tt
+	#print originLocColVals[:,0]
+	#print destinationLocColVals[:,0]
+	#print tt
 
         return data
 

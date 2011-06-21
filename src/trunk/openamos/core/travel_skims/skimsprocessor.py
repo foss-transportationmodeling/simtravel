@@ -18,7 +18,7 @@ class SkimsProcessor(object):
     def __init__(self, offset, nodes):
         self.offset = offset
         self.nodes = nodes
-        print self.offset, self.nodes
+        #print self.offset, self.nodes
         #print 'Testing extension'
 
 
@@ -153,6 +153,12 @@ class SkimsProcessor(object):
         Output:
         Returns an array with travel times
         """         
+
+	# Printing vertices
+	#print 'origin - ', origin
+	#print 'destination - ', destination
+
+
         #get the array length and initialize the tt array
         arr_len = origin.size
         tt = zeros(arr_len)
@@ -174,6 +180,7 @@ class SkimsProcessor(object):
         self.delete_carray(tt_arr, 1)
         
         #return the travel times numpy array
+	#print 'tt', new_tt
         return new_tt
         
    
@@ -221,7 +228,7 @@ class SkimsProcessor(object):
                 #no land use information present, set land use length to nodes
                 land_use_len = self.nodes
         
-        print 'land use length is %s'%land_use_len
+        #print 'land use length is %s'%land_use_len
         #initialize locations array to zero
         locations = zeros(loc_len)
         
@@ -330,7 +337,7 @@ class TestSkimsProcessor(unittest.TestCase):
     def setUp(self):
         self.numarr = 'numarr'
         self.offset = 1
-        self.nodes = 0
+        self.nodes = 1995
 
     def testEx(self):
         ext_obj = SkimsProcessor(self.offset, self.nodes)
@@ -338,7 +345,7 @@ class TestSkimsProcessor(unittest.TestCase):
         origin = zeros(100)
         destination = zeros(100)
         arr_len = origin.size
-        num_of_locations = 60        
+        num_of_locations = 15        
         land_use = array([1010,548,656,445,356,490,1258,184,1647,1722,327,360,1786,187,680,685,604,511,608,1005,545,461,549,1750,347,501,506,444,1262,1723,1266,352,945,524,1773,643,599,50,651,644,195,1751,322,1265,614,550,989,1713,469,1294,273,1712,996,174,484,576,589,339,266])
                 
         i = 0
@@ -352,81 +359,17 @@ class TestSkimsProcessor(unittest.TestCase):
             destination[i] = j
             j = j - 1
         print origin, destination 
-        """
-        # 2nd thousand
-        j = 1000
-        for i in range(1000, 2000):
-            origin[i] = i+offset
-            destination[i] = j
-            j = j -1
-        
-        #3rd thousand
-        j = 1995
-        for i in range(2000, 3000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j - 1
-        
-        # 4th thousand
-        j = 1500
-        for i in range(3000, 4000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-            
-        # 5th thousand
-        j = 1200
-        for i in range(4000, 5000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j - 1
-        
-        # 6th thousand
-        j = 1800
-        for i in range(5000, 6000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-
-        # 7th thousand
-        j = 1400
-        for i in range(6000, 7000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-            
-        # 8th thousand
-        j = 1700
-        for i in range(7000, 8000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-
-        # 9th thousand
-        j = 1300
-        for i in range(8000, 9000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-            
-        # 10th thousand
-        j = 1600
-        for i in range(9000, 10000):
-            origin[i] = i/10
-            destination[i] = j
-            j = j -1
-        """
         
         """
         To get travel times
         """
         
         #pass file paths to the C program
-        node_path = "/home/namrata/Documents/swig/arr_sample/temp_data_copy.csv"
-        graph_path = "/home/namrata/Documents/swig/arr_sample/skim1.dat"
+        #node_path = "/home/namrata/Documents/swig/arr_sample/temp_data_copy.csv"
+        graph_path = "/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat"
 
-        flag = 1
-        ext_obj.set_string(node_path, flag)
+        #flag = 1
+        #ext_obj.set_string(node_path, flag)
         flag = 0
         ext_obj.set_string(graph_path, flag)
         
@@ -462,13 +405,15 @@ class TestSkimsProcessor(unittest.TestCase):
         #land_use = zeros(1)
         print '\tLocation choices'
         t1 = time.time()
-        new_loc = ext_obj.get_location_choices(origin, destination, new_tt, num_of_locations, land_use)
+        new_loc = ext_obj.get_location_choices(origin, destination, new_tt*25, num_of_locations, land_use)
         t2 = time.time()
         print '\tTime taken to retrieve location choices %.4f'%(t2-t1)
         
+	print 'LOCS RETRIEVED', new_loc.shape,  new_loc[:5,:]
+
         #printing the location choices
-        for each in range(arr_len):
-            print new_loc[each]
+        for each in range(num_of_locations):
+            print new_loc[:5,each]
                 
         #after all computations are done delete all the arrays in the C program
         print 'deleting graph'

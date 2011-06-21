@@ -736,7 +736,7 @@ class QueryBrowser(object):
             
         
         # Convert it back to a regular array to enable all the other processing
-        print '\t - Size of the data set that was retrieved - ', data.shape
+        print '\tSize of the data set that was retrieved - ', data.shape
         #print '\t - Records were processed after query in %.4f' %(time.time()-t)
 
 	if data.shape[0] == 0:
@@ -869,7 +869,7 @@ class QueryBrowser(object):
                     
                 #result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print '\t\tTime after insert query %.4f' %(time.time()-ti)
+                #print '\t\tTime after insert query %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
@@ -888,7 +888,7 @@ class QueryBrowser(object):
         Inserts all the rows from data array in the table
         """
 
-	print 'Table Name - %s, creating index - %s and deleting index - %s'  %(table_name , createIndex, deleteIndex)
+	#print 'Table Name - %s, creating index - %s and deleting index - %s'  %(table_name , createIndex, deleteIndex)
         
 	if partId == None:
 	    partId = ""
@@ -989,7 +989,7 @@ class QueryBrowser(object):
                 else:
                     columns = columns + i
             index_stmt = 'create index %s on %s (%s)'%(index_name, table_name, columns)
-	    print 'Index Statement - %s' %(index_stmt)
+	    #print 'Index Statement - %s' %(index_stmt)
             try:
                 self.dbcon_obj.cursor.execute(index_stmt)
                 self.dbcon_obj.connection.commit()

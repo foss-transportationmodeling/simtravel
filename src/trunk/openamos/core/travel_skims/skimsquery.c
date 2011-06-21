@@ -67,22 +67,22 @@ void set_file(char *s, int length, int flag){
    {
         node_file_name = (char *)malloc(length*sizeof(char));
         node_file_name = s;
-        printf("C-->node file name --> %s\n", node_file_name);
+        //printf("C-->node file name --> %s\n", node_file_name);
    }
    else
    {
         graph_file_name = (char *)malloc(length*sizeof(char));
         graph_file_name = s;
-        printf("C-->graph_file name --> %s\n", graph_file_name);
+        //printf("C-->graph_file name --> %s\n", graph_file_name);
    }
 }
 
 
 void print_string()
 {
-    printf("C--> printing the file names\n");
-    printf("C--> node file name:  %s\n", node_file_name);
-    printf("C--> graph file name:  %s\n", graph_file_name);
+    //printf("C--> printing the file names\n");
+    //printf("C--> node file name:  %s\n", node_file_name);
+    //printf("C--> graph file name:  %s\n", graph_file_name);
 }
 /*********************************************/
 
@@ -138,21 +138,21 @@ of nodes and edges and saves them in the respective variables.
 int get_nodes()
 {
     //open the file
-    printf("C--> Opening the file\n");
-    printf("C--> Node File: %s\n", node_file_name);
+    //printf("C--> Opening the file\n");
+    //printf("C--> Node File: %s\n", node_file_name);
     FILE *file = fopen(node_file_name, "r");
     
     //process till end of file
     if( node_file_name != NULL )
     {
         //find the nodes and edges
-        printf("C--> Reading from the file\n");
+        //printf("C--> Reading from the file\n");
         fscanf(file, "%d, %d", &nodes, &edges);
-        printf("C--> Nodes are: %d\n", nodes);
-        printf("C--> Edges are: %d\n", edges);
+        //printf("C--> Nodes are: %d\n", nodes);
+        //printf("C--> Edges are: %d\n", edges);
         
         //close the file
-        printf("C--> Closing the file\n");
+        //printf("C--> Closing the file\n");
         fclose(file);
         
         //return the nodes
@@ -161,7 +161,7 @@ int get_nodes()
     else
     {
         //error if file is null
-        printf("C--> Error reading the file.\n");
+        //printf("C--> Error reading the file.\n");
         perror(node_file_name);
         return 0;
     }
@@ -176,9 +176,9 @@ void initialize_array(int nodes_temp)
 {
     int x;
     nodes = nodes_temp;
-    printf("C--> Nodes are %d\n", nodes);
+    //printf("C--> Nodes are %d\n", nodes);
     edges = nodes * nodes;
-    printf("C--> Initializing the graph\n");
+    //printf("C--> Initializing the graph\n");
     
     //initialize the 2D array to the size of the number of nodes
     org_graph = (float **)malloc(nodes*sizeof(float *));
@@ -190,7 +190,7 @@ void initialize_array(int nodes_temp)
         org_graph[x] = (float *)malloc(nodes*sizeof(float));
         //org_graph[x] = malloc(nodes * sizeof(float));
     }
-    printf("C--> Graph created\n");
+    //printf("C--> Graph created\n");
 }
 
 
@@ -203,8 +203,8 @@ void set_array(int offset)
     int i;
 
     //open the file to read data
-    printf("C--> Opening the file\n");
-    printf("C--> Graph File: %s\n", graph_file_name);
+    //printf("C--> Opening the file\n");
+    //printf("C--> Graph File: %s\n", graph_file_name);
     FILE *file = fopen(graph_file_name, "r");
 
     //process till end of file
@@ -224,16 +224,16 @@ void set_array(int offset)
         }
         
         //close the file
-        printf("C--> Closing the file\n");
+        //printf("C--> Closing the file\n");
         fclose(file);
     }
     else
     {
         //error if file is null
-        printf("C--> Error reading the file.\n");
+        //printf("C--> Error reading the file.\n");
         perror(graph_file_name);
     }
-    printf("C--> Graph created with new values\n");
+    //printf("C--> Graph created with new values\n");
 }
 
 
@@ -250,7 +250,7 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
     int count;
     float temp;
     
-    printf("C--> Get the travel times\n");
+    //printf("C--> Get the travel times\n");
     count = 0;
 
     //get the travel times using the origin and destination
@@ -270,7 +270,7 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
             tt[i] = temp;
         }
     }
-    printf("C--> Travel times retrieved\n");
+    //printf("C--> Travel times retrieved\n");
 }
 
 
@@ -295,7 +295,7 @@ void delete_array()
     //set the pointer to NULL to avoid any memory access
     org_graph = NULL;
     
-    printf("C--> Array deleted\n");
+    //printf("C--> Array deleted\n");
 }
 
 /*********************************************/
@@ -340,7 +340,7 @@ void initialize_location_array(int arr_len)
 {
     int x;
     rows = arr_len;
-    printf("C--> Initializing locations graph\n");
+    //printf("C--> Initializing locations graph\n");
     
     //initialize the 2D array to the size of the number of nodes
     location_choices = (int **)malloc(rows*sizeof(int *));
@@ -350,7 +350,7 @@ void initialize_location_array(int arr_len)
     {
         location_choices[x] = (int *)malloc(nodes*sizeof(int));
     }
-    printf("C--> Locations graph created\n");
+    //printf("C--> Locations graph created\n");
 }
 
 
@@ -496,7 +496,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
     counter = 0;
     final_count = 0;
     loop_counter = 0;
-    printf("C--> inside location choices\n");
+    //printf("C--> inside location choices\n");
     
     //check if land use data is present
     if(land_use_length == nodes)
@@ -504,7 +504,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         //land use data not present. loop over all the nodes
         //i --> rows in origin/dest j --> all nodes k --> final location choices
         //run a loop on the number of origin-destination pairs for every pair look for nodes that are accessible
-        printf("C--> No land use data\n");
+        //printf("C--> No land use data\n");
         for(i = 0; i < arr_len; i++)
         {
             //set the origin, destination and travel time to local variable
@@ -515,7 +515,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
             if( org == 0 || dest == 0)
             {
                 //invalid origin or destination. set all the locations to zero. copy the locations into location choices
-	            printf("C--> Origin or destination are zeros - %d\n", i);
+	            //printf("C--> Origin or destination are zeros - %d\n", i);
                 for(k = 0; k < no_of_locations; k++)
                 {
                     if(i == 0)
@@ -579,7 +579,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
         //land use data is present. loop over all the elements in the land use array
         //i --> rows in origin/dest j --> all nodes k --> final location choices
         //run a loop on the number of origin-destination pairs for every pair look for nodes that are accessible
-        printf("C--> Land use data present.\n");
+        //printf("C--> Land use data present.\n");
         for(i = 0; i < arr_len; i++)
         {
             //set the origin, destination and travel time to local variable
@@ -590,7 +590,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
             if( org == 0 || dest == 0)
             {
                 //invalid origin or destination. set all the locations to zero. copy the locations into location choices
-	            printf("C--> Origin or destination are zeros - %d\n", i);
+	            //printf("C--> Origin or destination are zeros - %d\n", i);
                 for(k = 0; k < no_of_locations; k++)
                 {
                     if(i == 0)
@@ -643,7 +643,7 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
                 }
         
                 //write all the locations to the file
-                write_locations(i);
+                //write_locations(i);
                 
                 //after copying the locations, reset temp locations
                 set_temp_location_array();
@@ -660,8 +660,8 @@ and free memory.
 void delete_location_array(int arr_len)
 {
     int i;
-    printf("C--> Starting to delete location array\n");    
-    printf("Nodes-%d\n", nodes);
+    //printf("C--> Starting to delete location array\n");    
+    //printf("Nodes-%d\n", nodes);
     //delete all the rows
     for ( i = 0; i < arr_len; i++ )
     {
@@ -674,7 +674,7 @@ void delete_location_array(int arr_len)
     
     //set the pointer to NULL to avoid any memory access
     location_choices = NULL;
-    printf("C--> Location array deleted\n");
+    //printf("C--> Location array deleted\n");
 }
 /*********************************************/
 

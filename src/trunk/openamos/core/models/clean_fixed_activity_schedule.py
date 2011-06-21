@@ -28,7 +28,7 @@ class CleanFixedActivitySchedule(Model):
 
 
     def create_col_numbers(self, colnamesDict):
-        print colnamesDict
+        #print colnamesDict
         self.schidCol = colnamesDict[self.activityAttribs.scheduleidName]
         self.actTypeCol = colnamesDict[self.activityAttribs.activitytypeName]
         self.locidCol = colnamesDict[self.activityAttribs.locationidName]
@@ -114,8 +114,8 @@ class CleanFixedActivitySchedule(Model):
         self.personIndicesOfActs[1:,2] = indicesRow[:-1]
         self.personIndicesOfActs[:,3] = indicesRow
 
-        print self.personIndicesOfActs[:20, :]
-        print self.personIndicesOfActs[-20:, :]
+        #print self.personIndicesOfActs[:20, :]
+        #print self.personIndicesOfActs[-20:, :]
 
 
 
@@ -135,13 +135,13 @@ class CleanFixedActivitySchedule(Model):
         self.hhldIndicesOfPersons[1:,1] = indicesHidRow[:-1]
         self.hhldIndicesOfPersons[:,2] = indicesHidRow
 
-        print idCols[:30,:]
-        print self.hhldIndicesOfPersons[:20,:]
-        print self.personIndicesOfActs[:20,:]
+        #print idCols[:30,:]
+        #print self.hhldIndicesOfPersons[:20,:]
+        #print self.personIndicesOfActs[:20,:]
 
-        print idCols[-30:,:]
-        print self.hhldIndicesOfPersons[-20:,:]
-        print self.personIndicesOfActs[-20:,:]
+        #print idCols[-30:,:]
+        #print self.hhldIndicesOfPersons[-20:,:]
+        #print self.personIndicesOfActs[-20:,:]
 
 
 
@@ -173,9 +173,9 @@ class CleanFixedActivitySchedule(Model):
 
             schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
                                                        lastPersonLastAct,:], data.varnames)
-            print 'hID - ', hhldIndex[0]
-            print schedulesForHhld.data.astype(int)
-            print data.varnames
+            #print 'hID - ', hhldIndex[0]
+            #print schedulesForHhld.data.astype(int)
+            #print data.varnames
 
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
@@ -197,11 +197,11 @@ class CleanFixedActivitySchedule(Model):
 
                 householdObject.add_person(personObject)
 
-                print '\thID - %s, pID - %s' %(perIndex[0], perIndex[1])
-                print schedulesForPerson.data.astype(int)
+                #print '\thID - %s, pID - %s' %(perIndex[0], perIndex[1])
+                #print schedulesForPerson.data.astype(int)
 
             reconciledSchedules = householdObject.clean_schedules(seed)
-            print reconciledSchedules
+            #print reconciledSchedules
             
             actList += reconciledSchedules
 
@@ -300,7 +300,7 @@ class TestReconcileModel(unittest.TestCase):
     def test_retrieve_loop_ids(self):
         houseIdsCol = self.actSchedules.columns(['houseid']).data
         houseIdsUnique = unique(houseIdsCol)
-        print houseIdsUnique
+        #print houseIdsUnique
 
         
         for hid in houseIdsUnique:

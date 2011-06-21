@@ -53,8 +53,8 @@ class Person(object):
 	anchorAct.endTime = self.actualArrival	
 	anchorAct.duration = 0
 	self.add_episodes([anchorAct])
-	print 'Dest Act - ', self.destAct
-	print 'Anchor Act - ', anchorAct
+	#print 'Dest Act - ', self.destAct
+	#print 'Anchor Act - ', anchorAct
 	#raw_input('adding an anchor activity')	
 
 
@@ -114,7 +114,7 @@ class Person(object):
 
 
     def add_episodes(self, activityEpisodes, temp=False):
-	print 'Before adding: Number of acts - ', len(self.listOfActivityEpisodes)
+	#print 'Before adding: Number of acts - ', len(self.listOfActivityEpisodes)
         for activity in activityEpisodes:
             #activity.personid = self.pid
 	    if activity.startOfDay and not temp:
@@ -124,7 +124,7 @@ class Person(object):
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
             self._update_schedule_conflict_indicator(activity, add=True)
-	print 'After adding: Number of acts - ', len(self.listOfActivityEpisodes)
+	#print 'After adding: Number of acts - ', len(self.listOfActivityEpisodes)
 
     def remove_episodes(self, activityEpisodes):
         #print 'CURRENT ACTIVIITES FOR PERSON - ', self.hid, self.pid
@@ -156,21 +156,21 @@ class Person(object):
         #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
         minStartTime = activityList[0].startTime
         maxEndTime = activityList[-1].endTime
-        print 'DEPENDENT ACTS'
-        for act in depActs:
-            print '\t', act
+        #print 'DEPENDENT ACTS'
+        #for act in depActs:
+        #    print '\t', act
 
-        print 'OWN ACTIVITIES'
-        for act in ownActs:
-            print '\t', act
+        #print 'OWN ACTIVITIES'
+        #for act in ownActs:
+        #    print '\t', act
             
-        print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
+        #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
 
         if len(ownActs) == 1:
-            print '\tException, Only one activity of the adult that needs to be modified'            
+            #print '\tException, Only one activity of the adult that needs to be modified'            
             self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
         elif len(ownActs) > 1:
-            print '\tException, More than one activity of the adult person need to be modified/deleted'
+            #print '\tException, More than one activity of the adult person need to be modified/deleted'
             self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
         else:
             raise Exception, 'NO CONFLICTS??'
@@ -194,7 +194,7 @@ class Person(object):
         newOwnActs = []
         for act in ownActs:
             if (act.startTime > minStartTime and act.endTime < maxEndTime):
-                print '\tRemoving activity', act
+                #print '\tRemoving activity', act
                 #raw_input()
                 self.remove_episodes([act])
             else:
@@ -206,7 +206,7 @@ class Person(object):
         
         for nextActIndex in range(len(newOwnActs) - 1):
             nextAct = newOwnActs[nextActIndex + 1]
-            print firstAct, nextAct, 'BEFORE'
+            #print firstAct, nextAct, 'BEFORE'
 
             #self.remove_episodes([firstAct, nextAct])
             overlap = self._conflict_duration_with_activity(nextAct)
@@ -217,13 +217,13 @@ class Person(object):
 
             nextActRef = nextAct.startTime + (overlap - overlapAdj) + 1
             self.move_start(nextAct, nextActRef)
-            print overlap, overlapAdj, firstActRef, nextActRef
+            #print overlap, overlapAdj, firstActRef, nextActRef
 
             firstAct = nextAct
 
 
-            print firstAct, nextAct, 'AFTER'
-            raw_input()
+            #print firstAct, nextAct, 'AFTER'
+            #raw_input()
 
     def sort_acts(self, actList):
         actVerticesDict = {}
@@ -244,7 +244,7 @@ class Person(object):
         #return
         # TODO: NEED TO INCLUDE THE NECESSARY TRAVEL TIME LATER
         # Adjusting start term episode
-        print 'ownAct start - %s and ownAct end - %s' %(ownAct.startTime, ownAct.endTime)
+        #print 'ownAct start - %s and ownAct end - %s' %(ownAct.startTime, ownAct.endTime)
         if (ownAct.startTime == 0 and ownAct.endTime >= minStartTime):
             self.move_end(ownAct, minStartTime - 1)
             return
@@ -270,23 +270,23 @@ class Person(object):
             self.move_start(ownAct, maxEndTime + 1)
             return
 
-        print ownAct
+        #print ownAct
         raise Exception, 'DONE NOTHING'
 
     def adjust_and_delete_own_activities(self, ownActs, minStartTime, maxEndTime):
         #return
         for act in ownActs:
-            print 'THIS IS WHAT IS BEING ADJUSTED'
+            #print 'THIS IS WHAT IS BEING ADJUSTED'
             if (act.startTime == minStartTime and act.endTime == maxEndTime and
                 act.actType == 100):
                 continue
             if (act.startTime == minStartTime and act.endTime == maxEndTime and 
                 act.actType <> 100):
-                print '\tRemoving activity', act
+                #print '\tRemoving activity', act
                 self.remove_episodes([act])
                 continue
             if (act.startTime >= minStartTime - 1 and act.endTime <= maxEndTime + 1):
-                print '\tRemoving activity', act
+                #print '\tRemoving activity', act
                 #raw_input()
                 self.remove_episodes([act])
             else:
@@ -323,9 +323,9 @@ class Person(object):
 	consequentInHomeActs = []
 	lengthOfConseqActs = 0
 
-	print 'Original Acts List'
-	for i in self.listOfActivityEpisodes:
-	    print i
+	#print 'Original Acts List'
+	#for i in self.listOfActivityEpisodes:
+	#    print i
 
 	newActsList = []
 
@@ -347,16 +347,16 @@ class Person(object):
 		    consequentInHomeActs = []		
 		    lengthOfConseqActs = 0
 
-	print 'New Acts List'
-	for i in newActsList:
-	    print i
+	#print 'New Acts List'
+	#for i in newActsList:
+	#    print i
 
 	self.listOfActivityEpisodes = newActsList
 	    
 	#raw_input ('Inside aggregating acts')
 
     def createNewInHomeAct(self, consequentInHomeActs):
-	print ('\tAggregating all in-home acts between subsequent OH acts')
+	#print ('\tAggregating all in-home acts between subsequent OH acts')
 	minStartTime, maxEndTime = self.return_min_max_time_of_activities(consequentInHomeActs)
 
 	act = copy.deepcopy(consequentInHomeActs[0])
@@ -369,8 +369,8 @@ class Person(object):
     def _check_for_conflicts(self):
         conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
         if conflict > 0:
-            print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s' %(self.pid,
-                                                                                                    conflict)
+            #print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s' %(self.pid,
+            #                                                                                        conflict)
             return False
         return True
 
@@ -389,8 +389,8 @@ class Person(object):
             conflict += conflictAct
             
         if conflict > 0:
-            print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s ' %(self.pid,
-                                                                                                     conflict)
+            #print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s ' %(self.pid,
+            #                                                                                         conflict)
             return False
         return True
 
@@ -404,14 +404,13 @@ class Person(object):
                                                                conflictActs)
         
         #print 'Person Id - ', self.pid
-        #print 'conflictActs', conflictActs
         
         #print 'conflict', conflict
         #print 'Same Location', checkConflictActsLocation
 
         if (conflict == activity.duration) and checkConflictActsLocation:
-            print """\t\t\t\tThere is some person at the current location """\
-                """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
+            #print """\t\t\t\tThere is some person at the current location """\
+            #    """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
             for act in conflictActs:
                 act.dependentPersonId = 99
 
@@ -510,11 +509,11 @@ class Person(object):
 
 
     def move_start_end(self, act, moveByValue):
-	print '\tRemoving episode - ', act
+	#print '\tRemoving episode - ', act
 	self.remove_episodes([act])
 	act.startTime += moveByValue + 1
 	act.endTime += moveByValue + 1
-	print '\tAdding episode - ', act
+	#print '\tAdding episode - ', act
 	self.add_episodes([act])
 	
 
@@ -557,7 +556,7 @@ class Person(object):
 	self.firstEpisode.duration = (self.firstEpisode.endTime - 
 				      self.firstEpisode.startTime)
         """
-        print 'START MOVED', self.firstEpisode
+        #print 'START MOVED', self.firstEpisode
 
 
     def move_end_of_day(self, refStartTime):
@@ -578,7 +577,7 @@ class Person(object):
 	self.lastEpisode.duration = (self.lastEpisode.endTime -
 				     self.lastEpisode.startTime)
         """
-        print 'END MOVED', self.lastEpisode
+        #print 'END MOVED', self.lastEpisode
 
     def add_status_dependency(self, workstatus, schoolstatus, child_dependency):
         self.workstatus = workstatus
@@ -602,25 +601,25 @@ class Person(object):
 		break
 
 
-	print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
+	#print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
 	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
 	tempActList = []
 	for actIndex in range(len(self.listOfActivityEpisodes)):
 	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
 	    if act.startTime >= self.expectedArrival:
 		self.expectedActivities.append(act)
-		print '\t', act
+		#print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
 
 	self.listOfActivityEpisodes = tempActList
 	tempActList = []
-	print 'Activities after actual arrival of %s - ' %(self.actualArrival)
+	#print 'Activities after actual arrival of %s - ' %(self.actualArrival)
 	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
 	for actIndex in range(len(self.listOfActivityEpisodes)):
 	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
 	    if act.startTime >= self.actualArrival:
 		self.actualActivities.append(act)
-		print '\t', act
+		#print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
 	self.listOfActivityEpisodes = tempActList
 	#self.destAct = copy.deepcopy(destAct)
@@ -649,8 +648,8 @@ class Person(object):
             # for this activity happens at the end after all other activities have been
             # reconciled
 	    #print len(self.listOfActivityEpisodes), len(self.reconciledActivityEpisodes)
-	    print '\tFIRST ACT OF PRISM - ', stAct
-	    print '\tLAST ACT OF PRISM -  ', endAct
+	    #print '\tFIRST ACT OF PRISM - ', stAct
+	    #print '\tLAST ACT OF PRISM -  ', endAct
 	
             if endAct.endTime == 1439 and len(self.listOfActivityEpisodes) > 0:
                 hp.heappush(self.listOfActivityEpisodes, (1439, endAct))
@@ -674,13 +673,14 @@ class Person(object):
             # intermediate acts
 	    intAct = self._move_episode(stAct, endAct) 
 	    if intAct.endTime > 1439:
-	        print("cannot be adjusted within the day")	
+	        #print("cannot be adjusted within the day for person with hid = %s and pid = %s" %(self.hid, self.pid))	
+		pass
 	    else:
 		stAct = intAct
 
-    	    print '\tMOVED EPISODE -', stAct            
+    	    #print '\tMOVED EPISODE -', stAct            
             
-	    print 'RECONCILED SCHEDULES', self.reconciledActivityEpisodes
+	    #print 'RECONCILED SCHEDULES', self.reconciledActivityEpisodes
 
         hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
 
@@ -716,7 +716,7 @@ class Person(object):
     def _collate_results_aslist(self):
         #print self.listOfActivityEpisodes
         #print self.reconciledActivityEpisodes
-	print 'Length before collaing results - ', len(self.listOfActivityEpisodes)
+	#print 'Length before collaing results - ', len(self.listOfActivityEpisodes)
         resList = []
         for recAct in self.listOfActivityEpisodes:
             actObject = recAct[1]
@@ -735,7 +735,7 @@ class Person(object):
         if prismDur > tt:
             pass
         else:
-            print '\t\t-- ADJUSTING FOR FIRST PRISM OF DAY --'
+            #print '\t\t-- ADJUSTING FOR FIRST PRISM OF DAY --'
 
             adjDur = tt - prismDur
 
@@ -771,7 +771,7 @@ class Person(object):
         if prismDur > tt:
             pass
         else:
-            print '\t\t-- ADJUSTING FOR ACTIVITIES WITHIN A DAY --'
+            #print '\t\t-- ADJUSTING FOR ACTIVITIES WITHIN A DAY --'
 
             adjDur = tt - prismDur
 
@@ -807,7 +807,7 @@ class Person(object):
 	    hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
             pass
         else:
-            print "\t\t-- MOVING WITHIN DAY FIXED ACTIVITY --"
+            #print "\t\t-- MOVING WITHIN DAY FIXED ACTIVITY --"
 
             adjDur = tt - prismDur
 
@@ -823,7 +823,7 @@ class Person(object):
                 rndNum = self.rndGen.return_random_variables()
                 endAct.endTime = endAct.startTime + rndNum * endAct.duration
 		
-    	    print 'End activity before limiting to 1439- ', endAct
+    	    #print 'End activity before limiting to 1439- ', endAct
 
 	    if (endAct.endTime > 1439 and endAct.startTime < 1438) or (endAct.endTime < 1439):
 		# i.e even by limiting the endtime we are doing OK because the starttime is still < 1438
@@ -831,7 +831,7 @@ class Person(object):
 		# cannot be accommodated within the schedule
 
 		endAct.endTime = 1438
-		print("endtime less than starttime random * duration being added")
+		#print("endtime less than starttime random * duration being added")
 		hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
 	     
 
@@ -849,7 +849,7 @@ class Person(object):
         if prismDur > tt:
             pass
         else:
-            print "\t\t-- ADJUSTING FOR LAST PRISM OF DAY --"
+            #print "\t\t-- ADJUSTING FOR LAST PRISM OF DAY --"
             adjDur = tt - prismDur
 
             # Modify end of the Starting Activity for the prism
@@ -885,8 +885,8 @@ class Person(object):
             # then we move its location in the heap to end so that the adjustment
             # for this activity happens at the end after all other activities have been
             # reconciled
-	    print '\tFIRST ACT OF PRISM - ', stAct
-	    print '\tLAST ACT OF PRISM -  ', endAct
+	    #print '\tFIRST ACT OF PRISM - ', stAct
+	    #print '\tLAST ACT OF PRISM -  ', endAct
 	
             if endAct.endTime == 1439 and len(self.listOfActivityEpisodes) > 0:
                 hp.heappush(self.listOfActivityEpisodes, (1439, endAct))
@@ -909,7 +909,7 @@ class Person(object):
 
             # intermediate acts
             stAct = self._adjust_episode(stAct, endAct)
-    	    print '\tADJUSTEDD EPISODE -', stAct            
+    	    #print '\tADJUSTEDD EPISODE -', stAct            
             
         hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
 

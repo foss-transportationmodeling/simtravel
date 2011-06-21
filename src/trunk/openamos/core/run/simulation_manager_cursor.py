@@ -384,12 +384,12 @@ class SimulationManager(object):
 
 	#print 'Create index - %s and Delete Index - %s' %(createIndex, deleteIndex)
 
-        print '\tNumber of rows processed for this component - ', nRowsProcessed
+        #print '\tNumber of rows processed for this component - ', nRowsProcessed
         if nRowsProcessed == 0:
             return
         resArr = table[-nRowsProcessed:]
-        print """\t    creating the array object to insert into table - %s took - %.4f""" %(tableName,
-                                                                                            time.time()-t)
+        #print """\t    creating the array object to insert into table - %s took - %.4f""" %(tableName,
+        #                                                                                    time.time()-t)
         colsToWrite = table.colnames
 
         #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
