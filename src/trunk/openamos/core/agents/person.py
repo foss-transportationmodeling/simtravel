@@ -34,15 +34,16 @@ class Person(object):
 
     def adjust_schedules_given_arrival_info(self, seed=1):
 	if self.destAct.startTime == self.actualArrival:
-	    print '\n-- Arrived as expected; nothing needs to be done --'
+	    #print '\n-- Arrived as expected; nothing needs to be done --'
+	    pass
 
 	if self.destAct.startTime > self.actualArrival:
-	    print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
+	    #print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
 	    self.push_destination_activity_to_earlier()
 	    self.add_anchor_activity()
 
 	if self.destAct.startTime < self.actualArrival:
-	    print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
+	    #print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
 	    self.adjust_push_subsequent_activities()
 
     def add_anchor_activity(self):
@@ -80,10 +81,10 @@ class Person(object):
 	    if firstExpActAfterArrival.endTime == self.actualArrival + 1:
 		#firstExpActAfterArrival.startTime = self.actualArrival
 		self.move_start(firstExpActAfterArrival, self.actualArrival)
-		print ('Only first activity needs to be adjusted; however move start to actual arrival and then move the whole episode to avoid prism extraction errors')
+		#print ('Only first activity needs to be adjusted; however move start to actual arrival and then move the whole episode to avoid prism extraction errors')
 	    else:
 		self.move_start(firstExpActAfterArrival, self.actualArrival + 1)
-	    	print ('Only first activity needs to be adjusted')
+	    	#print ('Only first activity needs to be adjusted')
 	    	return
 
 	# Adjusting when more than one activity is affected: Push all activities
@@ -93,23 +94,23 @@ class Person(object):
 	    else:
 	        actsToPursue.append(act)
 
-	print 'Missed Activities'
-	for act in missedActsStillToPursue:
-	    print '\t', act
+	#print 'Missed Activities'
+	#for act in missedActsStillToPursue:
+	#    print '\t', act
 
-	print 'Activities to Pursue'
-	for act in actsToPursue:
-	    print '\t', act
+	#print 'Activities to Pursue'
+	#for act in actsToPursue:
+	#    print '\t', act
 
 	actEnd = self.actualArrival
 	for act in missedActsStillToPursue + actsToPursue:
-	    print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+	    #print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 	    if actEnd-act.startTime >= 0:
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
 		self.move_start_end(act, moveByValue)
 	    actEnd = copy.deepcopy(act.endTime)
 	
-	print('Push all dependent activities that were missed and subsequent activities')
+	#print('Push all dependent activities that were missed and subsequent activities')
 
 
 

@@ -29,38 +29,38 @@ class AdjustSchedules(Model):
                                self.activityAttribs.pidName]).data
         combId = idCols[:,0]*100 + idCols[:,1]
         
-        print idCols[:20,:]
-        print 'comid', combId[:20]
-        print 'comid', combId[-20:]
+        #print idCols[:20,:]
+        #print 'comid', combId[:20]
+        #print 'comid', combId[-20:]
 
         comIdUnique, comId_reverse_indices = unique(combId, return_inverse=True)
 
-        print 'unique', comIdUnique[:20]
-        print 'unique records', comIdUnique.shape
-        print 'reverse indices', comId_reverse_indices[:20]
-        print 'reverse indices', comId_reverse_indices[-20:]
+        #print 'unique', comIdUnique[:20]
+        #print 'unique records', comIdUnique.shape
+        #print 'reverse indices', comId_reverse_indices[:20]
+        #print 'reverse indices', comId_reverse_indices[-20:]
 
 
         binsIndices = array(range(comId_reverse_indices.max()+2))
         
         histIndices = histogram(comId_reverse_indices, bins=binsIndices)
-        print histIndices[0][:20]
-        print histIndices[0][-20:]
+        #print histIndices[0][:20]
+        #print histIndices[0][-20:]
         
         indicesRowCount = histIndices[0]
         
         indicesRow = indicesRowCount.cumsum()
-        print 'Row Count', indicesRowCount[:20]
-        print 'Row Index Low', indicesRow[:20]
+        #print 'Row Count', indicesRowCount[:20]
+        #print 'Row Index Low', indicesRow[:20]
         #print 'Row Index Hig', indicesRowHigh[:20]
 
 
         self.indices = zeros((comIdUnique.shape[0], 4), dtype=int)
 
-        print self.indices.shape
-        print idCols.shape
-        print indicesRow.shape
-        print binsIndices.shape
+        #print self.indices.shape
+        #print idCols.shape
+        #print indicesRow.shape
+        #print binsIndices.shape
 
         self.indices[:,0] = comIdUnique/100
         self.indices[:,1] = comIdUnique - self.indices[:,0]*100
@@ -68,8 +68,8 @@ class AdjustSchedules(Model):
         self.indices[1:,2] = indicesRow[:-1]
         self.indices[:,3] = indicesRow
         
-        print self.indices[:20, :]
-        print self.indices[-20:, :]
+        #print self.indices[:20, :]
+        #print self.indices[-20:, :]
         
     def create_col_numbers(self, colNamesDict):
         self.schidCol = colNamesDict[self.activityAttribs.scheduleidName]
@@ -87,7 +87,7 @@ class AdjustSchedules(Model):
 	actualArrival = schedulesForPerson.data[0,self.actualArrivalCol]
 	expectedArrival = schedulesForPerson.data[0,self.expectedArrivalCol]
 	
-	print 'Actual Arrival - %s and Expected Arrival - %s ' %(actualArrival, expectedArrival)
+	#print 'Actual Arrival - %s and Expected Arrival - %s ' %(actualArrival, expectedArrival)
 	return actualArrival, expectedArrival
 
 
@@ -101,7 +101,7 @@ class AdjustSchedules(Model):
         self.create_indices(data)
 	self.create_col_numbers(data._colnames)
 
-        print 'Indices created in %.4f' %(time.time()-ti)
+        #print 'Indices created in %.4f' %(time.time()-ti)
 
         row = 0
         
@@ -129,23 +129,23 @@ class AdjustSchedules(Model):
             personObject.add_episodes(activityList)
 	    actualArrival, expectedArrival = self.return_arrival_info(schedulesForPerson)
 	    personObject.add_arrival_status(actualArrival, expectedArrival)
-	    print 'person indices', perIndex
-	    print 'Activity list before adjustment'
+	    #print 'person indices', perIndex
+	    #print 'Activity list before adjustment'
 	    
 	    oriList = activityList
 	    oriList = personObject.sort_acts(oriList)
 
-	    for x in oriList:
-		print '\t', x
+	    #for x in oriList:
+	    #	print '\t', x
             personObject.adjust_schedules_given_arrival_info(seed)
 	    reconciledSchedules = personObject._collate_results_aslist()
 
-	    print 'Activity list after adjustment'
+	    #print 'Activity list after adjustment'
 	    #modList = personObject.listOfActivityEpisodes
 	    #modList = personObject.sort_acts(modList)
 
-	    for x in reconciledSchedules:
-		print '\t', x
+	    #for x in reconciledSchedules:
+	    #	print '\t', x
 
 
 	    if not personObject._check_for_conflicts():

@@ -109,7 +109,7 @@ class AbstractComponent(object):
 
 
 
-	print 'Basic Query complete'
+	#print 'Basic Query complete'
 
 
         self.db = db
@@ -125,7 +125,7 @@ class AbstractComponent(object):
         if data == None or data.rows == 0:
             return None
 
-	print 'Additional Columns added'
+	#print 'Additional Columns added'
 
         # Process and include spatial query information
         data = self.process_data_for_locs(data, self.spatialConst_list, 
@@ -135,7 +135,7 @@ class AbstractComponent(object):
         if data == None or data.rows == 0:
             return None
 
-	print 'Location processed'
+	#print 'Location processed'
 
         #print 'processing dependencies', self.dependencyAllocationFlag
 	"""
@@ -229,7 +229,7 @@ class AbstractComponent(object):
 	
 	    keyCols = tableNamesKeyDict[self.writeToTable][0] 
 
-	    print '--> here are the keyCols for this component', keyCols
+	    #print '--> here are the keyCols for this component', keyCols
 	    #raw_input()
 	
 	    if self.component_name == 'ExtractTravelEpisodes' or self.component_name == 'ExtractBackgroundTravelEpisodes':
@@ -264,46 +264,6 @@ class AbstractComponent(object):
 	    return data_array
 
 	
-	"""
-	try:
-
-	    if self.component_name == 'ExtractTravelEpisodes':
-	        ti = time.time()
-	        tripColsTable = self.db.returnCols('trips_r')
-            
-                convType = self.db.returnTypeConversion('trips_r')
-	        dtypesInput = self.db.tableColTypes('trips_r')
-
-	        # O and D are not same
-		trips_filter = valid_data_filter
-	        trips_data = self.data.columnsOfType(tripColsTable, trips_filter, dtypesInput)
-	
-		keyCols = tableNamesKeyDict['trips_r'][0] 
-
-		queryBrowser.copy_into_table(trips_data.data, tripColsTable, 'trips_r', keyCols, fileLoc)
-		trips_data_array = zeros((trips_filter.sum(), len(tripColsTable)))
-		tripDataTempNames = trips_data.data.dtype.names 
-		for i in range(len(tripDataTempNames)):
-		    name = tripDataTempNames[i]
-		    trips_data_array[:,i] = trips_data.data[name]
-		
-	        print '\t\tBatch Insert for trips took - %.4f' %(time.time()-ti) 
-		print '\t\tNumber of rows processed - ', trips_filter.sum()
-	        tripsProcessed = trips_filter.sum()
-	    else:
-		tripsProcessed = 0
-		trips_data_array = zeros((1,9))
-	except Exception, e:
-	    print '-- Error -- ', e
-	    tripsProcessed = 0
-	    trips_data_array = zeros((1,9))
-	    pass
-
-	print trips_data
-	print trips_data._colnames
-	return trips_data_array
-	"""
-
     def create_filter(self, data_filter, filter_type):
         ti = time.time()
 	if data_filter is None:
@@ -333,8 +293,8 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
-	    print i.data_filter
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+	    #print i.data_filter
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -351,8 +311,8 @@ class AbstractComponent(object):
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                                                                              time.time()-tiii)
+                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                #                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 #choiceset_shape = (data_subset.rows,
@@ -373,7 +333,7 @@ class AbstractComponent(object):
 
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
-                print result.data
+                #print result.data
                 #self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
         
         # Update hte model list for next iteration within the component
@@ -388,7 +348,7 @@ class AbstractComponent(object):
                 if run_subset_filter.sum() > 0:
                     model_list_forlooping.append(i)
 
-        print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
+        #print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
         return model_list_forlooping, data_subset_filter
 
         # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
@@ -716,7 +676,7 @@ class AbstractComponent(object):
         """
         # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
         	
-	print 'Type of skims Matrix - ', type(skimsMatrix)
+	#print 'Type of skims Matrix - ', type(skimsMatrix)
 
         t = time.time()
 
@@ -724,11 +684,11 @@ class AbstractComponent(object):
             for i in spatialConst_list:
 	
                 if i.countChoices is not None: 
-                    print ("""\t\tNeed to sample location choices for the following""" \
-                               """model with also location info extracted """)
+                    #print ("""\t\tNeed to sample location choices for the following""" \
+                    #           """model with also location info extracted """)
                     data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i, fileLoc)
                 else:
-                    print '\tNeed to extract skims'
+                    #print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
 
         return data
@@ -803,10 +763,10 @@ class AbstractComponent(object):
                                                             locVariables,
 							    fileLoc)
 
-	    print locationsTable.varnames
+	    #print locationsTable.varnames
 	# Universe of possible locations; to allow for smart sampling
 
-	print 'shape of uniqueIds', uniqueIds.shape
+	#print 'shape of uniqueIds', uniqueIds.shape
 
 
 	if len(spatialconst.locationVariables) > 0:
@@ -814,25 +774,25 @@ class AbstractComponent(object):
 		location_subset_filter = self.create_location_filter(spatialconst.locationFilterList, 
 								     spatialconst.locationFilterType, 
 								     locationsTable)
-		print 'Only so many possible locations - ', location_subset_filter.sum()
-		print 'shape of filter', location_subset_filter.shape
+		#print 'Only so many possible locations - ', location_subset_filter.sum()
+		#print 'shape of filter', location_subset_filter.shape
 		uniqueIds = uniqueIds[location_subset_filter]
 	
 
 
-	print 'Origin - ', originLocColVals[:,0]
-	print 'Destination - ', destinationLocColVals[:,0]
+	#print 'Origin - ', originLocColVals[:,0]
+	#print 'Destination - ', destinationLocColVals[:,0]
 	timeAvailable = timeAvailable.astype(float)
-	print 'Time Available - ', timeAvailable[:,0]	
+	#print 'Time Available - ', timeAvailable[:,0]	
 	
 
-	print spatialconst.countChoices, data.rows
+	#print spatialconst.countChoices, data.rows
 	skimsMatrix2.create_location_array(data.rows)
 	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
 					  		    timeAvailable[:,0], spatialconst.countChoices,
 							    uniqueIds)
 
-	print locationChoices.sum(-1)
+	#print locationChoices.sum(-1)
 	#print locationChoices
 	
 	for i in range(spatialconst.countChoices):
@@ -896,9 +856,9 @@ class AbstractComponent(object):
         self.append_cols_for_dependent_variables(data, sampleVarDict)
         data.setcolumn(colName, tt)	
 
-	print originLocColVals[:,0]
-	print destinationLocColVals[:,0]
-	print tt
+	#print originLocColVals[:,0]
+	#print destinationLocColVals[:,0]
+	#print tt
 
         return data
 

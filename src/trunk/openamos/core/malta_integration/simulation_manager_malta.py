@@ -171,8 +171,6 @@ class SimulationManager(object):
 
             data = DataArray(dataVals, ['tripid', 'arrivaltime'])
             
-	    print 'Following vehicles arrived and the corresponding arrival interval - '
-	    print data
         else:
             data = None
             #raw_input ('\t Press any key to continue')
@@ -241,18 +239,19 @@ class SimulationManager(object):
                 
                 if tableName <> self.lastTableName and len(comp.spatialConst_list) > 0:
                     # Load the skims matrix
-                    print """\tThe tod interval for the the previous component is not same """\
-                        """as current component. """\
-                        """Therefore the skims matrix should be reloaded.\n"""\
-			"""Last one - %s and this one - %s """ %(self.lastTableName, tableName)
+                    #print """\tThe tod interval for the the previous component is not same """\
+                    #    """as current component. """\
+                    #    """Therefore the skims matrix should be reloaded.\n"""\
+		    #	"""Last one - %s and this one - %s """ %(self.lastTableName, tableName)
 		    #raw_input()
                     self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
                     self.lastTableName = tableName
 
                 elif tableName == self.lastTableName:
-                    print """\tThe tod interval for the the previous component is same """\
-                        """as current component. """\
-                        """Therefore the skims matrix need not be reloaded."""
+                    #print """\tThe tod interval for the the previous component is same """\
+                    #    """as current component. """\
+                    #    """Therefore the skims matrix need not be reloaded."""
+		    pass
 
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
 		
@@ -275,9 +274,9 @@ class SimulationManager(object):
 	# Reduce 100 to match TAZ notatiosample_locn of MALTA
 	tripInfo = tripInfo.astype(int)
 
-	print 'RECORDS TO BE PASSED TO MALTA FROM COMPONENT %s AFTER ALTERING THE TAZ IDs ' %(comp.component_name)
-	print tripInfo.shape
-        print tripInfo[-3:, [0, -6, -5]]
+	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
+	#print tripInfo.shape
+        #print tripInfo[-3:, [0, -6, -5]]
         #raw_input('This is the shape --')
 
 	return tripInfo

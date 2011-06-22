@@ -659,7 +659,7 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s %s' %(colStr, mainTable, allJoinStr, aggStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        print 'SQL string for query - ', sql_string
+        #print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
@@ -698,9 +698,9 @@ class QueryBrowser(object):
 		
 	    delete_sql_string = ('delete from %s where %s in (select %s from (%s) as foo)' 
 				 %(table, var, var, sql_string))
-	    print 'Delete string - ', delete_sql_string
+	    #print 'Delete string - ', delete_sql_string
 
-	    print 'delete records after select'
+	    #print 'delete records after select'
 
 	    try:
 		ti = time.time()
@@ -923,8 +923,8 @@ class QueryBrowser(object):
                 #print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
-                print '\t\tTime after insert query - %.4f' %(time.time() - ti)
-                print '\t\tTime to insert - %.4f' %(time.time()-ti)
+                #print '\t\tTime after insert query - %.4f' %(time.time() - ti)
+                #print '\t\tTime to insert - %.4f' %(time.time()-ti)
             except Exception, e:
                 print e
         else:
@@ -1293,7 +1293,7 @@ class QueryBrowser(object):
             
         for each in sequence_list:
             sql_string = "alter sequence %s restart with 1"%each
-            print sql_string
+            #print sql_string
             try:
                 self.dbcon_obj.cursor.execute(sql_string)
                 self.dbcon_obj.connection.commit()
