@@ -3,6 +3,8 @@ from PyQt4.QtGui import *
 from models import *
 from spec_abstract_dialog import *
 from mixed_abstract_dialog import *
+from project_config_dialog import *
+from file_menu.databaseconfig import *
 from openamos.gui.env import *
 
 
@@ -325,6 +327,13 @@ class Model_Manager_Treewidget(QTreeWidget):
         self.connect(self, SIGNAL('itemChanged (QTreeWidgetItem *,int)'), self.saveSkip)
 
 
+    def setProjectElement(self):
+        projelts = self.configobject.getProjects()
+        for elt in projelts:
+            if elt.tag != MODELCONFIG and elt.tag != "DTAConnection":
+                root_term = QTreeWidgetItem(self)
+                root_term.setText(0, str(elt.tag))        
+
     def setTreeWidget(self):
         if self.configobject != None:
             root_term = QTreeWidgetItem(self)
@@ -365,8 +374,9 @@ class Model_Manager_Treewidget(QTreeWidget):
                             element_term = QTreeWidgetItem(component_term)
                             element_term.setText(0, name)
                         else:
+                            name = title + ": " + name
                             element_term = QTreeWidgetItem(component_term)
-                            element_term.setText(0, title)                            
+                            element_term.setText(0, name)                            
 
 
 #    def setTreeWidgetEle(self,elt,tree_term):
@@ -388,8 +398,12 @@ class Model_Manager_Treewidget(QTreeWidget):
 
         menubar = QMenu(self)
         if father == None:
-            one = menubar.addAction("Add Component")
-            self.connect(one,SIGNAL("triggered()"),self.addComponent)
+            if item.text(0) != COMP:
+                one = menubar.addAction("Open")
+                self.connect(one,SIGNAL("triggered()"),self.openProject)
+            else:
+                one = menubar.addAction("Add Component")
+                self.connect(one,SIGNAL("triggered()"),self.addComponent)
             
         elif father.text(0) == "Component":
             open_com = menubar.addAction("Open Component")
@@ -419,8 +433,7 @@ class Model_Manager_Treewidget(QTreeWidget):
             self.connect(remove,SIGNAL("triggered()"),self.remove_element)
             
         else:
-            foreparent = father.parent()
-     
+#            foreparent = father.parent()
             one = menubar.addAction("Open Element")
             menubar.addSeparator()
             remove = menubar.addAction("Delete Element")
@@ -500,6 +513,7 @@ class Model_Manager_Treewidget(QTreeWidget):
 
     def setConfigObject(self,co):
         self.configobject = co
+        self.setProjectElement()
         self.setTreeWidget()
 #        self.setAllComSimStatuses()
         
@@ -557,6 +571,18 @@ class Model_Manager_Treewidget(QTreeWidget):
 #            if model != None:
 #                diag = AbtractSpecDialog(self.configobject,"","",model)
 #                diag.exec_()
+
+    def openProject(self):
+        item = self.currentItem()
+        eltname = str(item.text(0))
+        model = self.configobject.protree.find(eltname)
+        if model != None:
+            if eltname != DB_CONFIG:
+                diag = ProjectConfigDialog(self.configobject,model,self)
+                diag.exec_()
+            else:
+                diag = DatabaseConfig(self.configobject)
+                diag.exec_()
 
     def addComponent(self):
         model = self.configobject.protree.find(MODELCONFIG)

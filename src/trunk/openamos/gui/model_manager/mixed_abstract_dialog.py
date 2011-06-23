@@ -11,7 +11,7 @@ from PyQt4.QtCore import *
 from lxml import etree
 
 from openamos.gui.env import *
-#from mixed_widgets import *
+from mixed_widgets import *
 
 from openamos.gui.misc.basic_widgets import *
 from openamos.gui.env import *
@@ -37,7 +37,7 @@ class AbtractMixedDialog(QDialog):
             self.elt = None
             self.father = element
         
-        self.populateFromDatabase()
+#        self.populateFromDatabase()
         
         self.setWindowTitle("")
         self.alllayout = QHBoxLayout()
@@ -65,34 +65,34 @@ class AbtractMixedDialog(QDialog):
         row1layout.addWidget(dummy1,0,1)
 
         
-        row2 = QWidget(self)
-        row2layout = QGridLayout()
-        row2.setLayout(row2layout)
-        
-        tableslabel = QLabel('Tables')
-        row2layout.addWidget(tableslabel,0,0)
-        
-        self.tableswidget = QListWidget()
-        self.tableswidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.tableswidget.addItems(self.tablelist)
-        self.tableswidget.setMaximumSize(250,200)
-        row2layout.addWidget(self.tableswidget,1,0)
-        
-        self.addTable = QPushButton('Value')
-        self.addTable.setMaximumWidth(50)
-        row2layout.addWidget(self.addTable,2,0)
-
-        varslabel = QLabel('Columns')
-        row2layout.addWidget(varslabel,0,1)
-        
-        self.colswidget = QListWidget()
-        self.colswidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.colswidget.setMaximumSize(250,200)
-        row2layout.addWidget(self.colswidget,1,1)
-        
-        self.addColumn = QPushButton('Value')
-        self.addColumn.setMaximumWidth(50)
-        row2layout.addWidget(self.addColumn,2,1)
+#        row2 = QWidget(self)
+#        row2layout = QGridLayout()
+#        row2.setLayout(row2layout)
+#        
+#        tableslabel = QLabel('Tables')
+#        row2layout.addWidget(tableslabel,0,0)
+#        
+#        self.tableswidget = QListWidget()
+#        self.tableswidget.setSelectionMode(QAbstractItemView.SingleSelection)
+#        self.tableswidget.addItems(self.tablelist)
+#        self.tableswidget.setMaximumSize(250,200)
+#        row2layout.addWidget(self.tableswidget,1,0)
+#        
+#        self.addTable = QPushButton('Value')
+#        self.addTable.setMaximumWidth(50)
+#        row2layout.addWidget(self.addTable,2,0)
+#
+#        varslabel = QLabel('Columns')
+#        row2layout.addWidget(varslabel,0,1)
+#        
+#        self.colswidget = QListWidget()
+#        self.colswidget.setSelectionMode(QAbstractItemView.MultiSelection)
+#        self.colswidget.setMaximumSize(250,200)
+#        row2layout.addWidget(self.colswidget,1,1)
+#        
+#        self.addColumn = QPushButton('Value')
+#        self.addColumn.setMaximumWidth(50)
+#        row2layout.addWidget(self.addColumn,2,1)
 
         
 #        btnwidget1 = QWidget(self)
@@ -107,60 +107,75 @@ class AbtractMixedDialog(QDialog):
 #        row2layout.addWidget(btnwidget1,1,1)
         
 
-        row3 = QWidget(self)
-        row3layout = QHBoxLayout()
-        row3.setLayout(row3layout)
+#        row3 = QWidget(self)
+#        row3layout = QHBoxLayout()
+#        row3.setLayout(row3layout)
+#
+#        valuewidget = QWidget(self)
+#        valuelayout = QGridLayout()
+#        valuewidget.setLayout(valuelayout)
+#        valuelayout.setContentsMargins(0,0,0,0)
+#        
+#        selectlabel = QLabel("Attribute Name: ")
+#        self.attriname = QComboBox()
+#        self.attriname.setMinimumWidth(220)
+#        if self.elt != None:
+#            self.attriname.addItems(self.attributes(str(self.elt.tag)))
+#        else:
+#            temp = self.parent()
+#            self.attriname.addItems(self.attributes(str(temp.subcomponent)))        
+#
+#        attrivaluelabel = QLabel("Attribute Value: ")
+#        self.valueline = LineEdit()
+#        self.valueline.setMinimumWidth(220)
+#        
+#        valuelayout.addWidget(selectlabel,0,0)
+#        valuelayout.addWidget(self.attriname,1,0)
+#        valuelayout.addWidget(attrivaluelabel,0,1)
+#        valuelayout.addWidget(self.valueline,1,1)
+#        row3layout.addWidget(valuewidget)
+            
+#        row4 = QWidget(self)
+#        row4layout = QHBoxLayout()
+#        row4.setLayout(row4layout)
+#    
+#        btnwidget1 = QWidget(self)
+#        btnlayout1 = QHBoxLayout()
+#        btnwidget1.setLayout(btnlayout1) 
+#        btnlayout1.setContentsMargins(0,0,0,0)
+#        self.addbutton = QPushButton('Add')
+#        self.addbutton.setMaximumWidth(120)
+#        self.delbutton = QPushButton('Delete')
+#        self.delbutton.setMaximumWidth(120) 
+#        btnlayout1.addWidget(self.addbutton)
+#        btnlayout1.addWidget(self.delbutton)
+#          
+#        row4layout.addWidget(btnwidget1)
+#        dummy = QLabel("")
+#        row4layout.addWidget(dummy)
 
-        valuewidget = QWidget(self)
-        valuelayout = QVBoxLayout()
-        
-        selectlabel = QLabel("Attribute Name: ")
-        self.attriname = QComboBox()
-        self.attriname.setMinimumWidth(220)
+#        row5 = QWidget(self)
+#        row5layout = QVBoxLayout()
+#        row5.setLayout(row5layout)
+#        row5layout.setContentsMargins(10,0,10,0)
+#        self.attritable = QTableWidget(self)
+#        self.attritable.setRowCount(0)
+#        self.attritable.setColumnCount(2)
+#        self.attritable.setHorizontalHeaderLabels(['Attribute', 'Value'])
+#        self.attritable.setSelectionMode(QAbstractItemView.SingleSelection)
+#        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+#        self.attritable.setSizePolicy(sizePolicy)
+#        self.attritable.horizontalHeader().setResizeMode(0,1)
+#        self.attritable.horizontalHeader().setResizeMode(1,1)
+#        row5layout.addWidget(self.attritable)
+
+        self.genwidgets = AbstractMixedWidget(self)
         if self.elt != None:
-            self.attriname.addItems(self.attributes(str(self.elt.tag)))
+            self.genwidgets.attriname.addItems(self.attributes(str(self.elt.tag)))
         else:
             temp = self.parent()
-            self.attriname.addItems(self.attributes(str(temp.subcomponent)))        
-    
-        valuewidget.setLayout(valuelayout)        
-#        attrinamelabel = QLabel("Attribute Name: ")
-#        self.nameline = LineEdit()
-#        self.nameline.setMaximumWidth(300)
-
-        attrivaluelabel = QLabel("Attribute Value: ")
-        self.valueline = LineEdit()
-        self.valueline.setMaximumWidth(220)
-        dummy2 = QLabel("")
-        valuelayout.addWidget(selectlabel)
-        valuelayout.addWidget(self.attriname)
-        valuelayout.addWidget(attrivaluelabel)
-        valuelayout.addWidget(self.valueline)
-        valuelayout.addWidget(dummy2)
-        row3layout.addWidget(valuewidget)
+            self.genwidgets.attriname.addItems(self.attributes(str(temp.subcomponent))) 
             
-        btnwidget1 = QWidget(self)
-        btnlayout1 = QVBoxLayout()
-        btnwidget1.setLayout(btnlayout1)    
-        self.addbutton = QPushButton('>>')
-        self.addbutton.setMaximumWidth(60)
-        btnlayout1.addWidget(self.addbutton)
-        self.delbutton = QPushButton('<<')
-        self.delbutton.setMaximumWidth(60)
-        btnlayout1.addWidget(self.delbutton)
-        row3layout.addWidget(btnwidget1)
-
-        self.attritable = QTableWidget(self)
-        self.attritable.setRowCount(0)
-        self.attritable.setColumnCount(2)
-        self.attritable.setHorizontalHeaderLabels(['Attribute', 'Value'])
-        #self.choicetable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.attritable.setSelectionMode(QAbstractItemView.SingleSelection)
-        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Expanding)
-        self.attritable.setSizePolicy(sizePolicy)
-        self.attritable.horizontalHeader().setResizeMode(0,1)
-        self.attritable.horizontalHeader().setResizeMode(1,1)
-        row3layout.addWidget(self.attritable)
 
         btnwidget2 = QWidget(self)
         btnlayout2 = QHBoxLayout()
@@ -179,10 +194,14 @@ class AbtractMixedDialog(QDialog):
         btnlayout2.addWidget(self.btnsave)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Close)
         btnlayout2.addWidget(self.dialogButtonBox)
-        
+
+            
         attrilayout.addWidget(row1)
-        attrilayout.addWidget(row2)
-        attrilayout.addWidget(row3)
+#        attrilayout.addWidget(row2)
+#        attrilayout.addWidget(row3)
+#        attrilayout.addWidget(row4)
+#        attrilayout.addWidget(row5)
+        attrilayout.addWidget(self.genwidgets)
         attrilayout.addWidget(btnwidget2)
         
         if IsOpen < 3:
@@ -196,12 +215,11 @@ class AbtractMixedDialog(QDialog):
         elif IsOpen == 3:
             self.showComponent()
         
-        self.connect(self.tableswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateColumns)
-#        self.connect(self.titleline1, SIGNAL("currentIndexChanged(int)"), self.fillAttr)
-        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addAttribute)
-        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delAttribute)
-        self.connect(self.addTable, SIGNAL("clicked(bool)"), self.fillValueT)
-        self.connect(self.addColumn, SIGNAL("clicked(bool)"), self.fillValueC)
+#        self.connect(self.tableswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateColumns)
+#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addAttribute)
+#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delAttribute)
+#        self.connect(self.addTable, SIGNAL("clicked(bool)"), self.fillValueT)
+#        self.connect(self.addColumn, SIGNAL("clicked(bool)"), self.fillValueC)
         self.connect(self.btnsaveas, SIGNAL("clicked(bool)"), self.saveAsElement)
         self.connect(self.btnsave, SIGNAL("clicked(bool)"), self.saveElement)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
@@ -223,12 +241,6 @@ class AbtractMixedDialog(QDialog):
     def setTitleText(self, row1layout):
         self.titleline2 = LineEdit()
         self.titleline2.setMinimumWidth(250)
-#        if self.elt != None:
-#            self.titleline2.setText("")
-#        else:
-#            self.titleline2.setText("Component")
-#            self.titleline2.setDisabled(True)
-        
         row1layout.addWidget(self.titleline2,1,0)
 
 
@@ -251,6 +263,7 @@ class AbtractMixedDialog(QDialog):
         self.treewidget.setMinimumWidth(250)
         self.treewidget.headerItem().setText(0, "Sub-element Management")
 
+        leftwidget.setMaximumWidth(400)
         leftlayout.addWidget(self.treewidget)
         self.alllayout.addWidget(leftwidget)
         
@@ -272,22 +285,37 @@ class AbtractMixedDialog(QDialog):
 
             
     def attributes(self,eltname):
-        elements = self.configobject.getElements(eltname)
+        temp = eltname.split('-')
+        name = temp[0]
+        elements = self.configobject.getDElements(name)
         items = []
         for elt in elements:
             for key in elt.keys():
                 if key not in items:
                     items.append(key)
         
-        if eltname == COMP:
+        if name == COMP:
             items.remove("skip")
             items.remove("completed")
             items.remove("name")
                   
         return items
     
+#    def attrivalues(self,eltname):
+#        temp = eltname.split('-')
+#        name = temp[0]
+#        elements = self.configobject.getDElements(name)
+#        items = []
+#        for elt in elements:
+#            for key in elt.keys():
+#                value = str(elt.get(key))
+#                if value not in items:
+#                    items.append(value)
+#                  
+#        return items
+        
     def titles(self,eltname):
-        elements = self.configobject.getElements(eltname)
+        elements = self.configobject.getDElements(eltname)
         items = []
         items.append(str(eltname))
         for elt in elements:
@@ -307,36 +335,50 @@ class AbtractMixedDialog(QDialog):
         temp = self.parent()
         title = temp.subcomponent
 
-        attrdict1 = {}
-        treeelt = TreeWidgetItem(self.treewidget, attrdict1)
+#        attrdict1 = {}
+        sets1 = []
+        values1 = []
+        treeelt = TreeWidgetItem(self.treewidget, sets1, values1)
         treeelt.setText(0, title)
         self.treewidget.setCurrentItem(treeelt)
 
 
     def readtree(self):
-        attrdict1 = {}
-        for key in self.elt.keys():
-            attrdict1[key] = str(self.elt.get(key))
-            
-        treeelt = TreeWidgetItem(self.treewidget, attrdict1)
+        sets1 = []
+        values1 = []
+        for key1 in self.elt.keys():
+            sets1.append(str(key1))
+            values1.append(str(self.elt.get(key1)))
+                        
+        treeelt = TreeWidgetItem(self.treewidget, sets1, values1)
         treeelt.setText(0, str(self.elt.tag))
         self.treewidget.setCurrentItem(treeelt)
+        self.showAttributes()
         
         for elt1 in self.elt.getchildren():
-            attrdict2 = {}
-            for key in elt1.keys():
-                attrdict2[key] = str(elt1.get(key))
+            sets2 = []
+            values2 = []
+            for key2 in elt1.keys():
+                sets2.append(str(key2))
+                values2.append(str(elt1.get(key2)))
                 
-            subitem = TreeWidgetItem(treeelt, attrdict2)
+            subitem = TreeWidgetItem(treeelt, sets2, values2)
             subitem.setText(0, str(elt1.tag)) 
             
             for elt2 in elt1.getchildren():
-                attrdict3 = {}
-                for key in elt2.keys():
-                    attrdict3[key] = str(elt2.get(key))
+                sets3 = []
+                values3 = []
+                tlabel = str(elt2.tag) + "-"
+                for key3 in elt2.keys():
+                    sets3.append(str(key3))
+                    values3.append(str(elt2.get(key3)))
+                    tlabel = tlabel + str(key3) + ":" + str(elt2.get(key3)) + " "
                     
-                subsub = TreeWidgetItem(subitem, attrdict3)
-                subsub.setText(0, str(elt2.tag))
+                subsub = TreeWidgetItem(subitem, sets3, values3)
+                if str(elt2.tag) == "LocationVariable" or str(elt2.tag) == "Filter1" or str(elt2.tag) == "Filter":
+                    subsub.setText(0, tlabel)
+                else:
+                    subsub.setText(0, str(elt2.tag))
                 
     def showComponent(self):
             
@@ -344,157 +386,111 @@ class AbtractMixedDialog(QDialog):
             value = str(self.elt.get(key))
             
             if str(key) != NAME and str(key) != "skip" and str(key) != "completed":
-                self.attritable.insertRow(self.attritable.rowCount())
+                self.genwidgets.attritable.insertRow(self.genwidgets.attritable.rowCount())
                 attritem = QTableWidgetItem()
                 attritem.setText(str(key))
                 attritem.setFlags(attritem.flags() & ~Qt.ItemIsEditable)
-                self.attritable.setItem(self.attritable.rowCount()-1, 0, attritem)
+                self.genwidgets.attritable.setItem(self.genwidgets.attritable.rowCount()-1, 0, attritem)
                 
                 varitem = QTableWidgetItem()
                 varitem.setText(value)
-                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
-                self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)
+#                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+                self.genwidgets.attritable.setItem(self.genwidgets.attritable.rowCount()-1, 1, varitem)
             elif str(key) == NAME:
                 self.titleline2.setText(value)
 
 
     def showAttributes(self):
         curitem = self.treewidget.currentItem()
-        self.attriname.clear()
-        self.attriname.addItems(self.attributes(str(curitem.text(0))))
-        ind = self.titleline1.findText(str(curitem.text(0)))
+        temp = str(curitem.text(0)).split('-')
+        name = temp[0]
+        self.genwidgets.attriname.clear()
+        self.genwidgets.attriname.addItems(self.attributes(str(curitem.text(0))))
+        ind = self.titleline1.findText(name) #str(curitem.text(0)))
         self.titleline1.setCurrentIndex(ind)
         
-        num = self.attritable.rowCount()
+        num = self.genwidgets.attritable.rowCount()
         for i in range(num):
-            self.attritable.removeRow(0)
+            self.genwidgets.attritable.removeRow(0)
             
-        for key in curitem.attribute.keys():
-            value = curitem.attribute[key]
+#        for key in curitem.attribute.keys():
+        for i in range(len(curitem.sets)):
+#            value = curitem.attribute[key]
+            key = curitem.sets[i]
+            value = curitem.values[i]
 
-            self.attritable.insertRow(self.attritable.rowCount())
+            self.genwidgets.attritable.insertRow(self.genwidgets.attritable.rowCount())
             attritem = QTableWidgetItem()
             attritem.setText(str(key))
             attritem.setFlags(attritem.flags() & ~Qt.ItemIsEditable)
-            self.attritable.setItem(self.attritable.rowCount()-1, 0, attritem)
+            self.genwidgets.attritable.setItem(self.genwidgets.attritable.rowCount()-1, 0, attritem)
             
             varitem = QTableWidgetItem()
             varitem.setText(value)
-            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
-            self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)
+            self.genwidgets.attritable.setItem(self.genwidgets.attritable.rowCount()-1, 1, varitem)
             
-            
-
-
-#    def fillName(self):
-#        name = str(self.attriname.currentText())
-#        self.nameline.setText(name)
 
     def fillAttr(self):
         name = str(self.titleline1.currentText())
-        self.attriname.clear()
-        self.attriname.addItems(self.attributes(name))
+        self.genwidgets.attriname.clear()
+        self.genwidgets.attriname.addItems(self.attributes(name))
         
         item = self.treewidget.currentItem()
         if name != str(item.text(0)):
-            numrows = self.attritable.rowCount()
+            numrows = self.genwidgets.attritable.rowCount()
             for i in range(numrows):
-                self.attritable.removeRow(0)
+                self.genwidgets.attritable.removeRow(0)
         
-    def fillValueT(self):
-        temp = self.tableswidget.currentItem()
-        if temp != None:
-            value = str(temp.text())
-            self.valueline.setText(value)
-
-        
-    def fillValueC(self):
-        temp = self.colswidget.currentItem()
-        if temp != None:
-            value = str(temp.text())
-            self.valueline.setText(value)
-
-
-    def populateFromDatabase(self):
-        self.protocol = self.configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
-        self.user_name = self.configobject.getConfigElement(DB_CONFIG,DB_USER)
-        self.password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
-        self.host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
-        self.database_name = self.configobject.getConfigElement(DB_CONFIG,DB_NAME)
-        self.database_config_object = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
-        
-        new_obj = DataBaseConnection(self.database_config_object)
-        new_obj.new_connection()
-        tables = new_obj.get_table_list()
-        
-        self.tablelist = []
-        self.coldict = {}
-        for table in tables:
-            self.tablelist.append(QString(table))
-            cols = new_obj.get_column_list(table)
-            varlist = []
-            if cols is not None:
-                for col in cols:
-                    varlist.append(QString(col))
-                self.coldict[table] = varlist
-
-
-    def populateColumns(self, item):
-        self.colswidget.clear()
-        seltab = str(item.text())
-        self.colswidget.addItems(self.coldict[seltab])
-             
-    def addAttribute(self):
-        name = str(self.attriname.currentText())
-        value = str(self.valueline.text())
-
-        if (name != "") & (value != ""):
-            self.attritable.insertRow(self.attritable.rowCount())
-            tableitem = QTableWidgetItem()
-            tableitem.setText(name)
-            tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
-            self.attritable.setItem(self.attritable.rowCount()-1, 0, tableitem)
-            
-            varitem = QTableWidgetItem()
-            varitem.setText(value)
-            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
-            self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)   
-
-   
-    def delAttribute(self):
-        self.attritable.removeRow(self.attritable.currentRow())
 
     def saveAsElement(self):
 
         if self.elt != None:
-            if self.attritable.rowCount() >= 1:
+            if self.genwidgets.attritable.rowCount() >= 1:
                 
-                title = str(self.titleline1.currentText())
+#                title = str(self.titleline1.currentText())
+#                treeitem = self.treewidget.currentItem()
+#                father = treeitem.parent()
+#                xmlitem = self.elt
+#
+#                if father != None:
+#                    i = father.indexOfChild(treeitem)
+#                    childs = xmlitem.getchildren()
+#                    xmlitem = childs[i]
+#                    temp = father.parent()
+#                    father = temp
+#
+#                if father == None and title != str(self.elt.tag):
+#                    self.addElement(title, treeitem, xmlitem)
+                    
+                title = str(self.titleline1.currentText())    
                 item = self.treewidget.currentItem()
                 father = item.parent()
+                
                 while father != None:
                     item = father
                     father = item.parent()
                 
-                if title != "" and title != str(self.elt.tag) and title != "LocationVariable" and title != "ActivityFilter" and title != "Aggregate":
+                if title != "" and title != str(self.elt.tag) and title != "LocationVariable" and title != "FilterSet" and title != "Filter1" and title != "Filter" and title != "Aggregate" and title != "ActivityFilter":
                     self.addElement(title, item, self.elt)
                     
                 elif title == "ActivityFilter":
-                    attr = {}
+                    sets = []
+                    values = []
                     element = etree.Element(title)
-                    for i in range(self.attritable.rowCount()):
-                        name = str((self.attritable.item(i,0)).text())
-                        value = str((self.attritable.item(i,1)).text())
+                    for i in range(self.genwidgets.attritable.rowCount()):
+                        name = str((self.genwidgets.attritable.item(i,0)).text())
+                        value = str((self.genwidgets.attritable.item(i,1)).text())
                         element.set(name,value)
-                        attr[name] = value
+                        sets.append(name)
+                        values.append(value)
                         
                     self.elt.insert(0, element)
-                    treeelt = TreeWidgetItem(item,attr)
+                    treeelt = TreeWidgetItem(item,sets,values)
                     treeelt.setText(0, title)
                     item.removeChild(treeelt)
                     item.insertChild(0, treeelt)   
                     
-                elif title == "LocationVariable":
+                elif title == "LocationVariable" or title == "FilterSet" or title == "Filter1" or title == "Filter":
                     i = item.childCount()
                     extract = item.child(i-1)
                     if str(extract.text(0)) == "ExtractLocationInformation":
@@ -514,8 +510,8 @@ class AbtractMixedDialog(QDialog):
                         else:
                             self.addElement(title, item, elt1[index])
                 
-                elif title == "Aggregate":
-                    self.addElement(title, item, self.elt)
+#                elif title == "Aggregate":
+#                    self.addElement(title, item, self.elt)
 
             else:
                 msg = "Please specify the attribute name and value"
@@ -524,15 +520,16 @@ class AbtractMixedDialog(QDialog):
                                     QMessageBox.Ok) 
                 
         else:
-            length = self.attritable.rowCount()
+            length = self.genwidgets.attritable.rowCount()
             if str(self.father.tag) == "ModelConfig":
                 if length > 0:
                     element = etree.Element(COMP)
                     element.set(NAME,str(self.titleline2.text()))
                     for i in range(length):
-                        name = str((self.attritable.item(i,0)).text())
-                        value = str((self.attritable.item(i,1)).text())
-                        element.set(name,value)       
+                        name = str((self.genwidgets.attritable.item(i,0)).text())
+                        value = str((self.genwidgets.attritable.item(i,1)).text())
+                        element.set(name,value)
+                               
                     element.set("skip","False")
                     element.set("completed","False")
                     self.elt = element
@@ -554,15 +551,19 @@ class AbtractMixedDialog(QDialog):
             else:
                 item = self.treewidget.currentItem()
                 if str(self.titleline1.currentText()) == str(item.text(0)):
-                    if length > 0 or str(item.text(0)) == "DBTables":
+                    if length > 0 or str(item.text(0)) == "DBTables" or str(item.text(0)) == "Aggregate":
                         element = etree.Element(str(item.text(0)))
-                        attr = {}
+                        sets = []
+                        values = []
                         for i in range(length):
-                            name = str((self.attritable.item(i,0)).text())
-                            value = str((self.attritable.item(i,1)).text())
+                            name = str((self.genwidgets.attritable.item(i,0)).text())
+                            value = str((self.genwidgets.attritable.item(i,1)).text())
                             element.set(name,value)
-                            attr[name] = value        
-                        item.attribute = attr
+                            sets.append(name)
+                            values.append(value)
+                                    
+                        item.sets = sets
+                        item.values = values
                         self.elt = element
                         self.father.append(self.elt)
                         tree = self.parent()
@@ -579,22 +580,29 @@ class AbtractMixedDialog(QDialog):
   
     
             
-    def addElement(self, title, item, elt):           
-        attr = {}
+    def addElement(self, title, item, elt):
+        sets = []
+        values = []
         element = etree.Element(title)
-        for i in range(self.attritable.rowCount()):
-            name = str((self.attritable.item(i,0)).text())
-            value = str((self.attritable.item(i,1)).text())
+        tlabel = title + "-"
+        for i in range(self.genwidgets.attritable.rowCount()):
+            name = str((self.genwidgets.attritable.item(i,0)).text())
+            value = str((self.genwidgets.attritable.item(i,1)).text())
             element.set(name,value)
-            attr[name] = value
+            sets.append(name)
+            values.append(value)
+            tlabel = tlabel + name + ":" + value + " "
                 
         elt.append(element)        
-        treeelt = TreeWidgetItem(item,attr)
-        treeelt.setText(0, title)
+        treeelt = TreeWidgetItem(item,sets,values)
+        if title == "LocationVariable" or title == "Filter1" or title == "Filter":
+            treeelt.setText(0, tlabel)
+        else:
+            treeelt.setText(0, title)
         
 
     def saveElement(self):
-        length = self.attritable.rowCount()
+        length = self.genwidgets.attritable.rowCount()
         if length > 0 and self.elt != None:
             if self.elt.tag == COMP:
                 skip = str(self.elt.get("skip"))
@@ -605,8 +613,8 @@ class AbtractMixedDialog(QDialog):
     
                 self.elt.set(NAME,str(self.titleline2.text()))
                 for i in range(length):
-                    name = str((self.attritable.item(i,0)).text())
-                    value = str((self.attritable.item(i,1)).text())
+                    name = str((self.genwidgets.attritable.item(i,0)).text())
+                    value = str((self.genwidgets.attritable.item(i,1)).text())
                     self.elt.set(name,value)       
                 self.elt.set("skip",skip)
                 self.elt.set("completed",completed) 
@@ -614,21 +622,27 @@ class AbtractMixedDialog(QDialog):
                 QDialog.accept(self)               
             else:
                 item = self.treewidget.currentItem()
-                if str(self.titleline1.currentText()) == str(item.text(0)):
-#                    if self.elt != None:
+                temp = str(item.text(0)).split('-')
+                name = str(temp[0])
+
+                if str(self.titleline1.currentText()) == name:
                     index = self.findIndex(item)
                     child = self.elt
                     for i in range(len(index)):
                         childs = child.getchildren()
                         child = childs[index[i]]
                     
-                    attr = {}
-                    for i in range(self.attritable.rowCount()):
-                        name = str((self.attritable.item(i,0)).text())
-                        value = str((self.attritable.item(i,1)).text())
+                    sets = []
+                    values = []
+                    for i in range(self.genwidgets.attritable.rowCount()):
+                        name = str((self.genwidgets.attritable.item(i,0)).text())
+                        value = str((self.genwidgets.attritable.item(i,1)).text())
                         child.set(name,value)
-                        attr[name] = value        
-                    item.attribute = attr    
+                        sets.append(name)
+                        values.append(value)
+                                
+                    item.sets = sets
+                    item.values = values    
 
 
     def remove_element(self):
@@ -739,7 +753,7 @@ class AbtractMixedDialog(QDialog):
 
     def reset(self):
         self.titleline1.clear()
-        self.attriname.setCurrentIndex(0)
+        self.genwidgets.attriname.setCurrentIndex(0)
 #        self.nameline.clear()
         self.valueline.clear()
         self.colswidget.clear()
@@ -748,10 +762,90 @@ class AbtractMixedDialog(QDialog):
         num = self.attritable.rowCount()
         for i in range(num):
             self.attritable.removeRow(0)
-        
 
-class TreeWidgetItem(QTreeWidgetItem):
-    def __init__(self, parent, attr):
-        super(TreeWidgetItem, self).__init__(parent)
-        self.attribute = attr
+
+#    def fillValueT(self):
+#        temp = self.tableswidget.currentItem()
+#        if temp != None:
+#            value = str(temp.text())
+#            self.valueline.setText(value)
+
+        
+#    def fillValueC(self):
+#        items = self.colswidget.selectedItems()
+#        length = len(items)
+#        if length > 0:
+#            value = ""
+#            for i in range(len(items)-1):
+#                value = value + str(items[i].text()) + ","
+#            value = value + str(items[length-1].text())
+#            self.valueline.setText(value)
+        
+#        temp = self.colswidget.currentItem()
+#        if temp != None:
+#            value = str(temp.text())
+#            self.valueline.setText(value)
+
+
+
+#    def populateFromDatabase(self):
+#        self.protocol = self.configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
+#        self.user_name = self.configobject.getConfigElement(DB_CONFIG,DB_USER)
+#        self.password = self.configobject.getConfigElement(DB_CONFIG,DB_PASS)
+#        self.host_name = self.configobject.getConfigElement(DB_CONFIG,DB_HOST)
+#        self.database_name = self.configobject.getConfigElement(DB_CONFIG,DB_NAME)
+#        self.database_config_object = DataBaseConfiguration(self.protocol, self.user_name, self.password, self.host_name, self.database_name)
+#        
+#        new_obj = DataBaseConnection(self.database_config_object)
+#        new_obj.new_connection()
+#        tables = new_obj.get_table_list()
+#        
+#        self.tablelist = []
+#        self.coldict = {}
+#        for table in tables:
+#            self.tablelist.append(QString(table))
+#            cols = new_obj.get_column_list(table)
+#            varlist = []
+#            if cols is not None:
+#                for col in cols:
+#                    varlist.append(QString(col))
+#                self.coldict[table] = varlist
+
+
+
+#    def populateColumns(self, item):
+#        self.colswidget.clear()
+#        seltab = str(item.text())
+#        self.colswidget.addItems(self.coldict[seltab])
+             
+#    def addAttribute(self):
+#        name = str(self.attriname.currentText())
+#        value = str(self.valueline.text())
+#
+#        if (name != "") & (value != ""):
+#            self.attritable.insertRow(self.attritable.rowCount())
+#            tableitem = QTableWidgetItem()
+#            tableitem.setText(name)
+#            tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
+#            self.attritable.setItem(self.attritable.rowCount()-1, 0, tableitem)
+#            
+#            varitem = QTableWidgetItem()
+#            varitem.setText(value)
+##            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
+#            self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)   
+
+   
+#    def delAttribute(self):
+#        self.attritable.removeRow(self.attritable.currentRow())
+
+
+#    def fillName(self):
+#        name = str(self.attriname.currentText())
+#        self.nameline.setText(name)
+
+
+#class TreeWidgetItem(QTreeWidgetItem):
+#    def __init__(self, parent, attr):
+#        super(TreeWidgetItem, self).__init__(parent)
+#        self.attribute = attr
         

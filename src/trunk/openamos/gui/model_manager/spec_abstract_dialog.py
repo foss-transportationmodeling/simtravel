@@ -141,12 +141,6 @@ class AbtractSpecDialog(QDialog):
 #        self.glayout.addWidget(self.attributegb,2,0)
         self.fill_attribute(model)
         
-
-#        tool2 = QToolBar()
-#        tool2.setMaximumHeight(30)
-#        show_action2 = self.createaction("",self.showgb2,"arrow","")
-#        tool2.addAction(show_action2)
-#        self.glayout.addWidget(tool2,3,0)
         
         self.filters = FilterWidget("Sub-Population",self)
         self.filters.setVisible(False)
@@ -161,21 +155,9 @@ class AbtractSpecDialog(QDialog):
         self.untilcondition = FilterWidget("Run Condition",self)
         self.untilcondition.setVisible(False)
 #        self.glayout.addWidget(self.untilcondition,6,0)
-
-#        tool4 = QToolBar()
-#        tool4.setMaximumHeight(30)
-#        show_action4 = self.createaction("",self.showgb4,"arrow","")
-#        tool4.addAction(show_action4)
-#        self.glayout.addWidget(tool4,7,0)
         
         self.modwidget = QWidget()
 #        self.glayout.addWidget(self.modwidget,8,0)
-        
-
-#        scrollArea = QScrollArea()
-#        scrollArea.setWidget(wholewidget)
-#        scrollArea.setMaximumHeight(550)
-#        scrollArea.setWidgetResizable(True)
         
         buttonwidget = QWidget(self)
         buttonlayout = QHBoxLayout()
@@ -201,13 +183,8 @@ class AbtractSpecDialog(QDialog):
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.storeSpec)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         self.connect(self.defaultbutton, SIGNAL("clicked(bool)"), self.defaultModel)
-#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addAttribute)
-#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delAttribute)
-#        self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns)
-#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addFiter)
-#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.deleteFiter)
-#        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-#        self.glayout.addWidget(self.dialogButtonBox,3,0)
+        self.connect(self.dependentcb, SIGNAL("currentIndexChanged(int)"), self.addDependent)
+
 
         if model.tag != COMP:
             self.loadFromConfigObject2(model)
@@ -219,7 +196,7 @@ class AbtractSpecDialog(QDialog):
         
 
     def fill_attribute(self,model):
-        elements = self.configobject.getElements("Model")
+        elements = self.configobject.getDElements("Model")
         values = []
         values.append("")
         for elt in elements:
@@ -278,27 +255,15 @@ class AbtractSpecDialog(QDialog):
 #                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
 #                self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)  
 
-#    def addAttribute(self):
-#        name = str(self.attrinamecb.currentText())
-#        value = str(self.attrivaluecb.currentText())
-#        if value == "":
-#            value = str(self.attrivaluetxt.text())
-#
-#        if (name != "") & (value != ""):
-#            self.attritable.insertRow(self.attritable.rowCount())
-#            tableitem = QTableWidgetItem()
-#            tableitem.setText(name)
-#            tableitem.setFlags(tableitem.flags() & ~Qt.ItemIsEditable)
-#            self.attritable.setItem(self.attritable.rowCount()-1, 0, tableitem)
-#            
-#            varitem = QTableWidgetItem()
-#            varitem.setText(value)
-#            varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
-#            self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)   
-#
-#   
-#    def delAttribute(self):
-#        self.attritable.removeRow(self.attritable.currentRow())
+    def addDependent(self):
+        current = str(self.dependentcb.currentText())
+        if current == "Other":
+            dvalue, ok = QInputDialog.getText(self,"","Enter dependent variable name:")
+            if ok:
+                self.dependentcb.addItem(str(dvalue))
+                ind = self.dependentcb.findText(str(dvalue))
+                self.dependentcb.setCurrentIndex(ind)
+
 
     def dependents(self):
         elements = self.configobject.getElements(DEPVARIABLE)
@@ -307,6 +272,7 @@ class AbtractSpecDialog(QDialog):
             value = elt.get(COLUMN)
             if value not in items:
                 items.append(value)
+        items.append("Other")
               
         return items        
 
@@ -559,9 +525,11 @@ class AbtractSpecDialog(QDialog):
                     self.untilcondition.conditions[i].subpopvartext.setText(filt.get(COLUMN)) 
                 ind = self.untilcondition.conditions[i].subpopop.findText(filt.get(COND))
                 self.untilcondition.conditions[i].subpopop.setCurrentIndex(ind)
-                if VALUE in tempkey:              
+                if VALUE in tempkey:
+                    self.untilcondition.conditions[i].isEnableValue.setChecked(True)              
                     self.untilcondition.conditions[i].subpopval.setText(filt.get(VALUE))
                 else:
+                    self.untilcondition.conditions[i].isEnableValue.setChecked(False)
                     ind = self.untilcondition.conditions[i].subpopvtab.findText(filt.get(VTABLE))
                     self.untilcondition.conditions[i].subpopvtab.setCurrentIndex(ind)
                     if str(filt.get(VTABLE)) != "runtime": 
@@ -615,9 +583,11 @@ class AbtractSpecDialog(QDialog):
                     self.filters.conditions[i].subpopvartext.setText(filt.get(COLUMN))                   
                 ind = self.filters.conditions[i].subpopop.findText(filt.get(COND))
                 self.filters.conditions[i].subpopop.setCurrentIndex(ind)                
-                if VALUE in tempkey:              
+                if VALUE in tempkey:
+                    self.filters.conditions[i].isEnableValue.setChecked(True)              
                     self.filters.conditions[i].subpopval.setText(filt.get(VALUE))
                 else:
+                    self.filters.conditions[i].isEnableValue.setChecked(False)
                     ind = self.filters.conditions[i].subpopvtab.findText(filt.get(VTABLE))
                     self.filters.conditions[i].subpopvtab.setCurrentIndex(ind)
                     if str(filt.get(VTABLE)) != "runtime": 
@@ -1095,8 +1065,9 @@ class AbtractSpecDialog(QDialog):
                 runelt.set(COLUMN,str(self.filters.conditions[i].subpopvartext.text()))
             runelt.set(COND,str(self.filters.conditions[i].subpopop.currentText()))
             
-            value = str(self.filters.conditions[i].subpopval.text())
-            if value != "":
+            
+            if self.filters.conditions[i].isEnableValue.isChecked():
+                value = str(self.filters.conditions[i].subpopval.text())
                 runelt.set(VALUE,value)
             else:
                 vtable = str(self.filters.conditions[i].subpopvtab.currentText())
@@ -1137,8 +1108,9 @@ class AbtractSpecDialog(QDialog):
                 runelt.set(COLUMN,str(self.untilcondition.conditions[i].subpopvartext.text()))
             runelt.set(COND,str(self.untilcondition.conditions[i].subpopop.currentText()))
             
-            value = str(self.untilcondition.conditions[i].subpopval.text())
-            if value != "":
+            
+            if self.untilcondition.conditions[i].isEnableValue.isChecked():
+                value = str(self.untilcondition.conditions[i].subpopval.text())
                 runelt.set(VALUE,value)
             else:
                 vtable = str(self.untilcondition.conditions[i].subpopvtab.currentText())
@@ -1630,8 +1602,10 @@ class ConditionWidget(QWidget):
                                 QString(OP_GTE), QString(OP_LTE)])
         conditionlayout.addWidget(self.subpopop,2,2)
         
-        vallabel = QLabel("Value")  
-        conditionlayout.addWidget(vallabel,1,3)          
+        #vallabel = QLabel("Value")
+        self.isEnableValue = QCheckBox("Value")
+        self.isEnableValue.setChecked(True)
+        conditionlayout.addWidget(self.isEnableValue,1,3)          
         self.subpopval = LineEdit()
         conditionlayout.addWidget(self.subpopval,2,3)
         
@@ -1640,11 +1614,13 @@ class ConditionWidget(QWidget):
         self.subpopvtab = QComboBox()
         self.subpopvtab.addItem("")
         self.subpopvtab.addItems(father.tablelist)
+        self.subpopvtab.setDisabled(True)
         conditionlayout.addWidget(self.subpopvtab,2,4)
         
         valvarlabel = QLabel("Value Variable")  
         conditionlayout.addWidget(valvarlabel,1,5)          
         self.subpopvalvar = QComboBox()
+        self.subpopvalvar.setDisabled(True)
         conditionlayout.addWidget(self.subpopvalvar,2,5)
         self.subpopvalvartext = LineEdit()
         self.subpopvalvartext.setDisabled(True)
@@ -1658,9 +1634,9 @@ class ConditionWidget(QWidget):
         conditionlayout.setColumnStretch(4,1)
         conditionlayout.setColumnStretch(5,1)
 
-        
         self.connect(self.subpoptab, SIGNAL("currentIndexChanged(int)"), self.populateColumns1)
         self.connect(self.subpopvtab, SIGNAL("currentIndexChanged(int)"), self.populateColumns2)
+        self.connect(self.isEnableValue, SIGNAL("stateChanged(int)"), self.enableValue)
         
     def populateColumns1(self, idx=0):
         self.subpopvar.clear()
@@ -1670,7 +1646,6 @@ class ConditionWidget(QWidget):
             self.subpopvartext.setVisible(False)
             self.subpopvar.setDisabled(False)
             self.subpopvar.setVisible(True)
-#            fatherdialog = self.parent().father
             self.subpopvar.addItems(self.coldict[seltab])
         else:
             self.subpopvartext.setDisabled(False)
@@ -1686,14 +1661,25 @@ class ConditionWidget(QWidget):
             self.subpopvalvartext.setVisible(False)
             self.subpopvalvar.setDisabled(False)
             self.subpopvalvar.setVisible(True)
-#            fatherdialog = self.parent().father
             self.subpopvalvar.addItems(self.coldict[seltab])
         else:
             self.subpopvalvartext.setDisabled(False)
             self.subpopvalvartext.setVisible(True)
             self.subpopvalvar.setDisabled(True)
             self.subpopvalvar.setVisible(False)
-        
+            
+    def enableValue(self):
+        if self.isEnableValue.isChecked() == True:
+            self.subpopval.setDisabled(False)
+            self.subpopvtab.setDisabled(True)
+            self.subpopvalvar.setDisabled(True)
+            self.subpopvalvartext.setDisabled(True)
+        else:         
+            self.subpopval.setDisabled(True)
+            self.subpopvtab.setDisabled(False)
+            self.subpopvalvar.setDisabled(False)
+            self.subpopvalvartext.setDisabled(False)
+                    
     def reset(self):
         self.subpoptab.setCurrentIndex(0)
         self.subpopvar.clear()

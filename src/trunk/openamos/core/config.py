@@ -24,7 +24,7 @@ class ConfigObject(object):
             
         # Approach to the default configuration file
         parser = etree.XMLParser(remove_blank_text=True)
-        self.default = etree.parse('../configs/config_mag.xml',parser)        
+        self.default = etree.parse('../configs/config_mag_full.xml',parser)        
 
 
     def getConfigElement(self, elt, prop='text' ):
@@ -91,7 +91,13 @@ class ConfigObject(object):
                                 return model
                             else:
                                 modelcnt += 1 
-                                
+
+
+    def getProjects(self):
+        root = self.protree.getroot()
+        childs = root.getchildren()
+        return childs                                
+
 
     def getCompSimStatus(self,compname):
         compelt = self.protree.find(MODELCONFIG)
@@ -135,6 +141,15 @@ class ConfigObject(object):
     
     def getElements(self,key):
         compelt = self.protree.find(MODELCONFIG)
+        elements = []
+        for comp in compelt.getiterator(key):
+
+            elements.append(comp)
+            
+        return elements
+    
+    def getDElements(self,key):
+        compelt = self.default.find(MODELCONFIG)
         elements = []
         for comp in compelt.getiterator(key):
 
@@ -238,6 +253,7 @@ class ConfigObject(object):
             os.mkdir(configpath)
         configfileloc = projecthome + '/' + projectname + '.xml'
 
+        print configfileloc
         configfile = open(configfileloc, 'w')
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
