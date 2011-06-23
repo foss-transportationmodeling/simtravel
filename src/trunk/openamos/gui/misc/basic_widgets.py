@@ -53,3 +53,10 @@ class ComboBoxFolder(QComboBox):
             if location == self.itemText(i):
                 return i
         return None
+    
+class TreeWidgetItem(QTreeWidgetItem):
+    def __init__(self, parent, sets, values):
+        super(TreeWidgetItem, self).__init__(parent)
+#        self.attribute = attr
+        self.sets = sets
+        self.values = values
