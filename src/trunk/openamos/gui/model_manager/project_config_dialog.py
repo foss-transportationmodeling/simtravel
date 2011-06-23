@@ -28,8 +28,8 @@ class ProjectConfigDialog(QDialog):
         self.isMove = True
 
         self.setWindowTitle("")
-        self.alllayout = QHBoxLayout()
-        self.setLayout(self.alllayout)
+        alllayout = QHBoxLayout()
+        self.setLayout(alllayout)
      
         attributegb = QGroupBox("")
         attrilayout = QVBoxLayout()
@@ -72,8 +72,12 @@ class ProjectConfigDialog(QDialog):
         attrilayout.addWidget(self.genwidgets)
         attrilayout.addWidget(btnwidget)
         
+        self.splitter = QSplitter(Qt.Horizontal)
         self.tree()
-        self.alllayout.addWidget(attributegb)
+        self.splitter.addWidget(attributegb)
+#        self.splitter.setSizes([350,450])
+        
+        alllayout.addWidget(self.splitter)
         
         items = self.attributes(str(self.elt.tag))
         self.genwidgets.attriname.addItems(items)
@@ -101,12 +105,10 @@ class ProjectConfigDialog(QDialog):
         leftlayout.addWidget(tools)
 
         self.treewidget = QTreeWidget()
-        self.treewidget.setMinimumWidth(250)
         self.treewidget.headerItem().setText(0, "Sub-element Management")
 
-        leftwidget.setMaximumWidth(400)
-        leftlayout.addWidget(self.treewidget)
-        self.alllayout.addWidget(leftwidget)
+        leftlayout.addWidget(self.treewidget)    
+        self.splitter.addWidget(leftwidget)
         
         self.connect(self.treewidget, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.showValues)
 

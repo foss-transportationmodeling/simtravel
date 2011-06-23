@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
 #                self.models = Models(self.centralwidget)
                 self.models.show_clear_widget()
 
-            
+        
             self.proconfig = ConfigObject(configtree=project_new.configtree)
             self.checkProject()
             self.data_menu.actions()[2].setEnabled(True)
@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
             self.result_menu.actions()[1].setEnabled(True)
             self.result_menu.actions()[2].setEnabled(True)
 
-            
+
 
     def projectopen(self):
         if self.proconfig <> None:
@@ -353,7 +353,7 @@ class MainWindow(QMainWindow):
                 self.proconfig.write()
             
         self.project_open = OpenProject()
-        #print self.project_open.file
+#        print self.project_open.file
         if self.project_open.file != '':
             Temp = self.model_management.currentItem()
             if Temp <> None:
@@ -381,7 +381,8 @@ class MainWindow(QMainWindow):
             
 
     def projectsave(self):
-        self.proconfig.write()
+#        self.proconfig.write()
+        self.proconfig.saveconfig()
 
 
 
@@ -390,24 +391,24 @@ class MainWindow(QMainWindow):
                                                              "%s" %self.proconfig.getConfigElement(PROJECT_HOME), 
                                                              "XML File (*.xml)")
         
-        file = re.split("[/.]", file)
-        location = ""
-        for i in range(len(file)-3):
-            location = location + file[i] + '/'
-        location =  location + file[len(file)-3]
-            
-        filename = file[-2]
-        if not filename.isEmpty():
+#        fileparse = re.split("[/.]", file)
+#        location = ""
+#        for i in range(len(file)-3):
+#            location = location + file[i] + '/'
+#        location =  location + file[len(file)-3]
+#            
+#        filename = fileparse[-2]
+        if not file.isEmpty():
             reply = QMessageBox.warning(self, "Save Existing Project As...",
                                         QString("""Would you like to continue?"""), 
                                         QMessageBox.Yes| QMessageBox.No)
             if reply == QMessageBox.Yes:
-                print "%s, %s"%(location,filename)
+#                print "%s"%(filename)
                 elt = self.proconfig.getConfigElt(PROJECT)
-                elt.set(PROJECT_NAME,str(filename))
-                elt.set(PROJECT_HOME,str(location))
-                self.proconfig.write()
-                self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %str(filename))
+                projname = str(elt.get(PROJECT_NAME))
+                self.proconfig.fileloc = file
+                self.proconfig.saveconfig()
+                self.setWindowTitle("OpenAMOS: Version-1.0 (%s)" %projname)
                 
 #                self.project.filename = filename
 #                self.project.save()

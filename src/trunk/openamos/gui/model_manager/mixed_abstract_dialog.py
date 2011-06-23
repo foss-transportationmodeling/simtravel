@@ -40,8 +40,8 @@ class AbtractMixedDialog(QDialog):
 #        self.populateFromDatabase()
         
         self.setWindowTitle("")
-        self.alllayout = QHBoxLayout()
-        self.setLayout(self.alllayout)
+        alllayout = QHBoxLayout()
+        self.setLayout(alllayout)
      
 
         attributegb = QGroupBox("")
@@ -64,110 +64,6 @@ class AbtractMixedDialog(QDialog):
         dummy1 = QLabel("")
         row1layout.addWidget(dummy1,0,1)
 
-        
-#        row2 = QWidget(self)
-#        row2layout = QGridLayout()
-#        row2.setLayout(row2layout)
-#        
-#        tableslabel = QLabel('Tables')
-#        row2layout.addWidget(tableslabel,0,0)
-#        
-#        self.tableswidget = QListWidget()
-#        self.tableswidget.setSelectionMode(QAbstractItemView.SingleSelection)
-#        self.tableswidget.addItems(self.tablelist)
-#        self.tableswidget.setMaximumSize(250,200)
-#        row2layout.addWidget(self.tableswidget,1,0)
-#        
-#        self.addTable = QPushButton('Value')
-#        self.addTable.setMaximumWidth(50)
-#        row2layout.addWidget(self.addTable,2,0)
-#
-#        varslabel = QLabel('Columns')
-#        row2layout.addWidget(varslabel,0,1)
-#        
-#        self.colswidget = QListWidget()
-#        self.colswidget.setSelectionMode(QAbstractItemView.MultiSelection)
-#        self.colswidget.setMaximumSize(250,200)
-#        row2layout.addWidget(self.colswidget,1,1)
-#        
-#        self.addColumn = QPushButton('Value')
-#        self.addColumn.setMaximumWidth(50)
-#        row2layout.addWidget(self.addColumn,2,1)
-
-        
-#        btnwidget1 = QWidget(self)
-#        btnlayout1 = QVBoxLayout()
-#        btnwidget1.setLayout(btnlayout1)    
-#        self.addTable = QPushButton('Table Name')
-#        self.addTable.setMaximumWidth(80)
-#        btnlayout1.addWidget(self.addTable)
-#        self.addColumn = QPushButton('Column Name')
-#        self.addColumn.setMaximumWidth(80)
-#        btnlayout1.addWidget(self.addColumn)
-#        row2layout.addWidget(btnwidget1,1,1)
-        
-
-#        row3 = QWidget(self)
-#        row3layout = QHBoxLayout()
-#        row3.setLayout(row3layout)
-#
-#        valuewidget = QWidget(self)
-#        valuelayout = QGridLayout()
-#        valuewidget.setLayout(valuelayout)
-#        valuelayout.setContentsMargins(0,0,0,0)
-#        
-#        selectlabel = QLabel("Attribute Name: ")
-#        self.attriname = QComboBox()
-#        self.attriname.setMinimumWidth(220)
-#        if self.elt != None:
-#            self.attriname.addItems(self.attributes(str(self.elt.tag)))
-#        else:
-#            temp = self.parent()
-#            self.attriname.addItems(self.attributes(str(temp.subcomponent)))        
-#
-#        attrivaluelabel = QLabel("Attribute Value: ")
-#        self.valueline = LineEdit()
-#        self.valueline.setMinimumWidth(220)
-#        
-#        valuelayout.addWidget(selectlabel,0,0)
-#        valuelayout.addWidget(self.attriname,1,0)
-#        valuelayout.addWidget(attrivaluelabel,0,1)
-#        valuelayout.addWidget(self.valueline,1,1)
-#        row3layout.addWidget(valuewidget)
-            
-#        row4 = QWidget(self)
-#        row4layout = QHBoxLayout()
-#        row4.setLayout(row4layout)
-#    
-#        btnwidget1 = QWidget(self)
-#        btnlayout1 = QHBoxLayout()
-#        btnwidget1.setLayout(btnlayout1) 
-#        btnlayout1.setContentsMargins(0,0,0,0)
-#        self.addbutton = QPushButton('Add')
-#        self.addbutton.setMaximumWidth(120)
-#        self.delbutton = QPushButton('Delete')
-#        self.delbutton.setMaximumWidth(120) 
-#        btnlayout1.addWidget(self.addbutton)
-#        btnlayout1.addWidget(self.delbutton)
-#          
-#        row4layout.addWidget(btnwidget1)
-#        dummy = QLabel("")
-#        row4layout.addWidget(dummy)
-
-#        row5 = QWidget(self)
-#        row5layout = QVBoxLayout()
-#        row5.setLayout(row5layout)
-#        row5layout.setContentsMargins(10,0,10,0)
-#        self.attritable = QTableWidget(self)
-#        self.attritable.setRowCount(0)
-#        self.attritable.setColumnCount(2)
-#        self.attritable.setHorizontalHeaderLabels(['Attribute', 'Value'])
-#        self.attritable.setSelectionMode(QAbstractItemView.SingleSelection)
-#        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-#        self.attritable.setSizePolicy(sizePolicy)
-#        self.attritable.horizontalHeader().setResizeMode(0,1)
-#        self.attritable.horizontalHeader().setResizeMode(1,1)
-#        row5layout.addWidget(self.attritable)
 
         self.genwidgets = AbstractMixedWidget(self)
         if self.elt != None:
@@ -194,19 +90,16 @@ class AbtractMixedDialog(QDialog):
         btnlayout2.addWidget(self.btnsave)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Close)
         btnlayout2.addWidget(self.dialogButtonBox)
-
-            
+    
         attrilayout.addWidget(row1)
-#        attrilayout.addWidget(row2)
-#        attrilayout.addWidget(row3)
-#        attrilayout.addWidget(row4)
-#        attrilayout.addWidget(row5)
         attrilayout.addWidget(self.genwidgets)
         attrilayout.addWidget(btnwidget2)
         
+        self.splitter = QSplitter(Qt.Horizontal)
         if IsOpen < 3:
             self.notcomponent()
-        self.alllayout.addWidget(attributegb)
+        self.splitter.addWidget(attributegb)    
+        alllayout.addWidget(self.splitter)
         
         if IsOpen == 1:
             self.readtree()
@@ -215,11 +108,7 @@ class AbtractMixedDialog(QDialog):
         elif IsOpen == 3:
             self.showComponent()
         
-#        self.connect(self.tableswidget, SIGNAL("itemClicked (QListWidgetItem *)"), self.populateColumns)
-#        self.connect(self.addbutton, SIGNAL("clicked(bool)"), self.addAttribute)
-#        self.connect(self.delbutton, SIGNAL("clicked(bool)"), self.delAttribute)
-#        self.connect(self.addTable, SIGNAL("clicked(bool)"), self.fillValueT)
-#        self.connect(self.addColumn, SIGNAL("clicked(bool)"), self.fillValueC)
+
         self.connect(self.btnsaveas, SIGNAL("clicked(bool)"), self.saveAsElement)
         self.connect(self.btnsave, SIGNAL("clicked(bool)"), self.saveElement)
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
@@ -260,12 +149,10 @@ class AbtractMixedDialog(QDialog):
         leftlayout.addWidget(tools)
 
         self.treewidget = QTreeWidget()
-        self.treewidget.setMinimumWidth(250)
         self.treewidget.headerItem().setText(0, "Sub-element Management")
 
-        leftwidget.setMaximumWidth(400)
         leftlayout.addWidget(self.treewidget)
-        self.alllayout.addWidget(leftwidget)
+        self.splitter.addWidget(leftwidget)
         
         self.connect(self.treewidget, SIGNAL('itemClicked (QTreeWidgetItem *,int)'), self.showAttributes)
 

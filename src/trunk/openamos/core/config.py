@@ -16,6 +16,7 @@ class ConfigObject(object):
     '''
 
     def __init__(self,configfileloc = None, configtree = None):
+        self.fileloc = configfileloc
         if configfileloc:
             parser = etree.XMLParser(remove_blank_text=True)
             self.protree = etree.parse(configfileloc,parser)
@@ -258,6 +259,10 @@ class ConfigObject(object):
         self.protree.write(configfile, pretty_print=True)
         configfile.close()
         
+    def saveconfig(self):
+        configfile = open(self.fileloc, 'w')
+        self.protree.write(configfile, pretty_print=True)
+        configfile.close()
         
     def comparemodels(self,modelkey):
         previous = self.modelSpecInDefault(modelkey)
