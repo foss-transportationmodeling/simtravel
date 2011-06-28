@@ -241,6 +241,16 @@ class SimulationManager(object):
                     # are often dependent on the choices generated in the previous components
                     # run
 	    
+		    if comp.analysisInterval is not None:
+			createIndex = False
+			deleteIndex = False
+
+		    else:
+			createIndex = True
+			deleteIndex = True
+
+		    """
+
 		    if (comp.readFromTable <> comp.writeToTable):
 			if comp.analysisInterval == 1439:
 			    createIndex = True
@@ -252,7 +262,7 @@ class SimulationManager(object):
 		        createIndex = True
 
 		    deleteIndex = True
-					    
+		    """		    
 			
 
                     self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 

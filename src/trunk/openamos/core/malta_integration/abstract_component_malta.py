@@ -142,9 +142,9 @@ class AbstractComponent(object):
         if self.dependencyAllocationFlag:
             self.process_adult_allocation(data, queryBrowser, householdStructureObject)
         """
-
-        return data
         print '-- Time taken to retrieve data - %.4f --' %(time.time()-t_d)
+        return data
+
 
     def create_choiceset(self, shape, criterion, names):
         #TODO: Should setup a system to generate the choicesets dynamically
@@ -204,7 +204,14 @@ class AbstractComponent(object):
             nRowsProcessed += valid_data_rows_count
 
             #print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
-	    trips = self.reflectToDatabase(valid_data_rows, tableNamesKeyDict, queryBrowser, fileLoc)
+	    if self.data.rows == 0 and self.component_name == 'ExtractAllTravelEpisodes':
+		return zeros((1, 11))
+	    elif self.data.rows == 0:
+		return
+	    else:
+	    	trips = self.reflectToDatabase(valid_data_rows, tableNamesKeyDict, queryBrowser, fileLoc)
+
+
         return trips
 
 
@@ -218,38 +225,48 @@ class AbstractComponent(object):
         """
 	# Reflecting the dynamic activity-travel generation to data table and also extracting and passing trips
 	try:
-	    ti = time.time()
-	    tableCols = self.db.returnCols(self.writeToTable)
+	
+	    if valid_data_filter.sum() == 0:
+		data_array = zeros((1, 11))
+		print "\t\tNo rows to reflect to database skipping database update"
+	    else:
+	    	ti = time.time()
+	    	tableCols = self.db.returnCols(self.writeToTable)
             
-            convType = self.db.returnTypeConversion(self.writeToTable)
-	    dtypesInput = self.db.tableColTypes(self.writeToTable)
+            	convType = self.db.returnTypeConversion(self.writeToTable)
+	    	dtypesInput = self.db.tableColTypes(self.writeToTable)
 
 	    # O and D are not same
-	    data = self.data.columnsOfType(tableCols, valid_data_filter, dtypesInput)
+	    	data = self.data.columnsOfType(tableCols, valid_data_filter, dtypesInput)
 	
-	    keyCols = tableNamesKeyDict[self.writeToTable][0] 
+	    	keyCols = tableNamesKeyDict[self.writeToTable][0] 
 
 	    #print '--> here are the keyCols for this component', keyCols
 	    #raw_input()
 	
-	    if self.component_name == 'ExtractTravelEpisodes' or self.component_name == 'ExtractBackgroundTravelEpisodes':
- 	    	queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=True)
-	    else:
- 	    	queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)		
+	    	#if self.component_name == 'ExtractTravelEpisodes' or self.component_name == 'ExtractBackgroundTravelEpisodes':
+ 	    	#    #queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)
+		#    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=True)
+	    	#else:
+ 	    	#    #queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)		
+ 	    	#    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)		
+		queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)		
+	    	if self.component_name == 'ExtractAllTravelEpisodes':
+	            data_array = zeros((valid_data_filter.sum(), len(tableCols)))
 
-	    if self.component_name == 'ExtractAllTravelEpisodes':
-	        data_array = zeros((valid_data_filter.sum(), len(tableCols)))
-
-	    	dataTempNames = data.data.dtype.names 
-	        for i in range(len(dataTempNames)):
-		    name = dataTempNames[i]
-		    data_array[:,i] = data.data[name]
+	    	    dataTempNames = data.data.dtype.names 
+	            for i in range(len(dataTempNames)):
+		        name = dataTempNames[i]
+		        data_array[:,i] = data.data[name]
 
 
             if self.delete_criterion is not None:
             	if self.delete_criterion:
                     self.data.deleterows(~valid_data_filter)
             	else:
+		    #if valid_data_filter.sum() > 0:
+		    #print valid_data_filter
+		    #raw_input('filter')
                     self.data.deleterows(valid_data_filter)          
 
 	

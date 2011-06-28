@@ -659,7 +659,7 @@ class QueryBrowser(object):
         sql_string = 'select %s from %s %s %s' %(colStr, mainTable, allJoinStr, aggStr)
 	
 	#sql_string += ' and (persons.houseid = 35802 or persons.houseid = 90971  or persons.houseid = 119866)'
-        #print 'SQL string for query - ', sql_string
+        print 'SQL string for query - ', sql_string
         #print cols_list
 	#raw_input()
         
@@ -698,7 +698,7 @@ class QueryBrowser(object):
 		
 	    delete_sql_string = ('delete from %s where %s in (select %s from (%s) as foo)' 
 				 %(table, var, var, sql_string))
-	    #print 'Delete string - ', delete_sql_string
+	    print 'Delete string - ', delete_sql_string
 
 	    #print 'delete records after select'
 
@@ -895,11 +895,12 @@ class QueryBrowser(object):
 
         table_name = table_name.lower()
 
+	t_d = time.time()
 	if deleteIndex:
             # Delete index before inserting
-	    t_d = time.time()
+
             index_cols = self.delete_index(table_name)
-	    print '\t\tDeleting index took - %.2f' %(time.time()-t_d)
+	print '\t\tDeleting index took - %.2f' %(time.time()-t_d)
 
         self.file_write(arr, loc, partId)
         
@@ -929,10 +930,11 @@ class QueryBrowser(object):
                 print e
         else:
            print 'Table %s does not exist.'##%table_name 
+	t_c = time.time()
 	if createIndex:
-	    t_c = time.time()
+	    
             self.create_index(table_name, keyCols)
-      	    print '\t\tCreating index took - %.2f' %(time.time()-t_c)
+      	print '\t\tCreating index took - %.2f' %(time.time()-t_c)
         
     def insert_nrows(self, table_name, cols_listStr, arr):
         arr_str = [tuple(each) for each in arr]
@@ -1027,7 +1029,7 @@ class QueryBrowser(object):
                     print e
                     self.dbcon_obj.connection.rollback()
             else:
-                print 'Index does not exists so cannot be deleted.'
+                print '\t\tIndex does not exists so cannot be deleted.'
                 
     #get the index columns
     def get_index_columns(self, table_name):
