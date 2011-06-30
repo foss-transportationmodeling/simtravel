@@ -16,6 +16,7 @@ http://www.drlock.com/projects/pyrwi/docs/install.php
 
 C:\Documents and Settings\dhyou\workspace\src\openamos\core\travel_skims>python setup.py build_ext --inplace -cmingw32
 
+install Cygwin.
 install MinGW.
 download and unzip SWIGwin and move to tghe folder that has MinGw installed.
 install PCRE.
