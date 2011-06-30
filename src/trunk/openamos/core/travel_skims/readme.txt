@@ -9,3 +9,14 @@ python setup.py build_ext --inplace
 python extensions.py
 
 Uploading only the source code and data files.
+
+
+Important for windows:
+http://www.drlock.com/projects/pyrwi/docs/install.php
+
+C:\Documents and Settings\dhyou\workspace\src\openamos\core\travel_skims>python setup.py build_ext --inplace -cmingw32
+
+install MinGW.
+download and unzip SWIGwin and move to tghe folder that has MinGw installed.
+install PCRE.
+change the environment vairable PATH and append the path of the swig folder and the python folder
