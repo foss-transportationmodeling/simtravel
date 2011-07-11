@@ -13,10 +13,10 @@ from results_menu.to_postgis import *
 from results_menu.view_sched import *
 from results_menu.view_plot import *
 from results_menu.kml_num_trips import *
-#from run_menu.simulation_dialog import *
+from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
-#from openamos.core.run.simulation_manager_cursor import SimulationManager
+from openamos.core.run.simulation_manager_cursor import SimulationManager
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
 #        self.centralwidget.setFixedSize(1140, 1200)
 #        self.centralwidgetscroll.setWidget(self.centralwidget)
 
-        
+    
         # Defining status bar        
         self.sizelabel = QLabel()
         self.sizelabel.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
@@ -478,16 +478,16 @@ class MainWindow(QMainWindow):
 #        """This accepts only one argument which is the location of the configuration """\
 #        """file. e.g. /home/config.xml (linux machine) """\
 #        """or c:/testproject/config.xml (windows machine)"""
-
-        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
-        simulationManagerObject.setup_databaseConnection()
-        simulationManagerObject.setup_cacheDatabase('w')
-        simulationManagerObject.setup_location_information()
-        simulationManagerObject.setup_tod_skims()
-        simulationManagerObject.parse_config()
-        simulationManagerObject.clean_database_tables()
-        simulationManagerObject.run_components()
-        simulationManagerObject.close_connections()
+#
+#        simulationManagerObject = SimulationManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
+#        simulationManagerObject.setup_databaseConnection()
+#        simulationManagerObject.setup_cacheDatabase('w')
+#        simulationManagerObject.setup_location_information()
+#        simulationManagerObject.setup_tod_skims()
+#        simulationManagerObject.parse_config()
+#        simulationManagerObject.clean_database_tables()
+#        simulationManagerObject.run_components()
+#        simulationManagerObject.close_connections()
 
 #        if fileloc <> None and fileloc <> "" and pname <> None and pname <> "":
 #            componentManager = ComponentManager(fileLoc = "%s/%s.xml" %(fileloc,pname))
