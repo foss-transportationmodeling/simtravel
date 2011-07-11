@@ -120,9 +120,13 @@ class SimDialog(QDialog):
           
     def accept(self):
         self.outputWindow.clear()
-        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
-        pname = self.proconfig.getConfigElement(PROJECT,NAME)
-        cmd = "python ../core/openamos_run.py %s/%s.xml" %(fileloc,pname)
+#        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
+#        pname = self.proconfig.getConfigElement(PROJECT,NAME)
+#        cmd = "python ../core/openamos_run.py %s/%s.xml" %(fileloc,pname)
+        fileloc1 = self.proconfig.fileloc
+        cmd = "python ../core/openamos_run.py %s" %(fileloc1)
+        print fileloc1
+        print cmd
         
         mythread = Worker(self,cmd)
         mythread.progress.connect(self.write_meg)
