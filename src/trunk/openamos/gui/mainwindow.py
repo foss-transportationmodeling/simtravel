@@ -473,6 +473,10 @@ class MainWindow(QMainWindow):
         simdiag = SimDialog(self.proconfig)  
         simdiag.exec_() 
         
+        self.models.show_clear_widget() 
+        self.proconfig = ConfigObject(configfileloc=str(self.project_open.file))
+        self.checkProject()
+            
 #        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
 #        pname = self.proconfig.getConfigElement(PROJECT,NAME)
 #        """This accepts only one argument which is the location of the configuration """\

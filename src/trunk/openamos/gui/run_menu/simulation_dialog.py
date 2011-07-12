@@ -60,18 +60,28 @@ class SimDialog(QDialog):
         self.outputWindow = QTextEdit()
         leftlayout.addWidget(self.outputWindow)
         
-        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel| QDialogButtonBox.Ok)
-        leftlayout.addWidget(self.dialogButtonBox)
+        
+        self.runbutton = QPushButton("Run")
+        self.runbutton.setDefault(True)
+        
+        self.cancelbutton = QPushButton("Cancel")
+        self.cancelbutton.setDefault(True)
+        
+        dialogButtonBox = QDialogButtonBox(Qt.Horizontal)
+        dialogButtonBox.addButton(self.runbutton, QDialogButtonBox.ActionRole)
+        dialogButtonBox.addButton(self.cancelbutton, QDialogButtonBox.ActionRole)
+        
+#        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel| QDialogButtonBox.Ok)
+        leftlayout.addWidget(dialogButtonBox)
         
         self.splitter.addWidget(leftwidget)
         self.splitter.setStretchFactor(0,0)
         self.splitter.setStretchFactor(1,1)
         alllayout.addWidget(self.splitter)
 
-
-        self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self, SLOT("accept()"))
-        self.connect(self.dialogButtonBox, SIGNAL("rejected()"), self, SLOT("reject()"))
-
+        self.mythread = None
+        self.connect(self.runbutton, SIGNAL("clicked(bool)"), self, SLOT("accept()"))
+        self.connect(self.cancelbutton, SIGNAL("clicked(bool)"), self, SLOT("reject()"))
 
 #        self.index = 0
 #        
@@ -108,16 +118,34 @@ class SimDialog(QDialog):
                         attr = "%s"%(comp.get(key))
                         if key == "skip":
                             if attr == "True":
-                                component_term.setCheckState(2, Qt.Checked)
+#                                component_term.setCheckState(2, Qt.Checked)
+                                component_term.setText(2, "Yes")
+                                component_term.setTextColor(2,QColor("green"))
+                                component_term.setTextAlignment(2,Qt.AlignHCenter)
                             else:
-                                component_term.setCheckState(2, Qt.Unchecked)                     
+#                                component_term.setCheckState(2, Qt.Unchecked)
+                                component_term.setText(2, "No")
+                                component_term.setTextColor(2,QColor("red")) 
+                                component_term.setTextAlignment(2,Qt.AlignHCenter)                 
                         else:
-                            component_term.setIcon(1, QIcon("./images/%s" %(attr)))
+#                            component_term.setIcon(1, QIcon("./images/%s" %(attr)))
+                            if attr == "True":
+                                component_term.setText(1, "Yes")
+                                component_term.setTextColor(1,QColor("green"))
+                                component_term.setTextAlignment(1,Qt.AlignHCenter)
+                            else:
+                                component_term.setText(1, "No")
+                                component_term.setTextColor(1,QColor("red")) 
+                                component_term.setTextAlignment(1,Qt.AlignHCenter)
+
 
 
     def reject(self):
+        if self.mythread != None:
+            self.mythread.terminate()
+            self.mythread = None
         QDialog.accept(self)
-          
+
     def accept(self):
         self.outputWindow.clear()
 #        fileloc = self.proconfig.getConfigElement(PROJECT,LOCATION)
@@ -125,13 +153,12 @@ class SimDialog(QDialog):
 #        cmd = "python ../core/openamos_run.py %s/%s.xml" %(fileloc,pname)
         fileloc1 = self.proconfig.fileloc
         cmd = "python ../core/openamos_run.py %s" %(fileloc1)
-        print fileloc1
-        print cmd
         
-        mythread = Worker(self,cmd)
-        mythread.progress.connect(self.write_meg)
-        mythread.start()
-        
+        self.mythread = Worker(self,cmd)
+        self.mythread.progress.connect(self.write_meg)
+        self.mythread.start()
+
+
     def write_meg(self,s):
         self.outputWindow.append(s)
 
@@ -216,16 +243,20 @@ class Worker(QThread):
 #                                         stdout = subprocess.PIPE,
 #                                         stderr = subprocess.STDOUT ).communicate()
 
-        p = subprocess.Popen(self.cmd, shell = True, 
+        self.p = subprocess.Popen(self.cmd, shell = True, 
                                          stdout = subprocess.PIPE,
                                          stderr = subprocess.STDOUT )
 
         while True:
-            line = p.stdout.readline()
+            line = self.p.stdout.readline()
             if not line: break
             self.progress.emit(line)
             sys.stdout.flush()
 
+        father = self.parent()
+        father.runbutton.setVisible(False)
+        father.cancelbutton.setText("Finish")
+        
 #        p = Popen(self.cmd, shell = True,
 #                                         stdout = PIPE,
 #                                         stderr = STDOUT)
