@@ -6,13 +6,13 @@ class ProjectConfiguration(object):
     def __init__(self, 
                  name,
                  location, 
-                 seed=0, 
-                 subsample=None):
+                 subsample=None,
+                 seed=0):
         
         self.name = name
         self.location = location
-        self.seed = seed
         self.subsample = subsample
+        self.seed = seed
 
     def __repr__(self):
         return ("""Project Configuration:\n\tName - %s"""\
