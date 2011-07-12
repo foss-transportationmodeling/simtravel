@@ -74,9 +74,9 @@ class AbstractComponent(object):
 
     def pre_process(self, queryBrowser, 
                     skimsMatrix, uniqueIds,
-                    db):
+                    db, projectSeed=0):
 
-
+	self.projectSeed = projectSeed	
 	#print skimsMatrix
 	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)
 
@@ -160,6 +160,8 @@ class AbstractComponent(object):
         # this way first we run through all models once.  
         # In the next iteration, only those models are executed
         # as indicated by the run_until_condition
+
+	
         model_list_duringrun = copy.deepcopy(self.model_list)
         iteration = 0
 
@@ -825,7 +827,7 @@ class AbstractComponent(object):
             probDataArray = DataArray(probLocSet, zoneLabels)
 
             # seed is the count of the sampled destination starting with 1
-            probModel = AbstractProbabilityModel(probDataArray, seed+i)
+            probModel = AbstractProbabilityModel(probDataArray, self.projectSeed+seed+i)
             res = probModel.selected_choice()
             
             # Assigning the destination

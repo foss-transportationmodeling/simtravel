@@ -104,12 +104,12 @@ class ConfigParser(object):
                         #print 'NEW FLAG _ ', compElement.get('completed')                    
 
 
-    def parse_models(self):
+    def parse_models(self, projectSeed=0):
         self.iterator = self.configObject.getiterator("Component")
         componentList = []
         
         for i in self.iterator:
-            componentIntermediateList = self.parse_analysis_interval_and_create_component(i)
+            componentIntermediateList = self.parse_analysis_interval_and_create_component(i, projectSeed)
             componentList += componentIntermediateList
             if i.attrib['name'] == self.componentName:
                 return componentList
@@ -122,12 +122,18 @@ class ConfigParser(object):
         projectName = projectElement.get('name')
         projectLocation = projectElement.get('location')
         projectSubsample = projectElement.get('subsample')
+	projectSeed = projectElement.get('seed')
+	if projectSeed is None:
+	    projectSeed = 0
+	else:
+	    projectSeed = int(projectSeed)
         if projectSubsample is not None:
             projectSubsample = int(projectSubsample)
 
         projectConfigObject = ProjectConfiguration(projectName,
                                                    projectLocation,
-                                                   projectSubsample)
+                                                   projectSubsample,
+					           projectSeed)
             
         return projectConfigObject
 
@@ -262,7 +268,7 @@ class ConfigParser(object):
 
 
 
-    def parse_analysis_interval_and_create_component(self, component_element):
+    def parse_analysis_interval_and_create_component(self, component_element, projectSeed):
         ti = time.time()
         comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
 	print "Parsing Component - %s" %(comp_name)
@@ -281,7 +287,7 @@ class ConfigParser(object):
 	    
             for i in range(endInterval - startInterval):
                 #tempComponent = copy.deepcopy(repeatComponent)
-		tempComponent = self.create_component(component_element)
+		tempComponent = self.create_component(component_element, projectSeed)
                 for model in tempComponent.model_list:
                     model.seed +=  i 
                 tempComponent.analysisInterval = startInterval + i
@@ -294,7 +300,7 @@ class ConfigParser(object):
 	    """	
 	    
         else:
-            component = self.create_component(component_element)
+            component = self.create_component(component_element, projectSeed)
             componentList.append(component)
         print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
 
@@ -315,7 +321,7 @@ class ConfigParser(object):
         return delete_criterion
 
     
-    def create_component(self, component_element):
+    def create_component(self, component_element, projectSeed=0):
         self.model_list = []
         self.component_variable_list = []
 
@@ -370,7 +376,7 @@ class ConfigParser(object):
 
         modelsIterator = component_element.getiterator("Model")
         for i in modelsIterator:
-            self.create_model_object(i)
+            self.create_model_object(i, projectSeed)
             self.create_linear_object_for_locations(i, spatialConst_list)
             #component_variable_list = (component_variable_list 
             #                           + variable_list)
@@ -487,43 +493,43 @@ class ConfigParser(object):
 
 
 
-    def create_model_object(self, model_element):
+    def create_model_object(self, model_element, projectSeed=0):
         model_formulation = model_element.attrib['formulation']
 	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
         
         if model_formulation == 'Regression':
-            self.create_regression_object(model_element)
+            self.create_regression_object(model_element, projectSeed)
             
         if model_formulation == 'Count':
-            self.create_count_object(model_element)
+            self.create_count_object(model_element, projectSeed)
         
         if model_formulation == 'Multinomial Logit':
             if model_element.find('AlternativeSet') is None:
-                self.create_multinomial_logit_object(model_element)
+                self.create_multinomial_logit_object(model_element, projectSeed)
             else:
-                self.create_multinomial_logit_object_generic_locs(model_element)
+                self.create_multinomial_logit_object_generic_locs(model_element, projectSeed)
     
         if model_formulation == 'Nested Logit':
-            self.create_nested_logit_object(model_element)
+            self.create_nested_logit_object(model_element, projectSeed)
 
         if model_formulation == 'Ordered':
-            self.create_ordered_choice_object(model_element)
+            self.create_ordered_choice_object(model_element, projectSeed)
 
         if model_formulation == 'Probability Distribution':
-            self.create_probability_object(model_element)
+            self.create_probability_object(model_element, projectSeed)
 
         if model_formulation == 'Reconcile Schedules':
-            self.create_reconcile_schedules_object(model_element)
+            self.create_reconcile_schedules_object(model_element, projectSeed)
 
         if model_formulation == 'Clean Fixed Activity Schedule':
-            self.create_clean_fixed_activity_schedule(model_element)
+            self.create_clean_fixed_activity_schedule(model_element, projectSeed)
 
 	if model_formulation == 'Clean Aggregate Activity Schedule':
-            self.create_clean_aggregate_activity_schedule(model_element)
+            self.create_clean_aggregate_activity_schedule(model_element, projectSeed)
 
         if model_formulation == 'Child Dependency Allocation':
-            self.create_child_dependency_allocation_object(model_element)
+            self.create_child_dependency_allocation_object(model_element, projectSeed)
 
 
     def process_seed(self, model_element):
@@ -533,10 +539,10 @@ class ConfigParser(object):
         else:
             return 1
 
-    def create_regression_object(self, model_element):
+    def create_regression_object(self, model_element, projectSeed=0):
         #model type
         model_type = model_element.get('type')
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         #variable list required for running the model
         variable_list = []
@@ -645,10 +651,10 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
 
-    def create_count_object(self, model_element):
+    def create_count_object(self, model_element, projectSeed=0):
         #model type
         model_type = model_element.get('type')
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
         #variable list required for running the model
         variable_list = []
         
@@ -714,7 +720,7 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
         
 
-    def create_multinomial_logit_object(self, model_element):
+    def create_multinomial_logit_object(self, model_element, projectSeed=0):
         """
         Accomodates both generic and alternative specific where the
         alternatives are spelled out
@@ -723,7 +729,7 @@ class ConfigParser(object):
 
         #model type
         model_type = model_element.get('type')
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         #variable_list_required for running the model
         variable_list = []
@@ -793,7 +799,7 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
 
-    def create_multinomial_logit_object_generic_locs(self, model_element):
+    def create_multinomial_logit_object_generic_locs(self, model_element, projectSeed=0):
         """
         Accomodates alternative specific where the
         alternatives are not spelled out. Like for location choices
@@ -803,7 +809,7 @@ class ConfigParser(object):
 
         #model type
         model_type = model_element.get('type')
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         #variable_list_required for running the model
         variable_list = []
@@ -867,12 +873,12 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
 
-    def create_linear_object_for_locations(self, model_element, spatialConst_list):
+    def create_linear_object_for_locations(self, model_element, spatialConst_list, projectSeed=0):
         """
         creates linear combination objects for locations and travel times
         """
 
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
         altSetElement = model_element.find('AlternativeSet')        
         if altSetElement is None or spatialConst_list is None: 
             return 
@@ -954,10 +960,10 @@ class ConfigParser(object):
                     self.model_list.append(model_object)
 
 
-    def create_nested_logit_object(self, model_element):
+    def create_nested_logit_object(self, model_element, projectSeed=0):
         #variable list required for running the model
         variable_list = []
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
         #dependent variable
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')        
@@ -1116,10 +1122,10 @@ class ConfigParser(object):
 
         
     
-    def create_ordered_choice_object(self, model_element):
+    def create_ordered_choice_object(self, model_element, projectSeed=0):
         #model type
         model_type = model_element.get('type')
-        seed = self.process_seed(model_element)        
+        seed = self.process_seed(model_element) + projectSeed        
         #variable_list_required for running the model
         variable_list = []
 
@@ -1193,10 +1199,10 @@ class ConfigParser(object):
         #raw_input()
 
     
-    def create_probability_object(self, model_element):
+    def create_probability_object(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         variable_list = []
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
         # dependent variable
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -1252,12 +1258,12 @@ class ConfigParser(object):
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def create_reconcile_schedules_object(self, model_element):
+    def create_reconcile_schedules_object(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         
         variable_list = []
         
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -1299,12 +1305,12 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def create_clean_fixed_activity_schedule(self, model_element):
+    def create_clean_fixed_activity_schedule(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         
         variable_list = []
         
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -1355,12 +1361,12 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
     
-    def create_clean_aggregate_activity_schedule(self, model_element):
+    def create_clean_aggregate_activity_schedule(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         
         variable_list = []
         
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -1411,12 +1417,12 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
         
-    def create_child_dependency_allocation_object(self, model_element):
+    def create_child_dependency_allocation_object(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         
         variable_list = []
         
-        seed = self.process_seed(model_element)
+        seed = self.process_seed(model_element) + projectSeed
 
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
