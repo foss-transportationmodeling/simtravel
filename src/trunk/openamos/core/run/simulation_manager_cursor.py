@@ -129,7 +129,7 @@ class SimulationManager(object):
 
     def parse_config(self):
         print "-- Parsing components and model specifications --"
-        self.componentList = self.configParser.parse_models()
+        self.componentList = self.configParser.parse_models(self.projectConfigObject.seed)
         #TODO: implement subsample runs 
 
         # Printing models that were parsed
@@ -228,7 +228,7 @@ class SimulationManager(object):
 
 	        data = comp.pre_process(queryBrowser,  
                                         skimsMatrix, uniqueIds,
-                                        self.db)
+                                        self.db, self.projectConfigObject.seed)
 		
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
