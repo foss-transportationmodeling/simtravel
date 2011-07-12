@@ -105,12 +105,12 @@ class SimDialog(QDialog):
             for comp in compelts:
 
                 comtitle = str(comp.get(NAME))
-                if comtitle in COMPONENTMAP.keys():
-                    compname = COMPONENTMAP[comp.get(NAME)][0]
-                else:
-                    compname = comtitle
+#                if comtitle in COMPONENTMAP.keys():
+#                    compname = COMPONENTMAP[comp.get(NAME)][0]
+#                else:
+#                    compname = comtitle
                 component_term = QTreeWidgetItem(self.treewidget)
-                component_term.setText(0, compname)
+                component_term.setText(0, comtitle) #compname)
                 component_term.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
                 
                 for key in comp.keys():
