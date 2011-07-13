@@ -267,6 +267,10 @@ void get_tt(int org[], int dest[], float tt[], int arr_len, int offset )
         else
         {
             temp = org_graph[st-offset][en-offset];
+	    if (temp < 3)
+	    {
+		temp = 3;
+	    }
             tt[i] = temp;
         }
     }
