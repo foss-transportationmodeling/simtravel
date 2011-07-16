@@ -271,6 +271,8 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Final Schedules")
         if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
             tables.append("Schedules: Aggregated in Home Final Schedules")
+#        if self.new_obj.check_if_table_exists("schedule_nhts"):
+#            tables.append("Schedules: NHTS")
             
         self.stablecombo.addItems(tables)
 
@@ -536,25 +538,21 @@ class MakeSchedPlot(QDialog):
                     #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
                     self.cursor.execute(SQL)
                     temp = self.cursor.fetchall()
+        
                     
-                    tid = ""
-                    index = 0
-                    i = 0
-                    if len(temp) > 50:
-                        index = randint(0, len(temp)-50)
-                       
-                    for id in temp:
+                    ind = []
+                    for i in range(50):
+                        ind.append(randint(0, len(temp)))
+                    
+                    tid = ''
+                    for i in range(50):
+                        id = temp[ind[i]]
                         if self.segment1.isChecked():
                             tid = str(id[0])
                         else:
                             tid = '%s,%s'%(str(id[0]),str(id[1]))
-                        
-                        if i >= index and i < index+50:
-                            pid.append(tid)
-                        
-                        i = i+1
-                    #self.fixedFifty(pid)
-                    self.idwidget.addItems(pid)
+                            
+                        self.idwidget.addItem(tid) 
 
             
             except Exception, e:
@@ -572,7 +570,7 @@ class MakeSchedPlot(QDialog):
         try:
             self.idwidget2.clear()
             self.data = []
-            pid = []
+#            pid = []
             temp = None
 
             SQL = self.SQL_ID2()  
@@ -580,18 +578,17 @@ class MakeSchedPlot(QDialog):
                 #self.cursor.execute("""SELECT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order))
                 self.cursor.execute(SQL)
                 temp = self.cursor.fetchall()
-                
-                id = ""
+
                 for i in temp:
                     if self.segment1.isChecked():
-                        id = str(i[0])
+                        self.idwidget2.addItem(str(i[0]))
                     else:
-                        id = '%s,%s'%(str(i[0]),str(i[1]))
+                        self.idwidget2.addItem(i[0])
+
                     
-                    pid.append(id)
-                    
-                #self.fixedFifty(pid)
-                self.idwidget2.addItems(pid)
+#                    pid.append(id)
+#                self.fixedFifty(pid)
+#                self.idwidget2.addItems(pid)
         
         except Exception, e:
             print '\tError while unloading data from the table %s'%self.table
@@ -717,10 +714,12 @@ class MakeSchedPlot(QDialog):
         tablename = '%s AS A, %s AS B' %(self.schedule_table(),self.table)
         vars = ''
         if self.segment1.isChecked():
+            tablename = 'households AS A'
             vars = 'A.houseid'
         else:
+            tablename = 'persons AS A'
             vars = 'A.houseid, A.personid'
-        filter = '(A.starttime >= 0'
+        filter = '' #(A.starttime >= 0'
 #        order = ''
 #        if self.segment1.isChecked():
 #            order = 'A.houseid'
@@ -729,26 +728,29 @@ class MakeSchedPlot(QDialog):
         
         numrows = self.varstable.rowCount()
         for i in range(numrows):
-            filter = filter + " AND "
+            if i > 0:
+                filter = filter + " AND "
             column = str((self.varstable.item(i,0)).text())
             value = str((self.varstable.item(i,1)).text())
-            filter = filter + "B.%s = '%s'" %(column,value)
+            filter = filter + "A.%s = '%s'" %(column,value)
             
-        filter = filter + ') AND A.houseid = B.houseid'
-        if self.table == 'persons':
-            filter = filter + ' AND A.personid = B.personid'
-        #state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
-        state = """SELECT DISTINCT %s FROM %s WHERE %s"""%(vars,tablename,filter)
-
+#        filter = filter + ') AND A.houseid = B.houseid'
+#        if self.table == 'persons':
+#            filter = filter + ' AND A.personid = B.personid'
+        
+#        state = """SELECT DISTINCT %s FROM %s WHERE %s"""%(vars,tablename,filter)
+        state = """SELECT %s FROM %s WHERE %s"""%(vars,tablename,filter)
         return state
 
     def SQL_ID2(self):
         tablename = '%s AS A' %(self.schedule_table())
         vars = ''
         if self.segment1.isChecked():
+            tablename = 'households AS A'
             vars = 'A.houseid'
         else:
-            vars = 'A.houseid, A.personid'
+            tablename = 'persons AS A'
+            vars = "A.houseid || ',' || A.personid" #'A.houseid, A.personid'
         filter = 'A.starttime >= 0'
         order = ''
         if self.segment1.isChecked():
@@ -756,7 +758,8 @@ class MakeSchedPlot(QDialog):
         else:
             order = 'A.houseid, A.personid'
         
-        state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+        #state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
+        state = """SELECT %s FROM %s ORDER BY %s"""%(vars,tablename,order)
 
         return state
 
@@ -821,10 +824,11 @@ class MakeSchedPlot(QDialog):
             return "schedule_inctravelrec_r"
         elif cur_text == "Schedules: Aggregated in Home Final Schedules":
             return "schedule_aggregatefinal_r"
+#        elif cur_text == "Schedules: NHTS":
+#            return "schedule_nhts"
         else:
             return "schedule_final_r"
-
-            
+    
 
     def on_draw1(self):
         """ Redraws the figure
