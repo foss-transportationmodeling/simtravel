@@ -78,7 +78,7 @@ class AbstractComponent(object):
 
 	self.projectSeed = projectSeed	
 	#print skimsMatrix
-	print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)
+	#print '\tInside the pre processor and refcount is - ', sys.getrefcount(skimsMatrix), sys.getsizeof(skimsMatrix)
 
 
         t_d = time.time()
@@ -296,6 +296,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 	      
+		#print result.varnames
                 #print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
@@ -617,7 +618,7 @@ class AbstractComponent(object):
         to generating the choices, one has to also retrieve the travel skims corresponding
         to the N random location choices.
         """
-        # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAY
+        # LOAD THE NETWORK SKIMS ON THE MEMORY AS NUMPY ARRAYNeed to e
 
         t = time.time()
 

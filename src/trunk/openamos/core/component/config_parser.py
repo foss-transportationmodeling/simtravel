@@ -22,6 +22,7 @@ from openamos.core.models.probability_distribution_model import ProbabilityModel
 from openamos.core.models.nested_logit_choice_model import NestedLogitChoiceModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.models.model_components import Specification
+from openamos.core.models.model_components import ColumnOperationsSpecification
 from openamos.core.models.count_regression_model_components import CountSpecification
 from openamos.core.models.ordered_choice_model_components import OLSpecification
 from openamos.core.models.nested_logit_model_components import NestedChoiceSpecification, NestedSpecification
@@ -36,6 +37,7 @@ from openamos.core.models.reconcile_schedules import ReconcileSchedules
 from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
+from openamos.core.models.column_operations_model import ColumnOperationsModel
 
 from openamos.core.models.model import SubModel
 
@@ -123,6 +125,7 @@ class ConfigParser(object):
         projectLocation = projectElement.get('location')
         projectSubsample = projectElement.get('subsample')
 	projectSeed = projectElement.get('seed')
+	projectIteration = projectElement.get('iteration')
 	if projectSeed is None:
 	    projectSeed = 0
 	else:
@@ -130,10 +133,16 @@ class ConfigParser(object):
         if projectSubsample is not None:
             projectSubsample = int(projectSubsample)
 
+	if projectIteration is not None:
+	    projectIteration = int(projectIteration)
+	else:
+	    projectIteration = 1
+
         projectConfigObject = ProjectConfiguration(projectName,
                                                    projectLocation,
                                                    projectSubsample,
-					           projectSeed)
+					           projectSeed, 
+						   projectIteration)
             
         return projectConfigObject
 
@@ -530,6 +539,9 @@ class ConfigParser(object):
 
         if model_formulation == 'Child Dependency Allocation':
             self.create_child_dependency_allocation_object(model_element, projectSeed)
+
+	if model_formulation == 'Column Operations':
+            self.create_column_operations_object(model_element, projectSeed)	    
 
 
     def process_seed(self, model_element):
@@ -1472,7 +1484,59 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+    def create_column_operations_object(self, model_element, projectSeed=0):
+        variable_list = []
         
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')	
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+        #print dep_varname, '----variable Name -----'
+        choice = [dep_varname]
+
+        # Creating the coefficients input for the regression model
+        coeff_dict, vars_list = self.return_coeff_vars(model_element)
+        coefficients = coeff_dict 
+
+        variable_list = variable_list + vars_list
+
+        #print choice, coefficients
+        # specification object
+	scalarCalcType = model_element.get('type')
+        specification = ColumnOperationsSpecification(choice, coefficients, 
+						       scalarCalcType)
+	
+	model = ColumnOperationsModel(specification)
+
+
+
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model_type = 'create_scalar'
+        model_object = SubModel(model, model_type, dep_varname, dataFilter, 
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+        
+        #return model_object, variable_list
+        self.model_list.append(model_object)
+        self.component_variable_list = self.component_variable_list + variable_list        
+
 
     def return_daily_status_attribs(self, dailystatus_attribs_element):
         variable_list = []
