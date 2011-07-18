@@ -140,6 +140,9 @@ void set_ts_array(char *file_1, char *file_2, char *file_3, int iteration)
     int org2, dest2;
     float tt1, tt2;
     int columns;
+    float iter;
+
+    iter = (float)iteration;
     
     printf("C--> Iteration: %d \n", iteration);
     columns = 3;
@@ -167,7 +170,7 @@ void set_ts_array(char *file_1, char *file_2, char *file_3, int iteration)
             //{
                 avg_travel_skim[i][0] = org1;
                 avg_travel_skim[i][1] = dest1;
-                avg_travel_skim[i][2] = (tt1+tt2);
+                avg_travel_skim[i][2] = (1/iter*tt1+(iter-1)/iter*tt2);
             //}
             /*else
             {

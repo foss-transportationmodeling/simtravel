@@ -50,7 +50,7 @@ class SuccessiveAverageProcessor(object):
         
         #get the avg tt
         successive_average.set_ts_array(file_path_1, file_path_2, file_path_3, iteration)
-        
+        self.write_results()
             
     def write_results(self):
         """
