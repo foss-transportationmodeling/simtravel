@@ -101,3 +101,19 @@ class Trips_Final_R(t.IsDescription):
     endtime = t.Int32Col()
     trippurpose = t.Int32Col()
 	
+class Gap_Function_R(t.IsDescription):
+    tripid = t.Int64Col()
+    gap = t.Int64Col()
+
+class OD_R(t.IsDescription):
+    origin = t.Int32Col()
+    destination = t.Int32Col()
+    count = t.Int32Col()
+
+
+class ODT_R(t.IsDescription):
+    origin = t.Int32Col()
+    destination = t.Int32Col()
+    time = t.Int32Col()
+    count = t.Int32Col()
+

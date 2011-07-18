@@ -73,6 +73,9 @@ class DB(object):
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_inc_expected_to_malta_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_to_malta_r", Trips_Final_R)
+        self.fileh.createTable(output_grp, "gap_function_r", Gap_Function_R)
+        self.fileh.createTable(output_grp, "od_r", OD_R)
+        self.fileh.createTable(output_grp, "odt_r", ODT_R)
 
 
 
