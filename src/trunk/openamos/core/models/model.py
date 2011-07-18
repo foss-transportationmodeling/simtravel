@@ -24,7 +24,7 @@ class SubModel(object):
             raise ModelError, 'the model input is not a valid Model object'
         self.model = model
 
-        if self.check_string(model_type, ['regression', 'choice', 'consistency']):
+        if self.check_string(model_type, ['regression', 'choice', 'consistency', 'create_scalar']):
             self.model_type = model_type.lower()
 
         if self.check_string(dep_varname, [dep_varname.lower()]):
@@ -99,7 +99,8 @@ class SubModel(object):
         if self.model_type == 'consistency':
             result = self.model.resolve_consistency(data, seed)
             
-            
+        if self.model_type == 'create_scalar':
+	    result = self.model.calc_scalar(data, seed)
 
         # In case of regression model, an DataArray object is returned
         # the column contains the values predicted for the dependent 

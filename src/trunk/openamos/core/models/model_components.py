@@ -109,6 +109,11 @@ class Specification(object):
     def num_choices(self):
         return len(self.choices)            
 
+class ColumnOperationsSpecification(Specification):
+    def __init__(self, choices, coefficients, scalarCalcType):
+	Specification.__init__(self, choices, coefficients)
+	self.scalarCalcType = scalarCalcType
+
 
 import unittest
 from numpy import array
