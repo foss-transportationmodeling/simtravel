@@ -1,6 +1,7 @@
 import copy
 import time
 import os
+import shutil
 import traceback, sys
 import csv
 from lxml import etree
@@ -15,11 +16,12 @@ from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
+from openamos.core.travel_skims.successive_avg_processor import SuccessiveAverageProcessor
 
 from multiprocessing import Process
 
 class SimulationManager(object):
-    """
+    """os.copy python
     The class reads the configuration file, creates the component and model objects,
     and runs the models to simulate the various activity-travel choice processes.
 
@@ -120,7 +122,71 @@ class SimulationManager(object):
         self.db.load_input_output_nodes(partId)
         
     def setup_tod_skims(self):
+	iteration = self.projectConfigObject.iteration
+
+	self.successive_average_skims(iteration)
+
 	return
+
+
+    def successive_average_skims(self, iteration=1):
+	print 'Processing skims for iteration - %s' %iteration
+	uniqueTableList = list(set(self.projectSkimsObject.table_locationLookup.values()))
+
+	t_sa = time.time()
+	for table in uniqueTableList:
+	    sa_filePath = '%s/skimOutput/successive_average/SA_%s' %(self.projectConfigObject.location, os.path.basename(table))
+  	    sa_oldFilePath = '%s/skimOutput/successive_average/SA_temp_%s' %(self.projectConfigObject.location, os.path.basename(table))
+	    print '\tCalculating successive averages for file - ', sa_filePath
+	    if iteration == 1:
+	    	try:
+		    os.remove(sa_filePath)
+		except Exception, e:
+		    print 'Error occurred when deleting a successive average file - %s' %e
+		shutil.copyfile(table, sa_filePath)
+
+	    elif iteration > 1:
+	    	#look for a file with a prefix SA_<filename> and calculate an average based on 1/k * tt_current + k-1/k * tt_current-1
+		
+		succAvgObject = SuccessiveAverageProcessor(1995)
+	    	try:
+		    os.remove(sa_oldFilePath)
+		except Exception, e:
+		    print 'Error occurred when deleting a successive average file - %s' %e
+
+
+		print '\tLag file - ', sa_filePath
+		print '\tNew file - ', table
+		print '\tCopy of old lag - ', sa_oldFilePath
+
+		succAvgObject.get_avg_tt(sa_filePath, table, sa_oldFilePath, iteration)		
+	    else:
+		raise Exception, "the iteration number is invalid"
+
+	# Updating the location of skim tables which are averaged across iterations to be used in OpenAMOS
+	skimTables = self.projectSkimsObject.table_locationLookup.keys()
+	for skimTable in skimTables:
+	    oldPath = self.projectSkimsObject.table_locationLookup[skimTable]
+  	    sa_filePath = '%s/skimOutput/successive_average/SA_%s' %(self.projectConfigObject.location, os.path.basename(oldPath))
+	    print '\tOld Path - ', oldPath
+	    print '\tNew Path - ', sa_filePath
+            self.projectSkimsObject.table_locationLookup[skimTable] = sa_filePath
+
+	print 'Time taken to calculate successive average - %.4f'  %(time.time()-t_sa)
+
+	raw_input()
+
+
+    def load_file(self, location, delimiter=","):
+	f = open(location, 'r')
+	arr = []
+	for line in f:
+	    line = line.split(delimiter)
+	    arr.append(line)
+	arr = array(arr, float)
+	f.close()
+	return arr
+
     def setup_location_information(self, queryBrowser):
         print "-- Processing Location Information --"
         self.db.createLocationsTableFromDatabase(self.projectLocationsObject, 
@@ -209,7 +275,7 @@ class SimulationManager(object):
 		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
                 
-                if tableName <> lastTableName and len(comp.spatialConst_list) > 0:
+                if tableName <> lastTableName and (len(comp.spatialConst_list) > 0 or len(comp.dynamicspatialConst_list) > 0):
                     # Load the skims matrix
                     print """\tThe tod interval for the the previous component is not same """\
                         """as current component. """\
@@ -222,7 +288,6 @@ class SimulationManager(object):
                     print """\tThe tod interval for the the previous component is same """\
                         """as current component. """\
                         """Therefore the skims matrix need not be reloaded."""
-
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
 		#raw_input('\tPress any key to continue')
 
@@ -249,22 +314,6 @@ class SimulationManager(object):
 			createIndex = True
 			deleteIndex = True
 
-		    """
-
-		    if (comp.readFromTable <> comp.writeToTable):
-			if comp.analysisInterval == 1439:
-			    createIndex = True
-			elif comp.analysisInterval == None:
-			    createIndex = True
-			else:
-			    createIndex = False
-		    else:
-		        createIndex = True
-
-		    deleteIndex = True
-		    """		    
-			
-
                     self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 
                                            nRowsProcessed, partId, createIndex, deleteIndex)
                     #if nRowsProcessed > 0:
@@ -285,7 +334,7 @@ class SimulationManager(object):
 
     def identify_skims_matrix(self, comp):
         ti = time.time()
-        if len(comp.spatialConst_list) == 0:
+        if len(comp.spatialConst_list) == 0 and len(comp.dynamicspatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
             tableLocation = None
@@ -304,32 +353,12 @@ class SimulationManager(object):
         return tableLocation
 
 
-    def identify_skims_matrix1(self, comp):
-        ti = time.time()
-        if len(comp.spatialConst_list) == 0:
-            # When there are no spatial constraints to be processed
-            # return an empty skims object
-            tableName = None
-            pass
-        else:
-            analysisInterval = comp.analysisInterval
-        
-            if comp.analysisInterval is not None:
-                tableName = self.projectSkimsObject.lookup_table(analysisInterval)
-            else:
-                # Corresponding to the morning peak
-                # currently fixed can be varied as need be
-                tableName = self.projectSkimsObject.lookup_table(240)
-
-        print '\tSkims Matrix Loaded in - %.4f' %(time.time()-ti)
-        return tableName
-
-
-    def load_skims_matrix(self, comp, tableLocation):
+    def load_skims_matrix(self, comp, tableLocation, iteration=1):
 
 	# the first argument is an offset and the second one is the count of nodes
 	# note that the taz id's should be indexed at the offset and be in increments
 	# of 1 for every subsequent taz id
+
 	skimsMatrix = SkimsProcessor(1, 1995)
 
 	# Not sure what the flag does?SkimsProcessor
@@ -342,24 +371,6 @@ class SimulationManager(object):
 	uniqueIds = None
 	#return origin, origin
         return skimsMatrix, uniqueIds
-
-
-
-
-    def load_skims_matrix1(self, comp, tableName):
-        const = comp.spatialConst_list[0]
-        
-        originColName = const.originField
-        destinationColName = const.destinationField
-        skimColName = const.skimField
-
-
-        skimsMatrix, uniqueIds = self.db.returnTableAsMatrix(tableName,
-                                                             originColName,
-                                                             destinationColName,
-                                                             skimColName)
-        return skimsMatrix, uniqueIds
-        
 
 
 
