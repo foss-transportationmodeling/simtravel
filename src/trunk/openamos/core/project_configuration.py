@@ -7,19 +7,23 @@ class ProjectConfiguration(object):
                  name,
                  location, 
                  subsample=None,
-                 seed=0):
+                 seed=0,
+		 iteration=1):
         
         self.name = name
         self.location = location
         self.subsample = subsample
         self.seed = seed
+	self.iteration = iteration
 
     def __repr__(self):
         return ("""Project Configuration:\n\tName - %s"""\
             """\n\tLocation - %s"""\
             """\n\tSeed - %s"""\
-            """\n\tSubSample - %s""" %(self.name, self.location, 
-                                       self.seed, self.subsample))
+            """\n\tSubSample - %s"""\
+	    """\n\tIteration - %s""" %(self.name, self.location, 
+                                        self.seed, self.subsample,
+				        self.iteration))
 
 #unit test to test the code
 import unittest
