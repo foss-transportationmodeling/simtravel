@@ -360,7 +360,7 @@ class AbtractSpecDialog(QDialog):
             ind = self.modeltypecb.findText(modtxt)
             self.modeltypecb.setCurrentIndex(ind)
 
-#        self.changeModelWidget()
+        self.changeModelWidget()
 #        self.populateColumns()
         
         if modelspecified is not None:

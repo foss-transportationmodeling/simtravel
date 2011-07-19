@@ -53,7 +53,7 @@ class MakeSchedPlot(QDialog):
         self.tabs = QTabWidget()
         self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
-        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Ok)
+        self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
 
         radiowidget = QWidget(self)
         radiolayout = QHBoxLayout()
@@ -134,7 +134,7 @@ class MakeSchedPlot(QDialog):
         self.vbox.setStretch(2,1)
         self.setLayout(self.vbox)
         
-        self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self.disconnects)
+        self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()"))
         self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
         self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
         self.connect(self.based1, SIGNAL("clicked(bool)"), self.showGroupBox)
@@ -385,9 +385,9 @@ class MakeSchedPlot(QDialog):
         self.new_obj.new_connection()
 
         
-    def disconnects(self):
+    def reject(self):
         self.new_obj.close_connection()
-        self.close()
+        QDialog.accept(self)
 
 
     def columnName(self):
@@ -774,25 +774,24 @@ class MakeSchedPlot(QDialog):
 #             600:'#006400',601:'#7CFC00', # Green shades
 #             900:'#000000',599:'#000000',1000:'#FBB117',1001:'#817339'}
 
-        if index >= 101 and index < 150:
+        if index >= 101 and index < 200:
             index = 101
-        elif index >= 150 and index < 200:
-            index = 150
         elif index >= 200 and index < 300:
             index = 200
         elif index >= 300 and index < 400:
             index = 300
-        elif index >= 400 and index < 450:
+        elif index >= 400 and index < 500:
             index = 400
-        elif index >= 450 and index < 500:
-            index = 450
-        elif index >= 500 and index < 550:
+        elif index >= 500 and index < 597:
             index = 500
-        elif index >= 550 and index < 597:
-            index = 550
         elif index >= 597 and index <=598:
             index = 597
-
+#        elif index >= 150 and index < 200:
+#            index = 150
+#        elif index >= 450 and index < 500:
+#            index = 450
+#        elif index >= 550 and index < 597:
+#            index = 550
                
         colorpooldict = {100:'#191970',101:'#6495ED',150:'#00FFFF', # Blue Shades
              200:'#B03060',
@@ -874,26 +873,27 @@ class MakeSchedPlot(QDialog):
             bars=[]
             bars.append(barh(0, 0, 0, left=0,color=self.colors(100)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(101)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(150)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(200)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(300)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(400)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(450)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(500)))
-            bars.append(barh(0, 0, 0, left=0,color=self.colors(550)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(597)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(600)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(601)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(599)))
+            
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(150)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(151)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(201)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(301)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(412)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(415)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(416)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(450)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(462)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(465)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(466)))
+#            bars.append(barh(0, 0, 0, left=0,color=self.colors(550)))
 #            bars.append(barh(0, 0, 0, left=0,color=self.colors(598)))
             
 #            bar_names = ['IH-Sojourn','IH', 'IH-Dependent Sojourn', 'IH-Dependent', 
@@ -901,11 +901,14 @@ class MakeSchedPlot(QDialog):
 #                        'OH-Shopping','OH-Meal','OH-Srv Passgr','OH-Social',
 #                        'OH-Dependent Pers Buss','OH-Dependent Shopping','OH-Dependent Meal','OH-Dependent Serve Passgr',
 #                        'OH-Sports/Rec','Filler','Anchor','Pick Up','Drop Off','OH-Other']
+#            
+#            bar_names = ['Home','In-Home','In-Home Dependent',
+#                        'Work','School',
+#                        'Maintenance','Dependent Maintenance','Discretionary','Dependent Discretionary',
+#                        'Filler','Pick Up','Drop Off','OH-Other']
             
-            bar_names = ['Home','In-Home','In-Home Dependent',
-                        'Work','School',
-                        'Maintenance','Dependent Maintenance','Discretionary','Dependent Discretionary',
-                        'Filler','Pick Up','Drop Off','OH-Other']
+            bar_names = ['Home','In-Home','Work','School','Maintenance','Discretionary',
+                        'Anchor','Pick Up','Drop Off','OH-Other']
             
             if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules":
                 bars.append(barh(0, 0, 0, left=0,color=self.colors(1000)))
