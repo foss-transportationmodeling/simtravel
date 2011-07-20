@@ -13,7 +13,43 @@ char *temp_file_name_2;
 char *temp_file_name_3;
 
 
-void create_new_file(int interval, int number_intervals, char *file1, char *file2, char *file3)
+/* delete and rename the file */
+void delete_file(char *file_name)
+{
+    int removeFile;
+    
+    //delete the file
+    removeFile = remove(file_name);
+    if(removeFile != 0)
+        printf("C--> Error removing file \n");
+
+}
+
+void rename_file(char *old_file, char *new_file)
+{
+    int renameFile;
+
+    //rename the file
+    //rename(rename from, rename to)
+    renameFile = rename(old_file, new_file);
+    if(renameFile != 0)
+        printf("C--> Error renaming file \n");
+        
+}
+
+
+/*
+This method creates a new file and saves the travel times after a transpose.
+Arguments:
+interval - the interval length i.e after what interval the links repeat. example: 20522
+number_intervals - the number of intervals that are present in the input file. example: 1400
+file1 - input file to read all the links from
+file2 - temporary file
+file3 - temporary file
+file4 - final output file name
+file2 and file3 need be created. the files are created when the code executes.
+*/
+void create_new_file(int interval, int number_intervals, char *file1, char *file2, char *file3, char *file4)
 {
 	int i, j;
 	int travel_time, test_interval;
@@ -34,10 +70,12 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 	input_file_name = (char *)malloc(length*sizeof(char));
     temp_file_name_1 = (char *)malloc(length*sizeof(char));
 	temp_file_name_2 = (char *)malloc(length*sizeof(char));
+	output_file_name = (char *)malloc(length*sizeof(char));
     
 	input_file_name = file1;
 	temp_file_name_1 = file2;
 	temp_file_name_2 = file3;
+	output_file_name = file4;
 
 	//open the files 
 	ip_file = fopen(input_file_name, "r");
@@ -173,6 +211,9 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 		}
 		fclose(tp_file_1);
 		fclose(tp_file_2);
+		//rename the file and delete the other file
+		delete_file(temp_file_name_1);
+		rename_file(temp_file_name_2, output_file_name);
 	}
 	else
 	{
@@ -198,6 +239,9 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 		}
 		fclose(tp_file_1);
 		fclose(tp_file_2);
+		//rename the file and delete the other file
+		delete_file(temp_file_name_2);
+		rename_file(temp_file_name_1, output_file_name);
 	}
 
 	//free the strings 
@@ -205,5 +249,3 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 	//free(mystring);
 
 }
-
-
