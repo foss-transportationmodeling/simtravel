@@ -206,7 +206,7 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 
 }
 
-/*
+
 int main()
 {
 	int i, j, k;
@@ -242,5 +242,5 @@ int main()
 
 	getch();
 
-}*/
+}
 
