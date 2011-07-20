@@ -4,7 +4,7 @@
 #include<time.h>
 #include<malloc.h>
 #include<string.h>
-//#include"temp_header.h"
+
 
 char *input_file_name;
 char *output_file_name;
@@ -13,7 +13,43 @@ char *temp_file_name_2;
 char *temp_file_name_3;
 
 
-void create_new_file(int interval, int number_intervals, char *file1, char *file2, char *file3)
+/* delete and rename the file */
+void delete_file(char *file_name)
+{
+    int removeFile;
+    
+    //delete the file
+    removeFile = remove(file_name);
+    if(removeFile != 0)
+        printf("C--> Error removing file \n");
+
+}
+
+void rename_file(char *old_file, char *new_file)
+{
+    int renameFile;
+
+    //rename the file
+    //rename(rename from, rename to)
+    renameFile = rename(old_file, new_file);
+    if(renameFile != 0)
+        printf("C--> Error renaming file \n");
+        
+}
+
+
+/*
+This method creates a new file and saves the travel times after a transpose.
+Arguments:
+interval - the interval length i.e after what interval the links repeat. example: 20522
+number_intervals - the number of intervals that are present in the input file. example: 1400
+file1 - input file to read all the links from
+file2 - temporary file
+file3 - temporary file
+file4 - final output file name
+file2 and file3 need be created. the files are created when the code executes.
+*/
+void create_new_file(int interval, int number_intervals, char *file1, char *file2, char *file3, char *file4)
 {
 	int i, j;
 	int travel_time, test_interval;
@@ -34,10 +70,12 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 	input_file_name = (char *)malloc(length*sizeof(char));
     temp_file_name_1 = (char *)malloc(length*sizeof(char));
 	temp_file_name_2 = (char *)malloc(length*sizeof(char));
+	output_file_name = (char *)malloc(length*sizeof(char));
     
 	input_file_name = file1;
 	temp_file_name_1 = file2;
 	temp_file_name_2 = file3;
+	output_file_name = file4;
 
 	//open the files 
 	ip_file = fopen(input_file_name, "r");
@@ -173,6 +211,9 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 		}
 		fclose(tp_file_1);
 		fclose(tp_file_2);
+		//rename the file and delete the other file
+		delete_file(temp_file_name_1);
+		rename_file(temp_file_name_2, output_file_name);
 	}
 	else
 	{
@@ -198,6 +239,9 @@ void create_new_file(int interval, int number_intervals, char *file1, char *file
 		}
 		fclose(tp_file_1);
 		fclose(tp_file_2);
+		//rename the file and delete the other file
+		delete_file(temp_file_name_2);
+		rename_file(temp_file_name_1, output_file_name);
 	}
 
 	//free the strings 
@@ -220,18 +264,24 @@ int main()
 	int num_temp;
 	FILE * pFile;
 	float temp1, temp2, temp3, temp4, temp5;
+	char *input_file_name1;
+	char *output_file_name1;
+	char *temp_file_name_11;
+	char *temp_file_name_21;
+	char *temp_file_name_31;
 	time(&now);
 	current = localtime(&now);
 	printf("the time is %i:%i:%i\n", current->tm_hour, current->tm_min, current->tm_sec);
 	
 	//output_gui_LinkStats_0
-	input_file_name = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\output_gui_LinkStats_0.dat";
-	temp_file_name_1 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\temp.txt";
-	temp_file_name_2 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\example.txt";
+	input_file_name1 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\output_gui_LinkStats_0.dat";
+	temp_file_name_11 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\temp.txt";
+	temp_file_name_21 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\example.txt";
+	output_file_name1 = "C:\\Users\\Namz\\SimTRAVEL\\link_attributes\\output_final.dat";
 	interval = 20522;//4;
 	num_int = 6;//5;
 	
-	create_new_file(interval, num_int, input_file_name, temp_file_name_1, temp_file_name_2);
+	create_new_file(interval, num_int, input_file_name1, temp_file_name_11, temp_file_name_21, output_file_name1);
 
 	//print_file_path(input_file_name, temp_file_name_1, temp_file_name_2);
 	
