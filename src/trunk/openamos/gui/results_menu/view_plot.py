@@ -904,9 +904,10 @@ class MakeResultPlot(QDialog):
         return filter1
 
     def where_trip(self):
-        trippurpose = {1:[100],2:[101],3:[150],4:[151],5:[200],6:[201],7:[300],8:[301],9:[411],
-                        10:[412],11:[415],12:[416],13:[461],14:[462],15:[465],16:[466],17:[513],18:[514],
-                        19:[597],20:[598],21:[600],22:[601],23:[599]}
+#        trippurpose = {1:[100],2:[101],3:[150],4:[151],5:[200],6:[201],7:[300],8:[301],9:[411],
+#                        10:[412],11:[415],12:[416],13:[461],14:[462],15:[465],16:[466],17:[513],18:[514],
+#                        19:[597],20:[598],21:[600],22:[601],23:[599]}
+        trippurpose = self.time_categroy("trippurpose")
         setime = self.time_categroy("starttime")
         duration = self.time_categroy("duration")
         tripmode = self.time_categroy("tripmode")
@@ -927,7 +928,7 @@ class MakeResultPlot(QDialog):
 
         filter2 = self.sub_where_trip("A.starttime",index2,setime)
         filter3 = self.sub_where_trip("A.endtime",index3,setime)
-        filter4 = self.sub_where_trip("A.endtime - A.starttime",index4,duration)
+        filter4 = self.sub_where_trip("A.duration",index4,duration) #"A.endtime - A.starttime",index4,duration)
         filter5 = self.sub_where_trip("A.tripmode",index5,tripmode)
 
         filter = ""
