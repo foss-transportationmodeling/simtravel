@@ -187,7 +187,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *input_fil
 		{
 
 			intOrder = (int) ordToStore_graph[i];
-			printf("MATCH FOUND - %d", i);
+			//printf("MATCH FOUND - %d", i);
 			//keep reading the file
 			for(j = 0; j < number_intervals; j++)
 			{
