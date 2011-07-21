@@ -3,8 +3,6 @@
 #include <time.h>
 #include <malloc.h>
 #include <string.h>
-#include <iostream>
-#include <sstream>
 
 char *input_file_name;
 char *output_file_name;
