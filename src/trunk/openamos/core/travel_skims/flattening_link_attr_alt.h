@@ -193,7 +193,10 @@ void flatten_link_attributes(int interval, int number_intervals, char *input_fil
 			{
 				sprintf(tt_temp, "%f", org_graph[intOrder][j]);
 				fputs(tt_temp, tp_file_2);
+				if (j < number_intervals -1)
+				{
 				fputs(" ", tp_file_2);
+				}
 			}
 			fputs("\n", tp_file_2);
 

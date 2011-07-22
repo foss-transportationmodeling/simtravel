@@ -22,7 +22,7 @@ class SuccessiveAverageLinkAttributes(object):
 
     def get_avg_link_attributes(self, sa_filePath, new_filePath, temp_filePath, iteration):
 	ti = time.time()
-	sa_linkAttr = self.load_file(sa_filePath, "\t")
+	sa_linkAttr = self.load_file(sa_filePath)
 	new_linkAttr = self.load_file(new_filePath)
 	print 'Time taken to load - %.4f' %(time.time()-ti)
 	ti = time.time()
@@ -38,7 +38,7 @@ class SuccessiveAverageLinkAttributes(object):
 	    if delimiterChar == "\t":
 		arr.append(i)
 	    elif delimiterChar == " ":
-		arr.append(i[:-1])
+		arr.append(i)
 	arr = array(arr, float)
 	print arr[:5,:].shape
 
@@ -68,8 +68,8 @@ class SuccessiveAverageLinkAttributes(object):
 if __name__ == "__main__":
     obj = SuccessiveAverageLinkAttributes()
 
-    sa_filePath = "/home/karthik/simtravel/malta/input_HTDSP_tdcost_MAG_24hr.dat"
-    new_filePath = "/home/karthik/simtravel/malta/input_HTDSP_tdcost_MAG_24hr_new.dat"
-    temp_filePath = "/home/karthik/simtravel/malta/input_HTDSP_tdcost_MAG_24hr_temp.dat"
+    sa_filePath = "/simtravel/malta/input_HTDSP_tdcost_MAG_24hr.dat"
+    new_filePath = "/simtravel/malta/input_HTDSP_tdcost_MAG_24hr_new.dat"
+    temp_filePath = "/simtravel/malta/input_HTDSP_tdcost_MAG_24hr_temp.dat"
 
-    obj.get_avg_link_attributes(sa_filePath, new_filePath, temp_filePath, 2)
+    obj.get_avg_link_attributes(sa_filePath, new_filePath, temp_filePath, 3)
