@@ -124,9 +124,6 @@ class MakeSchedPlot(QDialog):
         scrollArea.setWidgetResizable(True)
         
         self.vbox = QVBoxLayout()
-#        self.vbox.addWidget(radiowidget)
-#        self.vbox.addWidget(self.varswidget1)
-#        self.vbox.addWidget(self.varswidget2)
         self.vbox.addWidget(scrollArea)
         self.vbox.addWidget(stablewidget)
         self.vbox.addWidget(self.tabs)
@@ -246,11 +243,6 @@ class MakeSchedPlot(QDialog):
     
 
     def hasTables(self):
-#        isExist = False
-#        if self.new_obj.check_if_table_exists("schedule_r"):
-#            isExist = True
-#        
-#        return isExist
 
         tables = []
         if self.new_obj.check_if_table_exists("schedule_r"):
@@ -760,19 +752,12 @@ class MakeSchedPlot(QDialog):
         
         #state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
         state = """SELECT %s FROM %s ORDER BY %s"""%(vars,tablename,order)
+        print state
 
         return state
 
 
     def colors(self, index):
-#        colorpooldict = {100:'#191970',101:'#6495ED',150:'#66FFEE', 151:'#00FFFF', # Blue Shades
-#             200:'#B03060',201:'#B5718A',
-#             300:'#7B68EE',301:'#B0A4EB',
-#             411:'#FF0000',412:'#B30000',415:'#FFBFBF',416:'#FF8080', # Red Shades
-#             461:'#2f4f4f',462:'#696969',465:'#708090',466:'#bebebe',
-#             513:'#FF8000',514:'#B35A00',597:'#F4A460',598:'#CD853F', # Brown shades
-#             600:'#006400',601:'#7CFC00', # Green shades
-#             900:'#000000',599:'#000000',1000:'#FBB117',1001:'#817339'}
 
         if index >= 101 and index < 200:
             index = 101

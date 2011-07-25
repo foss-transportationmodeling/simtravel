@@ -793,19 +793,17 @@ class MakeResultPlot(QDialog):
         col_list = []
         numrows = self.varstable.rowCount()
         if numrows < 1:
-            return "WHERE"
-#            filter = "age < 18"
-#            state = ", (SELECT %s FROM %s WHERE %s) AS B " %(vars,table1,filter)
-#            return state
+            return "" #"WHERE"
         
         for i in range(numrows):
             column = str((self.varstable.item(i,0)).text())
             col = str(column)
             col_list.append(col)
             value = str((self.varstable.item(i,1)).text())
-            filter = filter + "%s = '%s' AND " %(column,value)
+            filter = filter + "%s = '%s' and " %(column,value)
         filter = filter[0:len(filter)-5]
-        state = "join (SELECT %s FROM %s WHERE %s) AS B on" %(vars,table1,filter)
+#        state = "join (SELECT %s FROM %s WHERE %s) AS B on" %(vars,table1,filter)
+        state = "(select %s from %s where %s order by %s) as b" %(vars,table1,filter,vars)
 
         return state
 
@@ -922,36 +920,36 @@ class MakeResultPlot(QDialog):
         
         filter1 =""
         if self.tripradio.isChecked():   
-            filter1 = self.sub_where_trip("A.trippurpose",index1,trippurpose)
+            filter1 = self.sub_where_trip("trippurpose",index1,trippurpose)
         else:
-            filter1 = self.sub_where_trip("A.activitytype",index1,trippurpose)
+            filter1 = self.sub_where_trip("activitytype",index1,trippurpose)
 
-        filter2 = self.sub_where_trip("A.starttime",index2,setime)
-        filter3 = self.sub_where_trip("A.endtime",index3,setime)
-        filter4 = self.sub_where_trip("A.duration",index4,duration) #"A.endtime - A.starttime",index4,duration)
-        filter5 = self.sub_where_trip("A.tripmode",index5,tripmode)
+        filter2 = self.sub_where_trip("starttime",index2,setime)
+        filter3 = self.sub_where_trip("endtime",index3,setime)
+        filter4 = self.sub_where_trip("duration",index4,duration) #"A.endtime - A.starttime",index4,duration)
+        filter5 = self.sub_where_trip("tripmode",index5,tripmode)
 
         filter = ""
         if filter1 != "":
             filter = filter1
         if filter2 != "":
             if filter != "":
-                filter = "%s AND %s"%(filter,filter2)
+                filter = "%s and %s"%(filter,filter2)
             else:
                 filter = filter2
         if filter3 != "":
             if filter != "":
-                filter = "%s AND %s"%(filter,filter3)
+                filter = "%s and %s"%(filter,filter3)
             else:
                 filter = filter3
         if filter4 != "":
             if filter != "":
-                filter = "%s AND %s"%(filter,filter4)
+                filter = "%s and %s"%(filter,filter4)
             else:
                 filter = filter4
         if filter5 != "":
             if filter != "":
-                filter = "%s AND %s"%(filter,filter5)
+                filter = "%s and %s"%(filter,filter5)
             else:
                 filter = filter5
                 
@@ -960,11 +958,11 @@ class MakeResultPlot(QDialog):
 
          
     def retrieveResult(self):
-        tablename = ""
+        table = ""
         if self.tripradio.isChecked():
-            tablename = "trips_r"
+            table = "trips_r"
         else:
-            tablename = "schedule_final_r"
+            table = "schedule_final_r"
         
         column = self.choicevar1.currentText()
         if column == "":
@@ -973,12 +971,15 @@ class MakeResultPlot(QDialog):
         t1 = time.time()
         filter = ""
         socio = str(self.socio_sql())
-        if socio != "WHERE": 
+        if socio != "": #"WHERE": 
             if self.segment1.isChecked():
-                filter = " AND A.houseid = B.houseid"
+                filter = "a.houseid = b.houseid"
             else:
-                filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
+                filter = "a.houseid = b.houseid and a.personid = b.personid"
 
+        charact = ""
+        if self.where_trip() != "":
+            charact = " and %s"%(self.where_trip())
         
         try:
             self.total = 0.0
@@ -1000,13 +1001,24 @@ class MakeResultPlot(QDialog):
 #                else:
 #                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
 
-                if len(lowhigh) > 1:
-                    sql = "SELECT count(*) FROM %s AS A %s A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
-                else:
-                    sql = "SELECT count(*) FROM %s AS A %s A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
+#                if len(lowhigh) > 1:
+#                    sql = "select count(*) from %s as a %s a.%s >= %d and a.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
+#                else:
+#                    sql = "select count(*) from %s as a %s a.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
+#                
+#                if self.where_trip() != "":
+#                    sql = sql + " and " +self.where_trip()
                 
-                if self.where_trip() != "":
-                    sql = sql + " AND " +self.where_trip()
+                sql = "select count(*) from "
+                if len(lowhigh) > 1:
+                    sql = "%s(select houseid, personid from %s where %s >= %d and %s < %d%s order by houseid, personid) as a" %(sql,table,column,lowhigh[0],column,lowhigh[1],charact)
+                else:
+                    sql = "%s(select houseid, personid from %s where %s = %d%s) as a" %(sql,table,column,lowhigh[0],charact)
+                    
+                if socio != "":
+                    sql = "%s,%s"%(sql,socio)
+                    sql = "%s where %s"%(sql,filter)
+
                 print sql
                 self.cursor.execute(sql)
                 data = self.cursor.fetchall()
@@ -1179,14 +1191,18 @@ class MakeResultPlot(QDialog):
             
             filter = ""
             socio = str(self.socio_sql())
-            if socio != "WHERE": 
+            if socio != "": #"where": 
                 if self.segment1.isChecked():
-                    filter = " AND A.houseid = B.houseid"
+                    filter = "a.houseid = b.houseid"
                 else:
-                    filter = " AND A.houseid = B.houseid AND A.personid = B.personid"
-                            
+                    filter = "a.houseid = b.houseid and a.personid = b.personid"
+
+            charact = ""
+            if self.where_trip() != "":
+                charact = " and %s"%(self.where_trip())
+
             yvalue = []
-            previous = []  
+            previous = []
             t1 = time.time()
             for key in category1.keys():
                 
@@ -1197,8 +1213,7 @@ class MakeResultPlot(QDialog):
                     
                 try:
                    
-                    sql = ""
-                    
+#                    sql = ""
 #                    if column1 == "duration" and self.tripradio.isChecked():
 #                        if len(lowhigh1) > 1:
 #                            sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.endtime - A.starttime >= %d AND A.endtime - A.starttime < %d)%s" %(column2,table,socio,lowhigh1[0],lowhigh1[1],filter)
@@ -1208,15 +1223,26 @@ class MakeResultPlot(QDialog):
 #                    else:
 #                        sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s = %d)%s" %(column2,table,socio,column1,lowhigh1[0],filter)                             
                     
+#                    if len(lowhigh1) > 1:
+#                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s >= %d AND A.%s < %d)%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter)
+#                    else:
+#                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s = %d)%s" %(column2,table,socio,column1,lowhigh1[0],filter) 
+#                        
+#                    if self.where_trip() != "":
+#                        sql = "%s AND %s GROUP BY A.%s ORDER BY A.%s"%(sql,self.where_trip(),column2,column2)
+#                    else:
+#                        sql = "%s GROUP BY A.%s ORDER BY A.%s"%(sql,column2,column2)
+                    
+                    sql = "select count(*), a.%s from "%(column2)
                     if len(lowhigh1) > 1:
-                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s >= %d AND A.%s < %d)%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter)
+                        sql = "%s(select houseid, personid, %s from %s where %s >= %d and %s < %d%s order by houseid, personid) as a" %(sql,column2,table,column1,lowhigh1[0],column1,lowhigh1[1],charact)
                     else:
-                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s = %d)%s" %(column2,table,socio,column1,lowhigh1[0],filter) 
+                        sql = "%s(select houseid, personid, %s from %s where %s = %d%s) as a" %(sql,column2,table,column1,lowhigh1[0],charact)
                         
-                    if self.where_trip() != "":
-                        sql = "%s AND %s GROUP BY A.%s ORDER BY A.%s"%(sql,self.where_trip(),column2,column2)
-                    else:
-                        sql = "%s GROUP BY A.%s ORDER BY A.%s"%(sql,column2,column2)
+                    if socio != "":
+                        sql = "%s,%s"%(sql,socio)
+                        sql = "%s where %s"%(sql,filter)
+                    sql = "%s group by a.%s order by a.%s"%(sql,column2,column2)
                     
                     print sql
                     self.cursor.execute(sql)
@@ -1225,17 +1251,19 @@ class MakeResultPlot(QDialog):
                     if isExchange:
                         total = 0
                         for t in data:
-                            index = category2.index(self.purpose_index(int(t[1]))) #int(t[1]))
-                            xvalue[index] = xvalue[index] + int(t[0])
-                            total = total+int(t[0])
+                            if self.purpose_index(int(t[1])) > 0:
+                                index = category2.index(self.purpose_index(int(t[1]))) #int(t[1]))
+                                xvalue[index] = xvalue[index] + int(t[0])
+                                total = total+int(t[0])
                         
                         cumulate.append(total)
                         yvalue.append(xvalue)
                     else:   
                         for t in data:
-                            index = category2.index(self.purpose_index(int(t[1]))) #int(t[1]))
-                            xvalue[index] = xvalue[index] + int(t[0])
-                            cumulate[index] = cumulate[index] + int(t[0]) #xvalue[index]
+                            if self.purpose_index(int(t[1])) > 0:
+                                index = category2.index(self.purpose_index(int(t[1]))) #int(t[1]))
+                                xvalue[index] = xvalue[index] + int(t[0])
+                                cumulate[index] = cumulate[index] + int(t[0])
     
                         yvalue.append(xvalue)
                         previous.append(deepcopy(cumulate))
@@ -1489,7 +1517,7 @@ class MakeResultPlot(QDialog):
             self.total = 0.0
             character = "WHERE houseid > 0"
             if self.where_trip() != "":
-                character = character + " AND " + self.where_trip().replace("A.","")
+                character = character + " AND " + self.where_trip()
             sql = "SELECT b.freq, count(*) FROM (SELECT p.houseid, p.personid FROM persons as p, households as h \
                   WHERE p.houseid = h.houseid%s) as a LEFT JOIN  \
                   (SELECT houseid, personid, count(*) as freq FROM %s %s GROUP BY houseid, personid) as b \
