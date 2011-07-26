@@ -43,6 +43,7 @@ class MakeResultPlot(QDialog):
         self.setWindowIcon(QIcon("./images/run.png"))
 
         self.table = 'households'
+        self.out_table = 'schedule_final_r'
         self.data = []
         self.figs = []
         self.sketches = []
@@ -543,7 +544,7 @@ class MakeResultPlot(QDialog):
         else:
             #temp = ["activitytype","starttime","endtime","duration"]
             for i in self.schedule_r_temp:
-                if self.checkColumnExists("schedule_final_r",i):
+                if self.checkColumnExists(self.out_table,i):
                     vars.append(i)
             
             vars.append("activity episode rates")
@@ -604,12 +605,12 @@ class MakeResultPlot(QDialog):
             if text == "activitytype":
                 temp = ["starttime","endtime","duration"]
                 for i in temp:
-                    if self.checkColumnExists("schedule_final_r",i):
+                    if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
             elif text != "activitytype" and text != "" and text != "activity episode rates":
                 temp = ["activitytype"]
                 for i in temp:
-                    if self.checkColumnExists("schedule_final_r",i):
+                    if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
         
         self.choicevar2.addItems(vars) 
@@ -962,7 +963,7 @@ class MakeResultPlot(QDialog):
         if self.tripradio.isChecked():
             table = "trips_r"
         else:
-            table = "schedule_final_r"
+            table = self.out_table
         
         column = self.choicevar1.currentText()
         if column == "":
@@ -1171,7 +1172,7 @@ class MakeResultPlot(QDialog):
             if self.tripradio.isChecked():
                 table = "trips_r"
             else:
-                table = "schedule_final_r"
+                table = self.out_table
             
             category1 = self.time_categroy(column1)
             
@@ -1495,7 +1496,7 @@ class MakeResultPlot(QDialog):
         if self.tripradio.isChecked():
             table = "trips_r"
         else:
-            table = "schedule_final_r"
+            table = self.out_table
         
         socio = ""
         numrows = self.varstable.rowCount()
