@@ -43,7 +43,7 @@ class MakeResultPlot(QDialog):
         self.setWindowIcon(QIcon("./images/run.png"))
 
         self.table = 'households'
-        self.out_table = 'schedule_final_r'
+        self.out_table = 'schedule_r'
         self.data = []
         self.figs = []
         self.sketches = []
@@ -91,7 +91,7 @@ class MakeResultPlot(QDialog):
         addfilter.addWidget(self.choicevar2)
         radiolayout.addWidget(filter)
         radiolayout.setContentsMargins(0,0,0,0)
-        self.fill_item1()       
+#        self.fill_item1()       
 
         stablewidget = QWidget(self)
         stablelayout = QHBoxLayout()
@@ -117,6 +117,17 @@ class MakeResultPlot(QDialog):
         addoutput.addWidget(self.percent)
         addoutput.setAlignment(Qt.AlignCenter)
         stablelayout.addWidget(output)
+        
+        self.selecttable = QGroupBox(self)
+        selecttablelayout = QHBoxLayout()
+        self.selecttable.setLayout(selecttablelayout)
+        stablelabel = QLabel('Schedule Type')
+        self.stablecombo = QComboBox()
+        self.hasTables()
+        self.stablecombo.setMinimumWidth(250)
+        selecttablelayout.addWidget(stablelabel)
+        selecttablelayout.addWidget(self.stablecombo)
+        stablelayout.addWidget(self.selecttable)
         
         substablewidget = QWidget(self)
         substablelayout = QHBoxLayout()
@@ -169,6 +180,7 @@ class MakeResultPlot(QDialog):
         self.vbox.addWidget(splitter)
 #        self.vbox.setStretch(0,1)
         self.setLayout(self.vbox)
+        self.fill_item1()
         
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), SLOT("reject()")) #self.disconnects)
         self.connect(self.resetbutton, SIGNAL("clicked(bool)"), self.reset_all)
@@ -177,6 +189,7 @@ class MakeResultPlot(QDialog):
         self.connect(self.actiradio, SIGNAL("clicked(bool)"), self.fill_item1)
         self.connect(self.choicevar1, SIGNAL("currentIndexChanged(int)"), self.manage_combo)
         self.connect(self.choicevar2, SIGNAL("currentIndexChanged(int)"), self.set_disable)
+        self.connect(self.stablecombo, SIGNAL("currentIndexChanged(const QString&)"), self.selected_table)
 
         
 
@@ -306,6 +319,51 @@ class MakeResultPlot(QDialog):
         self.connect(self.segment1, SIGNAL("clicked(bool)"), self.initTables)
         self.connect(self.segment2, SIGNAL("clicked(bool)"), self.initTables)
 
+    def hasTables(self):
+
+        tables = []
+        if self.new_obj.check_if_table_exists("schedule_r"):
+            tables.append("Schedules: Non-reconciled")
+        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
+            tables.append("Schedules: Reconciled without Travel Episodes")
+        if self.new_obj.check_if_table_exists("schedule_cleanfixedactivityschedule_r"):
+            tables.append("Schedules: Daily Patterns Including Full Child Episodes")
+        if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
+            tables.append("Schedules: Reconciled Including Travel Episodes")
+        if self.new_obj.check_if_table_exists("schedule_cleanaggregateactivityschedule_r"):
+            tables.append("Schedules: Aggregated in Home Schedule for Children")
+        if self.new_obj.check_if_table_exists("schedule_dailyallocrec_r"):
+            tables.append("Schedules: Daily Pattern with Child Allocation")
+        if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
+            tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
+        if self.new_obj.check_if_table_exists("schedule_final_r"):
+            tables.append("Schedules: Final Schedules")
+        if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
+            tables.append("Schedules: Aggregated in Home Final Schedules")
+            
+        self.stablecombo.addItems(tables)
+
+
+    def selected_table(self, cur_text):
+        if cur_text == "Schedules: Non-reconciled":
+            self.out_table = "schedule_r"
+        elif cur_text == "Schedules: Reconciled without Travel Episodes":
+            self.out_table = "schedule_ltrec_r"
+        elif cur_text == "Schedules: Daily Patterns Including Full Child Episodes":
+            self.out_table = "schedule_cleanfixedactivityschedule_r"
+        elif cur_text == "Schedules: Reconciled Including Travel Episodes":
+            self.out_table = "schedule_childreninctravelrec_r"
+        elif cur_text == "Schedules: Aggregated in Home Schedule for Children":
+            self.out_table = "schedule_cleanaggregateactivityschedule_r"
+        elif cur_text == "Schedules: Daily Pattern with Child Allocation":
+            self.out_table = "schedule_dailyallocrec_r"
+        elif cur_text == "Schedules: Reconciled Daily Pattern Skeleton with Child Allocation":
+            self.out_table = "schedule_inctravelrec_r"
+        elif cur_text == "Schedules: Aggregated in Home Final Schedules":
+            self.out_table = "schedule_aggregatefinal_r"
+        else:
+            self.out_table = "schedule_final_r"
+            
 
     def createaction(self, text, slot=None, icon=None,
                      tip=None, signal="triggered()"):
@@ -529,6 +587,7 @@ class MakeResultPlot(QDialog):
         self.choicevar2.clear()
         vars = [""]
         if self.tripradio.isChecked():
+            self.selecttable.setVisible(False)
             #temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
             for i in self.trips_r_temp:
                 if self.checkColumnExists("trips_r",i) or i == "duration":
@@ -542,6 +601,7 @@ class MakeResultPlot(QDialog):
             self.occupchoice.setVisible(True)
             
         else:
+            self.selecttable.setVisible(True)
             #temp = ["activitytype","starttime","endtime","duration"]
             for i in self.schedule_r_temp:
                 if self.checkColumnExists(self.out_table,i):
