@@ -1,7 +1,7 @@
 <ProjectConfig>
   <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic_mod" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
@@ -177,6 +177,9 @@
     	<Table table="child_dependency_r" key="houseid,personid"/>
 	<Table1 table="persons_arrived_r" key="houseid,personid" count_key="actualarrivaltime"/>
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>
+
       </DBTables>
 
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
@@ -284,11 +287,13 @@
       <Model name="DynamicNonMandatoryActivityTypeAdltWorkerNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter table="persons" var="schstat" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
         <Alternative id="inhome" value="101">
 	  <Variable table="persons" var="one" coeff="3.1663"/>
 	  <Variable table="runtime" var="ih_history" coeff="-.0017"/>
@@ -347,14 +352,16 @@
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
-      <Model name="DynamicNonMandatoryActivityTypeAdltWorkerNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="DynamicNonMandatoryActivityTypeAdltWorkerNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter table="persons" var="schstat" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
         <Alternative id="perbus" value="411">
 	  <Variable table="persons" var="one" coeff=".2029"/>
 	  <Variable table="households" var="inclt35k" coeff="-.324"/>
@@ -404,7 +411,7 @@
         <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
 
 
 
@@ -416,11 +423,13 @@
       <Model name="DynamicNonMandatoryActivityTypeAdltWorkerWITHSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter table="persons" var="schstat" condition="equals" value="1"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
         <Alternative id="inhome" value="101">
 	  <Variable table="persons" var="one" coeff="3.1663"/>
 	  <Variable table="runtime" var="ih_history" coeff="-.0017"/>
@@ -486,14 +495,16 @@
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
-      <Model name="DynamicNonMandatoryActivityTypeAdltWorkerWITHSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="DynamicNonMandatoryActivityTypeAdltWorkerWITHSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
-	<Filter table="persons" var="schstat" condition="equals" value="1"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
         <Alternative id="school" value="301">
 	  <Variable table="persons" var="one" coeff="-3.708"/>
 	  <Variable table="runtime" var="fixed_history" coeff="-.003"/>
@@ -550,7 +561,7 @@
         <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
 
 
 
@@ -569,11 +580,13 @@
       <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
-	<Filter table="persons" var="schstat" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
         <Alternative id="inhome" value="101">
 	  <Variable table="persons" var="one" coeff="2.538"/>
 	  <Variable table="runtime" var="ih_history" coeff="-.0025"/>
@@ -639,14 +652,16 @@
         </Alternative>
       </Model>
 
-      <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
-	<Filter table="persons" var="schstat" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
         <Alternative id="perbus" value="411">
 	  <Variable table="persons" var="one" coeff="-.4086"/>
 	  <Variable table="households" var="vdratio" coeff=".1855"/>
@@ -701,7 +716,7 @@
         <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
 
 
 
@@ -717,12 +732,13 @@
       <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
-	<Filter table="persons" var="schstat" condition="equals" value="1"/>
-
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
         <Alternative id="inhome" value="101">
 	  <Variable table="persons" var="one" coeff="2.538"/>
 	  <Variable table="runtime" var="ih_history" coeff="-.0025"/>
@@ -796,15 +812,16 @@
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
-      <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
-	<Filter table="persons" var="schstat" condition="equals" value="1"/>
-
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
+        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
         <Alternative id="school" value="301">
 	  <Variable table="persons" var="one" coeff="-3.2169"/>
 	  <Variable table="households" var="nwrkcnt" coeff=".5893"/>
@@ -868,7 +885,7 @@
         <Alternative id="other" value="599">
 	  <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
 
 
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
@@ -927,7 +944,8 @@
         <FilterSet type="and"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
 	<Variance value="7596.29"/>
         <Variable table="persons" var="one" coeff="50.89"/>
         <Variable table="runtime" var="activitytype_101" coeff="72.38"/>
@@ -954,7 +972,8 @@
         <FilterSet type="and"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
 	<Variance value="2.28"/>
         <Variable table="persons" var="one" coeff="2.597"/>
         <Variable table="runtime" var="activitytype_101" coeff="1.748"/>
@@ -987,7 +1006,8 @@
         <FilterSet type="and"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
 	<Variance value="7342.78"/>
         <Variable table="persons" var="one" coeff="55.10"/>
         <Variable table="runtime" var="activitytype_101" coeff="115.79"/>
@@ -1016,7 +1036,8 @@
         <FilterSet type="and"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
 	<Variance value="2.19"/>
         <Variable table="persons" var="one" coeff="3.0779"/>
         <Variable table="runtime" var="activitytype_101" coeff="1.8414"/>
@@ -1072,7 +1093,8 @@
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.1753" interaction="True" repeat="tt_to"/>
         <Variable table="persons,locations" var="one,retail_employment" coeff=".0006" interaction="True" repeat="retail_employment"/>
         <Variable table="persons,locations" var="one,public_employment" coeff=".0003" interaction="True" repeat="public_employment"/>
@@ -1089,7 +1111,8 @@
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="persons" var="wrkr" condition="equals" value="0"/>
+	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
         <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.2123" interaction="True" repeat="tt_to"/>
         <Variable table="persons,locations" var="one,retail_employment" coeff=".0005" interaction="True" repeat="retail_employment"/>
         <Variable table="persons,locations" var="one,institutional_population" coeff=".0012" interaction="True" repeat="institutional_population"/>

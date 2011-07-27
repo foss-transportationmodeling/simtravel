@@ -1,7 +1,7 @@
 <ProjectConfig>
   <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic_newreconciliation" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
@@ -115,7 +115,7 @@
         <Variable table="households" var="one" coeff="1"/>
       </Model>
     </Component>
-    <Component1 name="AllocatePrimaryVehicle" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component1 name="AllocatePrimaryVehicle" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="schedule_r" key="houseid,personid" order="1"/>
         <Table table="schedule_ltrec_r" key="houseid,personid"/>
@@ -218,9 +218,9 @@
       <Model name="endtime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="180" upper_threshold="990" seed="1">
         <DependentVariable var="endtime"/>
         <Filter table="persons" var="nadlt" condition="equals" value="1"/>
-        <Variance value="545.7013"/>
-        <Variance value="54710.0982" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="136.6304"/>
+        <Variance value="775.7013"/>
+        <Variance value="4710.0982" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="151.6304"/>
         <Variable table="households" var="numwrkr" coeff="-4.2452"/>
         <Variable table="households" var="noc" coeff="2.0948"/>
         <Variable table="households" var="urb" coeff="7.2064"/>
@@ -279,14 +279,14 @@
         <Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="540" upper_threshold="1125" seed="1">
+      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="540" upper_threshold="1435" seed="1">
         <DependentVariable var="starttime"/>
         <FilterSet type="and"/>
         <Filter table="persons" var="age" condition="greater than equals" value="18"/>
         <Filter table="persons" var="wrkr" condition="equals" value="1"/>
-        <Variance value="18074.98"/>
-        <Variance value="33926.53" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="979.94"/>
+        <Variance value="27074.98"/>
+        <Variance value="3926.53" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="780.94"/>
         <Variable table="runtime" var="timetowk" coeff="0.0346"/>
         <Variable table="households" var="noc" coeff="4.1229"/>
         <Variable table="households" var="rur" coeff="-12.7294"/>
@@ -294,37 +294,37 @@
         <Variable table="persons" var="white" coeff="-10.3636"/>
         <Variable table="persons" var="coled" coeff="15.4304"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="375" upper_threshold="1079" seed="1">
+      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="375" upper_threshold="1435" seed="1">
         <DependentVariable var="starttime"/>
         <FilterSet type="and"/>
         <Filter table="persons" var="age" condition="greater than equals" value="18"/>
         <Filter table="persons" var="wrkr" condition="equals" value="0"/>
         <Variance value="35952.27"/>
-        <Variance value="27574.93" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="872.666"/>
+        <Variance value="2574.93" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="722.666"/>
         <Variable table="households" var="noc" coeff="12.8562"/>
         <Variable table="persons" var="agge65" coeff="-49.8705"/>
         <Variable table="households" var="urb" coeff="9.5435"/>
         <Variable table="persons" var="coled" coeff="27.5151"/>
         <Variable table="households" var="inclt35k" coeff="-13.6319"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="575" upper_threshold="1065" seed="1">
+      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="575" upper_threshold="1435" seed="1">
         <DependentVariable var="starttime"/>
         <Filter table="persons" var="nadlt" condition="equals" value="1"/>
-        <Variance value="18742.2907"/>
-        <Variance value="22019.8916" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="910.8752"/>
+        <Variance value="13742.2907"/>
+        <Variance value="19.8916" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="720.8752"/>
         <Variable table="households" var="noc" coeff="-5.5291"/>
         <Variable table="runtime" var="timetosch" coeff="-.0267"/>
         <Variable table="households" var="incge75k" coeff="13.5649"/>
         <Variable table="households" var="numwrkr" coeff="8.1035"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="450" upper_threshold="1050" seed="1">
+      <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="end" lower_threshold="450" upper_threshold="1435" seed="1">
         <DependentVariable var="starttime"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
-        <Variance value="15801.38"/>
-        <Variance value="47623.58" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="958.14"/>
+        <Variance value="45801.38"/>
+        <Variance value="4623.58" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="798.14"/>
         <Variable table="households" var="inclt35k" coeff="15.54"/>
         <Variable table="persons" var="white" coeff="-14.99"/>
         <Variable table="households" var="nwrkcnt" coeff="-4.36"/>
@@ -393,7 +393,7 @@
         <Variance value="0"/>
         <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Log Stochastic Frontier" vertex="start" lower_threshold="104" upper_threshold="719" seed="1">
+      <Model name="starttime" formulation="Regression" type="Log Stochastic Frontier" vertex="start" lower_threshold="15" upper_threshold="719" seed="1">
         <DependentVariable var="starttime"/>
         <FilterSet type="and"/>
         <Filter table="workers_r" var="episodes" condition="equals" value="1"/>
@@ -406,9 +406,9 @@
         <RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value=".2742"/>
-        <Variance value=".1978" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="5.8911"/>
+        <Variance value=".1842"/>
+        <Variance value=".0078" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="5.5911"/>
         <Variable table="runtime" var="timetowk" coeff="-.00017"/>
         <Variable table="persons" var="male" coeff="-.0852"/>
         <Variable table="households" var="rur" coeff="-.0297"/>
@@ -427,8 +427,8 @@
         <RunUntilCondition table="workers_r" var="episodes" condition="equals" value="1"/>
         <RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.1247"/>
-        <Variable table="persons" var="one" coeff="6.4769"/>
+        <Variance value="0.0147"/>
+        <Variable table="persons" var="one" coeff="6.6669"/>
         <Variable table="persons" var="fulltim" coeff=".0669"/>
         <Variable table="persons" var="coled" coeff=".0262"/>
         <Variable table="persons" var="male" coeff="-.0209"/>
@@ -449,7 +449,7 @@
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="persons" var="one" coeff="104"/>
+        <Variable table="persons" var="one" coeff="15"/>
       </Model>
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="endtime"/>
@@ -569,7 +569,7 @@
         <Variance value="0"/>
         <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
-      <Model name="starttime" formulation="Regression" type="Log Stochastic Frontier" vertex="start" lower_threshold="120" upper_threshold="390" seed="1">
+      <Model name="starttime" formulation="Regression" type="Log Stochastic Frontier" vertex="start" lower_threshold="15" upper_threshold="390" seed="1">
         <DependentVariable var="starttime"/>
         <FilterSet type="and"/>
         <Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -583,14 +583,14 @@
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
         <Variance value=".0837"/>
-        <Variance value=".168" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="5.7796"/>
+        <Variance value=".018" type="Half Normal"/>
+        <Variable table="persons" var="one" coeff="5.5796"/>
         <Variable table="persons" var="fulltim" coeff="-.1446"/>
         <Variable table="persons" var="wkhome" coeff=".1213"/>
         <Variable table="households" var="urb" coeff=".0287"/>
         <Variable table="persons" var="coled" coeff=".0832"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="270" upper_threshold="680" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="270" upper_threshold="900" seed="1">
         <DependentVariable var="endtime"/>
         <FilterSet type="and"/>
         <Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -603,8 +603,8 @@
         <RunUntilCondition table="workers_r" var="episodes" condition="equals" value="2"/>
         <RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.0824"/>
-        <Variable table="persons" var="one" coeff="6.1142"/>
+        <Variance value="0.0234"/>
+        <Variable table="persons" var="one" coeff="6.2242"/>
         <Variable table="households" var="incge100" coeff=".0217"/>
         <Variable table="persons" var="coled" coeff=".0531"/>
         <Variable table="persons" var="male" coeff="-.0819"/>
@@ -625,7 +625,7 @@
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="persons" var="one" coeff="120"/>
+        <Variable table="persons" var="one" coeff="15"/>
       </Model>
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="endtime"/>
@@ -642,7 +642,7 @@
         <RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="persons" var="one" coeff="680"/>
+        <Variable table="persons" var="one" coeff="900"/>
       </Model>
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="duration"/>
@@ -743,12 +743,12 @@
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
         <Variance value=".0268"/>
         <Variance value=".0654" type="Half Normal"/>
-        <Variable table="persons" var="one" coeff="6.5254"/>
+        <Variable table="persons" var="one" coeff="6.2754"/>
         <Variable table="households" var="inclt35k" coeff=".0405"/>
         <Variable table="persons" var="selfemp" coeff=".0273"/>
         <Variable table="persons" var="fulltim" coeff="-.0293"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="630" upper_threshold="970" seed="1">
+      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="630" upper_threshold="1080" seed="1">
         <DependentVariable var="endtime"/>
         <FilterSet type="and"/>
         <Filter table="workers_r" var="episodes" condition="equals" value="2"/>
@@ -761,8 +761,8 @@
         <RunUntilCondition table="persons" var="age" condition="greater than equals" value="18"/>
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.02335"/>
-        <Variable table="persons" var="one" coeff="6.6147"/>
+        <Variance value="0.00535"/>
+        <Variable table="persons" var="one" coeff="6.6647"/>
         <Variable table="persons" var="coled" coeff=".0219"/>
         <Variable table="persons" var="fulltim" coeff=".0491"/>
         <Variable table="persons" var="white" coeff="-.0198"/>
@@ -799,7 +799,7 @@
         <RunUntilCondition table="persons" var="wrkr" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="persons" var="one" coeff="970"/>
+        <Variable table="persons" var="one" coeff="1080"/>
       </Model>
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="duration"/>
@@ -885,13 +885,13 @@
         <RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value=".1729"/>
-        <Variable table="persons" var="one" coeff="5.5703"/>
+        <Variance value=".1029"/>
+        <Variable table="persons" var="one" coeff="5.4703"/>
         <Variable table="households" var="numwrkr" coeff="-.0946"/>
         <Variable table="households" var="drvrcnt" coeff=".0799"/>
         <Variable table="households" var="nwrkcnt" coeff=".0387"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="558" upper_threshold="808" seed="2">
+      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="558" upper_threshold="1080" seed="2">
         <DependentVariable var="endtime"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilConditionSet type="and"/>
@@ -899,8 +899,8 @@
         <RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.0786"/>
-        <Variable table="persons" var="one" coeff="6.512"/>
+        <Variance value="0.0116"/>
+        <Variable table="persons" var="one" coeff="6.812"/>
         <Variable table="households" var="numwrkr" coeff=".0893"/>
         <Variable table="households" var="drvrcnt" coeff="-.0621"/>
         <Variable table="households" var="nwrkcnt" coeff="-.029"/>
@@ -1033,7 +1033,7 @@
         <RunUntilCondition table="persons" var="schstat" condition="equals" value="1"/>
         <RunUntilCondition table="persons" var="nadlt" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.0177"/>
+        <Variance value="0.0057"/>
         <Variable table="persons" var="one" coeff="6.5152"/>
         <Variable table="households" var="rur" coeff=".0126"/>
         <Variable table="households" var="numwrkr" coeff="-.0069"/>
@@ -1347,6 +1347,9 @@
         <Table table="schedule_r" key="houseid,personid"/>
         <Table table="schedule_cleanfixedactivityschedule_r" key="houseid,personid"/>
         <Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>
+
       </DBTables>
       <AnalysisInterval start="1440" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
@@ -1437,8 +1440,9 @@
       <Model name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-        <Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-        <Filter table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+        <Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
         <Filter table="persons" var="age" condition="less than" value="18"/>
         <Alternative id="inhome" value="101">
           <Variable table="persons" var="one" coeff="2.073"/>
@@ -1500,11 +1504,12 @@
           <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
-      <Model name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
         <Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-        <Filter table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
         <Filter table="persons" var="age" condition="less than" value="18"/>
         <Alternative id="perbus" value="411">
           <Variable table="persons" var="one" coeff="-1.401"/>
@@ -1556,12 +1561,22 @@
         <Alternative id="other" value="599">
           <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
+
+
+
+
+
+
+
+
+
       <Model name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-        <Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-        <Filter table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
+        <Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Filter table="persons" var="age" condition="less than" value="18"/>
         <Alternative id="inhome" value="101">
           <Variable table="persons" var="one" coeff="2.073"/>
@@ -1628,11 +1643,12 @@
           <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
       </Model>
-      <Model name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+      <Model1 name="AftSchActivityType" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
         <Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-        <Filter table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Filter table="persons" var="age" condition="less than" value="18"/>
         <Alternative id="work" value="201">
           <Variable table="persons" var="one" coeff="-4.494"/>
@@ -1689,7 +1705,7 @@
         <Alternative id="other" value="599">
           <Variable table="persons" var="one" coeff="0.0"/>
         </Alternative>
-      </Model>
+      </Model1>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="activitytype_201"/>
         <FilterSet type="and"/>
@@ -1790,7 +1806,8 @@
       <Model name="LocationIDIHActs" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="locationid"/>
         <FilterSet type="and"/>
-        <Filter table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Filter table="persons" var="nadlt" condition="equals" value="1"/>
         <Filter table="runtime" var="activitytype" condition="greater than equals" value="200"/>
         <Filter table="runtime" var="activitytype" condition="less than" value="300"/>
@@ -2089,6 +2106,15 @@
         <Variance value="0"/>
         <Variable table="runtime" var="starttime" coeff="1"/>
         <Variable table="runtime" var="adjustment" coeff="1"/>
+      </Model>
+      <Model name="RecodeStartTime" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="starttime"/>
+        <FilterSet type="and"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <Filter table="runtime" var="starttime" condition="greater than equals" value="1439"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1438"/>
       </Model>
       <Model name="SecondEndtime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="endtime"/>

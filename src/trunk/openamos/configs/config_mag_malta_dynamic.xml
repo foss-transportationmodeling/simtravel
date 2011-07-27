@@ -1,5 +1,5 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/karthik/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
@@ -30,11 +30,11 @@
 
   </TravelSkims1>
   <TravelSkims reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
     <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
     <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
   </TravelSkims>
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
@@ -179,7 +179,7 @@
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
 
-      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
+      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_final_r" location_var="locationid" time_var="starttime"/>
@@ -772,7 +772,7 @@
 
 
       <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="3"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
@@ -789,7 +789,7 @@
         <Variable table="persons,locations" var="one,single_family_dwelling" coeff=".0003" interaction="True" repeat="single_family_dwelling"/>	
       </Model>
       <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="3"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
@@ -1650,21 +1650,26 @@
 
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="duration"/>
+        <FilterSet type="and"/>
+	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
+	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
+	<Filter table="background_trips" var="origin_taz" condition="less than" value="2900"/>
+	<Filter table="background_trips" var="destination_taz" condition="less than" value="2900"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
 
-      <Model name="trippurpose" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="trippurpose" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="trippurpose"/>
         <FilterSet type="and"/>
 	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
-	<Filter table="background_trips" var="origin_taz" condition="less than" value="3000"/>
-	<Filter table="background_trips" var="destination_taz" condition="less than" value="3000"/>
+	<Filter table="background_trips" var="origin_taz" condition="less than" value="2900"/>
+	<Filter table="background_trips" var="destination_taz" condition="less than" value="2900"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="trippurpose" coeff="1"/>
-      </Model>
+      </Model1>
 
     </Component>
 

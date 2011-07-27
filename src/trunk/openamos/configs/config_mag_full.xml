@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/karthik/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone_fulldata_seq" location="/home/karthik/simtravel/test/mag_zone_fulldata/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_fulldata_dynamic" dbusername="postgres" dbpassword="1234"/>
 
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/sequential/skim0.dat" delimiter=","/>
@@ -1479,7 +1479,7 @@
 
       <AnalysisInterval start="1440" end="1440" step="1"/>
 
-      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="15" seed="1" threshold="120">
+      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
@@ -1822,7 +1822,7 @@
       </Model>
 
       <Model name="locationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="15"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2236,7 +2236,7 @@
 
 
 
-    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -2291,7 +2291,7 @@
 
       <AnalysisInterval start="1440" end="1440" step="1"/>
 
-      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="15" seed="1" threshold="120">
+      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_dailyallocrec_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_dailyallocrec_r" location_var="locationid" time_var="starttime"/>
@@ -2888,7 +2888,7 @@
 
 
       <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="15"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
@@ -2905,7 +2905,7 @@
         <Variable table="persons,locations" var="one,single_family_dwelling" coeff=".0003" interaction="True" repeat="single_family_dwelling"/>	
       </Model>
       <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="15"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
@@ -3598,14 +3598,14 @@
 
 
 
-    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+    <Component name="ExtractTravelEpisodes" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="trips_r" key="houseid,personid"/>
     	<Table table="child_dependency_r" key="houseid,personid"/>True
     	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
-      <AnalysisInterval start="650" end="652" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
@@ -3719,7 +3719,7 @@
 
     </Component>
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		

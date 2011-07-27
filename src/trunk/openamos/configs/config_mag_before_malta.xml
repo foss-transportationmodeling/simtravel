@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone" location="/home/karthik/simtravel/test/mag_zone/" seed="10" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic_old" dbusername="postgres" dbpassword="1234"/>
 
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
@@ -32,11 +32,11 @@
   </TravelSkims1>
 
   <TravelSkims reference_tablename="travel_skims" indb="True">
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
     <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="120" intervalEnd="299" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="300" intervalEnd="659" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
     <Period tablename="travel_skims_peak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="660" intervalEnd="899" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
-    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_peak.dat" delimiter=","/>
+    <Period tablename="travel_skims_offpeak" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="900" intervalEnd="1439" fileLocation="/home/karthik/simtravel/test/skimsInput/travel_skims_offpeak.dat" delimiter=","/>
   </TravelSkims>
 
 
@@ -124,6 +124,42 @@
         <Variable table="households" var="one" coeff="1"/>
       </Model>
     </Component>
+
+    <Component1 name="AllocatePrimaryVehicle" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="False" completed="True">
+      <DBTables>
+    	<Table table="schedule_r" key="houseid,personid" order="1"/>
+    	<Table table="schedule_ltrec_r" key="houseid,personid"/>
+      </DBTables>
+
+      <DeleteRecords value="False"/>	
+
+
+
+      <SpatialConstraints1 table="travel_skims" skim_var="tt" origin_var="origin" destination_var="destination">
+	<Start table="schedule_r" location_var="locationid" time_var="endtime"/>
+	<End table="schedule_r" location_var="locationid" time_var="starttime"/>
+      </SpatialConstraints1>
+
+
+      <Model name="ReconcileSchedules" formulation="Reconcile Schedules" seed="1">
+	<DependentVariable var="reconcileschedules"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_r" var="houseid"/>
+	  <PersonIdName table="schedule_r" var="personid"/>
+	  <ScheduleIdName table="schedule_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_r" var="activitytype"/>
+	  <LocationIdName table="schedule_r" var="locationid"/>
+	  <StartTimeName table="schedule_r" var="starttime"/>
+	  <EndTimeName table="schedule_r" var="endtime"/>
+	  <DurationName table="schedule_r" var="duration"/>
+	  <DependentPersonName table="schedule_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+      </Model>
+     
+    </Component1>
+
 
     <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
@@ -1540,7 +1576,7 @@
 
       <AnalysisInterval start="1440" end="1440" step="1"/>
 
-      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="3" seed="1" threshold="120">
+      <SpatialConstraints table="travel_skims" sample_var="destination" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" count="5" seed="1" threshold="120">
         <ActivityFilter table="locations" var="retail_employment_ind" condition="equals" value="1"/>
 	<Start table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_cleanfixedactivityschedule_r" location_var="locationid" time_var="starttime"/>
@@ -1883,7 +1919,7 @@
       </Model>
 
       <Model name="locationIDOHActs" formulation="Multinomial Logit" seed="1">
-        <AlternativeSet count="3"/>
+        <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
