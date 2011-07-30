@@ -124,7 +124,7 @@ class SimulationManager(object):
     def setup_tod_skims(self):
 	iteration = self.projectConfigObject.iteration
 
-	self.successive_average_skims(iteration)
+	#self.successive_average_skims(iteration)
 
 	return
 
@@ -416,7 +416,7 @@ class SimulationManager(object):
         #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
         queryBrowser.copy_into_table(resArr, colsToWrite, tableName, keyCols, fileLoc, partId, createIndex, deleteIndex)
 
-        
+
     def close_database_connection(self, queryBrowser):
         queryBrowser.dbcon_obj.close_connection()
     
