@@ -370,11 +370,67 @@ class QueryBrowser(object):
 
 
         #Add history information
+
         if history_info is not None:
             histVarAggConditions = history_info.historyVarAggConditions
             histAggVar = history_info.historyAggVar
             histTable = history_info.tableName
+            """
+
+            histTempTableName = "history_temp"
             
+	    summationStr = ""
+	    selectAggStr = ""
+	    for histVar in histVarAggConditions:
+		conditions = histVarAggConditions[histVar]
+		conditionsStr = ""
+	
+		for j in conditions:
+		    conditionsStr += " %s and" %(j)
+		conditionsStr = conditionsStr[:-3]
+
+                selectVarStr = "sum(%s) as %s" %(histAggVar, histVar)
+
+		summationStr += " sum(case when (%s) then %s end) as %s, " %(conditionsStr, histAggVar, histVar)
+
+		final_list.append("%s.%s" %(histTempTableName, histVar))
+		cols_list.append(histVar)
+
+	    summationStr = summationStr[:-2]
+            keyCols = column_names[histTable]
+                
+
+	    keyCols.reverse()
+
+            grpStr = ""
+            for i in keyCols:
+                grpStr += "%s," %(i)
+            grpStr = grpStr[:-1]
+
+
+
+	    selectAggStr = ("(select %s, %s from %s where endtime <= %s group by %s) as %s" 
+			    %(grpStr, summationStr, histTable, analysisInterval, grpStr, histTempTableName))
+
+
+            joinCondition = ""
+            for i in keyCols:
+                joinCondition += " %s.%s = %s.%s and" %(mainTable, i, 
+                                                   	histTempTableName, i)
+            joinCondition = joinCondition[:-3]
+
+            leftJoinStr = (" left join %s on (%s)" 
+                           %(selectAggStr, joinCondition))
+
+            joinStrList.append(leftJoinStr)
+
+
+
+
+	    """
+
+
+
             for histVar in histVarAggConditions:
                 conditions = histVarAggConditions[histVar]
                 conditionsStr = ""
@@ -399,7 +455,7 @@ class QueryBrowser(object):
 
 
 
-                selectAggStr = ("(select %s,%s from %s where %s and endtime < %s group by %s) as %s "
+                selectAggStr = ("(select %s,%s from %s where (%s) and endtime <= %s group by %s) as %s "
                                 %(grpStr, selectVarStr, histTable, conditionsStr, analysisInterval,
                                   grpStr, histTempTableName))
 
@@ -416,7 +472,7 @@ class QueryBrowser(object):
 
                 joinStrList.append(leftJoinStr)
                 
-            
+
 
 
         # Spatial TSP identification
@@ -522,6 +578,7 @@ class QueryBrowser(object):
 
                     final_list.append('stl.%s as st_%s' %('duration', 'duration'))
                     cols_list.append('st_%s' %'duration')
+
 
                     #stLocJoinCondition = stLocJoinCondition[:-3]
 
