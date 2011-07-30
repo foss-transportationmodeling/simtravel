@@ -500,6 +500,8 @@ class Person(object):
 	
 
     def check_end_of_day(self, refStartTime):
+	#print 'Checking end of day for person - ', self.pid
+	#print 'Last Episode - ', self.lastEpisode, self.lastEpisode.startTime
 	if self.lastEpisode.startTime <= refStartTime:
             #if self.lastEpisode.dependentPersonId == 0:
             #    self.lastEpisode.dependentPersonId = depPersonId
@@ -731,7 +733,8 @@ class Person(object):
         tt = self._extract_travel_time(stAct.location, endAct.location)
         prismDur = endAct.startTime - stAct.endTime
 
-        adjDenominator = stAct.duration + 0.5*endAct.duration
+        #adjDenominator = stAct.duration + 0.5*endAct.duration
+	adjDenominator = stAct.duration
 
         if prismDur > tt:
             pass
@@ -747,6 +750,7 @@ class Person(object):
             stAct.duration = stAct.endTime - stAct.startTime
 
             # Modify start of the Ending Activity for the prism
+	    """
             endAct_StAdj = adjDur * 0.5*endAct.duration/adjDenominator
             endAct.startTime = endAct.startTime + endAct_StAdj
             # Modify end of the Ending Activity for the prism
@@ -758,7 +762,7 @@ class Person(object):
                 endAct.endTime = 1439
             #Update duration
             endAct.duration = endAct.endTime - endAct.startTime
-
+	    """
 
         hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
         return endAct
@@ -818,13 +822,24 @@ class Person(object):
             rndNum = self.rndGen.return_random_variables()
             endAct_EndAdj = rndNum * 0.5 * adjDur
             endAct.endTime = endAct.endTime + endAct_EndAdj
-            
+
                 #If the adjusted endtime is less than the adjusted starttime
             if endAct.endTime < endAct.startTime:
                 rndNum = self.rndGen.return_random_variables()
                 endAct.endTime = endAct.startTime + rndNum * endAct.duration
 		
-    	    #print 'End activity before limiting to 1439- ', endAct
+	    if endAct.endTime > 1439:
+		if endAct.startTime < 1438:
+		    endAct.endTime = 1438
+
+		if endAct.startTime > 1438:
+		    endAct.startTime = 1438
+		    endAct.endTime = 1438
+	    endAct.duration = endAct.endTime - endAct.startTime
+	    hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))			
+
+
+	    """
 
 	    if (endAct.endTime > 1439 and endAct.startTime < 1438) or (endAct.endTime < 1439):
 		# i.e even by limiting the endtime we are doing OK because the starttime is still < 1438
@@ -835,9 +850,9 @@ class Person(object):
 		#print("endtime less than starttime random * duration being added")
 		hp.heappush(self.reconciledActivityEpisodes, (stAct.startTime, stAct))
 	     
-
+	    """
             #Update duration
-            endAct.duration = endAct.endTime - endAct.startTime
+            
             
         return endAct
 
@@ -845,7 +860,8 @@ class Person(object):
         tt = self._extract_travel_time(stAct.location, endAct.location)
         prismDur = endAct.startTime - stAct.endTime
 
-        adjDenominator = 0.5*stAct.duration + endAct.duration
+        #adjDenominator = 0.5*stAct.duration + endAct.duration
+	adjDenominator = endAct.duration
 
         if prismDur > tt:
             pass
@@ -853,11 +869,13 @@ class Person(object):
             #print "\t\t-- ADJUSTING FOR LAST PRISM OF DAY --"
             adjDur = tt - prismDur
 
+	    """
             # Modify end of the Starting Activity for the prism
             stAct_EndAdj = adjDur * 0.5*stAct.duration/adjDenominator
             stAct.endTime = stAct.endTime - stAct_EndAdj
             #Update duration
             stAct.duration = stAct.endTime - stAct.startTime
+	    """
 
             # Modify start of the Ending Activity for the prism
             endAct_StAdj = adjDur * endAct.duration/adjDenominator
