@@ -208,7 +208,7 @@
 	</ExtractLocationInformation>
       </SpatialConstraints>
 
-      <HistoryInformation table="schedule_dailyallocrec_r" history_var="duration">
+      <HistoryInformation table="schedule_final_r" history_var="duration">
 	<HistoryVar var="ih_history">
 	  <Aggregate condition_var="activitytype" value="100"/>
 	  <Aggregate condition_var="activitytype" value="101"/>
