@@ -102,7 +102,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
             pred_value[predValue_lessThresholdInd] = threshold
 	    #print 'Lower; Before', pred_value[predValue_lessThresholdInd]
 	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, 1, seed, size)
+	    smoothingErr = self.calc_halfnormal_error(threshold, 5, seed, size)
 	    #print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
 	    pred_value[predValue_lessThresholdInd] -= smoothingErr
 	    #print 'Lower; After', pred_value[predValue_lessThresholdInd]
@@ -118,7 +118,7 @@ class StocFronRegressionModel(AbstractRegressionModel):
             pred_value[predValue_moreThresholdInd] = threshold
 	    #print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
 	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, 1438, seed, size)
+	    smoothingErr = self.calc_halfnormal_error(threshold, 1435, seed, size)
 	    #print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
 	    pred_value[predValue_moreThresholdInd] += smoothingErr
 	    #print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
