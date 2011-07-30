@@ -247,10 +247,10 @@ class MakeSchedPlot(QDialog):
         tables = []
         if self.new_obj.check_if_table_exists("schedule_r"):
             tables.append("Schedules: Non-reconciled")
-        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
-            tables.append("Schedules: Reconciled without Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanfixedactivityschedule_r"):
-            tables.append("Schedules: Daily Patterns Including Full Child Episodes")
+            tables.append("Schedules: Cleaned to Account for Daily Status")
+        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
+            tables.append("Schedules: Reconciled including Full Child Episodes")
         if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
             tables.append("Schedules: Reconciled Including Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanaggregateactivityschedule_r"):
@@ -614,11 +614,16 @@ class MakeSchedPlot(QDialog):
 
 
     def trip_sql(self,id):
+        tablename = 'trips_r AS A'
+        vars = 'A.houseid, A.personid, A.starttime, (A.endtime - A.starttime), A.endtime'
+        order = 'A.houseid, A.personid, A.starttime'
+        filter = 'A.starttime >= 0'
+	"""	
         tablename = 'persons_arrived_r AS A'
         vars = 'A.houseid, A.personid, A.expectedstarttime, (A.expectedarrivaltime - A.expectedstarttime), A.actualarrivaltime'
         order = 'A.houseid, A.personid, A.expectedstarttime'
         filter = 'A.expectedstarttime >= 0'
-        
+        """
         ids = id.split(',')
         filter = filter + " AND A.houseid = '%s' AND A.personid = '%s'" %(ids[0],ids[1])
         state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
@@ -794,10 +799,10 @@ class MakeSchedPlot(QDialog):
         cur_text = self.stablecombo.currentText()
         if cur_text == "Schedules: Non-reconciled":
             return "schedule_r"
-        elif cur_text == "Schedules: Reconciled without Travel Episodes":
-            return "schedule_ltrec_r"
-        elif cur_text == "Schedules: Daily Patterns Including Full Child Episodes":
+        elif cur_text == "Schedules: Cleaned to Account for Daily Status":
             return "schedule_cleanfixedactivityschedule_r"
+        elif cur_text == "Schedules: Reconciled including Full Child Episodes":
+            return "schedule_ltrec_r"
         elif cur_text == "Schedules: Reconciled Including Travel Episodes":
             return "schedule_childreninctravelrec_r"
         elif cur_text == "Schedules: Aggregated in Home Schedule for Children":

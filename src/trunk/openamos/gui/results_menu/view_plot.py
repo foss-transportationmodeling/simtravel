@@ -324,10 +324,10 @@ class MakeResultPlot(QDialog):
         tables = []
         if self.new_obj.check_if_table_exists("schedule_r"):
             tables.append("Schedules: Non-reconciled")
-        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
-            tables.append("Schedules: Reconciled without Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanfixedactivityschedule_r"):
-            tables.append("Schedules: Daily Patterns Including Full Child Episodes")
+            tables.append("Schedules: Cleaned to Account for Daily Status")
+        if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
+            tables.append("Schedules: Reconciled including Full Child Episodes")
         if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
             tables.append("Schedules: Reconciled Including Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanaggregateactivityschedule_r"):
@@ -347,10 +347,10 @@ class MakeResultPlot(QDialog):
     def selected_table(self, cur_text):
         if cur_text == "Schedules: Non-reconciled":
             self.out_table = "schedule_r"
-        elif cur_text == "Schedules: Reconciled without Travel Episodes":
-            self.out_table = "schedule_ltrec_r"
-        elif cur_text == "Schedules: Daily Patterns Including Full Child Episodes":
+        elif cur_text == "Schedules: Cleaned to Account for Daily Status":
             self.out_table = "schedule_cleanfixedactivityschedule_r"
+        elif cur_text == "Schedules: Reconciled including Full Child Episodes":
+            self.out_table = "schedule_ltrec_r"
         elif cur_text == "Schedules: Reconciled Including Travel Episodes":
             self.out_table = "schedule_childreninctravelrec_r"
         elif cur_text == "Schedules: Aggregated in Home Schedule for Children":
@@ -463,6 +463,9 @@ class MakeResultPlot(QDialog):
     def reset_all(self):
         reply = QMessageBox.information(self,"Warning","Do you really want to remove?",QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
+
+
+
             self.tabs.clear()
             self.figs = []
             self.sketches = []
@@ -548,7 +551,7 @@ class MakeResultPlot(QDialog):
 #        
 #        #for schedule_final_r
 #        table_name = 'schedule_final_r'
-#        for each in self.schedule_r_temp:
+#        for each in self.schedule_ltrec_r_temp:
 #            col_name = []
 #            index_name = 'plot'
 #            col_name.append(each)
@@ -571,7 +574,7 @@ class MakeResultPlot(QDialog):
 #        
 #        #for schedule_final_r
 #        table_name = 'schedule_final_r'
-#        for each in self.schedule_r_temp:
+#        for each in self.schedule_ltrec_r_temp:
 #            index_name = 'plot'
 #            index_name = index_name + '_' + each + '_' + table_name
 #            self.qb_obj.delete_index(table_name, index_name)
@@ -586,6 +589,7 @@ class MakeResultPlot(QDialog):
         self.choicevar1.clear()
         self.choicevar2.clear()
         vars = [""]
+
         if self.tripradio.isChecked():
             self.selecttable.setVisible(False)
             #temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
@@ -606,6 +610,10 @@ class MakeResultPlot(QDialog):
             for i in self.schedule_r_temp:
                 if self.checkColumnExists(self.out_table,i):
                     vars.append(i)
+
+		
+                #if self.checkColumnExists("schedule_final_r",i):
+                #    vars.append(i)
             
             vars.append("activity episode rates")
             self.activitylabel.setText("Activity Type")
@@ -667,11 +675,17 @@ class MakeResultPlot(QDialog):
                 for i in temp:
                     if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
+
+                    #if self.checkColumnExists("schedule_final_r",i):
+                    #    vars.append(i)
             elif text != "activitytype" and text != "" and text != "activity episode rates":
                 temp = ["activitytype"]
                 for i in temp:
                     if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
+
+                    #if self.checkColumnExists("schedule_final_r",i):
+                    #    vars.append(i)
         
         self.choicevar2.addItems(vars) 
             
@@ -1100,6 +1114,7 @@ class MakeResultPlot(QDialog):
             print 'time taken --> %s'%(t2-t1)
             return True
         except Exception, e:
+	    print sql
             print '\tError while fetching the columns from the table'
             print e
             
@@ -1331,6 +1346,7 @@ class MakeResultPlot(QDialog):
 
 
                 except Exception, e:
+		    print sql
                     print '\tError while fetching the columns from the table'
                     print e
 
