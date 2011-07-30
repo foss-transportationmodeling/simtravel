@@ -34,10 +34,6 @@ class Household(object):
         for pid in self.persons:
             person = self.persons[pid]
 
-            if not person._check_for_conflicts():
-                self.print_activity_list(person)
-                print 'Exception', 'The person still has conflicts - %s, %s' %(self.hid, pid)
-                raw_input()
                 
             for actStart, act in person.listOfActivityEpisodes:
                 resList.append([self.hid, pid, act.scheduleId,
@@ -66,6 +62,12 @@ class Household(object):
 	for pid in self.personIds:
 	    person = self.persons[pid]
 	    person.clean_schedules_for_in_home_episodes()
+
+            if not person._check_for_conflicts():
+                self.print_activity_list(person)
+                print 'Exception', 'The person still has conflicts - %s, %s' %(self.hid, pid)
+                raw_input()
+
 
 	return self._collate_results()
 
