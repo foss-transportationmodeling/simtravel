@@ -118,10 +118,14 @@ class DataArray(object):
             temp = self.data[:,colnum]
             exprStr = "%s*temp + result" %coefficients[i]
             result = ne.evaluate(exprStr)
+	    #print '\tvar - %s and coeff - %.4f' %(i, coefficients[i])
+	    #print '\tmoving result value - ', result[:5]
         #print '\t\t\tNumexpr approach for linear combination - %.4f' %(time.time()-ti)
 
         if rows is not None:
             return result[rows]
+
+	#print '---->final result - ', result[:5]
         return result
     
     def calculate_product(self, coefficients, rows=None):
