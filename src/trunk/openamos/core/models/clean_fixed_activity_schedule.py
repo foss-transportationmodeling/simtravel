@@ -205,7 +205,15 @@ class CleanFixedActivitySchedule(Model):
             
             actList += reconciledSchedules
 
+
+
+            #for i in reconciledSchedules:
+            #    print i
             
+	    #if hhldIndex[0] == 322 or hhldIndex[0] == 352 or hhldIndex[0] == 386 or hhldIndex[0] == 604 or hhldIndex[0] == 605:
+	    #	raw_input()	   
+
+
             #raw_input()
 
             # TODO: CHECK THE DATA UPDATING PART
