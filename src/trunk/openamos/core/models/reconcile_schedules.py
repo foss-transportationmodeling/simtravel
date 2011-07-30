@@ -170,7 +170,7 @@ class ReconcileSchedules(Model):
                 data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
                 i += 1
 	    
-	    if (perIndex[0] == 100708 and perIndex[1] == 2) or (perIndex[0] == 107 and perIndex[1] == 2) or (perIndex[0] == 100708 and perIndex[1] == 2):
+	    if (perIndex[0] == 44144 and perIndex[1] == 3): # or (perIndex[0] == 107 and perIndex[1] == 2) or (perIndex[0] == 100708 and perIndex[1] == 2):
 		raw_input()
             """                      
             #print 'MODIFIED DATA'
