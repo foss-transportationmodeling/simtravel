@@ -32,6 +32,9 @@ int temp_locations[MAX];
 
 /* Sample functions */
 /*********************************************/
+/*
+Sample methods to create and print arrays.
+*/
 void print_array(int a[], int n)
 {
     int i;    
@@ -58,6 +61,10 @@ void create_array(int a[], int n)
 
 /* String Functions */
 /*********************************************/
+/*
+This method is used to set the location of the file name.
+The flag is used to indicate the type of file: node file or graph file
+*/
 void set_file(char *s, int length, int flag){
    //if flag is 1 then nodes of the graph were not provided
    //set the file name to the node_file_name(function needs to be called twice)
@@ -77,7 +84,7 @@ void set_file(char *s, int length, int flag){
    }
 }
 
-
+/* Print the file location */
 void print_string()
 {
     //printf("C--> printing the file names\n");
@@ -90,7 +97,7 @@ void print_string()
 /*File functions */
 /*********************************************/
 /*
-This function writes all the locations to the file
+This function writes all the locations to a temporary locations file
 */
 void write_locations(int index)
 {
@@ -133,7 +140,7 @@ void write_locations(int index)
 /*********************************************/
 /*
 This function reads the file and finds the total number 
-of nodes and edges and saves them in the respective variables.
+of nodes and edges and saves them in the respective global variables.
 */
 int get_nodes()
 {
