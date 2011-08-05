@@ -68,6 +68,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 	//set the file names
 	length = strlen(file1) + 20;
     
+    //initialize the file names
 	input_file_name = (char *)malloc(length*sizeof(char));
     	temp_file_name_1 = (char *)malloc(length*sizeof(char));
 	temp_file_name_2 = (char *)malloc(length*sizeof(char));
@@ -89,7 +90,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 	
 	printf("File opened -->\n");
 
-	//open the files 
+	//open input the file
 	ip_file = fopen(input_file_name, "r");
 	
 
@@ -108,7 +109,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 				//first interval. read from input file only
 				file_flag = 0;
 				tp_file_2 = fopen(temp_file_name_2, "w");
-
+                //write to file 2
 				if(tp_file_2 != NULL)
 				{
 					for(j = 0; j < test_interval; j++)
@@ -130,7 +131,8 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 			}
 			else if(i % 2 == 1)
 			{
-				//even intervals. open the respective file
+				//odd intervals. open the respective file
+                //for odd intervals read from file 2 and write to file 1
 				file_flag = 1;
 				tp_file_1 = fopen(temp_file_name_1, "w");
 				tp_file_2 = fopen(temp_file_name_2, "r");
@@ -161,6 +163,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 			else if(i % 2 == 0)
 			{
 				//even intervals. open the respective file
+                //for even intervals read from file 1 and write to file 2
 				file_flag = 0;
 				tp_file_1 = fopen(temp_file_name_1, "r");
 				tp_file_2 = fopen(temp_file_name_2, "w");
@@ -205,6 +208,7 @@ void flatten_link_attributes(int interval, int number_intervals, char *file1, ch
 	}
 	fclose(ip_file);
 
+    //based on the file_flag rename and delete the required the files
 	if (file_flag)
 	{
 	delete_file(temp_file_name_2);
