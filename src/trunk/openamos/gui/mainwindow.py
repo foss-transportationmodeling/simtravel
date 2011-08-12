@@ -13,6 +13,7 @@ from results_menu.to_postgis import *
 from results_menu.view_sched import *
 from results_menu.view_plot import *
 from results_menu.kml_num_trips import *
+from results_menu.import_nhts import *
 from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
@@ -202,7 +203,9 @@ class MainWindow(QMainWindow):
         importSubMenu.setIcon(QIcon("./images/import.png"))
         import_shapefile = self.createaction("Import spatial data (.shp)", self.importshape, None, 
                                     None, None)
-        self.addActions(importSubMenu, (import_shapefile,))
+        import_nhts = self.createaction("Import NHTS (.csv)", self.importnhts, None, 
+                                    None, None)
+        self.addActions(importSubMenu, (import_shapefile,import_nhts))
         
         data_export_action = self.createaction("Export data", None, None,
                                             "export", "Export data.")
@@ -293,17 +296,39 @@ class MainWindow(QMainWindow):
 
 # Show flowcharts from model management tree widget
     def showflowchart(self,selitem,col):
+#        if selitem.text(col) == COMP_LONGTERM:
+#            self.models.show_long_term_models()
+#        if selitem.text(col) == COMP_FIXEDACTLOCATION:
+#            self.models.show_fixed_activity_models()
+#        if selitem.text(col) == COMP_VEHOWN:
+#            self.models.show_vehicle_ownership_models()
+#        if selitem.text(col) == COMP_FIXEDACTPRISM:
+#            self.models.show_fixed_activity_prism_models()
+#        if selitem.text(col) == COMP_CHILDSTATUS:
+#            self.models.show_child_model()
+#        if selitem.text(col) == COMP_ADULTSTATUS:
+#            self.models.show_adult_model()
+#        if selitem.text(col) == COMP_ACTSKELRECONCILIATION:
+#            self.models.show_skeleton_reconciliation_system()
+#        if selitem.text(col) == COMP_ACTTRAVSIMULATOR:
+#            self.models.show_activity_travel_pattern_simulator()
+#        if selitem.text(col) == COMP_ACTTRAVRECONCILIATION:
+#            self.models.show_travel_reconciliation_system()
+        
         if selitem.text(col) == COMP_LONGTERM:
             self.models.show_long_term_models()
         if selitem.text(col) == COMP_FIXEDACTLOCATION:
             self.models.show_fixed_activity_models()
-        if selitem.text(col) == COMP_VEHOWN:
+        if selitem.text(col) == COMPMODEL_NUMVEHS or selitem.text(col) == COMPMODEL_NUMTYPES:
             self.models.show_vehicle_ownership_models()
-        if selitem.text(col) == COMP_FIXEDACTPRISM:
+        if selitem.text(col) == COMPMODEL_WRKEPISODES or selitem.text(col) == COMPMODEL_DAYSTART or \
+            selitem.text(col) == COMPMODEL_DAYEND or selitem.text(col) == COMPMODEL_1WEPISODE or \
+            selitem.text(col) == COMPMODEL_2WEPISODE1 or selitem.text(col) == COMPMODEL_2WEPISODE2 or \
+            selitem.text(col) == COMPMODEL_PRESCHEPISODES or selitem.text(col) == COMPMODEL_SCHEPISODES:
             self.models.show_fixed_activity_prism_models()
-        if selitem.text(col) == COMP_CHILDSTATUS:
+        if selitem.text(col) == COMPMODEL_SCHSTATUS or selitem.text(col) == COMPMODEL_CHIDDEPEND:
             self.models.show_child_model()
-        if selitem.text(col) == COMP_ADULTSTATUS:
+        if selitem.text(col) == COMPMODEL_WRKDAILYSTATUS:
             self.models.show_adult_model()
         if selitem.text(col) == COMP_ACTSKELRECONCILIATION:
             self.models.show_skeleton_reconciliation_system()
@@ -311,7 +336,6 @@ class MainWindow(QMainWindow):
             self.models.show_activity_travel_pattern_simulator()
         if selitem.text(col) == COMP_ACTTRAVRECONCILIATION:
             self.models.show_travel_reconciliation_system()
-
 
 
 # Call file functions
@@ -448,6 +472,11 @@ class MainWindow(QMainWindow):
         if self.proconfig <> None:
             import_shape = Read_Shape(self.proconfig)
             import_shape.exec_()
+            
+    def importnhts(self):
+        if self.proconfig <> None:
+            import_nhts = Import_NHTS(self.proconfig)
+            import_nhts.exec_()
             
     def databaseconfiguration(self):
         if self.proconfig <> None:

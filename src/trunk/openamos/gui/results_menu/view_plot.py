@@ -56,12 +56,17 @@ class MakeResultPlot(QDialog):
         self.connects(config)
         self.cursor = self.new_obj.cursor
 
-        self.makeVarsWidget1()
+        
         self.tabs = QTabWidget()
         self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
 
+        self.show_nhts = QCheckBox("Check if you would show NHTS results instead of OpenAmos")
+        if not (self.new_obj.check_if_table_exists("schedule_nhts") and self.new_obj.check_if_table_exists("trips_nhts") \
+            and self.new_obj.check_if_table_exists("households_nhts") and self.new_obj.check_if_table_exists("persons_nhts")):
+            self.show_nhts.setDisabled(True)
+        
         radiowidget = QWidget(self)
         radiolayout = QHBoxLayout()
         radiowidget.setLayout(radiolayout)
@@ -151,9 +156,12 @@ class MakeResultPlot(QDialog):
         progresslayout.addWidget(self.dialogButtonBox)
         progresslayout.setContentsMargins(0,0,0,0)
 
+
+        self.makeVarsWidget1()
         filter_widget = QWidget(self)
         filterlayout = QVBoxLayout()
         filter_widget.setLayout(filterlayout)
+        filterlayout.addWidget(self.show_nhts)
         filterlayout.addWidget(radiowidget)
         filterlayout.addWidget(self.socio)
         filterlayout.addWidget(self.tripfilter)
@@ -190,6 +198,7 @@ class MakeResultPlot(QDialog):
         self.connect(self.choicevar1, SIGNAL("currentIndexChanged(int)"), self.manage_combo)
         self.connect(self.choicevar2, SIGNAL("currentIndexChanged(int)"), self.set_disable)
         self.connect(self.stablecombo, SIGNAL("currentIndexChanged(const QString&)"), self.selected_table)
+        self.connect(self.show_nhts, SIGNAL("stateChanged(int)"), self.initTables)
 
         
 
@@ -247,10 +256,22 @@ class MakeResultPlot(QDialog):
         self.varstable.setSizePolicy(sizePolicy)
         self.varstable.horizontalHeader().setResizeMode(0,1)
         self.varstable.horizontalHeader().setResizeMode(1,1)
-        self.varstable.setMaximumWidth(360)
+        self.varstable.setMaximumWidth(300)
         self.varstable.setMinimumHeight(150)
         varslayout.addWidget(self.varstable,1,4)
         
+        workwidget = QWidget(self)
+        worklayout = QVBoxLayout()
+        workwidget.setLayout(worklayout)
+        worklabel = QLabel("Work Status:")
+        self.cmbworkstatus = QComboBox()
+        self.cmbworkstatus.addItems([QString("All"),QString("Worker"),
+                                 QString("Non-worker")])
+        self.cmbworkstatus.setMinimumWidth(120)
+        worklayout.addWidget(worklabel)
+        worklayout.addWidget(self.cmbworkstatus)
+        workwidget.setContentsMargins(0,0,0,40)
+        varslayout.addWidget(workwidget,1,5)
         
         self.tripfilter = QGroupBox("")
         tripfilterlayout = QGridLayout()
@@ -592,9 +613,9 @@ class MakeResultPlot(QDialog):
 
         if self.tripradio.isChecked():
             self.selecttable.setVisible(False)
-            #temp = ["trippurpose","starttime","endtime","tripmode","miles","occupancy","duration"]
+            
             for i in self.trips_r_temp:
-                if self.checkColumnExists("trips_r",i) or i == "duration":
+                if self.checkColumnExists("trips_r",i):# or i == "duration":
                     vars.append(i)
             
             vars.append("trip episode rates")
@@ -606,14 +627,11 @@ class MakeResultPlot(QDialog):
             
         else:
             self.selecttable.setVisible(True)
-            #temp = ["activitytype","starttime","endtime","duration"]
+            
             for i in self.schedule_r_temp:
                 if self.checkColumnExists(self.out_table,i):
                     vars.append(i)
 
-		
-                #if self.checkColumnExists("schedule_final_r",i):
-                #    vars.append(i)
             
             vars.append("activity episode rates")
             self.activitylabel.setText("Activity Type")
@@ -661,7 +679,7 @@ class MakeResultPlot(QDialog):
             if text == "trippurpose":
                 temp = ["tripmode","starttime","endtime","miles","occupancy","duration"]
                 for i in temp:
-                    if self.checkColumnExists("trips_r",i) or i == "duration":
+                    if self.checkColumnExists("trips_r",i): # or i == "duration":
                         vars.append(i)
             elif text != "trippurpose" and text != "" and text != "trip episode rates":
                 temp = ["trippurpose"]
@@ -676,16 +694,12 @@ class MakeResultPlot(QDialog):
                     if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
 
-                    #if self.checkColumnExists("schedule_final_r",i):
-                    #    vars.append(i)
             elif text != "activitytype" and text != "" and text != "activity episode rates":
                 temp = ["activitytype"]
                 for i in temp:
                     if self.checkColumnExists(self.out_table,i):
                         vars.append(i)
 
-                    #if self.checkColumnExists("schedule_final_r",i):
-                    #    vars.append(i)
         
         self.choicevar2.addItems(vars) 
             
@@ -698,8 +712,12 @@ class MakeResultPlot(QDialog):
             self.freq.setEnabled(True)
 
     def columnName(self):
-        if self.new_obj.check_if_table_exists(self.table):
-            cols = self.new_obj.get_column_list(self.table)
+        tablename = self.table
+        if self.show_nhts.isChecked():
+            tablename = tablename + "_nhts"
+            
+        if self.new_obj.check_if_table_exists(tablename): #self.table):
+            cols = self.new_obj.get_column_list(tablename) #self.table)
             columns = []
             for col in cols:
                 
@@ -714,7 +732,11 @@ class MakeResultPlot(QDialog):
             values = []
             temp = None
             vars = str(item.text())
+            
             tablename = self.table
+            if self.show_nhts.isChecked():
+                tablename = tablename + "_nhts"
+            
             order = str(item.text())
             
             self.cursor.execute("""SELECT DISTINCT %s FROM %s ORDER BY %s"""%(vars,tablename,order))
@@ -771,14 +793,15 @@ class MakeResultPlot(QDialog):
 
 
     def initTables(self):
-        if self.segment1.isChecked() and self.table != 'households':
+        
+        if self.segment1.isChecked(): #and self.table != 'households':
             self.colswidget.clear()
             self.valwidget.clear()
             self.delRow()
             self.table = 'households'
             if self.columnName() <> None:
                 self.colswidget.addItems(self.columnName())
-        if self.segment2.isChecked() and self.table != 'persons':
+        if self.segment2.isChecked(): #and self.table != 'persons':
             self.colswidget.clear()
             self.valwidget.clear()
             self.delRow()
@@ -851,12 +874,31 @@ class MakeResultPlot(QDialog):
         return title
 
 
+    def work_sql(self):
+        if self.show_nhts.isChecked():
+            table = "daily_work_status_nhts"
+        else:
+            table = "daily_work_status_r"
+        
+        if self.cmbworkstatus.currentIndex() == 1:
+            state = "(select * from %s where wrkdailystatus = 1 order by houseid, personid) as c" %(table)
+        elif self.cmbworkstatus.currentIndex() == 2:
+            state = "(select * from %s where wrkdailystatus = 0 order by houseid, personid) as c" %(table)
+        else:
+            state = ""
+            
+        return state
+            
+
     def socio_sql(self):
         table1 = ""
         if self.segment1.isChecked():
             table1 = "households"
         else:
             table1 = "persons"
+            
+        if self.show_nhts.isChecked():
+            table1 = table1 + "_nhts"
             
         vars = ''
         if self.segment1.isChecked():
@@ -875,7 +917,7 @@ class MakeResultPlot(QDialog):
             col = str(column)
             col_list.append(col)
             value = str((self.varstable.item(i,1)).text())
-            filter = filter + "%s = '%s' and " %(column,value)
+            filter = filter + "%s = %s and " %(column,value)
         filter = filter[0:len(filter)-5]
 #        state = "join (SELECT %s FROM %s WHERE %s) AS B on" %(vars,table1,filter)
         state = "(select %s from %s where %s order by %s) as b" %(vars,table1,filter,vars)
@@ -1033,11 +1075,7 @@ class MakeResultPlot(QDialog):
 
          
     def retrieveResult(self):
-        table = ""
-        if self.tripradio.isChecked():
-            table = "trips_r"
-        else:
-            table = self.out_table
+        table = self.tableName()
         
         column = self.choicevar1.currentText()
         if column == "":
@@ -1046,11 +1084,21 @@ class MakeResultPlot(QDialog):
         t1 = time.time()
         filter = ""
         socio = str(self.socio_sql())
-        if socio != "": #"WHERE": 
+        if socio != "":
             if self.segment1.isChecked():
                 filter = "a.houseid = b.houseid"
             else:
                 filter = "a.houseid = b.houseid and a.personid = b.personid"
+                
+        work = self.work_sql()
+        if work != "":
+            if filter != "":
+                filter = "%s and "%(filter)
+                
+#            if self.segment1.isChecked():
+#                filter = filter + "a.houseid = c.houseid"
+#            else:
+            filter = filter + "a.houseid = c.houseid and a.personid = c.personid"            
 
         charact = ""
         if self.where_trip() != "":
@@ -1066,24 +1114,7 @@ class MakeResultPlot(QDialog):
             for key in temp: #cond.keys():
                 lowhigh = cond[key]
                     
-                sql = "" 
-#                if column == "duration" and self.tripradio.isChecked():
-#                    if len(lowhigh) > 1:
-#                        sql = "SELECT count(*) FROM %s AS A %sWHERE A.endtime - A.starttime >= %d AND A.endtime - A.starttime < %d%s" %(tablename,socio,lowhigh[0],lowhigh[1],filter)
-#                else:
-#                if len(lowhigh) > 1:
-#                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s >= %d AND A.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
-#                else:
-#                    sql = "SELECT count(*) FROM %s AS A %sWHERE A.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
-
-#                if len(lowhigh) > 1:
-#                    sql = "select count(*) from %s as a %s a.%s >= %d and a.%s < %d%s" %(tablename,socio,column,lowhigh[0],column,lowhigh[1],filter)
-#                else:
-#                    sql = "select count(*) from %s as a %s a.%s = %d%s" %(tablename,socio,column,lowhigh[0],filter)
-#                
-#                if self.where_trip() != "":
-#                    sql = sql + " and " +self.where_trip()
-                
+#                sql = "" 
                 sql = "select count(*) from "
                 if len(lowhigh) > 1:
                     sql = "%s(select houseid, personid from %s where %s >= %d and %s < %d%s order by houseid, personid) as a" %(sql,table,column,lowhigh[0],column,lowhigh[1],charact)
@@ -1092,6 +1123,11 @@ class MakeResultPlot(QDialog):
                     
                 if socio != "":
                     sql = "%s,%s"%(sql,socio)
+                    
+                if work != "":
+                    sql = "%s,%s"%(sql,work)
+                
+                if filter != "": 
                     sql = "%s where %s"%(sql,filter)
 
                 print sql
@@ -1243,12 +1279,7 @@ class MakeResultPlot(QDialog):
         category2.sort()    
         if len(category2) > 0:
             
-            table = ""
-            if self.tripradio.isChecked():
-                table = "trips_r"
-            else:
-                table = self.out_table
-            
+            table = self.tableName()
             category1 = self.time_categroy(column1)
             
             Sketch = self.createCanvas()
@@ -1267,11 +1298,21 @@ class MakeResultPlot(QDialog):
             
             filter = ""
             socio = str(self.socio_sql())
-            if socio != "": #"where": 
+            if socio != "":
                 if self.segment1.isChecked():
                     filter = "a.houseid = b.houseid"
                 else:
                     filter = "a.houseid = b.houseid and a.personid = b.personid"
+
+            work = self.work_sql()
+            if work != "":
+                if filter != "":
+                    filter = "%s and "%(filter)
+                    
+#                if self.segment1.isChecked():
+#                    filter = filter + "a.houseid = c.houseid"
+#                else:
+                filter = filter + "a.houseid = c.houseid and a.personid = c.personid"  
 
             charact = ""
             if self.where_trip() != "":
@@ -1288,26 +1329,7 @@ class MakeResultPlot(QDialog):
                     xvalue.append(0)
                     
                 try:
-                   
-#                    sql = ""
-#                    if column1 == "duration" and self.tripradio.isChecked():
-#                        if len(lowhigh1) > 1:
-#                            sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.endtime - A.starttime >= %d AND A.endtime - A.starttime < %d)%s" %(column2,table,socio,lowhigh1[0],lowhigh1[1],filter)
-#                    else:
-#                    if len(lowhigh1) > 1:
-#                        sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s >= %d AND A.%s < %d)%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter)
-#                    else:
-#                        sql = "SELECT count(*), A.%s FROM %s AS A %sWHERE (A.%s = %d)%s" %(column2,table,socio,column1,lowhigh1[0],filter)                             
-                    
-#                    if len(lowhigh1) > 1:
-#                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s >= %d AND A.%s < %d)%s" %(column2,table,socio,column1,lowhigh1[0],column1,lowhigh1[1],filter)
-#                    else:
-#                        sql = "SELECT count(*), A.%s FROM %s AS A %s (A.%s = %d)%s" %(column2,table,socio,column1,lowhigh1[0],filter) 
-#                        
-#                    if self.where_trip() != "":
-#                        sql = "%s AND %s GROUP BY A.%s ORDER BY A.%s"%(sql,self.where_trip(),column2,column2)
-#                    else:
-#                        sql = "%s GROUP BY A.%s ORDER BY A.%s"%(sql,column2,column2)
+
                     
                     sql = "select count(*), a.%s from "%(column2)
                     if len(lowhigh1) > 1:
@@ -1317,7 +1339,13 @@ class MakeResultPlot(QDialog):
                         
                     if socio != "":
                         sql = "%s,%s"%(sql,socio)
+                        
+                    if work != "":
+                        sql = "%s,%s"%(sql,work)
+                    
+                    if filter != "": 
                         sql = "%s where %s"%(sql,filter)
+                    
                     sql = "%s group by a.%s order by a.%s"%(sql,column2,column2)
                     
                     print sql
@@ -1346,7 +1374,6 @@ class MakeResultPlot(QDialog):
 
 
                 except Exception, e:
-		    print sql
                     print '\tError while fetching the columns from the table'
                     print e
 
@@ -1568,12 +1595,24 @@ class MakeResultPlot(QDialog):
     '''
     def numPersons(self):
         
-        table = ""
-        if self.tripradio.isChecked():
-            table = "trips_r"
+        if self.show_nhts.isChecked():
+            table1 = "persons_nhts as p, households_nhts as h"
         else:
-            table = self.out_table
+            table1 = "persons as p, households as h"
+            
+        base = ""
+        if self.cmbworkstatus.currentIndex() > 0:
+            if self.show_nhts.isChecked():
+                table1 = "%s, daily_work_status_nhts as w"%(table1)
+            else:
+                table1 = "%s, daily_work_status_r as w"%(table1)
+            
+            if self.cmbworkstatus.currentIndex() == 1:
+                base = " AND p.houseid = w.houseid AND p.personid = w.personid AND w.wrkdailystatus = 1"
+            else:
+                base = " AND p.houseid = w.houseid AND p.personid = w.personid AND w.wrkdailystatus = 0"
         
+        table2 = self.tableName()
         socio = ""
         numrows = self.varstable.rowCount()
         if numrows > 0:
@@ -1595,11 +1634,11 @@ class MakeResultPlot(QDialog):
             character = "WHERE houseid > 0"
             if self.where_trip() != "":
                 character = character + " AND " + self.where_trip()
-            sql = "SELECT b.freq, count(*) FROM (SELECT p.houseid, p.personid FROM persons as p, households as h \
-                  WHERE p.houseid = h.houseid%s) as a LEFT JOIN  \
+            sql = "SELECT b.freq, count(*) FROM (SELECT p.houseid, p.personid FROM %s \
+                  WHERE p.houseid = h.houseid%s%s) as a LEFT JOIN  \
                   (SELECT houseid, personid, count(*) as freq FROM %s %s GROUP BY houseid, personid) as b \
                   ON a.houseid = b.houseid AND a.personid = b.personid \
-                  GROUP BY b.freq ORDER BY b.freq" %(socio,table,character)
+                  GROUP BY b.freq ORDER BY b.freq" %(table1,base,socio,table2,character)
             
             print sql
             self.cursor.execute(sql)
@@ -1629,7 +1668,22 @@ class MakeResultPlot(QDialog):
             print e
             
         return False
-    
+
+    def tableName(self):
+        
+        table = ""
+        if not self.show_nhts.isChecked():
+            if self.tripradio.isChecked():
+                table = "trips_r"
+            else:
+                table = self.out_table
+        else:
+            if self.tripradio.isChecked():
+                table = "trips_nhts"
+            else:
+                table = "schedule_nhts"
+            
+        return table
 
 
 class CustomTable(QTableWidget):
