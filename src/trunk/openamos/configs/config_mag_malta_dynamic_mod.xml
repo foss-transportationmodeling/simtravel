@@ -1658,6 +1658,17 @@
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="1"/>
       </Model>
+      <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripind"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="200"/>
+	<Filter table="runtime" var="en_activitytype" condition="equals" value="200"/>
+	<Filter table="runtime" var="duration" condition="greater than equals" value="1"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
 
 
       <Model name="dummyforadult" formulation="Regression" type="Linear" seed="1">
