@@ -34,7 +34,9 @@ class AbstractComponent(object):
                  dependencyAllocationFlag = False,
                  skipFlag=False,
 		 aggregate_variable_dict={},
-		 delete_dict={}):
+		 delete_dict={},
+		 writeToTable2 = None,
+		 key2=None):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -59,18 +61,28 @@ class AbstractComponent(object):
         self.delete_criterion = delete_criterion
         self.history_info = history_info
         self.skipFlag = skipFlag
-        self.keyColsList()
         self.dependencyAllocationFlag = dependencyAllocationFlag
 	self.aggregate_variable_dict = aggregate_variable_dict
 	self.delete_dict = delete_dict
-    #TODO: check for names in the variable list
-    #TODO: check for varnames in model specs and in the data
+	self.writeToTable2 = writeToTable2
+	self.key2 = key2
+
+        self.keyColsList()
+
+
 
     def keyColsList(self):
         if self.key[1] is not None:
             self.keyCols = self.key[0] + self.key[1]
         else:
             self.keyCols = self.key[0]
+
+	if self.writeToTable2 is not None:
+            if self.key2[1] is not None:
+                self.keyCols2 = self.key2[0] + self.key2[1]
+            else:
+                self.keyCols2 = self.key2[0]
+
 
     def pre_process(self, queryBrowser, 
                     skimsMatrix, uniqueIds,
@@ -195,25 +207,33 @@ class AbstractComponent(object):
 
             print "\t\tWriting to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
 	    self.write_data_to_cache(valid_data_rows, partId)
-        return nRowsProcessed
+	    if self.writeToTable2 is not None:
+		data_filter = array([True]*self.data2.rows)
+		self.write_data_to_cache2(data_filter, partId)
+		nRowsProcessed2 = data_filter.sum()
+	    else:
+		nRowsProcessed2 = 0
+        return nRowsProcessed, nRowsProcessed2
 
     def write_data_to_cache(self, data_filter, partId=None):
+	print '\tWriting to primary table - ', self.writeToTable
         # writing to the hdf5 cache
         #print 'writing to cache for ----', partId
 
-        cacheTableRef = self.db.returnTableReference(self.writeToTable, partId)
-        cacheColsTable = cacheTableRef.colnames
+	if data_filter.sum() > 0:
+	    cacheTableRef = self.db.returnTableReference(self.writeToTable, partId)
+            cacheColsTable = cacheTableRef.colnames
 
-        t = time.time()
-        convType = self.db.returnTypeConversion(self.writeToTable, partId)
-        dtypesInput = cacheTableRef.coldtypes
-        data_to_write = self.data.columnsOfType(cacheColsTable, data_filter, dtypesInput)
-        #print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 
+            t = time.time()
+            convType = self.db.returnTypeConversion(self.writeToTable, partId)
+            dtypesInput = cacheTableRef.coldtypes
+            data_to_write = self.data.columnsOfType(cacheColsTable, data_filter, dtypesInput)
+            #print '\t\tConversion to appropriate record array took - %.4f' %(time.time()-t) 
 
-        ti = time.time()
-        cacheTableRef.append(data_to_write.data)
-        cacheTableRef.flush()
-        #print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
+            ti = time.time()
+            cacheTableRef.append(data_to_write.data)
+            cacheTableRef.flush()
+            #print '\t\tBatch Insert Took - %.4f' %(time.time()-ti) 
 
         ti = time.time()
         if self.delete_criterion is not None:
@@ -225,6 +245,29 @@ class AbstractComponent(object):
         #print '\t\t', self.delete_criterion
         #print '\t\tDeleting rows for which processing was complete - %.4f' %(time.time()-ti)
         #print '\t\tSize of dataset', self.data.rows	
+
+
+    def write_data_to_cache2(self, data_filter, partId=None):
+	print '\tWriting to secondary table - ', self.writeToTable2
+
+	if data_filter.sum() > 0:
+            cacheTableRef = self.db.returnTableReference(self.writeToTable2, partId)
+            cacheColsTable = cacheTableRef.colnames
+
+            convType = self.db.returnTypeConversion(self.writeToTable, partId)
+            dtypesInput = cacheTableRef.coldtypes
+            data_to_write = self.data2.columnsOfType(cacheColsTable, data_filter, dtypesInput)
+
+
+            cacheTableRef.append(data_to_write.data)
+            cacheTableRef.flush()
+
+
+        if self.delete_criterion is not None:
+            if self.delete_criterion:
+                self.data2.deleterows(~data_filter)
+            else:
+                self.data2.deleterows(data_filter)          
 
 
     def create_filter(self, data_filter, filter_type):
@@ -256,7 +299,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -275,8 +318,8 @@ class AbstractComponent(object):
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                #                                                              time.time()-tiii)
+                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 #choiceset_shape = (data_subset.rows,
@@ -284,20 +327,25 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                #print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+                print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
 		else:
 		    result = i.simulate_choice(data_subset, choiceset, iteration)
+		    if self.writeToTable2 <> None:
+			self.data2 = result[1]
+			result = result[0]
+
 		    self.data = result
 		    # Update the filter because the number of rows may have changed in the data
 		    # for eg. remove work activties from schedules when daily work status is zero
-		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+		    #data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
+		    data_subset_filter = array([True]*self.data.rows)
 	      
 		#print result.varnames
-                #print 'RESULT', result.data
+                print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -364,10 +412,11 @@ class AbstractComponent(object):
                 tempdep_columnDict['temp'] += self.key[1]
 	#print 'FIRST INSTANCE PROCESSING OF COUNT KEY', count_keys, prim_keys, indep_columnDict
 	
-	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable] and len(self.aggregate_variable_dict) == 0 :
+	if (self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable]) and len(self.aggregate_variable_dict) == 0 :
 	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
-	    prim_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][0]
-	    count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
+	    #prim_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][0]
+	    if self.tableKeys[depVarWriteTable][1] <> []:
+	    	count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
 	    prim_keys[depVarTable] = self.tableKeys[depVarTable][0]
 	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
@@ -569,7 +618,8 @@ class AbstractComponent(object):
             max_dict = None
         else:
             max_dict = count_keys
-
+	print max_dict
+	#raw_input('max dict')
         # Cleaning up the independent variables dictionary
         iterIndepDictKeys = indepVarDict.keys()
         for i in iterIndepDictKeys:

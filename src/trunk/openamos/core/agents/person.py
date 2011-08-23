@@ -18,6 +18,95 @@ class Person(object):
 	self.lastEpisode = None
         self.scheduleConflictIndicator = zeros((2880,1))
 
+	# Activity attributes
+	self.child_dependency = 0
+	self.workstatus = 0
+	self.schoolstatus = 0
+
+	# Person-level attributes for evolution
+	self.age = 0
+	self.clwkr = 0
+	self.educ = 0
+	self.enroll = 0
+	self.esr = 0
+	self.indnaics = 0
+	self.occcen5 = 0
+	self.race1 = 0
+	self.relate = 0
+	self.sex = 0
+	self.marstat = 0
+	self.hours = 0
+	self.grade = 0	
+	self.hispan = 0
+
+	# Evolution process fields for evolution
+	self.mortality_f = 0
+	self.birth_f = 0
+	self.age_f = 0
+	self.enrollment_f = 0
+	self.grade_f = 0
+	self.educ_f = 0
+	self.educInYears_f = 0
+	self.residenceType_f = 0
+	self.laborParticipation_f = 0
+	self.occupation_f = 0
+	self.income_f = 0
+	self.marriageDecision_f = 0
+	self.divorceDecision_f = 0
+
+
+
+
+    def set_person_attributes(self, age, clwkr, educ, enroll,
+			      esr, indnaics, occcen5, race1,
+			      relate, sex, marstat, hours, grade,	
+			      hispan):
+	# Person attributes for evolution
+	self.age = age
+	self.clwkr = clwkr
+	self.educ = educ
+	self.enroll = enroll
+	self.esr = esr
+	self.indnaics = indnaics
+	self.occcen5 = occcen5
+	self.race1 = race1
+	self.relate = relate
+	self.sex = sex
+	self.marstat = marstat
+	self.hours = hours
+	self.grade = grade	
+	self.hispan = hispan
+
+	
+    def set_evolution_attributes(self, mortality_f, birth_f,
+				 age_f, enrollment_f, 
+				 grade_f, educ_f, 
+				 educInYears_f, residenceType_f,
+				 laborParticipation_f, occupation_f,
+				 income_f, marriageDecision_f,
+				 divorceDecision_f):
+	# Evolution process fields
+	self.mortality_f = mortality_f
+	self.birth_f = birth_f
+	self.age_f = age_f
+	self.enrollment_f = enrollment_f
+	self.grade_f = grade_f
+	self.educ_f = educ_f
+	self.educInYears_f = educInYears_f
+	self.residenceType_f = residenceType_f
+	self.laborParticipation_f = laborParticipation_f
+	self.occupation_f = occupation_f
+	self.income_f = income_f
+	self.marriageDecision_f = marriageDecision_f
+	self.divorceDecision_f = divorceDecision_f
+
+
+
+
+
+
+
+
     def reconcile_activity_schedules(self, seed=1):
         self.reconciledActivityEpisodes = []
         self.seed = seed

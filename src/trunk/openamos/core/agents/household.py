@@ -3,6 +3,7 @@ import heapq as hp
 from numpy import array
 
 from openamos.core.models.abstract_random_distribution_model import RandomDistribution
+from openamos.core.agents.person import Person
 
 class Household(object):
     def __init__(self, hid):
@@ -13,9 +14,64 @@ class Household(object):
         self.noDailyFixedActPersonIds = []
         self.indepPersonIds = []
 
+	# Household attributes for evolution
+	self.bldgsz = 0
+	self.hht = 0
+	self.hinc = 0
+	self.noc = 0
+	self.personsSize = 0
+	self.unittype = 0
+	self.vehicl = 0
+	self.wif = 0
+	self.yrMoved = 0
+	self.oldHid = 0
+
+
+	self.relateDict = {1:'Householder',
+			   2:'Husband/Wife',
+			   3:'Natural born son/daughter',
+			   4:'Adopted son/daughter',
+			   5:'Stepson/stepdaughter',
+			   6:'Brother/sister',
+			   7:'Father/mother',
+			   8:'Grandchild',
+			   9:'Parent-in-law',
+			   10:'Son-in-law/daughter-in-law',
+			   11:'Other relative',
+			   12:'Brother-in-law/sister-in-law',
+			   13:'Nephew/niece',
+			   14:'Grandparent',
+			   15:'Uncle/aunt',
+			   16:'Cousin',
+			   17:'Roomer/boarder',
+			   18:'Housemate/roommate',
+			   19:'Unmarried partner',
+			   20:'Foster child',
+			   21:'Other nonrelative',
+			   22:'Institutionalized GQ person',
+			   23:'Noninstitutionalized GQ person'}
+
+	self.hhtDict = {0:"Not in universe (Vacant or GQ)",
+			     1:"Family household: Married-couple",
+			     2:"Family household: Male householder, no wife present",
+			     3:"Family household: Female householder, no husband present",
+			     4:"Nonfamily household: Male householder, living alone",
+			     5:"Nonfamily household: Male householder, not living alone",
+			     6:"Nonfamily household: Female householder, living alone",
+			     7:"Nonfamily household: Female householder, not living alone"}
+
+	self.sexDict = {1:'Male', 2:'Female'}
+
+	self.hhldrAlive = True
+
+
     def add_person(self, person):
         # person is an object of the Person class
+	person.hid = self.hid
         self.persons[person.pid] = person
+	self.personsSize += 1
+	if person.age < 18:
+	    self.noc += 1
 
         if person.child_dependency == 1:
             self.dependencyPersonIds.append(person.pid)
@@ -26,9 +82,371 @@ class Household(object):
             self.noDailyFixedActPersonIds.append(person.pid)
             self.indepPersonIds.append(person.pid)
 
+    def remove_person(self, personId):
+	person = self.persons.pop(personId)
+	self.personsSize -= 1
+	if person.age < 18:
+	    self.noc -= 1
 
-        
-        
+	return person
+
+    def return_person_list(self):
+	personList = []
+	for personId in self.persons.keys():
+	    person = self.persons[personId]
+	    personList.append([person.hid,
+			       person.pid,
+				person.age_f,
+				person.clwkr,
+				person.educ_f,
+				person.enrollment_f,
+				person.esr,
+				person.indnaics,
+				person.occupation_f,
+				person.race1,
+				person.relate,
+				person.sex,
+				person.marstat,
+				person.hours,
+				person.grade_f,	
+				person.hispan,
+			        self.oldHid])
+
+        return personList
+
+	    
+
+
+
+    def set_household_attributes(self, bldgsz, hht, hinc, noc,
+				 persons, unittype, vehicl, wif,
+				 yrMoved):
+	self.bldgsz = bldgsz
+	self.hht = hht
+	self.hinc = hinc
+	#self.noc = noc (No need to assign these; they are updated as person objects are added)
+	#self.persons = persons (No need to assign these; they are updated as person objects are added)
+	self.unittype = unittype
+	self.vehicl = vehicl
+	self.wif = wif
+	self.yrMoved = yrMoved
+
+    def print_person_relationship_gender(self):
+	personIds = copy.deepcopy(self.persons.keys())
+	print '\n    Household Id - ', self.hid
+	for personId in personIds:
+	    person = self.persons[personId]
+	    print """\t    Relationship of person - %s, """\
+			"""relationship - %s and gender - %s' """%(person.pid, 
+								   self.relateDict[person.relate], 
+								   self.sexDict[person.sex])
+	
+
+    def evolve_population(self, seed, highestHid):
+	# All data dictionaries are borrowed directly from PUMS 2000
+	# Once a full implementation is complete we can extend the code
+	# to generalize the data dictionaries
+	
+        self.rndGen = RandomDistribution(int(self.hid + seed))
+	self.highestHid = highestHid
+
+
+	# Printing relationship for current residents of the household
+	print 'HOUSEHOLD ID - %s' %self.hid
+        print '\tHousehold type - ', self.hhtDict[self.hht]
+	personIds = copy.deepcopy(self.persons.keys())
+	for personId in personIds:
+	    person = self.persons[personId]
+	    print '\t    Relationship of all people - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
+
+	# Processing birth
+	birthFlag = False
+	personIds = copy.deepcopy(self.persons.keys())
+	for personId in personIds:
+	    person = self.persons[personId]
+	    	
+	    if person.birth_f == 1:
+		self.process_birth()
+		birthFlag = True
+	if birthFlag:
+	    print '1. After birth processing'
+	    self.print_person_relationship_gender()
+	    #raw_input("press any key to continue...")
+
+	# Processing mortality
+	mortalityFlag = False
+	personIds = copy.deepcopy(self.persons.keys())
+	for personId in personIds:
+	    person = self.persons[personId]
+	    #print '\tRelationship of all people - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
+	    if person.mortality_f == 1:
+		self.process_mortality(personId)
+		mortalityFlag = True
+		if person.relate == 1:
+		    self.hhldrAlive = False
+
+	if mortalityFlag:
+	    print '2. After Mortality Processing'
+	    self.print_person_relationship_gender()		
+	    #raw_input("press any key to continue...")
+
+
+	# Processing divorce
+	divorceFlag = False
+	personIds = copy.deepcopy(self.persons.keys())
+	for personId in personIds:
+	    person = self.persons[personId]
+	    if person.divorceDecision_f == 1:
+		partnerHousehold = self.process_divorce()
+		divorceFlag = True
+		break
+	
+	if divorceFlag:
+	    print '3. After divorce processing'
+	    self.print_person_relationship_gender()
+	    if partnerHousehold is not None:
+		partnerHousehold.print_person_relationship_gender()
+	    #raw_input("press any key to continue...")
+	else:
+	    partnerHousehold = None
+	self.process_household_type()	
+
+
+	#TODO:update the household type for this household and partner's household
+	#TODO:update the household income for this household and partner's household
+	#TODO:update the unit type for this household and partner's household
+	#TODO:update the vehicle count for this household and partner's household
+	#TODO:update the number of workers for this household and partner's household
+	#TODO:update the vehicle count for this household and partner's household
+	#TODO:update the yrmoved for this household and partner's household
+
+
+	#TODO:update PERSON ATTRIBUTES
+
+
+	return partnerHousehold, self.highestHid
+	
+    def process_birth(self):
+	print '\n--1. Person born--'
+	maxPid = max(self.persons.keys())
+	personNew = Person(self.hid, maxPid + 1)
+
+	sexRndNum = self.rndGen.return_uniform()
+	if sexRndNum<= 0.5:
+	    sex = 1
+	else:
+	    sex = 2
+
+	personNew.sex = sex
+	personNew.relate = 3
+
+	hhldrId = False
+	partnerId = False
+	for personId in self.persons.keys():
+	    person = self.persons[personId]
+	    if person.relate == 1:
+		hhldrId = personId
+	    elif person.relate == 2:
+		partnerId = personId
+
+	if hhldrId <> False and partnerId <> False:
+	    hhldr = self.persons[hhldrId]
+	    partner = self.persons[partnerId]
+
+	    if hhldr.race1 == partner.race1:
+		personNew.race1 = hhldr.race1
+
+	    if hhldr.race1 <> partner.race1:
+		personNew.race1 = 9
+	    
+	    print 'Hhldr race - %s and partner race - %s and new Kids race - %s' %(hhldr.race1, partner.race1, personNew.race1)
+
+	if hhldrId <> False and partnerId == False:
+	    hhldr = self.persons[hhldrId]
+	    personNew.race1 = hhldr.race1
+
+	    print 'Hhldr race - %s and partner race - %s and new Kids race - %s' %(hhldr.race1, None, personNew.race1)
+
+	#raw_input()	
+
+
+
+	self.add_person(personNew)
+
+
+    def process_mortality(self, personId):
+	# Remove person record
+	print '\n--2. Person expired need to remove record and update household attributes--'
+
+	print '\tPerson ids list', self.persons.keys()
+	#person = self.persons.pop(personId)
+	person = self.persons[personId]
+	
+	# Update marriage status for the partner
+	if person.marstat == 1:
+	    hhldrId, partnerId = self.identify_hhldr_partner_id()
+	    if hhldrId == personId and partnerId <> False:
+		partner = self.persons[partnerId]
+		partner.marstat = 2
+
+	    if hhldrId <> False and partnerId == personId:
+		hhldr = self.persons[partnerId]
+		hhldr.marstat = 2
+		
+	self.remove_person(personId)
+
+	print '\tNew Person ids list', self.persons.keys()
+	print
+
+
+    def process_divorce(self):
+	print '\n--k. Divorce occurred need to dissolve the household--'
+	
+	if self.hht >=4 and self.hht <=7:
+	    self.print_person_relationship_gender()
+	    print ('Non family household seeking divorce')	
+	partnerHousehold = None
+
+
+	hhldrId, partnerId = self.identify_hhldr_partner_id()
+
+
+	if hhldrId <> False:
+	    hhldr = self.persons[hhldrId]
+	    hhldr.marstat = 3			# changing the marriage status of the hhldr
+		
+	if partnerId <> False:
+	    partner = self.persons[partnerId]
+	    partner.marstat = 3				# changing the marriage status of the partner
+
+	if hhldrId == False or partnerId == False:
+	    print '\tOne or more partners was not identified husbandPid - %s and wifePid - %s' %(hhldrId, partnerId)
+	    #raw_input("\tNo need to dissolve the household one or both are missing from the household due to passign away")
+
+	if hhldrId and partnerId:
+	    print '\tBoth partners were identified husbandPid - %s and wifePid - %s' %(hhldrId, partnerId)
+
+
+	    self.highestHid += 1
+	    partnerHousehold = Household(self.highestHid)
+
+	    print '\t    a. Allocate the partner'
+	    #partner = self.persons.pop(partnerId)
+	    partner = self.remove_person(partnerId)
+	    partnerHousehold.add_person(partner)
+
+	    print '\tMembers in the household other than the householder and partner- '
+		
+	    ownKidIds = []
+	    partnersKidIds = []
+	    ownParentIds = []
+	    partnersParentIds = []		
+	    otherIds = []
+
+	    personIds = copy.deepcopy(self.persons.keys())
+	    for personId in personIds:
+	    	person = self.persons[personId]
+
+	    	print '\t    Relationship of surviving - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
+		if person.relate == 3 or person.relate == 4:
+		    ownKidIds.append(personId)
+		elif person.relate == 5:
+		    partnersKidIds.append(personId)
+		elif person.relate == 7:
+		    ownParentIds.append(personId)
+		elif person.relate == 9:
+		    partnersParentIds.append(personId)
+		elif person.relate <> 1 and person.relate <> 2:
+		    otherIds.append(personId)
+
+	    print '\t    b. Own Kids - ', ownKidIds
+	    print '\t\t Allocating Own Kids'
+	    ownKidsRndNum = self.rndGen.return_uniform()
+	    if ownKidsRndNum <= 0.5:
+		for ownKidId in ownKidIds:
+		    #ownKid = self.persons.pop(ownKidId)
+		    ownKid = self.remove_person(ownKidId)
+		    partnerHousehold.add_person(ownKid)
+
+	    print '\t    c. Partners Kids - ', partnersKidIds
+	    print '\t\t Allocating partner kids'
+	    for partnersKidId in partnersKidIds:
+		#partnersKid = self.persons.pop(partnersKidId)
+		partnersKid = self.remove_person(partnersKidId)
+		partnerHousehold.add_person(partnersKid)
+
+	    print '\t    d. Own parents - ', ownParentIds
+
+	    print '\t    e. Partners parents - ', partnersParentIds
+	    print '\t\t Allocating partner parents'
+	    for partnersParentId in partnersParentIds:
+		#partnersParent = self.persons.pop(partnersParentId)
+		partnersParent = self.remove_person(partnersParentId)
+		partnerHousehold.add_person(partnersParent)
+
+	    print '\t    f. Other - ', otherIds
+	    print '\t\t Allocating others'
+	    for otherId in otherIds:
+		otherRndNum = self.rndGen.return_uniform()
+		if otherRndNum <= 0.5:
+		    #other = self.persons.pop(otherId)
+		    other = self.remove_person(otherId)
+		    partnerHousehold.add_person(other)
+
+	    partnerHousehold.oldHid = self.hid
+	    #raw_input("\tWe need to dissolve the household")	
+	
+	return partnerHousehold
+
+
+    def identify_hhldr_partner_id(self, hid=None):
+	hhldrId = False
+	partnerId = False
+	if hid is None:
+	    personsDict = self.persons
+	else:
+	    personsDict = hid.persons
+
+	personIds = copy.deepcopy(personsDict.keys())
+	for personId in personIds:
+	    person = personsDict[personId]
+	    # Male householder
+	    if person.relate == 1 and person.sex == 1:
+		print '\tIdentified the male householder in the marriage - ', personId
+		hhldrId = personId
+	    # female non-householder
+	    if person.relate == 2 and person.sex == 2:
+		print '\tIdentified the female non-householder in the marriage - ', personId		
+		partnerId = personId
+	    # female householder
+	    if person.relate == 1 and person.sex == 2:
+		print '\tIdentified the female householder in the marriage - ', personId
+		hhldrId = personId
+	    # male non-householder
+	    if person.relate == 2 and person.sex == 1:
+		print '\tIdentified the male non-householder in the marriage - ', personId		
+		partnerId = personId
+	return hhldrId, partnerId
+
+    def process_household_type(self):
+	print '\n--k+1. Process the household type --'
+	print '\tHouseholder alive flag - %s' %self.hhldrAlive
+	personIds = copy.deepcopy(self.persons.keys())
+	for personId in personIds:
+	    person = self.persons[personId]
+	    print '\t    Relationship of surviving - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
+
+	    if self.hhldrAlive:
+		# Householder alive
+		if self.hht >= 1 and self.hht <= 3:
+		    if self.persons == 1:
+			pass
+		    
+
+	    else:
+		# Householder not alive
+		pass
+       
     def _collate_results(self):
         resList = []
         for pid in self.persons:
@@ -664,7 +1082,7 @@ class Household(object):
             person.add_episodes(actIncChauffering, temp=True)
             #print 'THE ACT COUNT AFTER ADDING', person.actCount, len(person.listOfActivityEpisodes)
             #self.print_activity_list(person)
-            #if not person._check_for_conflicts():
+            #if not person._check_f = 0or_conflicts():
             if not person._check_for_conflicts_with_activity(actIncChauffering):
                 person.remove_episodes(actIncChauffering)
             else:

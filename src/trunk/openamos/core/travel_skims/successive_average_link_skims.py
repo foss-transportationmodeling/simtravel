@@ -2,7 +2,7 @@ import shutil
 import time
 import csv
 import os
-from numpy import array
+from numpy import array, average
 
 class SuccessiveAverageLinkAttributes(object):
     def __init__(self, edges=20522, timeIntervals=1440):
@@ -29,6 +29,26 @@ class SuccessiveAverageLinkAttributes(object):
 	self.copy_to_temp(sa_filePath, temp_filePath)
 	sa_new = self.calculate_average(sa_linkAttr, new_linkAttr, iteration, sa_filePath)
 	print 'Time taken to calculate and write to the file - %.4f' %(time.time()-ti)
+
+
+    def get_deviation_link_attributes(self, sa_filePath, new_filePath):
+	ti = time.time()
+	sa_linkAttr = self.load_file(sa_filePath, "\t")
+	new_linkAttr = self.load_file(new_filePath)
+	print 'Time taken to load - %.4f' %(time.time()-ti)
+	ti = time.time()
+	self.copy_to_temp(sa_filePath, temp_filePath)
+	avgVal = self.calculate_deviation(sa_linkAttr, new_linkAttr)
+	print 'Time taken to calculate and write to the file - %.4f' %(time.time()-ti)
+	return avgVal
+
+
+    def calculate_deviation(self, sa, new):
+	meanAbsDiff = average(abs(new - sa))
+
+	return meanAbsDiff
+
+
 
     def load_file(self, filePath, delimiterChar=" "):
 	f = csv.reader(open(filePath, 'r'), delimiter=delimiterChar)

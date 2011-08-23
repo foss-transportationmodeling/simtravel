@@ -240,6 +240,14 @@ class SimulationManager(object):
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
                 queryBrowser.delete_all(tableName)                            
+	    if comp.writeToTable2 is not None:
+		tableName = comp.writeToTable2
+            	if tableName not in tableNamesDelete:
+                    tableNamesDelete.append(tableName)
+                    print "\tDeleting records in the second output table - %s before simulating choices again" %(tableName)
+	            queryBrowser.delete_all(tableName)                            
+
+
         self.close_database_connection(queryBrowser)
         
 
@@ -299,7 +307,7 @@ class SimulationManager(object):
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed = comp.run(data, skimsMatrix, partId)
+                    nRowsProcessed, nRowsProcessed2 = comp.run(data, skimsMatrix, partId)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
@@ -316,6 +324,10 @@ class SimulationManager(object):
 
                     self.reflectToDatabase(queryBrowser, comp.writeToTable, comp.keyCols, 
                                            nRowsProcessed, partId, createIndex, deleteIndex)
+		    if comp.writeToTable2 is not None:
+			self.reflectToDatabase(queryBrowser, comp.writeToTable2, comp.keyCols2,
+					       nRowsProcessed2, partId, createIndex, deleteIndex)
+			
                     #if nRowsProcessed > 0:
 		    # 	raw_input()
                 configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
@@ -395,8 +407,6 @@ class SimulationManager(object):
         are using tables in the database which only contain the input tables 
         and hence the need to reflect the run-time caches to the database
         """
-
-	
 
         fileLoc = self.projectConfigObject.location
         table = self.db.returnTableReference(tableName, partId)

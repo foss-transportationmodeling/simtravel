@@ -1,3 +1,5 @@
+import copy
+
 from openamos.core.errors import ModelError
 from openamos.core.data_array import DataFilter
 from openamos.core.models.abstract_model import Model
@@ -92,10 +94,10 @@ class SubModel(object):
         if self.model_type == 'choice':
             result = self.model.calc_chosenalternative(data, choiceset, seed)
             if self.values is not None:
+	    	resultCp = copy.deepcopy(result)
                 for i in range(len(self.values)):
-                    rows = result == i+1
+                    rows = resultCp == i+1
                     result.data[rows] = self.values[i]
-                    
         if self.model_type == 'consistency':
             result = self.model.resolve_consistency(data, seed)
             

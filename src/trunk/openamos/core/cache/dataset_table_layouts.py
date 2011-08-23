@@ -119,3 +119,119 @@ class ODT_R(t.IsDescription):
     count = t.Int32Col()
 
 
+class Mortality_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    mortality_f = t.Int32Col()
+
+class Birth_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    childbirth_f = t.Int32Col()
+
+class Aging_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    age_f = t.Int32Col()
+    age_sq_f = t.Int32Col()
+
+class Student_Residence_Choice_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    residence_type_f = t.Int32Col()
+
+class Education_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    enroll = t.Int32Col()
+    grade_disagg = t.Int32Col()
+    educ_disagg = t.Int32Col()
+    educ_in_yrs = t.Int32Col()
+
+class Education_Forecast_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    enroll_f = t.Int32Col()
+    grade_disagg_f = t.Int32Col()
+    educ_disagg_f = t.Int32Col()
+    educ_in_yrs_f = t.Int32Col()
+
+class Labor_Participation_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    labor_participation_f = t.Int32Col()
+    occupation_f = t.Int32Col()
+    income_f = t.Int32Col()
+
+class Marriage_Decision_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    marriage_decision_f = t.Int32Col()
+
+class Divorce_Decision_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    divorce_decision_f = t.Int32Col()
+
+class Household_Forecast_Population_R(t.IsDescription):
+    houseid = t.Int64Col()
+    bldgsz = t.Int32Col()
+    hht = t.Int32Col()
+    hinc = t.Int32Col()
+    noc = t.Int32Col()
+    persons = t.Int32Col()
+    unittype = t.Int32Col()
+    vehicl = t.Int32Col()
+    wif = t.Int32Col()
+    yrmoved = t.Int32Col()
+    old_houseid = t.Int64Col()
+
+class Household_Moving_Population_R(t.IsDescription):
+    houseid = t.Int64Col()
+    bldgsz = t.Int32Col()
+    hht = t.Int32Col()
+    hinc = t.Int32Col()
+    noc = t.Int32Col()
+    persons = t.Int32Col()
+    unittype = t.Int32Col()
+    vehicl = t.Int32Col()
+    wif = t.Int32Col()
+    yrmoved = t.Int32Col()
+
+class Person_Forecast_Population_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    age = t.Int32Col()
+    clwkr = t.Int32Col()
+    educ_disagg = t.Int32Col()
+    enroll = t.Int32Col()
+    esr = t.Int32Col()
+    indnaics = t.Int32Col()
+    occcen5 = t.Int32Col()
+    race1 = t.Int32Col()
+    relate = t.Int32Col()
+    sex = t.Int32Col()
+    marstat = t.Int32Col()
+    hours = t.Int32Col()
+    grade_disagg = t.Int32Col()
+    hispan = t.Int32Col()
+    old_houseid = t.Int64Col()
+
+class Person_Moving_Population_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    age = t.Int32Col()
+    clwkr = t.Int32Col()
+    educ = t.Int32Col()
+    enroll = t.Int32Col()
+    esr = t.Int32Col()
+    indnaics = t.Int32Col()
+    occcen5 = t.Int32Col()
+    race1 = t.Int32Col()
+    relate = t.Int32Col()
+    sex = t.Int32Col()
+    marstat = t.Int32Col()
+    hours = t.Int32Col()
+    grade = t.Int32Col()
+    hispan = t.Int32Col()
+

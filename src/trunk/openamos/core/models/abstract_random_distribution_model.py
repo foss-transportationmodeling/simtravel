@@ -33,6 +33,9 @@ class RandomDistribution(RandomState):
     def shuffle_sequence(self, sequence):
 	return self.shuffle(sequence)
 
+    def return_uniform(self, low=0.0, high=1.0, size=1):
+	return self.uniform(low, high, size)
+
 
 
 import unittest

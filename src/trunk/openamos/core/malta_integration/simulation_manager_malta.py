@@ -14,6 +14,7 @@ from openamos.core.malta_integration.dataset_malta import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
+from openamos.core.travel_skims.successive_average_link_skims import SuccessiveAverageLinkAttributes
 
 #from multiprocessing import Process
 
@@ -30,7 +31,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic_mod.xml'
 	configObject = None
 
 
@@ -274,6 +275,9 @@ class SimulationManager(object):
 	# Reduce 100 to match TAZ notatiosample_locn of MALTA
 	tripInfo = tripInfo.astype(int)
 
+	#tripInfo[:,5] = 100
+	#tripInfo[:,6] = 1000
+
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
 	#print tripInfo.shape
         #print tripInfo[-3:, [0, -6, -5]]
@@ -319,6 +323,7 @@ class SimulationManager(object):
 	uniqueIds = None
 	#return origin, origin
         return skimsMatrix, uniqueIds
+
 
     def close_connections(self):
         self.queryBrowser.dbcon_obj.close_connection()

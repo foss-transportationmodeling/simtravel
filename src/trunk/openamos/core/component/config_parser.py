@@ -33,28 +33,31 @@ from openamos.core.models.schedules_model_components import ActivityAttribsSpeci
 from openamos.core.models.schedules_model_components import DailyStatusAttribsSpecification
 from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
 from openamos.core.models.schedules_model_components import HouseholdSpecification
+from openamos.core.models.evolution_model_components import IdSpecification
+from openamos.core.models.evolution_model_components import HouseholdAttributesSpecification
+from openamos.core.models.evolution_model_components import PersonAttributesSpecification
+from openamos.core.models.evolution_model_components import EvolutionAttributesSpecification
+from openamos.core.models.evolution_model_components import HouseholdEvolutionSpecification
+from openamos.core.models.population_synthesis_model_components import PopGenModelSpecification
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
 from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
+from openamos.core.models.population_evolution_processing import PopulationEvolutionProcessing
+from openamos.core.models.emigration import Emigration
+from openamos.core.models.immigration import Immigration
 from openamos.core.models.column_operations_model import ColumnOperationsModel
-
 from openamos.core.models.model import SubModel
-
 from openamos.core.component.abstract_component import AbstractComponent
-
 from openamos.core.activity_travel.activity_travel_components import HistoryInfo, HouseholdStructureInfo
-
 from openamos.core.spatial_analysis.spatial_query_components import SpatioTemporalConstraint, PrismConstraints
-
 from openamos.core.travel_skims.travel_skims_components import TravelSkimsInfo
 from openamos.core.travel_skims.locations_components import LocationsInfo
-
 from openamos.core.database_management.database_configuration import DataBaseConfiguration
-
 from openamos.core.project_configuration import ProjectConfiguration
 from openamos.core.data_array import DataArray, DataFilter
 from openamos.core.errors import ConfigurationError 
+
 
 class ConfigParser(object):
     """
@@ -279,7 +282,7 @@ class ConfigParser(object):
 
     def parse_analysis_interval_and_create_component(self, component_element, projectSeed):
         ti = time.time()
-        comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
+        comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
 	print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
@@ -341,7 +344,7 @@ class ConfigParser(object):
 	    analysisIntervalFilter = None
 	
 
-        comp_name, comp_read_table, comp_write_table = self.return_component_attribs(component_element)
+        comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
 
         deleteCriterion = self.return_delete_records_criterion(component_element)
         
@@ -354,7 +357,10 @@ class ConfigParser(object):
         else:
             comp_keys = tableKeys[comp_read_table]
 
-
+	if comp_write_to_table2 is not None:
+	    key2 = tableKeys[comp_write_to_table2]
+	else:
+	    key2 = None
 
         spatialConstIterator = component_element.getiterator("SpatialConstraints")
         spatialConst_list = []
@@ -430,7 +436,9 @@ class ConfigParser(object):
                                       dependencyAllocationFlag = dependencyAllocationFlag,
                                       skipFlag = skipFlag, 
 				      aggregate_variable_dict = agg_vars_dict,
-				      delete_dict = delete_dict)
+				      delete_dict = delete_dict,
+				      writeToTable2=comp_write_to_table2,
+				      key2 = key2)
         return component
 
 
@@ -542,6 +550,16 @@ class ConfigParser(object):
 
 	if model_formulation == 'Column Operations':
             self.create_column_operations_object(model_element, projectSeed)	    
+
+	if model_formulation == 'Evolution Post Process':
+            self.create_evolution_post_process_object(model_element, projectSeed)	    
+
+	if model_formulation == 'Emigration':
+            self.create_migration_object(model_element, projectSeed, migrationType='Emigration')	    
+
+	if model_formulation == 'Immigration':
+            self.create_migration_object(model_element, projectSeed, migrationType='Immigration')	    
+
 
 
     def process_seed(self, model_element):
@@ -1484,6 +1502,130 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+
+    def create_evolution_post_process_object(self, model_element, projectSeed):
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+	agentType = model_element.get('type')
+
+
+	id_element = model_element.find('Id')
+	idSpec = self.return_id_spec(id_element)
+
+	hhld_attribs_element = model_element.find('HouseholdAttributes')
+	hhldAttribsSpec = self.return_hhld_attribs(hhld_attribs_element)
+
+	person_attribs_element = model_element.find('PersonAttributes')
+	personAttribsSpec = self.return_person_attribs(person_attribs_element)
+
+	evolution_attribs_element = model_element.find('EvolutionAttributes')
+	evolutionAttribsSpec = self.return_evolution_attribs(evolution_attribs_element)
+	
+	specification = HouseholdEvolutionSpecification(idSpec, agentType, 
+							hhldAttribsSpec, 
+							personAttribsSpec, 
+							evolutionAttribsSpec)
+	
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+	model = PopulationEvolutionProcessing(specification)
+	
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+    def create_migration_object(self, model_element, projectSeed, migrationType):
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+	agentType = model_element.get('type')
+
+	id_element = model_element.find('Id')
+	idSpec = self.return_id_spec(id_element)
+
+	hhld_attribs_element = model_element.find('HouseholdAttributes')
+	hhldAttribsSpec = self.return_hhld_attribs(hhld_attribs_element)
+
+	person_attribs_element = model_element.find('PersonAttributes')
+	personAttribsSpec = self.return_person_attribs(person_attribs_element)
+	
+	popgenConfig = model_element.find('ProjectConfig')
+
+	specification = PopGenModelSpecification(idSpec, 
+						 hhldAttribsSpec, 
+						 personAttribsSpec,
+						 popgenConfig)
+
+
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+	if migrationType == 'Emigration':
+	    model = Emigration(specification)
+	elif migrationType == 'Immigration':
+	    model = Immigration(specification)
+	
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+
+
+
+
+
     def create_column_operations_object(self, model_element, projectSeed=0):
         variable_list = []
         
@@ -1580,6 +1722,231 @@ class ConfigParser(object):
 
 
 
+    def return_id_spec(self, id_element):
+	variable_list = []
+
+	houseIdName_element = id_element.find('HouseId')
+	houseIdParsed = self.return_table_var(houseIdName_element)
+	variable_list.append(houseIdParsed)
+
+	personIdName_element = id_element.find('PersonId')
+	personIdParsed = self.return_table_var(personIdName_element)
+	variable_list.append(personIdParsed)
+
+	idSpec = IdSpecification(houseIdParsed[1], personIdParsed[1])
+	
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	return idSpec
+
+
+    def return_hhld_attribs(self, hhld_attribs_element):
+	variable_list = []
+
+	bldgszName_element = hhld_attribs_element.find('BuildingSize')
+	bldgszParsed = self.return_table_var(bldgszName_element)
+	variable_list.append(bldgszParsed)
+
+	typeName_element = hhld_attribs_element.find('Type')
+	typeParsed = self.return_table_var(typeName_element)
+	variable_list.append(typeParsed)
+
+	hincName_element = hhld_attribs_element.find('HhldIncome')
+	hincParsed = self.return_table_var(hincName_element)
+	variable_list.append(hincParsed)
+
+	numChildren_element = hhld_attribs_element.find('NumChildren')	
+	numChildrenParsed = self.return_table_var(numChildren_element)
+	variable_list.append(numChildrenParsed)
+
+	personsName_element = hhld_attribs_element.find('Persons')
+	personsParsed = self.return_table_var(personsName_element)
+	variable_list.append(personsParsed)
+
+	unittype_element = hhld_attribs_element.find('UnitType')	
+	unittypeParsed = self.return_table_var(unittype_element)
+	variable_list.append(unittypeParsed)
+	
+	vehicleCount_element = hhld_attribs_element.find('VehicleCount')	
+	vehicleCountParsed = self.return_table_var(vehicleCount_element)
+	variable_list.append(vehicleCountParsed)
+
+	workersInFamily_element = hhld_attribs_element.find('WorkersInFamily')	
+	workersInFamilyParsed = self.return_table_var(workersInFamily_element)
+	variable_list.append(workersInFamilyParsed)
+
+	yearMoved_element = hhld_attribs_element.find('YearMoved')	
+	yearMovedParsed = self.return_table_var(yearMoved_element)
+	variable_list.append(yearMovedParsed)
+
+
+	hhldAttribsSpec = HouseholdAttributesSpecification(bldgszParsed[1],
+							   typeParsed[1], 
+							   hincParsed[1],
+							   numChildrenParsed[1], 
+							   personsParsed[1],
+							   unittypeParsed[1], 
+							   vehicleCountParsed[1],
+							   workersInFamilyParsed[1], 
+							   yearMovedParsed[1])
+	
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	return hhldAttribsSpec	
+
+    def return_person_attribs(self, person_attribs_element):
+	variable_list = []
+
+	ageName_element = person_attribs_element.find('Age')
+	ageParsed = self.return_table_var(ageName_element)
+	variable_list.append(ageParsed)
+
+	clwkrName_element = person_attribs_element.find('ClassWorker')
+	clwkrParsed = self.return_table_var(clwkrName_element)
+	variable_list.append(clwkrParsed)
+
+	educationName_element = person_attribs_element.find('Education')
+	educationParsed = self.return_table_var(educationName_element)
+	variable_list.append(educationParsed)
+
+	enrollmentName_element = person_attribs_element.find('Enrollment')
+	enrollmentParsed = self.return_table_var(enrollmentName_element)
+	variable_list.append(enrollmentParsed)
+
+	employmentName_element = person_attribs_element.find('Employment')
+	employmentParsed = self.return_table_var(employmentName_element)
+	variable_list.append(employmentParsed)
+
+	industryName_element = person_attribs_element.find('IndustryCode')
+	industryParsed = self.return_table_var(industryName_element)
+	variable_list.append(industryParsed)
+
+	occupationName_element = person_attribs_element.find('Occupation')
+	occupationParsed = self.return_table_var(occupationName_element)
+	variable_list.append(occupationParsed)
+
+	raceName_element = person_attribs_element.find('Race')
+	raceParsed = self.return_table_var(raceName_element)
+	variable_list.append(raceParsed)
+
+	relateName_element = person_attribs_element.find('Relate')
+	relateParsed = self.return_table_var(relateName_element)
+	variable_list.append(relateParsed)
+
+	sexName_element = person_attribs_element.find('Sex')
+	sexParsed = self.return_table_var(sexName_element)
+	variable_list.append(sexParsed)
+
+	maritalStatusName_element = person_attribs_element.find('MaritalStatus')
+	maritalStatusParsed = self.return_table_var(maritalStatusName_element)
+	variable_list.append(maritalStatusParsed)
+
+	hoursWorkedName_element = person_attribs_element.find('HoursWorked')
+	hoursWorkedParsed = self.return_table_var(hoursWorkedName_element)
+	variable_list.append(hoursWorkedParsed)
+
+	gradeName_element = person_attribs_element.find('Grade')
+	gradeParsed = self.return_table_var(gradeName_element)
+	variable_list.append(gradeParsed)
+
+	hispanicIndicatorName_element = person_attribs_element.find('HispanicIndicator')
+	hispanicIndicatorParsed = self.return_table_var(hispanicIndicatorName_element)
+	variable_list.append(hispanicIndicatorParsed)
+
+	personAttribsSpec = PersonAttributesSpecification(ageParsed[1], 
+							  clwkrParsed[1], 
+							  educationParsed[1],
+							  enrollmentParsed[1], 
+							  employmentParsed[1], 
+							  industryParsed[1], 
+							  occupationParsed[1], 
+							  raceParsed[1], 
+							  relateParsed[1], 
+							  sexParsed[1],
+							  maritalStatusParsed[1], 
+							  hoursWorkedParsed[1], 
+							  gradeParsed[1], 
+							  hispanicIndicatorParsed[1])
+
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	return personAttribsSpec	
+
+    def return_evolution_attribs(self, evolution_attribs_element):
+	variable_list = []
+
+	mortalityName_element = evolution_attribs_element.find('MortalityStatus')
+	mortalityParsed = self.return_table_var(mortalityName_element)
+	variable_list.append(mortalityParsed)
+
+	birthName_element = evolution_attribs_element.find('BirthStatus')
+	birthParsed = self.return_table_var(birthName_element)
+	variable_list.append(birthParsed)
+
+	agingName_element = evolution_attribs_element.find('AgeStatus')
+	agingParsed = self.return_table_var(agingName_element)
+	variable_list.append(agingParsed)
+
+	enrollmentName_element = evolution_attribs_element.find('Enrollment')
+	enrollmentParsed = self.return_table_var(enrollmentName_element)
+	variable_list.append(enrollmentParsed)
+
+	gradeName_element = evolution_attribs_element.find('Grade')
+	gradeParsed = self.return_table_var(gradeName_element)
+	variable_list.append(gradeParsed)
+
+	educationName_element = evolution_attribs_element.find('Education')
+	educationParsed = self.return_table_var(educationName_element)
+	variable_list.append(educationParsed)
+
+	educationInYearsName_element = evolution_attribs_element.find('EducationInYears')
+	educationInYearsParsed = self.return_table_var(educationInYearsName_element)
+	variable_list.append(educationInYearsParsed)
+
+	residenceDecisionName_element = evolution_attribs_element.find('ResidenceDecision')
+	residenceDecisionParsed = self.return_table_var(residenceDecisionName_element)
+	variable_list.append(residenceDecisionParsed)
+
+	laborParticipationName_element = evolution_attribs_element.find('LaborParticipation')
+	laborParticipationParsed = self.return_table_var(laborParticipationName_element)
+	variable_list.append(laborParticipationParsed)
+
+	occupationName_element = evolution_attribs_element.find('Occupation')
+	occupationParsed = self.return_table_var(occupationName_element)
+	variable_list.append(occupationParsed)
+
+	incomeName_element = evolution_attribs_element.find('Income')
+	incomeParsed = self.return_table_var(incomeName_element)
+	variable_list.append(incomeParsed)
+
+	marriageDecisionName_element = evolution_attribs_element.find('MarriageDecision')
+	marriageDecisionParsed = self.return_table_var(marriageDecisionName_element)
+	variable_list.append(marriageDecisionParsed)
+
+	divorceDecisionName_element = evolution_attribs_element.find('DivorceDecision')
+	divorceDecisionParsed = self.return_table_var(divorceDecisionName_element)
+	variable_list.append(divorceDecisionParsed)
+
+	evolutionAttribsSpec = EvolutionAttributesSpecification(mortalityParsed[1],
+								birthParsed[1],
+								agingParsed[1],
+								enrollmentParsed[1],
+								gradeParsed[1],
+								educationParsed[1],
+								educationInYearsParsed[1],	
+								residenceDecisionParsed[1],
+								laborParticipationParsed[1],
+								occupationParsed[1],
+								incomeParsed[1],
+								marriageDecisionParsed[1],
+								divorceDecisionParsed[1])
+			
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	return evolutionAttribsSpec	
 
 
 
@@ -1971,6 +2338,8 @@ class ConfigParser(object):
         writeToTable = component_element.get('write_to_table')
         if writeToTable is None:
             writeToTable = readFromTable
+
+	writeToTable2 = component_element.get('write_to_table_2')
             
         """    
         prim_keys = component_element.get('key')
@@ -1983,7 +2352,7 @@ class ConfigParser(object):
         
         #print varname, tablename, [prim_keys, index_keys]
         #return name, readFromTable, writeToTable, [prim_keys, index_keys]
-        return name, readFromTable, writeToTable
+        return name, readFromTable, writeToTable, writeToTable2
         
         
                             

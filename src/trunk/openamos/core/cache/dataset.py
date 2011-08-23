@@ -76,7 +76,23 @@ class DB(object):
         self.fileh.createTable(output_grp, "gap_function_r", Gap_Function_R)
         self.fileh.createTable(output_grp, "od_r", OD_R)
         self.fileh.createTable(output_grp, "odt_r", ODT_R)
-
+        self.fileh.createTable(output_grp, "mortality_r", Mortality_R)
+        self.fileh.createTable(output_grp, "birth_r", Birth_R)
+        self.fileh.createTable(output_grp, "aging_r", Aging_R)
+        self.fileh.createTable(output_grp, "student_residence_choice_r", Student_Residence_Choice_R)
+        self.fileh.createTable(output_grp, "education_r", Education_R)
+        self.fileh.createTable(output_grp, "education_continuation_r", Education_Forecast_R)
+        self.fileh.createTable(output_grp, "labor_participation_r", Labor_Participation_R)
+        self.fileh.createTable(output_grp, "marriage_decision_r", Marriage_Decision_R)
+        self.fileh.createTable(output_grp, "divorce_decision_r", Divorce_Decision_R)
+        self.fileh.createTable(output_grp, "household_forecast_population_r", Household_Forecast_Population_R)
+        self.fileh.createTable(output_grp, "person_forecast_population_r", Person_Forecast_Population_R)
+        self.fileh.createTable(output_grp, "household_emigration_population_r", Household_Moving_Population_R)
+        self.fileh.createTable(output_grp, "person_emigration_population_r", Person_Moving_Population_R)
+        self.fileh.createTable(output_grp, "household_immigration_population_r", Household_Moving_Population_R)
+        self.fileh.createTable(output_grp, "person_immigration_population_r", Person_Moving_Population_R)
+        self.fileh.createTable(output_grp, "household_population_r", Household_Moving_Population_R)
+        self.fileh.createTable(output_grp, "person_population_r", Person_Moving_Population_R)
 
 
 
