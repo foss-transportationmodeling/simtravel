@@ -14,6 +14,7 @@ from results_menu.view_sched import *
 from results_menu.view_plot import *
 from results_menu.kml_num_trips import *
 from results_menu.import_nhts import *
+from results_menu.to_msexcel import *
 from run_menu.simulation_dialog import *
 
 from openamos.core.config import *
@@ -239,7 +240,9 @@ class MainWindow(QMainWindow):
                                                   "schedule", "Show profile of activity travel pattern in persons or households", False, True)
         kml_tirps_action = self.createaction("Travel or Activity Characteristics in KML", self.create_kml, None,
                                                   "earth", "Show travel characteristics", False, True)
-        self.addActions(self.result_menu, (activity_pattern_action,person_schedule_action,kml_tirps_action, ))
+        export_output = self.createaction("Export Output (.xls)", self.exportoutput, None, 
+                                    "excel","Produce the basic OpenAmos or NHTS results as MS Excel", False, True)
+        self.addActions(self.result_menu, (activity_pattern_action,person_schedule_action,kml_tirps_action,export_output, ))
 
     # Defining help
         self.help_menu = self.menuBar().addMenu("&Help")
@@ -365,6 +368,7 @@ class MainWindow(QMainWindow):
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
             self.result_menu.actions()[2].setEnabled(True)
+            self.result_menu.actions()[3].setEnabled(True)
 
 
 
@@ -400,6 +404,7 @@ class MainWindow(QMainWindow):
             self.result_menu.actions()[0].setEnabled(True)
             self.result_menu.actions()[1].setEnabled(True)
             self.result_menu.actions()[2].setEnabled(True)
+            self.result_menu.actions()[3].setEnabled(True)
 
 
             
@@ -448,6 +453,7 @@ class MainWindow(QMainWindow):
         self.result_menu.actions()[0].setDisabled(True)
         self.result_menu.actions()[1].setDisabled(True)
         self.result_menu.actions()[2].setDisabled(True)
+        self.result_menu.actions()[3].setDisabled(True)
 
         
 
@@ -477,6 +483,11 @@ class MainWindow(QMainWindow):
         if self.proconfig <> None:
             import_nhts = Import_NHTS(self.proconfig)
             import_nhts.exec_()
+            
+    def exportoutput(self):
+        if self.proconfig <> None:
+            export_output = Export_Outputs(self.proconfig)
+            export_output.exec_()
             
     def databaseconfiguration(self):
         if self.proconfig <> None:
