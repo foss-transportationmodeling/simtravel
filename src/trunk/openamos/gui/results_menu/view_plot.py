@@ -59,6 +59,7 @@ class MakeResultPlot(QDialog):
         
         self.tabs = QTabWidget()
         self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tabs.setMinimumHeight(300)
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
 
