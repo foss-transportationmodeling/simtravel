@@ -148,6 +148,8 @@ class ChildDependencyAllocation(Model):
     def resolve_consistency(self, data, seed):
 
         actList = []
+	actListJoint = []
+
         data.sort([self.activityAttribs.hidName,
                    self.activityAttribs.pidName,
                    self.activityAttribs.scheduleidName])
@@ -189,21 +191,37 @@ class ChildDependencyAllocation(Model):
 
                 householdObject.add_person(personObject)
 
-                #print '\thID - %s, pID - %s' %(perIndex[0], perIndex[1])
+                #print 'Allocating for person hID - %s, pID - %s' %(perIndex[0], perIndex[1])
                 #print schedulesForPerson.data.astype(int)
 
-            reconciledSchedules = householdObject.allocate_dependent_activities(seed)
-            #print reconciledSchedules
-            
+	    #if hhldIndex[0] <> 125110:
+	    #	continue
+		
+            householdObject.allocate_dependent_activities(seed)
+	    householdObject.identify_joint_episodes()
+
+	    reconciledSchedules = householdObject._collate_results()
+	    reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
+
             actList += reconciledSchedules
+            actListJoint += reconciledSchedulesJoint
+
+            """
 
             #print self.colNames
             #for i in reconciledSchedules:
                 #print i
 
-	    #if hhldIndex[0] == 15080 or hhldIndex[0] == 322 or hhldIndex[0] == 42033 or hhldIndex[0] == 650 or hhldIndex[0] == 43160:
+	    if hhldIndex[0] == 6006 or hhldIndex[0] == 89192:
+            	reconciledSchedules = householdObject.allocate_dependent_activities(seed)
+            	actList += reconciledSchedules
+
+            	reconciledSchedulesJoint = householdObject.identify_joint_episodes()
+            	actListJoint += reconciledSchedulesJoint
+	    	raw_input()	   
+	    """
 	    #if hhldIndex[0] == 42033 or hhldIndex[0] == 15080 or hhldIndex[0] == 1066 or hhldIndex[0] == 48927 or hhldIndex[0] == 35802:
-	    #	raw_input()	   
+
 
             #raw_input()
 
@@ -213,7 +231,9 @@ class ChildDependencyAllocation(Model):
             #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
             #    i += 1
                 
-        return DataArray(actList, self.colNames)
+	
+	raw_input()
+        return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list

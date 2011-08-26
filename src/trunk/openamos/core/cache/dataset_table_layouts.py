@@ -85,9 +85,24 @@ class Trips_R(t.IsDescription):
     tozone = t.Int32Col()
     starttime = t.Int32Col()
     endtime = t.Int32Col()
+    trippurposefrom = t.Int32Col()
     trippurpose = t.Int32Col()
     duration = t.Int32Col()
+    occupancy = t.Int32Col()
+    tripind = t.Int32Col()
+    dependentpersonid = t.Int32Col()
 
+class Trips_Invalid_R(t.IsDescription):
+    tripid = t.Int64Col()
+    tripind = t.Int32Col()
+
+
+class Occupancy_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    tripid = t.Int32Col()
+    occupancy = t.Int32Col()
+    dependentpersonid = t.Int32Col()
 
 class Trips_Final_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -100,6 +115,7 @@ class Trips_Final_R(t.IsDescription):
     starttime = t.Int32Col()
     endtime = t.Int32Col()
     trippurpose = t.Int32Col()
+
 	
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()

@@ -21,10 +21,10 @@ class ActivityEpisode(object):
 
 
     def __repr__(self):
-        return """scheduleid - %s, acttype - %s, """\
-            """location - %s, """\
-            """starttime - %s, endtime - %s, duration - %s, """\
-	    """depPersonId - %s """% (self.scheduleId, self.actType, self.location,
+        return """schid - %s, acttype - %s, """\
+            """loc - %s, """\
+            """start - %s, end - %s, dur - %s, """\
+	    """depPId - %s, stFLag-%s, endFlag-%s """% (self.scheduleId, self.actType, self.location,
 		                      self.startTime, self.endTime, self.duration,
-			              self.dependentPersonId)
+			              self.dependentPersonId, self.startOfDay, self.endOfDay)
 

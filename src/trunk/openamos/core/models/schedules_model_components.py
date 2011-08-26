@@ -48,3 +48,27 @@ class DependencyAttribsSpecification(object):
     def __init__(self, childDependencyName, elderlyDependencyName=None):
 	self.childDependencyName = childDependencyName
 	self.elderlyDependencyName = elderlyDependencyName
+
+class TripOccupantSpecification(object):
+    def __init__(self,
+		 idSpec,
+		 tripDepAttribSpec):
+	self.idSpec = idSpec	
+	self.tripDepAttribSpec = tripDepAttribSpec
+		 
+        self.choices = None
+        self.coefficients = None
+
+class TripDependentPersonAttributes(object):
+    def __init__(self, 
+		 tripPurposeFromName,
+		 tripDepName,
+		 lastTripDepName,
+		 stActDepName,
+		 enActDepName):
+	self.tripPpurposeFromName = tripPurposeFromName
+	self.tripDepName = tripDepName
+	self.lastTripDepName = lastTripDepName
+	self.stActDepName = stActDepName
+	self.enActDepName = enActDepName
+

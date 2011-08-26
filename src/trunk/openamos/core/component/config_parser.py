@@ -13,6 +13,7 @@ from numpy import array
 
 from openamos.core.models.linear_regression_model import LinearRegressionModel
 from openamos.core.models.log_linear_regression_model import LogLinearRegressionModel
+from openamos.core.models.approx_log_linear_regression_model import ApproxLogRegressionModel
 from openamos.core.models.stochastic_frontier_regression_model import StocFronRegressionModel
 from openamos.core.models.log_stochastic_frontier_regression_model import LogStocFronRegressionModel
 from openamos.core.models.count_regression_model import CountRegressionModel
@@ -33,6 +34,8 @@ from openamos.core.models.schedules_model_components import ActivityAttribsSpeci
 from openamos.core.models.schedules_model_components import DailyStatusAttribsSpecification
 from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
 from openamos.core.models.schedules_model_components import HouseholdSpecification
+from openamos.core.models.schedules_model_components import TripDependentPersonAttributes
+from openamos.core.models.schedules_model_components import TripOccupantSpecification
 from openamos.core.models.evolution_model_components import IdSpecification
 from openamos.core.models.evolution_model_components import HouseholdAttributesSpecification
 from openamos.core.models.evolution_model_components import PersonAttributesSpecification
@@ -44,6 +47,7 @@ from openamos.core.models.child_dependency_allocation import ChildDependencyAllo
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
 from openamos.core.models.population_evolution_processing import PopulationEvolutionProcessing
+from openamos.core.models.trip_occupant_processing import TripOccupantProcessing
 from openamos.core.models.emigration import Emigration
 from openamos.core.models.immigration import Immigration
 from openamos.core.models.column_operations_model import ColumnOperationsModel
@@ -110,15 +114,41 @@ class ConfigParser(object):
 
 
     def parse_models(self, projectSeed=0):
-        self.iterator = self.configObject.getiterator("Component")
+	ti = time.time()
         componentList = []
-        
-        for i in self.iterator:
-            componentIntermediateList = self.parse_analysis_interval_and_create_component(i, projectSeed)
-            componentList += componentIntermediateList
-            if i.attrib['name'] == self.componentName:
-                return componentList
+	for element in self.configObject.iter(tag=etree.Element):
+	    if element.tag == 'Component':
+		#print 'Found component - ', element.get('name')
+		componentList += self.parse_analysis_interval_and_create_component(element, projectSeed)
+	    elif element.tag == 'ComponentList':
+		#print 'Component list found - '
+        	interval_element = element.find("AnalysisInterval")
+        	if interval_element is not None:
+            	    startInterval = interval_element.get("start")
+            	    startInterval = int(startInterval)
 
+            	    endInterval = interval_element.get("end")
+            	    endInterval = int(endInterval)
+
+		else:
+		    startInterval = 0
+		    endInterval = 1
+
+            	for i in range(endInterval - startInterval):
+		    for subElement in element.getiterator('SubComponent'):
+			#print 'Found component in component list - ', subElement.get('name')
+			subComponentList = self.parse_analysis_interval_and_create_component(subElement, projectSeed)
+
+			for subComp in subComponentList:
+                	    for model in subComp.model_list:
+                    		model.seed +=  i 
+
+			    if interval_element is not None:
+			        subComp.analysisInterval = startInterval + i
+		    	componentList += subComponentList
+
+	print '\tTime taken to parse all the components - %.4f' %(time.time()-ti)
+	#raw_input('waiting in config parse ... ')
         return componentList
 
     def parse_projectAttributes(self):
@@ -283,7 +313,7 @@ class ConfigParser(object):
     def parse_analysis_interval_and_create_component(self, component_element, projectSeed):
         ti = time.time()
         comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
-	print "Parsing Component - %s" %(comp_name)
+	#print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
         if interval_element is not None:
@@ -314,7 +344,7 @@ class ConfigParser(object):
         else:
             component = self.create_component(component_element, projectSeed)
             componentList.append(component)
-        print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
+        #print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
 
         return componentList
 
@@ -560,6 +590,9 @@ class ConfigParser(object):
 	if model_formulation == 'Immigration':
             self.create_migration_object(model_element, projectSeed, migrationType='Immigration')	    
 
+	if model_formulation == 'Trip Occupant Processing':
+            self.create_trip_occupant_processing_object(model_element, projectSeed, migrationType='Immigration')	    
+
 
 
     def process_seed(self, model_element):
@@ -632,7 +665,7 @@ class ConfigParser(object):
         
         varianceIterator = model_element.getiterator('Variance')
         
-        if model_type in ['Linear', 'Log Linear'] :
+        if model_type in ['Linear', 'Log Linear', 'Approx Log'] :
             for i in varianceIterator:
                 variance = array([[float(i.get('value'))]])
             errorSpec = LinearRegErrorSpecification(variance, vertex, 
@@ -640,8 +673,10 @@ class ConfigParser(object):
 						    upper_threshold)         
             if model_type == 'Linear':
                 model = LinearRegressionModel(specification, errorSpec)
-            else:
+            elif model_type == 'Log Linear':
                 model = LogLinearRegressionModel(specification, errorSpec)
+	    elif model_type == 'Approx Log':
+                model = ApproxLogRegressionModel(specification, errorSpec)		
         """
         if model_type == 'Log Linear':
             for i in varianceIterator:
@@ -1621,6 +1656,53 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+    def create_trip_occupant_processing_object(self, model_element, projectSeed, migrationType):
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+	id_element = model_element.find('Id')
+	idSpec = self.return_id_spec(id_element)
+
+	trip_dep_pers_attribs_element = model_element.find('TripDependentPersonAttributes')
+	tripDepAttribSpec = self.return_dep_pers_attribs(trip_dep_pers_attribs_element)
+
+	specification = TripOccupantSpecification(idSpec, 
+						  tripDepAttribSpec)
+
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+	model = TripOccupantProcessing(specification)
+	
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
 
 
 
@@ -1678,6 +1760,45 @@ class ConfigParser(object):
         #return model_object, variable_list
         self.model_list.append(model_object)
         self.component_variable_list = self.component_variable_list + variable_list        
+
+
+    def return_dep_pers_attribs(self, trip_dep_pers_attribs_element):
+        variable_list = []
+
+        tripPurpFrom_element = trip_dep_pers_attribs_element.find('TripPurposeFrom')
+        tripPurpFromParsed = self.return_table_var(tripPurpFrom_element)
+        variable_list.append(tripPurpFromParsed)
+
+        trpDepPersIdName_element = trip_dep_pers_attribs_element.find('TripDependentPersonIdName')
+        trpDepPersIdNameParsed = self.return_table_var(trpDepPersIdName_element)
+        variable_list.append(trpDepPersIdNameParsed)
+
+
+        lastTrpActDepPersIdName_element = trip_dep_pers_attribs_element.find('LastTripDependentPersonIdName')
+        lastTrpActDepPersIdNameParsed = self.return_table_var(lastTrpActDepPersIdName_element)
+        variable_list.append(lastTrpActDepPersIdNameParsed)
+
+
+        stActDepPersIdName_element = trip_dep_pers_attribs_element.find('StActDependentPersonIdName')
+        stActDepPersIdNameParsed = self.return_table_var(stActDepPersIdName_element)
+        variable_list.append(stActDepPersIdNameParsed)
+
+
+        enActDepPersIdName_element = trip_dep_pers_attribs_element.find('EnActDependentPersonIdName')
+        enActDepPersIdNameParsed = self.return_table_var(enActDepPersIdName_element)
+        variable_list.append(enActDepPersIdNameParsed)
+
+
+	tripDepAttribSpec = TripDependentPersonAttributes(tripPurpFromParsed[1],
+							  trpDepPersIdNameParsed[1],
+							  lastTrpActDepPersIdNameParsed[1],
+							  stActDepPersIdNameParsed[1],
+							  enActDepPersIdNameParsed[1])
+
+	
+        self.component_variable_list = self.component_variable_list + variable_list
+
+        return tripDepAttribSpec
 
 
     def return_daily_status_attribs(self, dailystatus_attribs_element):

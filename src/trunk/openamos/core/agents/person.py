@@ -243,16 +243,17 @@ class Person(object):
         conflictActs = self._identify_conflict_activities(activityList)
         ownActs, depActs = self.return_own_dep_acts(conflictActs)
         #minStartTime, maxEndTime = self.return_min_max_time_of_activities(depActs)
-        #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
+
         minStartTime = activityList[0].startTime
         maxEndTime = activityList[-1].endTime
-        #print 'DEPENDENT ACTS'
-        #for act in depActs:
-        #    print '\t', act
+        #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
+        print 'DEPENDENT ACTS'
+        for act in depActs:
+            print '\t', act
 
-        #print 'OWN ACTIVITIES'
-        #for act in ownActs:
-        #    print '\t', act
+        print 'OWN ACTIVITIES'
+        for act in ownActs:
+            print '\t', act
             
         #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
 
@@ -263,8 +264,11 @@ class Person(object):
             #print '\tException, More than one activity of the adult person need to be modified/deleted'
             self.adjust_and_delete_own_activities(ownActs, minStartTime, maxEndTime)
         else:
-            raise Exception, 'NO CONFLICTS??'
-
+	    print 'No conflicts with own acts'
+            #raise Exception, 'NO CONFLICTS??'
+	print 'Adjusted acts - '
+	for i in ownActs:
+	    print '\t', i
         """
         if len(depActs) == 0:
             self.adjust_merged_own_acts(ownActs, minStartTime, maxEndTime)
@@ -336,7 +340,9 @@ class Person(object):
         # Adjusting start term episode
         #print 'ownAct start - %s and ownAct end - %s' %(ownAct.startTime, ownAct.endTime)
         if (ownAct.startTime == 0 and ownAct.endTime >= minStartTime):
+	    #print 'move_end'
             self.move_end(ownAct, minStartTime - 1)
+	    #print ownAct
             return
 
         # Adjusting end term episode
@@ -399,6 +405,7 @@ class Person(object):
         ownActsList = []
         depActsList = []
         for act in activityList:
+	    #print '\tchecking for own/dep', act
             if act.dependentPersonId <> 99:
                 ownActsList.append(act)
             elif act.dependentPersonId == 99 and (act.startTime == 0 or act.endTime == 1439):
@@ -542,6 +549,7 @@ class Person(object):
         
         actConflicts = []
         for act in activityList:
+	    #print 'Checking conflicts for act - ', act
             actConflict = self._identify_conflict_activity(act)
             
             if actConflict is not None:
@@ -558,14 +566,19 @@ class Person(object):
         actList = []
         for stAct, act in self.listOfActivityEpisodes:
             #print len(self.listOfActivityEpisodes)
-            #print 'ACTIVITY COORDINATES', activity.startTime, activity.endTime
-            #print 'CONFLICT COORDINATES', act.startTime, act.endTime
-            if ((act.startTime >= activity.startTime and act.startTime <= activity.endTime) 
+            #print '\t\tACTIVITY COORDINATES', activity.startTime, activity.endTime
+            #print '\t\tCONFLICT COORDINATES', act.startTime, act.endTime
+	    
+            if ((act.startTime >= activity.startTime and act.endTime <= activity.endTime) # perfectly in line or within
+		or
+		(activity.startTime > act.startTime and activity.startTime < act.endTime) # if it just grazes it is not a conflict?
                 or
-                (act.endTime >= activity.startTime and act.endTime <= activity.endTime)
+                (activity.endTime > act.startTime and activity.endTime < act.endTime)  # if it just grazes it is not a conflict?
                 or 
                 (act.endTime > activity.endTime and act.startTime < activity.startTime)):
                 actList.append(act)
+		#print '\tchecking against', act, 
+		#print 'this is it --<'
         return actList
 
 
@@ -590,7 +603,8 @@ class Person(object):
 
     def check_end_of_day(self, refStartTime):
 	#print 'Checking end of day for person - ', self.pid
-	#print 'Last Episode - ', self.lastEpisode, self.lastEpisode.startTime
+	#print 'Pid - ', self.pid, 'Last Episode starttime - ', self.lastEpisode, self.lastEpisode.startTime
+	#print 'Ref starttime - ', refStartTime
 	if self.lastEpisode.startTime <= refStartTime:
             #if self.lastEpisode.dependentPersonId == 0:
             #    self.lastEpisode.dependentPersonId = depPersonId
