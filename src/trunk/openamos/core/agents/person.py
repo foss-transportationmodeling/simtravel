@@ -201,6 +201,12 @@ class Person(object):
 	
 	#print('Push all dependent activities that were missed and subsequent activities')
 
+    def print_activity_list(self):
+        print '\t--> ACTIVITY LIST for person - ', self.hid, self.pid
+        acts = copy.deepcopy(self.listOfActivityEpisodes)
+        for i in range(len(acts)):
+	    stTime, act = hp.heappop(acts)
+	    print '\t\t', stTime, act
 
 
     def add_episodes(self, activityEpisodes, temp=False):
@@ -214,6 +220,9 @@ class Person(object):
             hp.heappush(self.listOfActivityEpisodes, (activity.startTime, activity))
             self.actCount += 1
             self._update_schedule_conflict_indicator(activity, add=True)
+	#print 'After adding episodes - '
+	#self.print_activity_list()
+	#raw_input()
 	#print 'After adding: Number of acts - ', len(self.listOfActivityEpisodes)
 
     def remove_episodes(self, activityEpisodes):
@@ -225,6 +234,7 @@ class Person(object):
             #print (activity.startTime, activity)
 	    try:
 	        self.listOfActivityEpisodes.remove((activity.startTime, activity))
+		hp.heapify(self.listOfActivityEpisodes)
 	    except ValueError, e:
 		print 'Warning: Trying to remove a copy of the activityObject: %s' %e
 		raise ValueError, 'Warning: Trying to remove a copy of the activityObject: %s' %e
@@ -240,6 +250,7 @@ class Person(object):
 
 
     def adjust_child_dependencies(self, activityList):
+	#print '--->inside adjustment for conflicts', self.print_activity_list()
         conflictActs = self._identify_conflict_activities(activityList)
         ownActs, depActs = self.return_own_dep_acts(conflictActs)
         #minStartTime, maxEndTime = self.return_min_max_time_of_activities(depActs)
@@ -247,13 +258,13 @@ class Person(object):
         minStartTime = activityList[0].startTime
         maxEndTime = activityList[-1].endTime
         #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
-        print 'DEPENDENT ACTS'
-        for act in depActs:
-            print '\t', act
+        #print 'DEPENDENT ACTS'
+        #for act in depActs:
+        #    print '\t', act
 
-        print 'OWN ACTIVITIES'
-        for act in ownActs:
-            print '\t', act
+        #print 'OWN ACTIVITIES'
+        #for act in ownActs:
+        #    print '\t', act
             
         #print 'Min Start Time - %s and Max End Time - %s' %(minStartTime, maxEndTime)
 
@@ -266,9 +277,10 @@ class Person(object):
         else:
 	    print 'No conflicts with own acts'
             #raise Exception, 'NO CONFLICTS??'
-	print 'Adjusted acts - '
-	for i in ownActs:
-	    print '\t', i
+	#print 'Adjusted acts - '
+	#for i in ownActs:
+	#    print '\t', i
+	#print '--->after adjustment for conflicts', self.print_activity_list()
         """
         if len(depActs) == 0:
             self.adjust_merged_own_acts(ownActs, minStartTime, maxEndTime)
@@ -340,6 +352,7 @@ class Person(object):
         # Adjusting start term episode
         #print 'ownAct start - %s and ownAct end - %s' %(ownAct.startTime, ownAct.endTime)
         if (ownAct.startTime == 0 and ownAct.endTime >= minStartTime):
+	    #print 'Logic 1---------------------------------------'
 	    #print 'move_end'
             self.move_end(ownAct, minStartTime - 1)
 	    #print ownAct
@@ -347,22 +360,27 @@ class Person(object):
 
         # Adjusting end term episode
         if (ownAct.endTime == 1439 and ownAct.startTime <= maxEndTime):
+	    #print 'Logic 2---------------------------------------'
             self.move_start(ownAct, maxEndTime + 1)
             return
 
         # Own activity is engulfing the travel episode
         if ownAct.startTime < minStartTime and ownAct.endTime > maxEndTime:
             if ((minStartTime - ownAct.startTime) > (ownAct.endTime - maxEndTime)):
+	    	#print 'Logic 3---------------------------------------'
                 self.move_end(ownAct, minStartTime - 1)
             else:
+		#print 'Logic 4---------------------------------------'		
                 self.move_start(ownAct, maxEndTime + 1)
             return 
 
         if (ownAct.endTime >= minStartTime and ownAct.endTime <= maxEndTime):
+	    #print 'Logic 5---------------------------------------'
             self.move_end(ownAct, minStartTime - 1)
             return
 
         if (ownAct.startTime >= minStartTime and ownAct.startTime <= maxEndTime):
+	    #print 'Logic 6---------------------------------------'
             self.move_start(ownAct, maxEndTime + 1)
             return
 
@@ -386,8 +404,9 @@ class Person(object):
                 #raw_input()
                 self.remove_episodes([act])
             else:
-                
+		#print '--->BEFORE one activity adjustment for conflicts', self.print_activity_list()                
                 self.adjust_one_activity(act, minStartTime, maxEndTime)
+		#print '--->AFTER one activity adjustment for conflicts', self.print_activity_list()
 
 
     def return_min_max_time_of_activities(self, activityList):
@@ -472,6 +491,9 @@ class Person(object):
         return True
 
     def _check_for_conflicts_with_activity(self, activity):
+	if self._check_for_home_to_home_trips():
+	    return False
+
         if type(activity) == list:
             actList = activity
         else:
@@ -490,6 +512,39 @@ class Person(object):
             #                                                                                         conflict)
             return False
         return True
+
+    def _check_for_home_to_home_trips(self):
+	return False
+	actCount = len(self.listOfActivityEpisodes)
+
+	homeLoc = self.firstEpisode.location
+
+	tempList = []
+	
+	i = 0
+	stTime, stAct  = hp.heappop(self.listOfActivityEpisodes)
+	hp.heappush(tempList, (stTime, stAct))
+	actCount -= 1
+
+	homeToHomeTripFlag = False
+	while (i < actCount):
+	    enStTime, enAct  = hp.heappop(self.listOfActivityEpisodes)
+	    hp.heappush(tempList, (enStTime, enAct))
+		
+	    if (stAct.location == enAct.location and stAct.location == homeLoc and stAct.actType == 600 and enAct.actType == 600):
+		print 'Home to home trip added therefore conflict identified for person - ', self.pid
+		print '\t', stAct
+		print '\t', enAct
+
+		homeToHomeTripFlag = True
+	    i += 1
+	    stTime = enStTime
+	    stAct = enAct
+	self.listOfActivityEpisodes = tempList
+	
+	return homeToHomeTripFlag	
+
+	
 
     def _check_for_ih_conflicts(self, activity):
         conflict = self._conflict_duration_with_activity(activity)
@@ -544,6 +599,86 @@ class Person(object):
         conflict = (self.scheduleConflictIndicator[stTime:endTime, :] > 1).sum()
         return conflict
 
+    def _identify_next_activity(self, activity, count=1):
+        # conflict wrt one activity
+
+	actCount = len(self.listOfActivityEpisodes)
+
+	actList = []
+	tempList = []
+	
+	#print 'Length before - ', len(self.listOfActivityEpisodes)
+
+	i = 0
+	while (i < actCount):
+	    #print 'i value', i
+	    actSt, act  = hp.heappop(self.listOfActivityEpisodes)
+	    hp.heappush(tempList, (actSt, act))
+		
+	    if (act.startTime >= activity.startTime and act.endTime <= activity.endTime):
+
+		#print '\nNext TWO----------'
+		for k in range(count):
+	    	    nextActSt, nextAct = hp.heappop(self.listOfActivityEpisodes)
+		    #print nextAct
+	    	    actList.append(nextAct)
+	    	    hp.heappush(tempList, (nextActSt, nextAct))
+		#print '--------ABOVE TWO' 	
+		i = i + count
+		#print 'i value updated -', i
+	    i += 1
+	self.listOfActivityEpisodes = tempList
+	#print 'Length after - ', len(self.listOfActivityEpisodes)
+	return actList
+
+    def _identify_previous_activity(self, activity, count=1):
+        # conflict wrt one activity
+		
+	actList = []
+	tempList = []
+	tempPrevList = []
+
+	#print 'Length before - ', len(self.listOfActivityEpisodes)
+	actCount = len(self.listOfActivityEpisodes)
+	i = 0
+	for i in range(actCount):
+	    actSt, act  = hp.heappop(self.listOfActivityEpisodes)
+	    hp.heappush(tempList, (actSt, act))
+
+	    if (act.startTime >= activity.startTime and act.endTime <= activity.endTime):
+		pass
+	    elif act.startTime < activity.startTime:
+	    	tempPrevList.append(act)
+
+	self.listOfActivityEpisodes = tempList
+	#print 'Length after - ', len(self.listOfActivityEpisodes)
+	return tempPrevList[-count:]
+
+    def _identify_match_activities(self, activityList):
+        # matches with respect to a list of activities including chains
+        
+        actMatches = []
+        for act in activityList:
+	    #print 'Checking Matches for act - ', act
+            actMatch = self._identify_match_activity(act)
+            
+            if actMatch is not None:
+                for newMatchAct  in actMatch:
+                    if newMatchAct not in actMatches:
+                        actMatches.append(newMatchAct)
+
+        #actMatches = self.sort_acts(actMatches)
+        return actMatches
+
+
+
+    def _identify_match_activity(self, activity):
+        # match wrt one activity
+        for stAct, act in self.listOfActivityEpisodes:
+	    
+            if (act.startTime == activity.startTime and act.endTime == activity.endTime): # perfectly in line or within
+		return [act]
+
     def _identify_conflict_activities(self, activityList):
         # conflict with respect to a list of activities including chains
         
@@ -591,6 +726,7 @@ class Person(object):
 
 
     def check_start_of_day(self, refEndTime):
+	#print 'First episode end - %s for pid - %s and ref - %s' %(self.firstEpisode.endTime, self.pid, refEndTime), self.firstEpisode.endTime >= refEndTime
 	if self.firstEpisode.endTime >= refEndTime:
             #if self.firstEpisode.dependentPersonId == 0:
             #    self.firstEpisode.dependentPersonId = depPersonId
@@ -635,12 +771,15 @@ class Person(object):
 
 
     def move_end(self, act, value):
+	#print 'before logic 3 - ', self.print_activity_list()
         self.remove_episodes([act])
+	#print 'after removing episode logic 3 - ', self.print_activity_list()
         act.endTime = value
         act.duration = act.endTime - act.startTime
         if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
         self.add_episodes([act])
+	#print 'after logic 3 - ', self.print_activity_list()
 
 
 

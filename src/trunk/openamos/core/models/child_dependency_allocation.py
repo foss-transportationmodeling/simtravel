@@ -176,9 +176,12 @@ class ChildDependencyAllocation(Model):
                                                                  :]
 
 
+	    if hhldIndex[0] not in[8, 6006, 15080,149978]:
+	    	continue
 
 
             householdObject = Household(hhldIndex[0])
+
 
             for perIndex in persIndicesForActsForHhld:
                 personObject = Person(perIndex[0], perIndex[1])
@@ -194,11 +197,28 @@ class ChildDependencyAllocation(Model):
                 #print 'Allocating for person hID - %s, pID - %s' %(perIndex[0], perIndex[1])
                 #print schedulesForPerson.data.astype(int)
 
-	    #if hhldIndex[0] <> 125110:
-	    #	continue
-		
+
+            #householdObject.lineup_allocate_start_of_day_episodes_for_dependents()
+
+	    #print 'BEFORE ALLOCATION'		
+	    #householdObject.print_activity_list(person)
+
+
+	
             householdObject.allocate_dependent_activities(seed)
+	    print 'AFTER ALLOCATION'
+	    #raw_input()
+
+	    #householdObject.identify_home_to_home_trips()
+
+
+	    #householdObject.print_activity_list(person)
+	    #raw_input()	
+
 	    householdObject.identify_joint_episodes()
+	    print 'AFTER IDENTIFYING JOINT EPISODES'
+	    #householdObject.print_activity_list(person)
+	    #raw_input()
 
 	    reconciledSchedules = householdObject._collate_results()
 	    reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
@@ -221,7 +241,9 @@ class ChildDependencyAllocation(Model):
 	    	raw_input()	   
 	    """
 	    #if hhldIndex[0] == 42033 or hhldIndex[0] == 15080 or hhldIndex[0] == 1066 or hhldIndex[0] == 48927 or hhldIndex[0] == 35802:
-
+	    if hhldIndex[0] == 8 or hhldIndex[0] == 6006:
+		raw_input()	
+		pass
 
             #raw_input()
 
@@ -232,7 +254,6 @@ class ChildDependencyAllocation(Model):
             #    i += 1
                 
 	
-	raw_input()
         return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
