@@ -425,9 +425,11 @@ class Person(object):
         depActsList = []
         for act in activityList:
 	    #print '\tchecking for own/dep', act
-            if act.dependentPersonId <> 99:
+            #if act.dependentPersonId <> 99:
+            if act.dependentPersonId == 0:
                 ownActsList.append(act)
-            elif act.dependentPersonId == 99 and (act.startTime == 0 or act.endTime == 1439):
+            #elif act.dependentPersonId == 99 and (act.startTime == 0 or act.endTime == 1439):
+            elif act.dependentPersonId > 0 and (act.startTime == 0 or act.endTime == 1439):
                 ownActsList.append(act)
             else:
                 depActsList.append(act)
@@ -514,7 +516,6 @@ class Person(object):
         return True
 
     def _check_for_home_to_home_trips(self):
-	return False
 	actCount = len(self.listOfActivityEpisodes)
 
 	homeLoc = self.firstEpisode.location
@@ -546,7 +547,7 @@ class Person(object):
 
 	
 
-    def _check_for_ih_conflicts(self, activity):
+    def _check_for_ih_conflicts(self, activity, depPersonId):
         conflict = self._conflict_duration_with_activity(activity)
         
         self.remove_episodes([activity])
@@ -564,7 +565,11 @@ class Person(object):
             #print """\t\t\t\tThere is some person at the current location """\
             #    """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
             for act in conflictActs:
-                act.dependentPersonId = 99
+		if act.dependentPersonId == 0:
+		    act.dependentPersonId = 100 + depPersonId
+		else:
+		    act.dependentPersonId = act.dependentPersonId*100 + depPersonId
+                #act.dependentPersonId = 99
 
             return True
         else:
@@ -725,26 +730,35 @@ class Person(object):
 
 
 
-    def check_start_of_day(self, refEndTime):
+    def check_start_of_day(self, refEndTime, depPersonId):
 	#print 'First episode end - %s for pid - %s and ref - %s' %(self.firstEpisode.endTime, self.pid, refEndTime), self.firstEpisode.endTime >= refEndTime
 	if self.firstEpisode.endTime >= refEndTime:
             #if self.firstEpisode.dependentPersonId == 0:
             #    self.firstEpisode.dependentPersonId = depPersonId
-            self.firstEpisode.dependentPersonId = 99
+	    if self.firstEpisode.dependentPersonId == 0:
+		self.firstEpisode.dependentPersonId = 100 + depPersonId
+	    else:
+		self.firstEpisode.dependentPersonId = 100*self.firstEpisode.dependentPersonId + depPersonId		
+            #self.firstEpisode.dependentPersonId = 99
 	    return True
 	else:
 	    return False
 	
 	
 
-    def check_end_of_day(self, refStartTime):
+    def check_end_of_day(self, refStartTime, depPersonId):
 	#print 'Checking end of day for person - ', self.pid
 	#print 'Pid - ', self.pid, 'Last Episode starttime - ', self.lastEpisode, self.lastEpisode.startTime
 	#print 'Ref starttime - ', refStartTime
 	if self.lastEpisode.startTime <= refStartTime:
             #if self.lastEpisode.dependentPersonId == 0:
             #    self.lastEpisode.dependentPersonId = depPersonId
-            self.lastEpisode.dependentPersonId = 99
+	    if self.lastEpisode.dependentPersonId == 0:
+		self.lastEpisode.dependentPersonId = 100 + depPersonId
+	    else:
+		self.lastEpisode.dependentPersonId = 100*self.lastEpisode.dependentPersonId + depPersonId		
+
+            #self.lastEpisode.dependentPersonId = 99
 	    return True
 	else:
 	    return False

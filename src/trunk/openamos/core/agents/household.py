@@ -1042,9 +1042,9 @@ class Household(object):
             person = self.persons[pid]
 
             if start:
-                check = person.check_start_of_day(actOfdepPerson.endTime)
+                check = person.check_start_of_day(actOfdepPerson.endTime, depPersonId)
             else:
-                check = person.check_end_of_day(actOfdepPerson.startTime)
+                check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
 
             if check:
                 print '\t\t\t\tPerson with no fixed activities found and id is -- ', pid
@@ -1058,9 +1058,9 @@ class Household(object):
 
 
             if start:
-                check = person.check_start_of_day(actOfdepPerson.endTime)
+                check = person.check_start_of_day(actOfdepPerson.endTime, depPersonId)
             else:
-                check = person.check_end_of_day(actOfdepPerson.startTime)
+                check = person.check_end_of_day(actOfdepPerson.startTime, depPersonId)
 
             if check:
                 print '\t\t\t\tPerson with fixed activities found and id is -- ', pid
@@ -1139,15 +1139,14 @@ class Household(object):
 	assignPerson = self.persons[pid]
 	#self.print_activity_list(assignPerson)
         
-            
-
 
     def allocate_ih_activity(self, depPersonId, act):
         # Changing the activitytype to +50 to assign that as a dependent
         # activity
         act = copy.deepcopy(act)
         act.actType += 50
-        act.dependentPersonId = 99
+        #act.dependentPersonId = 99
+        act.dependentPersonId = 100 + depPersonId
         
         # If there are people already home then that 
         # person is allocated this particular activity
@@ -1159,7 +1158,7 @@ class Household(object):
             act.scheduleId = person.actCount + 1
             person.add_episodes([act], temp=True)
 
-            if person._check_for_ih_conflicts(act):
+            if person._check_for_ih_conflicts(act, depPersonId):
                 print '\t\t\t\tPerson - %s is already home so he is allocated this activity' %(pid)
                 self.update_depPersonId(act, depPersonId, pid)
                 #person.remove_episodes([act])
@@ -1278,8 +1277,11 @@ class Household(object):
         #if pickup:
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
 
-        dummyActPickUp.dependentPersonId = 99
-        dummyActDropOff.dependentPersonId = 99
+        #dummyActPickUp.dependentPersonId = 99
+        #dummyActDropOff.dependentPersonId = 99
+
+        dummyActPickUp.dependentPersonId = 100 + depPersonId
+        dummyActDropOff.dependentPersonId = 100 + depPersonId
 
         # Person without fixed activities
         #print '\t\t\tScanning person without fixed activities - '
@@ -1380,9 +1382,14 @@ class Household(object):
                                                                          actsInTour[i+0], 
                                                                          actsInTour[i+1])
 
-            dummyActPickUp.dependentPersonId = 99
-            dummyActDropOff.dependentPersonId = 99
-            actsInTour[i+1].dependentPersonId = 99
+            #dummyActPickUp.dependentPersonId = 99
+            #dummyActDropOff.dependentPersonId = 99
+            #actsInTour[i+1].dependentPersonId = 99
+
+            dummyActPickUp.dependentPersonId = 100 + depPersonId
+            dummyActDropOff.dependentPersonId = 100 + depPersonId
+            actsInTour[i+1].dependentPersonId = 100 + depPersonId
+
             actsInTour[i+1].actType += 50
             
             chaufferingEpisodes.append(dummyActPickUp)
@@ -1537,9 +1544,14 @@ class Household(object):
         endActToNonDependent = copy.deepcopy(endAct)
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
 
-        dummyActPickUp.dependentPersonId = 99
-        dummyActDropOff.dependentPersonId = 99
-        endActToNonDependent.dependentPersonId = 99
+        #dummyActPickUp.dependentPersonId = 99
+        #dummyActDropOff.dependentPersonId = 99
+        #endActToNonDependent.dependentPersonId = 99
+
+        dummyActPickUp.dependentPersonId = 100 + depPersonId
+        dummyActDropOff.dependentPersonId = 100 + depPersonId
+        endActToNonDependent.dependentPersonId = 100 + depPersonId
+
         endActToNonDependent.actType += 50
 
 
@@ -1760,13 +1772,13 @@ class Household(object):
             #print '\t\t\t\t\t', act
             print '\tdependencies for conflicts - ', act.dependentPersonId, depPersonId
             if act.startTime == 0 or act.endTime == 1439:
-                if (act.dependentPersonId > 0 and act.dependentPersonId < 99 and act.dependentPersonId <> depPersonId):
+                if (act.dependentPersonId > 0 and act.dependentPersonId <> depPersonId):
                     #print act
                     raw_input()
                     raise Exception, 'This should never happen'
                     #return False
             #print 'DEP IDS', act.dependentPersonId, depPersonId
-            if act.dependentPersonId == 99:
+            if act.dependentPersonId <> depPersonId:
                 #print act, depPersonId
                 #raw_input()
                 return False
