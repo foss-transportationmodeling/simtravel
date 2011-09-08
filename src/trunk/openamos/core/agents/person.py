@@ -239,7 +239,6 @@ class Person(object):
 		print 'Warning: Trying to remove a copy of the activityObject: %s' %e
 		raise ValueError, 'Warning: Trying to remove a copy of the activityObject: %s' %e
 		
-	
             self._update_schedule_conflict_indicator(activity, add=False)
 
     def _update_schedule_conflict_indicator(self, activity, add=True):
@@ -494,6 +493,9 @@ class Person(object):
 
     def _check_for_conflicts_with_activity(self, activity):
 	if self._check_for_home_to_home_trips():
+	    #self.print_activity_list()
+	    print '\tLooks like a home to home trip for hid - %s, pid - %s ? --------------------<<<<<<<<<<<<<<' %(self.hid, self.pid)
+	    #self.print_activity_list()
 	    return False
 
         if type(activity) == list:
@@ -505,17 +507,22 @@ class Person(object):
         for activity in actList:
             stTime = activity.startTime
             endTime = activity.endTime
-        #print 'stTime - ', stTime, 'endTime', endTime
+
+		
             conflictAct = (self.scheduleConflictIndicator[stTime:endTime, :] > 1).sum()
+	    #if conflictAct > 0:
+		#print '\t\t\t', self.hid, self.pid, stTime, endTime
+		#print '\t\t\t', activity
             conflict += conflictAct
+
             
         if conflict > 0:
-            #print '\t\t\t\tTHERE ARE CONFLICTS IN THE SCHEDULE FOR PERSON - %s and CONFLICT - %s ' %(self.pid,
-            #                                                                                         conflict)
             return False
         return True
 
     def _check_for_home_to_home_trips(self):
+	#print 'checking for home to home trips'
+	#self.print_activity_list()
 	actCount = len(self.listOfActivityEpisodes)
 
 	homeLoc = self.firstEpisode.location
@@ -532,10 +539,14 @@ class Person(object):
 	    enStTime, enAct  = hp.heappop(self.listOfActivityEpisodes)
 	    hp.heappush(tempList, (enStTime, enAct))
 		
+	    #print '\t', stAct
+	    #print '\t', enAct
+	    #print '\t\t', (stAct.location == enAct.location and stAct.location == homeLoc and stAct.actType == 600 and enAct.actType == 600)
+
 	    if (stAct.location == enAct.location and stAct.location == homeLoc and stAct.actType == 600 and enAct.actType == 600):
-		print 'Home to home trip added therefore conflict identified for person - ', self.pid
-		print '\t', stAct
-		print '\t', enAct
+		print '\t\t\t\t\tHome to home trip added therefore conflict identified for person - ', self.pid
+		print '\t\t\t\t\t', stAct
+		print '\t\t\t\t\t', enAct
 
 		homeToHomeTripFlag = True
 	    i += 1
@@ -556,15 +567,12 @@ class Person(object):
         checkConflictActsLocation = self._check_location_match(activity,
                                                                conflictActs)
         
-        #print 'Person Id - ', self.pid
-        
-        #print 'conflict', conflict
-        #print 'Same Location', checkConflictActsLocation
 
         if (conflict == activity.duration) and checkConflictActsLocation:
             #print """\t\t\t\tThere is some person at the current location """\
             #    """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
             for act in conflictActs:
+		print 'conflictact - ', act
 		if act.dependentPersonId == 0:
 		    act.dependentPersonId = 100 + depPersonId
 		else:
@@ -579,8 +587,9 @@ class Person(object):
     def _check_location_match(self, activity, conflictActs):
         for act in conflictActs:
             if act.location <> activity.location:
-                #print act.location, activity.location
                 return False
+	    if act.actType == 600 or act.actType == 601:
+		return False
 
         return True
 
@@ -715,7 +724,7 @@ class Person(object):
                 or
                 (activity.endTime > act.startTime and activity.endTime < act.endTime)  # if it just grazes it is not a conflict?
                 or 
-                (act.endTime > activity.endTime and act.startTime < activity.startTime)):
+                (act.startTime < activity.startTime and act.endTime > activity.endTime)):
                 actList.append(act)
 		#print '\tchecking against', act, 
 		#print 'this is it --<'
@@ -775,12 +784,14 @@ class Person(object):
 
 
     def move_start(self, act, value):
+	#self.print_activity_list()
         self.remove_episodes([act])
         act.startTime = value
         act.duration = act.endTime - act.startTime
         if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
         self.add_episodes([act])
+	#self.print_activity_list()
 
 
 
@@ -797,46 +808,32 @@ class Person(object):
 
 
 
-    def move_start_of_day(self, refEndTime):
-        #print 'MOVED START from - ', self.firstEpisode.endTime, refEndTime, 
+    def move_start_of_day(self, refEndTime, depPersonId, dependent=False):
         self.remove_episodes([self.firstEpisode])
         self.firstEpisode.endTime = refEndTime
         self.firstEpisode.duration = (self.firstEpisode.endTime - 
                                       self.firstEpisode.startTime) 
         
-        self.firstEpisode.dependentPersonId = 99
+	if not dependent:
+	    self.firstEpisode.dependentPersonId = 100 + depPersonId
+	else:
+	    self.firstEpisode.dependentPersonId = depPersonId	
         self.add_episodes([self.firstEpisode])
-        """
-        self.scheduleConflictIndicator[self.firstEpisode.endTime:refEndTime, 
-                                       :] += 1
-
-	self.firstEpisode.endTime = refEndTime 
-        self.firstEpisode.dependentPersonId = 99
-	self.firstEpisode.duration = (self.firstEpisode.endTime - 
-				      self.firstEpisode.startTime)
-        """
-        #print 'START MOVED', self.firstEpisode
 
 
-    def move_end_of_day(self, refStartTime):
-        #print 'MOVED END from - ', self.lastEpisode.startTime, refStartTime
+    def move_end_of_day(self, refStartTime, depPersonId, dependent=False):
         self.remove_episodes([self.lastEpisode])
         self.lastEpisode.startTime = refStartTime
         self.lastEpisode.duration = (self.lastEpisode.endTime - 
                                       self.lastEpisode.startTime) 
         
-        self.lastEpisode.dependentPersonId = 99
-        self.add_episodes([self.lastEpisode])
-        """
-        self.scheduleConflictIndicator[refStartTime:self.lastEpisode.startTime, 
-                                       :] += 1
+	if not dependent:
+            self.lastEpisode.dependentPersonId = 100 + depPersonId
+	else:
+            self.lastEpisode.dependentPersonId = depPersonId
 
-	self.lastEpisode.startTime = refStartTime 
-        self.lastEpisode.dependentPersonId = 99
-	self.lastEpisode.duration = (self.lastEpisode.endTime -
-				     self.lastEpisode.startTime)
-        """
-        #print 'END MOVED', self.lastEpisode
+
+        self.add_episodes([self.lastEpisode])
 
     def add_status_dependency(self, workstatus, schoolstatus, child_dependency):
         self.workstatus = workstatus

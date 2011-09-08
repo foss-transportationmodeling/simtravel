@@ -575,8 +575,12 @@ class ConfigParser(object):
 	if model_formulation == 'Clean Aggregate Activity Schedule':
             self.create_clean_aggregate_activity_schedule(model_element, projectSeed)
 
+        if model_formulation == 'Child Dependency Allocation Terminal':
+            self.create_child_dependency_allocation_object(model_element, terminal=True, projectSeed=projectSeed)
+
+
         if model_formulation == 'Child Dependency Allocation':
-            self.create_child_dependency_allocation_object(model_element, projectSeed)
+            self.create_child_dependency_allocation_object(model_element, terminal=False, projectSeed=projectSeed)
 
 	if model_formulation == 'Column Operations':
             self.create_column_operations_object(model_element, projectSeed)	    
@@ -1482,7 +1486,7 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
         
-    def create_child_dependency_allocation_object(self, model_element, projectSeed=0):
+    def create_child_dependency_allocation_object(self, model_element, terminal=False, projectSeed=0):
         #variable_list_required for running the model
         
         variable_list = []
@@ -1520,7 +1524,8 @@ class ConfigParser(object):
 
         specification = HouseholdSpecification(activityAttribsSpec, 
                                                dailyStatusAttribsSpec,
-                                               dependencyAttribsSpec)
+                                               dependencyAttribsSpec,
+					       terminalEpisodesAllocation=terminal)
                                                         
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)

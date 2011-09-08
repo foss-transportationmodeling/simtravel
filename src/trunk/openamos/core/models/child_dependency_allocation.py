@@ -44,57 +44,6 @@ class ChildDependencyAllocation(Model):
 
 
         
-
-
-    def create_indices1(self, data):
-        houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
-                                                 return_inverse=True)
-
-
-        countOfHid = 0
-
-        hhldIndicesOfPersons = []
-        personIndicesOfActs = []
-        self.actIndex = 0
-        self.persIndex = 0
-        for hid in houseIdsUnique:
-            hIdIndices = hId_reverse_indices == countOfHid
-            #hIdIndices.shape = (hIdIndices.sum(), )
-            schedulesForHid = data.rowsof(hIdIndices)
-            #print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
-            #print schedulesForHid.data.astype(int)
-            
-            pIdsUnique, pId_reverse_indices = unique(schedulesForHid.columns([self.activityAttribs.pidName]).data,
-                                                  return_inverse=True)
-            #print '\tperson Ids - ', pIdsUnique
-            countOfPid = 0
-            for pid in pIdsUnique:
-                pIdIndices = pId_reverse_indices == countOfPid
-                #print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
-                #       ' start-', self.actIndex, ' end-', (self.actIndex + pIdIndices.sum()))
-                #print data.data[self.actIndex:(self.actIndex + pIdIndices.sum()), :].astype(int)
-                
-                personIndicesOfActs.append([hid, pid, self.actIndex, self.actIndex + pIdIndices.sum()])
-
-                self.actIndex += pIdIndices.sum()
-                countOfPid += 1
-
-            hhldIndicesOfPersons.append([hid, self.persIndex, self.persIndex + pIdsUnique.shape[0]])
-            #print 'HID - %s, pers index start - %s, pers index end - %s ' %(hid, self.persIndex,
-            #                                                                self.persIndex + pIdsUnique.shape[0])
-            self.persIndex += pIdsUnique.shape[0]
-            countOfHid += 1
-
-
-	self.personIndicesOfActs = array(personIndicesOfActs, dtype=int)
-        self.hhldIndicesOfPersons = array(hhldIndicesOfPersons, dtype=int)
-                   
-
-        #print self.personIndicesOfActs
-        #print self.hhldIndicesOfPersons
-
-        #raw_input()
-
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName,
                                self.activityAttribs.pidName]).data
@@ -176,8 +125,10 @@ class ChildDependencyAllocation(Model):
                                                                  :]
 
 
-	    if hhldIndex[0] not in[8, 6006, 15080,149978]:
+	    if hhldIndex[0] not in [8, 1839, 6006, 13139, 15080, 25779, 35751, 
+				    49815, 57273, 94554, 95335, 96768, 1353601, 149978]:
 	    	continue
+		pass
 
 
             householdObject = Household(hhldIndex[0])
@@ -191,34 +142,16 @@ class ChildDependencyAllocation(Model):
                 workStatus, schoolStatus, childDependency = self.return_status_dependency(schedulesForPerson)
                 personObject.add_status_dependency(workStatus, schoolStatus, 
                                                    childDependency)
-
                 householdObject.add_person(personObject)
 
-                #print 'Allocating for person hID - %s, pID - %s' %(perIndex[0], perIndex[1])
-                #print schedulesForPerson.data.astype(int)
 
+	    if self.specification.terminalEpisodesAllocation:
+		householdObject.allocate_terminal_dependent_activities(seed)
+	    else:
+		householdObject.allocate_dependent_activities(seed)
 
-            #householdObject.lineup_allocate_start_of_day_episodes_for_dependents()
+		#householdObject.lineup_subsequent_ih_dropoffs(seed)
 
-	    #print 'BEFORE ALLOCATION'		
-	    #householdObject.print_activity_list(person)
-
-
-	
-            householdObject.allocate_dependent_activities(seed)
-	    print 'AFTER ALLOCATION'
-	    #raw_input()
-
-	    #householdObject.identify_home_to_home_trips()
-
-
-	    #householdObject.print_activity_list(person)
-	    #raw_input()	
-
-	    householdObject.identify_joint_episodes()
-	    print 'AFTER IDENTIFYING JOINT EPISODES'
-	    #householdObject.print_activity_list(person)
-	    #raw_input()
 
 	    reconciledSchedules = householdObject._collate_results()
 	    reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
@@ -226,33 +159,14 @@ class ChildDependencyAllocation(Model):
             actList += reconciledSchedules
             actListJoint += reconciledSchedulesJoint
 
-            """
-
-            #print self.colNames
-            #for i in reconciledSchedules:
-                #print i
-
-	    if hhldIndex[0] == 6006 or hhldIndex[0] == 89192:
-            	reconciledSchedules = householdObject.allocate_dependent_activities(seed)
-            	actList += reconciledSchedules
-
-            	reconciledSchedulesJoint = householdObject.identify_joint_episodes()
-            	actListJoint += reconciledSchedulesJoint
-	    	raw_input()	   
-	    """
-	    #if hhldIndex[0] == 42033 or hhldIndex[0] == 15080 or hhldIndex[0] == 1066 or hhldIndex[0] == 48927 or hhldIndex[0] == 35802:
-	    if hhldIndex[0] == 8 or hhldIndex[0] == 6006:
-		raw_input()	
+	    if (hhldIndex[0] == 8 or hhldIndex[0] == 6006 or hhldIndex[0] == 13139 
+		or hhldIndex[0] == 15080 or hhldIndex[0] == 35751
+		or hhldIndex[0] == 95335 or hhldIndex[0] == 57273  
+		or hhldIndex[0] == 94554 or hhldIndex[0] == 96768 
+		or hhldIndex[0] == 1353601 or hhldIndex[0] == 149978):
+		#raw_input()	
 		pass
 
-            #raw_input()
-
-            # TODO: CHECK THE DATA UPDATING PART
-            #i = 0
-            #for colN in colNames:
-            #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-            #    i += 1
-                
 	
         return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
 

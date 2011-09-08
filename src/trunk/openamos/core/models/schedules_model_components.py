@@ -9,11 +9,14 @@ class ReconcileSchedulesSpecification(object):
 
 class HouseholdSpecification(object):
     def __init__(self, activityAttribs, dailyStatusAttribs=None,
-                 dependencyAttribs=None, arrivalInfoAttribs=None):
+                 dependencyAttribs=None, arrivalInfoAttribs=None,
+		 terminalEpisodesAllocation=False):
 	self.activityAttribs = activityAttribs
 	self.dailyStatusAttribs = dailyStatusAttribs
 	self.dependencyAttribs = dependencyAttribs
 	self.arrivalInfoAttribs = arrivalInfoAttribs
+
+	self.terminalEpisodesAllocation = terminalEpisodesAllocation
 
 	self.choices = None
 	self.coefficients = None
