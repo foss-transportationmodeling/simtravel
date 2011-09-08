@@ -588,7 +588,7 @@ class Person(object):
         for act in conflictActs:
             if act.location <> activity.location:
                 return False
-	    if act.actType == 600 or act.actType == 601:
+	    if act.actType >= 200:
 		return False
 
         return True

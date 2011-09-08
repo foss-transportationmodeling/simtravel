@@ -466,7 +466,7 @@ class Household(object):
         for pid in self.dependencyPersonIds:
             person = self.persons[pid]
             for actStart, act in person.listOfActivityEpisodes:
-		if act.dependentPersonId == 0:
+		if act.dependentPersonId == 0 or act.dependentPersonId == 99:
                     resList.append([self.hid, pid, act.scheduleId,
                                    act.actType, act.startTime, act.endTime,
                                    act.location, act.duration, act.dependentPersonId])
@@ -772,7 +772,7 @@ class Household(object):
 	    cpTripDep, pid = divmod(cpTripDep, 100)
 	    #print cpTripDep, pid
 	    if pid <> 0 and cpTripDep>0:
-		pers.append(pid)
+		pers.append(int(pid))
 	    if cpTripDep > 100:
 		modGrt100 = True
 	    else:
@@ -1056,7 +1056,7 @@ class Household(object):
 
 	if len(self.unallocatedActs.keys()) > 0:
 	   print 'lenof unallocated acts for hid - %s is - %s' %(self.hid, self.lenUnallocatedActs)
-	   raw_input()
+	   #raw_input()
 	
 	for pid in self.persons.keys():
 	    person = self.persons[pid]
@@ -1166,6 +1166,7 @@ class Household(object):
 											   # conflict
 
         if pid is None:
+	    self.update_depPersonId_for_terminal_episode(start, depPersonId, 99)
             print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1252,6 +1253,7 @@ class Household(object):
         #pid = self.personId_with_least_conflict([terminalAct], 
         #                                        self.indepPersonIds)
         if pid is None:
+	    self.update_depPersonId_for_terminal_episode(start, depPersonId, 99)
             print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1382,6 +1384,7 @@ class Household(object):
 
 
         if pid is None:
+            self.update_depPersonId(act, depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1417,9 +1420,9 @@ class Household(object):
 	for activity in activityList:
             for actStart, act in depPerson.listOfActivityEpisodes:
             	if act.startTime == activity.startTime:
-		    print '\t\t\t\t------>BEFORE ASSIGN', act			
+		    #print '\t\t\t\t------>BEFORE ASSIGN', act			
             	    act.dependentPersonId = pid
-	       	    print '\t\t\t\t-------------->AFTER ASSIGN', act
+	       	    #print '\t\t\t\t-------------->AFTER ASSIGN', act
         #indAct = depPerson.listOfActivityEpisodes.index((activity.startTime, activity))
         #act = depPerson.listOfActivities[indAct]
         
@@ -1428,19 +1431,13 @@ class Household(object):
 		
 	#self.print_activity_list(depPerson)
 
-	assignPerson = self.persons[pid]
-	#self.print_activity_list(assignPerson)
-	#raw_input('activity list added and dep updated')
-
-        #print pid
-        #raw_input('FOUND THE INDEX')
+	if pid <> 99:
+	    assignPerson = self.persons[pid]
+	    #self.print_activity_list(assignPerson)
 
     def allocate_pickup_dropoff(self, depPersonId, stAct, endAct):
         # Create pickup-dropoff for the front end of the activity
         dummyActPickUp, dummyActDropOff = self.create_dummy_activity(depPersonId, stAct, endAct)
-
-        dummyActPickUp.dependentPersonId = 100 + depPersonId
-        dummyActDropOff.dependentPersonId = 100 + depPersonId
 
         dummyActPickUp.dependentPersonId = 100 + depPersonId
         dummyActDropOff.dependentPersonId = 100 + depPersonId
@@ -1523,6 +1520,7 @@ class Household(object):
                                                 self.indepPersonIds)
 
         if pid is None:
+	    self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1762,6 +1760,8 @@ class Household(object):
                                                 self.indepPersonIds)
 
         if pid is None:
+            self.add_activity_update_depPersonId(chaufferingEpisodes, depPersonId, 99)
+	    self.update_depPersonId(actIncChauffering, depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1895,6 +1895,10 @@ class Household(object):
                                                 self.indepPersonIds)
 
         if pid is None:
+  	    self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, 99)
+	    self.update_depPersonId([dummyActPickUp, dummyActDropOff, 
+                                                              endActToNonDependent], depPersonId, 99)
+
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
@@ -1951,9 +1955,9 @@ class Household(object):
         depPerson.add_episodes(activityList)
         depPerson._check_for_conflicts()
         
-	assignPerson = self.persons[pid]
-	
-	self.print_activity_list(assignPerson)
+	if pid <> 99:
+	    assignPerson = self.persons[pid]
+	    #self.print_activity_list(assignPerson)
 	#raw_input('activity list added and dep updated')
 
 
@@ -2048,19 +2052,23 @@ class Household(object):
 
             if act.dependentPersonId <> 0: # there is a dependency
 		# If the terminal episodes are allocated for that dependent person then the indep person is a candidate
-		if [depPersonId] == self.parse_personids(act.dependentPersonId) and (act.startTime == 0 or act.endTime == 1439): 
+		#if [depPersonId] == self.parse_personids(act.dependentPersonId) and (act.startTime == 0 or act.endTime == 1439):
+		#print [depPersonId],self.parse_personids(act.dependentPersonId), 'person ids --- ' 
+		if [depPersonId] == self.parse_personids(act.dependentPersonId):  
 		    conflict.append(True)
 		    #return True
 
 		# If the terminal episodes are allocated for that dependent person and others then the indep person is NOT a candidate
-		if [depPersonId] <> self.parse_personids(act.dependentPersonId) and (act.startTime == 0 or act.endTime == 1439):
+		#if [depPersonId] <> self.parse_personids(act.dependentPersonId) and (act.startTime == 0 or act.endTime == 1439):
+		if [depPersonId] <> self.parse_personids(act.dependentPersonId):
 		    conflict.append(False)
 		    #return False
-		
+		"""		
 		if depPersonId > 0:
+		    print 'this logic is being applied ---'
 		    conflict.append(False)
 
-		"""
+
 		if depPersonId not in self.parse_personids(act.dependentPersonId): # check to see if the dependency is the same 
 										   # as the one for which activities are being allocated
 										   # for

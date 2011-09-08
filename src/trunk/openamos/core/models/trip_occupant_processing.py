@@ -102,7 +102,7 @@ class TripOccupantProcessing(Model):
 	while(modGrt100):
 	    cpTripDep, pid = divmod(cpTripDep, 100)
 	    #print cpTripDep, pid
-	    if pid <> 0 and cpTripDep>0:
+	    if (pid > 0 and pid < 99) and cpTripDep>0:
 		pers.append(pid)
 	    if cpTripDep > 100:
 		modGrt100 = True

@@ -127,7 +127,7 @@ class ChildDependencyAllocation(Model):
 
 	    if hhldIndex[0] not in [8, 1839, 6006, 13139, 15080, 25779, 35751, 
 				    49815, 57273, 94554, 95335, 96768, 1353601, 149978]:
-	    	continue
+	    	#continue
 		pass
 
 
@@ -163,7 +163,7 @@ class ChildDependencyAllocation(Model):
 		or hhldIndex[0] == 15080 or hhldIndex[0] == 35751
 		or hhldIndex[0] == 95335 or hhldIndex[0] == 57273  
 		or hhldIndex[0] == 94554 or hhldIndex[0] == 96768 
-		or hhldIndex[0] == 1353601 or hhldIndex[0] == 149978):
+		or hhldIndex[0] == 1353601 or hhldIndex[0] == 149978 or hhldIndex[0] == 155946):
 		#raw_input()	
 		pass
 
