@@ -34,8 +34,9 @@ class AbstractComponent(object):
                  dependencyAllocationFlag = False,
                  skipFlag=False,
 		 aggregate_variable_dict={},
-		 delete_dict={}):
-
+		 delete_dict={},
+		 writeToTable2 = None,
+		 key2=None):
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
 
@@ -61,6 +62,8 @@ class AbstractComponent(object):
         self.skipFlag = skipFlag
 	self.aggregate_variable_dict = aggregate_variable_dict
 	self.delete_dict = delete_dict
+	self.writeToTable2 = writeToTable2
+	self.key2 = key2
 
         self.keyColsList()
         #self.dependencyAllocationFlag = dependencyAllocationFlag
@@ -209,6 +212,9 @@ class AbstractComponent(object):
 	    elif self.data.rows == 0:
 		return
 	    else:
+		if self.component_name == 'ArrivalTimeInformation' and self.data.rows > 0:
+		    print 'rows - %s and valid data rows - %s' %(self.data.rows, valid_data_rows.sum())
+		    #raw_input()
 	    	trips = self.reflectToDatabase(valid_data_rows, tableNamesKeyDict, queryBrowser, fileLoc)
 
 
@@ -337,6 +343,8 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
 
+		#print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
                     self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
@@ -347,7 +355,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 
-
+                #print 'RESULT', result.data
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
                 #print result.data
@@ -419,10 +427,10 @@ class AbstractComponent(object):
                 count_keys[depVarTable] = self.key[1]
                 tempdep_columnDict['temp'] += self.key[1]
 	
-	if self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable]:
+	if (self.tableKeys[depVarTable] <> self.tableKeys[depVarWriteTable]) and len(self.aggregate_variable_dict) == 0 :
 	    #prim_keys[depVarTable] = tableNamesKeyDict[depVarTable][0]
-	    prim_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][0]
-	    count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
+	    if self.tableKeys[depVarWriteTable][1] <> []:
+	    	count_keys[depVarWriteTable] = self.tableKeys[depVarWriteTable][1]
 	    prim_keys[depVarTable] = self.tableKeys[depVarTable][0]
 	    #count_keys[depVarTable] = tableNamesKeyDict[depVarTable][1]
 
@@ -430,6 +438,7 @@ class AbstractComponent(object):
         indep_columnDict = self.update_dictionary(indep_columnDict, prim_keys)
         indep_columnDict = self.update_dictionary(indep_columnDict, count_keys)
 
+	indep_columnDict = self.update_dictionary(indep_columnDict, self.aggregate_variable_dict)
         #dep_columnDict = self.update_dictionary(dep_columnDict, count_keys)
         
 
@@ -663,6 +672,10 @@ class AbstractComponent(object):
             for j in colsInTable:
                 if j not in data._colnames:
                     data.insertcolumn([j], tempValsArr)
+
+	if self.analysisInterval is not None:
+	    data.insertcolumn(['analysisinterval'], tempValsArr+self.analysisInterval)
+
         return data
 
 

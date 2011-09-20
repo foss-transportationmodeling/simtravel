@@ -121,86 +121,6 @@ class Person(object):
         
 
 
-    def adjust_schedules_given_arrival_info(self, seed=1):
-	if self.destAct.startTime == self.actualArrival:
-	    #print '\n-- Arrived as expected; nothing needs to be done --'
-	    pass
-
-	if self.destAct.startTime > self.actualArrival:
-	    #print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
-	    self.push_destination_activity_to_earlier()
-	    self.add_anchor_activity()
-
-	if self.destAct.startTime < self.actualArrival:
-	    #print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
-	    self.adjust_push_subsequent_activities()
-
-    def add_anchor_activity(self):
-	anchorAct = copy.deepcopy(self.destAct)
-	#anchorAct.actType += 25
-	anchorAct.actType = 598
-	anchorAct.startTime = self.actualArrival
-	anchorAct.endTime = self.actualArrival	
-	anchorAct.duration = 0
-	self.add_episodes([anchorAct])
-	#print 'Dest Act - ', self.destAct
-	#print 'Anchor Act - ', anchorAct
-	#raw_input('adding an anchor activity')	
-
-
-    def push_destination_activity_to_earlier(self):
-	if self.destAct.actType <> 100 or self.destAct.actType <> 600:
-	    moveByValue = self.actualArrival - self.destAct.startTime
-	    self.move_start_end(self.destAct, moveByValue)
-	else:
-	    print '\tThe dest act was of type - %s hence cannot be moved' % self.destAct.actType
-
-    def adjust_push_subsequent_activities(self):
-	#raw_input('adjusting and pushing subsequent activities')
-
-	self.add_anchor_activity()	    
-	missedActsStillToPursue = []
-	actsToPursue = []
-	
-
-	# Adjusting if only the first activity is affected
-	firstExpActAfterArrival = self.expectedActivities[0]
-	
-	if firstExpActAfterArrival.startTime < self.actualArrival and firstExpActAfterArrival.endTime > self.actualArrival:
-	    if firstExpActAfterArrival.endTime == self.actualArrival + 1:
-		#firstExpActAfterArrival.startTime = self.actualArrival
-		self.move_start(firstExpActAfterArrival, self.actualArrival)
-		#print ('Only first activity needs to be adjusted; however move start to actual arrival and then move the whole episode to avoid prism extraction errors')
-	    else:
-		self.move_start(firstExpActAfterArrival, self.actualArrival + 1)
-	    	#print ('Only first activity needs to be adjusted')
-	    	return
-
-	# Adjusting when more than one activity is affected: Push all activities
-	for act in self.expectedActivities:
-	    if (act.endTime < self.actualArrival and act.dependentPersonId > 0):
-		missedActsStillToPursue.append(act)
-	    else:
-	        actsToPursue.append(act)
-
-	#print 'Missed Activities'
-	#for act in missedActsStillToPursue:
-	#    print '\t', act
-
-	#print 'Activities to Pursue'
-	#for act in actsToPursue:
-	#    print '\t', act
-
-	actEnd = self.actualArrival
-	for act in missedActsStillToPursue + actsToPursue:
-	    #print '-->This ', act, ' is being moved by ', actEnd-act.startTime
-	    if actEnd-act.startTime >= 0:
-		moveByValue = copy.deepcopy(actEnd-act.startTime)
-		self.move_start_end(act, moveByValue)
-	    actEnd = copy.deepcopy(act.endTime)
-	
-	#print('Push all dependent activities that were missed and subsequent activities')
-
     def print_activity_list(self):
         print '\t--> ACTIVITY LIST for person - ', self.hid, self.pid
         acts = copy.deepcopy(self.listOfActivityEpisodes)
@@ -494,7 +414,7 @@ class Person(object):
     def _check_for_conflicts_with_activity(self, activity):
 	if self._check_for_home_to_home_trips():
 	    #self.print_activity_list()
-	    print '\tLooks like a home to home trip for hid - %s, pid - %s ? --------------------<<<<<<<<<<<<<<' %(self.hid, self.pid)
+	    #print '\tLooks like a home to home trip for hid - %s, pid - %s ? --------------------<<<<<<<<<<<<<<' %(self.hid, self.pid)
 	    #self.print_activity_list()
 	    return False
 
@@ -544,9 +464,9 @@ class Person(object):
 	    #print '\t\t', (stAct.location == enAct.location and stAct.location == homeLoc and stAct.actType == 600 and enAct.actType == 600)
 
 	    if (stAct.location == enAct.location and stAct.location == homeLoc and stAct.actType == 600 and enAct.actType == 600):
-		print '\t\t\t\t\tHome to home trip added therefore conflict identified for person - ', self.pid
-		print '\t\t\t\t\t', stAct
-		print '\t\t\t\t\t', enAct
+		#print '\t\t\t\t\tHome to home trip added therefore conflict identified for person - ', self.pid
+		#print '\t\t\t\t\t', stAct
+		#print '\t\t\t\t\t', enAct
 
 		homeToHomeTripFlag = True
 	    i += 1
@@ -557,6 +477,26 @@ class Person(object):
 	return homeToHomeTripFlag	
 
 	
+
+    def parse_personids(self, tripDep):
+	cpTripDep = copy.deepcopy(tripDep)
+	modGrt100 = True
+	pers = []
+	while(modGrt100):
+	    cpTripDep, pid = divmod(cpTripDep, 100)
+	    #print cpTripDep, pid
+	    if pid <> 0 and cpTripDep>0:
+		pers.append(int(pid))
+	    if cpTripDep > 100:
+		modGrt100 = True
+	    else:
+		modGrt100 = False
+	#print tripDep, pers
+	if len(pers) > 1:
+	    #print '\t\tExciting picking up more than one persoallocate_dependent_activitiesn ... '
+	    pass
+	return pers
+
 
     def _check_for_ih_conflicts(self, activity, depPersonId):
         conflict = self._conflict_duration_with_activity(activity)
@@ -572,12 +512,16 @@ class Person(object):
             #print """\t\t\t\tThere is some person at the current location """\
             #    """and the activities temporal vertices fit in with this person - %s""" %(self.pid)
             for act in conflictActs:
-		print 'conflictact - ', act
+		#print 'conflictact - ', act
 		if act.dependentPersonId == 0:
 		    act.dependentPersonId = 100 + depPersonId
 		else:
-		    act.dependentPersonId = act.dependentPersonId*100 + depPersonId
+		    otherDepPids = self.parse_personids(act.dependentPersonId)
+		    if depPersonId not in otherDepPids:
+		    	act.dependentPersonId = act.dependentPersonId*100. + depPersonId
                 #act.dependentPersonId = 99
+		#print 'conflictact after - ', act
+	    	#print 'checking for in home conflicts', act
 
             return True
         else:
@@ -730,6 +674,13 @@ class Person(object):
 		#print 'this is it --<'
         return actList
 
+    def _identify_conflict_with_arrival(self, arrivalTime):
+	actList = []
+        for stAct, act in self.listOfActivityEpisodes:
+            if (act.startTime == arrivalTime and arrivalTime <= act.endTime): # encases the arrivalTime
+		actList.append(act)
+	return actList
+
 
     def pop_earliest_activity(self):
 	self.actCount -= 1
@@ -747,7 +698,7 @@ class Person(object):
 	    if self.firstEpisode.dependentPersonId == 0:
 		self.firstEpisode.dependentPersonId = 100 + depPersonId
 	    else:
-		self.firstEpisode.dependentPersonId = 100*self.firstEpisode.dependentPersonId + depPersonId		
+		self.firstEpisode.dependentPersonId = 100.*self.firstEpisode.dependentPersonId + depPersonId		
             #self.firstEpisode.dependentPersonId = 99
 	    return True
 	else:
@@ -762,11 +713,12 @@ class Person(object):
 	if self.lastEpisode.startTime <= refStartTime:
             #if self.lastEpisode.dependentPersonId == 0:
             #    self.lastEpisode.dependentPersonId = depPersonId
+	    #print 'dep person id before - ', self.lastEpisode.dependentPersonId
 	    if self.lastEpisode.dependentPersonId == 0:
 		self.lastEpisode.dependentPersonId = 100 + depPersonId
 	    else:
-		self.lastEpisode.dependentPersonId = 100*self.lastEpisode.dependentPersonId + depPersonId		
-
+		self.lastEpisode.dependentPersonId = 100.*self.lastEpisode.dependentPersonId + depPersonId		
+	    #print '-- dep person id after - ', self.lastEpisode.dependentPersonId
             #self.lastEpisode.dependentPersonId = 99
 	    return True
 	else:
@@ -781,6 +733,16 @@ class Person(object):
 	#print '\tAdding episode - ', act
 	self.add_episodes([act])
 	
+	
+    def move_start_end_by_diff_values(self, act, stValue, endValue):
+        self.remove_episodes([act])
+        act.startTime = stValue
+	act.endTime = endValue
+        act.duration = act.endTime - act.startTime
+        if act.duration < 0:
+            raise Exception, 'Incorrect adjustment - %s' %act
+        self.add_episodes([act])
+			
 
 
     def move_start(self, act, value):
@@ -843,20 +805,37 @@ class Person(object):
         self.extract_work_episodes()
         self.extract_school_episodes()
         
-    def add_arrival_status(self, actualArrival, expectedArrival):
+    def add_arrival_status(self, actualArrival, expectedArrival, tripDependentPerson=None):
 	self.actualArrival = actualArrival
 	self.expectedArrival = expectedArrival
-	self.extract_destination_episode()
+	self.tripDependentPerson = tripDependentPerson
+	if self.actualArrival > 0 and self.expectedArrival > 0:
+	    self.extract_destination_episode()
 
     def extract_destination_episode(self):
 	self.expectedActivities = []
 	self.actualActivities = []
 	
+	"""
 	for startTime, destAct in self.listOfActivityEpisodes:
 	    if destAct.startTime == self.expectedArrival:
 		break
+	"""
+	destAct = None
+	destActList = self._identify_conflict_with_arrival(self.expectedArrival)
 
-
+	print '\texpected arrival - ', self.expectedArrival
+	if len(destActList) == 0:
+	    self.print_activity_list()
+	    print '\t     No dest act found for this arrival'
+	elif len(destActList) > 1:
+	    self.print_activity_list()
+	    print '\t     More than one conflicts found for this arrival'
+	    for i in destActList:
+		print '\t\tdest Act with conflict arrival - ', i
+	else:
+	    destAct = destActList[0]
+	
 	#print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
 	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
 	tempActList = []
@@ -879,6 +858,7 @@ class Person(object):
 	    hp.heappush(tempActList, (startTime, act))
 	self.listOfActivityEpisodes = tempActList
 	#self.destAct = copy.deepcopy(destAct)
+	
 	self.destAct = destAct
 
     def extract_work_episodes(self):

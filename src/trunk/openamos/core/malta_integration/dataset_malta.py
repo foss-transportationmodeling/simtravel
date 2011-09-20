@@ -36,11 +36,21 @@ class DB(object):
 			  'schedule_final_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
 					'endtime', 'duration', 'dependentpersonid'],
 
-			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration'],
-			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration'],
+			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
+				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid'],
+
+			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 
+					      'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration', 'dependentpersonid', 'persononnetworkflag'],
+			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid'],
+			  'trips_invalid_r':['tripid', 'tripind'],
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
-					       'expectedarrivaltime', 'actualarrivaltime'],
+					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
+			  'persons_arrived_id_r':['houseid', 'personid', 'actualarrivaltime', 'expectedarrivaltime', 'tripdependentpersonid', 'tozone', 'personuniqueid'],
+			  'persons_leaving_id_r':['tripid', 'houseid', 'personid', 'personuniqueid', 'starttime', 'fromzone'],
+			  'persons_location_r':['houseid', 'personid', 'personuniqueid', 'location'],
+			  'trips_occupant_origin_invalid_r':['tripid', 'houseid', 'personid', 'tripvalid'],
+			  'households_arrived_id_r':['houseid', 'actualarrivaltime'],
 			  'persons_prism_activities_r':['scheduleid', 'houseid', 'personid'],
 			  'workers_r':['houseid', 'personid', 'episodes'], 
 			  'child_dependency_r':['houseid', 'personid', 'dependency'],
@@ -55,7 +65,9 @@ class DB(object):
 			'expectedarrivaltime':int32, 'actualarrivaltime':int32,
 			'tripmode':int32, 'fromzone':int32, 'tozone':int32, 'starttime':int32,
 			'endtime':int32, 'origin':int32, 'destination':int32, 'tt':float32, 'locationid':int32,
-			'trippurpose':int32, 'arrivaltime':int32, 
+			'trippurpose':int32, 'trippurposefrom':int32, 'tripind':int32, 'occupancy':int32,
+			'persononnetworkflag':int32, 'personuniqueid':int32, 'time':int32, 'location':int32, 'tripvalid':int32,
+			'arrivaltime':int32, 'arrivedpersonid':int32,'tripdependentpersonid':int32,
 			'population':int32, 'public_employment':int32, 'retail_employment':int32, 
 			'office_employment':int32, 'industrial_employment':int32, 'other_employment':int32, 
 			'public_employment_ind':int32, 'retail_employment_ind':int32, 
@@ -63,7 +75,7 @@ class DB(object):
 			'total_area':float32, 'residential_population':int32, 'single_family_dwelling':int32, 
 			'institutional_population':int32, 'multi_family_dwelling':int32, 'vehcount':int32, 
 			'vehtype':int32, 'scheduleid':int32, 'activitytype':int32, 'duration':int32, 
-			'dependentpersonid':int32}
+			'dependentpersonid':int64}
 
 	
 

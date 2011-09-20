@@ -1,4 +1,5 @@
 from openamos.core.agents.person import Person
+from openamos.core.agents.household import Household
 from openamos.core.agents.activity import ActivityEpisode
 from openamos.core.models.abstract_model import Model
  
@@ -14,6 +15,10 @@ class AdjustSchedules(Model):
 	self.activityAttribs = self.specification.activityAttribs
 	self.arrivalInfoAttribs = self.specification.arrivalInfoAttribs
 
+        self.dailyStatusAttribs = self.specification.dailyStatusAttribs
+        self.dependencyAttribs = self.specification.dependencyAttribs
+
+
 	self.colNames = [self.activityAttribs.hidName,
                          self.activityAttribs.pidName,
                          self.activityAttribs.scheduleidName, 
@@ -25,53 +30,69 @@ class AdjustSchedules(Model):
                          self.activityAttribs.dependentPersonName]
 
     def create_indices(self, data):
-        idCols = data.columns([self.activityAttribs.hidName, 
+        idCols = data.columns([self.activityAttribs.hidName,
                                self.activityAttribs.pidName]).data
         combId = idCols[:,0]*100 + idCols[:,1]
-        
-        #print idCols[:20,:]
-        #print 'comid', combId[:20]
-        #print 'comid', combId[-20:]
-
         comIdUnique, comId_reverse_indices = unique(combId, return_inverse=True)
 
-        #print 'unique', comIdUnique[:20]
-        #print 'unique records', comIdUnique.shape
-        #print 'reverse indices', comId_reverse_indices[:20]
-        #print 'reverse indices', comId_reverse_indices[-20:]
-
-
         binsIndices = array(range(comId_reverse_indices.max()+2))
-        
         histIndices = histogram(comId_reverse_indices, bins=binsIndices)
-        #print histIndices[0][:20]
-        #print histIndices[0][-20:]
-        
+
         indicesRowCount = histIndices[0]
-        
         indicesRow = indicesRowCount.cumsum()
-        #print 'Row Count', indicesRowCount[:20]
-        #print 'Row Index Low', indicesRow[:20]
-        #print 'Row Index Hig', indicesRowHigh[:20]
 
 
-        self.indices = zeros((comIdUnique.shape[0], 4), dtype=int)
+        self.personIndicesOfActs = zeros((comIdUnique.shape[0], 4), dtype=int)
 
-        #print self.indices.shape
-        #print idCols.shape
-        #print indicesRow.shape
-        #print binsIndices.shape
+        self.personIndicesOfActs[:,0] = comIdUnique/100
+        self.personIndicesOfActs[:,1] = comIdUnique - self.personIndicesOfActs[:,0]*100
+        self.personIndicesOfActs[1:,2] = indicesRow[:-1]
+        self.personIndicesOfActs[:,3] = indicesRow
 
-        self.indices[:,0] = comIdUnique/100
-        self.indices[:,1] = comIdUnique - self.indices[:,0]*100
+        #print self.personIndicesOfActs[:20, :]
+        #print self.personIndicesOfActs[-20:, :]
 
-        self.indices[1:,2] = indicesRow[:-1]
-        self.indices[:,3] = indicesRow
-        
-        #print self.indices[:20, :]
-        #print self.indices[-20:, :]
+
+        hid = self.personIndicesOfActs[:,0]
+
+        hidUnique, hid_reverse_indices = unique(hid, return_inverse=True)
+
+        binsHidIndices = array(range(hid_reverse_indices.max()+2))
+        histHidIndices = histogram(hid_reverse_indices, bins=binsHidIndices)
+
+        indicesHidRowCount = histHidIndices[0]
+        indicesHidRow = indicesHidRowCount.cumsum()
+
+        self.hhldIndicesOfPersons = zeros((hidUnique.shape[0], 3))
+
+        self.hhldIndicesOfPersons[:,0] = hidUnique
+        self.hhldIndicesOfPersons[1:,1] = indicesHidRow[:-1]
+        self.hhldIndicesOfPersons[:,2] = indicesHidRow
+
+        #print idCols[:30,:]
+        #print self.hhldIndicesOfPersons[:20,:]
+        #print self.personIndicesOfActs[:20,:]
+
+
+
+        #raw_input('new implementation of indices')                
+
+	self.check_hhldIndices_for_multiple_person_arrivals()	
+
+    def check_hhldIndices_for_multiple_person_arrivals(self):
+	numPersons = self.hhldIndicesOfPersons[:,-1] - self.hhldIndicesOfPersons[:,-2]
+	numPersonGrt1Flag = numPersons > 1
+
+	if numPersonGrt1Flag.sum() > 0:
+	    print self.hhldIndicesOfPersons[numPersonGrt1Flag,:].astype(int)
+	#raw_input('hhldIndices; checking for multiple person arrivals')
+	
+
         
     def create_col_numbers(self, colNamesDict):
+        self.hidCol = colNamesDict[self.activityAttribs.hidName]
+        self.pidCol = colNamesDict[self.activityAttribs.pidName]
+
         self.schidCol = colNamesDict[self.activityAttribs.scheduleidName]
         self.actTypeCol = colNamesDict[self.activityAttribs.activitytypeName]
         self.locidCol = colNamesDict[self.activityAttribs.locationidName]
@@ -80,15 +101,89 @@ class AdjustSchedules(Model):
         self.durCol = colNamesDict[self.activityAttribs.durationName]
 	self.depPersonCol = colNamesDict[self.activityAttribs.dependentPersonName]
 
+	self.tripDependentPersonCol = colNamesDict[self.arrivalInfoAttribs.dependentPersonName]
 	self.actualArrivalCol = colNamesDict[self.arrivalInfoAttribs.actualArrivalName]
 	self.expectedArrivalCol = colNamesDict[self.arrivalInfoAttribs.expectedArrivalName]
+
+        self.schoolStatusCol = colNamesDict[self.dailyStatusAttribs.schoolStatusName]
+        self.workStatusCol = colNamesDict[self.dailyStatusAttribs.workStatusName]
+
+        self.childDependencyCol = colNamesDict[self.dependencyAttribs.childDependencyName]
+
+
+    def return_status_dependency(self, schedulesForPerson):
+        workStatus = schedulesForPerson.data[0,self.workStatusCol]
+        schoolStatus = schedulesForPerson.data[0,self.schoolStatusCol]
+        childDependency = schedulesForPerson.data[0,self.childDependencyCol]
+
+        #print 'wrkcol - %s, schcol - %s, depcol - %s' %(self.workStatusCol, 
+        #                                                self.schoolStatusCol,
+        #                                                self.childDependencyCol)
+        #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
+        #                                           childDependency)
+        
+        # Checking for status and dependency
+        # whether the merge happened correctly
+        # this can be replaced with a simple extraction as opposed 
+        # to identifying unique values, checking for single value 
+        # and then updating the status variables
+        workStatusUnique = unique(schedulesForPerson.data[:, self.workStatusCol])
+        if workStatusUnique.shape[0] > 1:
+            print 'Work Status', workStatusUnique
+        
+            raise Exception, "More than one values for status/dependency"
+        else:
+            workStatus = workStatusUnique[0]
+        
+        schoolStatusUnique = unique(schedulesForPerson.data[:, self.schoolStatusCol])
+        if schoolStatusUnique.shape[0] > 1:
+            print 'School Status', schoolStatusUnique
+            raise Exception, "More than one values for status/dependency"
+        else:
+            schoolStatus = schoolStatusUnique[0]
+
+        childDependencyUnique = unique(schedulesForPerson.data[:, self.childDependencyCol])
+        if childDependencyUnique.shape[0] > 1:
+            print 'Child Dependency', childDependencyUnique
+            raise Exception, "More than one values for status/dependency"
+        else:
+            childDependency = childDependencyUnique[0]
+        
+        #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
+        #                                           childDependency)
+        return workStatus, schoolStatus, childDependency
+
 
     def return_arrival_info(self, schedulesForPerson):
 	actualArrival = schedulesForPerson.data[0,self.actualArrivalCol]
 	expectedArrival = schedulesForPerson.data[0,self.expectedArrivalCol]
-	
+	tripDependentPerson = schedulesForPerson.data[0,self.tripDependentPersonCol]	
+
 	#print 'Actual Arrival - %s and Expected Arrival - %s ' %(actualArrival, expectedArrival)
-	return actualArrival, expectedArrival
+	return actualArrival, expectedArrival, tripDependentPerson
+
+    def return_activity_list_for_person(self, schedulesForPerson):
+        # Updating activity list
+        activityList = []
+        for sched in schedulesForPerson.data:
+	    hid = sched[self.hidCol]
+	    pid = sched[self.pidCol]
+
+            scheduleid = sched[self.schidCol]
+            activitytype = sched[self.actTypeCol]
+            locationid = sched[self.locidCol]
+            starttime = sched[self.sttimeCol]
+            endtime = sched[self.endtimeCol]
+            duration = sched[self.durCol]
+            depPersonId = sched[self.depPersonCol]
+            
+            actepisode = ActivityEpisode(hid, pid, scheduleid, activitytype, locationid, 
+                                         starttime, endtime, duration, depPersonId)
+            activityList.append(actepisode)
+
+        
+
+        return activityList
 
 
     def resolve_consistency(self, data, seed):
@@ -101,62 +196,79 @@ class AdjustSchedules(Model):
         self.create_indices(data)
 	self.create_col_numbers(data._colnames)
 
+	print data._colnames, data.varnames
+
         #print 'Indices created in %.4f' %(time.time()-ti)
 
-        row = 0
-        
-        for perIndex in self.indices:
-            schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
-            #print schedulesForPerson.data.astype(int)
-            #raw_input()
+        for hhldIndex in self.hhldIndicesOfPersons:
+            firstPersonRec = hhldIndex[1]
+            lastPersonRec = hhldIndex[2]
 
-            activityList = []
-            for sched in schedulesForPerson.data:
-                scheduleid = sched[self.schidCol]
-                activitytype = sched[self.actTypeCol]
-                locationid = sched[self.locidCol]
-                starttime = sched[self.sttimeCol]
-                endtime = sched[self.endtimeCol]
-                duration = sched[self.durCol]
-		depPers = sched[self.depPersonCol]                
+            firstPersonFirstAct = self.personIndicesOfActs[firstPersonRec,2]
+            lastPersonLastAct = self.personIndicesOfActs[lastPersonRec-1,3]
+
+            schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
+                                                       lastPersonLastAct,:], data.varnames)
+            #print schedulesForHhld.data.astype(int)
+            #print data.varnames
+
+            persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
+                                                                     lastPersonRec,
+                                                                 :]
+            householdObject = Household(hhldIndex[0])
+	    #personarrivedId = schedulesForHhld.data[0, self.personArrivedCol]
+
+            print 'hID - ', hhldIndex[0]
+	    #print '--Person Arrived Id - ', personarrivedId
+
+
+            for perIndex in persIndicesForActsForHhld:
+		print '\tPerson Id processing is - ', perIndex[1]
 	
-                actepisode = ActivityEpisode(scheduleid, activitytype, locationid, 
-                                             starttime, endtime, duration, depPers)
-                activityList.append(actepisode)
+		"""
+		if perIndex[1] <> personarrivedId:
+		    print '\t--This is not the person who engaged on the trip'
+		    
+		else:
+		    print '\t--This is the person that engaged in the trip.Hence we need to process the arrival info and adjust the schedule and the associated dependent persons'
+		"""
 
-	    
-            personObject = Person(perIndex[0], perIndex[1])
-            personObject.add_episodes(activityList)
-	    actualArrival, expectedArrival = self.return_arrival_info(schedulesForPerson)
-	    personObject.add_arrival_status(actualArrival, expectedArrival)
-	    #print 'person indices', perIndex
-	    #print 'Activity list before adjustment'
-	    
-	    oriList = activityList
-	    oriList = personObject.sort_acts(oriList)
+                personObject = Person(perIndex[0], perIndex[1])
+                schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
+                activityList = self.return_activity_list_for_person(schedulesForPerson)
+                personObject.add_episodes(activityList)
 
-	    #for x in oriList:
-	    #	print '\t', x
-            personObject.adjust_schedules_given_arrival_info(seed)
-	    reconciledSchedules = personObject._collate_results_aslist()
+                workStatus, schoolStatus, childDependency = self.return_status_dependency(schedulesForPerson)
+                personObject.add_status_dependency(workStatus, schoolStatus, 
+                                                   childDependency)
 
-	    #print 'Activity list after adjustment'
-	    #modList = personObject.listOfActivityEpisodes
-	    #modList = personObject.sort_acts(modList)
 
-	    #for x in reconciledSchedules:
-	    #	print '\t', x
+	    	actualArrival, expectedArrival, tripDependentPerson = self.return_arrival_info(schedulesForPerson)
+	    	personObject.add_arrival_status(actualArrival, expectedArrival, tripDependentPerson)
+
+            	householdObject.add_person(personObject)
+
+	    #householdObject.lineup_activities(seed)
+
+	    householdObject.adjust_schedules_given_arrival_info(seed)
+
+	    reconciledSchedules = householdObject._collate_results()
+
+
+	    for x in reconciledSchedules:
+	    	print '\t', x
 
 
 	    if not personObject._check_for_conflicts():
+		personObject.print_activity_list()
+		print "THE SCHEDULES ARE STILL MESSED UP"    
                 raise Exception, "THE SCHEDULES ARE STILL MESSED UP"    
-            #reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
-	    #raw_input('Person schedules processed')             
+
 	    actList += reconciledSchedules
 
         return DataArray(actList, self.colNames)
-                
-        #return data
+
+
 
 import unittest
 from numpy import genfromtxt, unique
@@ -164,21 +276,74 @@ from openamos.core.data_array import DataArray
 
 class TestReconcileModel(unittest.TestCase):
     def setUp(self):
-        self.data = genfromtxt("/home/kkonduri/simtravel/test/mag_zone/schedule_txt.csv", delimiter=",", dtype=int)
-        colNames = ['houseid', 'personid', 'scheduleid', 'activitytype', 'locationid', 'starttime', 
-                    'endtime', 'duration']
+        self.data = genfromtxt("/home/karthik/simtravel/test/mag_zone_dynamic/schedule_txt_small.csv", delimiter=",", dtype=int)
+        colNames = ['scheduleid', 'houseid', 'personid', 'activitytype', 'locationid', 'starttime', 
+                    'endtime', 'duration', 'dependentpersonid']
         self.actSchedules = DataArray(self.data, colNames)
 
+
+    def create_indices(self, data):
+        idCols = data.columns(['houseid',
+                               'personid']).data
+        combId = idCols[:,0]*100 + idCols[:,1]
+        comIdUnique, comId_reverse_indices = unique(combId, return_inverse=True)
+
+        binsIndices = array(range(comId_reverse_indices.max()+2))
+        histIndices = histogram(comId_reverse_indices, bins=binsIndices)
+
+        indicesRowCount = histIndices[0]
+        indicesRow = indicesRowCount.cumsum()
+
+
+        self.personIndicesOfActs = zeros((comIdUnique.shape[0], 4), dtype=int)
+
+        self.personIndicesOfActs[:,0] = comIdUnique/100
+        self.personIndicesOfActs[:,1] = comIdUnique - self.personIndicesOfActs[:,0]*100
+        self.personIndicesOfActs[1:,2] = indicesRow[:-1]
+        self.personIndicesOfActs[:,3] = indicesRow
+
+        #print self.personIndicesOfActs[:20, :]
+        #print self.personIndicesOfActs[-20:, :]
+
+
+        hid = self.personIndicesOfActs[:,0]
+
+        hidUnique, hid_reverse_indices = unique(hid, return_inverse=True)
+
+        binsHidIndices = array(range(hid_reverse_indices.max()+2))
+        histHidIndices = histogram(hid_reverse_indices, bins=binsHidIndices)
+
+        indicesHidRowCount = histHidIndices[0]
+        indicesHidRow = indicesHidRowCount.cumsum()
+
+        self.hhldIndicesOfPersons = zeros((hidUnique.shape[0], 3))
+
+        self.hhldIndicesOfPersons[:,0] = hidUnique
+        self.hhldIndicesOfPersons[1:,1] = indicesHidRow[:-1]
+        self.hhldIndicesOfPersons[:,2] = indicesHidRow
+
+        #print idCols[:30,:]
+        #print self.hhldIndicesOfPersons[:20,:]
+        #print self.personIndicesOfActs[:20,:]
+
+
+
+        #raw_input('new implementation of indices')                
 
         
 
     def test_retrieve_loop_ids(self):
-        houseIdsCol = self.actSchedules.columns(['houseid']).data
-        houseIdsUnique = unique(houseIdsCol)
-        print houseIdsUnique
-
+        #houseIdsCol = self.actSchedules.columns(['houseid']).data
+        #houseIdsUnique = unique(houseIdsCol)
+        #print houseIdsUnique
+	self.create_indices(self.actSchedules)
         
-        for hid in houseIdsUnique:
+        for hid in self.hhldIndicesOfPersons:
+	    print hid
+
+
+	    """
+
             schedulesRowsIndForHh = houseIdsCol == hid
             schedulesForHh = self.actSchedules.rowsof(schedulesRowsIndForHh)
 
@@ -208,6 +373,7 @@ class TestReconcileModel(unittest.TestCase):
                 personObject.add_and_reconcile_episodes(activityList)
                 #print '\tReconciled Activity schedules - ', personObject.reconciledActivityEpisodes
                 #raw_input()
+		"""
         #pid = unique(self.actSchedules.columns(['houseid', 'personid']).
         #acts = self.actSchedules
 

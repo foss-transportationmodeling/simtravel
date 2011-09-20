@@ -109,6 +109,9 @@ class ReconcileSchedules(Model):
         self.create_indices(data)
 
         print 'Indices created in %.4f' %(time.time()-ti)
+        hidCol = data._colnames[self.activityAttribs.hidName]
+        pidCol = data._colnames[self.activityAttribs.pidName]
+
 
         schidCol = data._colnames[self.activityAttribs.scheduleidName]
         actTypeCol = data._colnames[self.activityAttribs.activitytypeName]
@@ -139,6 +142,9 @@ class ReconcileSchedules(Model):
 
             activityList = []
             for sched in schedulesForPerson.data:
+		hid = sched[hidCol]
+		pid = sched[pidCol]
+
                 scheduleid = sched[schidCol]
                 activitytype = sched[actTypeCol]
                 locationid = sched[locidCol]
@@ -146,7 +152,7 @@ class ReconcileSchedules(Model):
                 endtime = sched[endtimeCol]
                 duration = sched[durCol]
                 
-                actepisode = ActivityEpisode(scheduleid, activitytype, locationid, 
+                actepisode = ActivityEpisode(hid, pid, scheduleid, activitytype, locationid, 
                                              starttime, endtime, duration)
                 activityList.append(actepisode)
 

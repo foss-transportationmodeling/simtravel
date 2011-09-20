@@ -245,6 +245,10 @@ class DataArray(object):
         """
         the method returns a dataarray of columns with the rows removed
         """
+	
+	if rows.shape == (0,):
+	    return
+
         self.data = self.data[rows]
         self.rows = self.data.shape[0]
         #return DataArray(self.data, self.varnames)
@@ -291,7 +295,6 @@ class DataArray(object):
             colName = columnames[i]
             colType = colTypes[colName]
             dataCols.append(dataSubset.data[:,i].astype(colType))
-
         dataSubset.data = rec.array(dataCols)
 
         return dataSubset

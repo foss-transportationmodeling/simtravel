@@ -10,7 +10,8 @@ class ReconcileSchedulesSpecification(object):
 class HouseholdSpecification(object):
     def __init__(self, activityAttribs, dailyStatusAttribs=None,
                  dependencyAttribs=None, arrivalInfoAttribs=None,
-		 terminalEpisodesAllocation=False):
+		 terminalEpisodesAllocation=False, childDepProcessingType="Allocation"):
+	self.childDepProcessingType = childDepProcessingType
 	self.activityAttribs = activityAttribs
 	self.dailyStatusAttribs = dailyStatusAttribs
 	self.dependencyAttribs = dependencyAttribs
@@ -37,7 +38,9 @@ class ActivityAttribsSpecification(object):
         self.dependentPersonName = dependentPersonName
 
 class ArrivalInfoSpecification(object):
-    def __init__(self, actualArrivalName, expectedArrivalName):
+    def __init__(self, dependentPersonName,
+		 actualArrivalName, expectedArrivalName):
+	self.dependentPersonName = dependentPersonName
 	self.actualArrivalName = actualArrivalName
 	self.expectedArrivalName = expectedArrivalName
 
@@ -62,16 +65,41 @@ class TripOccupantSpecification(object):
         self.choices = None
         self.coefficients = None
 
+class PersonsArrivedSpecification(object):
+    def __init__(self,
+		 idSpec,
+		 persArrivedAttribSpec):
+	self.idSpec = idSpec
+	self.persArrivedAttribSpec = persArrivedAttribSpec
+
+        self.choices = None
+        self.coefficients = None
+
+
+
+class PersonsArrivedAttributes(object):
+    def __init__(self, tripDepName):
+	self.tripDepName = tripDepName
+
 class TripDependentPersonAttributes(object):
     def __init__(self, 
 		 tripPurposeFromName,
 		 tripDepName,
 		 lastTripDepName,
 		 stActDepName,
-		 enActDepName):
+		 enActDepName,
+		 personOnNetworkName=None):
 	self.tripPpurposeFromName = tripPurposeFromName
 	self.tripDepName = tripDepName
 	self.lastTripDepName = lastTripDepName
 	self.stActDepName = stActDepName
 	self.enActDepName = enActDepName
+	self.personOnNetworkName = personOnNetworkName
+
+class UniqueRecordsSpecification(object):
+    def __init__(self, uniqueRecordsColName):
+	self.uniqueRecordsColName = uniqueRecordsColName
+
+        self.choices = None
+        self.coefficients = None
 

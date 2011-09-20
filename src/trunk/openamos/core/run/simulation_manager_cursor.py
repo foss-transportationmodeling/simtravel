@@ -237,9 +237,11 @@ class SimulationManager(object):
             #delete the delete statement; this was done to clean the tables during testing
             tableName = comp.writeToTable
             if tableName not in tableNamesDelete:
-                tableNamesDelete.append(tableName)
-                print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
-                queryBrowser.delete_all(tableName)                            
+		if comp.readFromTable <> comp.writeToTable:
+                    tableNamesDelete.append(tableName)
+                    print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
+                    queryBrowser.delete_all(tableName)                            
+
 	    if comp.writeToTable2 is not None:
 		tableName = comp.writeToTable2
             	if tableName not in tableNamesDelete:

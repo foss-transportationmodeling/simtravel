@@ -5,10 +5,11 @@ from openamos.core.models.abstract_model import Model
 
 from numpy import array, logical_and, histogram, zeros
 
-class ChildDependencyAllocation(Model):
+class ChildDependencyProcessing(Model):
     def __init__(self, specification):
         Model.__init__(self, specification)
         self.specification = specification
+	self.childDepProcessingType = self.specification.childDepProcessingType
         self.activityAttribs = self.specification.activityAttribs
         self.dailyStatusAttribs = self.specification.dailyStatusAttribs
         self.dependencyAttribs = self.specification.dependencyAttribs
@@ -29,6 +30,9 @@ class ChildDependencyAllocation(Model):
 
     def create_col_numbers(self, colnamesDict):
         #print colnamesDict
+        self.hidCol = colnamesDict[self.activityAttribs.hidName]
+        self.pidCol = colnamesDict[self.activityAttribs.pidName]
+
         self.schidCol = colnamesDict[self.activityAttribs.scheduleidName]
         self.actTypeCol = colnamesDict[self.activityAttribs.activitytypeName]
         self.locidCol = colnamesDict[self.activityAttribs.locationidName]
@@ -84,18 +88,9 @@ class ChildDependencyAllocation(Model):
         self.hhldIndicesOfPersons[1:,1] = indicesHidRow[:-1]
         self.hhldIndicesOfPersons[:,2] = indicesHidRow
 
-        #print idCols[:30,:]
-        #print self.hhldIndicesOfPersons[:20,:]
-        #print self.personIndicesOfActs[:20,:]
-
-
-
-        #raw_input('new implementation of indices')                                                                                 
-
 
 
     def resolve_consistency(self, data, seed):
-
         actList = []
 	actListJoint = []
 
@@ -116,9 +111,6 @@ class ChildDependencyAllocation(Model):
 
             schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
                                                        lastPersonLastAct,:], data.varnames)
-            print 'hID - ', hhldIndex[0]
-            #print schedulesForHhld.data.astype(int)
-            #print data.varnames
 
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
@@ -126,14 +118,15 @@ class ChildDependencyAllocation(Model):
 
 
 	    #if hhldIndex[0] not in [8, 1839, 6006, 13139, 15080, 22501, 25779, 32174, 
-	    # 			    34664, 35751, 40563, 71887, 
-	    #			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978]:
-	    	#continue
-	    #	pass
+	    #			    34664, 35751, 40563, 52876, 71887, 
+	    #			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978, 133718]:
+	    if hhldIndex[0] not in [352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
+				    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
+	    	continue
+	     	pass
 
 
             householdObject = Household(hhldIndex[0])
-
 
             for perIndex in persIndicesForActsForHhld:
                 personObject = Person(perIndex[0], perIndex[1])
@@ -148,10 +141,10 @@ class ChildDependencyAllocation(Model):
 
 	    if self.specification.terminalEpisodesAllocation:
 		householdObject.allocate_terminal_dependent_activities(seed)
-	    else:
+	    elif self.childDepProcessingType == 'Allocation':
 		householdObject.allocate_dependent_activities(seed)
-
-		#householdObject.lineup_subsequent_ih_dropoffs(seed)
+	    elif self.childDepProcessingType == 'Resolution':
+		householdObject.lineup_activities(seed)
 
 
 	    reconciledSchedules = householdObject._collate_results()
@@ -162,12 +155,11 @@ class ChildDependencyAllocation(Model):
 
 	    #if (hhldIndex[0] == 8 or hhldIndex[0] == 6006 or hhldIndex[0] == 13139 
 	    #	or hhldIndex[0] == 15080 or hhldIndex[0] == 35751
-	    # 	or hhldIndex[0] == 95335 or hhldIndex[0] == 57273  
+	    #	or hhldIndex[0] == 95335 or hhldIndex[0] == 57273  
 	    #	or hhldIndex[0] == 94554 or hhldIndex[0] == 96768 
-	    #	or hhldIndex[0] == 1353601 or hhldIndex[0] == 149978 or hhldIndex[0] == 155946):
-	    #	householdObject.persons[1].print_activity_list()
+	    #	or hhldIndex[0] == 1353601 or hhldIndex[0] == 149978 or hhldIndex[0] == 155946 or hhldIndex[0] == 108694):
 		#raw_input()
-		pass
+	    #	pass
 
 	
         #return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
@@ -176,7 +168,9 @@ class ChildDependencyAllocation(Model):
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
         activityList = []
-        for sched in schedulesForPerson.data:
+        for sched in schedulesForPerson.data:	
+	    hid = sched[self.hidCol]
+	    pid = sched[self.pidCol]
             scheduleid = sched[self.schidCol]
             activitytype = sched[self.actTypeCol]
             locationid = sched[self.locidCol]
@@ -185,7 +179,8 @@ class ChildDependencyAllocation(Model):
             duration = sched[self.durCol]
             depPersonId = sched[self.depPersonCol]
             
-            actepisode = ActivityEpisode(scheduleid, activitytype, locationid, 
+            actepisode = ActivityEpisode(hid, pid, scheduleid,
+					 activitytype, locationid, 
                                          starttime, endtime, duration, depPersonId)
             activityList.append(actepisode)
 

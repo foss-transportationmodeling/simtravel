@@ -181,6 +181,7 @@ class AbstractComponent(object):
         count_key = self.key[1]
 
         nRowsProcessed = 0
+        nRowsProcessed2 = 0
         while len(model_list_duringrun) > 0:
             t = time.time()
         
@@ -299,7 +300,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -318,8 +319,8 @@ class AbstractComponent(object):
             if data_subset_filter.sum() > 0:
                 data_subset = self.data.columns(self.data.varnames, 
                                                 data_subset_filter)
-                print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
-                                                                              time.time()-tiii)
+                #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
+                #                                                              time.time()-tiii)
                 # Generate a choiceset for the corresponding agents
                 #TODO: Dummy as of now
                 #choiceset_shape = (data_subset.rows,
@@ -327,7 +328,7 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+                #print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -345,7 +346,7 @@ class AbstractComponent(object):
 		    data_subset_filter = array([True]*self.data.rows)
 	      
 		#print result.varnames
-                print 'RESULT', result.data
+                #print 'RESULT', result.data
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -655,6 +656,11 @@ class AbstractComponent(object):
             for j in colsInTable:
                 if j not in data._colnames:
                     data.insertcolumn([j], tempValsArr)
+	
+	if self.analysisInterval is not None:
+	    data.insertcolumn(['analysisinterval'], tempValsArr+self.analysisInterval)
+
+
         return data
 
 

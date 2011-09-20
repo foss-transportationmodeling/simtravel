@@ -3,6 +3,8 @@ import copy
 import time
 import os
 import csv
+import traceback
+import sys
 from lxml import etree
 from numpy import array, ma, ones, zeros, vstack, where, save, load
 
@@ -142,36 +144,48 @@ class SimulationManager(object):
         for comp in self.componentList:
 	    #if comp.skipFlag or comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_arrived_r':
             #    continue
-	    if comp.skipFlag or comp.writeToTable == 'schedule_final_r':
-                continue
             # clean the run time tables
             #delete the delete statement; this was done to clean the tables during testing
             tableName = comp.writeToTable
             if tableName not in tableNamesDelete:
+		if comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_location_r':
+		    continue
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
                 self.queryBrowser.delete_all(tableName)                            
 
 
     def run_selected_components_for_malta(self, analysisInterval, tripInfoArrivals=array([])):
+	try:
+            tripInfo = self.run_components(analysisInterval, tripInfoArrivals)
+	except Exception, e:
+	    print 'Error occurred: ', e
+	    traceback.print_exc(file=sys.stdout)		
+	    raw_input()
+	    raise Exception, 'Error occurred when executing component - %s: %s'%(comp.component_name, e)
+	return tripInfo
+	
+    def run_components(self, analysisInterval, tripInfoArrivals):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
 	print 'These are trips that arrived - '
 	print tripInfoArrivals
-	#raw_input('Press any key to continue ...')
-        
-	bkgTrips = zeros((1,11))
-	studyRegionTrips = zeros((1,11))
+	#tripInfoArrivals = array([20])
+	if tripInfoArrivals.shape[0] > 0:
+	    print tripInfoArrivals.shape[0]
+	    print tripInfoArrivals
+
 
         # To test python simulation_manager_cursor.py use dummy arrival info
-        #tripInfoArrivals = array([1,2,3])
+        #tripInfoArrivals = array([34])
 
-	if tripInfoArrivals <> array([]):
+	if tripInfoArrivals.shape[0] > 1 or (tripInfoArrivals.shape[0] == 1 and tripInfoArrivals[0] <> -1):
             dataVals = zeros((tripInfoArrivals.shape[0], 2))
             dataVals[:,0] = tripInfoArrivals
             dataVals[:,1] = analysisInterval - 1
 
             data = DataArray(dataVals, ['tripid', 'arrivaltime'])
-            
+            print data
+	    #raw_input('atleast one trip returend and here is data array')
         else:
             data = None
             #raw_input ('\t Press any key to continue')
@@ -182,40 +196,18 @@ class SimulationManager(object):
         # openamos analysisInterval = above_analysisInterval - 1
 
 	# Get the two components one for dynamic activity simulation and another for extracting trips
-	compObjects = []
-        for comp in self.componentList:
-	    # Integrated application
-
-	    """
-	    if comp.component_name in ['DynamicNonMandatoryActivities', 'FinalReconciliationOfActivityTravelStartAdj', 
-					'FinalReconciliationOfActivityTravelEndAdj', 'ExtractTravelEpisodes', 
-					'ExtractBackgroundTravelEpisode', 'ExtractAllTravelEpisodes']:
-	    """
-	    # Sequential application
-	    if comp.component_name in ['ArrivalTimeInformation', 'PersonsArrived', 'ArrivalTimeProcessing', 
-					'DynamicNonMandatoryActivities', 
-					'PersonPrismActivityInformation',
-					'AdjustPrismEndsForInsufficientPrisms',
-					'PersonPrismActivitiesOrigDelete',
-					'DeleteScheduleIdsFromPersonsPrism',
-					'ExtractTravelEpisodes', 
-					'ExtractBackgroundTravelEpisodes',  'ExtractAllTravelEpisodes']:
-
-	        compObjects.append(comp)
-
 
         fileLoc = self.projectConfigObject.location
 
 
 	print ('Starting to process...')
 
-	for comp in compObjects:
+	for comp in self.componentList:
 
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
-
 
             if comp.component_name in ['AdjustPrismEndsForInsufficientPrisms', 'ExtractTravelEpisodes']:
 		print ('Just finished processing - %s' %comp.component_name)
@@ -264,9 +256,8 @@ class SimulationManager(object):
                 # Call the run function to simulate the chocies(models)
                 # as per the specification in the configuration file
                 # data is written to the hdf5 cache because of the faster I/O
-                tripInfo = comp.run(data, self.queryBrowser, 
-				    self.skimsMatrix, self.uniqueIds, fileLoc)
-
+		tripInfo = comp.run(data, self.queryBrowser, 
+			    self.skimsMatrix, self.uniqueIds, fileLoc)
             else:
                 tripInfo = zeros((1,11))
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
@@ -275,13 +266,7 @@ class SimulationManager(object):
 	# Reduce 100 to match TAZ notatiosample_locn of MALTA
 	tripInfo = tripInfo.astype(int)
 
-	#tripInfo[:,5] = 100
-	#tripInfo[:,6] = 1000
-
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
-	#print tripInfo.shape
-        #print tripInfo[-3:, [0, -6, -5]]
-        #raw_input('This is the shape --')
 
 	return tripInfo
 
@@ -333,7 +318,7 @@ if __name__ == '__main__':
     simulationObject = SimulationManager()
 
     for i in range(2):
-    	simulationObject.run_selected_components_for_malta(500 + i)
+    	simulationObject.run_selected_components_for_malta(26 + i)
     #raw_input()
     #simulationObject.run_selected_components_for_malta(191)
     #raw_input()

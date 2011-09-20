@@ -54,7 +54,7 @@ class Schedule_R(t.IsDescription):
     starttime = t.Int32Col()
     endtime = t.Int32Col()
     duration = t.Int32Col()
-    dependentpersonid = t.Int32Col()
+    dependentpersonid = t.Int64Col()
 
 class Child_Dependency_R(t.IsDescription):
     houseid = t.Int64Col()
@@ -90,7 +90,7 @@ class Trips_R(t.IsDescription):
     duration = t.Int32Col()
     occupancy = t.Int32Col()
     tripind = t.Int32Col()
-    dependentpersonid = t.Int32Col()
+    dependentpersonid = t.Int64Col()
 
 class Trips_Invalid_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -102,7 +102,7 @@ class Occupancy_R(t.IsDescription):
     personid = t.Int32Col()
     tripid = t.Int32Col()
     occupancy = t.Int32Col()
-    dependentpersonid = t.Int32Col()
+    dependentpersonid = t.Int64Col()
 
 class Trips_Final_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -116,6 +116,17 @@ class Trips_Final_R(t.IsDescription):
     endtime = t.Int32Col()
     trippurpose = t.Int32Col()
 
+class Persons_Prism_Activities_R(t.IsDescription):
+    scheduleid = t.Int64Col()
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+
+class Persons_Location_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    personuniqueid = t.Int32Col()
+    time = t.Int32Col()
+    location = t.Int32Col()
 	
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -202,7 +213,7 @@ class Household_Forecast_Population_R(t.IsDescription):
     yrmoved = t.Int32Col()
     old_houseid = t.Int64Col()
 
-class Household_Moving_Population_R(t.IsDescription):
+class Household_Population_R(t.IsDescription):
     houseid = t.Int64Col()
     bldgsz = t.Int32Col()
     hht = t.Int32Col()
@@ -250,4 +261,45 @@ class Person_Moving_Population_R(t.IsDescription):
     hours = t.Int32Col()
     grade = t.Int32Col()
     hispan = t.Int32Col()
+
+class Person_Population_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int64Col()
+    age = t.Int32Col()
+    clwkr = t.Int32Col()
+    educ_disagg = t.Int32Col()
+    enroll = t.Int32Col()
+    esr = t.Int32Col()
+    indnaics = t.Int32Col()
+    occcen5 = t.Int32Col()
+    race1 = t.Int32Col()
+    relate = t.Int32Col()
+    sex = t.Int32Col()
+    marstat = t.Int32Col()
+    hours = t.Int32Col()
+    grade_disagg = t.Int32Col()
+    hispan = t.Int32Col()
+
+
+class Age_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    age = t.Int32Col()
+    count = t.Int32Col()
+
+class Sex_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    sex = t.Int32Col()
+    count = t.Int32Col()
+
+
+class Race_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    race1 = t.Int32Col()
+    count = t.Int32Col()
+
+
+class Persons_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    persons = t.Int32Col()
+    count = t.Int32Col()
 

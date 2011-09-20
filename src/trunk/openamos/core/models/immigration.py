@@ -25,6 +25,7 @@ class Immigration(Model):
 	self.hhldAttribs = self.specification.hhldAttribs
 	self.personAttribs = self.specification.personAttribs
 	self.popgenConfig = self.specification.popgenConfig
+	self.hhldIdSeries = self.specification.hhldIdSeries
 	self.popgenConfigObject = ConfigParserPopGen(self.popgenConfig)
 	self.popgenConfigObject.parse_project()
 	self.popgenConfigObject.parse_scenarios()
@@ -168,7 +169,6 @@ class Immigration(Model):
         self.create_col_numbers(data._colnames)
 
 	#highestHid = amax(self.hhldIndicesOfPersons[:,0])
-	highestHid = 10000000
 
 	#fHhld = csv.writer(open(self.scenario.sampleUserProv.hhLocation, 'w'), delimiter=",")
 	fHhld = open(self.scenario.sampleUserProv.hhLocation, 'w')
@@ -293,7 +293,7 @@ class Immigration(Model):
 
 	hhldSynArr, persSynArr = self.update_houseids(hhldSynArr, persSynArr,
 							hhldSynVars, personSynVars, 
-							highestHid)
+							self.hhldIdSeries)
 
 	print '\nHousehold sample file location - ', self.scenario.synHousingTableNameLoc
 	print 'Person sample file location - ', self.scenario.synPersTableNameLoc
@@ -354,7 +354,7 @@ class Immigration(Model):
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
 
-	    print hhldIndex[0], highestHid + 1, firstPersonRec, lastPersonRec
+	    #print hhldIndex[0], highestHid + 1, firstPersonRec, lastPersonRec
 
 	    hhldSyn[row,hidIndex_popgenH] = highestHid + 1
 	    persSyn[firstPersonRec:lastPersonRec,hidIndex_popgenP] = highestHid + 1

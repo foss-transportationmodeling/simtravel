@@ -171,7 +171,7 @@ class PopulationEvolutionProcessing(Model):
 
 	highestHid = amax(self.hhldIndicesOfPersons[:,0])
 
-        for hhldIndex in self.hhldIndicesOfPersons[:200,:]:
+        for hhldIndex in self.hhldIndicesOfPersons:
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
 
@@ -231,7 +231,6 @@ class PopulationEvolutionProcessing(Model):
 
 	    	householdObject.add_person(personObject)
 	    additionalHouseholdObject, highestHid = householdObject.evolve_population(seed, highestHid)
-		
 		
 
 

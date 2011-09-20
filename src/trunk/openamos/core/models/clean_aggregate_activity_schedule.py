@@ -29,6 +29,10 @@ class CleanAggregateActivitySchedule(Model):
 
     def create_col_numbers(self, colnamesDict):
         #print colnamesDict
+        self.hidCol = colnamesDict[self.activityAttribs.hidName]
+        self.pidCol = colnamesDict[self.activityAttribs.pidName]
+
+
         self.schidCol = colnamesDict[self.activityAttribs.scheduleidName]
         self.actTypeCol = colnamesDict[self.activityAttribs.activitytypeName]
         self.locidCol = colnamesDict[self.activityAttribs.locationidName]
@@ -221,6 +225,9 @@ class CleanAggregateActivitySchedule(Model):
         # Updating activity list
         activityList = []
         for sched in schedulesForPerson.data:
+	    hid = sched[self.hidCol]
+	    pid = sched[self.pidCol]
+
             scheduleid = sched[self.schidCol]
             activitytype = sched[self.actTypeCol]
             locationid = sched[self.locidCol]
@@ -229,7 +236,7 @@ class CleanAggregateActivitySchedule(Model):
             duration = sched[self.durCol]
             depPersonId = sched[self.depPersonCol]
 
-            actepisode = ActivityEpisode(scheduleid, activitytype, locationid, 
+            actepisode = ActivityEpisode(hid, pid, scheduleid, activitytype, locationid, 
                                          starttime, endtime, duration, depPersonId)
             activityList.append(actepisode)
 

@@ -28,7 +28,10 @@ class TripOccupantProcessing(Model):
 	self.lastTripDepNameCol = colnamesDict[self.tripDepAttribSpec.lastTripDepName]
 	self.stActDepNameCol = colnamesDict[self.tripDepAttribSpec.stActDepName]
 	self.enActDepNameCol = colnamesDict[self.tripDepAttribSpec.enActDepName]
-
+	if self.tripDepAttribSpec.personOnNetworkName is not None:
+	    self.personOnNetworkNameCol = colnamesDict[self.tripDepAttribSpec.personOnNetworkName]
+	else:
+	    self.personOnNetworkNameCol = None
 
     def resolve_consistency(self, data, seed):
         self.create_col_numbers(data._colnames)
@@ -42,9 +45,19 @@ class TripOccupantProcessing(Model):
 	    lastTripDep = row[self.lastTripDepNameCol]
 	    stActDep = row[self.stActDepNameCol]
 	    enActDep = row[self.enActDepNameCol]
-	
+
 	    print 'For hid - %s and pid - %s' %(hid, pid)
 	    print '     The trip purpose from is - ', tripPurposeFrom
+
+	    if self.personOnNetworkNameCol <> None:
+		self.personOnNetwork = row[self.personOnNetworkNameCol]
+		# THIS IS LIKE AN OVERRIDE FOR PROCESSING OCCUPANCY WHEN THE PERSON IS STILL ON THE NETWORK FOR THE DYNAMIC CASE
+		if self.personOnNetwork == 1:
+		    print '\ta.3. Person is still on the network therefore the trip dependent person is set to the old occupancy'
+		    tripDepPers = lastTripDep
+	    	    data.data[rowId, self.tripDepNameCol] = tripDepPers
+		    continue
+		
 	    if tripPurposeFrom == 600 or tripPurposeFrom == 601:
 		if stActDep > 100:
 		    print '\ta.2. The occupancy of the trip changed and processing occupancy now ... stActDep - %s' %stActDep
@@ -57,6 +70,7 @@ class TripOccupantProcessing(Model):
 	    else:
 		print '\ta.1. The occupancy of the trip did not change and occupancy is - ', lastTripDep
 		tripDepPers = lastTripDep
+
 	
 
 	    data.data[rowId, self.tripDepNameCol] = tripDepPers

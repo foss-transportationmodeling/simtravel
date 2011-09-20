@@ -1,8 +1,10 @@
 
 
 class ActivityEpisode(object):
-    def __init__(self, scheduleId, actType, location, startTime, endTime, duration, personId=0):
+    def __init__(self, hid, pid, scheduleId, actType, location, startTime, endTime, duration, personId=0):
         self.scheduleId = scheduleId
+	self.hid = hid
+	self.pid = pid
         self.actType = actType
         self.startTime = startTime
         self.endTime = endTime
@@ -11,7 +13,7 @@ class ActivityEpisode(object):
 	self.dependentPersonId = personId
         self._first_episode_check()
         self._last_episode_check()
-
+	self.activities_subsumed = {}
 
     def _first_episode_check(self):
         self.startOfDay = self.startTime == 0
@@ -19,12 +21,26 @@ class ActivityEpisode(object):
     def _last_episode_check(self):
         self.endOfDay = self.endTime == 1439
 
+	
+    def add_activities_subsumed(self, depAct):
+	#self.activities_subsumed
+	pass
 
+
+    def prev_activity(self, prevAct):
+	self.prevAct = prevAct
+
+    def subs_activity(self, subsAct):
+	self.subsAct = subsAct
+
+	
     def __repr__(self):
-        return """schid - %s, acttype - %s, """\
+        return """schid - %s, hid - %s, pid - %s, acttype - %s, """\
             """loc - %s, """\
             """start - %s, end - %s, dur - %s, """\
-	    """depPId - %s, stFLag-%s, endFlag-%s """% (self.scheduleId, self.actType, self.location,
+	    """depPId - %s, stFLag-%s, endFlag-%s """% (self.scheduleId, 
+				      self.hid, self.pid, 
+				      self.actType, self.location,
 		                      self.startTime, self.endTime, self.duration,
 			              self.dependentPersonId, self.startOfDay, self.endOfDay)
 

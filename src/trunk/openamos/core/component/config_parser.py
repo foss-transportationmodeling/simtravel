@@ -35,7 +35,11 @@ from openamos.core.models.schedules_model_components import DailyStatusAttribsSp
 from openamos.core.models.schedules_model_components import DependencyAttribsSpecification
 from openamos.core.models.schedules_model_components import HouseholdSpecification
 from openamos.core.models.schedules_model_components import TripDependentPersonAttributes
+from openamos.core.models.schedules_model_components import PersonsArrivedAttributes
 from openamos.core.models.schedules_model_components import TripOccupantSpecification
+from openamos.core.models.schedules_model_components import ArrivalInfoSpecification
+from openamos.core.models.schedules_model_components import PersonsArrivedSpecification
+from openamos.core.models.schedules_model_components import UniqueRecordsSpecification
 from openamos.core.models.evolution_model_components import IdSpecification
 from openamos.core.models.evolution_model_components import HouseholdAttributesSpecification
 from openamos.core.models.evolution_model_components import PersonAttributesSpecification
@@ -43,11 +47,14 @@ from openamos.core.models.evolution_model_components import EvolutionAttributesS
 from openamos.core.models.evolution_model_components import HouseholdEvolutionSpecification
 from openamos.core.models.population_synthesis_model_components import PopGenModelSpecification
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
-from openamos.core.models.child_dependency_allocation import ChildDependencyAllocation
+from openamos.core.models.child_dependency_processing import ChildDependencyProcessing
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
 from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
 from openamos.core.models.population_evolution_processing import PopulationEvolutionProcessing
 from openamos.core.models.trip_occupant_processing import TripOccupantProcessing
+from openamos.core.models.persons_arrived_processing import PersonsArrivedProcessing
+from openamos.core.models.unique_records_processing import UniqueRecordsProcessing
+from openamos.core.models.adjust_schedules import AdjustSchedules
 from openamos.core.models.emigration import Emigration
 from openamos.core.models.immigration import Immigration
 from openamos.core.models.column_operations_model import ColumnOperationsModel
@@ -86,19 +93,22 @@ class ConfigParser(object):
         self.componentName = component
 
     def update_completedFlag(self, component_name, analysisInterval=None):
+	pass
         self.iterator = self.configObject.getiterator('Component')
 
         for compElement in self.iterator:
             if compElement.get('name') == component_name:
                 if analysisInterval is None:
                     #print 'OLD FLAG _ ', compElement.get('completed')
-                    compElement.set('completed', "True")
-                    compElement.set('skip', "True")
+                    #compElement.set('completed', "True")
+                    #compElement.set('skip', "True")
                     #print 'NEW FLAG _ ', compElement.get('completed')
-
+		    pass
 
                 if analysisInterval is not None:
                     analysisIntervalElement = compElement.find('AnalysisInterval')
+		    if analysisIntervalElement is None:
+			continue
                     #print 'OLD ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
                     analysisIntervalElement.set('start', str(analysisInterval + 1))
                     #print 'updated ANALYSIS INTERVAL START _ ', analysisIntervalElement.get('start')
@@ -108,10 +118,10 @@ class ConfigParser(object):
                     
                     if endIntervalValue == analysisInterval + 1:
                         #print 'OLD FLAG _ ', compElement.get('completed')
-                        compElement.set('completed', "True")
-                        compElement.set('skip', "True")
+                        #compElement.set('completed', "True")
+                        #compElement.set('skip', "True")
                         #print 'NEW FLAG _ ', compElement.get('completed')                    
-
+			pass
 
     def parse_models(self, projectSeed=0):
 	ti = time.time()
@@ -121,7 +131,8 @@ class ConfigParser(object):
 		#print 'Found component - ', element.get('name')
 		componentList += self.parse_analysis_interval_and_create_component(element, projectSeed)
 	    elif element.tag == 'ComponentList':
-		#print 'Component list found - '
+		print 'Component list found - '
+
         	interval_element = element.find("AnalysisInterval")
         	if interval_element is not None:
             	    startInterval = interval_element.get("start")
@@ -137,7 +148,8 @@ class ConfigParser(object):
             	for i in range(endInterval - startInterval):
 		    for subElement in element.getiterator('SubComponent'):
 			#print 'Found component in component list - ', subElement.get('name')
-			subComponentList = self.parse_analysis_interval_and_create_component(subElement, projectSeed)
+			subComponentList = self.parse_analysis_interval_and_create_component(subElement, projectSeed, 
+											     analysisInterval=i+1)
 
 			for subComp in subComponentList:
                 	    for model in subComp.model_list:
@@ -310,10 +322,10 @@ class ConfigParser(object):
 
 
 
-    def parse_analysis_interval_and_create_component(self, component_element, projectSeed):
+    def parse_analysis_interval_and_create_component(self, component_element, projectSeed, analysisInterval=None):
         ti = time.time()
         comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
-	#print "Parsing Component - %s" %(comp_name)
+	print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
         if interval_element is not None:
@@ -329,7 +341,7 @@ class ConfigParser(object):
 	    
             for i in range(endInterval - startInterval):
                 #tempComponent = copy.deepcopy(repeatComponent)
-		tempComponent = self.create_component(component_element, projectSeed)
+		tempComponent = self.create_component(component_element, projectSeed, analysisInterval)
                 for model in tempComponent.model_list:
                     model.seed +=  i 
                 tempComponent.analysisInterval = startInterval + i
@@ -342,7 +354,7 @@ class ConfigParser(object):
 	    """	
 	    
         else:
-            component = self.create_component(component_element, projectSeed)
+            component = self.create_component(component_element, projectSeed, analysisInterval)
             componentList.append(component)
         #print '\t\tTime taken to parse across all analysis intervals %.4f' %(time.time()-ti)
 
@@ -363,7 +375,7 @@ class ConfigParser(object):
         return delete_criterion
 
     
-    def create_component(self, component_element, projectSeed=0):
+    def create_component(self, component_element, projectSeed=0, analysisInterval=None):
         self.model_list = []
         self.component_variable_list = []
 
@@ -421,7 +433,7 @@ class ConfigParser(object):
 
         modelsIterator = component_element.getiterator("Model")
         for i in modelsIterator:
-            self.create_model_object(i, projectSeed)
+            self.create_model_object(i, projectSeed, analysisInterval)
             self.create_linear_object_for_locations(i, spatialConst_list)
             #component_variable_list = (component_variable_list 
             #                           + variable_list)
@@ -540,7 +552,7 @@ class ConfigParser(object):
 
 
 
-    def create_model_object(self, model_element, projectSeed=0):
+    def create_model_object(self, model_element, projectSeed=0, analysisInterval=None):
         model_formulation = model_element.attrib['formulation']
 	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
@@ -579,7 +591,7 @@ class ConfigParser(object):
             self.create_child_dependency_allocation_object(model_element, terminal=True, projectSeed=projectSeed)
 
 
-        if model_formulation == 'Child Dependency Allocation':
+        if model_formulation == 'Child Dependency':
             self.create_child_dependency_allocation_object(model_element, terminal=False, projectSeed=projectSeed)
 
 	if model_formulation == 'Column Operations':
@@ -592,10 +604,19 @@ class ConfigParser(object):
             self.create_migration_object(model_element, projectSeed, migrationType='Emigration')	    
 
 	if model_formulation == 'Immigration':
-            self.create_migration_object(model_element, projectSeed, migrationType='Immigration')	    
+            self.create_migration_object(model_element, projectSeed, migrationType='Immigration', analysisInterval=analysisInterval)	    
 
 	if model_formulation == 'Trip Occupant Processing':
-            self.create_trip_occupant_processing_object(model_element, projectSeed, migrationType='Immigration')	    
+            self.create_trip_occupant_processing_object(model_element, projectSeed)	    
+
+	if model_formulation == 'Persons on Trip Arrival Processing':
+	    self.create_persons_arrived_processing_object(model_element, projectSeed)
+
+	if model_formulation == 'Arrival Time Schedule Adjustment':
+	    self.create_schedule_adjustment_arrival_processing_object(model_element)
+
+	if model_formulation == 'Identify Unique':
+	    self.create_unique_records_object(model_element, projectSeed)
 
 
 
@@ -1490,6 +1511,13 @@ class ConfigParser(object):
         #variable_list_required for running the model
         
         variable_list = []
+
+        model_type = model_element.get('type')
+
+	if model_type == None:
+	    model_type == "Allocation"
+	else:
+	    model_type == 'Processing'
         
         seed = self.process_seed(model_element) + projectSeed
 
@@ -1525,12 +1553,13 @@ class ConfigParser(object):
         specification = HouseholdSpecification(activityAttribsSpec, 
                                                dailyStatusAttribsSpec,
                                                dependencyAttribsSpec,
-					       terminalEpisodesAllocation=terminal)
+					       terminalEpisodesAllocation=terminal,
+					       childDepProcessingType=model_type)
                                                         
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
-        model = ChildDependencyAllocation(specification)
+        model = ChildDependencyProcessing(specification)
 
         model_type = 'consistency'
 
@@ -1600,7 +1629,7 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def create_migration_object(self, model_element, projectSeed, migrationType):
+    def create_migration_object(self, model_element, projectSeed, migrationType, analysisInterval=None):
         variable_list = []
         
         seed = self.process_seed(model_element) + projectSeed
@@ -1633,14 +1662,23 @@ class ConfigParser(object):
 	person_attribs_element = model_element.find('PersonAttributes')
 	personAttribsSpec = self.return_person_attribs(person_attribs_element)
 	
+	householdIdSeries_element = model_element.find('HHldIDSeries')
+	if householdIdSeries_element is not None:
+	    householdIdSeries_val = householdIdSeries_element.get('value') 
+		
+	    householdIdSeries = float(householdIdSeries_val)*analysisInterval
+	
+	else:
+	    householdIdSeries = None
 	popgenConfig = model_element.find('ProjectConfig')
 
 	specification = PopGenModelSpecification(idSpec, 
 						 hhldAttribsSpec, 
 						 personAttribsSpec,
-						 popgenConfig)
+						 popgenConfig,
+						 householdIdSeries)
 
-
+	print '\t - ', householdIdSeries
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
 
@@ -1648,6 +1686,56 @@ class ConfigParser(object):
 	    model = Emigration(specification)
 	elif migrationType == 'Immigration':
 	    model = Immigration(specification)
+	
+        model_type = 'consistency'
+	if model_formulation == 'Arrival Time Schedule Adjustment':
+	    self.create_schedule_adjustment_arrival_processing_object(model_element)
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+
+    def create_unique_records_object(self, model_element, projectSeed):
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+	unique_records_element = model_element.find('Variable')
+	uniqueRecordsVarNameParsed = self.return_table_var(unique_records_element)
+
+	variable_list.append(uniqueRecordsVarNameParsed)
+
+	specification = UniqueRecordsSpecification(uniqueRecordsVarNameParsed[1])
+
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+	model = UniqueRecordsProcessing(specification)
 	
         model_type = 'consistency'
 
@@ -1661,7 +1749,64 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
-    def create_trip_occupant_processing_object(self, model_element, projectSeed, migrationType):
+
+
+
+
+    def create_persons_arrived_processing_object(self, model_element, projectSeed):
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+	id_element = model_element.find('Id')
+	idSpec = self.return_id_spec(id_element)
+
+
+	pers_arrived_attribs_element = model_element.find('PersonsArrivedAttributes')
+	persArrivedAttribSpec = self.return_arrived_pers_attribs(pers_arrived_attribs_element)
+
+	specification = PersonsArrivedSpecification(idSpec, 
+						  persArrivedAttribSpec)
+
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+	model = PersonsArrivedProcessing(specification)
+	
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+
+
+
+
+    def create_trip_occupant_processing_object(self, model_element, projectSeed):
         variable_list = []
         
         seed = self.process_seed(model_element) + projectSeed
@@ -1709,6 +1854,54 @@ class ConfigParser(object):
         
         self.component_variable_list = self.component_variable_list + variable_list
 
+
+    def create_schedule_adjustment_arrival_processing_object(self, model_element):
+        #variable_list_required for running the model
+        
+        variable_list = []
+        
+        seed = self.process_seed(model_element)
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+        arrival_info_element = model_element.find('ArrivalTime')
+        arrivalInfoAttribsSpec = self.return_arrival_info_attribs(arrival_info_element)
+
+        specification = HouseholdSpecification(activityAttribsSpec, 
+					       arrivalInfoAttribs=arrivalInfoAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = AdjustSchedules(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
 
 
 
@@ -1767,6 +1960,20 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list        
 
 
+    def return_arrived_pers_attribs(self, trip_arrived_pers_attribs_element):
+        variable_list = []
+	
+        trpDepPersIdName_element = trip_arrived_pers_attribs_element.find('TripDependentPersonIdName')
+        trpDepPersIdNameParsed = self.return_table_var(trpDepPersIdName_element)
+        variable_list.append(trpDepPersIdNameParsed)
+
+	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1])
+
+        self.component_variable_list = self.component_variable_list + variable_list
+
+	return personsArrivedSpec
+
+
     def return_dep_pers_attribs(self, trip_dep_pers_attribs_element):
         variable_list = []
 
@@ -1794,11 +2001,19 @@ class ConfigParser(object):
         variable_list.append(enActDepPersIdNameParsed)
 
 
+	persOnNetworkName_element = trip_dep_pers_attribs_element.find('PersonOnNetwork')
+	if persOnNetworkName_element is not None:
+	    persOnNetworkNameParsed = self.return_table_var(persOnNetworkName_element)
+	    variable_list.append(persOnNetworkNameParsed)
+	else:
+	    persOnNetworkNameParsed = (None,None)
+
 	tripDepAttribSpec = TripDependentPersonAttributes(tripPurpFromParsed[1],
 							  trpDepPersIdNameParsed[1],
 							  lastTrpActDepPersIdNameParsed[1],
 							  stActDepPersIdNameParsed[1],
-							  enActDepPersIdNameParsed[1])
+							  enActDepPersIdNameParsed[1],
+							  persOnNetworkNameParsed[1])
 
 	
         self.component_variable_list = self.component_variable_list + variable_list
@@ -1824,6 +2039,30 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
         return dailyStatusSpec
+
+    def return_arrival_info_attribs(self, arrival_info_element):
+	variable_list = []
+
+	dependentperson_element = arrival_info_element.find('DependentPersonId')
+	dependentpersonParsed = self.return_table_var(dependentperson_element)
+	variable_list.append(dependentpersonParsed)
+
+	actualArrival_element = arrival_info_element.find('Actual')
+	actualArrivalParsed = self.return_table_var(actualArrival_element)
+	variable_list.append(actualArrivalParsed)
+
+	expectedArrival_element = arrival_info_element.find('Expected')
+	expectedArrivalParsed = self.return_table_var(expectedArrival_element)
+	variable_list.append(expectedArrivalParsed)
+	
+	arrivalInfoSpec = ArrivalInfoSpecification(dependentpersonParsed[1],
+						   actualArrivalParsed[1],
+						   expectedArrivalParsed[1])
+
+	self.component_variable_list = self.component_variable_list + variable_list
+
+	return arrivalInfoSpec
+
 
     def return_dependency_attribs(self, dependency_attribs_element):
         variable_list = []

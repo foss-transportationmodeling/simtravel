@@ -1,12 +1,14 @@
 class PopGenModelSpecification(object):
     def __init__(self, idSpec, hhldAttribs, personAttribs,
-		 popgenConfig):
+		 popgenConfig, hhldIdSeries):
 
 	self.idSpec = idSpec	
 	self.hhldAttribs = hhldAttribs
 	self.personAttribs = personAttribs
 
 	self.popgenConfig = popgenConfig
+
+	self.hhldIdSeries = hhldIdSeries
 
 	self.choices = None
 	self.coefficients = None
