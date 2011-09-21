@@ -2803,7 +2803,7 @@
         <Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
@@ -5433,7 +5433,7 @@
     </Component>	
 
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_final_r" write_to_table="schedule_finalresolved_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_final_r" write_to_table="schedule_finalresolved_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
