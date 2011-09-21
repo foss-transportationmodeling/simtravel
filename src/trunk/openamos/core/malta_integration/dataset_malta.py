@@ -37,10 +37,14 @@ class DB(object):
 					'endtime', 'duration', 'dependentpersonid'],
 
 			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
-				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid'],
+				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid', 'tripwithhhmember'],
+
+			  'trips_with_nonhh_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
+				     'trippurpose', 'duration', 'occupancy', 'dependentpersonid'],
 
 			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 
-					      'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration', 'dependentpersonid', 'persononnetworkflag'],
+					      'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration', 
+					      'dependentpersonid', 'persononnetworkflag'],
 			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid'],
 			  'trips_invalid_r':['tripid', 'tripind'],
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
@@ -67,7 +71,7 @@ class DB(object):
 			'endtime':int32, 'origin':int32, 'destination':int32, 'tt':float32, 'locationid':int32,
 			'trippurpose':int32, 'trippurposefrom':int32, 'tripind':int32, 'occupancy':int32,
 			'persononnetworkflag':int32, 'personuniqueid':int32, 'time':int32, 'location':int32, 'tripvalid':int32,
-			'arrivaltime':int32, 'arrivedpersonid':int32,'tripdependentpersonid':int32,
+			'arrivaltime':int32, 'arrivedpersonid':int32,'tripdependentpersonid':int32, 'tripwithhhmember':int32,
 			'population':int32, 'public_employment':int32, 'retail_employment':int32, 
 			'office_employment':int32, 'industrial_employment':int32, 'other_employment':int32, 
 			'public_employment_ind':int32, 'retail_employment_ind':int32, 
