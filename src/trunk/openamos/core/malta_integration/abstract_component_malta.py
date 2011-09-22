@@ -212,9 +212,6 @@ class AbstractComponent(object):
 	    elif self.data.rows == 0:
 		return
 	    else:
-		if self.component_name == 'ArrivalTimeInformation' and self.data.rows > 0:
-		    print 'rows - %s and valid data rows - %s' %(self.data.rows, valid_data_rows.sum())
-		    #raw_input()
 	    	trips = self.reflectToDatabase(valid_data_rows, tableNamesKeyDict, queryBrowser, fileLoc)
 
 
@@ -316,7 +313,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
 	    #print i.data_filter
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
@@ -355,7 +352,7 @@ class AbstractComponent(object):
 		    # for eg. remove work activties from schedules when daily work status is zero
 		    data_subset_filter = self.create_filter(i.data_filter, i.filter_type)
 
-                #print 'RESULT', result.data
+                print 'RESULT', result.data
 		                    
                 #result = i.simulate_choice(data_subset, choiceset, iteration)
                 #print result.data

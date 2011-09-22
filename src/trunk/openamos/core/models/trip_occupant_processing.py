@@ -49,11 +49,12 @@ class TripOccupantProcessing(Model):
 	    print 'For hid - %s and pid - %s' %(hid, pid)
 	    print '     The trip purpose from is - ', tripPurposeFrom
 
+
 	    if self.personOnNetworkNameCol <> None:
 		self.personOnNetwork = row[self.personOnNetworkNameCol]
 		# THIS IS LIKE AN OVERRIDE FOR PROCESSING OCCUPANCY WHEN THE PERSON IS STILL ON THE NETWORK FOR THE DYNAMIC CASE
 		if self.personOnNetwork == 1:
-		    print '\ta.3. Person is still on the network therefore the trip dependent person is set to the old occupancy'
+		    print '\ta.3. Person is still on the network therefore the trip dependent person is set to the old occupancy - ', lastTripDep
 		    tripDepPers = lastTripDep
 	    	    data.data[rowId, self.tripDepNameCol] = tripDepPers
 		    continue
@@ -74,11 +75,12 @@ class TripOccupantProcessing(Model):
 	
 
 	    data.data[rowId, self.tripDepNameCol] = tripDepPers
-
+	#raw_input()
         return data
 
     def parse_trip_dependentpersonid(self, lastTripDep, stActDep, tripPurposeFrom):
 	print '\t\tStart Activity Dep - %s' %(stActDep)
+	print '\t\tLast trip Dependency is - ', lastTripDep
 
 	lastTripPersons = self.parse_personids(lastTripDep)	
 	print '\t\tThe number of people on the previous trip is - %s and they are - %s and depid is - %s' %(len(lastTripPersons), lastTripPersons, lastTripDep)

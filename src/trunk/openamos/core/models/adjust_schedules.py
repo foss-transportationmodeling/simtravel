@@ -14,10 +14,11 @@ class AdjustSchedules(Model):
 	self.specification = specification
 	self.activityAttribs = self.specification.activityAttribs
 	self.arrivalInfoAttribs = self.specification.arrivalInfoAttribs
-
+	self.occupancyInfoAttribs = self.specification.occupancyInfoAttribs
         self.dailyStatusAttribs = self.specification.dailyStatusAttribs
         self.dependencyAttribs = self.specification.dependencyAttribs
 
+	self.schedAdjType = self.specification.schedAdjType
 
 	self.colNames = [self.activityAttribs.hidName,
                          self.activityAttribs.pidName,
@@ -101,13 +102,17 @@ class AdjustSchedules(Model):
         self.durCol = colNamesDict[self.activityAttribs.durationName]
 	self.depPersonCol = colNamesDict[self.activityAttribs.dependentPersonName]
 
-	self.tripDependentPersonCol = colNamesDict[self.arrivalInfoAttribs.dependentPersonName]
-	self.actualArrivalCol = colNamesDict[self.arrivalInfoAttribs.actualArrivalName]
-	self.expectedArrivalCol = colNamesDict[self.arrivalInfoAttribs.expectedArrivalName]
+	if self.schedAdjType == "Arrival Adjustment":
+	    self.tripDependentPersonCol = colNamesDict[self.arrivalInfoAttribs.dependentPersonName]
+	    self.actualArrivalCol = colNamesDict[self.arrivalInfoAttribs.actualArrivalName]
+	    self.expectedArrivalCol = colNamesDict[self.arrivalInfoAttribs.expectedArrivalName]
+
+	if self.schedAdjType == "Occupancy Adjustment":
+	    self.tripIndicatorCol = colNamesDict[self.occupancyInfoAttribs.tripIndicatorName]
+	    self.tripStTimeCol = colNamesDict[self.occupancyInfoAttribs.startTimeName]
 
         self.schoolStatusCol = colNamesDict[self.dailyStatusAttribs.schoolStatusName]
         self.workStatusCol = colNamesDict[self.dailyStatusAttribs.workStatusName]
-
         self.childDependencyCol = colNamesDict[self.dependencyAttribs.childDependencyName]
 
 
@@ -153,6 +158,11 @@ class AdjustSchedules(Model):
         #                                           childDependency)
         return workStatus, schoolStatus, childDependency
 
+
+    def return_trip_occupancy_info(self, schedulesForPerson):
+	tripIndicator = schedulesForPerson.data[0, self.tripIndicatorCol]
+	tripStTime = schedulesForPerson.data[0, self.tripStTimeCol]
+	return tripIndicator, tripStTime
 
     def return_arrival_info(self, schedulesForPerson):
 	actualArrival = schedulesForPerson.data[0,self.actualArrivalCol]
@@ -242,21 +252,29 @@ class AdjustSchedules(Model):
                 personObject.add_status_dependency(workStatus, schoolStatus, 
                                                    childDependency)
 
-
-	    	actualArrival, expectedArrival, tripDependentPerson = self.return_arrival_info(schedulesForPerson)
-	    	personObject.add_arrival_status(actualArrival, expectedArrival, tripDependentPerson)
-
             	householdObject.add_person(personObject)
+		
+		if self.schedAdjType == "Arrival Adjustment":
+	    	    actualArrival, expectedArrival, tripDependentPerson = self.return_arrival_info(schedulesForPerson)
+	    	    personObject.add_arrival_status(actualArrival, expectedArrival, tripDependentPerson)
 
-	    #householdObject.lineup_activities(seed)
+		elif self.schedAdjType == "Occupancy Adjustment":
+		    tripInd, tripStTime = self.return_trip_occupancy_info(schedulesForPerson)
+		    print 'trip indicator, trip start time -- ', tripInd, tripStTime
+		    personObject.add_occupancy_status(tripInd, tripStTime)
+		    householdObject.wait_push_subsequent_activities(personObject)
+		else:
+		    raise Exception, 'Invalid adjustment type ... '
 
-	    householdObject.adjust_schedules_given_arrival_info(seed)
 
+	    if self.schedAdjType == "Arrival Adjustment":
+	    	householdObject.adjust_schedules_given_arrival_info(seed)
+	    elif self.schedAdjType == "Occupancy Adjustment":
+	    			
+		#raw_input()
+		pass
+	    #raw_input()
 	    reconciledSchedules = householdObject._collate_results()
-
-
-	    for x in reconciledSchedules:
-	    	print '\t', x
 
 
 	    if not personObject._check_for_conflicts():

@@ -93,7 +93,7 @@ class ConfigParser(object):
         self.componentName = component
 
     def update_completedFlag(self, component_name, analysisInterval=None):
-	pass
+	return
         self.iterator = self.configObject.getiterator('Component')
 
         for compElement in self.iterator:
@@ -1688,8 +1688,6 @@ class ConfigParser(object):
 	    model = Immigration(specification)
 	
         model_type = 'consistency'
-	if model_formulation == 'Arrival Time Schedule Adjustment':
-	    self.create_schedule_adjustment_arrival_processing_object(model_element)
 
         model_object = SubModel(model, model_type, dep_varname, dataFilter,
                                 runUntilFilter, seed=seed, filter_type=filter_type,

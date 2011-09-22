@@ -746,8 +746,41 @@ class Household(object):
 	    self.add_anchor_activity(person, person.destAct, person.actualArrival)
 
 	
+    def wait_push_subsequent_activities(self, person):
+	self.affectedActs = {}
+	#raw_input('adjusting and pushing subsequent activities')
+
+	print 'start act -', person.stAct
+
+	print 'Expected Activities'
+	for act in person.expectedActivities:
+	    print '\t', act
+
+	print 'Actual Activities'
+	for act in person.actualActivities:
+	    print '\t', act
+
+	#raw_input('actual/expected should all be the same?')
+
+	print 'before adjustment for occupancy ----', person.print_activity_list()
+
+	person.move_end(person.stAct, person.tripStTime+1)
+
+	actEnd = person.tripStTime + 1
 
 
+	for act in person.expectedActivities:
+	    if actEnd-act.startTime > 0:
+		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+		moveByValue = copy.deepcopy(actEnd-act.startTime)
+		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
+		person.move_start_end(act, moveByValue)
+
+
+	    actEnd = copy.deepcopy(act.endTime)
+
+	print 'Moving the end of the starting episode'
+	print 'activity list after ----', person.print_activity_list()
 
     def adjust_push_subsequent_activities(self, person, refArrivalTime=None):
 	#raw_input('adjusting and pushing subsequent activities')

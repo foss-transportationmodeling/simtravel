@@ -674,13 +674,6 @@ class Person(object):
 		#print 'this is it --<'
         return actList
 
-    def _identify_conflict_with_arrival(self, arrivalTime):
-	actList = []
-        for stAct, act in self.listOfActivityEpisodes:
-            if (act.startTime == arrivalTime and arrivalTime <= act.endTime): # encases the arrivalTime
-		actList.append(act)
-	return actList
-
 
     def pop_earliest_activity(self):
 	self.actCount -= 1
@@ -811,11 +804,38 @@ class Person(object):
 	self.tripDependentPerson = tripDependentPerson
 	if self.actualArrival > 0 and self.expectedArrival > 0:
 	    self.extract_destination_episode()
+	    self.identify_actual_expected_activities(arrival=True)
+
+    def add_occupancy_status(self, tripIndicator, tripStTime):
+	self.tripIndicator = tripIndicator	
+	self.tripStTime = tripStTime
+	
+	if self.tripIndicator == -1:
+	    self.extract_start_episode()
+   	    self.identify_actual_expected_activities(waiting=True)
+
+
+    def extract_start_episode(self):
+	stAct = None
+	stActList = self._identify_conflict_with_endtime(self.tripStTime)
+
+	print 'Start time of trip - ', self.tripStTime
+
+	if len(stActList) == 0:
+	    self.print_activity_list()
+	    print '\tNo start activity found for this trip'	
+
+	elif len(stActList) > 1:
+	    self.print_activity_list()
+	    print '\tThis should not happen how can there be two activities with same end time'
+
+	else:
+	    stAct = stActList[0]
+
+	self.stAct = stAct
 
     def extract_destination_episode(self):
-	self.expectedActivities = []
-	self.actualActivities = []
-	
+
 	"""
 	for startTime, destAct in self.listOfActivityEpisodes:
 	    if destAct.startTime == self.expectedArrival:
@@ -836,12 +856,47 @@ class Person(object):
 	else:
 	    destAct = destActList[0]
 	
+
+	self.destAct = destAct
+
+    def _identify_conflict_with_arrival(self, arrivalTime):
+	actList = []
+        for stAct, act in self.listOfActivityEpisodes:
+            if (act.startTime == arrivalTime and arrivalTime <= act.endTime): # encases the arrivalTime
+		actList.append(act)
+	return actList
+
+    def _identify_conflict_with_endtime(self, endTime):
+	actList = []
+        for stAct, act in self.listOfActivityEpisodes:
+            if (act.endTime == endTime): # encases the arrivalTime
+		actList.append(act)
+	return actList
+
+
+
+
+    def identify_actual_expected_activities(self, arrival=None, waiting=None):
 	#print 'Activities after expected arrival of %s - ' %(self.expectedArrival)
 	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
+
+	self.expectedActivities = []
+	self.actualActivities = []
+
+
+	if arrival == True:
+	    refExpTime = self.expectedArrival
+	    refActTime = self.actualArrival
+
+	if waiting == True:
+	    refExpTime = self.tripStTime
+	    refActTime = self.tripStTime
+
+
 	tempActList = []
 	for actIndex in range(len(self.listOfActivityEpisodes)):
 	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
-	    if act.startTime >= self.expectedArrival:
+	    if act.startTime >= refExpTime:
 		self.expectedActivities.append(act)
 		#print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
@@ -852,14 +907,13 @@ class Person(object):
 	#tempActList = copy.deepcopy(self.listOfActivityEpisodes)
 	for actIndex in range(len(self.listOfActivityEpisodes)):
 	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
-	    if act.startTime >= self.actualArrival:
+	    if act.startTime >= refActTime:
 		self.actualActivities.append(act)
 		#print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
 	self.listOfActivityEpisodes = tempActList
 	#self.destAct = copy.deepcopy(destAct)
 	
-	self.destAct = destAct
 
     def extract_work_episodes(self):
         for startTime, act in self.listOfActivityEpisodes:

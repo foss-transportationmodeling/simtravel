@@ -13,14 +13,18 @@ class DummyMALTA(object):
 	self.manager = SimulationManager()
 
     def request_trips(self):
-	
+	#self.tripsActDum = {117:[4], 155:[8], 133:[2], 147:[11], 167:[16]}
 	for i in range(1440):
 	    seed(i)
-	    time = i
+	    time = i+1
 	
+
 	    if time in self.tripsAct.keys():
+	    #if time in self.tripsActDum.keys():
 		print 'Following trips have reached the destination in time - %s' %time, self.tripsAct[time]
+		#print 'Following trips have reached the destination in time - %s' %time, self.tripsActDum[time]
 		tripIdsArrived = self.tripsAct.pop(time)
+		#tripIdsArrived = self.tripsActDum.pop(time)
 		tripInfoArrivals = array(tripIdsArrived)
 	    else:
 		tripInfoArrivals = array([-1])
@@ -37,8 +41,9 @@ class DummyMALTA(object):
 		    else:
 			self.trips[trip[8]] += [trip[0]]
 
-
+			
 		    actArrival = randint(trip[7]+2, trip[8]+15)
+		    #actArrival = randint(trip[8]+2, trip[8]+25)
 
 		    if actArrival not in self.tripsAct.keys():
 			self.tripsAct[actArrival]  = [trip[0]]

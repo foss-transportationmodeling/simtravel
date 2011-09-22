@@ -10,14 +10,24 @@ class ReconcileSchedulesSpecification(object):
 class HouseholdSpecification(object):
     def __init__(self, activityAttribs, dailyStatusAttribs=None,
                  dependencyAttribs=None, arrivalInfoAttribs=None,
-		 terminalEpisodesAllocation=False, childDepProcessingType="Allocation"):
+		 terminalEpisodesAllocation=False, 
+		 childDepProcessingType="Allocation",
+		 occupancyInfoAttribs=False):
 	self.childDepProcessingType = childDepProcessingType
 	self.activityAttribs = activityAttribs
 	self.dailyStatusAttribs = dailyStatusAttribs
 	self.dependencyAttribs = dependencyAttribs
 	self.arrivalInfoAttribs = arrivalInfoAttribs
+	self.occupancyInfoAttribs = occupancyInfoAttribs
 
 	self.terminalEpisodesAllocation = terminalEpisodesAllocation
+
+	if self.arrivalInfoAttribs == None:
+	    self.schedAdjType = "Occupancy Adjustment"
+
+
+	if self.occupancyInfoAttribs == None:
+	    self.schedAdjType = "Arrival Adjustment"
 
 	self.choices = None
 	self.coefficients = None
@@ -43,6 +53,12 @@ class ArrivalInfoSpecification(object):
 	self.dependentPersonName = dependentPersonName
 	self.actualArrivalName = actualArrivalName
 	self.expectedArrivalName = expectedArrivalName
+
+class OccupancyInfoSpecification(object):
+    def __init__(self, tripIndicatorName, startTimeName):
+	self.tripIndicatorName = tripIndicatorName
+	self.startTimeName = startTimeName
+
 
 class DailyStatusAttribsSpecification(object):
     def __init__(self, workStatusName, schoolStatusName):

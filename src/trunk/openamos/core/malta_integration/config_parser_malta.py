@@ -38,6 +38,7 @@ from openamos.core.models.schedules_model_components import TripDependentPersonA
 from openamos.core.models.schedules_model_components import PersonsArrivedAttributes
 from openamos.core.models.schedules_model_components import TripOccupantSpecification
 from openamos.core.models.schedules_model_components import ArrivalInfoSpecification
+from openamos.core.models.schedules_model_components import OccupancyInfoSpecification
 from openamos.core.models.schedules_model_components import PersonsArrivedSpecification
 from openamos.core.models.schedules_model_components import UniqueRecordsSpecification
 from openamos.core.models.evolution_model_components import IdSpecification
@@ -93,6 +94,7 @@ class ConfigParser(object):
         self.componentName = component
 
     def update_completedFlag(self, component_name, analysisInterval=None):
+	return
         self.iterator = self.configObject.getiterator('Component')
 
         for compElement in self.iterator:
@@ -611,8 +613,8 @@ class ConfigParser(object):
 	if model_formulation == 'Persons On Trip Arrival Processing':
 	    self.create_persons_arrived_processing_object(model_element, projectSeed)
 
-	if model_formulation == 'Arrival Time Schedule Adjustment':
-	    self.create_schedule_adjustment_arrival_processing_object(model_element)
+	if model_formulation == 'Schedule Adjustment':
+	    self.create_schedule_adjustment_object(model_element)
 
 	if model_formulation == 'Identify Unique':
 	    self.create_unique_records_object(model_element, projectSeed)
@@ -1686,8 +1688,6 @@ class ConfigParser(object):
 	    model = Immigration(specification)
 	
         model_type = 'consistency'
-	if model_formulation == 'Arrival Time Schedule Adjustment':
-	    self.create_schedule_adjustment_arrival_processing_object(model_element)
 
         model_object = SubModel(model, model_type, dep_varname, dataFilter,
                                 runUntilFilter, seed=seed, filter_type=filter_type,
@@ -1850,12 +1850,14 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
 
-    def create_schedule_adjustment_arrival_processing_object(self, model_element):
+    def create_schedule_adjustment_object(self, model_element):
         #variable_list_required for running the model
         
         variable_list = []
         
         seed = self.process_seed(model_element)
+
+	model_type = model_element.get('type')
 
         depvariable_element = model_element.find('DependentVariable')
         dep_varname = depvariable_element.get('var')
@@ -1877,9 +1879,6 @@ class ConfigParser(object):
         activity_attribs_element = model_element.find('ActivityAttributes')
         activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
 
-        activity_attribs_element = model_element.find('ActivityAttributes')
-        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
-
         dailystatus_attribs_element = model_element.find('DailyStatus')
         dailyStatusAttribsSpec = self.return_daily_status_attribs(dailystatus_attribs_element)
 
@@ -1888,12 +1887,22 @@ class ConfigParser(object):
 
 
         arrival_info_element = model_element.find('ArrivalTime')
-        arrivalInfoAttribsSpec = self.return_arrival_info_attribs(arrival_info_element)
+	if arrival_info_element is not None:
+	    arrivalInfoAttribsSpec = self.return_arrival_info_attribs(arrival_info_element)
+	else:
+	    arrivalInfoAttribsSpec = None
+
+	occupancy_info_element = model_element.find('OccupancyInvalid')
+	if occupancy_info_element is not None:
+	    occupancyInfoAttribsSpec = self.return_occupancy_info_attribs(occupancy_info_element)
+	else:
+	    occupancyInfoAttribsSpec = None
 
         specification = HouseholdSpecification(activityAttribsSpec, 
 					       dailyStatusAttribs=dailyStatusAttribsSpec,
                  			       dependencyAttribs=dependencyAttribsSpec,
-					       arrivalInfoAttribs=arrivalInfoAttribsSpec)
+					       arrivalInfoAttribs=arrivalInfoAttribsSpec,
+					       occupancyInfoAttribs=occupancyInfoAttribsSpec)
                                                         
         dataFilter = self.return_filter_condition_list(model_element)
         runUntilFilter = self.return_run_until_condition(model_element)
@@ -2071,6 +2080,25 @@ class ConfigParser(object):
 	self.component_variable_list = self.component_variable_list + variable_list
 
 	return arrivalInfoSpec
+
+    def return_occupancy_info_attribs(self, occupancy_info_element):
+	variable_list = []
+
+
+	tripIndicator_element = occupancy_info_element.find('TripInd')
+	tripIndicatorParsed = self.return_table_var(tripIndicator_element)
+	variable_list.append(tripIndicatorParsed)
+
+	startTime_element = occupancy_info_element.find('StartTime')
+	startTimeParsed = self.return_table_var(startTime_element)
+	variable_list.append(startTimeParsed)
+
+
+	occupancyInfoSpec = OccupancyInfoSpecification(tripIndicatorParsed[1], 
+						       startTimeParsed[1])
+
+	self.component_variable_list = self.component_variable_list + variable_list
+	return occupancyInfoSpec
 
 
     def return_dependency_attribs(self, dependency_attribs_element):

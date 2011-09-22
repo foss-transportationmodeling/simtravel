@@ -122,8 +122,9 @@ class ChildDependencyProcessing(Model):
 	    #			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978, 133718]:
 	    #if hhldIndex[0] not in [352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
 	    #			    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
-	    #	continue
-	    #  	pass
+	    if hhldIndex[0] not in [159353]:
+	    	continue
+	      	pass
 
 
             householdObject = Household(hhldIndex[0])
@@ -144,14 +145,15 @@ class ChildDependencyProcessing(Model):
 	    elif self.childDepProcessingType == 'Allocation':
 		householdObject.allocate_dependent_activities(seed)
 	    elif self.childDepProcessingType == 'Resolution':
-		householdObject.lineup_activities(seed)
+		#householdObject.lineup_activities(seed)
+		pass
 
 
 	    reconciledSchedules = householdObject._collate_results()
-	    reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
+	    #reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
 
             actList += reconciledSchedules
-            actListJoint += reconciledSchedulesJoint
+            #actListJoint += reconciledSchedulesJoint
 
 	    #if (hhldIndex[0] == 8 or hhldIndex[0] == 6006 or hhldIndex[0] == 13139 
 	    #	or hhldIndex[0] == 15080 or hhldIndex[0] == 35751
@@ -163,7 +165,7 @@ class ChildDependencyProcessing(Model):
 
 	
         #return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
-	return DataArray(actList, self.colNames), DataArray(actList, self.colNames)
+	return DataArray(actList, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
