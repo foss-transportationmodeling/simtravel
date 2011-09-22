@@ -123,7 +123,7 @@ class ChildDependencyProcessing(Model):
 	    #if hhldIndex[0] not in [352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
 	    #			    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
 	    if hhldIndex[0] not in [159353]:
-	    	continue
+	    	#continue
 	      	pass
 
 
