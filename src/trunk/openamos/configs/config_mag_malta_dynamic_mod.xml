@@ -277,7 +277,7 @@
       <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
 
 
-      <Model name="ArrivalInformationProcessing" formulation="Arrival Time Schedule Adjustment" seed="1">
+      <Model name="ArrivalInformationProcessing" formulation="Schedule Adjustment" seed="1">
 	<DependentVariable var="childdependencyallocation"/>
 
 	<ActivityAttributes>
@@ -1998,6 +1998,19 @@
           <Variable table="persons" var="one" coeff="0"/>
         </Model>
 
+        <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Recode the valid trip -->
+	<!-- Filter Description:  when the start loc is same as end loc and st acttype is pickup and end loc is an in home dependent act engagement-->
+
+	  <DependentVariable var="tripind"/>
+          <FilterSet type="and"/>
+	  <Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
+	  <Filter table="runtime" var="st_activitytype" condition="equals" value="600"/>
+	  <Filter table="runtime" var="en_activitytype" condition="equals" value="151"/>
+	  <Variance value="0"/>
+          <Variable table="persons" var="one" coeff="1"/>
+        </Model>
+
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the valid trip -->
@@ -2040,6 +2053,20 @@
 	  <Variance value="100"/>
           <Variable table="runtime" var="st_dependentpersonid" coeff="1"/>
         </Model>
+
+        <Model name="PrevDepPerId" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="lasttripdependentpersonid"/>
+	  <Variance value="0"/>
+          <Variable table="current_occupancy_r" var="dependentpersonid" coeff="1"/>
+        </Model>
+
+
+        <Model name="PrevOccupancy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="lastoccupancy"/>
+	  <Variance value="0"/>
+          <Variable table="current_occupancy_r" var="occupancy" coeff="1"/>
+        </Model>
+
 
 
         <Model name="occupancy_d" formulation="Regression" type="Linear" seed="1">
@@ -2137,6 +2164,8 @@
           <Variable table="runtime" var="trip_dependentpersonid" coeff="1"/>
         </Model>
 
+
+
         <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the trip with hh member indicator -->
 	  <DependentVariable var="tripwithhhmember"/>
@@ -2190,7 +2219,261 @@
 
 
 
+    <Component name="PersonsLeaving" read_from_table="trips_r" write_to_table="persons_leaving_id_r" skip="False" completed="True">
+      <DBTables>
+	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_leaving_id_r" key="houseid,personid"/>
+    	<Table table="persons" key="houseid,personid"/>
 
+      </DBTables>
+
+      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
+
+      <Model name="TripId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripiddummy"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="tripid" coeff="1"/>
+      </Model>
+
+      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personuniqueiddummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="personuniqueid" coeff="1"/>
+      </Model>
+
+
+      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="fromzone"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="fromzone" coeff="1"/>
+      </Model>
+
+
+      <Model name="triptype" formulation="Persons On Trip Arrival Processing" seed="1">
+	<DependentVariable var="triptype"/>
+	<Filter table="trips_r" var="tripind" condition="equals" value="1"/>
+	<Id>
+	  <HouseId table="trips_r" var="houseid"/>
+	  <PersonId table="trips_r" var="personid"/>
+	</Id>
+	<PersonsArrivedAttributes>
+	  <TripDependentPersonIdName table="trips_r" var="dependentpersonid"/>
+	</PersonsArrivedAttributes>
+      </Model>
+
+   </Component>
+
+
+    <Component name="CheckPersonsAtSameOrigin" read_from_table="persons_leaving_id_r" write_to_table="trips_occupant_origin_invalid_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_leaving_id_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_location_r" key="houseid,personid"/>
+    	<Table table="persons" key="houseid,personid"/>
+    	<Table table="trips_occupant_origin_invalid_r" key="houseid,personid"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="persons_leaving_id_r" var="starttime"/>
+
+      <Model name="tripvalid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripvalid"/>
+	<Filter table="persons_location_r" var="location" condition="equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+
+      <Model name="tripvalid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripvalid"/>
+	<Filter table="persons_location_r" var="location" condition="not equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="-1"/>
+      </Model>
+
+      <Model name="tripstarttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripstarttime"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="starttime" coeff="1"/>
+      </Model>
+
+      <Model name="UniqueTripId" formulation="Identify Unique" seed="1">
+	<DependentVariable var="tripiddummy"/>
+	<Filter table="runtime" var="tripvalid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="persons_leaving_id_r" var="tripid" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
+
+
+    <Component name="TripsPersonIDWhereOccupantsNotAtTheOrigin" read_from_table="trips_occupant_origin_invalid_r" write_to_table="person_trips_occupant_origin_invalid_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_occupant_origin_invalid_r" key="tripid" order="1"/>
+    	<Table table="trips_r" key="tripid"/>
+    	<Table table="person_trips_occupant_origin_invalid_r" key="tripid"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="trips_occupant_origin_invalid_r" var="tripstarttime"/>
+
+      <Model name="houseid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="houseid" coeff="1"/>
+      </Model>
+      <Model name="personid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Filter table="trips_occupant_origin_invalid_r" var="tripvalid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="personid" coeff="1"/>
+      </Model>
+
+      <Model1 name="tripstarttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripstarttime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="starttime" coeff="1"/>
+      </Model1>
+
+
+   </Component>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <Component name="OccupantProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
+      <DBTables>
+    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="person_trips_occupant_origin_invalid_r" key="houseid,personid"/>
+      </DBTables>
+
+      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
+      <AnalysisIntervalFilter table="person_trips_occupant_origin_invalid_r" var="tripstarttime"/>
+
+      <Model name="ArrivalInformationProcessing" formulation="Schedule Adjustment" type="Occupancy Invalid" seed="1">
+	<DependentVariable var="childdependencyallocation"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
+	  <PersonIdName table="schedule_final_r" var="personid"/>
+	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
+	  <LocationIdName table="schedule_final_r" var="locationid"/>
+	  <StartTimeName table="schedule_final_r" var="starttime"/>
+	  <EndTimeName table="schedule_final_r" var="endtime"/>
+	  <DurationName table="schedule_final_r" var="duration"/>
+	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+	<DailyStatus>
+	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	</DailyStatus>
+	
+	<Dependency>
+	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	</Dependency>
+	
+	<OccupancyInvalid>
+	  <TripInd table="person_trips_occupant_origin_invalid_r" var="tripvalid"/>
+	  <StartTime table="person_trips_occupant_origin_invalid_r" var="tripstarttime"/>
+	</OccupancyInvalid>
+
+
+      </Model>
+
+    </Component>
+
+
+      <Component name="DeleteInvalidTripsPersonIDsWithOccupancyIssues" read_from_table="person_trips_occupant_origin_invalid_r" skip="False" completed="True">
+        <DBTables>
+    	<Table table="person_trips_occupant_origin_invalid_r" key="tripid" order="1"/>
+        </DBTables>
+        <DeleteBasedOn table="person_trips_occupant_origin_invalid_r" var="tripid"/>
+
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Filter table="person_trips_occupant_origin_invalid_r" var="tripid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="person_trips_occupant_origin_invalid_r" var="tripid" coeff="1"/>
+      </Model>
+
+
+      </Component>
+
+
+
+      <Component name="RevertOccupancyForInvalidOccupantTrip" read_from_table="trips_r" write_to_table="current_occupancy_r" skip="False" completed="True">
+        <DBTables>
+    	<Table table="trips_r" key="tripid" order="1"/>
+    	<Table table="trips_occupant_origin_invalid_r" key="tripid"/>
+    	<Table table="current_occupancy_r" key="tripid"/>
+        </DBTables>
+
+      <AnalysisIntervalFilter table="trips_occupant_origin_invalid_r" var="tripstarttime"/>
+
+        <Model name="dummyhouseid" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummyhouseid"/>
+	  <Variance value="0"/>
+          <Variable table="trips_r" var="houseid" coeff="1"/>
+        </Model>
+
+        <Model name="dummypersonid" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummypersonid"/>
+	  <Variance value="0"/>
+          <Variable table="trips_r" var="personid" coeff="1"/>
+        </Model>
+
+
+        <Model name="dependentpersonid" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dependentpersonid"/>
+	  <Variance value="0"/>
+          <Variable table="trips_r" var="lasttripdependentpersonid" coeff="1"/>
+        </Model>
+
+        <Model name="occupancy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="occupancy"/>
+	  <Variance value="0"/>
+          <Variable table="trips_r" var="lastoccupancy" coeff="1"/>
+        </Model>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Filter table="trips_occupant_origin_invalid_r" var="tripvalid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="trips_occupant_origin_invalid_r" var="tripid" coeff="1"/>
+      </Model>
+      </Component>
+
+
+      <Component name="DeleteInvalidOccupantTrip" read_from_table="trips_r" skip="False" completed="True">
+        <DBTables>
+    	<Table table="trips_r" key="tripid" order="1"/>
+    	<Table table="trips_occupant_origin_invalid_r" key="tripid"/>
+        </DBTables>
+        <DeleteBasedOn table="trips_r" var="tripid"/>
+      <AnalysisIntervalFilter table="trips_occupant_origin_invalid_r" var="tripstarttime"/>
+
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Filter table="trips_occupant_origin_invalid_r" var="tripid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="trips_occupant_origin_invalid_r" var="tripid" coeff="1"/>
+      </Model>
+
+
+      </Component>
 
 
 
@@ -2279,193 +2562,6 @@
         </Model>
 
       </Component>
-
-
-    <Component name="PersonsLeaving" read_from_table="trips_r" write_to_table="persons_leaving_id_r" skip="False" completed="True">
-      <DBTables>
-	<Table table="trips_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_leaving_id_r" key="houseid,personid"/>
-    	<Table table="persons" key="houseid,personid"/>
-
-      </DBTables>
-
-      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
-
-      <Model name="TripId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripiddummy"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="tripid" coeff="1"/>
-      </Model>
-
-      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personuniqueiddummy"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="personuniqueid" coeff="1"/>
-      </Model>
-
-
-      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="fromzone"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="fromzone" coeff="1"/>
-      </Model>
-
-
-      <Model name="triptype" formulation="Persons On Trip Arrival Processing" seed="1">
-	<DependentVariable var="triptype"/>
-	<Id>
-	  <HouseId table="trips_r" var="houseid"/>
-	  <PersonId table="trips_r" var="personid"/>
-	</Id>
-	<PersonsArrivedAttributes>
-	  <TripDependentPersonIdName table="trips_r" var="dependentpersonid"/>
-	</PersonsArrivedAttributes>
-      </Model>
-
-   </Component>
-
-
-    <Component name="CheckPersonsAtSameOrigin" read_from_table="persons_leaving_id_r" write_to_table="trips_occupant_origin_invalid_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_leaving_id_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_location_r" key="houseid,personid"/>
-    	<Table table="persons" key="houseid,personid"/>
-    	<Table table="trips_occupant_origin_invalid_r" key="houseid,personid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="persons_leaving_id_r" var="starttime"/>
-
-      <Model name="tripvalid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripvalid"/>
-	<Filter table="persons_location_r" var="location" condition="equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-      <Model name="tripvalid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripvalid"/>
-	<Filter table="persons_location_r" var="location" condition="not equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="-1"/>
-      </Model>
-
-      <Model name="UniqueTripId" formulation="Identify Unique" seed="1">
-	<DependentVariable var="tripiddummy"/>
-	<Filter table="runtime" var="tripvalid" condition="equals" value="-1"/>
-	<Variance value="0"/>
-        <Variable table="persons_leaving_id_r" var="tripid" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <Component1 name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
-      <DBTables>
-    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_arrived_id_r" key="houseid,personid"/>
-    	<Table table="households_arrived_id_r" key="houseid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
-    	<Table table="trips_occupant_origin_invalid_r" key="houseid,personid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="households_arrived_id_r" var="actualarrivaltime"/>
-	
-      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
-
-
-      <Model name="ArrivalInformationProcessing" formulation="Occupancy Invalid Schedule Adjustment" seed="1">
-	<DependentVariable var="childdependencyallocation"/>
-
-	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
-	  <PersonIdName table="schedule_final_r" var="personid"/>
-	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
-	  <LocationIdName table="schedule_final_r" var="locationid"/>
-	  <StartTimeName table="schedule_final_r" var="starttime"/>
-	  <EndTimeName table="schedule_final_r" var="endtime"/>
-	  <DurationName table="schedule_final_r" var="duration"/>
-	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
-	</ActivityAttributes>
-
-	<DailyStatus>
-	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
-	</DailyStatus>
-	
-	<Dependency>
-	  <ChildDependency table="child_dependency_r" var="dependency"/>
-	</Dependency>
-	
-	<OccupancyInvalid>
-	  <TripInd table="trips_occupant_origin_invalid_r" var="tripvalid"/>
-	</OccupancyInvalid>
-
-
-      </Model>
-
-    </Component1>
-
-
-
-
-
-      <Component1 name="DeleteInvalidTripsNonArrivals" read_from_table="trips_occupant_origin_invalid_r" key="tripid" skip="False" completed="True">
-        <DBTables>
-    	  <Table table="trips_occupant_origin_invalid_r" key="tripid" order="1"/>
-        </DBTables>
-        <DeleteBasedOn table="trips_r" var="tripid"/>
-
-        <Model name="dummyTripIdsForDeleting" formulation="Regression" type="Linear" seed="1">
-	  <DependentVariable var="dummytripidsForDeleting"/>
-	  <Filter table="trips_invalid_r" var="tripind" condition="equals" value="99"/>
-	  <Variance value="0"/>
-          <Variable table="trips_occupant_origin_invalid_r" var="tripid" coeff="1"/>
-        </Model>
-
-      </Component1>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

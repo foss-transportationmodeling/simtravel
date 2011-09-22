@@ -2537,7 +2537,7 @@
 
 
 
-    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" write_to_table_2="schedule_joint_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" count_key="scheduleid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -2553,7 +2553,6 @@
 
       <Model name="ChildDependencyAllocation" formulation="Child Dependency" type="Allocation" seed="1">
 	<DependentVariable var="childdependencyallocation"/>
-
 	<ActivityAttributes>
 	  <HouseholdIdName table="schedule_cleanaggregateactivityschedule_r" var="houseid"/>
 	  <PersonIdName table="schedule_cleanaggregateactivityschedule_r" var="personid"/>
@@ -2803,7 +2802,7 @@
         <Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
@@ -5433,13 +5432,13 @@
     </Component>	
 
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_final_r" write_to_table="schedule_finalresolved_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
     	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="schedule_finalresolved_r" key="houseid,personid"/>
+    	<Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>
+    	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
 
       <DeleteRecords value="False"/>	
@@ -5450,15 +5449,15 @@
 	<DependentVariable var="childdependencyallocation"/>
 
 	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
-	  <PersonIdName table="schedule_final_r" var="personid"/>
-	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
-	  <LocationIdName table="schedule_final_r" var="locationid"/>
-	  <StartTimeName table="schedule_final_r" var="starttime"/>
-	  <EndTimeName table="schedule_final_r" var="endtime"/>
-	  <DurationName table="schedule_final_r" var="duration"/>
-	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	  <HouseholdIdName table="schedule_skeleton_r" var="houseid"/>
+	  <PersonIdName table="schedule_skeleton_r" var="personid"/>
+	  <ScheduleIdName table="schedule_skeleton_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_skeleton_r" var="activitytype"/>
+	  <LocationIdName table="schedule_skeleton_r" var="locationid"/>
+	  <StartTimeName table="schedule_skeleton_r" var="starttime"/>
+	  <EndTimeName table="schedule_skeleton_r" var="endtime"/>
+	  <DurationName table="schedule_skeleton_r" var="duration"/>
+	  <DependentPersonName table="schedule_skeleton_r" var="dependentpersonid"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
