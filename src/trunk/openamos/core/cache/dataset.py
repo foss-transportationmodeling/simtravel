@@ -71,6 +71,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_skeleton_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_inctravelrec_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_final_r", Schedule_R)
+        self.fileh.createTable(output_grp, "schedule_full_r", Schedule_R)
         self.fileh.createTable(output_grp, "schedule_aggregatefinal_r", Schedule_R)
         self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
         self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)

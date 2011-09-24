@@ -230,7 +230,7 @@ class PopulationEvolutionProcessing(Model):
 
 
 	    	householdObject.add_person(personObject)
-	    additionalHouseholdObject, highestHid = householdObject.evolve_population(seed, highestHid)
+	    additionalHouseholdObject, highestHid = householdObject.evolve_population(highestHid)
 		
 
 

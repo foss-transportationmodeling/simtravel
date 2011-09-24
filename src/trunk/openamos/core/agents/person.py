@@ -44,17 +44,18 @@ class Person(object):
 	self.birth_f = 0
 	self.age_f = 0
 	self.enrollment_f = 0
-	self.grade_f = 0
-	self.educ_f = 0
+	self.grade_f = -3
+	self.educ_f = -3
 	self.educInYears_f = 0
 	self.residenceType_f = 0
 	self.laborParticipation_f = 0
 	self.occupation_f = 0
 	self.income_f = 0
+	self.incomeCont = 0
 	self.marriageDecision_f = 0
 	self.divorceDecision_f = 0
 
-
+        self.rndGen = RandomDistribution(int(self.hid * self.pid))
 
 
     def set_person_attributes(self, age, clwkr, educ, enroll,
@@ -97,11 +98,37 @@ class Person(object):
 	self.laborParticipation_f = laborParticipation_f
 	self.occupation_f = occupation_f
 	self.income_f = income_f
+	self.incomeCont = self.discretize_personal_income(income_f)
 	self.marriageDecision_f = marriageDecision_f
 	self.divorceDecision_f = divorceDecision_f
 
+	
 
 
+    def discretize_personal_income(self, incomeCat):
+	if incomeCat == 0:
+	    contIncome = 0
+	elif incomeCat == 1:
+	    contIncome = self.rndGen.return_uniform(0, 10000)
+	elif incomeCat == 2:
+	    contIncome = self.rndGen.return_uniform(10000, 20000)
+	elif incomeCat == 3:
+	    contIncome = self.rndGen.return_uniform(20000, 30000)
+	elif incomeCat == 4:
+	    contIncome = self.rndGen.return_uniform(30000, 40000)
+	elif incomeCat == 5:
+	    contIncome = self.rndGen.return_uniform(40000, 50000)
+	elif incomeCat == 6:
+	    contIncome = self.rndGen.return_uniform(50000, 60000)
+	elif incomeCat == 7:
+	    contIncome = self.rndGen.return_uniform(60000, 80000)
+	elif incomeCat == 8:
+	    contIncome = self.rndGen.return_uniform(80000, 100000)
+	elif incomeCat == 9:
+	    contIncome = self.rndGen.return_uniform(100000, 150000)
+	elif incomeCat == 10:
+	    contIncome = self.rndGen.return_half_normal_variables(150000, 25000)
+	return contIncome
 
 
 
@@ -718,47 +745,57 @@ class Person(object):
 	    return False
 
 
-    def move_start_end(self, act, moveByValue):
+    def move_start_end(self, act, moveByValue, removeAdd=True):
 	#print '\tRemoving episode - ', act
-	self.remove_episodes([act])
+	if removeAdd:
+	    self.remove_episodes([act])
 	act.startTime += moveByValue + 1
 	act.endTime += moveByValue + 1
 	#print '\tAdding episode - ', act
-	self.add_episodes([act])
+	if removeAdd:
+	    self.add_episodes([act])
 	
 	
-    def move_start_end_by_diff_values(self, act, stValue, endValue):
-        self.remove_episodes([act])
+    def move_start_end_by_diff_values(self, act, stValue, endValue, removeAdd=True):
+	if removeAdd:
+            self.remove_episodes([act])
         act.startTime = stValue
 	act.endTime = endValue
         act.duration = act.endTime - act.startTime
         if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
-        self.add_episodes([act])
+	if removeAdd:
+            self.add_episodes([act])
 			
 
 
-    def move_start(self, act, value):
+    def move_start(self, act, value, removeAdd=True):
 	#self.print_activity_list()
-        self.remove_episodes([act])
+	if removeAdd:
+            self.remove_episodes([act])
         act.startTime = value
         act.duration = act.endTime - act.startTime
         if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
-        self.add_episodes([act])
+	if removeAdd:
+            self.add_episodes([act])
+
 	#self.print_activity_list()
 
 
 
-    def move_end(self, act, value):
+    def move_end(self, act, value, removeAdd=True):
 	#print 'before logic 3 - ', self.print_activity_list()
-        self.remove_episodes([act])
+	if removeAdd:
+            self.remove_episodes([act])
 	#print 'after removing episode logic 3 - ', self.print_activity_list()
         act.endTime = value
         act.duration = act.endTime - act.startTime
         if act.duration < 0:
             raise Exception, 'Incorrect adjustment - %s' %act
-        self.add_episodes([act])
+	if removeAdd:
+            self.add_episodes([act])
+
 	#print 'after logic 3 - ', self.print_activity_list()
 
 

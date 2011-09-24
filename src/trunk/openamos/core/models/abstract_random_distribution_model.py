@@ -25,7 +25,7 @@ class RandomDistribution(RandomState):
 	rand_vars = self.random_integers(low, high, size)
 	return rand_vars
 
-    def return_half_normal_variables(self, location, scale, size):
+    def return_half_normal_variables(self, location, scale, size=1):
 	norm_vars = self.return_normal_variables(location, scale, size)
 	half_norm_vars = abs(norm_vars)
 	return half_norm_vars

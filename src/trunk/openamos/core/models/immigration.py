@@ -269,7 +269,7 @@ class Immigration(Model):
 	print 'Startint to synthesize population - '
 	ti = time.time()
 	popgenManagerObj = PopgenManager(configObject=self.popgenConfig)
-	#popgenManagerObj.run_scenarios()
+	popgenManagerObj.run_scenarios()
 	print '\t Synthesis complete in - %.4f' %(time.time()-ti)
 
 	hhldSynLoc = self.scenario.synHousingTableNameLoc.location

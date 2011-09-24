@@ -29,6 +29,8 @@ class Household(object):
 	self.oldHid = 0
 	self.partnerHousehold = None
 
+        self.rndGen = RandomDistribution(int(self.hid))
+
 
 	self.relateDict = {1:'Householder',
 			   2:'Husband/Wife',
@@ -75,6 +77,10 @@ class Household(object):
 	self.personsSize += 1
 	if person.age < 18:
 	    self.noc += 1
+	if person.laborParticipation_f == 1:
+	    self.wif += 1
+	    print 'Adding employed person ... '
+	self.hinc += person.incomeCont
 
         if person.child_dependency == 1:
             self.dependencyPersonIds.append(person.pid)
@@ -90,8 +96,15 @@ class Household(object):
 	self.personsSize -= 1
 	if person.age < 18:
 	    self.noc -= 1
-
+	if person.laborParticipation_f == 1:
+	    self.wif -= 1
+	    print 'Removing employed person ... '
+	self.hinc -= person.incomeCont
+	print 'Updating income removing income of person leaving'
 	return person
+
+
+
 
     def return_person_list(self):
 	personList = []
@@ -126,12 +139,12 @@ class Household(object):
 				 yrMoved):
 	self.bldgsz = bldgsz
 	self.hht = hht
-	self.hinc = hinc
+	#self.hinc = hinc (No need to assign these; they are updated as person objects are added)
 	#self.noc = noc (No need to assign these; they are updated as person objects are added)
 	#self.persons = persons (No need to assign these; they are updated as person objects are added)
 	self.unittype = unittype
 	self.vehicl = vehicl
-	self.wif = wif
+	#self.wif = wif (No need to assign these; they are updated as person objects are added)
 	self.yrMoved = yrMoved
 
     def print_person_relationship_gender(self):
@@ -145,12 +158,12 @@ class Household(object):
 								   self.sexDict[person.sex])
 	
 
-    def evolve_population(self, seed, highestHid):
+    def evolve_population(self, highestHid):
 	# All data dictionaries are borrowed directly from PUMS 2000
 	# Once a full implementation is complete we can extend the code
 	# to generalize the data dictionaries
 	
-        self.rndGen = RandomDistribution(int(self.hid + seed))
+
 	self.highestHid = highestHid
 
 
@@ -203,11 +216,15 @@ class Household(object):
 	for personId in personIds:
 	    person = self.persons[personId]
 	    if person.divorceDecision_f == 1:
+	    	print '3. Before divorce processing'
+	    	self.print_person_relationship_gender()
 		partnerHousehold = self.process_divorce()
 		self.partnerHousehold = partnerHousehold
 		divorceFlag = True
 		self.divorce = True
 		break
+	
+
 	
 	if divorceFlag:
 	    print '3. After divorce processing'
@@ -216,19 +233,22 @@ class Household(object):
 	    print '\t\tNumber of children - ', self.noc
 	    print '\t\tVehicle count - ', self.vehicl
 	    print '\t\tCount of workers in family - ', self.wif
-
+	    print '\t\tHousehold type - ', self.hhtDict[self.hht]
 	    if partnerHousehold is not None:
 		partnerHousehold.print_person_relationship_gender()
 	    	print '\t\tHousehold size - ', partnerHousehold.personsSize
 	    	print '\t\tNumber of children - ', partnerHousehold.noc
 	    	print '\t\tVehicle count - ', partnerHousehold.vehicl
 	    	print '\t\tCount of workers in family - ', partnerHousehold.wif
-
+	    	print '\t\tHousehold type - ', self.hhtDict[partnerHousehold.hht]
 	
 	    #raw_input("press any key to continue...")
 	else:
 	    partnerHousehold = None
-	self.process_household_type()	
+
+	self.process_household_type()
+
+
 
 
 	#TODO:update the household type for this household and partner's household
@@ -257,6 +277,8 @@ class Household(object):
 
 	personNew.sex = sex
 	personNew.relate = 3
+	personNew.marstat = 5
+
 
 	hhldrId = False
 	partnerId = False
@@ -267,6 +289,10 @@ class Household(object):
 	    elif person.relate == 2:
 		partnerId = personId
 
+	if hhldrId <> False:
+	    hhldr = self.persons[hhldrId]
+	    personNew.hispan = hhldr.hispan		
+
 	if hhldrId <> False and partnerId <> False:
 	    hhldr = self.persons[hhldrId]
 	    partner = self.persons[partnerId]
@@ -276,6 +302,8 @@ class Household(object):
 
 	    if hhldr.race1 <> partner.race1:
 		personNew.race1 = 9
+
+		
 	    
 	    print 'Hhldr race - %s and partner race - %s and new Kids race - %s' %(hhldr.race1, partner.race1, personNew.race1)
 
@@ -336,6 +364,7 @@ class Household(object):
 	if partnerId <> False:
 	    partner = self.persons[partnerId]
 	    partner.marstat = 3				# changing the marriage status of the partner
+	    partner.relate = 1				# changing the relationship status to householder
 
 	if hhldrId == False or partnerId == False:
 	    print '\tOne or more partners was not identified husbandPid - %s and wifePid - %s' %(hhldrId, partnerId)
@@ -355,67 +384,111 @@ class Household(object):
 
 	    print '\tMembers in the household other than the householder and partner- '
 		
-	    ownKidIds = []
-	    partnersKidIds = []
-	    ownParentIds = []
-	    partnersParentIds = []		
 	    otherIds = []
+	    ownFamily = []
+	    partnersFamily = []
 
 	    personIds = copy.deepcopy(self.persons.keys())
 	    for personId in personIds:
 	    	person = self.persons[personId]
 
 	    	print '\t    Relationship of surviving - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
-		if person.relate == 3 or person.relate == 4:
-		    ownKidIds.append(personId)
-		elif person.relate == 5:
-		    partnersKidIds.append(personId)
-		elif person.relate == 7:
-		    ownParentIds.append(personId)
-		elif person.relate == 9:
-		    partnersParentIds.append(personId)
+		if person.relate == 3 or person.relate == 4: # Own kids / adopted kids
+		    otherIds.append(personId)
+		elif person.relate == 5: 		     # Stepson/stepdaughter
+		    partnersFamily.append(personId)
+		    person.relate = 3        	  		# updating the relationship status to Natural born son/daughter
+		elif person.relate == 6:		     # Brother/sister
+		    ownFamily.append(personId)
+		elif person.relate == 7:		     # Father/mother
+		    ownFamily.append(personId)
+		elif person.relate == 9:		     # Parent-in-law
+		    partnersFamily.append(personId)
+		    person.relate = 7        	  		# updating the relationship status to Father/mother
+		elif person.relate == 12:		     # Brother-in-law/Sister-in-law
+		    partnersFamily.append(personId)
+		    person.relate = 6        	  		# updating the relationship status to Father/mother
 		elif person.relate <> 1 and person.relate <> 2:
 		    otherIds.append(personId)
 
-	    print '\t    b. Own Kids - ', ownKidIds
-	    print '\t\t Allocating Own Kids'
-	    ownKidsRndNum = self.rndGen.return_uniform()
-	    if ownKidsRndNum <= 0.5:
-		for ownKidId in ownKidIds:
-		    #ownKid = self.persons.pop(ownKidId)
-		    ownKid = self.remove_person(ownKidId)
-		    partnerHousehold.add_person(ownKid)
 
-	    print '\t    c. Partners Kids - ', partnersKidIds
+	    print '\t    c. Partners Family - ', partnersFamily
 	    print '\t\t Allocating partner kids'
-	    for partnersKidId in partnersKidIds:
+	    for paId in partnersFamily:
 		#partnersKid = self.persons.pop(partnersKidId)
-		partnersKid = self.remove_person(partnersKidId)
+		partnersKid = self.remove_person(paId)
 		partnerHousehold.add_person(partnersKid)
 
-	    print '\t    d. Own parents - ', ownParentIds
-
-	    print '\t    e. Partners parents - ', partnersParentIds
-	    print '\t\t Allocating partner parents'
-	    for partnersParentId in partnersParentIds:
-		#partnersParent = self.persons.pop(partnersParentId)
-		partnersParent = self.remove_person(partnersParentId)
-		partnerHousehold.add_person(partnersParent)
+	    print '\t    d. Own family - ', ownFamily
 
 	    print '\t    f. Other - ', otherIds
 	    print '\t\t Allocating others'
 	    for otherId in otherIds:
 		otherRndNum = self.rndGen.return_uniform()
 		if otherRndNum <= 0.5:
-		    #other = self.persons.pop(otherId)
 		    other = self.remove_person(otherId)
 		    partnerHousehold.add_person(other)
+				
+	    print '\t    Splitting the vehicle fleet'
+	    print '\t\tvehicle Count - ', self.vehicl
+	
+
+	    vehiclOriHhld = self.rndGen.return_random_integers(0, self.vehicl, 1)[0]
+	
+	    partnerHousehold.vehicl = self.vehicl - vehiclOriHhld
+	    self.vehicl = vehiclOriHhld
+		
+	    print '\t\tVehicle count to new hhld - '		, partnerHousehold.vehicl
+	    print '\t\tVehicle count to original hhld - '		, self.vehicl	
+
 
 	    partnerHousehold.oldHid = self.hid
-	    #raw_input("\tWe need to dissolve the household")	
-	
+
+	    #raw_input("\tvehicle allocation as shown above ... ")	
+			
+	    if hhldr.sex == 1 and len(self.persons) == 1:
+		self.hht = 4 # Non family household: Male householder living alone
+	    elif hhldr.sex == 2 and len(self.persons) == 1:
+		self.hht = 6 # Non family household: Female householder living alone
+
+	    elif self.check_if_family() and hhldr.sex == 1:
+		self.hht = 2 # Family household: Male householder
+	    elif self.check_if_family() and hhldr.sex == 2:
+		self.hht = 3 # Family household: Female householder
+
+	    elif not self.check_if_family() and hhldr.sex == 1:
+		self.hht = 5 # Non Family household: Male householder
+	    elif not self.check_if_family() and hhldr.sex == 2:
+		self.hht = 7 # Non Family household: Female householder
+		
+
+	    if partner.sex == 1 and len(partnerHousehold.persons) == 1:
+		partnerHousehold.hht = 4 # Non family household: Male householder living alone
+	    elif partner.sex == 2 and len(partnerHousehold.persons) == 1:
+		partnerHousehold.hht = 6 # Non family household: Female householder living alone
+
+	    elif partnerHousehold.check_if_family() and partner.sex == 1:
+		partnerHousehold.hht = 2 # Family household: Male householder
+	    elif partnerHousehold.check_if_family() and partner.sex == 2:
+		partnerHousehold.hht = 3 # Family household: Female householder
+
+	    elif not partnerHousehold.check_if_family() and partner.sex == 1:
+		partnerHousehold.hht = 5 # Non Family household: Male householder
+	    elif not partnerHousehold.check_if_family() and partner.sex == 2:
+		partnerHousehold.hht = 7 # Non Family household: Female householder
+
+		
+
 	return partnerHousehold
 
+
+    def check_if_family(self):
+	for pid in self.persons:
+	    person = self.persons[pid]
+		
+	    if (person.relate >= 3 and person.relate <=16):
+		return True
+	return False 
 
     def identify_hhldr_partner_id(self, hid=None):
 	hhldrId = False
@@ -828,6 +901,7 @@ class Household(object):
 
 	for act in missedActsStillToPursue + actsToPursue:
 	    #print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+	    #if actEnd-act.startTime >= 0:
 	    if actEnd-act.startTime >= 0:
 		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
@@ -899,12 +973,13 @@ class Household(object):
 
 
 
-    def lineup_activities(self, seed):
+    def lineup_activities_based_on_activities(self, seed):
 	print 'Post processing schedules for hid - ', self.hid
         print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
 	
 	depAct = {}
+	depIHAct = {}
 
 	for depPid in self.dependencyPersonIds:
 	    depPerson = self.persons[depPid]
@@ -917,13 +992,21 @@ class Household(object):
 			depAct[depPid] += [(act.startTime, act)]
 		    else:
 			depAct[depPid] = [(act.startTime, act)]
+
+		if act.dependentPersonId > 0 and act.dependentPersonId <> 99 and act.actType < 200:
+		    if depPid in depIHAct:
+			depIHAct[depPid] += [(act.startTime, act)]
+		    else:
+			depIHAct[depPid] = [(act.startTime, act)]
+
+
 		hp.heappush(depPersonTempList, (stTime, act))
 	    depPerson.listOfActivityEpisodes = depPersonTempList
 		
 		    
 
 	depActFromIndep = {}
-
+	depIHActFromIndep = {}
 	
 	for pid in self.indepPersonIds:
 	    person = self.persons[pid]
@@ -938,12 +1021,27 @@ class Household(object):
 			    depActFromIndep[depPid] += [(act.startTime, act)]
 		    	else:
 			    depActFromIndep[depPid] = [(act.startTime, act)]
+
+		if act.dependentPersonId > 0 and act.actType <> 598 and act.actType < 200:
+		    depPersonIds = self.parse_personids(act.dependentPersonId)
+		    for depPid in depPersonIds:
+		    	if depPid in depIHActFromIndep:
+			    depIHActFromIndep[depPid] += [(act.startTime, act)]
+		    	else:
+			    depIHActFromIndep[depPid] = [(act.startTime, act)]
+
+
 		hp.heappush(indepPersonTempList, (stTime, act))
 	    person.listOfActivityEpisodes = indepPersonTempList
 
 
 	for pid in depAct.keys():
 	    depPerson = self.persons[pid]
+
+	    if pid not in depAct.keys():
+		print depPerson.print_activity_list()
+		raise Exception, 'Activities for this person where all allocated to non-hh memebers?'
+
 	    depActs = depAct[pid]
 	    indepActs = depActFromIndep[pid]
 	
@@ -954,9 +1052,10 @@ class Household(object):
 		raise Exception, 'Some dependent activities got lost in the dynamic process? i.e. one-to-one matching of dependent activities is not happening'
 
 
+	    print "\nUpdating the dependent person's schedules to reflect the dynamic activity-travel scheduling"
+	    print 'Before - ', depPerson.print_activity_list()
 	    for i in range(len(depActs)):
-		depenActStTime, depenAct = hp.heappop(depActs)
-
+		depenActStTime, depenAct = hp.heappop(depActs)		
 		indepActStTime, indepAct = hp.heappop(indepActs)
 
 		if depenAct.startTime <> indepAct.startTime and depenAct.endTime <> indepAct.endTime:
@@ -964,27 +1063,205 @@ class Household(object):
 		    print '\tCorr indep act    ', indepAct
 		    print '\t\t Need to adjust the start and/or endtime'
 
-		    #depenAct.startTime = indepAct.startTime
-		    #depenAct.endTime = indepAct.endTime
-		    #depPerson.move_end(depenAct, indepAct.endTime)
-		    depPerson.move_start_end_by_diff_values(depenAct, indepAct.startTime, indepAct.endTime)
+		    if depenAct.actType == 600:
+		    	depPerson.move_start_end(depenAct, indepAct.startTime-depenAct.startTime-1)
+
+		    if depenAct.actType == 601:
+		    	depPerson.move_start_end(depenAct, indepAct.startTime-depenAct.startTime-1)
+
+		    if depenAct.actType >= 400 and depenAct.actType <= 450:
+			depPerson.move_start_end_by_diff_values(depenAct, indepAct.startTime, indepAct.endTime)
+
+
 		    print '\t\t Adjusted Dep Act - ', depenAct
 
-		    if not depPerson._check_for_conflicts():
-			print '\t\tThe adjustment caused conflicts with subsequent activities; need to make further adjustments'
-
-		    	subsDepenActConflicts = depPerson._identify_conflict_activities([depenAct])
-			depPerson.print_activity_list()
-			for depConf in subsDepenActConflicts:
-			    print depConf
-
-		    raw_input()	
 
 
+	    depIHActs = depIHAct[pid]
+	    indepIHActs = depIHActFromIndep[pid]
+	
+	    hp.heapify(depIHActs)
+	    hp.heapify(indepIHActs)		
+
+	    if len(depIHActs) <> len(indepIHActs):
+		"""
+		for i in range(len(depIHActs)):
+    		    depenIHActStTime, depenIHAct = hp.heappop(depIHActs)		
+		    print 'depn IH - ', depenIHAct
+
+		print
+		for i in range(len(indepIHActs)):
+    		    indepIHActStTime, indepIHAct = hp.heappop(indepIHActs)		
+		    print 'indepn IH - ', indepIHAct
+		"""
+		raw_input('Number of IH Acts is not the same i.e. count dependent IH episodes <> count dependent IH episodes allocated to independent persons')
+
+	    for i in range(len(depIHActs)):
+		depenIHActStTime, depenIHAct = hp.heappop(depIHActs)		
+		try:
+		    indepIHActStTime, indepIHAct = hp.heappop(indepIHActs)
+		except IndexError, e:
+		    print 'Since the indep acts are less; the last act that was popped will be used as reference ... '
+
+		print '\n\tIH Dep Act    	   ', depenIHAct
+		print '\tCorr IH indep act    ', indepIHAct
+
+
+		if depenIHAct.actType == 101 and indepIHAct.actType == 151:
+		    print '\t\t Need to adjust the start and/or endtime of IH Episode'
+		    depPerson.move_start_end_by_diff_values(depenIHAct, indepIHAct.startTime, indepIHAct.endTime)							
+
+		    print '\t\t Adjusted Dep IH Act - ', depenIHAct
+		    raw_input('\t\tadjusting ih allocated as ih dependent')
+
+		if depenIHAct.actType == 101 and indepIHAct.actType == 100:
+		    if depenIHAct.startTime < indepIHAct.startTime and indepIHAct.startTime:	 
+			print '\t\t Need to adjust start/endtime of IH Episode'
+		    	depPerson.move_start_end(depenIHAct, indepIHAct.startTime-depenIHAct.startTime)							
+
+		    	print '\t\t Adjusted Dep IH Act - ', depenIHAct
+		    	raw_input('\t\tadjusting ih allocated to ih sojourn')
+
+
+	    print 'After - ', depPerson.print_activity_list()
+		
+
+	    self.fill_gaps_in_dependent_person_schedule(depPerson)
+	    print depPerson.print_activity_list()
+
+	    print 'Conflicts exist: True - No, False - Yes', depPerson._check_for_conflicts()
+	    raw_input('processing complete for dependent personid - %s' %pid)	
+
+    def lineup_activities(self, seed):
+	print 'Post processing schedules for hid - ', self.hid
+        print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
+        print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
+
+	depTrips = {}
+
+	for pid in self.indepPersonIds:
+	    person = self.persons[pid]
+	    #person.print_activity_list()
+	    indepPersonTempList = []
+	    stTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+
+	    hp.heappush(indepPersonTempList, (stTime, stAct))
+	    for actC in range(len(person.listOfActivityEpisodes)):
+	    	enTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+
+		if stAct.actType == 600 and enAct.actType == 598:
+		    print 'Trip for person identified'
+		    depPersonIds = self.parse_personids(stAct.dependentPersonId)
+		    for depPid in depPersonIds:
+		    	if depPid in depTrips:
+			    depTrips[depPid].append((stAct.endTime, enAct.startTime))
+		    	else:
+			    depTrips[depPid] = [(stAct.endTime, enAct.startTime)]
+		stAct = enAct	
+		hp.heappush(indepPersonTempList, (enTime, enAct))
+	    person.listOfActivityEpisodes = indepPersonTempList
+
+	tripVertices = {}
+	for depPid in depTrips.keys():
+	    print 'For dependent person - ', depPid
+	    depPerson = self.persons[depPid]
+	    print depPerson.print_activity_list()
+
+	    depPersonTempList = []
+	    tripCount = 0
+	    trips = depTrips[depPid]
+	    trips.sort()
+
+	    stTime, stAct = hp.heappop(depPerson.listOfActivityEpisodes)
+	    hp.heappush(depPersonTempList, (stTime, stAct))
+	    for actC in range(len(depPerson.listOfActivityEpisodes)):
+	    	enTime, enAct = hp.heappop(depPerson.listOfActivityEpisodes)
+
+		if stAct.actType == 600 and enAct.actType == 601 and stAct.dependentPersonId <> 99:
+		    st, en = trips[tripCount]
+		    print '\tTrip %s: st - %s and end - %s' %(tripCount+1, st, en)
+		    print '\t    St Vertex - ', stAct
+		    if stAct.endTime <> st:
+		        depPerson.move_start_end(stAct, st-stAct.endTime-1, removeAdd=False)
+			print '\t\tMod St Vertex', stAct
+
+		    print '\t    En Vertex - ', enAct
+		    if enAct.startTime <> en + 1:
+		        depPerson.move_start_end(enAct, en-enAct.startTime, removeAdd=False) # No -1 because of the dummy we introduce
+			print '\t\tMod En Vertex', enAct
+		    tripCount += 1
+
+		if enAct.actType == 600:
+		    if stAct.endTime < enAct.startTime - 1:
+			# Need to fill upto the pickup act
+			print '\t    St Act before pickup', stAct
+			depPerson.move_end(stAct, enAct.startTime-stAct.endTime, removeAdd=False)
+			print '\t\tSt Act before pickup', stAct
+			raw_input("St Act before pickup")
+		    
+
+		stAct = enAct	
+		hp.heappush(depPersonTempList, (enTime, enAct))
+	    depPerson.listOfActivityEpisodes = depPersonTempList
+	
+		
+	raw_input()
+
+
+    def fill_gaps_in_dependent_person_schedule(self, person):
+	return
+	stActTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	tempList = []	
+
+	for i in range(len(person.listOfActivityEpisodes)):
+	    enActTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+
+	    if stAct.actType == 600 and enAct.actType == 601:
+		print 'pickups/dropoffs doing nothing'
+		tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+		continue
+
+	    if enAct.startTime > stAct.endTime and enAct.actType <> 600:
+		print 'adjusting start for end act except for pickups- ', enAct
+		person.move_start(enAct, stAct.endTime, removeAdd=False)
+		tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+		continue
+
+	    if stAct.endTime < enAct.startTime and stAct.actType <> 601:
+		print 'adjusting end for start act except for dropoffs- ', stAct
+		person.move_end(stAct, enAct.startTime, removeAdd=False)
+		tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+		continue
+	
+
+	    if enAct.startTime < stAct.endTime and enAct.actType == 100:
+		print 'ending sojourn'
+		person.move_start_end(enAct, stAct.endTime - enAct.startTime, removeAdd=False)
+		tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+		continue
+
+	    if stAct.startTime < enAct.endTime and stAct.actType == 100 and stAct.startTime <> 0:
+		print 'ending sojourn'
+		person.move_start_end(stAct, enAct.endTime - stAct.startTime, removeAdd=False)
+		tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+		continue
+
+	    	
+	    tempList.append((stAct.startTime, stAct))
+	    stAct = enAct
 
 
 
+	tempList.append((enAct.startTime, enAct))
+	hp.heapify(tempList)
 
+	person.listOfActivityEpisodes = tempList
+		
 
     def lineup_ih_pickups_for_dependents(self):
 	# This lines up in home pickup episodes for dependent children
