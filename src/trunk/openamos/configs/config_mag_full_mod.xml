@@ -5399,7 +5399,7 @@
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid"/>
       </DBTables>
 
-      <DeleteRecords value="False"/>	
+
 
 
       <Model name="CleanFixedActivitySchedulesofChildren" formulation="Clean Aggregate Activity Schedule" seed="1">
@@ -5432,7 +5432,58 @@
     </Component>	
 
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_final_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
+      <DBTables>
+    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="daily_school_status_r" key="houseid,personid"/>		
+    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
+    	<Table table="schedule_full_r" key="houseid,personid"/>
+      </DBTables>
+
+
+
+
+
+      <Model name="ChildDependencyAllocation" formulation="Child Dependency" type="Resolution" seed="1">
+	<DependentVariable var="childdependencyallocation"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
+	  <PersonIdName table="schedule_final_r" var="personid"/>
+	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
+	  <LocationIdName table="schedule_final_r" var="locationid"/>
+	  <StartTimeName table="schedule_final_r" var="starttime"/>
+	  <EndTimeName table="schedule_final_r" var="endtime"/>
+	  <DurationName table="schedule_final_r" var="duration"/>
+	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	</ActivityAttributes>
+
+	<DailyStatus>
+	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	</DailyStatus>
+	
+	<Dependency>
+	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	</Dependency>
+
+      </Model>
+
+     
+   </Component>	
+
+
+
+
+
+
+
+
+
+
+    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -5441,7 +5492,7 @@
     	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
 
-      <DeleteRecords value="False"/>	
+
 
 
 
@@ -5473,6 +5524,7 @@
 
      
    </Component>	
+
 
 
     <Component name="TourAttributeProcessing" read_from_table="trips_r" write_to_table="tours_r" key="houseid,personid" location="True" skip="True" completed="True">
