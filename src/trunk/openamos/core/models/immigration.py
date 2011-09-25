@@ -26,10 +26,6 @@ class Immigration(Model):
 	self.personAttribs = self.specification.personAttribs
 	self.popgenConfig = self.specification.popgenConfig
 	self.hhldIdSeries = self.specification.hhldIdSeries
-	self.popgenConfigObject = ConfigParserPopGen(self.popgenConfig)
-	self.popgenConfigObject.parse_project()
-	self.popgenConfigObject.parse_scenarios()
-	self.scenario = self.popgenConfigObject.scenarioList[0]
 
 	self.hhldColNames = [self.idSpec.hidName, 
 
@@ -143,24 +139,32 @@ class Immigration(Model):
     def resolve_consistency(self, data, seed):
 	print 'Data processing for use in PopGen'
 
+	popgenConfigObject = ConfigParserPopGen(self.popgenConfig)
+	popgenManagerObj = PopgenManager(configObject=self.popgenConfig)
+
+	popgenConfigObject.parse_project()
+	popgenConfigObject.parse_scenarios()
+	scenario = popgenConfigObject.scenarioList[0]
+
+
 	print 'Household vars - ', self.hhldColNames, len(self.hhldColNames)
-	print 'Extra household vars - ', self.scenario.hhldVars, len(self.scenario.hhldVars)
+	print 'Extra household vars - ', scenario.hhldVars, len(scenario.hhldVars)
 	hhldVars = copy.deepcopy(self.hhldColNames)
-	for var in self.scenario.hhldVars:
+	for var in scenario.hhldVars:
 	    if var not in hhldVars:
 		hhldVars.append(var)
 
 	print '\nHousehold vars - ', self.personColNames, len(self.personColNames)
-	print 'Extra household vars - ', self.scenario.personVars, len(self.scenario.personVars)
+	print 'Extra household vars - ', scenario.personVars, len(scenario.personVars)
 	personVars = copy.deepcopy(self.personColNames)
-	for var in self.scenario.personVars:
+	for var in scenario.personVars:
 	    if var not in personVars:
 		personVars.append(var)
 
 
 
-	print '\nHousehold sample file location - ', self.scenario.sampleUserProv.hhLocation
-	print 'Person sample file location - ', self.scenario.sampleUserProv.personLocation
+	print '\nHousehold sample file location - ', scenario.sampleUserProv.hhLocation
+	print 'Person sample file location - ', scenario.sampleUserProv.personLocation
 
 
         # Create Index Matrix
@@ -170,8 +174,8 @@ class Immigration(Model):
 
 	#highestHid = amax(self.hhldIndicesOfPersons[:,0])
 
-	#fHhld = csv.writer(open(self.scenario.sampleUserProv.hhLocation, 'w'), delimiter=",")
-	fHhld = open(self.scenario.sampleUserProv.hhLocation, 'w')
+	#fHhld = csv.writer(open(scenario.sampleUserProv.hhLocation, 'w'), delimiter=",")
+	fHhld = open(scenario.sampleUserProv.hhLocation, 'w')
 
 	hhldVars_forPopGen = copy.deepcopy(hhldVars)
 	try:
@@ -195,8 +199,8 @@ class Immigration(Model):
 	fHhld.write('\n')
 
 	personVars_forPopGen = copy.deepcopy(personVars)
-	#fPerson = csv.writer(open(self.scenario.sampleUserProv.personLocation, 'w'), delimiter=",")
-	fPerson = open(self.scenario.sampleUserProv.personLocation, 'w')
+	#fPerson = csv.writer(open(scenario.sampleUserProv.personLocation, 'w'), delimiter=",")
+	fPerson = open(scenario.sampleUserProv.personLocation, 'w')
 
 	try:
 	    hidIndex = personVars_forPopGen.index('houseid')
@@ -268,12 +272,12 @@ class Immigration(Model):
 
 	print 'Startint to synthesize population - '
 	ti = time.time()
-	popgenManagerObj = PopgenManager(configObject=self.popgenConfig)
+
 	popgenManagerObj.run_scenarios()
 	print '\t Synthesis complete in - %.4f' %(time.time()-ti)
 
-	hhldSynLoc = self.scenario.synHousingTableNameLoc.location
-	hhldSynFileName = self.scenario.synHousingTableNameLoc.name
+	hhldSynLoc = scenario.synHousingTableNameLoc.location
+	hhldSynFileName = scenario.synHousingTableNameLoc.name
 	fHhldSyn = csv.reader(open('%s%s%s.dat' %(hhldSynLoc, os.path.sep, hhldSynFileName), 'r'), delimiter='\t')
 	hhldSynArr = self.load_file(fHhldSyn)
 	print hhldSynArr[:5,:]
@@ -282,8 +286,8 @@ class Immigration(Model):
 
 
 
-	persSynLoc = self.scenario.synPersTableNameLoc.location
-	persSynFileName = self.scenario.synPersTableNameLoc.name
+	persSynLoc = scenario.synPersTableNameLoc.location
+	persSynFileName = scenario.synPersTableNameLoc.name
 	fPersSyn = csv.reader(open('%s%s%s.dat' %(persSynLoc, os.path.sep, persSynFileName), 'r'), delimiter='\t')
 	persSynArr = self.load_file(fPersSyn)
 	print persSynArr[:5,:]	
@@ -295,8 +299,8 @@ class Immigration(Model):
 							hhldSynVars, personSynVars, 
 							self.hhldIdSeries)
 
-	print '\nHousehold sample file location - ', self.scenario.synHousingTableNameLoc
-	print 'Person sample file location - ', self.scenario.synPersTableNameLoc
+	print '\nHousehold sample file location - ', scenario.synHousingTableNameLoc
+	print 'Person sample file location - ', scenario.synPersTableNameLoc
 
 
 	# changing the names of houseid and personid fields
