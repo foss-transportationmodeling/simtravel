@@ -234,6 +234,9 @@ class PopulationEvolutionProcessing(Model):
 		
 
 
+	    if householdObject.personsSize == 0:
+		#raw_input('the household has a size of 0? and hid - %s' %hhldIndex[0])
+		continue
 	    hhldAgentList.append([householdObject.hid,
 				  householdObject.bldgsz,
 				  householdObject.hht,

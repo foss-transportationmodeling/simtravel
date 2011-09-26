@@ -67,6 +67,17 @@ class Household(object):
 
 	self.sexDict = {1:'Male', 2:'Female'}
 
+	self.raceDict = {1:'White alone',		
+			 2:'Black or African American alone',
+			 3:'American Indian alone',
+			 4:'Alaska Native alone',
+			 5:'American Indian and Alaska Native tribes specified, and American Indian or Alaska Native, not specified, and no other races',
+			 6:'Asian alone',
+			 7:'Native Hawaiian and Other Pacific Islander alone',
+			 8:'Some other race alone',
+			 9:'Two or more major race groups'
+			}
+
 	self.hhldrAlive = True
 
 
@@ -110,6 +121,8 @@ class Household(object):
 	personList = []
 	for personId in self.persons.keys():
 	    person = self.persons[personId]
+	    if person.race1 == 0:
+		raw_input('Print the race of the person: hid- %s and pid - %s is 0' %(self.hid, person.pid))
 	    personList.append([person.hid,
 			       person.pid,
 				person.age_f,
@@ -153,9 +166,10 @@ class Household(object):
 	for personId in personIds:
 	    person = self.persons[personId]
 	    print """\t    Relationship of person - %s, """\
-			"""relationship - %s and gender - %s' """%(person.pid, 
-								   self.relateDict[person.relate], 
-								   self.sexDict[person.sex])
+			"""relationship - %s, gender - %s and race - %s' """%(person.pid, 
+								   	      self.relateDict[person.relate], 
+								              self.sexDict[person.sex],
+									      self.raceDict[person.race1])
 	
 
     def evolve_population(self, highestHid):
@@ -171,10 +185,12 @@ class Household(object):
 	print 'HOUSEHOLD ID - %s' %self.hid
         print '\tHousehold type - ', self.hhtDict[self.hht]
 	personIds = copy.deepcopy(self.persons.keys())
+	"""
 	for personId in personIds:
 	    person = self.persons[personId]
 	    print '\t    Relationship of all people - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
-
+	"""
+	self.print_person_relationship_gender()
 	# Processing birth
 	birthFlag = False
 	personIds = copy.deepcopy(self.persons.keys())
@@ -203,10 +219,18 @@ class Household(object):
 		if person.relate == 1:
 		    self.hhldrAlive = False
 
+
+
+
 	if mortalityFlag:
 	    print '2. After Mortality Processing'
 	    self.print_person_relationship_gender()		
-	    #raw_input("press any key to continue...")
+	    print '\t\tOld Household type - ', self.hhtDict[self.hht]
+	    self.process_household_type_after_mortality()
+	    print '\t\tNew Household type - ', self.hhtDict[self.hht]
+	    #raw_input("mortality processing done ... press any key to continue...")
+
+
 
 
 	# Processing divorce
@@ -225,7 +249,12 @@ class Household(object):
 		break
 	
 
-	
+
+	if divorceFlag:
+	    self.process_household_type_after_divorce()	
+	    if partnerHousehold is not None:
+	    	partnerHousehold.process_household_type_after_divorce()	
+
 	if divorceFlag:
 	    print '3. After divorce processing'
 	    self.print_person_relationship_gender()
@@ -242,11 +271,12 @@ class Household(object):
 	    	print '\t\tCount of workers in family - ', partnerHousehold.wif
 	    	print '\t\tHousehold type - ', self.hhtDict[partnerHousehold.hht]
 	
-	    #raw_input("press any key to continue...")
+	    #raw_input("divorce done ... press any key to continue...")
 	else:
 	    partnerHousehold = None
 
-	self.process_household_type()
+	
+	
 
 
 
@@ -313,9 +343,13 @@ class Household(object):
 
 	    print 'Hhldr race - %s and partner race - %s and new Kids race - %s' %(hhldr.race1, None, personNew.race1)
 
-	#raw_input()	
-
-
+	if hhldrId == False and partnerId == False:
+	    print 'Non family household?'
+	    for personId in self.persons.keys():
+		person = self.persons[personId]
+		if person.birth_f == 1:
+		    print 'Person Id bearing the child - %s' %personId
+		    personNew.race1 = person.race1
 
 	self.add_person(personNew)
 
@@ -443,9 +477,9 @@ class Household(object):
 
 
 	    partnerHousehold.oldHid = self.hid
-
+	    partnerHousehold.divorce = True
 	    #raw_input("\tvehicle allocation as shown above ... ")	
-			
+	    """			
 	    if hhldr.sex == 1 and len(self.persons) == 1:
 		self.hht = 4 # Non family household: Male householder living alone
 	    elif hhldr.sex == 2 and len(self.persons) == 1:
@@ -476,7 +510,7 @@ class Household(object):
 		partnerHousehold.hht = 5 # Non Family household: Male householder
 	    elif not partnerHousehold.check_if_family() and partner.sex == 2:
 		partnerHousehold.hht = 7 # Non Family household: Female householder
-
+	    """
 		
 
 	return partnerHousehold
@@ -519,36 +553,118 @@ class Household(object):
 		partnerId = personId
 	return hhldrId, partnerId
 
-    def process_household_type(self):
+    def process_household_type_after_divorce(self):
 	print '\n--k+1. Process the household type --'
 	print '\tOriginal household type - %s' %self.hhtDict[self.hht]
-	print '\tIs everyone in the household alive - %s' %self.allAlive
-	print '\t    --Householder alive flag - %s' %self.hhldrAlive
 	print '\tDid a divorce happen - %s' %self.divorce
-	if self.divorce:
-	    if self.partnerHousehold is None:
-		print "\t    --This is a atypical household where female is seeking divorce but doesn't live with partner"
-	    else:
-	    	print '\t    --Id of new partner household - %s' %self.partnerHousehold.hid
 
+	hhldrId, partnerId = self.identify_hhldr_partner_id()
+
+	if hhldrId == False or partnerId == False:
+	    print '\tOne or more partners was not identified husbandPid - %s and wifePid - %s hence house was not split and no further processing' %(hhldrId, partnerId)
+	    return
+	hhldr = self.persons[hhldrId]
+
+
+
+	if hhldr.sex == 1 and len(self.persons) == 1:
+	    self.hht = 4 # Non family household: Male householder living alone
+	elif hhldr.sex == 2 and len(self.persons) == 1:
+	    self.hht = 6 # Non family household: Female householder living alone
+
+	elif self.check_if_family() and hhldr.sex == 1:
+	    self.hht = 2 # Family household: Male householder
+	elif self.check_if_family() and hhldr.sex == 2:
+	    self.hht = 3 # Family household: Female householder
+
+	elif not self.check_if_family() and hhldr.sex == 1:
+	    self.hht = 5 # Non Family household: Male householder
+	elif not self.check_if_family() and hhldr.sex == 2:
+	    self.hht = 7 # Non Family household: Female householder
+	    
+
+
+	#raw_input ('\tNEW hht - %s' %self.hhtDict[self.hht])
+
+    def process_household_type_after_mortality(self):
+	if self.personsSize == 0:
+	    self.hht = 0
+	    return
+	hhldrId, partnerId = self.identify_hhldr_partner_id()
+
+	if hhldrId <> False:
+	    # Householder alive
+	    print '\t\tNo need to identify new householder ... id is pid - %s' %hhldrId
+	    hhldr = self.persons[hhldrId]
+	elif partnerId <> False:
+	    # Householder not alive
+	    print '\t\tPartner is the new householder ... id is pid - %s' %partnerId
+	    hhldr = self.persons[partnerId]
+	    hhldr.relate = 1
+	else:
+	    print '\t\tNeed to identify new householder ... id is pid - %s'
+	    oldestPersonId = self.eldest_person()
+	    hhldr = self.persons[oldestPersonId]
+	    print '\t\t THe oldest person is - %s and relationship is - %s' %(hhldr.pid, self.relateDict[hhldr.relate])
+	    hhldr.relate = 1
+	    print '\t\t\tThe oldest person is now a householder and all other family members are designated as other relatives for now this needs to be expanded ... '	    
+	
+	    for personId in self.persons.keys():
+		if personId == hhldr.pid:
+		    continue
+		else:
+		    person = self.persons[personId]
+		    if person.relate >= 3 and person.relate <= 16:
+			person.relate = 11
+	    self.print_person_relationship_gender()
+
+
+
+		
+	if hhldr.sex == 1 and len(self.persons) == 1:
+	    self.hht = 4 # Non family household: Male householder living alone
+	elif hhldr.sex == 2 and len(self.persons) == 1:
+	    self.hht = 6 # Non family household: Female householder living alone
+
+	elif self.check_if_family() and hhldr.sex == 1:
+	    self.hht = 2 # Family household: Male householder
+	elif self.check_if_family() and hhldr.sex == 2:
+	    self.hht = 3 # Family household: Female householder
+
+	elif not self.check_if_family() and hhldr.sex == 1:
+	    self.hht = 5 # Non Family household: Male householder
+	elif not self.check_if_family() and hhldr.sex == 2:
+	    self.hht = 7 # Non Family household: Female householder
+	
+	if hhldrId == False and partnerId == False:
+	    print 'New household type - ', self.hhtDict[self.hht]
+	    #raw_input('Need to process differently here ... ')
+
+    def eldest_person(self):
+	oldest = 0
+	for personId in self.persons.keys():
+	    person = self.persons[personId]
+	    if person.age > oldest:
+		oldest = copy.deepcopy(person.age)
+		oldestId = personId
+	return oldestId
+	
+
+    def identify_family_member_ids(self):
 	personIds = copy.deepcopy(self.persons.keys())
+	others = []
+	family = []
 	for personId in personIds:
 	    person = self.persons[personId]
-	    print '\t    Relationship of surviving - %s and gender - %s' %(self.relateDict[person.relate], self.sexDict[person.sex])
 
-	    if self.hhldrAlive:
-		# Householder alive
-		if self.hht >= 1 and self.hht <= 3:
-		    if self.persons == 1:
-			pass
-		    
+	    if person.relate >= 3 and person.relate <=16:
+	       	family.append(personId)
+	    elif person.relate > 16:
+		family.append(personId)
 
-	    else:
-		# Householder not alive
-		pass
+	return family, others
+	
 
-	if not self.allAlive or self.divorce:
-	    print ('The household type for this household needs to be processed')
 
     def _collate_results(self):
         resList = []
