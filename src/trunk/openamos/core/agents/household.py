@@ -202,8 +202,10 @@ class Household(object):
 		birthFlag = True
 	if birthFlag:
 	    print '1. After birth processing'
+	    print '\t\tOld Household type - ', self.hhtDict[self.hht]
 	    self.print_person_relationship_gender()
-	    #raw_input("press any key to continue...")
+   	    print '\t\tNew Household type - ', self.hhtDict[self.hht]
+	    raw_input("birth processing; press any key to continue...")
 
 	# Processing mortality
 	mortalityFlag = False
@@ -231,6 +233,8 @@ class Household(object):
 	    #raw_input("mortality processing done ... press any key to continue...")
 
 
+
+	#TODO: Processing child leaving
 
 
 	# Processing divorce
@@ -566,7 +570,6 @@ class Household(object):
 	hhldr = self.persons[hhldrId]
 
 
-
 	if hhldr.sex == 1 and len(self.persons) == 1:
 	    self.hht = 4 # Non family household: Male householder living alone
 	elif hhldr.sex == 2 and len(self.persons) == 1:
@@ -618,7 +621,9 @@ class Household(object):
 			person.relate = 11
 	    self.print_person_relationship_gender()
 
-
+	if hhldrId <> False and partnerId <> False:
+	    self.hht = 1
+	    return
 
 		
 	if hhldr.sex == 1 and len(self.persons) == 1:
