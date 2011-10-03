@@ -183,8 +183,8 @@ class Person(object):
 	        self.listOfActivityEpisodes.remove((activity.startTime, activity))
 		hp.heapify(self.listOfActivityEpisodes)
 	    except ValueError, e:
-		print 'Warning: Trying to remove a copy of the activityObject: %s' %e
-		raise ValueError, 'Warning: Trying to remove a copy of the activityObject: %s' %e
+		print 'Warning: Trying to remove a copy of the activityObject: %s and removing - %s' % (e, activity)
+		raise ValueError, 'Warning: Trying to remove a copy of the activityObject: %s and removing - %s' % (e, activity)
 		
             self._update_schedule_conflict_indicator(activity, add=False)
 
@@ -193,6 +193,11 @@ class Person(object):
             self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] += 1
         else:
             self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] -= 1            
+
+    def reset_schedule_conflict_indicator(self):
+	self.scheduleConflictIndicator = zeros((2880, 1))	
+	for stTime, activity in self.listOfActivityEpisodes:
+	    self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] += 1
 
 
     def adjust_child_dependencies(self, activityList):
@@ -429,6 +434,8 @@ class Person(object):
 	
 	return act
 
+
+
         
     def _check_for_conflicts(self):
         conflict = (self.scheduleConflictIndicator[:,:] > 1).sum()
@@ -604,10 +611,16 @@ class Person(object):
 
 		#print '\nNext TWO----------'
 		for k in range(count):
-	    	    nextActSt, nextAct = hp.heappop(self.listOfActivityEpisodes)
-		    #print nextAct
-	    	    actList.append(nextAct)
-	    	    hp.heappush(tempList, (nextActSt, nextAct))
+		    try:					    
+	    	    	nextActSt, nextAct = hp.heappop(self.listOfActivityEpisodes)
+		    	#print nextAct
+			if nextAct.startTime > activity.endTime:
+	    	    	    actList.append(nextAct)
+	    	    	hp.heappush(tempList, (nextActSt, nextAct))
+		    except IndexError, e:
+			print 'Cannot identify %s number of activities returned as many as possible...' %count
+			self.listOfActivityEpisodes = tempList
+			return actList
 		#print '--------ABOVE TWO' 	
 		i = i + count
 		#print 'i value updated -', i
@@ -615,6 +628,8 @@ class Person(object):
 	self.listOfActivityEpisodes = tempList
 	#print 'Length after - ', len(self.listOfActivityEpisodes)
 	return actList
+
+
 
     def _identify_previous_activity(self, activity, count=1):
         # conflict wrt one activity
@@ -663,6 +678,17 @@ class Person(object):
 	    
             if (act.startTime == activity.startTime and act.endTime == activity.endTime): # perfectly in line or within
 		return [act]
+
+	
+    def _identify_activities_between_time_boundaries(self, start, end):
+	
+        actList = []
+	for stAct, act in self.listOfActivityEpisodes:
+	    if act.startTime >= start and act.endTime <= end and act.actType <> 601:
+		actList.append(act)
+
+	return actList
+	
 
     def _identify_conflict_activities(self, activityList):
         # conflict with respect to a list of activities including chains
