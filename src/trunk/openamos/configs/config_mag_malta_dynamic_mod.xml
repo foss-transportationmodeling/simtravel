@@ -1486,11 +1486,25 @@
 	<!-- Filter Description: Start activity is of type dropoff and end is a ih dependent childs activity  -->
 	<DependentVariable var="adjfactor"/>
 	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="601"/>
 	<Filter table="runtime" var="en_activitytype" condition="greater than" value="150"/>
 	<Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Recode the adjustment factor -->
+	<!-- Filter Description: Start activity is of type dropoff and end is a oh maintenance activity  -->
+	<DependentVariable var="adjfactor"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="601"/>
+	<Filter table="runtime" var="en_activitytype" condition="greater than" value="450"/>
+	<Filter table="runtime" var="en_activitytype" condition="less than" value="500"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
 
