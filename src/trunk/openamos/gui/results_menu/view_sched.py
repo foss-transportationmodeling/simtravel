@@ -52,7 +52,7 @@ class MakeSchedPlot(QDialog):
         self.makeVarsWidget2()
         self.tabs = QTabWidget()
         self.tabs.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tabs.setMinimumHeight(300)
+        self.tabs.setMinimumHeight(350)
         self.connect(self.tabs, SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_context_menu)
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
 
@@ -252,15 +252,24 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Cleaned to Account for Daily Status")
         if self.new_obj.check_if_table_exists("schedule_ltrec_r"):
             tables.append("Schedules: Reconciled including Full Child Episodes")
+        if self.new_obj.check_if_table_exists("schedule_allocterm_r"):
+            tables.append("Schedules: Daily Pattern after Children Terminal Episodes are Allocated")
+        if self.new_obj.check_if_table_exists("schedule_joint_allocterm_r"):
+            tables.append("Schedules: Daily Pattern after Children Terminal Episodes are Allocated with only Joint Activities")
+        if self.new_obj.check_if_table_exists("schedule_childrenlastprismadj_r"):
+            tables.append("Schedules: Daily Pattern after Child's Last Prism is Filled")
         if self.new_obj.check_if_table_exists("schedule_childreninctravelrec_r"):
             tables.append("Schedules: Reconciled Including Travel Episodes")
         if self.new_obj.check_if_table_exists("schedule_cleanaggregateactivityschedule_r"):
             tables.append("Schedules: Aggregated in Home Schedule for Children")
         if self.new_obj.check_if_table_exists("schedule_dailyallocrec_r"):
             tables.append("Schedules: Daily Pattern with Child Allocation")
+        if self.new_obj.check_if_table_exists("schedule_joint_dailyallocrec_r"):
+            tables.append("Schedules: Daily Pattern after Child Allocation with only Joint Activities")
         if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
             tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
         if self.new_obj.check_if_table_exists("schedule_final_r"):
+        #if self.new_obj.check_if_table_exists("schedule_full_r"):
             tables.append("Schedules: Final Schedules")
         if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
             tables.append("Schedules: Aggregated in Home Final Schedules")
@@ -572,7 +581,20 @@ class MakeSchedPlot(QDialog):
                 self.cursor.execute(SQL)
                 temp = self.cursor.fetchall()
 
+
+
                 for i in temp:
+		    #if i[0] not in [8, 1839, 6006, 13139, 15080, 25779, 35751, 
+		    #		    49815, 57273, 94554, 95335, 96768, 130599, 133718, 1353601, 149978, 155946]:
+	    	    #if i[0] not in [352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
+		    #		    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
+		    if i[0] not in [8, 1839, 6006, 13139, 15080, 22501, 25779, 32174, 14513, 
+	    			    34664, 35751, 40563, 52876, 71887, 
+	    			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978, 133718,
+				    352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
+	    			    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
+			continue
+			pass
                     if self.segment1.isChecked():
                         self.idwidget2.addItem(str(i[0]))
                     else:
@@ -597,8 +619,8 @@ class MakeSchedPlot(QDialog):
             pid.pop(index)
             length = len(pid)
 
-    def sched_sql(self,id):
-        tablename = '%s AS A' %(self.schedule_table())
+    def sched_sql(self,id, tableName):
+        tablename = '%s AS A' %(tableName)
         vars = 'A.houseid, A.personid, A.activitytype, A.starttime, (A.endtime - A.starttime)' #A.duration'
         order = 'A.houseid, A.personid, A.starttime'
         filter = 'A.starttime >= 0'
@@ -614,24 +636,28 @@ class MakeSchedPlot(QDialog):
         return state
 
 
-    def trip_sql(self,id):
-        tablename = 'trips_r AS A'
-        vars = 'A.houseid, A.personid, A.starttime, (A.endtime - A.starttime), A.endtime'
-        order = 'A.houseid, A.personid, A.starttime'
-        filter = 'A.starttime >= 0'
-	"""	
-        tablename = 'persons_arrived_r AS A'
-        vars = 'A.houseid, A.personid, A.expectedstarttime, (A.expectedarrivaltime - A.expectedstarttime), A.actualarrivaltime'
-        order = 'A.houseid, A.personid, A.expectedstarttime'
-        filter = 'A.expectedstarttime >= 0'
-        """
+    def trip_sql(self,id, trip_type='Expected'):
+
+
+	if trip_type == 'Expected':
+            tablename = 'trips_r AS A'
+        #tablename = 'schedule_joint_dailyallocrec_r AS A'
+            vars = 'A.houseid, A.personid, A.starttime, (A.endtime - A.starttime), A.endtime'
+            order = 'A.houseid, A.personid, A.starttime'
+            filter = 'A.starttime >= 0'
+	if trip_type == 'Actual':
+	    tablename = 'persons_arrived_r AS A'
+            vars = 'A.houseid, A.personid, A.expectedstarttime, (A.actualarrivaltime - A.expectedstarttime), A.actualarrivaltime'
+            order = 'A.houseid, A.personid, A.expectedstarttime'
+            filter = 'A.expectedstarttime >= 0'
+
         ids = id.split(',')
         filter = filter + " AND A.houseid = '%s' AND A.personid = '%s'" %(ids[0],ids[1])
         state = """SELECT DISTINCT %s FROM %s WHERE %s ORDER BY %s"""%(vars,tablename,filter,order)
 
         return state
 
-    def retrieve_sched(self):
+    def retrieve_sched(self, tableName):
         
         pid = []
         try:
@@ -646,7 +672,7 @@ class MakeSchedPlot(QDialog):
                 
             for id1 in sindex:
                 id = id1.text()
-                SQL = self.sched_sql(id)
+                SQL = self.sched_sql(id, tableName)
         
                 if SQL != "" and SQL != None:
                     self.cursor.execute(SQL)
@@ -654,9 +680,11 @@ class MakeSchedPlot(QDialog):
                     
                     prior_id = '0'
                     aschedule = []
+		    print SQL
                     for i in temp:
                         id = '%s,%s' %(str(i[0]),str(i[1]))
-                            
+			
+                        print id
                         if prior_id <> id:
                             if prior_id <> '0':
                                 self.data.append(aschedule)
@@ -671,25 +699,25 @@ class MakeSchedPlot(QDialog):
                             aschedule.append(i[2])
                             aschedule.append(i[3])
                             aschedule.append(i[4])
-    
+		
                     self.data.append(aschedule)
 
-        
+            print self.data
         except Exception, e:
             print '\tError while unloading data from the table %s'%self.table
             print e
         
         return pid
    
-    def retrieve_trip(self, pid):
+    def retrieve_trip(self, pid, trip_type='Expected'):
 
         try:
             trips = []
             temp = None
             
             for id1 in pid:
-                SQL = self.trip_sql(id1)
-        
+                SQL = self.trip_sql(id1, trip_type)
+        	print 'TRIPS', SQL
                 if SQL != "" and SQL != None:
                     self.cursor.execute(SQL)
                     temp = self.cursor.fetchall()
@@ -700,7 +728,7 @@ class MakeSchedPlot(QDialog):
                         aschedule.append(i[3])
                         aschedule.append(i[4])
                     trips.append(aschedule)
-        
+            print 'trips inside the function - ', trips
         except Exception, e:
             print '\tError while unloading data from the table %s'%self.table
             print e
@@ -798,18 +826,31 @@ class MakeSchedPlot(QDialog):
         
     def schedule_table(self):
         cur_text = self.stablecombo.currentText()
+
         if cur_text == "Schedules: Non-reconciled":
             return "schedule_r"
         elif cur_text == "Schedules: Cleaned to Account for Daily Status":
             return "schedule_cleanfixedactivityschedule_r"
         elif cur_text == "Schedules: Reconciled including Full Child Episodes":
             return "schedule_ltrec_r"
+
+        elif cur_text == "Schedules: Daily Pattern after Children Terminal Episodes are Allocated":
+	    return "schedule_allocterm_r"
+
+	elif cur_text == "Schedules: Daily Pattern after Children Terminal Episodes are Allocated with only Joint Activities":
+	    return "schedule_joint_allocterm_r"
+
+	elif cur_text == "Schedules: Daily Pattern after Child's Last Prism is Filled":
+	    return "schedule_childrenlastprismadj_r"
+
         elif cur_text == "Schedules: Reconciled Including Travel Episodes":
             return "schedule_childreninctravelrec_r"
         elif cur_text == "Schedules: Aggregated in Home Schedule for Children":
             return "schedule_cleanaggregateactivityschedule_r"
         elif cur_text == "Schedules: Daily Pattern with Child Allocation":
             return "schedule_dailyallocrec_r"
+	elif cur_text == "Schedules: Daily Pattern after Child Allocation with only Joint Activities":
+	    return "schedule_joint_dailyallocrec_r"
         elif cur_text == "Schedules: Reconciled Daily Pattern Skeleton with Child Allocation":
             return "schedule_inctravelrec_r"
         elif cur_text == "Schedules: Aggregated in Home Final Schedules":
@@ -818,6 +859,7 @@ class MakeSchedPlot(QDialog):
 #            return "schedule_nhts"
         else:
             return "schedule_final_r"
+	    #return "schedule_full_r"
     
 
     def on_draw1(self):
@@ -825,7 +867,9 @@ class MakeSchedPlot(QDialog):
         """
         
         #sdata = self.selectedResults()
-        pid = self.retrieve_sched()
+	tableName = self.schedule_table()
+        #pid = self.retrieve_sched(tableName)
+        pid = self.retrieve_sched('schedule_final_r')
         if len(self.data) > 0 : #len(sdata) > 0:
             Sketch = self.createCanvas()
             Canvas = Sketch[0]
@@ -835,9 +879,11 @@ class MakeSchedPlot(QDialog):
             ticks = np.arange(rows+1)
             
             ind = 0.75
-            height = 0.4
-            if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules": 
-                ind = 1.0
+            height = 0.3
+            if (self.stablecombo.currentText() == "Schedules: Daily Pattern with Child Allocation" or 
+		self.stablecombo.currentText() == "Schedules: Final Schedules" or 
+		self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules"): 
+                ind = 0.6
             
             if self.segment1.isChecked():
                 axes.set_title("Household Schedule")
@@ -849,18 +895,44 @@ class MakeSchedPlot(QDialog):
                 for i in range(2,rowlen,3):
                     axes.barh(ind, row[i], height, left=row[i-1],color=self.colors(row[i-2]), picker=True)
                 ind = ind + 1
-                
 
-            if self.stablecombo.currentText() == "Schedules: Final Schedules" or self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules":
-                ind1 = 0.6
-                trip_time = self.retrieve_trip(pid)
+            if (self.stablecombo.currentText() == "Schedules: Daily Pattern with Child Allocation" or 
+		self.stablecombo.currentText() == "Schedules: Final Schedules" or 
+		self.stablecombo.currentText() == "Schedules: Aggregated in Home Final Schedules"):
+                ind1 = 0.3
+                trip_time = self.retrieve_trip(pid, 'Expected')
                 for row in trip_time:
                     rowlen = len(row)
                     for i in range(2,rowlen,3):
-                        axes.barh(ind1, row[i-1], height, left=row[i-2],color=self.colors(1000), picker=True)
+                        axes.barh(ind1, row[i-1], .15, left=row[i-2],color=self.colors(1000), picker=True)
                     ind1 = ind1 + 1
-                    
-            
+
+
+                ind1 = 0.45
+                trip_time = self.retrieve_trip(pid, 'Actual')
+                for row in trip_time:
+                    rowlen = len(row)
+                    for i in range(2,rowlen,3):
+                        axes.barh(ind1, row[i-1], .15, left=row[i-2],color=self.colors(1001), picker=True)
+                    ind1 = ind1 + 1
+
+
+                
+	    # Also including the schedules before adjustment 
+	    
+            if self.stablecombo.currentText() == "Schedules: Final Schedules":
+		self.data = []
+           	pid = self.retrieve_sched('schedule_skeleton_r')
+	    	ind2 = 0.9
+            	for row in self.data: #sdata:
+                    rowlen = len(row)
+                    for i in range(2,rowlen,3):
+                    	axes.barh(ind2, row[i], height, left=row[i-1],color=self.colors(row[i-2]), picker=True)
+                    ind2 = ind2 + 1
+
+
+	    
+	                
             bars=[]
             bars.append(barh(0, 0, 0, left=0,color=self.colors(100)))
             bars.append(barh(0, 0, 0, left=0,color=self.colors(101)))
