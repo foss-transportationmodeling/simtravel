@@ -53,6 +53,7 @@ class DB(object):
 					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
 			  'persons_arrived_id_r':['houseid', 'personid', 'actualarrivaltime', 'expectedarrivaltime', 'tripdependentpersonid', 'tozone', 'personuniqueid'],
 			  'persons_leaving_id_r':['tripid', 'houseid', 'personid', 'personuniqueid', 'starttime', 'fromzone'],
+			  'persons_leaving_valid_trips_id_r':['tripid', 'houseid', 'personid', 'starttime'],
 			  'persons_location_r':['houseid', 'personid', 'personuniqueid', 'location'],
 			  'trips_occupant_origin_invalid_r':['tripid', 'tripvalid', 'tripstarttime'],
 			  'person_trips_occupant_origin_invalid_r':['tripid', 'houseid', 'personid', 'tripvalid', 'tripstarttime'],

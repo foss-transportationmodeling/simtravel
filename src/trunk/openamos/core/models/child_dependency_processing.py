@@ -117,12 +117,15 @@ class ChildDependencyProcessing(Model):
                                                                  :]
 
 
-	    if hhldIndex[0] not in [8, 1839, 6006, 13139, 15080, 22501, 25779, 32174, 14513,
-	    			    34664, 35751, 40563, 52876, 71887, 
-	     			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978, 133718,
-	    			    352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
-	    			    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 16059]:
-	    #if hhldIndex[0] not in [14513]:
+	    #if hhldIndex[0] not in [8, 1839, 6006, 13139, 15080, 22501, 25779, 32174, 14513, 
+	    #			    34664, 35751, 40563, 52876, 71887, 
+	    #			    49815, 57273, 94554, 95335, 96768, 130599, 1353601, 149978, 133718,
+	    #			    352, 1533, 1839, 2396, 2776, 3441, 4315, 4514, 5937, 6006, 6930, 
+	    #			    7433, 7787, 8143, 8156, 8861, 12093, 14120, 14663, 14789, 
+	    #			    16059, 3636, 8442, 11154, 15810, 16831]:
+	    #if hhldIndex[0] not in [17608, 42872]:
+	    #if hhldIndex[0] not in [28166]:
+	    if hhldIndex[0] <> 2582:
 	    	#continue
 	      	pass
 
@@ -145,7 +148,7 @@ class ChildDependencyProcessing(Model):
 	    elif self.childDepProcessingType == 'Allocation':
 		householdObject.allocate_dependent_activities(seed)
 	    elif self.childDepProcessingType == 'Resolution':
-		householdObject.lineup_activities(seed)
+		#householdObject.lineup_activities(seed)
 		pass
 
 
@@ -163,7 +166,7 @@ class ChildDependencyProcessing(Model):
 		#raw_input()
 	    #	pass
 
-	
+	    #raw_input('allocation done for hhld - %s' %hhldIndex[0])	
         #return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
 	return DataArray(actList, self.colNames)
 

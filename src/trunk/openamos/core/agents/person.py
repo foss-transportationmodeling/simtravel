@@ -445,6 +445,30 @@ class Person(object):
             return False
         return True
 
+    def _check_for_acts_between_trip_vertices(self):
+	 
+	tempList = []
+	actListBetween = []
+
+
+	actListCp = copy.deepcopy(self.listOfActivityEpisodes)
+
+	actCount = len(self.listOfActivityEpisodes)
+	i = 0
+	stActSt, stAct  = hp.heappop(actListCp)
+	hp.heappush(tempList, (stActSt, stAct))
+
+	for i in range(actCount-1):
+	    enActSt, enAct  = hp.heappop(actListCp)
+	    hp.heappush(tempList, (enActSt, enAct))
+
+	    if stAct.actType == 600 and enAct.actType <> 601:
+		self.print_activity_list()
+		raise Exception, "there are activities between trip vertices and this shouldn't happen"
+
+
+
+
     def _check_for_conflicts_with_activity(self, activity):
 	if self._check_for_home_to_home_trips():
 	    #self.print_activity_list()
@@ -681,12 +705,13 @@ class Person(object):
 
 	
     def _identify_activities_between_time_boundaries(self, start, end):
-	
+	print 'boundaries ... ', start, end
+	print self.print_activity_list()
         actList = []
 	for stAct, act in self.listOfActivityEpisodes:
-	    if act.startTime >= start and act.endTime <= end and act.actType <> 601:
+	    #print 'for act - ', act, 'condition is - ', act.startTime >= start and act.endTime <= end
+	    if act.startTime >= start and act.endTime <= end:
 		actList.append(act)
-
 	return actList
 	
 
