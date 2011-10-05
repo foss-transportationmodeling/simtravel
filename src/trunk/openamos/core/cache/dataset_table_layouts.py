@@ -303,3 +303,18 @@ class Persons_Dist_R(t.IsDescription):
     persons = t.Int32Col()
     count = t.Int32Col()
 
+class Hht_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    hht = t.Int32Col()
+    count = t.Int32Col()
+
+class Wif_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    wif = t.Int32Col()
+    count = t.Int32Col()
+
+class Noc_Dist_R(t.IsDescription):
+    analysisinterval = t.Int64Col()
+    noc = t.Int32Col()
+    count = t.Int32Col()
+

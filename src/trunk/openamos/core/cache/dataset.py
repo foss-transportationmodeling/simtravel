@@ -108,6 +108,9 @@ class DB(object):
         self.fileh.createTable(output_grp, "sex_dist_r", Sex_Dist_R)
         self.fileh.createTable(output_grp, "race_dist_r", Race_Dist_R)
         self.fileh.createTable(output_grp, "persons_dist_r", Persons_Dist_R)
+        self.fileh.createTable(output_grp, "hht_dist_r", Hht_Dist_R)
+        self.fileh.createTable(output_grp, "noc_dist_r", Noc_Dist_R)
+        self.fileh.createTable(output_grp, "wif_dist_r", Wif_Dist_R)
 
 
 
