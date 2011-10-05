@@ -442,7 +442,7 @@
     </Component>
 
     <ComponentList>
-      <AnalysisInterval start="2008" end="2009" step="1"/>
+      <AnalysisInterval start="2008" end="2018" step="1"/>
 
 
 
@@ -8187,6 +8187,50 @@
       </Model>
     </SubComponent>
 
+    <SubComponent name="HHTDist" read_from_table="household_population_r" write_to_table="hht_dist_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="household_population_r" key="houseid,personid" order="1"/>
+    	<Table table="hht_dist_r" key="hht"/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="household_population_r" var="hht"/>
+      </Aggregate>
+      <Model name="count" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="count"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="frequency" coeff="1"/>
+      </Model>
+    </SubComponent>
+
+    <SubComponent name="NOCDist" read_from_table="household_population_r" write_to_table="noc_dist_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="household_population_r" key="houseid,personid" order="1"/>
+    	<Table table="noc_dist_r" key="noc"/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="household_population_r" var="noc"/>
+      </Aggregate>
+      <Model name="count" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="count"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="frequency" coeff="1"/>
+      </Model>
+    </SubComponent>
+
+    <SubComponent name="WIFDist" read_from_table="household_population_r" write_to_table="wif_dist_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="household_population_r" key="houseid,personid" order="1"/>
+    	<Table table="wif_dist_r" key="wif"/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="household_population_r" var="wif"/>
+      </Aggregate>
+      <Model name="count" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="count"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="frequency" coeff="1"/>
+      </Model>
+    </SubComponent>
 
     </ComponentList>
 
