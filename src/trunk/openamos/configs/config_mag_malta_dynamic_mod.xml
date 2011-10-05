@@ -2597,6 +2597,98 @@
       </Component>
 
 
+    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_malta_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_r" key="tripid" order="1"/>
+    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
+
+
+      <Model name="arrivaltime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="arrivaltime"/>
+	<Filter table="trips_r" var="tripwithhhmember" condition="equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="endtime" coeff="1"/>
+      </Model>
+
+    </Component>
+
+
+    <Component name="PersonsLeavingForValidTrips" read_from_table="trips_r" write_to_table="persons_leaving_valid_trips_id_r" skip="False" completed="True">
+      <DBTables>
+	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_leaving_valid_trips_id_r" key="houseid,personid"/>
+    	<Table table="persons" key="houseid,personid"/>
+
+      </DBTables>
+
+      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
+
+      <Model name="TripId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripiddummy"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="tripid" coeff="1"/>
+      </Model>
+
+      <Model name="triptype" formulation="Persons On Trip Arrival Processing" seed="1">
+	<DependentVariable var="triptype"/>
+	<Filter table="trips_r" var="tripind" condition="equals" value="1"/>
+	<Id>
+	  <HouseId table="trips_r" var="houseid"/>
+	  <PersonId table="trips_r" var="personid"/>
+	</Id>
+	<PersonsArrivedAttributes>
+	  <TripDependentPersonIdName table="trips_r" var="dependentpersonid"/>
+	</PersonsArrivedAttributes>
+      </Model>
+
+   </Component>
+
+    <Component name="PersonsLocationUpdateForValidTrips" read_from_table="persons_leaving_valid_trips_id_r" write_to_table="persons_location_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_location_r" key="houseid,personid"/>
+    	<Table table="persons_leaving_valid_trips_id_r" key="houseid,personid" order="1"/>
+    	<Table table="persons" key="houseid,personid"/>
+      </DBTables>
+
+      <DeleteBasedOn table="persons_location_r" var="personuniqueid"/>
+
+      <Model name="location" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="location"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="houseid" coeff="10000"/>
+        <Variable table="persons" var="personid" coeff="100"/>
+      </Model>
+
+      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personuniqueiddummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="personuniqueid" coeff="1"/>
+      </Model>
+
+   </Component>
+
+
+      <Component name="ResetPersonsLeavingValidTrip" read_from_table="persons_leaving_valid_trips_id_r" key="tripid" skip="False" completed="True">
+        <DBTables>
+    	  <Table table="persons_leaving_valid_trips_id_r" key="tripid" order="1"/>
+        </DBTables>
+        <DeleteBasedOn table="persons_leaving_valid_trips_id_r" var="tripid"/>
+
+        <Model name="dummytripind" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummytripind"/>
+	  <Filter table="persons_leaving_valid_trips_id_r" var="tripid" condition="equals" value="-99"/>
+	  <Variance value="0"/>
+          <Variable table="persons_leaving_valid_trips_id_r" var="tripid" coeff="1"/>
+        </Model>
+
+      </Component>
+
+
+
+
     <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
@@ -2661,36 +2753,6 @@
       </Model>
 
     </Component>
-
-
-
-
-
-
-
-
-    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_malta_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="trips_r" key="tripid" order="1"/>
-    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="trips_r" var="starttime"/>
-
-
-      <Model name="arrivaltime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="arrivaltime"/>
-	<Filter table="trips_r" var="tripwithhhmember" condition="equals" value="2"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="endtime" coeff="1"/>
-      </Model>
-
-    </Component>
-
-
-
-
-
 
     <Component name="ExtractAllTravelEpisodes" read_from_table="trips_r" write_to_table="trips_to_malta_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
