@@ -188,6 +188,9 @@ class Person(object):
 		
             self._update_schedule_conflict_indicator(activity, add=False)
 
+    def reset_activity_heap(self):
+	hp.heapify(self.listOfActivityEpisodes)
+
     def _update_schedule_conflict_indicator(self, activity, add=True):
         if add:
             self.scheduleConflictIndicator[activity.startTime:activity.endTime,:] += 1
@@ -891,8 +894,15 @@ class Person(object):
 	self.expectedArrival = expectedArrival
 	self.tripDependentPerson = tripDependentPerson
 	if self.actualArrival > 0 and self.expectedArrival > 0:
+	    print 'before extracting destination episode -'
+	    self.print_activity_list()
 	    self.extract_destination_episode()
+	    print 'after extracting destination episode but before identifying actual and expected -'
+	    self.print_activity_list()
+	    #self.reset_activity_heap()
 	    self.identify_actual_expected_activities(arrival=True)
+	    print 'after extracting destination episode and identifying actual and expected -'
+	    self.print_activity_list()
 
     def add_occupancy_status(self, tripIndicator, tripStTime):
 	self.tripIndicator = tripIndicator	

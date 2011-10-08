@@ -964,11 +964,21 @@ class Household(object):
 	print 'before adjustment for occupancy ----', person.print_activity_list()
 
 	person.move_end(person.stAct, person.tripStTime+1)
-
 	actEnd = person.tripStTime + 1
 
+	nextAct = person.expectedActivities[0]
+	if (person.stAct.actType == 600 and person.stAct.dependentPersonId == 99 and 
+	    nextAct.actType == 601 and nextAct.dependentPersonId == 99):
+	    person.move_start_end(nextAct, 0)
+	    actEnd = copy.deepcopy(nextAct.endTime)
+	    index = 1
+	    print ('Moving the non-hh member trip anchor in order to keep reasonable trip episodes for these ... ')
 
-	for act in person.expectedActivities:
+	else:
+	    index = 0
+	
+
+	for act in person.expectedActivities[index:]:
 	    if actEnd-act.startTime > 0:
 		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
@@ -992,6 +1002,7 @@ class Household(object):
 
 	missedActsStillToPursue = []
 	actsToPursue = []
+	actsToRemove = []
 	movedStartOfAct	= False
 	pushedActs = False
 
@@ -1000,9 +1011,9 @@ class Household(object):
 	
 	if firstExpActAfterArrival.startTime < actualArrival and firstExpActAfterArrival.endTime > actualArrival:
 	    movedStartOfAct = True
-	    person.move_start(firstExpActAfterArrival, actualArrival)
-	    self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival, -9999, -9999]
-	    """
+	    #person.move_start(firstExpActAfterArrival, actualArrival)
+	    #self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival, -9999, -9999]
+	    
 	    if firstExpActAfterArrival.endTime == actualArrival + 1:
 		person.move_start(firstExpActAfterArrival, actualArrival)
 		self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival, -9999, -9999]
@@ -1012,30 +1023,83 @@ class Household(object):
 	    	#print ('Only first activity needs to be adjusted')f
 		self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival+1, -9999, -9999]
 	    	return
-	    """
+	    
+	# Add an anchor only when the first activity is not the only one affected ... because individual's subsequent activity engagement is getting messed up ... 	
+	# because if there is a missed activity without adding an anchor the subsequent activity is starting from nowhere and hence the inconsistency ... 
+	self.add_anchor_activity(person, person.destAct, actualArrival)
+	pushedActs = True
+
 	# Adjusting when more than one activity is affected: Push all activities
 	for act in person.expectedActivities:
 	    #if (act.endTime < actualArrival and act.dependentPersonId > 0 and (act.actType == 600 or act.actType == 601)):
 	    if (act.endTime < actualArrival and act.dependentPersonId > 0):
 		missedActsStillToPursue.append(act)
-	    else:
+	    elif act.endTime >= actualArrival:
 	        actsToPursue.append(act)
+	    else:
+		actsToRemove.append(act)
 
-	#$print 'Missed Activities'
-	#for act in missedActsStillToPursue:
-	#    print '\t', act
 
-	#print 'Activities to Pursue'
-	#for act in actsToPursue:
-	#    print '\t', act
+	print 'Acts to Remove'
+	for act in actsToRemove:
+	    print '\t', act
 
-	actEnd = actualArrival
 
-	for act in missedActsStillToPursue + actsToPursue:
+	if len(actsToRemove) > 0:
+	    person.remove_episodes(actsToRemove)
+	    print 'After removing activities that can be skipped ... '
+	    person.print_activity_list()
+
+	print 'Missed Activities'
+	for act in missedActsStillToPursue:
+	    print '\t', act
+
+	print 'Activities to Pursue'
+	for act in actsToPursue:
+	    print '\t', act
+
+
+	actEnd = actualArrival+1
+	actsToBeAdjusted = missedActsStillToPursue + actsToPursue
+
+	if len(actsToBeAdjusted) > 2:
+	    destAct = actsToBeAdjusted[0]
+	    nextAct = actsToBeAdjusted[1]
+	
+	    if (
+	   	destAct.actType == 601 and # act is a dropoff
+	   	((nextAct.actType >= 450 and nextAct.actType <= 490) or (nextAct.actType == 151)) and # subsequent act is child dependent act
+	   	(nextAct.startTime < actualArrival and nextAct.endTime > actualArrival) # the dropoff is within duration for subsequent act
+	   	):
+	   	print 'before adjusting the dropoff and subs dep act'		
+	   	print 'dest act - ', destAct
+	   	print 'next act - ', nextAct
+
+	   	moveByValue = actualArrival - destAct.startTime
+	   	person.move_start_end(destAct, moveByValue)
+		
+	   		   
+	   	if nextAct.endTime > destAct.endTime + 2:
+		    person.move_start(nextAct, destAct.endTime + 1)
+	   	else:
+		    person.move_end(nextAct, destAct.endTime +2)
+		    person.move_start(nextAct, destAct.endTime +1)		
+	   	print 'after adjusting the dropoff and subs dep act'
+	   	print 'dest act - ', destAct
+	   	print 'next act - ', nextAct
+		 
+	   	actEnd = nextAct.endTime
+	   	index = 2
+	   	#raw_input()
+	    else:
+		index = 0
+	else:
+	   index = 0
+
+	for act in actsToBeAdjusted[index:]:
 	    #print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 	    #if actEnd-act.startTime >= 0:
-	    if actEnd-act.startTime-1 >= 0:
-		pushedActs = True
+	    if actEnd-act.startTime >= 0:
 		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime-1)
 		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
@@ -1046,7 +1110,7 @@ class Household(object):
 	
 	if pushedActs == False and movedStartOfAct == False:
 	    self.add_anchor_activity(person, person.destAct, actualArrival)	    	    
-	    raw_input('actual schedules were not moved ... need to add an anchor ... ')
+	    #raw_input('actual schedules were not moved ... need to add an anchor ... ')
 
 
     def add_anchor_activity(self, person, personAct, arrivaltime):
