@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/test/mag_zone_dynamic_fulldata/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic_fulldata" dbusername="postgres" dbpassword="1234"/>
   <TravelSkims1 reference_tablename="travel_skims" indb="True">
     <Period tablename="travel_skims_0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="59" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim0.dat" delimiter=","/>
     <Period tablename="travel_skims_1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="60" intervalEnd="119" fileLocation="/home/karthik/simtravel/test/mag_zone/skimOutput/dynamic/skim1.dat" delimiter=","/>
@@ -2700,9 +2700,10 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
+   	<Table table="persons" key="houseid,personid"/>
    	<Table table="background_trips" key="houseid,personid" order="1"/>
       </DBTables>
 
@@ -2749,6 +2750,42 @@
 	<DependentVariable var="endtime"/>
 	<Variance value="0"/>
         <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+      </Model>
+
+      <Model name="trippurposefrom" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="trippurposefrom"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="dependentpersonid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripwithhhmember"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="1"/>
+      </Model>
+      <Model name="occupancy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="occupancy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="lasttripdependentpersonid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="lasttripdependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="lastoccupancy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="lastoccupancy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="tripind" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripind"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
 
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
