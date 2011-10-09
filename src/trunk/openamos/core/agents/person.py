@@ -894,15 +894,15 @@ class Person(object):
 	self.expectedArrival = expectedArrival
 	self.tripDependentPerson = tripDependentPerson
 	if self.actualArrival > 0 and self.expectedArrival > 0:
-	    print 'before extracting destination episode -'
-	    self.print_activity_list()
+	    #print 'before extracting destination episode -'
+	    #self.print_activity_list()
 	    self.extract_destination_episode()
-	    print 'after extracting destination episode but before identifying actual and expected -'
-	    self.print_activity_list()
+	    #print 'after extracting destination episode but before identifying actual and expected -'
+	    #self.print_activity_list()
 	    #self.reset_activity_heap()
 	    self.identify_actual_expected_activities(arrival=True)
-	    print 'after extracting destination episode and identifying actual and expected -'
-	    self.print_activity_list()
+	    #print 'after extracting destination episode and identifying actual and expected -'
+	    #self.print_activity_list()
 
     def add_occupancy_status(self, tripIndicator, tripStTime):
 	self.tripIndicator = tripIndicator	
@@ -917,15 +917,15 @@ class Person(object):
 	stAct = None
 	stActList = self._identify_conflict_with_endtime(self.tripStTime)
 
-	print 'Start time of trip - ', self.tripStTime
+	#print 'Start time of trip - ', self.tripStTime
 
 	if len(stActList) == 0:
 	    self.print_activity_list()
-	    print '\tNo start activity found for this trip'	
+	    #print '\tNo start activity found for this trip'	
 
 	elif len(stActList) > 1:
 	    self.print_activity_list()
-	    print '\tThis should not happen how can there be two activities with same end time'
+	    raise Exception, '\tThis should not happen how can there be two activities with same end time'
 
 	else:
 	    stAct = stActList[0]
@@ -942,10 +942,10 @@ class Person(object):
 	destAct = None
 	destActList = self._identify_conflict_with_arrival(self.expectedArrival)
 
-	print '\texpected arrival - ', self.expectedArrival
+	#print '\texpected arrival - ', self.expectedArrival
 	if len(destActList) == 0:
 	    self.print_activity_list()
-	    print '\t     No dest act found for this arrival'
+	    #print '\t     No dest act found for this arrival'
 	elif len(destActList) > 1:
 	    self.print_activity_list()
 	    print '\t     More than one conflicts found for this arrival'

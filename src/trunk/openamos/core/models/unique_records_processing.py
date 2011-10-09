@@ -45,7 +45,7 @@ class UniqueRecordsProcessing(Model):
         self.create_col_numbers(data._colnames)
 	self.create_indices(data)	
 
-	print data.data.astype(int)
+	#print data.data.astype(int)
 	
 	newData = []
 	for uniqueId in self.indicesOfRecs:
@@ -57,8 +57,8 @@ class UniqueRecordsProcessing(Model):
 	    newData.append(list(strtRecNew))
 
 	newData = array(newData)
-	print newData.astype(int)
-	print 'person count - %s and hhld count - %s' %(data.rows, self.indicesOfRecs.shape[0])
+	#print newData.astype(int)
+	#print 'person count - %s and hhld count - %s' %(data.rows, self.indicesOfRecs.shape[0])
 	#raw_input('unique records identification ... ')
 
 

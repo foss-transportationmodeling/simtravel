@@ -84,8 +84,8 @@ class AdjustSchedules(Model):
 	numPersons = self.hhldIndicesOfPersons[:,-1] - self.hhldIndicesOfPersons[:,-2]
 	numPersonGrt1Flag = numPersons > 1
 
-	if numPersonGrt1Flag.sum() > 0:
-	    print self.hhldIndicesOfPersons[numPersonGrt1Flag,:].astype(int)
+	#if numPersonGrt1Flag.sum() > 0:
+	#    print self.hhldIndicesOfPersons[numPersonGrt1Flag,:].astype(int)
 	#raw_input('hhldIndices; checking for multiple person arrivals')
 	
 
@@ -206,7 +206,7 @@ class AdjustSchedules(Model):
         self.create_indices(data)
 	self.create_col_numbers(data._colnames)
 
-	print data._colnames, data.varnames
+	#print data._colnames, data.varnames
 
         #print 'Indices created in %.4f' %(time.time()-ti)
 
@@ -228,12 +228,12 @@ class AdjustSchedules(Model):
             householdObject = Household(hhldIndex[0])
 	    #personarrivedId = schedulesForHhld.data[0, self.personArrivedCol]
 
-            print 'hID - ', hhldIndex[0]
+            #print 'hID - ', hhldIndex[0]
 	    #print '--Person Arrived Id - ', personarrivedId
 
 
             for perIndex in persIndicesForActsForHhld:
-		print '\tPerson Id processing is - ', perIndex[1]
+		#print '\tPerson Id processing is - ', perIndex[1]
 	
 		"""
 		if perIndex[1] <> personarrivedId:
@@ -260,7 +260,7 @@ class AdjustSchedules(Model):
 
 		elif self.schedAdjType == "Occupancy Adjustment":
 		    tripInd, tripStTime = self.return_trip_occupancy_info(schedulesForPerson)
-		    print 'trip indicator, trip start time -- ', tripInd, tripStTime
+		    #print 'trip indicator, trip start time -- ', tripInd, tripStTime
 		    personObject.add_occupancy_status(tripInd, tripStTime)
 		    householdObject.wait_push_subsequent_activities(personObject)
 		else:

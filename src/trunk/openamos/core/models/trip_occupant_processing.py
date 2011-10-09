@@ -36,7 +36,7 @@ class TripOccupantProcessing(Model):
     def resolve_consistency(self, data, seed):
         self.create_col_numbers(data._colnames)
 	
-	print '--------------------------------------------'
+	#print '--------------------------------------------'
 	for rowId in range(data.rows):
 	    row = data.data[rowId,:]   
 	    hid = row[self.hidCol]
@@ -46,30 +46,30 @@ class TripOccupantProcessing(Model):
 	    stActDep = row[self.stActDepNameCol]
 	    enActDep = row[self.enActDepNameCol]
 
-	    print 'For hid - %s and pid - %s' %(hid, pid)
-	    print '     The trip purpose from is - ', tripPurposeFrom
+	    #print 'For hid - %s and pid - %s' %(hid, pid)
+	    #print '     The trip purpose from is - ', tripPurposeFrom
 
 
 	    if self.personOnNetworkNameCol <> None:
 		self.personOnNetwork = row[self.personOnNetworkNameCol]
 		# THIS IS LIKE AN OVERRIDE FOR PROCESSING OCCUPANCY WHEN THE PERSON IS STILL ON THE NETWORK FOR THE DYNAMIC CASE
 		if self.personOnNetwork == 1:
-		    print '\ta.3. Person is still on the network therefore the trip dependent person is set to the old occupancy - ', lastTripDep
+		    #print '\ta.3. Person is still on the network therefore the trip dependent person is set to the old occupancy - ', lastTripDep
 		    tripDepPers = lastTripDep
 	    	    data.data[rowId, self.tripDepNameCol] = tripDepPers
 		    continue
 		
 	    if tripPurposeFrom == 600 or tripPurposeFrom == 601:
 		if stActDep > 100:
-		    print '\ta.2. The occupancy of the trip changed and processing occupancy now ... stActDep - %s' %stActDep
+		    #print '\ta.2. The occupancy of the trip changed and processing occupancy now ... stActDep - %s' %stActDep
 		    tripDepPers = self.parse_trip_dependentpersonid(lastTripDep, stActDep, tripPurposeFrom)
-		    print '\t-->New dependentperson - %s<--' %tripDepPers, type(tripDepPers)
+		    #print '\t-->New dependentperson - %s<--' %tripDepPers, type(tripDepPers)
 
 		else:
-		    print '\ta.2. No need to process occupancy this is a dependent person ... stActDep - %s' %stActDep
+		    #print '\ta.2. No need to process occupancy this is a dependent person ... stActDep - %s' %stActDep
 		    tripDepPers = stActDep	
 	    else:
-		print '\ta.1. The occupancy of the trip did not change and occupancy is - ', lastTripDep
+		#print '\ta.1. The occupancy of the trip did not change and occupancy is - ', lastTripDep
 		tripDepPers = lastTripDep
 
 	
@@ -79,16 +79,16 @@ class TripOccupantProcessing(Model):
         return data
 
     def parse_trip_dependentpersonid(self, lastTripDep, stActDep, tripPurposeFrom):
-	print '\t\tStart Activity Dep - %s' %(stActDep)
-	print '\t\tLast trip Dependency is - ', lastTripDep
+	#print '\t\tStart Activity Dep - %s' %(stActDep)
+	#print '\t\tLast trip Dependency is - ', lastTripDep
 
 	lastTripPersons = self.parse_personids(lastTripDep)	
-	print '\t\tThe number of people on the previous trip is - %s and they are - %s and depid is - %s' %(len(lastTripPersons), lastTripPersons, lastTripDep)
+	#print '\t\tThe number of people on the previous trip is - %s and they are - %s and depid is - %s' %(len(lastTripPersons), lastTripPersons, lastTripDep)
 
 	
 	if tripPurposeFrom == 600:
 	    pickupPersons = self.parse_personids(stActDep)	    
-	    print '\t\tThis is a pickup so we should take all people from dummy pickup loc; count of people - %s and they are - %s ... ' %(len(pickupPersons), pickupPersons)
+	    #print '\t\tThis is a pickup so we should take all people from dummy pickup loc; count of people - %s and they are - %s ... ' %(len(pickupPersons), pickupPersons)
 
 
 	    lastTripPersons += pickupPersons
@@ -97,7 +97,7 @@ class TripOccupantProcessing(Model):
 
 	if tripPurposeFrom == 601:
 	    dropoffPersons = self.parse_personids(stActDep)	    
-	    print '\t\tThis is a dropoff so we should take all people from dummy pickup loc; count of people - %s and they are - %s ... ' %(len(dropoffPersons), dropoffPersons)
+	    #print '\t\tThis is a dropoff so we should take all people from dummy pickup loc; count of people - %s and they are - %s ... ' %(len(dropoffPersons), dropoffPersons)
 		
 	    for person in dropoffPersons:
 		try:
@@ -125,8 +125,8 @@ class TripOccupantProcessing(Model):
 	    else:
 		modGrt100 = False
 	#print tripDep, pers
-	if len(pers) > 1:
-	    print 'Exciting picking up more than one person ... '
+	#if len(pers) > 1:
+	#    print 'Exciting picking up more than one person ... '
 	return pers
 	
     def add_dependentpersonid(self,):

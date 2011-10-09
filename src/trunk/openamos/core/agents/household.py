@@ -783,7 +783,7 @@ class Household(object):
 	#print 'person arrived id - ', personarrivedId
 	#personarrived = self.persons[personarrivedId]
 
-	print 'number of persons for this household that arrived including dependents - %s and they are pids - %s' %(len(self.persons), self.persons.keys())
+	#print 'number of persons for this household that arrived including dependents - %s and they are pids - %s' %(len(self.persons), self.persons.keys())
 	
 	#raw_input('press to proceed to schedule adjustment')
 	
@@ -793,8 +793,8 @@ class Household(object):
 
 	    if (personarrived.child_dependency == 1 or 
 		(personarrived.expectedArrival == 0 and personarrived.actualArrival == 0)):
-	    	print '\tAdjusting schedules for houseid - %s and pid - %s' %(personarrived.hid, personarrived.pid)
-		print '\t    the schedule for this person need not be modified; this person is not independent and can only be adjusted due to schedule adjustment of adult'
+	    	#print '\tAdjusting schedules for houseid - %s and pid - %s' %(personarrived.hid, personarrived.pid)
+		#print '\t    the schedule for this person need not be modified; this person is not independent and can only be adjusted due to schedule adjustment of adult'
 		continue
 	    indepPidsForAdj.append(pid)
 
@@ -802,17 +802,17 @@ class Household(object):
 	    self.affectedActs = {}
 	    personarrived = self.persons[pid]
 
-    	    print '\tAdjusting schedules for houseid - %s and pid - %s' %(personarrived.hid, personarrived.pid)	
-	    print '\t    --Dest act - ', personarrived.destAct
+    	    #print '\tAdjusting schedules for houseid - %s and pid - %s' %(personarrived.hid, personarrived.pid)	
+	    #print '\t    --Dest act - ', personarrived.destAct
 
 	
-	    print 'FOR INDEP PERSON BEFORE - ', personarrived.print_activity_list()
+	    #print 'FOR INDEP PERSON BEFORE - ', personarrived.print_activity_list()
 	    self.adjust_person_schedules_given_arrival_info(personarrived, seed)
 
-	    print 'FOR INDEP PERSON AFTER', personarrived.print_activity_list()
+	    #print 'FOR INDEP PERSON AFTER', personarrived.print_activity_list()
 
-	    print '\t    --Dependentpersonid for trip- ', personarrived.tripDependentPerson
-	    print '\t    --Dependentpersonid for next act- ', personarrived.destAct.dependentPersonId
+	    #print '\t    --Dependentpersonid for trip- ', personarrived.tripDependentPerson
+	    #print '\t    --Dependentpersonid for next act- ', personarrived.destAct.dependentPersonId
 
 
 	    self.traverse_through_dependency_chain(personarrived.actualArrival)
@@ -909,22 +909,22 @@ class Household(object):
 
 
     def adjust_person_schedules_given_arrival_info(self, person, seed=1):
-	print '\tdest act for this person ', person.destAct
-	print '\tactual arrival - %s and expected arrival - %s' %(person.actualArrival, person.expectedArrival)
+	#print '\tdest act for this person ', person.destAct
+	#print '\tactual arrival - %s and expected arrival - %s' %(person.actualArrival, person.expectedArrival)
 
 
 	if person.destAct.startTime == person.actualArrival:
-	    print '\n-- Arrived as expected; nothing needs to be done --'
+	    #print '\n-- Arrived as expected; nothing needs to be done --'
 
 	    pass
 
 	if person.destAct.startTime > person.actualArrival:
-	    print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
+	    #print '\n-- Arrived earlier than expected; moving destination activity to earlier --'
 	    self.push_destination_activity_to_earlier(person)
 
 
 	if person.destAct.startTime < person.actualArrival:
-	    print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
+	    #print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
 	    self.adjust_push_subsequent_activities(person)
 	
     def push_destination_activity_to_earlier(self, person):
@@ -935,8 +935,8 @@ class Household(object):
 	#if person.destAct.dependentPersonId > 0:
 	if person.destAct.actType == 100 or person.destAct.actType == 600:
 	    self.add_anchor_activity(person, person.destAct, person.actualArrival)
-	    print '\tThe dest act was of type - %s and dependency - %s hence cannot be moved' % (person.destAct.actType,
-												 person.destAct.dependentPersonId)
+	    #print '\tThe dest act was of type - %s and dependency - %s hence cannot be moved' % (person.destAct.actType,
+	    #											 person.destAct.dependentPersonId)
 	else:
 	    #moveByValue = person.actualArrival - person.destAct.startTime
 	    moveByValue = person.actualArrival - person.destAct.startTime -1
@@ -949,19 +949,19 @@ class Household(object):
 	self.affectedActs = {}
 	#raw_input('adjusting and pushing subsequent activities')
 
-	print 'start act -', person.stAct
+	#print 'start act -', person.stAct
 
-	print 'Expected Activities'
-	for act in person.expectedActivities:
-	    print '\t', act
+	#print 'Expected Activities'
+	#for act in person.expectedActivities:
+	#    print '\t', act
 
-	print 'Actual Activities'
-	for act in person.actualActivities:
-	    print '\t', act
+	#print 'Actual Activities'
+	#for act in person.actualActivities:
+	#    print '\t', act
 
 	#raw_input('actual/expected should all be the same?')
 
-	print 'before adjustment for occupancy ----', person.print_activity_list()
+	#print 'before adjustment for occupancy ----', person.print_activity_list()
 
 	person.move_end(person.stAct, person.tripStTime+1)
 	actEnd = person.tripStTime + 1
@@ -972,7 +972,7 @@ class Household(object):
 	    person.move_start_end(nextAct, 0)
 	    actEnd = copy.deepcopy(nextAct.endTime)
 	    index = 1
-	    print ('Moving the non-hh member trip anchor in order to keep reasonable trip episodes for these ... ')
+	    #print ('Moving the non-hh member trip anchor in order to keep reasonable trip episodes for these ... ')
 
 	else:
 	    index = 0
@@ -980,7 +980,7 @@ class Household(object):
 
 	for act in person.expectedActivities[index:]:
 	    if actEnd-act.startTime > 0:
-		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+		#print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
 		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
 		person.move_start_end(act, moveByValue)
@@ -988,8 +988,8 @@ class Household(object):
 
 	    actEnd = copy.deepcopy(act.endTime)
 
-	print 'Moving the end of the starting episode'
-	print 'activity list after ----', person.print_activity_list()
+	#print 'Moving the end of the starting episode'
+	#print 'activity list after ----', person.print_activity_list()
 
     def adjust_push_subsequent_activities(self, person, refArrivalTime=None):
 	#raw_input('adjusting and pushing subsequent activities')
@@ -1040,23 +1040,23 @@ class Household(object):
 		actsToRemove.append(act)
 
 
-	print 'Acts to Remove'
-	for act in actsToRemove:
-	    print '\t', act
+	#print 'Acts to Remove'
+	#for act in actsToRemove:
+	#    print '\t', act
 
 
 	if len(actsToRemove) > 0:
 	    person.remove_episodes(actsToRemove)
-	    print 'After removing activities that can be skipped ... '
-	    person.print_activity_list()
+	    #print 'After removing activities that can be skipped ... '
+	    #person.print_activity_list()
 
-	print 'Missed Activities'
-	for act in missedActsStillToPursue:
-	    print '\t', act
+	#print 'Missed Activities'
+	#for act in missedActsStillToPursue:
+	    #print '\t', act
 
-	print 'Activities to Pursue'
-	for act in actsToPursue:
-	    print '\t', act
+	#print 'Activities to Pursue'
+	#for act in actsToPursue:
+	    #print '\t', act
 
 
 	actEnd = actualArrival+1
@@ -1071,9 +1071,9 @@ class Household(object):
 	   	((nextAct.actType >= 450 and nextAct.actType <= 490) or (nextAct.actType == 151)) and # subsequent act is child dependent act
 	   	(nextAct.startTime < actualArrival and nextAct.endTime > actualArrival) # the dropoff is within duration for subsequent act
 	   	):
-	   	print 'before adjusting the dropoff and subs dep act'		
-	   	print 'dest act - ', destAct
-	   	print 'next act - ', nextAct
+	   	#print 'before adjusting the dropoff and subs dep act'		
+	   	#print 'dest act - ', destAct
+	   	#print 'next act - ', nextAct
 
 	   	moveByValue = actualArrival - destAct.startTime
 	   	person.move_start_end(destAct, moveByValue)
@@ -1084,9 +1084,9 @@ class Household(object):
 	   	else:
 		    person.move_end(nextAct, destAct.endTime +2)
 		    person.move_start(nextAct, destAct.endTime +1)		
-	   	print 'after adjusting the dropoff and subs dep act'
-	   	print 'dest act - ', destAct
-	   	print 'next act - ', nextAct
+	   	#print 'after adjusting the dropoff and subs dep act'
+	   	#print 'dest act - ', destAct
+	   	#print 'next act - ', nextAct
 		 
 	   	actEnd = nextAct.endTime
 	   	index = 2
@@ -1100,7 +1100,7 @@ class Household(object):
 	    #print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 	    #if actEnd-act.startTime >= 0:
 	    if actEnd-act.startTime >= 0:
-		print '-->This ', act, ' is being moved by ', actEnd-act.startTime
+		#print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime-1)
 		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
 		person.move_start_end(act, moveByValue)
@@ -1786,7 +1786,7 @@ class Household(object):
     def lineup_ih_pickups_for_dependents(self):
 	# This lines up in home pickup episodes for dependent children
 
-        print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
+        #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
 	
 	if len(self.dependencyPersonIds) == 0:
 	    return
@@ -2118,7 +2118,7 @@ class Household(object):
                 actsOfDepPerson = copy.deepcopy(person.listOfActivityEpisodes)
 
 
-                print 'ALLOCATING ACTIVITIES FOR HID - %s, PERSON ID - %s' %(self.hid, pid)
+                #print 'ALLOCATING ACTIVITIES FOR HID - %s, PERSON ID - %s' %(self.hid, pid)
                 #self.print_activity_list(person)
                 stActStartTime, stAct = hp.heappop(actsOfDepPerson)
                 #hp.heappop(person.listOfActivityEpisodes)
@@ -2149,18 +2149,18 @@ class Household(object):
 
                     #if (endAct.location <> stAct.location) and (endAct.actType >= 400 and endAct.actType < 500):
                     if (endAct.actType >= 400 and endAct.actType < 500):
-                        print '\n\t\t2.2. OH Act: Activity-travel chain with maintenance activities'
-                        print '\t\t\t START-', stAct
-                        print '\t\t\t END-  ', endAct
+                        #print '\n\t\t2.2. OH Act: Activity-travel chain with maintenance activities'
+                        #print '\t\t\t START-', stAct
+                        #print '\t\t\t END-  ', endAct
                         actsInTour.append(stAct)
                     elif len(actsInTour) > 0:
                         actsInTour.append(stAct)
                         actsInTour.append(endAct)
                         
                         #self.allocate_pickup_dropoff_endact(pid, stAct, endAct)
-                        print "TRIP CHAIN IDENTIFIED"
-                        for act in actsInTour:
-                            print act
+                        #print "TRIP CHAIN IDENTIFIED"
+                        #for act in actsInTour:
+                        #    print act
                         #raw_input()
                         self.allocate_trip_activity_chain(pid, actsInTour)
 			#self.print_activity_list(person)
@@ -2217,8 +2217,8 @@ class Household(object):
                     if (endAct.location <> stAct.location)  and (endAct.actType >= 500 or 
                                                                  (endAct.actType < 400 and endAct.actType >= 200) or
                                                                  (endAct.actType <= 100)):
-                        print '\n\t\t2.3. OH Act: Terminal activity is not a Maint. activity and end act need not be allocated'
-                        print '\t\t\t Terminal Activity-', endAct
+                        #print '\n\t\t2.3. OH Act: Terminal activity is not a Maint. activity and end act need not be allocated'
+                        #print '\t\t\t Terminal Activity-', endAct
                         self.allocate_pickup_dropoff(pid, stAct, endAct)
                         stAct = endAct
 			#raw_input('Assigned a pickup dropoff')
@@ -2228,15 +2228,15 @@ class Household(object):
                     # ALLOCATE PICK-UP DROP-OFF TO END SOJOURN ADULT WHEN PREVIOUS OUTHOME - Case2 (see below started coding)
 
                     if (endAct.location <> stAct.location)  and (endAct.actType > 100 and endAct.actType < 200):
-                        print '\n\t\t2.4. Return Home Act: Allocate the IH activity as well'
-                        print '\t\t\t Terminal Activity-', endAct
+                        #print '\n\t\t2.4. Return Home Act: Allocate the IH activity as well'
+                        #print '\t\t\t Terminal Activity-', endAct
                         self.allocate_pickup_dropoff_endact(pid, stAct, endAct)
                         stAct = endAct
                         continue
 
                     if (endAct.location == stAct.location) and (endAct.actType > 100 and endAct.actType < 200):
-                        print '\n\t\t2.1. IH Act: Someone needs to be there'
-                        print '\t\t\t', endAct
+                        #print '\n\t\t2.1. IH Act: Someone needs to be there'
+                        #print '\t\t\t', endAct
                         self.allocate_ih_activity(pid, endAct)
                         stAct = endAct
                         continue
@@ -2276,9 +2276,9 @@ class Household(object):
 	   #raw_input()
 	"""
 	
-	for pid in self.dependencyPersonIds:
-	    person = self.persons[pid]
-     	    self.print_activity_list(person)
+	#for pid in self.dependencyPersonIds:
+	#    person = self.persons[pid]
+     	#    self.print_activity_list(person)
 
 
 	for pid in self.persons.keys():
@@ -2390,7 +2390,7 @@ class Household(object):
 
         if pid is None:
 	    self.update_depPersonId_for_terminal_episode(start, depPersonId, 99)
-            print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
+            #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
             return
 
         #print "\t\t\t\t--Randomly independent adults in the household is selected and id is --", pid
@@ -2526,7 +2526,7 @@ class Household(object):
             depPerson.lastEpisode.dependentPersonId = pid            
 	if pid <> 99:
 	    assignPerson = self.persons[pid]
-	    self.print_activity_list(assignPerson)
+	    #self.print_activity_list(assignPerson)
         
 
     def allocate_ih_activity(self, depPersonId, act):
@@ -2913,8 +2913,8 @@ class Household(object):
         intActs = self.intermediate_acts(actsInTour)
 
 	#print '\t\tActs including chauffering - '
-	for act in actIncChauffering:
-	    print '\t\t    ',act
+	#for act in actIncChauffering:
+	#    print '\t\t    ',act
 
         # Person without fixed activities
         #print '\t\t\tScanning person without fixed activities - '

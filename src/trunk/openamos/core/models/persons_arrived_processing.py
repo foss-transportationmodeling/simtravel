@@ -31,7 +31,7 @@ class PersonsArrivedProcessing(Model):
 	
 	#raw_input('processing arrived persons and num rows - %s' %data.rows)
 
-	print '--------------------------------------------'
+	#print '--------------------------------------------'
 	newData = []
 	for rowId in range(data.rows):
 	    row = data.data[rowId,:]   
@@ -40,8 +40,8 @@ class PersonsArrivedProcessing(Model):
 
 	    persArrived = row[self.persArrivedCol]
 
-	    print 'For hid - %s and pid - %s' %(hid, pid)
-	    print '     There are other dependent persons on the trip - ', persArrived
+	    #print 'For hid - %s and pid - %s' %(hid, pid)
+	    #print '     There are other dependent persons on the trip - ', persArrived
 
 	    if persArrived <= 100:
 		newData.append(list(row))
@@ -50,7 +50,7 @@ class PersonsArrivedProcessing(Model):
 	    newData.append(list(row))
 
 	    parsedPersonIds = self.parse_personids(persArrived)
-	    print '     Parsed dependent persons on the trip - ', parsedPersonIds
+	    #print '     Parsed dependent persons on the trip - ', parsedPersonIds
 				
 	    for pid in parsedPersonIds:
 		rowCp = copy.deepcopy(row)
@@ -77,8 +77,8 @@ class PersonsArrivedProcessing(Model):
 	    else:
 		modGrt100 = False
 	#print tripDep, pers
-	if len(pers) > 1:
-	    print 'Exciting picking up more than one person ... '
+	#if len(pers) > 1:
+	#    print 'Exciting picking up more than one person ... '
 	return pers
 	
 

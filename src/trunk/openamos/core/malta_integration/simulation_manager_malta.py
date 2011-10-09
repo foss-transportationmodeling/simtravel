@@ -170,9 +170,9 @@ class SimulationManager(object):
 	print 'These are trips that arrived - '
 	print tripInfoArrivals
 	#tripInfoArrivals = array([20])
-	if tripInfoArrivals.shape[0] > 0:
-	    print tripInfoArrivals.shape[0]
-	    print tripInfoArrivals
+	#if tripInfoArrivals.shape[0] > 0:
+	#    print tripInfoArrivals.shape[0]
+	#    print tripInfoArrivals
 
 
         # To test python simulation_manager_cursor.py use dummy arrival info
@@ -184,7 +184,7 @@ class SimulationManager(object):
             dataVals[:,1] = analysisInterval - 1
 
             data = DataArray(dataVals, ['tripid', 'arrivaltime'])
-            print data
+            #print data
 	    #raw_input('atleast one trip returend and here is data array')
         else:
             data = None
