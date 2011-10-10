@@ -920,8 +920,9 @@ class Person(object):
 	#print 'Start time of trip - ', self.tripStTime
 
 	if len(stActList) == 0:
-	    self.print_activity_list()
+	    #self.print_activity_list()
 	    #print '\tNo start activity found for this trip'	
+	    pass
 
 	elif len(stActList) > 1:
 	    self.print_activity_list()
@@ -944,8 +945,9 @@ class Person(object):
 
 	#print '\texpected arrival - ', self.expectedArrival
 	if len(destActList) == 0:
-	    self.print_activity_list()
+	    #self.print_activity_list()
 	    #print '\t     No dest act found for this arrival'
+	    pass
 	elif len(destActList) > 1:
 	    self.print_activity_list()
 	    print '\t     More than one conflicts found for this arrival'
