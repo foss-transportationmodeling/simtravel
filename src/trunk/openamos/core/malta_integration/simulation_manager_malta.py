@@ -33,7 +33,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/config_mag_malta_dynamic_mod.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta.xml'
 	configObject = None
 
 
@@ -142,10 +142,7 @@ class SimulationManager(object):
     def clean_database_tables(self):
         tableNamesDelete = []
         for comp in self.componentList:
-	    #if comp.skipFlag or comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_arrived_r':
-            #    continue
             # clean the run time tables
-            #delete the delete statement; this was done to clean the tables during testing
             tableName = comp.writeToTable
             if tableName not in tableNamesDelete:
 		if comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_location_r':
@@ -171,14 +168,8 @@ class SimulationManager(object):
 	ti = time.time()
 
 	print tripInfoArrivals
-	#tripInfoArrivals = array([20])
-	#if tripInfoArrivals.shape[0] > 0:
-	#    print tripInfoArrivals.shape[0]
-	#    print tripInfoArrivals
-
 
         # To test python simulation_manager_cursor.py use dummy arrival info
-        #tripInfoArrivals = array([34])
 
 	if tripInfoArrivals.shape[0] > 1 or (tripInfoArrivals.shape[0] == 1 and tripInfoArrivals[0] <> -1):
             dataVals = zeros((tripInfoArrivals.shape[0], 2))
@@ -186,34 +177,23 @@ class SimulationManager(object):
             dataVals[:,1] = analysisInterval - 1
 
             data = DataArray(dataVals, ['tripid', 'arrivaltime'])
-            #print data
-	    #raw_input('atleast one trip returend and here is data array')
         else:
             data = None
-            #raw_input ('\t Press any key to continue')
+
 	t_c = time.time()
 
         # The analysis interval returned is the end of the analysis interval
         # In openamos everything is referenced to the start of the analysis Interval
         # openamos analysisInterval = above_analysisInterval - 1
 
-	# Get the two components one for dynamic activity simulation and another for extracting trips
-
         fileLoc = self.projectConfigObject.location
-
-
 	print ('Starting to process...')
-
 	for comp in self.componentList:
-
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
             print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                        comp.analysisInterval)
 
-            if comp.component_name in ['AdjustPrismEndsForInsufficientPrisms', 'ExtractTravelEpisodes']:
-		print ('Just finished processing - %s' %comp.component_name)
-                
             if comp.component_name == 'ArrivalTimeInformation':
                 comp.db = self.db
             
@@ -233,31 +213,18 @@ class SimulationManager(object):
                 tableName = self.identify_skims_matrix(comp)
                 
                 if tableName <> self.lastTableName and len(comp.spatialConst_list) > 0:
-                    # Load the skims matrix
-                    #print """\tThe tod interval for the the previous component is not same """\
-                    #    """as current component. """\
-                    #    """Therefore the skims matrix should be reloaded.\n"""\
-		    #	"""Last one - %s and this one - %s """ %(self.lastTableName, tableName)
-		    #raw_input()
                     self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
                     self.lastTableName = tableName
 
                 elif tableName == self.lastTableName:
-                    #print """\tThe tod interval for the the previous component is same """\
-                    #    """as current component. """\
-                    #    """Therefore the skims matrix need not be reloaded."""
 		    pass
 
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
-		
                 data = comp.pre_process(self.queryBrowser, 
                                         self.skimsMatrix, self.uniqueIds, self.db, fileLoc)
 
             if data is not None:
                 #print 'inside here for component - ', comp.component_name
-                # Call the run function to simulate the chocies(models)
-                # as per the specification in the configuration file
-                # data is written to the hdf5 cache because of the faster I/O
 		tripInfo = comp.run(data, self.queryBrowser, 
 			    self.skimsMatrix, self.uniqueIds, fileLoc)
             else:
@@ -265,9 +232,7 @@ class SimulationManager(object):
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
 
-	# Reduce 100 to match TAZ notatiosample_locn of MALTA
 	tripInfo = tripInfo.astype(int)
-
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
 	print '\t Time taken to retrieve trips for the simulation interval - %.4f' %(time.time()-ti)
 

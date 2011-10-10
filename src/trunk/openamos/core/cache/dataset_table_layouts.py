@@ -128,6 +128,16 @@ class Persons_Location_R(t.IsDescription):
     time = t.Int32Col()
     location = t.Int32Col()
 	
+class Persons_History_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    personuniqueid = t.Int32Col()
+    ih_history = t.Int32Col()
+    maintenance_history = t.Int32Col()
+    discretionary_history = t.Int32Col()
+    fixed_history = t.Int32Col()
+
+
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()
     gap_before = t.Int64Col()

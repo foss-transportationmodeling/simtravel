@@ -233,7 +233,7 @@ class ConfigParser(object):
 
 
     def parse_skims_tables(self):
-        print "-- Parse skims tables' Time of Day information --"
+        #print "-- Parse skims tables' Time of Day information --"
         skims_element = self.configObject.find("TravelSkims")
         referenceTablename = skims_element.get("reference_tablename")
         indb_flag = skims_element.get("indb")

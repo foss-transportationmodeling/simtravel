@@ -7,8 +7,13 @@ from openamos.core.cache.dataset_table_layouts import *
 from openamos.core.data_array import DataArray
 
 class DB(object):
-    def __init__(self, fileLoc, mode='w'):
-        self.fileh = t.openFile("%s/amosdb.h5" %(fileLoc), mode=mode)
+    def __init__(self, fileLoc, mode='w', fileName=None):
+		
+	if fileName == None:
+	    fileName = "amosdb"
+
+        self.fileh = t.openFile("%s/%s.h5" %(fileLoc, fileName), mode=mode)
+
 
         """
 	if partId is None:
@@ -84,6 +89,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "trips_inc_expected_to_malta_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_to_malta_r", Trips_Final_R)
         self.fileh.createTable(output_grp, "persons_location_r", Persons_Location_R)
+        self.fileh.createTable(output_grp, "persons_history_r", Persons_History_R)
         self.fileh.createTable(output_grp, "gap_function_r", Gap_Function_R)
         self.fileh.createTable(output_grp, "od_r", OD_R)
         self.fileh.createTable(output_grp, "odt_r", ODT_R)

@@ -49,8 +49,12 @@ class DB(object):
 			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid'],
 			  'trips_invalid_r':['tripid', 'tripind'],
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
+			  'trips_arrival_from_openamos_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
 					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
+			  'persons_arrived_from_openamos_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
+					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
+
 			  'persons_arrived_id_r':['houseid', 'personid', 'actualarrivaltime', 'expectedarrivaltime', 'tripdependentpersonid', 'tozone', 'personuniqueid'],
 			  'persons_leaving_id_r':['tripid', 'houseid', 'personid', 'personuniqueid', 'starttime', 'fromzone'],
 			  'persons_leaving_valid_trips_id_r':['tripid', 'houseid', 'personid', 'starttime'],
@@ -62,7 +66,9 @@ class DB(object):
 			  'workers_r':['houseid', 'personid', 'episodes'], 
 			  'child_dependency_r':['houseid', 'personid', 'dependency'],
 			  'daily_school_status_r':['houseid', 'personid', 'schdailystatus'],
-			  'daily_work_satus_r':['houseid', 'personid', 'wrkdailystatus']}
+			  'daily_work_satus_r':['houseid', 'personid', 'wrkdailystatus'],
+			  'persons_history_r':['houseid', 'personid', 'personuniqueid', 'ih_history', 'discretionary_history', 'maintenance_history', 'fixed_history']
+			   }
 
 
 
@@ -83,7 +89,8 @@ class DB(object):
 			'total_area':float32, 'residential_population':int32, 'single_family_dwelling':int32, 
 			'institutional_population':int32, 'multi_family_dwelling':int32, 'vehcount':int32, 
 			'vehtype':int32, 'scheduleid':int32, 'activitytype':int32, 'duration':int32, 
-			'dependentpersonid':int64}
+			'dependentpersonid':int64, 'ih_history':int32, 'discretionary_history':int32, 
+			'maintenance_history':int32, 'fixed_history':int32}
 
 	
 

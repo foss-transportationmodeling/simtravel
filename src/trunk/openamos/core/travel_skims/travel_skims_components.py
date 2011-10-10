@@ -40,13 +40,13 @@ class TravelSkimsInfo(object):
 
     def add_tableLookup(self, intervalStart, intervalEnd, tableName):
         self.table_lookup[(intervalStart, intervalEnd)] = tableName
-        print '\tSkims table name - %s applies for interval starting at %s and ending at %s' %(tableName, intervalStart,
-                                                              intervalEnd)
+        #print '\tSkims table name - %s applies for interval starting at %s and ending at %s' %(tableName, intervalStart,
+        #                                                      intervalEnd)
         
     def add_tableLocationLookup(self, intervalStart, intervalEnd, file_location):
         self.table_locationLookup[(intervalStart, intervalEnd)] = file_location
-        print '\tSkims file location - %s applies for interval starting at %s and ending at %s' %(file_location, intervalStart,
-                                                              					  intervalEnd)
+        #print '\tSkims file location - %s applies for interval starting at %s and ending at %s' %(file_location, intervalStart,
+        #                                                      					  intervalEnd)
 
 
     def add_tableInfoToList(self, tableName, origin_var, destination_var,
@@ -62,7 +62,7 @@ class TravelSkimsInfo(object):
 						   #import_flag,
 						   file_location,
 						   delimiter)
-            print dbInfoObject
+            #print dbInfoObject
             self.tableDBInfoList.append(dbInfoObject)
             self.tableNamesList.append(tableName)
         self.add_tableLookup(intervalStart, intervalEnd, tableName)

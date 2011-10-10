@@ -30,7 +30,7 @@ class SimulationManager(object):
     be passed.
     """
 
-    def __init__(self, configObject=None, fileLoc=None, component=None):
+    def __init__(self, configObject=None, fileLoc=None, component=None, iteration=1):
         if configObject is None and fileLoc is None:
             raise ConfigurationError, """The configuration input is not valid; a """\
                 """location of the XML configuration file or a valid etree """\
@@ -51,6 +51,7 @@ class SimulationManager(object):
             raise ConfigurationError, """The path for configuration file was """\
                 """invalid or the file is not a valid configuration file."""
 
+	self.iteration = iteration
         self.fileLoc = fileLoc
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
@@ -92,6 +93,30 @@ class SimulationManager(object):
                 self.db = DB(fileLoc)
             #self.db.create()
             """
+
+    def setup_resultsBackup(self):
+	print "-- Creating a hdf5 backup of all results --"
+	fileLoc = self.projectConfigObject.location
+
+	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "iteration_%d" %self.iteration)
+
+	try:
+	    os.mkdir(backupDirectoryLoc)
+	except OSError, e:
+	    print 'Directory already exists'
+
+	# Copying the hdf 5 file
+	print 'Copying the hdf 5 file to the iteration folder'
+	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
+	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
+	shutil.copyfile(fileLoc, backupFileLoc)
+
+	# Copying the skims ... 
+	print 'Copying the skim files to the iteration folder'
+	for skimsTable in self.projectSkimsObject.table_locationLookup.values():
+	    shutil.copy(skimsTable, backupDirectoryLoc)
+
+
 
     def read_cacheDatabase(self):
         fileLoc = self.projectConfigObject.location
