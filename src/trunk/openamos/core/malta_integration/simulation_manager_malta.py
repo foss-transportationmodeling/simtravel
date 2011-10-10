@@ -168,6 +168,8 @@ class SimulationManager(object):
     def run_components(self, analysisInterval, tripInfoArrivals):
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
 	print 'These are trips that arrived - '
+	ti = time.time()
+
 	print tripInfoArrivals
 	#tripInfoArrivals = array([20])
 	#if tripInfoArrivals.shape[0] > 0:
@@ -267,6 +269,7 @@ class SimulationManager(object):
 	tripInfo = tripInfo.astype(int)
 
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
+	print '\t Time taken to retrieve trips for the simulation interval - %.4f' %(time.time()-ti)
 
 	return tripInfo
 
