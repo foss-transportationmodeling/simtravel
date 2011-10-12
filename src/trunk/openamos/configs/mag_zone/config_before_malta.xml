@@ -116,31 +116,6 @@
         <Variable table="households" var="one" coeff="1"/>
       </Model>
     </Component>
-    <Component1 name="AllocatePrimaryVehicle" read_from_table="schedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="True" completed="True">
-      <DBTables>
-        <Table table="schedule_r" key="houseid,personid" order="1"/>
-        <Table table="schedule_ltrec_r" key="houseid,personid"/>
-      </DBTables>
-      <DeleteRecords value="False"/>
-      <SpatialConstraints1 table="travel_skims" skim_var="tt" origin_var="origin" destination_var="destination">
-        <Start table="schedule_r" location_var="locationid" time_var="endtime"/>
-        <End table="schedule_r" location_var="locationid" time_var="starttime"/>
-      </SpatialConstraints1>
-      <Model name="ReconcileSchedules" formulation="Reconcile Schedules" seed="1">
-        <DependentVariable var="reconcileschedules"/>
-        <ActivityAttributes>
-          <HouseholdIdName table="schedule_r" var="houseid"/>
-          <PersonIdName table="schedule_r" var="personid"/>
-          <ScheduleIdName table="schedule_r" var="scheduleid"/>
-          <ActivityTypeName table="schedule_r" var="activitytype"/>
-          <LocationIdName table="schedule_r" var="locationid"/>
-          <StartTimeName table="schedule_r" var="starttime"/>
-          <EndTimeName table="schedule_r" var="endtime"/>
-          <DurationName table="schedule_r" var="duration"/>
-          <DependentPersonName table="schedule_r" var="dependentpersonid"/>
-        </ActivityAttributes>
-      </Model>
-    </Component1>
     <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
@@ -246,6 +221,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <Filter table="households" var="houseid" condition="greater than" value="0"/>
@@ -341,6 +321,11 @@
         <Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
@@ -486,11 +471,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependentpersonid"/>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
         <Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model1>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <FilterSet type="and"/>
@@ -662,11 +647,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependentpersonid"/>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
         <Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model1>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <FilterSet type="and"/>
@@ -819,11 +804,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependentpersonid"/>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
         <Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model1>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <FilterSet type="and"/>
@@ -945,11 +930,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependentpersonid"/>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
         <Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model1>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <FilterSet type="and"/>
@@ -1085,11 +1070,11 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
-      <Model1 name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
-        <DependentVariable var="dependentpersonid"/>
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
         <Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
-      </Model1>
+      </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <FilterSet type="and"/>
@@ -1338,6 +1323,7 @@
 	  <EndTimeName table="schedule_r" var="endtime"/>
 	  <DurationName table="schedule_r" var="duration"/>
 	  <DependentPersonName table="schedule_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -1376,6 +1362,7 @@
 	  <EndTimeName table="schedule_cleanfixedactivityschedule_r" var="endtime"/>
 	  <DurationName table="schedule_cleanfixedactivityschedule_r" var="duration"/>
 	  <DependentPersonName table="schedule_cleanfixedactivityschedule_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_cleanfixedactivityschedule_r" var="tripcount"/>
 	</ActivityAttributes>
 
       </Model>
@@ -1409,6 +1396,7 @@
 	  <EndTimeName table="schedule_ltrec_r" var="endtime"/>
 	  <DurationName table="schedule_ltrec_r" var="duration"/>
 	  <DependentPersonName table="schedule_ltrec_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_ltrec_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -1967,7 +1955,12 @@
         <Variable table="runtime" var="duration" coeff="1"/>
       </Model>
 
-      <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+      <Model name="Dependentpersonid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
         <Variable table="persons" var="one" coeff="0"/>
@@ -2054,6 +2047,13 @@
 	<Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="en_dependentpersonid" coeff="1"/>
+      </Model>
+
+      <Model name="FirstTripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_tripcount" coeff="1"/>
       </Model>
       <Model name="ScheduleId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
@@ -2214,7 +2214,13 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="st_scheduleid" coeff="1"/>
       </Model>
-
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_tripcount" coeff="1"/>
+      </Model>
       <Model name="FirstDependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2291,6 +2297,12 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="FirstTripcount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Filter table="runtime" var="st_starttime" condition="equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="st_tripcount" coeff="1"/>
       </Model>
       <Model name="FirstDependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
@@ -2468,7 +2480,13 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="en_scheduleid" coeff="1"/>
       </Model>
-
+      <Model name="FirstTripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="en_tripcount" coeff="1"/>
+      </Model>
       <Model name="FirstDependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2518,6 +2536,7 @@
 	  <EndTimeName table="schedule_childreninctravelrec_r" var="endtime"/>
 	  <DurationName table="schedule_childreninctravelrec_r" var="duration"/>
 	  <DependentPersonName table="schedule_childreninctravelrec_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_childreninctravelrec_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -2562,6 +2581,7 @@
 	  <EndTimeName table="schedule_cleanaggregateactivityschedule_r" var="endtime"/>
 	  <DurationName table="schedule_cleanaggregateactivityschedule_r" var="duration"/>
 	  <DependentPersonName table="schedule_cleanaggregateactivityschedule_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_cleanaggregateactivityschedule_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -2579,7 +2599,7 @@
    </Component>	
 
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2628,6 +2648,12 @@
         <Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+      <Model name="FirstTripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Filter table="runtime" var="st_starttime" condition="equals" value="0"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="st_tripcount" coeff="1"/>
       </Model>
       <Model name="FirstDependentPersonid" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
@@ -2775,6 +2801,13 @@
         <Variance value="0"/>
         <Variable table="runtime" var="en_scheduleid" coeff="1"/>
       </Model>
+      <Model name="EndEpisodeTripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="en_tripcount" coeff="1"/>
+      </Model>
       <Model name="EndEpisodeDependentPersonId" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2792,14 +2825,14 @@
         <Variable table="runtime" var="repeat" coeff="1"/>
       </Model>
     </Component>
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
         <Table table="daily_school_status_r" key="houseid,personid"/>
         <Table table="child_dependency_r" key="houseid,personid"/>
         <Table table="schedule_inctravelrec_r" key="houseid,personid"/>
-        <Table table="schedule_final_r" key="houseid,personid"/>
+        <Table table="schedule_skeleton_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
       <AnalysisInterval start="1440" end="1440" step="1"/>
@@ -2847,6 +2880,12 @@
         <Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
         <Variance value="0"/>
         <Variable table="runtime" var="en_scheduleid" coeff="1"/>
+      </Model>
+      <Model name="EndEpisodeTripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="en_tripcount" coeff="1"/>
       </Model>
       <Model name="EndEpisodeDependentPersonId" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
@@ -3025,6 +3064,13 @@
         <Variance value="0"/>
         <Variable table="runtime" var="st_scheduleid" coeff="1"/>
       </Model>
+      <Model name="EndEpisodeTripCount" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="tripcount"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="st_tripcount" coeff="1"/>
+      </Model>
       <Model name="EndEpisodeDependentPersonId" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="dependentpersonid"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -3064,39 +3110,44 @@
       </Model>
 
 
+      <Model name="lastTripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="lasttripcount"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="one" coeff="0"/>
+      </Model>
+
       <Model name="location" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="location"/>
 	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
-
-
    </Component>
 
 
-    <Component name="DummyCreator" read_from_table="schedule_final_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
     	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="schedule_skeleton_r" key="houseid,personid"/>
+    	<Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>
+    	<Table table="schedule_final_r" key="houseid,personid"/>
       </DBTables>
 
       <Model name="ChildDependencyAllocation" formulation="Child Dependency" type="Resolution" seed="1">
 	<DependentVariable var="childdependencyallocation"/>
 
 	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
-	  <PersonIdName table="schedule_final_r" var="personid"/>
-	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
-	  <LocationIdName table="schedule_final_r" var="locationid"/>
-	  <StartTimeName table="schedule_final_r" var="starttime"/>
-	  <EndTimeName table="schedule_final_r" var="endtime"/>
-	  <DurationName table="schedule_final_r" var="duration"/>
-	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	  <HouseholdIdName table="schedule_skeleton_r" var="houseid"/>
+	  <PersonIdName table="schedule_skeleton_r" var="personid"/>
+	  <ScheduleIdName table="schedule_skeleton_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_skeleton_r" var="activitytype"/>
+	  <LocationIdName table="schedule_skeleton_r" var="locationid"/>
+	  <StartTimeName table="schedule_skeleton_r" var="starttime"/>
+	  <EndTimeName table="schedule_skeleton_r" var="endtime"/>
+	  <DurationName table="schedule_skeleton_r" var="duration"/>
+	  <DependentPersonName table="schedule_skeleton_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_skeleton_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
