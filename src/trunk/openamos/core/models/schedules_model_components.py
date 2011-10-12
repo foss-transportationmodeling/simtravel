@@ -36,7 +36,7 @@ class ActivityAttribsSpecification(object):
     def __init__(self, hidName, pidName, scheduleidName,
                  activitytypeName, starttimeName,
                  endtimeName, locationidName, 
-                 durationName, dependentPersonName):
+                 durationName, dependentPersonName, tripCountName):
 	self.hidName = hidName
         self.pidName = pidName
         self.scheduleidName = scheduleidName
@@ -46,6 +46,7 @@ class ActivityAttribsSpecification(object):
         self.endtimeName = endtimeName
         self.durationName = durationName
         self.dependentPersonName = dependentPersonName
+	self.tripCountName = tripCountName
 
 class ArrivalInfoSpecification(object):
     def __init__(self, dependentPersonName,
@@ -94,8 +95,10 @@ class PersonsArrivedSpecification(object):
 
 
 class PersonsArrivedAttributes(object):
-    def __init__(self, tripDepName):
+    def __init__(self, tripDepName, tripCountName=None, actDepName=None):
 	self.tripDepName = tripDepName
+	self.tripCountName = tripCountName
+	self.actDepName = actDepName
 
 class TripDependentPersonAttributes(object):
     def __init__(self, 

@@ -21,7 +21,8 @@ class ChildDependencyProcessing(Model):
                          self.activityAttribs.endtimeName,
                          self.activityAttribs.locationidName,
                          self.activityAttribs.durationName,
-                         self.activityAttribs.dependentPersonName]
+                         self.activityAttribs.dependentPersonName,
+			 self.activityAttribs.tripCountName]
         
 
 
@@ -40,6 +41,8 @@ class ChildDependencyProcessing(Model):
         self.endtimeCol = colnamesDict[self.activityAttribs.endtimeName]
         self.durCol = colnamesDict[self.activityAttribs.durationName]
         self.depPersonCol = colnamesDict[self.activityAttribs.dependentPersonName]
+	self.tripCountCol = colnamesDict[self.activityAttribs.tripCountName]
+
 
         self.schoolStatusCol = colnamesDict[self.dailyStatusAttribs.schoolStatusName]
         self.workStatusCol = colnamesDict[self.dailyStatusAttribs.workStatusName]
@@ -125,7 +128,7 @@ class ChildDependencyProcessing(Model):
 	    #			    16059, 3636, 8442, 11154, 15810, 16831]:
 	    #if hhldIndex[0] not in [17608, 42872]:
 	    #if hhldIndex[0] not in [28166]:
-	    if hhldIndex[0] <> 2582:
+	    if hhldIndex[0] <> 164552:
 	    	#continue
 	      	pass
 
@@ -183,10 +186,12 @@ class ChildDependencyProcessing(Model):
             endtime = sched[self.endtimeCol]
             duration = sched[self.durCol]
             depPersonId = sched[self.depPersonCol]
+	    tripCount = sched[self.tripCountCol]
             
             actepisode = ActivityEpisode(hid, pid, scheduleid,
 					 activitytype, locationid, 
-                                         starttime, endtime, duration, depPersonId)
+                                         starttime, endtime, duration, depPersonId,
+					 tripCount)
             activityList.append(actepisode)
 
         

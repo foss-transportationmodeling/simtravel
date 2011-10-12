@@ -28,7 +28,8 @@ class AdjustSchedules(Model):
                          self.activityAttribs.endtimeName,
                          self.activityAttribs.locationidName,
                          self.activityAttribs.durationName,
-                         self.activityAttribs.dependentPersonName]
+                         self.activityAttribs.dependentPersonName,
+			 self.activityAttribs.tripCountName]
 
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName,
@@ -101,6 +102,7 @@ class AdjustSchedules(Model):
         self.endtimeCol = colNamesDict[self.activityAttribs.endtimeName]
         self.durCol = colNamesDict[self.activityAttribs.durationName]
 	self.depPersonCol = colNamesDict[self.activityAttribs.dependentPersonName]
+	self.tripCountCol = colNamesDict[self.activityAttribs.tripCountName]
 
 	if self.schedAdjType == "Arrival Adjustment":
 	    self.tripDependentPersonCol = colNamesDict[self.arrivalInfoAttribs.dependentPersonName]
@@ -186,9 +188,10 @@ class AdjustSchedules(Model):
             endtime = sched[self.endtimeCol]
             duration = sched[self.durCol]
             depPersonId = sched[self.depPersonCol]
-            
+	    tripCount = sched[self.tripCountCol]            
+
             actepisode = ActivityEpisode(hid, pid, scheduleid, activitytype, locationid, 
-                                         starttime, endtime, duration, depPersonId)
+                                         starttime, endtime, duration, depPersonId, tripCount)
             activityList.append(actepisode)
 
         
@@ -253,6 +256,11 @@ class AdjustSchedules(Model):
                                                    childDependency)
 
             	householdObject.add_person(personObject)
+		#print 'BEFORE -'
+	    	#personObject.print_activity_list()
+
+
+
 		
 		if self.schedAdjType == "Arrival Adjustment":
 	    	    actualArrival, expectedArrival, tripDependentPerson = self.return_arrival_info(schedulesForPerson)
@@ -275,6 +283,9 @@ class AdjustSchedules(Model):
 		pass
 	    #raw_input()
 	    reconciledSchedules = householdObject._collate_results()
+
+	    #print 'AFTER -'
+	    #personObject.print_activity_list()
 
 
 	    if not personObject._check_for_conflicts():

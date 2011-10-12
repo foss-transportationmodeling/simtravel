@@ -20,7 +20,8 @@ class CleanFixedActivitySchedule(Model):
                          self.activityAttribs.endtimeName,
                          self.activityAttribs.locationidName,
                          self.activityAttribs.durationName,
-                         self.activityAttribs.dependentPersonName]
+                         self.activityAttribs.dependentPersonName,
+			 self.activityAttribs.tripCountName]
         
 
 

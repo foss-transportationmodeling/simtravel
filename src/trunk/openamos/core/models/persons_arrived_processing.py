@@ -24,7 +24,8 @@ class PersonsArrivedProcessing(Model):
 	self.pidCol = colnamesDict[self.idSpec.pidName]
 
 	self.persArrivedCol = colnamesDict[self.persArrivedAttribSpec.tripDepName]
-
+	self.persTripCountCol = colnamesDict[self.persArrivedAttribSpec.tripCountName]
+	self.actDepCol = colnamesDict[self.persArrivedAttribSpec.actDepName]
 
     def resolve_consistency(self, data, seed):
         self.create_col_numbers(data._colnames)
@@ -39,10 +40,16 @@ class PersonsArrivedProcessing(Model):
 	    pid = row[self.pidCol]
 
 	    persArrived = row[self.persArrivedCol]
+	    tripCount = row[self.persTripCountCol]
+	    actDep = row[self.actDepCol]
 
-	    #print 'For hid - %s and pid - %s' %(hid, pid)
-	    #print '     There are other dependent persons on the trip - ', persArrived
+	    print 'For hid - %s and pid - %s' %(hid, pid)
+	    print '     There are other dependent persons on the trip - ', persArrived
+	    print '     Trip count on the trip - ', tripCount
+	    print '     Act dep for the trip - ', actDep
 
+
+	
 	    if persArrived <= 100:
 		newData.append(list(row))
 		continue
@@ -50,14 +57,35 @@ class PersonsArrivedProcessing(Model):
 	    newData.append(list(row))
 
 	    parsedPersonIds = self.parse_personids(persArrived)
-	    #print '     Parsed dependent persons on the trip - ', parsedPersonIds
-				
+	    print '     Parsed dependent persons on the trip - ', parsedPersonIds
+	    if tripCount > 10000:
+		parsedTripCount = self.parse_personids(tripCount)
+		actDepParsed = self.parse_personids(actDep)
+	    	print '     Parsed trip count on the trip - ', parsedTripCount
+		print '     Act dep the trip - ', actDepParsed
+		
+		i = 0
+		for pid in actDepParsed:
+		    rowCp = copy.deepcopy(row)
+		    rowCp[self.pidCol] = pid
+		    rowCp[self.persTripCountCol] = parsedTripCount[i]
+		    newData.append(list(rowCp))
+		    i += 1
+
+	        parsedPersonIds = list(set(parsedPersonIds) - set(actDepParsed))
+		print 'left over persons - ', parsedPersonIds
+
+	    	#raw_input()
+
 	    for pid in parsedPersonIds:
 		rowCp = copy.deepcopy(row)
 		rowCp[self.pidCol] = pid
 		newData.append(list(rowCp))
 
 	data = DataArray(newData, data.varnames)
+
+	print data.varnames
+	print data.data.astype(int)
 	    
 	#raw_input('arrived persons processing complete ---  and rows - %s' %data.rows)
 
