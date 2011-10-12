@@ -34,11 +34,12 @@ class DB(object):
 			  'schedule_dailyallocrec_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
 					'endtime', 'duration', 'dependentpersonid'],
 			  'schedule_final_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
-					'endtime', 'duration', 'dependentpersonid'],
+					'endtime', 'duration', 'dependentpersonid', 'tripcount'],
 
 			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
 				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid', 'tripwithhhmember', 
-				     'lasttripdependentpersonid', 'lastoccupancy'],
+				     'lasttripdependentpersonid', 'lastoccupancy', 'starttripcount', 'endtripcount',
+				     'startdependentpersonid', 'enddependentpersonid'],
 
 			  'trips_with_nonhh_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
 				     'trippurpose', 'duration', 'occupancy', 'dependentpersonid'],
@@ -51,14 +52,14 @@ class DB(object):
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
 			  'trips_arrival_from_openamos_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
-					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
+					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone', 'tripcount'],
 			  'persons_arrived_from_openamos_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
-					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone'],
-
-			  'persons_arrived_id_r':['houseid', 'personid', 'actualarrivaltime', 'expectedarrivaltime', 'tripdependentpersonid', 'tozone', 'personuniqueid'],
-			  'persons_leaving_id_r':['tripid', 'houseid', 'personid', 'personuniqueid', 'starttime', 'fromzone'],
-			  'persons_leaving_valid_trips_id_r':['tripid', 'houseid', 'personid', 'starttime'],
-			  'persons_location_r':['houseid', 'personid', 'personuniqueid', 'location'],
+					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone', 'tripcount'],
+			  'persons_arrived_id_r':['houseid', 'personid', 'actualarrivaltime', 'expectedarrivaltime', 
+						  'tripdependentpersonid', 'tozone', 'personuniqueid', 'tripcount'],
+			  'persons_leaving_id_r':['tripid', 'houseid', 'personid', 'personuniqueid', 'starttime', 'fromzone', 'tripcount'],
+			  'persons_leaving_valid_trips_id_r':['tripid', 'houseid', 'personid', 'starttime', 'tripcount'],
+			  'persons_location_r':['houseid', 'personid', 'personuniqueid', 'location', 'lasttripcount'],
 			  'trips_occupant_origin_invalid_r':['tripid', 'tripvalid', 'tripstarttime'],
 			  'person_trips_occupant_origin_invalid_r':['tripid', 'houseid', 'personid', 'tripvalid', 'tripstarttime'],
 			  'households_arrived_id_r':['houseid', 'actualarrivaltime'],
@@ -90,7 +91,9 @@ class DB(object):
 			'institutional_population':int32, 'multi_family_dwelling':int32, 'vehcount':int32, 
 			'vehtype':int32, 'scheduleid':int32, 'activitytype':int32, 'duration':int32, 
 			'dependentpersonid':int64, 'ih_history':int32, 'discretionary_history':int32, 
-			'maintenance_history':int32, 'fixed_history':int32}
+			'maintenance_history':int32, 'fixed_history':int32, 
+			'tripcount':int64, 'lasttripcount':int64, 'starttripcount':int64, 'endtripcount':int64,
+			'startdependentpersonid':int64, 'enddependentpersonid':int64}
 
 	
 

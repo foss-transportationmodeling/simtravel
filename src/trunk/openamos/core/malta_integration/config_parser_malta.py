@@ -1983,7 +1983,19 @@ class ConfigParser(object):
         trpDepPersIdNameParsed = self.return_table_var(trpDepPersIdName_element)
         variable_list.append(trpDepPersIdNameParsed)
 
-	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1])
+
+        tripCountName_element = trip_arrived_pers_attribs_element.find('TripCountName')
+        tripCountNameParsed = self.return_table_var(tripCountName_element)
+        variable_list.append(tripCountNameParsed)
+
+        actDepPersIdName_element = trip_arrived_pers_attribs_element.find('ActDependentPersonIdName')
+        actDepPersIdNameParsed = self.return_table_var(actDepPersIdName_element)
+        variable_list.append(actDepPersIdNameParsed)
+
+
+	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1],
+						      tripCountNameParsed[1],
+						      actDepPersIdNameParsed[1])
 
         self.component_variable_list = self.component_variable_list + variable_list
 
@@ -2392,6 +2404,11 @@ class ConfigParser(object):
         dependentPersonParsed = self.return_table_var(dependentPersonName_element)
         variable_list.append(dependentPersonParsed)
 
+
+        tripCountName_element = activity_attribs_element.find('TripCountName')
+        tripCountParsed = self.return_table_var(tripCountName_element)
+        variable_list.append(tripCountParsed)
+
         actAttribsSpec = ActivityAttribsSpecification(householdIdParsed[1],
                                                       personIdParsed[1],
                                                       scheduleIdParsed[1],
@@ -2400,7 +2417,8 @@ class ConfigParser(object):
                                                       endTimeParsed[1],
                                                       locationIdParsed[1],
                                                       durationParsed[1],
-                                                      dependentPersonParsed[1])        
+                                                      dependentPersonParsed[1],
+						      tripCountParsed[1])        
 
         self.component_variable_list = self.component_variable_list + variable_list
 
