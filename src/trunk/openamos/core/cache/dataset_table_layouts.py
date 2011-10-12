@@ -56,6 +56,18 @@ class Schedule_R(t.IsDescription):
     duration = t.Int32Col()
     dependentpersonid = t.Int64Col()
 
+class Schedule_Allocation_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    activitytype = t.Int32Col()
+    locationid = t.Int32Col()
+    starttime = t.Int32Col()
+    endtime = t.Int32Col()
+    duration = t.Int32Col()
+    dependentpersonid = t.Int64Col()
+    tripcount = t.Int32Col()
+
+
 class Child_Dependency_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
@@ -127,6 +139,7 @@ class Persons_Location_R(t.IsDescription):
     personuniqueid = t.Int32Col()
     time = t.Int32Col()
     location = t.Int32Col()
+    lasttripcount = t.Int32Col()
 	
 class Persons_History_R(t.IsDescription):
     houseid = t.Int64Col()
