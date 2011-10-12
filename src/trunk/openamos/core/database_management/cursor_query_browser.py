@@ -576,6 +576,9 @@ class QueryBrowser(object):
                     final_list.append('stl.%s as st_%s' %('dependentpersonid', 'dependentpersonid'))
                     cols_list.append('st_%s' %'dependentpersonid')
 
+                    final_list.append('stl.%s as st_%s' %('tripcount', 'tripcount'))
+                    cols_list.append('st_%s' %'tripcount')
+
                     final_list.append('stl.%s as st_%s' %('duration', 'duration'))
                     cols_list.append('st_%s' %'duration')
 
@@ -612,6 +615,9 @@ class QueryBrowser(object):
 
                     final_list.append('enl.%s as en_%s' %('dependentpersonid', 'dependentpersonid'))
                     cols_list.append('en_%s' %'dependentpersonid')
+
+                    final_list.append('enl.%s as en_%s' %('tripcount', 'tripcount'))
+                    cols_list.append('en_%s' %'tripcount')
 
                     final_list.append('enl.%s as en_%s' %('duration', 'duration'))
                     cols_list.append('en_%s' %'duration')
@@ -794,7 +800,7 @@ class QueryBrowser(object):
         
         # Convert it back to a regular array to enable all the other processing
         print '\tSize of the data set that was retrieved - ', data.shape
-        #print '\t - Records were processed after query in %.4f' %(time.time()-t)
+        print '\t - Records were processed after query in %.4f' %(time.time()-t)
 
 	if data.shape[0] == 0:
 	    return None
