@@ -325,7 +325,7 @@ class ConfigParser(object):
     def parse_analysis_interval_and_create_component(self, component_element, projectSeed, analysisInterval=None):
         ti = time.time()
         comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
-	#print "Parsing Component - %s" %(comp_name)
+	print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
         if interval_element is not None:
@@ -2353,6 +2353,11 @@ class ConfigParser(object):
         dependentPersonParsed = self.return_table_var(dependentPersonName_element)
         variable_list.append(dependentPersonParsed)
 
+        tripCountName_element = activity_attribs_element.find('TripCountName')
+        tripCountParsed = self.return_table_var(tripCountName_element)
+        variable_list.append(tripCountParsed)
+
+
         actAttribsSpec = ActivityAttribsSpecification(householdIdParsed[1],
                                                       personIdParsed[1],
                                                       scheduleIdParsed[1],
@@ -2361,7 +2366,8 @@ class ConfigParser(object):
                                                       endTimeParsed[1],
                                                       locationIdParsed[1],
                                                       durationParsed[1],
-                                                      dependentPersonParsed[1])        
+                                                      dependentPersonParsed[1],
+						      tripCountParsed[1])        
 
         self.component_variable_list = self.component_variable_list + variable_list
 
