@@ -1,7 +1,8 @@
 
 
 class ActivityEpisode(object):
-    def __init__(self, hid, pid, scheduleId, actType, location, startTime, endTime, duration, personId=0):
+    def __init__(self, hid, pid, scheduleId, actType, 
+		 location, startTime, endTime, duration, personId=0, tripCount=0):
         self.scheduleId = scheduleId
 	self.hid = hid
 	self.pid = pid
@@ -11,6 +12,7 @@ class ActivityEpisode(object):
         self.location = location
         self.duration = self.endTime - self.startTime
 	self.dependentPersonId = personId
+	self.tripCount = tripCount
         self._first_episode_check()
         self._last_episode_check()
 	self.activities_subsumed = {}
@@ -38,9 +40,10 @@ class ActivityEpisode(object):
         return """schid - %s, hid - %s, pid - %s, acttype - %s, """\
             """loc - %s, """\
             """start - %s, end - %s, dur - %s, """\
-	    """depPId - %s, stFLag-%s, endFlag-%s """% (self.scheduleId, 
+	    """depPId - %s, stFLag-%s, endFlag-%s, tripCnt-%s"""% (self.scheduleId, 
 				      self.hid, self.pid, 
 				      self.actType, self.location,
 		                      self.startTime, self.endTime, self.duration,
-			              self.dependentPersonId, self.startOfDay, self.endOfDay)
+			              self.dependentPersonId, 
+				      self.startOfDay, self.endOfDay, self.tripCount)
 

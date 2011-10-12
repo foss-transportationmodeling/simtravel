@@ -683,7 +683,8 @@ class Household(object):
             for actStart, act in person.listOfActivityEpisodes:
                 resList.append([self.hid, pid, act.scheduleId,
                                 act.actType, act.startTime, act.endTime,
-                                act.location, act.duration, act.dependentPersonId])
+                                act.location, act.duration, act.dependentPersonId,
+				act.tripCount])
         return resList
 
     def _collate_results_without_dependentActs(self):
@@ -694,14 +695,16 @@ class Household(object):
 		if act.dependentPersonId == 0 or act.dependentPersonId == 99:
                     resList.append([self.hid, pid, act.scheduleId,
                                    act.actType, act.startTime, act.endTime,
-                                   act.location, act.duration, act.dependentPersonId])
+                                   act.location, act.duration, act.dependentPersonId,
+				   act.tripCount])
 
         for pid in self.indepPersonIds:
             person = self.persons[pid]
             for actStart, act in person.listOfActivityEpisodes:
                 resList.append([self.hid, pid, act.scheduleId,
                                 act.actType, act.startTime, act.endTime,
-                                act.location, act.duration, act.dependentPersonId])
+                                act.location, act.duration, act.dependentPersonId,
+				act.tripCount])
 
         return resList
 
@@ -2067,7 +2070,6 @@ class Household(object):
 
                 actsOfDepPerson = copy.deepcopy(person.listOfActivityEpisodes)
 
-
                 #print 'ALLOCATING ACTIVITIES FOR HID - %s, PERSON ID - %s' %(self.hid, pid)
                 #self.print_activity_list(person)
                 stActStartTime, stAct = hp.heappop(actsOfDepPerson)
@@ -2116,7 +2118,7 @@ class Household(object):
                 person = self.persons[pid]
 
                 actsOfDepPerson = copy.deepcopy(person.listOfActivityEpisodes)
-
+		self.tripCount = 0
 
                 #print 'ALLOCATING ACTIVITIES FOR HID - %s, PERSON ID - %s' %(self.hid, pid)
                 #self.print_activity_list(person)
@@ -2276,10 +2278,10 @@ class Household(object):
 	   #raw_input()
 	"""
 	
-	#for pid in self.dependencyPersonIds:
-	#    person = self.persons[pid]
-     	#    self.print_activity_list(person)
-
+	for pid in self.dependencyPersonIds:
+	    person = self.persons[pid]
+     	    self.print_activity_list(person)
+	    #raw_input()
 
 	for pid in self.persons.keys():
 	    person = self.persons[pid]
@@ -2827,17 +2829,24 @@ class Household(object):
 
 	if (conflictPickup or conflictDropoff):
 	    if conflictPickup:	
-	    	#print ("\t\t\t\tconflict is with pickup")
-		#print '\t\t\t\tpickup act - ', dummyActPickUp
-		#print '\t\t\t\tpickup conflict - ', pickUpConf
+	    	print ("\t\t\t\tconflict is with pickup")
+		print '\t\t\t\tpickup act - ', dummyActPickUp
+		print '\t\t\t\tpickup conflict - ', pickUpConf
 	    	pickUpConf.dependentPersonId = pickUpConf.dependentPersonId*100. + depPersonId
+		if pickUpConf.tripCount < 100:
+		    pickUpConf.tripCount = (100+pickUpConf.tripCount)*100 + dummyActPickUp.tripCount
+		else:
+		    pickUpConf.tripCount = pickUpConf.tripCount*100 + dummyActPickUp.tripCount	
 	    if conflictDropoff:
-	    	#print ("\t\t\t\tconflict is with dropoff")
-		#print '\t\t\t\tdropoff act - ', dummyActDropOff
-		#print '\t\t\t\tdropoff conflict - ', dropOffConf
+	    	print ("\t\t\t\tconflict is with dropoff")
+		print '\t\t\t\tdropoff act - ', dummyActDropOff
+		print '\t\t\t\tdropoff conflict - ', dropOffConf
 	    	dropOffConf.dependentPersonId = dropOffConf.dependentPersonId*100. + depPersonId
-
-	  
+		if dropOffConf.tripCount < 100:
+		    dropOffConf.tripCount = (100+dropOffConf.tripCount)*100 + dummyActDropOff.tripCount
+		else:
+		    dropOffConf.tripCount = dropOffConf.tripCount*100 + dummyActDropOff.tripCount
+		  
 			
 	    #self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], pid, depPersonId, dependent=False) 
 
@@ -3379,6 +3388,7 @@ class Household(object):
         dummyPickUpAct = copy.deepcopy(stAct)
         dummyDropOffAct = copy.deepcopy(endAct)
 
+	self.tripCount += 1
 
         # Pickup overlaps with the end of an activity
         dummyPickUpAct.startTime = dummyPickUpAct.endTime 
@@ -3388,6 +3398,7 @@ class Household(object):
         dummyPickUpAct.startOfDay = False
         dummyPickUpAct.endOfDay = False
         dummyPickUpAct.dependentPersonId = 0
+	dummyPickUpAct.tripCount = self.tripCount
 
         # dropoff overlaps with the start of an activity
         dummyDropOffAct.startTime = dummyDropOffAct.startTime - 1
@@ -3397,6 +3408,7 @@ class Household(object):
         dummyDropOffAct.startOfDay = False
         dummyDropOffAct.endOfDay = False
         dummyDropOffAct.dependentPersonId = 0
+	dummyDropOffAct.tripCount = self.tripCount
 
 
         #print '\n\t\t\tPICKUP ACTIVITY - ', dummyPickUpAct

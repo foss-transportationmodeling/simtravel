@@ -1112,7 +1112,8 @@ class Person(object):
             actObject = recAct[1]
             resList.append([self.hid, self.pid, actObject.scheduleId, 
                             actObject.actType, actObject.startTime, actObject.endTime,
-                            actObject.location, actObject.duration, actObject.dependentPersonId])
+                            actObject.location, actObject.duration, actObject.dependentPersonId, 
+			    actObject.tripCount])
         return resList
 
     
