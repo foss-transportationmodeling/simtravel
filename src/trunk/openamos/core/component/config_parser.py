@@ -124,6 +124,7 @@ class ConfigParser(object):
 			pass
 
     def parse_models(self, projectSeed=0):
+	print 'Parsing components, component lists and models within them'
 	ti = time.time()
         componentList = []
 	for element in self.configObject.iter(tag=etree.Element):
@@ -325,7 +326,7 @@ class ConfigParser(object):
     def parse_analysis_interval_and_create_component(self, component_element, projectSeed, analysisInterval=None):
         ti = time.time()
         comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
-	print "Parsing Component - %s" %(comp_name)
+	#print "Parsing Component - %s" %(comp_name)
         interval_element = component_element.find("AnalysisInterval")
         componentList = []
         if interval_element is not None:

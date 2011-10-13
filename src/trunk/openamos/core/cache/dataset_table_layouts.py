@@ -153,8 +153,10 @@ class Persons_History_R(t.IsDescription):
 
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()
-    gap_before = t.Int64Col()
-    gap_after = t.Int64Col()
+    houseid = t.Int32Col()
+    personid = t.Int32Col()
+    gap_before = t.Int32Col()
+    gap_after = t.Int32Col()
 
 class OD_R(t.IsDescription):
     origin = t.Int32Col()

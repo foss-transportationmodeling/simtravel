@@ -641,11 +641,11 @@ class Person(object):
 		    try:					    
 	    	    	nextActSt, nextAct = hp.heappop(self.listOfActivityEpisodes)
 		    	#print nextAct
-			if nextAct.startTime > activity.endTime:
+			if nextAct.startTime >= activity.endTime:
 	    	    	    actList.append(nextAct)
 	    	    	hp.heappush(tempList, (nextActSt, nextAct))
 		    except IndexError, e:
-			print 'Cannot identify %s number of activities returned as many as possible...' %count
+			#print 'Cannot identify %s number of activities returned as many as possible...' %count
 			self.listOfActivityEpisodes = tempList
 			return actList
 		#print '--------ABOVE TWO' 	
@@ -708,8 +708,8 @@ class Person(object):
 
 	
     def _identify_activities_between_time_boundaries(self, start, end):
-	print 'boundaries ... ', start, end
-	print self.print_activity_list()
+	#print 'boundaries ... ', start, end
+	#print self.print_activity_list()
         actList = []
 	for stAct, act in self.listOfActivityEpisodes:
 	    #print 'for act - ', act, 'condition is - ', act.startTime >= start and act.endTime <= end
