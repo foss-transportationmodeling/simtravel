@@ -46,7 +46,7 @@
 
   <ModelConfig>
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -68,6 +68,7 @@
 	  <EndTimeName table="schedule_final_r" var="endtime"/>
 	  <DurationName table="schedule_final_r" var="duration"/>
 	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_final_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -81,7 +82,7 @@
       </Model>
     </Component>	
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -103,6 +104,7 @@
 	  <EndTimeName table="schedule_aggregatefinal_r" var="endtime"/>
 	  <DurationName table="schedule_aggregatefinal_r" var="duration"/>
 	  <DependentPersonName table="schedule_aggregatefinal_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_aggregatefinal_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -157,6 +159,22 @@
       <AnalysisInterval start="0" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="persons_arrived_r" var="expectedstarttime"/>
+
+      <Model name="houseidDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_r" var="houseid" coeff="1"/>
+      </Model>
+      <Model name="personidDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_r" var="personid" coeff="1"/>
+      </Model>
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="starttime" coeff="1"/>
+      </Model>
 
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
