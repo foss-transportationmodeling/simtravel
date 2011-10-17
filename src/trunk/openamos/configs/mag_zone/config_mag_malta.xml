@@ -31,20 +31,6 @@
 
   </TravelSkims>
 
-  <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
-    <LocationVariable var="retail_employment"/>
-    <LocationVariable var="public_employment"/>
-    <LocationVariable var="office_employment"/>
-    <LocationVariable var="industrial_employment"/>
-    <LocationVariable var="other_employment"/>
-    <LocationVariable var="residential_population"/>
-    <LocationVariable var="total_area"/>
-    <LocationVariable var="multi_family_dwelling"/>
-    <LocationVariable var="single_family_dwelling"/>
-    <LocationVariable var="institutional_population"/>
-  </Locations>
-
-
   <ModelConfig>
 
     <Component name="ArrivalTimeInformation" read_from_table="trips_arrival_from_malta_r" key="tripid" skip="False" completed="True">
@@ -461,16 +447,25 @@
 
 	<ExtractLocationInformation table="locations" location_var="locationid">
 	  <LocationVariable var="retail_employment"/>
-	  <LocationVariable var="public_employment"/>
-	  <LocationVariable var="residential_population"/>
+	  <LocationVariable var="office_employment"/>
+
+	  <LocationVariable var="retail_employment_density"/>
+	  <LocationVariable var="office_employment_density"/>
+	  <LocationVariable var="public_employment_density"/>
+	  <LocationVariable var="other_employment_density"/>
+
 	  <LocationVariable var="total_area"/>
-	  <LocationVariable var="multi_family_dwelling"/>
-	  <LocationVariable var="single_family_dwelling"/>
+
+	  <LocationVariable var="low_income"/>
+	  <LocationVariable var="lowest_income"/>
+	  <LocationVariable var="high_income"/>
+
 	  <LocationVariable var="institutional_population"/>
 
+	  <LocationVariable var="groupquarter_households"/>
+	  <LocationVariable var="residential_households"/>
+
           <FilterSet type="or"/>
-	  <Filter1 table="runtime" var="locationid" condition="greater than" value="0"/>
-	  <Filter1 table="runtime" var="locationid" condition="less than equals" value="1995"/>
 	  <Filter table="runtime" var="retail_employment" condition="greater than" value="0"/>
 	  <Filter table="runtime" var="public_employment" condition="greater than" value="0"/>
 	  <Filter table="runtime" var="office_employment" condition="greater than" value="0"/>
@@ -482,344 +477,401 @@
 
       <ConsistencyChecks name="DynamicNonMandatoryChecks">
 	<Filter table="runtime" var="locationid" condition="greater than" value="0"/>
-	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
+	<Filter table="runtime" var="prismduration" condition="greater than" value="15"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
       </ConsistencyChecks>
 
-      <Model name="TODInd6to9" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int6t9"/>
+      <Model name="TODInd5t7a" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int5t7a"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="60"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="179"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd6t9a" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int6t9a"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="120"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="299"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-      <Model name="TODInd6to11" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int6t11"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="120"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="419"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-
-      <Model name="TODInd7to11" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int7t11"/>
+      <Model name="TODInd7t9a" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int7t9a"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="180"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="419"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="299"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-
-      <Model name="TODInd9to12" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int9t12"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="300"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="479"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-      <Model name="TODInd8to12" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int8t12"/>
+      <Model name="TODInd8t11a" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int8t11a"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="240"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="479"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="419"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-
-      <Model name="TODInd11to1" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int11t1"/>
+      <Model name="TODInd9t11a" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int9t11a"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="300"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="419"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd11t1p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int11t1p"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="420"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="539"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-      <Model name="TODInd11to3" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int11t3"/>
+      <Model name="TODInd11t2p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int11t2p"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="420"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="659"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="599"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-
-      <Model name="TODInd12to3" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int12t3"/>
-        <FilterSet type="and"/>
-	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="480"/>
-	<Filter table="runtime" var="st_endtime" condition="less than equals" value="659"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
-      </Model>
-      <Model name="TODInd1to3" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int1t3"/>
+      <Model name="TODInd1t3p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int1t3p"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="540"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="659"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-
-
-      <Model name="TODInd3to5" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int3t5"/>
+      <Model name="TODInd1t4p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int1t4p"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="540"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="719"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd2t4p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int2t4p"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="600"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="719"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd2t5p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int2t5p"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="600"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="779"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd3t5p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int3t5p"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="660"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="779"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-      <Model name="TODInd5to7" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="int5t7"/>
+      <Model name="TODInd4t7p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int4t7p"/>
+        <FilterSet type="and"/>
+	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="720"/>
+	<Filter table="runtime" var="st_endtime" condition="less than equals" value="899"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="TODInd5t7p" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="int5t7p"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="780"/>
 	<Filter table="runtime" var="st_endtime" condition="less than equals" value="899"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
-      <Model name="TODIndAft7" formulation="Regression" type="Linear" seed="1">
+      <Model name="TODIndaft7p" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="intaft7"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="st_endtime" condition="greater than equals" value="900"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
+
+
+
       <Model name="DynamicNonMandatoryActivityTypeAdltWorkerNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
         <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
+
         <Alternative id="inhome" value="101">
-	  <Variable table="persons" var="one" coeff="2.40205137"/>
-	  <Variable table="persons_history_r" var="ih_history" coeff="-0.00155753"/>
-	  <Variable table="households" var="noc" coeff="0.11789681"/>
-	  <Variable table="runtime" var="int6t9" coeff="-0.39888595"/>
+          <Variable table="standard" var="one" coeff="2.81281519"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00163836"/>
+          <Variable table="households" var="inclt35k" coeff=".17766702"/>
+          <Variable table="persons" var="ag25t34" coeff="-.10865420"/>
+          <Variable table="households" var="noc" coeff=".14793416"/>
+          <Variable table="households" var="rur" coeff="-.27741331"/>
+          <Variable table="runtime" var="int5t7a" coeff="-.2795505"/>
+          <Variable table="runtime" var="int7t9a" coeff="-.2717589"/>
+          <Variable table="runtime" var="int11t1p" coeff=".49600861"/>
         </Alternative>
+
         <Alternative id="perbus" value="411">
-	  <Variable table="persons" var="one" coeff="0.40913813"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00193154"/>
-	  <Variable table="households" var="nwrkcnt" coeff="-0.06921232"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.13953765"/>
-	  <Variable table="runtime" var="int6t11" coeff="-0.83722590"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int11t3" coeff="0.83722590"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="intaft7" coeff="0.13953765"/><!-- New TOD Dummy -->
+          <Variable table="standard" var="one" coeff="-.07861713"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00208231"/>
+          <Variable table="persons" var="ag55t64" coeff=".33830625"/>
+          <Variable table="households" var="incge50k" coeff=".14057453"/>
+          <Variable table="persons" var="white" coeff=".42305457"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.2198378"/>
+          <Variable table="runtime" var="int3t5p" coeff="-.31408633"/>
         </Alternative>
+
         <Alternative id="shop" value="412">
-	  <Variable table="persons" var="one" coeff="1.84667273"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00241449"/>
-	  <Variable table="households" var="noc" coeff="-0.06785675"/><!-- New TOD Dummy -->
-	  <Variable table="persons" var="female" coeff="0.17398075"/>
-	  <Variable table="runtime" var="int6t11" coeff="-0.61363584"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int11t1" coeff="0.15340896"/>
-	  <Variable table="runtime" var="int1t3" coeff="0.46022688"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="intaft7" coeff="0.15340896"/> <!-- New TOD Dummy -->
+          <Variable table="standard" var="one" coeff="2.08423081"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00278944"/>
+          <Variable table="persons" var="ag18t24" coeff="-.23322122"/>
+          <Variable table="households" var="incge50k" coeff="-.14604776"/>
+          <Variable table="persons" var="female" coeff=".13481257"/>
+          <Variable table="households" var="urb" coeff="-.09860891"/>
+          <Variable table="households" var="withchild" coeff="-.1332564"/>
+          <Variable table="runtime" var="int11t1p" coeff=".3366942"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.14931418"/>
         </Alternative>
-        <Alternative id="meal" value="415">
-	  <Variable table="persons" var="one" coeff="0.79105995"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="-0.00247743"/>
-	  <Variable table="persons" var="agge65" coeff="-0.28199117"/>
-	  <Variable table="runtime" var="int11t1" coeff="1.84945625"/>
-	  <Variable table="runtime" var="int1t3" coeff="1.02440692"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="0.51220346"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.75495163"/>
-        </Alternative>
-        <Alternative1 id="srvpax" value="416">
-	  <Variable table="persons" var="one" coeff="0.1890381"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00151319"/>
-	  <Variable table="households" var="noc" coeff="0.51858143"/>
-	  <Variable table="persons" var="female" coeff="0.60759095"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.35330809"/>
-        </Alternative1>
 
         <Alternative id="social" value="513">
-	  <Variable table="persons" var="one" coeff="-0.00400921"/>
-	  <Variable table="households" var="urb" coeff="-0.18782542"/>
-	  <Variable table="persons" var="male" coeff="-0.15600816"/>
-	  <Variable table="persons" var="agge65" coeff="0.22102752"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.88591487"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="-0.88591487"/>
-	  <Variable table="runtime" var="intaft7" coeff="1.16577382"/>
+          <Variable table="standard" var="one" coeff=".2338477"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00151753"/>
+          <Variable table="persons" var="ag18t24" coeff=".68171424"/>
+          <Variable table="households" var="urb" coeff="-.2080508"/>
+          <Variable table="households" var="incge75k" coeff="-.11682068"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.56237282"/>
+          <Variable table="runtime" var="int5t7p" coeff=".58080212"/>
         </Alternative>
-        <Alternative id="sprec" value="514">
-	  <Variable table="persons" var="one" coeff="0.3741602"/>
-	  <Variable table="households" var="urb" coeff="0.14557064"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.76885766"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="0.76885766"/>
-	  <Variable table="runtime" var="intaft7" coeff="1.22735444"/>
+        
+	<Alternative id="sprec" value="514">
+          <Variable table="standard" var="one" coeff="-.00149548"/>
+          <Variable table="runtime" var="discretionary_history" coeff="-.0016515"/>
+          <Variable table="persons" var="ag35t44" coeff=".13341986"/>
+          <Variable table="households" var="incge50k" coeff=".26867267"/>
+          <Variable table="households" var="rur" coeff="-.16878773"/>
+          <Variable table="persons" var="male" coeff=".09904843"/>
+          <Variable table="persons" var="white" coeff=".20453713"/>
+          <Variable table="households" var="withchild" coeff=".08039139"/>
+          <Variable table="runtime" var="int5t7a" coeff="1.47955368"/>
+          <Variable table="runtime" var="int5t7p" coeff=".7964422"/>
+          <Variable table="runtime" var="intaft7" coeff="1.11597389"/>
+        </Alternative>
+
+	<Alternative id="meal" value="415">
+          <Variable table="standard" var="one" coeff=".87621375"/>
+          <Variable table="runtime" var="maintenance_history" coeff="-.00124799"/>
+          <Variable table="persons" var="agge65" coeff="-.33050424"/>
+          <Variable table="persons" var="ag18t24" coeff="-.31271073"/>
+          <Variable table="households" var="incge50k" coeff=".18421924"/>
+          <Variable table="persons" var="female" coeff="-.12420198"/>
+          <Variable table="runtime" var="int11t1p" coeff="2.02524564"/>
+          <Variable table="runtime" var="int5t7p" coeff=".26501281"/>
         </Alternative>
         <Alternative id="other" value="599">
-	  <Variable table="persons" var="one" coeff="0.0"/>
+          <Variable table="standard" var="one" coeff="0.0"/>
         </Alternative>
+
       </Model>
 
 
 
       <Model name="DynamicNonMandatoryActivityTypeAdltWorkerWITHSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
         <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
+
         <Alternative id="inhome" value="101">
-	  <Variable table="persons" var="one" coeff="2.40205137"/>
-	  <Variable table="persons_history_r" var="ih_history" coeff="-0.00155753"/>
-	  <Variable table="households" var="noc" coeff="0.11789681"/>
-	  <Variable table="runtime" var="int6t9" coeff="-0.39888595"/>
+          <Variable table="standard" var="one" coeff="2.81281519"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00163836"/>
+          <Variable table="households" var="inclt35k" coeff=".17766702"/>
+          <Variable table="persons" var="ag25t34" coeff="-.10865420"/>
+          <Variable table="households" var="noc" coeff=".14793416"/>
+          <Variable table="households" var="rur" coeff="-.27741331"/>
+          <Variable table="runtime" var="int5t7a" coeff="-.2795505"/>
+          <Variable table="runtime" var="int7t9a" coeff="-.2717589"/>
+          <Variable table="runtime" var="int11t1p" coeff=".49600861"/>
         </Alternative>
+
         <Alternative id="school" value="301">
-	  <Variable table="persons" var="one" coeff="-0.38730546"/>
-	  <Variable table="persons" var="wrkr" coeff="-0.43355883"/>
-	  <Variable table="households" var="incge35k" coeff="-0.19943837"/>
-	  <Variable table="runtime" var="int5t7" coeff="1.38404839"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.19727183"/>
+          <Variable table="standard" var="one" coeff="-.89369952"/>
+          <Variable table="runtime" var="fixed_history" coeff="-.00069388"/>
+          <Variable table="households" var="inclt35k" coeff=".22199839"/>
+          <Variable table="persons" var="ag18t24" coeff="1.79453222"/>
+          <Variable table="persons" var="male" coeff="-.21426499"/>
+          <Variable table="households" var="noc" coeff=".21535063"/>
+          <Variable table="runtime" var="int7t9a" coeff=".98602107"/>
+          <Variable table="runtime" var="int5t7p" coeff="1.38624169"/>
         </Alternative>
+
         <Alternative id="perbus" value="411">
-	  <Variable table="persons" var="one" coeff="0.40913813"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00193154"/>
-	  <Variable table="households" var="nwrkcnt" coeff="-0.06921232"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.13953765"/>
-	  <Variable table="runtime" var="int6t11" coeff="-0.83722590"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int11t3" coeff="0.83722590"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="intaft7" coeff="0.13953765"/><!-- New TOD Dummy -->
+          <Variable table="standard" var="one" coeff="-.07861713"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00208231"/>
+          <Variable table="persons" var="ag55t64" coeff=".33830625"/>
+          <Variable table="households" var="incge50k" coeff=".14057453"/>
+          <Variable table="persons" var="white" coeff=".42305457"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.2198378"/>
+          <Variable table="runtime" var="int3t5p" coeff="-.31408633"/>
         </Alternative>
+
         <Alternative id="shop" value="412">
-	  <Variable table="persons" var="one" coeff="1.84667273"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00241449"/>
-	  <Variable table="households" var="noc" coeff="-0.06785675"/>
-	  <Variable table="persons" var="female" coeff="0.17398075"/>
-	  <Variable table="runtime" var="int6t11" coeff="-0.61363584"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int11t1" coeff="0.15340896"/>
-	  <Variable table="runtime" var="int1t3" coeff="0.46022688"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="intaft7" coeff="0.15340896"/> <!-- New TOD Dummy -->
+          <Variable table="standard" var="one" coeff="2.08423081"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00278944"/>
+          <Variable table="persons" var="ag18t24" coeff="-.23322122"/>
+          <Variable table="households" var="incge50k" coeff="-.14604776"/>
+          <Variable table="persons" var="female" coeff=".13481257"/>
+          <Variable table="households" var="urb" coeff="-.09860891"/>
+          <Variable table="households" var="withchild" coeff="-.1332564"/>
+          <Variable table="runtime" var="int11t1p" coeff=".3366942"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.14931418"/>
         </Alternative>
-        <Alternative id="meal" value="415">
-	  <Variable table="persons" var="one" coeff="0.79105995"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="-0.00247743"/>
-	  <Variable table="persons" var="agge65" coeff="-0.28199117"/>
-	  <Variable table="runtime" var="int11t1" coeff="1.84945625"/>
-	  <Variable table="runtime" var="int1t3" coeff="1.02440692"/><!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="0.51220346"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.75495163"/>
-        </Alternative>
-        <Alternative1 id="srvpax" value="416">
-	  <Variable table="persons" var="one" coeff="0.1890381"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00151319"/>
-	  <Variable table="households" var="noc" coeff="0.51858143"/>
-	  <Variable table="persons" var="female" coeff="0.60759095"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.35330809"/>
-        </Alternative1>
 
         <Alternative id="social" value="513">
-	  <Variable table="persons" var="one" coeff="-0.00400921"/>
-	  <Variable table="households" var="urb" coeff="-0.18782542"/>
-	  <Variable table="persons" var="male" coeff="-0.15600816"/>
-	  <Variable table="persons" var="agge65" coeff="0.22102752"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.88591487"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="-0.88591487"/>
-	  <Variable table="runtime" var="intaft7" coeff="1.16577382"/>
+          <Variable table="standard" var="one" coeff=".2338477"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00151753"/>
+          <Variable table="persons" var="ag18t24" coeff=".68171424"/>
+          <Variable table="households" var="urb" coeff="-.2080508"/>
+          <Variable table="households" var="incge75k" coeff="-.11682068"/>
+          <Variable table="runtime" var="int1t3p" coeff="-.56237282"/>
+          <Variable table="runtime" var="int5t7p" coeff=".58080212"/>
         </Alternative>
-        <Alternative id="sprec" value="514">
-	  <Variable table="persons" var="one" coeff="0.3741602"/>
-	  <Variable table="households" var="urb" coeff="0.14557064"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.76885766"/> <!-- New TOD Dummy -->
-	  <Variable table="runtime" var="int5t7" coeff="0.76885766"/>
-	  <Variable table="runtime" var="intaft7" coeff="1.22735444"/>
+        
+	<Alternative id="sprec" value="514">
+          <Variable table="standard" var="one" coeff="-.00149548"/>
+          <Variable table="runtime" var="discretionary_history" coeff="-.0016515"/>
+          <Variable table="persons" var="ag35t44" coeff=".13341986"/>
+          <Variable table="households" var="incge50k" coeff=".26867267"/>
+          <Variable table="households" var="rur" coeff="-.16878773"/>
+          <Variable table="persons" var="male" coeff=".09904843"/>
+          <Variable table="persons" var="white" coeff=".20453713"/>
+          <Variable table="households" var="withchild" coeff=".08039139"/>
+          <Variable table="runtime" var="int5t7a" coeff="1.47955368"/>
+          <Variable table="runtime" var="int5t7p" coeff=".7964422"/>
+          <Variable table="runtime" var="intaft7" coeff="1.11597389"/>
+        </Alternative>
+
+	<Alternative id="meal" value="415">
+          <Variable table="standard" var="one" coeff=".87621375"/>
+          <Variable table="runtime" var="maintenance_history" coeff="-.00124799"/>
+          <Variable table="persons" var="agge65" coeff="-.33050424"/>
+          <Variable table="persons" var="ag18t24" coeff="-.31271073"/>
+          <Variable table="households" var="incge50k" coeff=".18421924"/>
+          <Variable table="persons" var="female" coeff="-.12420198"/>
+          <Variable table="runtime" var="int11t1p" coeff="2.02524564"/>
+          <Variable table="runtime" var="int5t7p" coeff=".26501281"/>
         </Alternative>
         <Alternative id="other" value="599">
-	  <Variable table="persons" var="one" coeff="0.0"/>
+          <Variable table="standard" var="one" coeff="0.0"/>
         </Alternative>
+
       </Model>
 
 
 
 
       <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithNoSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-	<Filter1 table="persons" var="schstat" condition="equals" value="0"/>
         <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
-        <Alternative id="inhome" value="101">
-	  <Variable table="persons" var="one" coeff="1.35780088"/> <!-- Altered constant -->
-	  <Variable table="persons_history_r" var="ih_history" coeff="-0.0021983"/>
-	  <Variable table="households" var="rur" coeff="-0.30936323"/>
-	  <Variable table="households" var="noc" coeff="0.31005112"/>
-	  <Variable table="runtime" var="int6t9" coeff="-0.1522595"/>
-        </Alternative>
-        <Alternative id="perbus" value="411">
-	  <Variable table="persons" var="one" coeff="-0.03632979"/>
-	  <Variable table="persons" var="agge65" coeff="0.09562551"/>
-	  <Variable table="households" var="nwrkcnt" coeff="-0.07950503"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.13924825"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.42157681"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.42157681"/>
-        </Alternative>
-        <Alternative id="shop" value="412">
-	  <Variable table="persons" var="one" coeff="1.44151052"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.0007868"/>
-	  <Variable table="persons" var="female" coeff="0.08679929"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.21657411"/>
-	  <Variable table="runtime" var="int11t1" coeff="0.21657411"/>
-	  <Variable table="runtime" var="int1t3" coeff="0.28737182"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.28737182"/>
 
+        <Alternative id="inhome" value="101">
+          <Variable table="standard" var="one" coeff="2.74279288"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00233867"/>
+          <Variable table="households" var="rur" coeff="-.26120781"/>
+          <Variable table="persons" var="ag45t54" coeff=".26035446"/>
+          <Variable table="households" var="noc" coeff=".26813354"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.85312085"/>
+          <Variable table="runtime" var="int5t7p" coeff="-.19735821"/>
         </Alternative>
-        <Alternative id="meal" value="415">
-	  <Variable table="persons" var="one" coeff="0.01870962"/>
-	  <Variable table="persons" var="agge65" coeff="0.07675632"/>
-	  <Variable table="runtime" var="int9t12" coeff="0.10022359"/>
-	  <Variable table="runtime" var="int12t3" coeff="0.18117357"/>
-	  <Variable table="runtime" var="int5t7" coeff="1.21372947"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.18117357"/>
+
+        <Alternative id="perbus" value="411">
+          <Variable table="standard" var="one" coeff=".1472918"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00103867"/>
+          <Variable table="persons" var="ag45t54" coeff=".24998587"/>
+          <Variable table="persons" var="agge65" coeff=".10211525"/>
+          <Variable table="households" var="nwrkcnt" coeff="-.07073217"/>
+          <Variable table="households" var="urb" coeff="-.14925279"/>
+          <Variable table="persons" var="coled" coeff=".0992252"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.30259874"/>
+          <Variable table="runtime" var="int2t5p" coeff="-.20435871"/>
         </Alternative>
-        <Alternative1 id="srvpax" value="416">
-	  <Variable table="persons" var="one" coeff="-0.66837027"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00183984"/>
-	  <Variable table="households" var="noc" coeff="0.55244886"/>
-	  <Variable table="persons" var="female" coeff="0.39197535"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.11080902"/>
-	  <Variable table="runtime" var="int3t5" coeff="0.5343389"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.39662761"/>
-        </Alternative1>
+
+        <Alternative id="shop" value="412">
+          <Variable table="standard" var="one" coeff="1.32676203"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00109782"/>
+          <Variable table="persons" var="ag45t54" coeff=".30881186"/>
+          <Variable table="households" var="incge50k" coeff="-.11961564"/>
+          <Variable table="persons" var="female" coeff=".05101292"/>
+          <Variable table="households" var="urb" coeff="-.11511187"/>
+          <Variable table="runtime" var="int11t2p" coeff=".75335632"/>
+          <Variable table="runtime" var="int2t5p" coeff=".50926423"/>
+        </Alternative>
+
         <Alternative id="social" value="513">
-	  <Variable table="persons" var="one" coeff="0.00642437"/>
-	  <Variable table="persons_history_r" var="discretionary_history" coeff="0.00200641"/>
-	  <Variable table="households" var="urb" coeff="-0.0918342"/>
-	  <Variable table="persons" var="coled" coeff="-0.11884188"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.12133058"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.83644531"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.52133058"/>
+          <Variable table="standard" var="one" coeff="-.07370901"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00275079"/>
+          <Variable table="persons" var="ag45t54" coeff=".20299677"/>
+          <Variable table="persons" var="ag35t44" coeff="-.10355239"/>
+          <Variable table="households" var="incge75k" coeff="-.07769936"/>
+          <Variable table="households" var="urb" coeff="-.11686185"/>
+          <Variable table="persons" var="coled" coeff="-.10169254"/>
+          <Variable table="runtime" var="int11t2p" coeff=".37168927"/>
+          <Variable table="runtime" var="int2t5p" coeff=".12871034"/>
+          <Variable table="runtime" var="int5t7p" coeff=".74762517"/>
         </Alternative>
+
         <Alternative id="sprec" value="514">
-	  <Variable table="persons" var="one" coeff="-0.38189096"/>
-	  <Variable table="persons_history_r" var="discretionary_history" coeff="-0.00076114"/>
-	  <Variable table="households" var="urb" coeff="0.15502139"/>
-	  <Variable table="persons" var="coled" coeff="0.41509007"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.12133058"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.82088388"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.89624298"/>
+          <Variable table="standard" var="one" coeff=".08258136"/>
+          <Variable table="persons" var="ag55t64" coeff="-.14440209"/>
+          <Variable table="persons" var="agge65" coeff="-.07550924"/>
+          <Variable table="households" var="incge75k" coeff=".2165752"/>
+          <Variable table="households" var="urb" coeff=".09535051"/>
+          <Variable table="persons" var="coled" coeff=".37447335"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.59051424"/>
+          <Variable table="runtime" var="int2t5p" coeff="-.59081167"/>
+          <Variable table="runtime" var="int5t7p" coeff=".23878287"/>
         </Alternative>
+
+        <Alternative id="meal" value="415">
+          <Variable table="runtime" var="one" coeff=".20600279"/>
+          <Variable table="runtime" var="maintenance_history" coeff="-.00064449"/>
+          <Variable table="persons" var="ag45t54" coeff=".23275827"/>
+          <Variable table="households" var="inclt35k" coeff="-.11947013"/>
+          <Variable table="persons" var="female" coeff="-.15189723"/>
+          <Variable table="persons" var="coled" coeff=".05648156"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.71977776"/>
+          <Variable table="runtime" var="int11t2p" coeff=".75578348"/>
+          <Variable table="runtime" var="int5t7p" coeff="1.0079389"/>
+        </Alternative>
+
         <Alternative id="other" value="599">
-	  <Variable table="persons" var="one" coeff="0.0"/>
+          <Variable table="standard" var="one" coeff="0.0"/>
         </Alternative>
+
+
       </Model>
 
 
@@ -834,203 +886,410 @@
 
 
       <Model name="DynamicNonMandatoryActivityTypeAdltNonWorkersWithSchool" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
-	<Filter1 table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-	<Filter1 table="persons" var="schstat" condition="equals" value="1"/>
         <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
 
-        <Alternative id="inhome" value="101">
-	  <Variable table="persons" var="one" coeff="1.35780088"/>
-	  <Variable table="persons_history_r" var="ih_history" coeff="-0.0021983"/>
-	  <Variable table="households" var="rur" coeff="-0.30936323"/>
-	  <Variable table="households" var="noc" coeff="0.31005112"/>
-	  <Variable table="runtime" var="int6t9" coeff="-0.1522595"/>
-        </Alternative>
-        <Alternative id="school" value="301">
-	  <Variable table="persons" var="one" coeff="-1.76047341"/>
-	  <Variable table="households" var="nwrkcnt" coeff="0.17714852"/>
-	  <Variable table="persons" var="female" coeff="0.11759558"/>
-	  <Variable table="runtime" var="int5t7" coeff="1.92881992"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.44513619"/>
-        </Alternative>
-        <Alternative id="perbus" value="411">
-	  <Variable table="persons" var="one" coeff="-0.03632979"/>
-	  <Variable table="persons" var="agge65" coeff="0.09562551"/>
-	  <Variable table="households" var="nwrkcnt" coeff="-0.07950503"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.13924825"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.42157681"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.42157681"/>
-        </Alternative>
-        <Alternative id="shop" value="412">
-	  <Variable table="persons" var="one" coeff="1.44151052"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.0007868"/>
-	  <Variable table="persons" var="female" coeff="0.08679929"/>
-	  <Variable table="runtime" var="int7t11" coeff="-0.21657411"/>
-	  <Variable table="runtime" var="int11t1" coeff="0.21657411"/>
-	  <Variable table="runtime" var="int1t3" coeff="0.28737182"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.28737182"/>
 
+        <Alternative id="inhome" value="101">
+          <Variable table="standard" var="one" coeff="2.74279288"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00233867"/>
+          <Variable table="households" var="rur" coeff="-.26120781"/>
+          <Variable table="persons" var="ag45t54" coeff=".26035446"/>
+          <Variable table="households" var="noc" coeff=".26813354"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.85312085"/>
+          <Variable table="runtime" var="int5t7p" coeff="-.19735821"/>
         </Alternative>
-        <Alternative id="meal" value="415">
-	  <Variable table="persons" var="one" coeff="0.01870962"/>
-	  <Variable table="persons" var="agge65" coeff="0.07675632"/>
-	  <Variable table="runtime" var="int9t12" coeff="0.10022359"/>
-	  <Variable table="runtime" var="int12t3" coeff="0.18117357"/>
-	  <Variable table="runtime" var="int5t7" coeff="1.21372947"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.18117357"/>
+
+        <Alternative id="school" value="301">
+          <Variable table="standard" var="one" coeff="-.30268794"/>
+          <Variable table="runtime" var="fixed_history" coeff=".00247586"/>
+          <Variable table="persons" var="ag25t34" coeff=".32200851"/>
+          <Variable table="households" var="inclt35k" coeff=".0747587"/>
+          <Variable table="households" var="nwrkcnt" coeff=".1446546"/>
+          <Variable table="persons" var="female" coeff=".13741645"/>
+          <Variable table="runtime" var="int8t11a" coeff="-1.07978831"/>
+          <Variable table="runtime" var="int11t2p" coeff="-1.58779432"/>
+          <Variable table="runtime" var="int2t5p" coeff="-1.6305172"/>
         </Alternative>
-        <Alternative1 id="srvpax" value="416">
-	  <Variable table="persons" var="one" coeff="-0.66837027"/>
-	  <Variable table="persons_history_r" var="maintenance_history" coeff="0.00183984"/>
-	  <Variable table="households" var="noc" coeff="0.55244886"/>
-	  <Variable table="persons" var="female" coeff="0.39197535"/>
-	  <Variable table="runtime" var="int6t9" coeff="1.11080902"/>
-	  <Variable table="runtime" var="int3t5" coeff="0.5343389"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.39662761"/>
-        </Alternative1>
+
+        <Alternative id="perbus" value="411">
+          <Variable table="standard" var="one" coeff=".1472918"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00103867"/>
+          <Variable table="persons" var="ag45t54" coeff=".24998587"/>
+          <Variable table="persons" var="agge65" coeff=".10211525"/>
+          <Variable table="households" var="nwrkcnt" coeff="-.07073217"/>
+          <Variable table="households" var="urb" coeff="-.14925279"/>
+          <Variable table="persons" var="coled" coeff=".0992252"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.30259874"/>
+          <Variable table="runtime" var="int2t5p" coeff="-.20435871"/>
+        </Alternative>
+
+        <Alternative id="shop" value="412">
+          <Variable table="standard" var="one" coeff="1.32676203"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00109782"/>
+          <Variable table="persons" var="ag45t54" coeff=".30881186"/>
+          <Variable table="households" var="incge50k" coeff="-.11961564"/>
+          <Variable table="persons" var="female" coeff=".05101292"/>
+          <Variable table="households" var="urb" coeff="-.11511187"/>
+          <Variable table="runtime" var="int11t2p" coeff=".75335632"/>
+          <Variable table="runtime" var="int2t5p" coeff=".50926423"/>
+        </Alternative>
+
         <Alternative id="social" value="513">
-	  <Variable table="persons" var="one" coeff="0.00642437"/>
-	  <Variable table="persons_history_r" var="discretionary_history" coeff="0.00200641"/>
-	  <Variable table="households" var="urb" coeff="-0.0918342"/>
-	  <Variable table="persons" var="coled" coeff="-0.11884188"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.12133058"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.83644531"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.52133058"/>
+          <Variable table="standard" var="one" coeff="-.07370901"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00275079"/>
+          <Variable table="persons" var="ag45t54" coeff=".20299677"/>
+          <Variable table="persons" var="ag35t44" coeff="-.10355239"/>
+          <Variable table="households" var="incge75k" coeff="-.07769936"/>
+          <Variable table="households" var="urb" coeff="-.11686185"/>
+          <Variable table="persons" var="coled" coeff="-.10169254"/>
+          <Variable table="runtime" var="int11t2p" coeff=".37168927"/>
+          <Variable table="runtime" var="int2t5p" coeff=".12871034"/>
+          <Variable table="runtime" var="int5t7p" coeff=".74762517"/>
         </Alternative>
+
         <Alternative id="sprec" value="514">
-	  <Variable table="persons" var="one" coeff="-0.38189096"/>
-	  <Variable table="persons_history_r" var="discretionary_history" coeff="-0.00076114"/>
-	  <Variable table="households" var="urb" coeff="0.15502139"/>
-	  <Variable table="persons" var="coled" coeff="0.41509007"/>
-	  <Variable table="runtime" var="int8t12" coeff="-0.12133058"/>
-	  <Variable table="runtime" var="int5t7" coeff="0.82088388"/>
-	  <Variable table="runtime" var="intaft7" coeff="0.89624298"/>
+          <Variable table="standard" var="one" coeff=".08258136"/>
+          <Variable table="persons" var="ag55t64" coeff="-.14440209"/>
+          <Variable table="persons" var="agge65" coeff="-.07550924"/>
+          <Variable table="households" var="incge75k" coeff=".2165752"/>
+          <Variable table="households" var="urb" coeff=".09535051"/>
+          <Variable table="persons" var="coled" coeff=".37447335"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.59051424"/>
+          <Variable table="runtime" var="int2t5p" coeff="-.59081167"/>
+          <Variable table="runtime" var="int5t7p" coeff=".23878287"/>
         </Alternative>
+
+        <Alternative id="meal" value="415">
+          <Variable table="runtime" var="one" coeff=".20600279"/>
+          <Variable table="runtime" var="maintenance_history" coeff="-.00064449"/>
+          <Variable table="persons" var="ag45t54" coeff=".23275827"/>
+          <Variable table="households" var="inclt35k" coeff="-.11947013"/>
+          <Variable table="persons" var="female" coeff="-.15189723"/>
+          <Variable table="persons" var="coled" coeff=".05648156"/>
+          <Variable table="runtime" var="int8t11a" coeff="-.71977776"/>
+          <Variable table="runtime" var="int11t2p" coeff=".75578348"/>
+          <Variable table="runtime" var="int5t7p" coeff="1.0079389"/>
+        </Alternative>
+
         <Alternative id="other" value="599">
-	  <Variable table="persons" var="one" coeff="0.0"/>
+          <Variable table="standard" var="one" coeff="0.0"/>
         </Alternative>
+
+
+
       </Model>
 
+      <Model name="DynamicNonMandatoryActivityTypeNonAdltWorkers" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
+        <DependentVariable var="activitytype"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="less than" value="18"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
 
+        <Alternative id="inhome" value="101">
+          <Variable table="standard" var="one" coeff="2.314935"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00326878"/>
+          <Variable table="households" var="noc" coeff=".06282644"/>
+          <Variable table="households" var="inclt35k" coeff="-.16776505"/>
+          <Variable table="runtime" var="int6t9a" coeff="-2.00025167"/>
+          <Variable table="runtime" var="int1t4p" coeff=".87023637"/>
+        </Alternative>
 
+        <Alternative id="work" value="201">
+          <Variable table="standard" var="one" coeff="-1.7896174"/>
+          <Variable table="runtime" var="ih_history" coeff="-.0008427"/>
+          <Variable table="persons" var="agge15" coeff="2.36252595"/>
+          <Variable table="households" var="nwrkcnt" coeff="-.29497727"/>
+          <Variable table="runtime" var="int1t4p" coeff=".52244829"/>
+          <Variable table="runtime" var="int4t7p" coeff=".39290886"/>
+        </Alternative>
 
+        <Alternative id="perbus" value="411">
+          <Variable table="standard" var="one" coeff="-.87095267"/>
+          <Variable table="persons" var="white" coeff=".5064938"/>
+          <Variable table="households" var="nwrkcnt" coeff="-.11331354"/>
+          <Variable table="persons" var="female" coeff="-.25420547"/>
+          <Variable table="households" var="incge100k" coeff="-.34843803"/>
+          <Variable table="runtime" var="int4t7p" coeff=".71114861"/>
+        </Alternative>
+
+        <Alternative id="shop" value="412">
+          <Variable table="standard" var="one" coeff=".21154929"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00312141"/>
+          <Variable table="persons" var="female" coeff=".26423271"/>
+          <Variable table="persons" var="agge15" coeff=".18139806"/>
+          <Variable table="runtime" var="int9t11a" coeff=".54387937"/>
+          <Variable table="runtime" var="int11t1p" coeff=".54880648"/>
+          <Variable table="runtime" var="int4t7p" coeff=".31895759"/>
+        </Alternative>
+
+        <Alternative id="social" value="513">
+          <Variable table="standard" var="one" coeff=".68831484"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00136309"/>
+          <Variable table="households" var="urb" coeff="-.13760585"/>
+          <Variable table="households" var="noc" coeff=".05770767"/>
+          <Variable table="runtime" var="int6t9a" coeff="-.89045713"/>
+          <Variable table="runtime" var="int1t4p" coeff=".10471978"/>
+          <Variable table="runtime" var="int4t7p" coeff=".27101811"/>
+        </Alternative>
+
+        <Alternative id="sprec" value="514">
+          <Variable table="standard" var="one" coeff=".66264958"/>
+          <Variable table="runtime" var="discretionary_history" coeff="-.00087568"/>
+          <Variable table="households" var="incge50k" coeff=".3047449"/>
+          <Variable table="persons" var="agge15" coeff="-.23579761"/>
+          <Variable table="runtime" var="int6t9a" coeff="-.50819419"/>
+          <Variable table="runtime" var="int4t7p" coeff=".73771072"/>
+          <Variable table="runtime" var="intaft7" coeff=".43275512"/>
+        </Alternative>
+
+        <Alternative id="meal" value="415">
+          <Variable table="standard" var="one" coeff="-.20461019"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00302733"/>
+          <Variable table="households" var="inclt35k" coeff="-.88700806"/>
+          <Variable table="persons" var="white" coeff=".26857059"/>
+          <Variable table="runtime" var="int11t1p" coeff=".67503287"/>
+          <Variable table="runtime" var="int4t7p" coeff=".24162776"/>
+        </Alternative>
+
+        <Alternative id="other" value="599">
+          <Variable table="standard" var="one" coeff="0.0"/>
+        </Alternative>
+
+      </Model>
+
+      <Model name="DynamicNonMandatoryActivityTypeNonAdltWithNOWork" formulation="Multinomial Logit" type="Alternative Specific" seed="1">
+	<!-- Model Updated-->
+        <DependentVariable var="activitytype"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="less than" value="18"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+
+        <Alternative id="inhome" value="101">
+          <Variable table="standard" var="one" coeff="2.314935"/>
+          <Variable table="runtime" var="ih_history" coeff="-.00326878"/>
+          <Variable table="households" var="noc" coeff=".06282644"/>
+          <Variable table="households" var="inclt35k" coeff="-.16776505"/>
+          <Variable table="runtime" var="int6t9a" coeff="-2.00025167"/>
+          <Variable table="runtime" var="int1t4p" coeff=".87023637"/>
+        </Alternative>
+
+        <Alternative id="perbus" value="411">
+          <Variable table="standard" var="one" coeff="-.87095267"/>
+          <Variable table="persons" var="white" coeff=".5064938"/>
+          <Variable table="households" var="nwrkcnt" coeff="-.11331354"/>
+          <Variable table="persons" var="female" coeff="-.25420547"/>
+          <Variable table="households" var="incge100k" coeff="-.34843803"/>
+          <Variable table="runtime" var="int4t7p" coeff=".71114861"/>
+        </Alternative>
+
+        <Alternative id="shop" value="412">
+          <Variable table="standard" var="one" coeff=".21154929"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00312141"/>
+          <Variable table="persons" var="female" coeff=".26423271"/>
+          <Variable table="persons" var="agge15" coeff=".18139806"/>
+          <Variable table="runtime" var="int9t11a" coeff=".54387937"/>
+          <Variable table="runtime" var="int11t1p" coeff=".54880648"/>
+          <Variable table="runtime" var="int4t7p" coeff=".31895759"/>
+        </Alternative>
+
+        <Alternative id="social" value="513">
+          <Variable table="standard" var="one" coeff=".68831484"/>
+          <Variable table="runtime" var="discretionary_history" coeff=".00136309"/>
+          <Variable table="households" var="urb" coeff="-.13760585"/>
+          <Variable table="households" var="noc" coeff=".05770767"/>
+          <Variable table="runtime" var="int6t9a" coeff="-.89045713"/>
+          <Variable table="runtime" var="int1t4p" coeff=".10471978"/>
+          <Variable table="runtime" var="int4t7p" coeff=".27101811"/>
+        </Alternative>
+
+        <Alternative id="sprec" value="514">
+          <Variable table="standard" var="one" coeff=".66264958"/>
+          <Variable table="runtime" var="discretionary_history" coeff="-.00087568"/>
+          <Variable table="households" var="incge50k" coeff=".3047449"/>
+          <Variable table="persons" var="agge15" coeff="-.23579761"/>
+          <Variable table="runtime" var="int6t9a" coeff="-.50819419"/>
+          <Variable table="runtime" var="int4t7p" coeff=".73771072"/>
+          <Variable table="runtime" var="intaft7" coeff=".43275512"/>
+        </Alternative>
+
+        <Alternative id="meal" value="415">
+          <Variable table="standard" var="one" coeff="-.20461019"/>
+          <Variable table="runtime" var="maintenance_history" coeff=".00302733"/>
+          <Variable table="households" var="inclt35k" coeff="-.88700806"/>
+          <Variable table="persons" var="white" coeff=".26857059"/>
+          <Variable table="runtime" var="int11t1p" coeff=".67503287"/>
+          <Variable table="runtime" var="int4t7p" coeff=".24162776"/>
+        </Alternative>
+
+        <Alternative id="other" value="599">
+          <Variable table="standard" var="one" coeff="0.0"/>
+        </Alternative>
+
+      </Model>
 
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_300"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="300"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_101"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_411"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="411"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_412"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="412"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_415"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="415"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_513"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="513"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="ActivityTypeInd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype_514"/>
         <FilterSet type="and"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="514"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
-      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Linear" vertex="start" lower_threshold="5" upper_threshold="240" seed="1">
+      <Model name="DynamicNonMandatoryActDurationAdltWrkr" formulation="Regression" type="Linear" vertex="start" lower_threshold="5" upper_threshold="195" seed="1">
+	<!-- Model Updated-->
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-	<Variance value="3828.16"/>
-        <Variable table="persons" var="one" coeff="35.2320375"/>
-        <Variable table="runtime" var="activitytype_101" coeff="61.9522598"/>
-        <Variable table="runtime" var="activitytype_300" coeff="93.2930478"/>
-        <Variable table="runtime" var="activitytype_411" coeff="17.2107539"/>
-        <Variable table="runtime" var="activitytype_412" coeff="-3.50209937"/>
-        <Variable table="runtime" var="activitytype_513" coeff="43.0557726"/>
-        <Variable table="runtime" var="activitytype_514" coeff="28.8453707"/>
-        <Variable table="runtime" var="activitytype_415" coeff="12.0965365"/>
-        <Variable table="households" var="noc" coeff="-4.04182965"/>
-        <Variable table="persons" var="fulltim" coeff="-10.4187699"/>
-        <Variable table="households" var="nwrkcnt" coeff="2.60399885"/>
-        <Variable table="persons" var="male" coeff="4.62151917"/>
-        <Variable table="households,runtime" var="inclt35k,activitytype_101" coeff="13.2994711" interaction="True"/>
-        <Variable table="households,runtime" var="inclt35k,activitytype_415" coeff="-9.95067098" interaction="True"/>
-        <Variable table="households,runtime" var="urb,activitytype_513" coeff="11.3863102" interaction="True"/>
-        <Variable table="runtime,runtime" var="int5t7,activitytype_101" coeff="-32.6476255" interaction="True"/>
-        <Variable table="runtime,runtime" var="int5t7,activitytype_513" coeff="10.2990331" interaction="True"/>
-        <Variable table="runtime,runtime" var="int5t7,activitytype_514" coeff="12.2157451" interaction="True"/>
-        <Variable table="runtime" var="int6t9" coeff="-8.66184769"/>
-        <Variable table="runtime" var="int3t5" coeff="-7.82162385"/>
-        <Variable table="runtime" var="intaft7" coeff="-14.8278847"/>
+        <Variance value="5369.81"/>
+        <Variable table="standard" var="one" coeff="131.625487"/>
+        <Variable table="runtime" var="activitytype_101" coeff="-41.6038946"/>
+        <Variable table="runtime" var="activitytype_411" coeff="-80.6892829"/>
+        <Variable table="runtime" var="activitytype_412" coeff="-99.8244044"/>
+        <Variable table="runtime" var="activitytype_513" coeff="-42.2815739"/>
+        <Variable table="runtime" var="activitytype_514" coeff="-79.2174112"/>
+        <Variable table="runtime" var="activitytype_415" coeff="-96.5982111"/>
+        <Variable table="households" var="noc" coeff="-2.41217847"/>
+        <Variable table="persons" var="fulltim" coeff="-8.42713568"/>
+        <Variable table="households" var="nwrkcnt" coeff="2.56065041"/>
+        <Variable table="persons" var="male" coeff="4.4859756"/>
+        <Variable table="persons" var="ag18t24" coeff="19.5954666"/>
+        <Variable table="persons" var="ag25t34" coeff="5.0466676"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_101" coeff="14.3992299" interaction="True"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_415" coeff="-8.40108885" interaction="True"/>
+        <Variable table="runtime,runtime" var="int11t1p,activitytype_415" coeff="13.6997715" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_514" coeff="34.4748893" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_415" coeff="22.5312065" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7p,activitytype_101" coeff="-24.2318882" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7p,activitytype_514" coeff="24.8182848" interaction="True"/>
+        <Variable table="runtime,runtime" var="int5t7p,activitytype_415" coeff="23.9427585" interaction="True"/>
+        <Variable table="runtime" var="int11t1p" coeff="-8.35650154"/>
+        <Variable table="runtime" var="int3t5p" coeff="-13.2445027"/>
+        <Variable table="runtime" var="int5t7p" coeff="-6.39737168"/>
+        <Variable table="runtime" var="intaft7" coeff="-17.274548"/>
       </Model>
 
 
-      <Model name="DynamicNonMandatoryActDuration" formulation="Regression" type="Linear" vertex="start" lower_threshold="5" upper_threshold="285" seed="1">
+      <Model name="DynamicNonMandatoryActDurationAdltNonWorker" formulation="Regression" type="Linear" vertex="start" lower_threshold="5" upper_threshold="300" seed="1">
+	<!-- Model Updated-->
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-	<Variance value="8616.69"/>
-        <Variable table="persons" var="one" coeff="71.0550183"/>
-        <Variable table="runtime" var="activitytype_101" coeff="106.762349"/>
-        <Variable table="runtime" var="activitytype_300" coeff="102.911163"/>
-        <Variable table="runtime" var="activitytype_411" coeff="8.97340339"/>
-        <Variable table="runtime" var="activitytype_412" coeff="-21.8506606"/>
-        <Variable table="runtime" var="activitytype_513" coeff="65.998347"/>
-        <Variable table="runtime" var="activitytype_514" coeff="22.8244871"/>
-        <Variable table="persons" var="coled" coeff="-4.97512841"/>
-        <Variable table="households" var="noc" coeff="-1.8563377"/>
-        <Variable table="persons" var="white" coeff="-6.79567961"/>
-        <Variable table="households,runtime" var="urb,activitytype_513" coeff="8.10740547" interaction="True"/>
-        <Variable table="runtime,runtime" var="int3t5,activitytype_101" coeff="-31.7003614" interaction="True"/>
-        <Variable table="runtime,runtime" var="int3t5,activitytype_412" coeff="21.2071348" interaction="True"/>
-        <Variable table="runtime,runtime" var="int3t5,activitytype_514" coeff="14.0552971" interaction="True"/>
-        <Variable table="runtime,runtime" var="int3t5,activitytype_415" coeff="18.5550053" interaction="True"/>
-        <Variable table="runtime" var="int6t9" coeff="22.5220103"/>
-        <Variable table="runtime" var="int12t3" coeff="-15.6769728"/>
-        <Variable table="runtime" var="int3t5" coeff="-33.6768289"/>
-        <Variable table="runtime" var="int5t7" coeff="-25.9519802"/>
-        <Variable table="runtime" var="intaft7" coeff="-37.9015575"/>
+        <Variance value="8178.49"/>
+        <Variable table="standard" var="one" coeff="108.01977"/>
+        <Variable table="runtime" var="activitytype_101" coeff="73.3042178"/>
+        <Variable table="runtime" var="activitytype_300" coeff="62.4170744"/>
+        <Variable table="runtime" var="activitytype_411" coeff="-25.8765097"/>
+        <Variable table="runtime" var="activitytype_412" coeff="-61.6866884"/>
+        <Variable table="runtime" var="activitytype_513" coeff="33.1937557"/>
+        <Variable table="runtime" var="activitytype_514" coeff="-14.7802881"/>
+        <Variable table="runtime" var="activitytype_415" coeff="-34.4164686"/>
+        <Variable table="persons" var="coled" coeff="-4.59962578"/>
+        <Variable table="persons" var="white" coeff="-6.58317344"/>
+        <Variable table="persons" var="ag18t24" coeff="31.4186235"/>
+        <Variable table="persons" var="ag25t34" coeff="8.38296723"/>
+        <Variable table="households" var="noc" coeff="-.75023389"/>
+        <Variable table="households" var="incge75k" coeff="1.65825795"/>
+        <Variable table="households,runtime" var="urb,activitytype_513" coeff="6.44006912" interaction="True"/>
+        <Variable table="runtime,runtime" var="int1t3p,activitytype_101" coeff="-5.24346456" interaction="True"/>
+        <Variable table="runtime,runtime" var="int1t3p,activitytype_411" coeff="11.3718155" interaction="True"/>
+        <Variable table="runtime,runtime" var="int1t3p,activitytype_412" coeff="26.4334077" interaction="True"/>
+        <Variable table="runtime,runtime" var="int1t3p,activitytype_513" coeff="-10.0381981" interaction="True"/>
+        <Variable table="runtime,runtime" var="int1t3p,activitytype_514" coeff="29.2572021" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_101" coeff="-29.3321661" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_411" coeff="13.642396" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_412" coeff="33.9794783" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_514" coeff="24.8477314" interaction="True"/>
+        <Variable table="runtime,runtime" var="int3t5p,activitytype_415" coeff="27.0655937" interaction="True"/>
+        <Variable table="runtime" var="int11t1p" coeff="-11.0496402"/>
+        <Variable table="runtime" var="int1t3p" coeff="-36.1609303"/>
+        <Variable table="runtime" var="int3t5p" coeff="-46.969311"/>
+        <Variable table="runtime" var="int5t7p" coeff="-29.5808211"/>
+
+      </Model>
+
+      <Model name="DynamicNonMandatoryActDurationNonAdlt" formulation="Regression" type="Linear" vertex="start" lower_threshold="5" upper_threshold="265" seed="1">
+	<!-- Model Updated-->
+	<DependentVariable var="duration"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="less than" value="18"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+        <Variance value="7161.37"/>
+        <Variable table="standard" var="one" coeff="102.647821"/>
+        <Variable table="runtime" var="activitytype_101" coeff="47.4244126"/>
+        <Variable table="runtime" var="activitytype_200" coeff="139.591903"/>
+        <Variable table="runtime" var="activitytype_412" coeff="-35.5549197"/>
+        <Variable table="runtime" var="activitytype_513" coeff="28.6597514"/>
+        <Variable table="runtime" var="activitytype_514" coeff="27.5828811"/>
+        <Variable table="runtime" var="activitytype_415" coeff="-29.001621"/>
+        <Variable table="persons" var="white" coeff="-9.1106919"/>
+        <Variable table="persons" var="ag5t14" coeff="-7.05386769"/>
+        <Variable table="households,runtime" var="inclt35k,activitytype_513" coeff="23.2586383" interaction="True"/>
+        <Variable table="households,runtime" var="incge75k,activitytype_101" coeff="-10.8316234" interaction="True"/>
+        <Variable table="households,runtime" var="incge75k,activitytype_513" coeff="14.8203078" interaction="True"/>
+        <Variable table="households,runtime" var="incge75k,activitytype_514" coeff="10.7005153" interaction="True"/>
+        <Variable table="runtime,runtime" var="int2t4p,activitytype_513" coeff="14.5645106" interaction="True"/>
+        <Variable table="runtime,runtime" var="int4t7p,activitytype_101" coeff="-22.7837485" interaction="True"/>
+        <Variable table="runtime,runtime" var="int4t7p,activitytype_412" coeff="20.0793056" interaction="True"/>
+        <Variable table="runtime,runtime" var="int4t7p,activitytype_415" coeff="24.4425187" interaction="True"/>
+        <Variable table="runtime" var="int2t4p" coeff="-29.8069323"/>
+        <Variable table="runtime" var="int4t7p" coeff="-45.4598576"/>
+        <Variable table="runtime" var="intaft7" coeff="-56.3683376"/>
 
       </Model>
 
@@ -1038,7 +1297,6 @@
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="less than" value="200"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="100"/>
@@ -1049,7 +1307,6 @@
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="less than" value="400"/>
 	<Filter table="runtime" var="activitytype" condition="greater than equals" value="300"/>
@@ -1058,44 +1315,87 @@
       </Model>
 
 
-      <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
+      <Model name="DynamicLocationIDOHActsAdltWrkr" formulation="Multinomial Logit" seed="1">
+	<!-- Model Updated-->
         <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="1"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-        <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.1753" interaction="True" repeat="tt_to"/>
-        <Variable table="persons,locations" var="one,retail_employment" coeff=".0006" interaction="True" repeat="retail_employment"/>
-        <Variable table="persons,locations" var="one,public_employment" coeff=".0003" interaction="True" repeat="public_employment"/>
-        <Variable table="persons,locations" var="one,institutional_population" coeff=".0014" interaction="True" repeat="institutional_population"/>
-        <Variable table="persons,locations" var="one,total_area" coeff=".0494" interaction="True" repeat="total_area"/>
-        <Variable table="persons,travel_skims" var="female,tt_to" coeff="-.0203" interaction="True" repeat="tt_to"/>
-        <Variable table="households,travel_skims" var="noc,tt_to" coeff="-.0159" interaction="True" repeat="tt_to"/>
-        <Variable table="persons,locations" var="one,single_family_dwelling" coeff=".0003" interaction="True" repeat="single_family_dwelling"/>	
+        <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.16188774" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,retail_employment" coeff=".00068035" interaction="True" repeat="retail_employment"/>
+        <Variable table="persons,locations" var="one,office_employment" coeff=".00013751" interaction="True" repeat="office_employment"/>
+        <Variable table="persons,locations" var="one,institutional_population" coeff=".00187395" interaction="True" repeat="institutional_population"/>
+        <Variable table="households,travel_skims" var="withchild,tt_to" coeff="-.02202905" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,travel_skims" var="white,tt_to" coeff="-.02686166" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,lowest_income" coeff="-.00115045" interaction="True" repeat="lowest_income"/>
+        <Variable table="persons,locations" var="one,high_income" coeff=".00209443" interaction="True" repeat="high_income"/>
+        <Variable table="persons,locations" var="one,groupquarter_households" coeff=".00400169" interaction="True" repeat="groupquarter_households"/>
+        <Variable table="households,travel_skims" var="twnhouse,tt_to" coeff="-.04698083" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,runtime" var="one,retail_employment_density" coeff="-.00011531" interaction="True" repeat="retail_employment_density"/>
+        <Variable table="persons,runtime" var="one,office_employment_density" coeff=".00001326" interaction="True" repeat="office_employment_density"/>
+        <Variable table="runtime,travel_skims" var="int9t11a,tt_to" coeff="-.04264572" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="int11t1p,tt_to" coeff="-.10841376" interaction="True" repeat="tt_to"/>
       </Model>
-      <Model name="DynamicLocationIDOHActs" formulation="Multinomial Logit" seed="1">
+
+      <Model name="DynamicLocationIDOHActsAdltNonWorker" formulation="Multinomial Logit" seed="1">
+	<!-- Model Updated-->
         <AlternativeSet count="5"/>
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="persons" var="wrkr" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-        <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.2123" interaction="True" repeat="tt_to"/>
-        <Variable table="persons,locations" var="one,retail_employment" coeff=".0005" interaction="True" repeat="retail_employment"/>
-        <Variable table="persons,locations" var="one,institutional_population" coeff=".0012" interaction="True" repeat="institutional_population"/>
-        <Variable table="persons,locations" var="one,residential_population" coeff="-.0002" interaction="True" repeat="residential_population"/>
-        <Variable table="persons,locations" var="one,total_area" coeff=".0419" interaction="True" repeat="total_area"/>
-        <Variable table="persons,travel_skims" var="female,tt_to" coeff="-.0166" interaction="True" repeat="tt_to"/>
-        <Variable table="households,travel_skims" var="noc,tt_to" coeff="-.0423" interaction="True" repeat="tt_to"/>
-        <Variable table="households,travel_skims" var="inclt35k,tt_to" coeff="-.0232" interaction="True" repeat="tt_to"/>
-        <Variable table="households_vehicles_count_r,travel_skims" var="vehcount,tt_to" coeff=".0136" interaction="True" repeat="tt_to"/>
-        <Variable table="persons,locations" var="one,single_family_dwelling" coeff=".0008" interaction="True" repeat="single_family_dwelling"/>
-        <Variable table="persons,locations" var="one,multi_family_dwelling" coeff=".0006" interaction="True" repeat="multi_family_dwelling"/>
+        <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.17307478" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_411,tt_to" coeff="-.02426673" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.10329537" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_514,tt_to" coeff="-.07553901" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_415,tt_to" coeff="-.05903244" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,retail_employment" coeff=".00063703" interaction="True" repeat="retail_employment"/>
+        <Variable table="persons,locations" var="one,total_area" coeff=".03955772" interaction="True" repeat="total_area"/>
+        <Variable table="households,travel_skims" var="inclt35k,tt_to" coeff="-.02909125" interaction="True" repeat="tt_to"/>
+        <Variable table="households_vehicles_count_r,travel_skims" var="vehcount,tt_to" coeff=".01277594" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,travel_skims" var="female,tt_to" coeff="-.02839005" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,high_income" coeff=".0003308" interaction="True" repeat="high_income"/>
+        <Variable table="persons,locations" var="one,institutional_population" coeff=".00176955" interaction="True" repeat="institutional_population"/>
+        <Variable table="persons,travel_skims" var="ag18t24,tt_to" coeff="-.03597208" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,travel_skims" var="ag25t34,tt_to" coeff=".03025569" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,travel_skims" var="agge65,tt_to" coeff="-.01976454" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,residential_households" coeff=".00017351" interaction="True" repeat="residential_households"/>
+        <Variable table="persons,runtime" var="one,public_employment_density" coeff=".0000411" interaction="True" repeat="public_employment_density"/>
+        <Variable table="persons,runtime" var="one,retail_employment_density" coeff="-.00004" interaction="True" repeat="retail_employment_density"/>
+        <Variable table="runtime,travel_skims" var="int9t11a,tt_to" coeff=".02221426" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="int11t1p,tt_to" coeff=".01909242" interaction="True" repeat="tt_to"/>
+
+      </Model>
+
+
+      <Model name="DynamicLocationIDOHActsNonAdlt" formulation="Multinomial Logit" seed="1">
+	<!-- Model Updated-->
+        <AlternativeSet count="5"/>
+	<DependentVariable var="locationid"/>
+	<FilterSet type="and"/>
+	<Filter table="persons" var="age" condition="less than" value="18"/>
+	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+        <Variable table="persons,travel_skims" var="one,tt_to" coeff="-.13787556" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.03717037" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_514,tt_to" coeff="-.0420764" interaction="True" repeat="tt_to"/>
+        <Variable table="runtime,travel_skims" var="activitytype_415,tt_to" coeff="-.18287555" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,retail_employment" coeff=".00045979" interaction="True" repeat="retail_employment"/>
+        <Variable table="persons,locations" var="one,total_area" coeff=".05192972" interaction="True" repeat="total_area"/>
+        <Variable table="households,travel_skims" var="inclt35k,tt_to" coeff="-.06092847" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,locations" var="one,low_income" coeff="-.00093146" interaction="True" repeat="low_income"/>
+        <Variable table="persons,locations" var="one,high_income" coeff=".00165003" interaction="True" repeat="high_income"/>
+        <Variable table="households,travel_skims" var="rur,tt_to" coeff="-.09980193" interaction="True" repeat="tt_to"/>
+        <Variable table="persons,runtime" var="one,other_employment_density" coeff=".00008159" interaction="True" repeat="other_employment_density"/>
+        <Variable table="persons,runtime" var="one,retail_employment_density" coeff=" -.00016987" interaction="True" repeat="retail_employment_density"/>
+        <Variable table="persons,runtime" var="one,office_employment_density" coeff="-.00002314" interaction="True" repeat="office_employment_density"/>
+        <Variable table="persons,travel_skims" var="agge15,tt_to" coeff="-.06024264" interaction="True" repeat="tt_to"/>
+        <Variable table="households,travel_skims" var="noc,tt_to" coeff=".00012078" interaction="True" repeat="tt_to"/>
       </Model>
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_from_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
@@ -1111,7 +1411,6 @@
       <Model name="TTFrom" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="tt_from"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -1121,19 +1420,17 @@
       <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
- 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
@@ -1141,19 +1438,18 @@
  	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="runtime" var="tt_to" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="travel_skims" var="tt_to" coeff="1"/>
       </Model>
@@ -1161,12 +1457,11 @@
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="travel_skims" var="tt_to" coeff="1"/>
       </Model>
@@ -1175,12 +1470,11 @@
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="runtime" var="tt_home" coeff="1"/>
       </Model>
@@ -1188,7 +1482,6 @@
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="starttime" coeff="1"/>
@@ -1198,31 +1491,28 @@
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="en_starttime" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="-1"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
       <Model name="DependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="TempActivityTravelEnd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytravelend"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="tt_from" coeff="1"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
 
@@ -1234,25 +1524,24 @@
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripcount"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
 	<FilterSet type="and"/>
-	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="0"/>
 	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="-1"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
@@ -1282,7 +1571,7 @@
       <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="repeat"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="FirstScheduleId" formulation="Regression" type="Linear" seed="1">
@@ -1298,7 +1587,7 @@
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="100"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="invalidprismflag" formulation="Regression" type="Linear" seed="1">
@@ -1308,7 +1597,7 @@
 	<Filter table="runtime" var="en_dependentpersonid" condition="less than" value="99"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
@@ -1330,7 +1619,7 @@
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
@@ -1342,12 +1631,10 @@
 	<DependentVariable var="repeat"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="less than equals" value="2"/>
-	<Filter1 table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="runtime" var="invalidprismflag" condition="equals" value="0"/>
 	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="0"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
       </Model>
 
@@ -1381,7 +1668,7 @@
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="100"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="invalidprismflag" formulation="Regression" type="Linear" seed="1">
@@ -1391,14 +1678,14 @@
 	<Filter table="runtime" var="en_dependentpersonid" condition="less than" value="99"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
       <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="repeat"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" after_model="repeat" before_model="prismdur">
@@ -1423,7 +1710,7 @@
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
@@ -1434,7 +1721,7 @@
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
@@ -1444,7 +1731,7 @@
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
@@ -1455,7 +1742,7 @@
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="TravelTimeRecode" formulation="Regression" type="Linear" seed="1">
@@ -1465,7 +1752,7 @@
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
@@ -1475,7 +1762,7 @@
 	<DependentVariable var="adjfactor"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0.5"/>
+        <Variable table="standard" var="one" coeff="0.5"/>
       </Model>
 
 
@@ -1488,7 +1775,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the adjustment factor -->
@@ -1499,7 +1786,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the adjustment factor -->
@@ -1510,7 +1797,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
@@ -1523,7 +1810,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
@@ -1536,7 +1823,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="less than" value="500"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
@@ -1549,7 +1836,7 @@
 	<Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
@@ -1561,7 +1848,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="equals" value="100"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="RandomAdjustmentFactorRecode" formulation="Regression" type="Linear" seed="1">
@@ -1575,7 +1862,7 @@
 	<Filter table="runtime" var="en_activitytype" condition="not equals" value="598"/>
 	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
 
@@ -1626,7 +1913,7 @@
 	<Filter table="runtime" var="prismdur" condition="greater than equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
 
@@ -1655,7 +1942,7 @@
 	<Filter table="runtime" var="tt_to" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
@@ -1736,7 +2023,7 @@
 	<FilterSet type="or"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
@@ -1824,12 +2111,10 @@
 	<DependentVariable var="repeat"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="less than equals" value="2"/>
-	<Filter1 table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter1 table="runtime" var="invalidprismflag" condition="equals" value="0"/>
 	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="0"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
       </Model>
 
@@ -1918,19 +2203,19 @@
         <Model name="VehicleID" formulation="Regression" type="Linear" seed="1">
 	  <DependentVariable var="vehid"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
         <Model name="ModeChoice" formulation="Probability Distribution" seed="1">
           <DependentVariable var="tripmode"/>
 
           <Alternative id="SOV" value="1">
-            <Variable table="persons" var="one" coeff="0.0"/>
+            <Variable table="standard" var="one" coeff="0.0"/>
           </Alternative>
           <Alternative id="HOVD" value="2">
-            <Variable table="persons" var="one" coeff="0.0"/>
+            <Variable table="standard" var="one" coeff="0.0"/>
           </Alternative>
           <Alternative id="HOVP" value="3">
-            <Variable table="persons" var="one" coeff="1.0"/>
+            <Variable table="standard" var="one" coeff="1.0"/>
           </Alternative>
         </Model>
         <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
@@ -1976,7 +2261,7 @@
 	  <DependentVariable var="tripind"/>
 	  <Filter table="runtime" var="st_locationid" condition="not equals" valuetable="runtime" valuevar="en_locationid"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="31">
@@ -1989,7 +2274,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="greater than equals" value="200"/>
 	  <Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2003,7 +2288,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="600"/>
 	  <Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2017,7 +2302,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="less than" value="200"/>
 	  <Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
 
@@ -2032,7 +2317,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="600"/>
 	  <Filter table="runtime" var="duration" condition="greater than equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2045,7 +2330,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="601"/>
 	  <Filter1 table="runtime" var="duration" condition="greater than equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2058,7 +2343,7 @@
 	  <Filter table="runtime" var="en_activitytype" condition="greater than equals" value="450"/>
 	  <Filter table="runtime" var="en_activitytype" condition="less than equals" value="499"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the valid trip -->
@@ -2070,7 +2355,7 @@
 	  <Filter table="runtime" var="st_activitytype" condition="less than equals" value="499"/>
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="600"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
 
@@ -2084,7 +2369,7 @@
 	  <Filter table="runtime" var="st_activitytype" condition="equals" value="200"/>
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="200"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2097,7 +2382,7 @@
 	  <Filter table="runtime" var="st_activitytype" condition="equals" value="600"/>
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="151"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
 
 
@@ -2110,7 +2395,7 @@
 	  <Filter table="runtime" var="st_locationid" condition="equals" valuetable="runtime" valuevar="en_locationid"/>
 	  <Filter table="runtime" var="st_activitytype" condition="equals" value="598"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2121,7 +2406,7 @@
           <FilterSet type="and"/>
           <Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="1"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
 
@@ -2167,7 +2452,7 @@
 	  <Filter table="runtime" var="trippurposefrom" condition="not equals" value="601"/>
 	  <Filter table="current_occupancy_r" var="occupancy" condition="equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
         <Model name="occupancy_d" formulation="Regression" type="Linear" seed="1">
 	<!-- Model Description: Recode the occupancy -->
@@ -2190,7 +2475,7 @@
 	  <Filter table="runtime" var="trippurposefrom" condition="equals" value="600"/>
 	  <Filter table="current_occupancy_r" var="occupancy" condition="equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
           <Variable table="runtime" var="pickupcount" coeff="1"/>
         </Model>
         <Model name="occupancy_d" formulation="Regression" type="Linear" seed="1">
@@ -2261,7 +2546,7 @@
           <FilterSet type="and"/>
 	  <Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
         </Model>
 
 
@@ -2300,7 +2585,7 @@
 	  <Filter table="runtime" var="st_dependentpersonid" condition="equals" value="99"/>
 	  <Filter table="runtime" var="en_dependentpersonid" condition="equals" value="99"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="2"/>
+          <Variable table="standard" var="one" coeff="2"/>
         </Model>
 
         <Model name="validtrip" formulation="Regression" type="Linear" seed="1">
@@ -2311,7 +2596,7 @@
           <FilterSet type="and"/>
 	  <Filter table="runtime" var="tripwithhhmember" condition="equals" value="0"/>
 	  <Variance value="0"/>
-          <Variable table="persons" var="one" coeff="0"/>
+          <Variable table="standard" var="one" coeff="0"/>
         </Model>
 
         <Model name="CurrOccTripID" formulation="Regression" type="Linear" seed="1">
@@ -2378,6 +2663,7 @@
 
       <Model name="tripcount" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripcount"/>
+	<Filter table="trips_r" var="tripind" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="starttripcount" coeff="1"/>
       </Model>
@@ -2402,14 +2688,14 @@
 	<DependentVariable var="tripvalid"/>
 	<Filter table="persons_location_r" var="location" condition="equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="tripvalid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripvalid"/>
 	<Filter table="persons_location_r" var="location" condition="not equals" valuetable="persons_leaving_id_r" valuevar="fromzone"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
 
@@ -2428,7 +2714,7 @@
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="persons_location_r" var="lasttripcount" condition="not equals" value="-99"/>
 	<Filter table="runtime" var="tripcountdiff" condition="greater than equals" value="2"/>
-        <Variable table="persons" var="one" coeff="-1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
       <Model name="tripstarttime" formulation="Regression" type="Linear" seed="1">
@@ -2829,7 +3115,7 @@
 	<Filter table="trips_r" var="tripind" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="starttime" coeff="1"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
     </Component>
@@ -2977,7 +3263,7 @@
 	<DependentVariable var="lasttripcount"/>
 	<Variance value="0"/>
         <Variable table="persons_leaving_valid_trips_id_r" var="tripcount" coeff="0"/>
-        <Variable table="persons" var="one" coeff="-99"/>
+        <Variable table="standard" var="one" coeff="-99"/>
       </Model>
 
       <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
@@ -3062,37 +3348,37 @@
       <Model name="trippurposefrom" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="trippurposefrom"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="dependentpersonid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripwithhhmember"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="occupancy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="occupancy"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="lasttripdependentpersonid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="lasttripdependentpersonid"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="lastoccupancy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="lastoccupancy"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="tripind" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
@@ -3185,7 +3471,7 @@
 	<DependentVariable var="persononnetworkflag"/>
 	<Filter table="trips_r" var="tripwithhhmember" condition="equals" value="1"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="one" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
 
