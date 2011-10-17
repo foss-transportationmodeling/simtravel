@@ -36,6 +36,32 @@ class LogLinearRegressionModel(LinearRegressionModel):
         #exp_pred_value = exp(pred_value)
         pred_value = ne.evaluate("exp(ln_pred_value)")
 
+	# upper threshold - lower threshold is assumed to be 2 sd
+	# scattering the points at lower threshold/upper threshold dispersed by 
+	# a half normal distribution with a sd as calculated above as the size
+
+
+	standDev = (self.error_specification.upper_threshold - 
+		    self.error_specification.lower_threshold)/2
+	#print 'lower threshold - ', self.error_specification.lower_threshold
+	#print 'upper threshold - ', self.error_specification.upper_threshold
+	#print 'sd - ', self.error_specification.upper_threshold
+	
+
+	lowerLimit = self.error_specification.lower_threshold - standDev
+	upperLimit = self.error_specification.lower_threshold + standDev
+
+	if lowerLimit < 5:
+	    lowerLimit = 5
+
+	if upperLimit > 1435:
+	    upperLimit = 1435
+
+	#print 'lower limit ', lowerLimit
+	#print 'upper limit', upperLimit
+	#raw_input()
+
+
 	if self.error_specification.lower_threshold >0:
 	    threshold = self.error_specification.lower_threshold
 	    predValue_lessThresholdInd = pred_value < threshold
@@ -46,7 +72,7 @@ class LogLinearRegressionModel(LinearRegressionModel):
             pred_value[predValue_lessThresholdInd] = threshold
 	    #print 'Lower; Before', pred_value[predValue_lessThresholdInd]
 	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, 5, seed, size)
+	    smoothingErr = self.calc_halfnormal_error(threshold, lowerLimit, seed, size)
 	    #print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
 	    pred_value[predValue_lessThresholdInd] -= smoothingErr
 	    #print 'Lower; After', pred_value[predValue_lessThresholdInd]
@@ -62,7 +88,7 @@ class LogLinearRegressionModel(LinearRegressionModel):
             pred_value[predValue_moreThresholdInd] = threshold
 	    #print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
 	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, 1435, seed, size)
+	    smoothingErr = self.calc_halfnormal_error(threshold, upperLimit, seed, size)
 	    #print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
 	    pred_value[predValue_moreThresholdInd] += smoothingErr
 	    #print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
