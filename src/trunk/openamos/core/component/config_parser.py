@@ -49,6 +49,7 @@ from openamos.core.models.population_synthesis_model_components import PopGenMod
 from openamos.core.models.reconcile_schedules import ReconcileSchedules
 from openamos.core.models.child_dependency_processing import ChildDependencyProcessing
 from openamos.core.models.clean_fixed_activity_schedule import CleanFixedActivitySchedule
+from openamos.core.models.identify_individual_attributes import IdentifyIndividualAttributes
 from openamos.core.models.clean_aggregate_activity_schedule import CleanAggregateActivitySchedule
 from openamos.core.models.population_evolution_processing import PopulationEvolutionProcessing
 from openamos.core.models.trip_occupant_processing import TripOccupantProcessing
@@ -584,6 +585,9 @@ class ConfigParser(object):
 
         if model_formulation == 'Clean Fixed Activity Schedule':
             self.create_clean_fixed_activity_schedule(model_element, projectSeed)
+	
+	if model_formulation == 'Identify Individual Attributes':
+	    self.create_identify_attributes_model_object(model_element, projectSeed)
 
 	if model_formulation == 'Clean Aggregate Activity Schedule':
             self.create_clean_aggregate_activity_schedule(model_element, projectSeed)
@@ -1452,6 +1456,53 @@ class ConfigParser(object):
         self.component_variable_list = self.component_variable_list + variable_list
 
     
+    def create_identify_attributes_model_object(self, model_element, projectSeed=0):
+        #variable_list_required for running the model
+        variable_list = []
+        
+        seed = self.process_seed(model_element) + projectSeed
+
+        depvariable_element = model_element.find('DependentVariable')
+        dep_varname = depvariable_element.get('var')
+
+        #Filter set
+        filter_set_element = model_element.find('FilterSet')
+        if filter_set_element is not None:
+            filter_type = filter_set_element.get('type')
+        else:
+            filter_type = None
+
+        #Run Filter set
+        run_filter_set_element = model_element.find('RunUntilConditionSet')
+        if run_filter_set_element is not None:
+            run_filter_type = run_filter_set_element.get('type')
+        else:
+            run_filter_type = None
+
+
+        activity_attribs_element = model_element.find('ActivityAttributes')
+        activityAttribsSpec = self.return_activity_attribs(activity_attribs_element)
+
+
+        specification = HouseholdSpecification(activityAttribsSpec)
+                                                        
+        dataFilter = self.return_filter_condition_list(model_element)
+        runUntilFilter = self.return_run_until_condition(model_element)
+
+        model = IdentifyIndividualAttributes(specification)
+
+        model_type = 'consistency'
+
+        model_object = SubModel(model, model_type, dep_varname, dataFilter,
+                                runUntilFilter, seed=seed, filter_type=filter_type,
+                                run_filter_type=run_filter_type)
+
+        self.model_list.append(model_object)
+        
+        self.component_variable_list = self.component_variable_list + variable_list
+
+
+
     def create_clean_aggregate_activity_schedule(self, model_element, projectSeed=0):
         #variable_list_required for running the model
         
@@ -2419,9 +2470,11 @@ class ConfigParser(object):
     def check_for_interaction_terms(self, var_element, alternativeSet):
         variable_list = []
         coeff_dict = {}
+	inverse_dict = {}
         dep_varname = ''
 
         #print 'alternativeSet', alternativeSet
+	#print var_element.get('var'), var_element.get('table')
 
         if var_element.get('interaction') is not None:
             rep_var = var_element.get('repeat')
@@ -2438,6 +2491,10 @@ class ConfigParser(object):
             tablenames = re.split('[,]', var_element.get('table'))
             #print 'tablenames', tablenames
             
+	    inverseElement = var_element.get('inverse')
+	    if inverseElement is not None:
+		inverseFlag = re.split('[,]', var_element.get('inverse'))
+
             rep_var_table_list = []
             for i in rep_var_list:
                 #find and remove the repeate variable from varnames
@@ -2452,13 +2509,21 @@ class ConfigParser(object):
                 variable_list.append((tablenames[i], varnames[i]))
                 dep_varname = dep_varname + varnames[i].title()
                 coeff_dict[varnames[i]] = 1
+		if inverseElement is not None:
+		    if inverseFlag[i] == 'True':
+			inverse_dict[varnames[i]] = True
+		    else:
+			inverse_dict[varnames[i]] = False
+	
+
             #print 'VARIABLE LIST', variable_list
 
             if alternativeSet is None:
                 choice = [dep_varname]
                 coefficients_list = [coeff_dict]
+		inverse_list = [inverse_dict]
                 # specification object
-                specification = Specification(choice, coefficients_list)
+                specification = Specification(choice, coefficients_list, inverse_list)
                 
                 model = InteractionModel(specification) 
                 model_type = 'regression'                   #Type of Model 
