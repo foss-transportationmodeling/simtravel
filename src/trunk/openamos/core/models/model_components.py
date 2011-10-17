@@ -9,12 +9,13 @@ class Specification(object):
     choices - list of strings
     coefficients - list of dictionaries; dictionary is {'variable':'coefficients'}
     """
-    def __init__(self, choices, coefficients):
+    def __init__(self, choices, coefficients, inverse=[{}]):
         self.choices = choices
         self.coefficients = coefficients
         self.check()
         self.convert_to_lowercase()
         self.number_choices = self.num_choices()
+	self.inverse = inverse
 
         
     def check(self):
