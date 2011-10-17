@@ -105,6 +105,9 @@ class ChildDependencyProcessing(Model):
         self.create_indices(data)
         self.create_col_numbers(data._colnames)
 
+	if self.childDepProcessingType == 'Dummy':
+	    return data
+
         for hhldIndex in self.hhldIndicesOfPersons:
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
@@ -144,8 +147,9 @@ class ChildDependencyProcessing(Model):
 	    elif self.childDepProcessingType == 'Resolution':
 		householdObject.lineup_activities(seed)
 		pass
-	    elif self.childDepProcessingType == 'Dummy':
-		pass
+
+	    #elif self.childDepProcessingType == 'Dummy':
+	    #	pass
 
 
 	    reconciledSchedules = householdObject._collate_results()
