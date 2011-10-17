@@ -2469,9 +2469,11 @@ class ConfigParser(object):
     def check_for_interaction_terms(self, var_element, alternativeSet):
         variable_list = []
         coeff_dict = {}
+	inverse_dict = {}
         dep_varname = ''
 
         #print 'alternativeSet', alternativeSet
+	#print var_element.get('var'), var_element.get('table')
 
         if var_element.get('interaction') is not None:
             rep_var = var_element.get('repeat')
@@ -2488,6 +2490,10 @@ class ConfigParser(object):
             tablenames = re.split('[,]', var_element.get('table'))
             #print 'tablenames', tablenames
             
+	    inverseElement = var_element.get('inverse')
+	    if inverseElement is not None:
+		inverseFlag = re.split('[,]', var_element.get('inverse'))
+
             rep_var_table_list = []
             for i in rep_var_list:
                 #find and remove the repeate variable from varnames
@@ -2502,13 +2508,21 @@ class ConfigParser(object):
                 variable_list.append((tablenames[i], varnames[i]))
                 dep_varname = dep_varname + varnames[i].title()
                 coeff_dict[varnames[i]] = 1
+		if inverseElement is not None:
+		    if inverseFlag[i] == 'True':
+			inverse_dict[varnames[i]] = True
+		    else:
+			inverse_dict[varnames[i]] = False
+	
+
             #print 'VARIABLE LIST', variable_list
 
             if alternativeSet is None:
                 choice = [dep_varname]
                 coefficients_list = [coeff_dict]
+		inverse_list = [inverse_dict]
                 # specification object
-                specification = Specification(choice, coefficients_list)
+                specification = Specification(choice, coefficients_list, inverse_list)
                 
                 model = InteractionModel(specification) 
                 model_type = 'regression'                   #Type of Model 
