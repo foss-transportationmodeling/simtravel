@@ -67,6 +67,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_allocterm_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_joint_allocterm_r", Schedule_Allocation_R)
+	self.fileh.createTable(output_grp, "persons_fixed_activity_vertices_r", Persons_Fixed_Activity_Vertices_R)
         self.fileh.createTable(output_grp, "schedule_cleanfixedactivityschedule_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_childrenlastprismadj_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_childreninctravelrec_r", Schedule_Allocation_R)
