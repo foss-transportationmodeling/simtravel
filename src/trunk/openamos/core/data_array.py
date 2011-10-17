@@ -128,7 +128,7 @@ class DataArray(object):
 	#print '---->final result - ', result[:5]
         return result
     
-    def calculate_product(self, coefficients, rows=None):
+    def calculate_product(self, coefficients, rows=None, inverse={}):
         if not isinstance(coefficients, dict):
             raise DataError, """coefficient input is invalid - should be of """\
                 """dictionary type"""
@@ -149,14 +149,27 @@ class DataArray(object):
             colnum = self._colnames[i.lower()]
             result = result * self.data[:,colnum] * coefficients[i]
         print '\t\t\tNumpy approach for product - %.4f' %(time.time()-ti)
-        """
+        """	
 
         ti = time.time()
         result = ones((self.rows,))
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             temp = self.data[:,colnum]
-            exprStr = "%s*temp * result" %coefficients[i]
+	    if i.lower() in inverse:
+	    	inverseFlag = inverse[i]
+
+		if inverseFlag:
+		    nanRows = temp == 0
+		    if any(nanRows):
+		        result[nanRows] = 0
+		        temp[nanRows] = 1
+		    exprStr = "%s*1/temp * result" %coefficients[i]
+		else:
+		    exprStr = "%s*temp * result" %coefficients[i]		
+	    else:
+		exprStr = "%s*temp * result" %coefficients[i]		
+
             result = ne.evaluate(exprStr)
         #print '\t\t\tNumexpr approach for product - %.4f' %(time.time()-ti)
 
