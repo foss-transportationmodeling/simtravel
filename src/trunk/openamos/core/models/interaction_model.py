@@ -18,10 +18,10 @@ class InteractionModel(Model):
         num_choices = self.specification.number_choices
         expected_value_array = DataArray(zeros((data.rows, num_choices)),
                                          self.choices)
-
+	self.inverse = self.specification.inverse[0]
         for i in range(num_choices):
             coefficients = self.coefficients[i]
-            expected_value_array.data[:,i] = data.calculate_product(coefficients)
+            expected_value_array.data[:,i] = data.calculate_product(coefficients, inverse=self.inverse)
         return expected_value_array
         
 
