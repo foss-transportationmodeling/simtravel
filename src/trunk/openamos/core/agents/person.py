@@ -188,6 +188,24 @@ class Person(object):
 		
             self._update_schedule_conflict_indicator(activity, add=False)
 
+    def retrieve_fixed_activity_ends(self, seed):
+	minStart = 1440
+	maxEnd = -1
+	for stTime, act in self.listOfActivityEpisodes:
+	    if act.actType == 200 or act.actType == 300:
+		if act.startTime < minStart:
+		    minStart = copy.deepcopy(act.startTime)
+		if act.endTime > maxEnd:
+		    maxEnd = copy.deepcopy(act.endTime)
+
+	if minStart == 1440:
+	    minStart = 0
+
+	if maxEnd == 1440:
+	    maxEnd = 0
+
+	return [self.hid, self.pid, minStart, maxEnd]
+
     def reset_activity_heap(self):
 	tempList = []
 	for stTime, act in self.listOfActivityEpisodes:

@@ -722,6 +722,19 @@ class Household(object):
         else:
             return False
 
+
+    def retrieve_fixed_activity_vertices(self, seed):
+	verts = []
+
+	for pid in self.persons:
+	    person = self.persons[pid]
+	
+	    personVerts = person.retrieve_fixed_activity_ends(seed)
+	    verts.append(personVerts)
+
+	return verts
+	
+
 	
     def clean_schedules_for_in_home_episodes(self, seed):
         self.personIds = self.persons.keys()
