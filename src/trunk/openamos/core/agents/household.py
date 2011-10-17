@@ -915,6 +915,7 @@ class Household(object):
 	#print '\tdest act for this person ', person.destAct
 	#print '\tactual arrival - %s and expected arrival - %s' %(person.actualArrival, person.expectedArrival)
 
+	#print person.print_activity_list()
 
 	if person.destAct.startTime == person.actualArrival:
 	    #print '\n-- Arrived as expected; nothing needs to be done --'
@@ -930,6 +931,8 @@ class Household(object):
 	    #print '\n-- Arrived later than expected; adjustment for activities needs to happen here --'
 	    self.adjust_push_subsequent_activities(person)
 	
+	#print person.print_activity_list()
+	#raw_input("after processing")
     def push_destination_activity_to_earlier(self, person):
 	#if self.destAct.actType == 100 or self.destAct.actType == 600:
 
@@ -1072,7 +1075,7 @@ class Household(object):
 	    if (
 	   	destAct.actType == 601 and # act is a dropoff
 	   	((nextAct.actType >= 450 and nextAct.actType <= 490) or (nextAct.actType == 151)) and # subsequent act is child dependent act
-	   	(nextAct.startTime < actualArrival and nextAct.endTime > actualArrival) # the dropoff is within duration for subsequent act
+	   	((nextAct.startTime < actualArrival) and (nextAct.endTime > actualArrival)) # the dropoff is within duration for subsequent act
 	   	):
 	   	#print 'before adjusting the dropoff and subs dep act'		
 	   	#print 'dest act - ', destAct
@@ -1342,6 +1345,8 @@ class Household(object):
 	depTripsSt = {}
 	depTripsEn = {}
 	otherOHDepActs = {}
+	ihDepActs = {}
+
 
 
 	for pid in self.indepPersonIds:
@@ -1381,11 +1386,53 @@ class Household(object):
 		    	else:
 			    otherOHDepActs[depPid] = [(act.startTime, act.endTime)]
 		
-
-
+		if act.actType == 151:
+		    depPersonIds = self.parse_personids(act.dependentPersonId)
+		    for depPid in depPersonIds:
+			if depPid in ihDepActs:
+			    ihDepActs[depPid].append((act.startTime, act.endTime))
+			else:
+			    ihDepActs[depPid] = [(act.startTime, act.endTime)]
 
 		hp.heappush(indepPersonTempList, (stTime, act))
 	    person.listOfActivityEpisodes = indepPersonTempList
+
+	#print ihDepActs
+
+
+
+	"""
+	for depPid in ihDepActs.keys():
+	    print 'For dependent person the ih acts are - - ', depPid
+	    depPerson = self.persons[depPid]
+	    depPerson.print_activity_list()
+
+	    depPersonTempList = []
+
+	    ihActsVerts = ihDepActs[depPid]
+	    ihActsVerts.sort()
+	    ihActCount = 0	
+		
+	
+	    for i in range(len(depPerson.listOfActivityEpisodes)):
+	    	actStTime, act = hp.heappop(depPerson.listOfActivityEpisodes)		
+
+		if act.actType == 101 and act.dependentPersonId <> 99:
+		    verts = ihActsVerts[ihActCount]
+		    depPerson.move_start_end_by_diff_values(act, verts[0], verts[1], removeAdd = False)
+
+		    ihActCount += 1
+
+	    	hp.heappush(depPersonTempList, (act.startTime, act))
+		
+
+	    depPerson.listOfActivityEpisodes = depPersonTempList
+	    depPerson.print_activity_list()
+
+	raw_input('ih dep act vertices')
+	"""
+
+
 
 
 
@@ -1414,6 +1461,77 @@ class Household(object):
 		#print 'No OH Acts to be adjusted for this dependent person - ', depPid
 		pass
 
+
+	    firstTripSt = -1
+	    lastTripEn = -1		
+
+
+	    for i in range(len(depPerson.listOfActivityEpisodes)):
+	    	stTime, act = hp.heappop(depPerson.listOfActivityEpisodes)
+
+
+		if act.actType == 600:
+		    if firstTripSt == -1:
+		    	#print 'start anchor', act.startTime, firstTripSt == -1
+		    	firstTripSt = copy.deepcopy(act.startTime)
+			
+
+		if act.actType == 601:
+		    lastTripEn = copy.deepcopy(act.endTime)
+
+		hp.heappush(depPersonTempList, (act.startTime, act))
+
+	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
+
+	    # Identifying first trip start 
+	    #depPerson.print_activity_list()
+	    #print 'First trip start before adjustment- ', firstTripSt
+	    #print 'Last trip end before adjustment- ', lastTripEn
+	    #raw_input()
+
+
+            #print 'len of acts', len(depPerson.listOfActivityEpisodes)
+
+	    # Identifying activities around trips
+	    actsBeforeFirstTrip = []
+	    actsBetweenTrips = []
+	    actsAfterLastTrip = []
+	    depPersonTempList = []
+		
+	    for i in range(len(depPerson.listOfActivityEpisodes)):
+	    	stTime, act = hp.heappop(depPerson.listOfActivityEpisodes)
+	    
+		if act.startTime < firstTripSt and act.actType <600:
+		    actsBeforeFirstTrip.append(act)			
+
+		elif act.startTime >= lastTripEn and act.actType <600:
+		    actsAfterLastTrip.append(act)
+		
+		elif  act.actType <600:
+		    actsBetweenTrips.append(act)
+
+		hp.heappush(depPersonTempList, (act.startTime, act))
+
+	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
+
+	    for act in actsBeforeFirstTrip:
+		#print 'before - ', act
+		pass
+
+	    for act in actsBetweenTrips:
+		#print 'between - ', act
+		pass
+
+	    for act in actsAfterLastTrip:
+		#print 'after - ', act
+		pass
+		
+            #print 'len of acts', len(depPerson.listOfActivityEpisodes)
+	    #raw_input('finished identifying acts around trip vertices')
+
+
+	    # adjusting the vertices based on arrivals and departure pegs derived from the independent adjults
+	    depPersonTempList = []
 	    lastTripEn = 0
 	    stTime, stAct = hp.heappop(depPerson.listOfActivityEpisodes)
 	    hp.heappush(depPersonTempList, (stTime, stAct))
@@ -1457,12 +1575,22 @@ class Household(object):
 		    lastTripEn = en
 
 
-		if stAct.actType == 600 and enAct.actType == 601 and stAct.dependentPersonId == 99 and enAct.dependentPersonId == 99:
+		#if stAct.actType == 600 and enAct.actType == 601 and stAct.dependentPersonId == 99 and enAct.dependentPersonId == 99:
+		# All waiting associated for trips with non household members why do you have to move pickup and dropoff simultaneously?
+		if stAct.actType == 600 and stAct.dependentPersonId == 99:		
 		    #print '\tTrip with nonhh member:' 
 
 		    st = stAct.endTime
 		    en = enAct.startTime
-		    #print '\t    St Vertex - ', stAct 
+		    #print '\t    St Vertex for non hh- ', stAct 
+		    #print 'last trip end - ', lastTripEn
+
+		    if st <= lastTripEn:
+			#st = lastTripEn + 1
+		        st = lastTripEn
+
+		    """
+
 		    if st == lastTripEn + 1:
 			st = st + 1 # just change the reference start time ... 
 			if en < st: # if the trip is very short then move the reference end of the trip too 
@@ -1475,22 +1603,28 @@ class Household(object):
 			if en < st: # if the trip is very short then move the reference end of the trip too 
 			    en = st + 1
 			#raw_input('the waiting and discretizing error case for trips with nonhh members')
+		    """
+		    #print 'pickup non hh end', stAct.endTime, ' proposed end -', st
 
-		    if stAct.endTime <> st:
-			depPerson.move_end(stAct, st+1, removeAdd=False)				
-			depPerson.move_start(stAct, st, removeAdd=False)
-			#print '\t\tMod St Vertex', stAct
+		    #if stAct.endTime <> st:
+		    depPerson.move_end(stAct, st+1, removeAdd=False)				
+		    depPerson.move_start(stAct, st, removeAdd=False)
+		    #print '\t\tMod St Vertex', stAct
 
-		    #print '\t    En Vertex - ', enAct
-		    if enAct.startTime <> en + 1:
-		        depPerson.move_start_end(enAct, en-enAct.startTime-1, removeAdd=False) 
-			#print '\t\tMod En Vertex', enAct
 
+		if enAct.actType == 601 and enAct.dependentPersonId == 99:
+		    #print '\t    En Vertex for non hh- ', enAct
+		    #if enAct.startTime <> en + 1:
+		    #    depPerson.move_start_end(enAct, en-enAct.startTime-1, removeAdd=False) 
+		    #	print '\t\tMod En Vertex', enAct
+		 
 		    lastTripEn = en
 
-
+		
 
 		if enAct.actType >= 400 and enAct.actType <= 450 and enAct.dependentPersonId <> 99:
+		    #print enAct
+		    #print 'ohAct', ohActCount
 		    ohActSt, ohActEn = ohActs[ohActCount]
 		    #print '\tOH Act St - %s and OH Act En - %s' %(ohActSt, ohActEn)
 		    #print '\t     OH ACt', enAct
@@ -1507,8 +1641,122 @@ class Household(object):
 		hp.heappush(depPersonTempList, (enAct.startTime, enAct))
 
 	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
+	    depPerson.reset_activity_heap()
 	    #print 'After adjusting pickups and dropoffs and OH Acts'
 	    #print depPerson.print_activity_list()
+	    #raw_input()
+
+
+
+
+	    # Identifying the trip vertices after adjustment
+	    depPersonTempList = []
+	    depPersonTripAnchorsList = []
+
+	    firstTripSt = -1
+	    lastTripEn = -1		
+
+
+	    for i in range(len(depPerson.listOfActivityEpisodes)):
+	    	stTime, act = hp.heappop(depPerson.listOfActivityEpisodes)
+
+
+		if act.actType == 600:
+		    if firstTripSt == -1:
+		    	#print 'start anchor', act.startTime, firstTripSt == -1
+		    	firstTripSt = copy.deepcopy(act.startTime)
+		    hp.heappush(depPersonTripAnchorsList, (act.startTime, act))			
+
+		if act.actType == 601:
+		    lastTripEn = copy.deepcopy(act.endTime)
+		    hp.heappush(depPersonTripAnchorsList, (act.startTime, act))
+		hp.heappush(depPersonTempList, (act.startTime, act))
+
+	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
+
+	    # Identifying first trip start 
+	    #depPerson.print_activity_list()
+	    #print 'First trip start - ', firstTripSt
+	    #print 'Last trip end - ', lastTripEn
+	    #raw_input()
+
+
+	    #actsBeforeFirstTrip = []
+	    #actsBetweenTrips = []
+	    #actsAfterLastTrip = []
+
+
+	    # Adjusting the last activity before pickup
+	    #print actsBeforeFirstTrip
+	    lastActBeforeFirstPickup = actsBeforeFirstTrip[-1]
+	    if lastActBeforeFirstPickup.endTime < firstTripSt - 1:
+		depPerson.move_end(lastActBeforeFirstPickup, firstTripSt - 1, removeAdd = False)
+
+	    #print actsBeforeFirstTrip
+	    #raw_input('adjusted first activity before pickup')
+
+	    # Adjusting activities between trips
+	    #print 'number of in between acts - ', len(actsBetweenTrips)
+	    #print 'number of verts - ', len(depPersonTripAnchorsList)
+	
+	    depPersonActs = copy.deepcopy(depPersonTripAnchorsList)
+
+	    hp.heappop(depPersonTripAnchorsList)
+	    for i in range(len(depPersonTripAnchorsList)/2):
+	    	actVertStTime, actVertSt = hp.heappop(depPersonTripAnchorsList)
+		actVertEnTime, actVertEn = hp.heappop(depPersonTripAnchorsList)
+
+		#print 'activity vertex st', actVertSt
+		#print 'activity vertex en', actVertEn
+		#print '\t act', actsBetweenTrips[i]
+		actBet = actsBetweenTrips[i]
+		
+		if (actVertEn.startTime - actVertSt.endTime) <= 1:
+		    #print '\tThis activity was not pursued ... the person visited the destination and moved on ... '
+		    pass
+
+		else:
+		    depPerson.move_start_end_by_diff_values(actBet, actVertSt.endTime, actVertEn.startTime, removeAdd=False)		
+		    #print '\t act after - ', actsBetweenTrips[i]
+		    hp.heappush(depPersonActs, (actBet.startTime, actBet))
+
+	    for act in actsBetweenTrips:
+		#print 'between - ', act
+		pass
+
+
+	    #raw_input('adjusted in betweek trips')
+
+	    # Adjusting activities after last trip
+
+	
+	    for act in actsAfterLastTrip:
+		#print 'after last trip - ', act
+		if act.startTime < lastTripEn:
+		    moveByValue = lastTripEn - act.startTime
+		    depPerson.move_start_end(act, moveByValue, removeAdd=False)
+		    #print '\tafter last trip modified- ', act
+		    lastTripEn = act.endTime
+	    #raw_input ('after adjusting acts after last trip')
+
+
+	    #depPerson.print_activity_list()
+
+	    for act in actsBeforeFirstTrip:
+		hp.heappush(depPersonActs, (act.startTime, act))
+		
+	    for act in actsAfterLastTrip:
+		hp.heappush(depPersonActs, (act.startTime, act))
+
+	    depPerson.listOfActivityEpisodes = depPersonActs
+	    #depPerson.print_activity_list()
+	    #raw_input('FINALFINAL')
+
+
+	    
+	    """
+
+
 
 	    depPersonTempList = []
 	
@@ -1530,9 +1778,9 @@ class Household(object):
 		hp.heappush(depPersonTempList, (enAct.startTime, enAct))
 
 	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
-	    #print 'After adjusting morning sojourn ... '
-	    #print depPerson.print_activity_list()
-
+	    print 'After adjusting morning sojourn ... '
+	    print depPerson.print_activity_list()
+	    raw_input()
 
 
 
@@ -1572,9 +1820,12 @@ class Household(object):
 	    		
 		missedActList = depPerson._identify_activities_between_time_boundaries(tripSt.endTime, tripEn.startTime)
 	
+		for ac in missedActList:
+		    print 'Missed acts - ', ac
+
 		if len(missedActList) > 0:
-		    #print 'trip start - ', tripSt
-		    #print 'trip end - ', tripEn
+		    print 'trip start - ', tripSt
+		    print 'trip end - ', tripEn
 		    actsToRemove = []
 		    moveTo = tripEnTime
 		    for act in missedActList:
@@ -1605,11 +1856,26 @@ class Household(object):
 			else:
 			    actsToRemove.append(act)
 
+		    print 'Before removing episodes and moving pickups for potentially missed episodes... '
+		    print depPerson.print_activity_list()
+			
+		    actsToActuallyRemove = []
+		    for ac in actsToRemove:
+                    	print 'removing act - ', ac
+			if ac.actType >= 600 and ac.dependentPersonId == 99:
+			    depPerson.move_start_end(ac, tripEn.endTime - ac.startTime)
+			else:
+			    actsToActuallyRemove.append(ac)
 
-		    depPerson.remove_episodes(actsToRemove)
-		    #print 'After removing episodes and moving pickups for potentially missed episodes... '
-		    #print depPerson.print_activity_list()
-		    #raw_input('actrs removed because missed -- ')
+		    for ac in actsToActuallyRemove:
+                    	print 'actually removing act - ', ac
+
+
+		    #depPerson.remove_episodes(actsToRemove)
+		    depPerson.remove_episodes(actsToActuallyRemove)
+		    print 'After removing episodes and moving pickups for potentially missed episodes... '
+		    print depPerson.print_activity_list()
+		    raw_input('actrs removed because missed -- ')
 
 
 	    # identifying trip anchors to adjust the activities between these subsequent dropoff-pickup anchors ... 
@@ -1668,19 +1934,21 @@ class Household(object):
 		    else:
 		    	depPerson.move_start_end_by_diff_values(actualOHAct[0], ohStAnc.endTime + 1, ohEnAnc.startTime - 1)
 		    	#print 'oh Act Modified - ', actualOHAct[0]	
-		    #print depPerson.print_activity_list()
+		    print depPerson.print_activity_list()
 		
 
-		#raw_input('OH act adjusted ... ')
+		raw_input('OH act adjusted ... ')
 				
+         
 	    depPerson.reset_schedule_conflict_indicator()
 
-	    	
 
 	    if not depPerson._check_for_conflicts():
 		#raise Exception, 'Conflicts exist still ... '
-		#depPerson.print_activity_list()		
-		#print 'last trip end - ', tripEn
+		depPerson.print_activity_list()		
+		print 'last trip end - ', tripEn
+		#raw_input()
+
 
 		conflictActs = depPerson._identify_conflict_activities([tripEn])
 
@@ -1699,7 +1967,7 @@ class Household(object):
 		refTime = copy.deepcopy(tripEn.endTime)
 		for act in [conflictAct] + afterActs:
 		#    print 'Act before adjustment - ', act
-		    depPerson.move_start_end(act, refTime - act.startTime)
+		    depPerson.move_start_end(act, refTime - act.startTime, removeAdd=False)
 		    refTime = copy.deepcopy(act.endTime)
 		#    print 'Act after adjustment - ', act
 
@@ -1716,11 +1984,11 @@ class Household(object):
 		#print ('does the last at need to be adjusted ... ?')
 
 	    depPerson.reset_schedule_conflict_indicator()
-
+	    """   	
 	    if not depPerson._check_for_conflicts():
 		depPerson.print_activity_list()		
-		#raise Exception, 'Conflicts exist still ... and this should not happen'		
-		raw_input('conflicts exist still for person')
+		raise Exception, 'Conflicts exist still ... and this should not happen'		
+		#raw_input('conflicts exist still for person')
 
 	    depPerson._check_for_acts_between_trip_vertices()
 

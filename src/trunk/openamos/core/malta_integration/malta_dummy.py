@@ -18,6 +18,10 @@ class DummyMALTA(object):
 	    seed(i)
 	    time = i+1
 	
+	    if (i >= 440 and i <= 450) or (i >= 160 and i <= 170):
+		#raw_input('check the schedules for drop off readjustment????')
+		pass
+
 
 	    if time in self.tripsAct.keys():
 	    #if time in self.tripsActDum.keys():
@@ -42,8 +46,8 @@ class DummyMALTA(object):
 			self.trips[trip[8]] += [trip[0]]
 
 			
-		    actArrival = randint(trip[7]+2, trip[8]+15)
-		    #actArrival = randint(trip[8]+2, trip[8]+25)
+		    #actArrival = randint(trip[7]+2, trip[8]+15)
+		    actArrival = randint(trip[7]+15, trip[8]+45)
 
 		    if actArrival not in self.tripsAct.keys():
 			self.tripsAct[actArrival]  = [trip[0]]

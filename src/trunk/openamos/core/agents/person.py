@@ -189,6 +189,11 @@ class Person(object):
             self._update_schedule_conflict_indicator(activity, add=False)
 
     def reset_activity_heap(self):
+	tempList = []
+	for stTime, act in self.listOfActivityEpisodes:
+	    tempList.append((act.startTime, act))
+	
+	self.listOfActivityEpisodes = tempList
 	hp.heapify(self.listOfActivityEpisodes)
 
     def _update_schedule_conflict_indicator(self, activity, add=True):

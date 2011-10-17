@@ -118,8 +118,8 @@ class ChildDependencyProcessing(Model):
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
-
-	    if hhldIndex[0] <> 164552:
+	    #
+	    if hhldIndex[0] not in [2871, 6027, 8861]:
 	    	#continue
 	      	pass
 
@@ -143,6 +143,7 @@ class ChildDependencyProcessing(Model):
 		householdObject.allocate_dependent_activities(seed)
 	    elif self.childDepProcessingType == 'Resolution':
 		householdObject.lineup_activities(seed)
+		pass
 	    elif self.childDepProcessingType == 'Dummy':
 		pass
 

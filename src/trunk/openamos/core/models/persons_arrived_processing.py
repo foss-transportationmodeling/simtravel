@@ -43,10 +43,10 @@ class PersonsArrivedProcessing(Model):
 	    tripCount = row[self.persTripCountCol]
 	    actDep = row[self.actDepCol]
 
-	    print 'For hid - %s and pid - %s' %(hid, pid)
-	    print '     There are other dependent persons on the trip - ', persArrived
-	    print '     Trip count on the trip - ', tripCount
-	    print '     Act dep for the trip - ', actDep
+	    #print 'For hid - %s and pid - %s' %(hid, pid)
+	    #print '     There are other dependent persons on the trip - ', persArrived
+	    #print '     Trip count on the trip - ', tripCount
+	    #print '     Act dep for the trip - ', actDep
 
 
 	
@@ -57,12 +57,12 @@ class PersonsArrivedProcessing(Model):
 	    newData.append(list(row))
 
 	    parsedPersonIds = self.parse_personids(persArrived)
-	    print '     Parsed dependent persons on the trip - ', parsedPersonIds
+	    #print '     Parsed dependent persons on the trip - ', parsedPersonIds
 	    if tripCount > 10000:
 		parsedTripCount = self.parse_personids(tripCount)
 		actDepParsed = self.parse_personids(actDep)
-	    	print '     Parsed trip count on the trip - ', parsedTripCount
-		print '     Act dep the trip - ', actDepParsed
+	    	#print '     Parsed trip count on the trip - ', parsedTripCount
+		#print '     Act dep the trip - ', actDepParsed
 		
 		i = 0
 		for pid in actDepParsed:
@@ -73,7 +73,7 @@ class PersonsArrivedProcessing(Model):
 		    i += 1
 
 	        parsedPersonIds = list(set(parsedPersonIds) - set(actDepParsed))
-		print 'left over persons - ', parsedPersonIds
+		#print 'left over persons - ', parsedPersonIds
 
 	    	#raw_input()
 
@@ -84,8 +84,8 @@ class PersonsArrivedProcessing(Model):
 
 	data = DataArray(newData, data.varnames)
 
-	print data.varnames
-	print data.data.astype(int)
+	#print data.varnames
+	#print data.data.astype(int)
 	    
 	#raw_input('arrived persons processing complete ---  and rows - %s' %data.rows)
 
