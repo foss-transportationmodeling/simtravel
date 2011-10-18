@@ -1323,7 +1323,7 @@
       </DBTables>
 
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1336,7 +1336,7 @@
         </Alternative>
       </Model>
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1349,7 +1349,7 @@
         </Alternative>
       </Model>
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1362,7 +1362,7 @@
         </Alternative> 
       </Model>
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1375,7 +1375,7 @@
         </Alternative>
       </Model>
       <Model name="DailySchStatus" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1388,7 +1388,7 @@
         </Alternative>
       </Model>
       <Model name="DailySchStatusNonAdults" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="schstat" condition="equals" value="1"/>
@@ -1401,7 +1401,7 @@
         </Alternative>
       </Model>
       <Model name="DailySchStatusAdults" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="schdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="schstat" condition="equals" value="1"/>
@@ -1431,7 +1431,7 @@
       </DBTables>
 
       <Model name="DailyWorkStatusAdults" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="wrkdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
@@ -1445,7 +1445,7 @@
         </Alternative>
       </Model>
       <Model name="DailyWorkStatusAdults" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="wrkdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
@@ -1461,7 +1461,7 @@
 
 
       <Model name="DailyWorkStatusNonAdults" formulation="Probability Distribution" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+ 	<!-- Model Updated-->
         <DependentVariable var="wrkdailystatus"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="wrkr" condition="equals" value="1"/>
@@ -1604,7 +1604,7 @@
      
     </Component>
 
-    <Component name="ChildDependencyTerminalAllocation" read_from_table="schedule_ltrec_r" write_to_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyTerminalAllocation" read_from_table="schedule_ltrec_r" write_to_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -1649,9 +1649,9 @@
    </Component>	
 
     <ComponentList>
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
-    <SubComponent name="PersonsHistory" read_from_table="schedule_allocterm_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <SubComponent name="PersonsHistory" read_from_table="schedule_allocterm_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_allocterm_r" key="houseid,personid" order="1"/>
     	<Table table="persons" key="houseid,personid"/>
@@ -1718,7 +1718,7 @@
 
 
 
-    <SubComponent name="AfterSchoolActivities" read_from_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <SubComponent name="AfterSchoolActivities" read_from_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -2230,7 +2230,7 @@
     </ComponentList>
 
 
-    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2369,7 +2369,6 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/>
- 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
@@ -2382,7 +2381,6 @@
 	<DependentVariable var="adjustment"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
- 	<Filter1 table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
@@ -2405,7 +2403,6 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/>
- 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2419,7 +2416,6 @@
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
- 	<Filter1 table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2479,6 +2475,7 @@
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
+        <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
 
 
@@ -2486,7 +2483,7 @@
     </Component>	
 
 
-    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2571,9 +2568,9 @@
       <Model name="RepeatConditionVariableForEndVertex" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="repeat"/>
 	<FilterSet type="or"/>
-	<Filter table="runtime" var="st_starttime" condition="greater than" value="0"/>seasonal residents
+	<Filter table="runtime" var="st_starttime" condition="greater than" value="0"/>
 	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="2"/><!-- New TOD Dummy -->
+        <Variable table="standard" var="one" coeff="2"/>
       </Model>
 
 
@@ -2626,7 +2623,6 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/>
- 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
@@ -2639,7 +2635,6 @@
 	<DependentVariable var="adjustment"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
- 	<Filter1 table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
@@ -2662,7 +2657,6 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/>
- 	<Filter1 table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="en_endtime" condition="not equals" value="1439"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2676,7 +2670,6 @@
 	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
- 	<Filter1 table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="runtime" var="en_endtime" condition="not equals" value="1439"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2745,6 +2738,7 @@
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
+        <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
 
 
@@ -2840,7 +2834,7 @@
    </Component>	
 
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
@@ -3064,9 +3058,10 @@
         <Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
+        <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
     </Component>
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
@@ -3076,7 +3071,7 @@
         <Table table="schedule_skeleton_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
@@ -3327,10 +3322,11 @@
         <Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
         <Variable table="runtime" var="repeat" coeff="1"/>
+        <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
     </Component>
 
-    <Component name="PersonsLocation" read_from_table="persons" write_to_table="persons_location_r" skip="True" completed="True">
+    <Component name="PersonsLocation" read_from_table="persons" write_to_table="persons_location_r" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid"/>
@@ -3366,7 +3362,7 @@
    </Component>
 
 
-    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
