@@ -476,7 +476,7 @@ class AbstractComponent(object):
             standard_tableEntries = indep_columnDict.pop('standard')
             tempdep_columnDict['standard'] = standard_tableEntries
 	
-        if len(tempdep_columnDict['temp']) > 0 or len(tempdep_columnDict['standard']) > 0:
+        if 'temp' in tempdep_columnDict or 'standard' in tempdep_columnDict:
             dep_columnDict = self.update_dictionary(dep_columnDict, tempdep_columnDict)
 
         return indep_columnDict, dep_columnDict, prim_keys, count_keys
