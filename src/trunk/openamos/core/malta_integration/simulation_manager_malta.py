@@ -99,7 +99,9 @@ class SimulationManager(object):
         print '\tTotal time taken to retrieve records from the database %.4f' %(time.time()-t)
 
 	fileLoc = self.projectConfigObject.location
-	save('%s/%s.npy' %(fileLoc, tableName), data.data)
+	
+	dataCp = array(data.data) # the new numpy doesn't work with masked array and hence the conversion ... 
+	save('%s/%s.npy' %(fileLoc, tableName), dataCp)
 
         print '\tTime taken to write to numpy cache format %.4f' %(time.time()-t)
 
