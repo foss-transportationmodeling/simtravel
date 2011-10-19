@@ -8,6 +8,7 @@ from openamos.core.models.model import SubModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.errors import ModelError
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
+import openamos
 
 class AbstractComponent(object):
     """
@@ -36,7 +37,8 @@ class AbstractComponent(object):
 		 aggregate_variable_dict={},
 		 delete_dict={},
 		 writeToTable2 = None,
-		 key2=None):
+		 key2=None,
+		 pre_run_filter=None):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -66,6 +68,7 @@ class AbstractComponent(object):
 	self.delete_dict = delete_dict
 	self.writeToTable2 = writeToTable2
 	self.key2 = key2
+	self.pre_run_filter = pre_run_filter
 
         self.keyColsList()
 
@@ -143,11 +146,6 @@ class AbstractComponent(object):
             return None
 
 
-        #print 'processing dependencies', self.dependencyAllocationFlag
-
-        #if self.dependencyAllocationFlag:
-        #    self.process_adult_allocation(data, queryBrowser, householdStructureObject)
-        
 	print '\tTime taken to retrieve data - %.4f --' %(time.time()-t_d)
         return data
         
@@ -176,6 +174,10 @@ class AbstractComponent(object):
 	
         model_list_duringrun = copy.deepcopy(self.model_list)
         iteration = 0
+
+	if self.pre_run_filter is not None:
+	    self.pre_process_data()
+
 
         prim_key = self.key[0]
         count_key = self.key[1]
@@ -215,6 +217,21 @@ class AbstractComponent(object):
 	    else:
 		nRowsProcessed2 = 0
         return nRowsProcessed, nRowsProcessed2
+
+    def pre_process_data(self):
+	print 'Pre Process Filter is not None and processing following filter - ', self.pre_run_filter
+
+	print 'Number of rows in the data - ', self.data.rows
+	preRunFilter = self.create_filter(self.pre_run_filter, 'or')
+	print 'Number of rows to be deleted - ', preRunFilter.sum()
+
+	if preRunFilter.sum() > 0:
+            self.data = self.data.columns(self.data.varnames, 
+                                                ~preRunFilter)
+	print 'Number of rows LEFT in the data - ', self.data.rows
+
+	#raw_input()
+
 
     def write_data_to_cache(self, data_filter, partId=None):
 	print '\tWriting to primary table - ', self.writeToTable
@@ -332,7 +349,14 @@ class AbstractComponent(object):
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
-                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+		    #print '\tFilter and data size - ', self.data.rows, data_subset_filter.sum()
+		    if data_subset_filter.sum() == self.data.rows:
+			#print '\t\tno filter'
+			self.data.setcolumn(i.dep_varname, result.data)            
+		    else:
+			#print '\t\tthere is filter'
+			self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            			
+
 		else:
 		    result = i.simulate_choice(data_subset, choiceset, iteration)
 		    if self.writeToTable2 <> None:
