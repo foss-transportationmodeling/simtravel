@@ -8,6 +8,7 @@ from openamos.core.models.model import SubModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.errors import ModelError
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
+import openamos
 
 class AbstractComponent(object):
     """
@@ -36,9 +37,8 @@ class AbstractComponent(object):
 		 aggregate_variable_dict={},
 		 delete_dict={},
 		 writeToTable2 = None,
-		 key2=None):
-        # TODO: HOW TO DEAL WITH CONSTRAINTS?
-        # TODO: CHOICESET GENERATION?
+		 key2=None,
+		 pre_run_filter=None):
 
         for i in model_list:
             if not isinstance(i, SubModel):
@@ -64,6 +64,7 @@ class AbstractComponent(object):
 	self.delete_dict = delete_dict
 	self.writeToTable2 = writeToTable2
 	self.key2 = key2
+	self.pre_run_filter = pre_run_filter
 
         self.keyColsList()
         #self.dependencyAllocationFlag = dependencyAllocationFlag
@@ -108,13 +109,6 @@ class AbstractComponent(object):
                                  tableOrderDict, tableNamesKeyDict, 
                                  count_keys)        
 
-
-
-
-
-	#print 'Basic Query complete'
-
-
         self.db = db
 
         # Skip running the component if no records are retrieved
@@ -140,11 +134,6 @@ class AbstractComponent(object):
 
 	#print 'Location processed'
 
-        #print 'processing dependencies', self.dependencyAllocationFlag
-	"""
-        if self.dependencyAllocationFlag:
-            self.process_adult_allocation(data, queryBrowser, householdStructureObject)
-        """
         print '-- Time taken to retrieve data - %.4f --' %(time.time()-t_d)
         return data
 
@@ -172,6 +161,9 @@ class AbstractComponent(object):
         model_list_duringrun = copy.deepcopy(self.model_list)
         iteration = 0
 
+	if self.pre_run_filter is not None:
+	    self.pre_process_data()
+
         prim_key = self.key[0]
         count_key = self.key[1]
 
@@ -198,12 +190,6 @@ class AbstractComponent(object):
                 print """\tSome rows (%s) are not valid; they do not """\
                     """satisfy consistency checks - %s""" %(count_invalid_rows, 
                                                             self.post_run_filter)
-	    """	
-            try:
-		print valid_data_rows
-	    except Exception, e:
-		print 'Error - e'
-	    """
             nRowsProcessed += valid_data_rows_count
 
             #print "\t    Writing to cache table %s: records - %s" %(self.writeToTable, valid_data_rows_count)
@@ -217,6 +203,19 @@ class AbstractComponent(object):
 
         return trips
 
+    def pre_process_data(self):
+	print 'Pre Process Filter is not None and processing following filter - ', self.pre_run_filter
+
+	print 'Number of rows in the data - ', self.data.rows
+	preRunFilter = self.create_filter(self.pre_run_filter, 'or')
+	print 'Number of rows to be deleted - ', preRunFilter.sum()
+
+	if preRunFilter.sum() > 0:
+            self.data = self.data.columns(self.data.varnames, 
+                                                ~preRunFilter)
+	print 'Number of rows LEFT in the data - ', self.data.rows
+
+	#raw_input()
 
     def reflectToDatabase(self, valid_data_filter, tableNamesKeyDict, queryBrowser, fileLoc):
         """
@@ -244,15 +243,6 @@ class AbstractComponent(object):
 	
 	    	keyCols = tableNamesKeyDict[self.writeToTable][0] 
 
-	    #print '--> here are the keyCols for this component', keyCols
-	    #raw_input()
-	
-	    	#if self.component_name == 'ExtractTravelEpisodes' or self.component_name == 'ExtractBackgroundTravelEpisodes':
- 	    	#    #queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)
-		#    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=True)
-	    	#else:
- 	    	#    #queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)		
- 	    	#    queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc)		
 		queryBrowser.copy_into_table(data.data, tableCols, self.writeToTable, keyCols, fileLoc, createIndex=False, deleteIndex=False)		
 	    	if self.component_name == 'ExtractAllTravelEpisodes':
 	            data_array = zeros((valid_data_filter.sum(), len(tableCols)))
@@ -310,11 +300,12 @@ class AbstractComponent(object):
                                        iteration, skimsMatrix, uniqueIds, fileLoc):
         ti = time.time()
         model_list_forlooping = []
-        
+
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
             #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
 	    #print i.data_filter
+	    
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -333,18 +324,20 @@ class AbstractComponent(object):
                                                 data_subset_filter)
                 #print '\t\tData subset extracted is of size %s in %.4f' %(data_subset_filter.sum(),
                 #                                                              time.time()-tiii)
-                # Generate a choiceset for the corresponding agents
-                #TODO: Dummy as of now
-                #choiceset_shape = (data_subset.rows,
-                #                   i.model.specification.number_choices)
-                #choicenames = i.model.specification.choices
+
                 choiceset = None
 
 		#print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
-                    self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
+		    #print '\tFilter and data size - ', self.data.rows, data_subset_filter.sum()
+		    if data_subset_filter.sum() == self.data.rows:
+			#print '\t\tno filter'
+			self.data.setcolumn(i.dep_varname, result.data)            
+		    else:
+			#print '\t\tthere is filter'
+			self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            			
 		else:
 		    result = i.simulate_choice(data_subset, choiceset, iteration)
 		    self.data = result
@@ -354,10 +347,6 @@ class AbstractComponent(object):
 
                 #print 'RESULT', result.data
 		                    
-                #result = i.simulate_choice(data_subset, choiceset, iteration)
-                #print result.data
-                #self.data.setcolumn(i.dep_varname, result.data, data_subset_filter)            
-        
         # Update hte model list for next iteration within the component
 
         for i in model_list_duringrun:
@@ -373,17 +362,6 @@ class AbstractComponent(object):
         #print '\t-- Iteration complete for one looping of models in %.4f--' %(time.time()-ti)
         return model_list_forlooping, data_subset_filter
 
-        # SOMEWHERE THE DATA HAS TO BE STORED FOR THE VALUES THAT
-        # ARE BEING SIMULATED IN BOTH CASES WHERE MODELS RUN IN A LOOP
-
-        # AND IN THE ALTERNATIVE CASE WHERE THEY RUN ONLY ONCE
-        # I.E. EITHER UPDATE SELF.DATA OBJECT; WRITE TO AGENT OBJECTS;
-        # WRITE TO DATABASE
-
-        # FOR MODELS THAT ARE RUN IN A LOOP SEED NEEDS TO BE MODIFIED
-        # BECAUSE EVERYTIME THE PROBABILITYMODEL CLASS IS CALLED
-        # LOOP, THE SEED IS BEING SET TO THE DEFAULT VALUE
-        # ALTERNATIVELY THE SEED CAN BE SET IN THE COMPONENT
 
     def check_for_dynamic_spatial_queries(self, prev_model_name, current_model_name, skimsMatrix, uniqueIds, fileLoc):
         if len(self.dynamicspatialConst_list) > 0:
@@ -683,23 +661,6 @@ class AbstractComponent(object):
 
 
         return data
-
-
-
-
-    def process_adult_allocation(self, data, queryBrowser, householdStructureObject):
-
-        structuresDict = householdStructureObject.structuresDict
-
-        for structure in structuresDict:
-            structureVarVal = structuresDict[structure]
-            self.prepare_household_structure_matrix(data, queryBrowser, 
-                                                    structureVarVal, householdStructureObject)
-
-            
-
-
-            
 
     def process_data_for_locs(self, data, spatialConst_list, 
                               analysisInterval, skimsMatrix, uniqueIds, fileLoc):
