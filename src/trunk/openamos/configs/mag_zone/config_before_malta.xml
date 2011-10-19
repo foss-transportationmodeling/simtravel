@@ -671,7 +671,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -703,34 +703,38 @@
         <Variance value="0"/>
         <Variable table="persons" var="schtaz" coeff="1"/>
       </Model>
-      <Model name="StartTime" formulation="Regression" type="Log Linear" vertex="start" lower_threshold="180" upper_threshold="285" seed="1">
-      	<!-- TODO: Model Needs to be Updated-->
+      <Model name="StartTime" formulation="Regression" type="Linear" vertex="start" lower_threshold="185" upper_threshold="510" seed="1">
+      	<!-- Model Updated-->
         <DependentVariable var="starttime"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilConditionSet type="and"/>
         <RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value=".1029"/>
-        <Variable table="standard" var="one" coeff="5.4703"/>
-        <Variable table="households" var="numwrkr" coeff="-.0946"/>
-        <Variable table="households" var="drvrcnt" coeff=".0799"/>
-        <Variable table="households" var="nwrkcnt" coeff=".0387"/>
+        <Variance value="6317.75"/>
+        <Variable table="standard" var="one" coeff="60.5631628"/>
+        <Variable table="households" var="rur" coeff="-15.981477"/>
+        <Variable table="households" var="hhsize" coeff="-39.6193385"/>
+        <Variable table="households" var="noc" coeff="41.375184"/>
+        <Variable table="persons" var="age" coeff="-.00012388"/>
+        <Variable table="households" var="incge50k" coeff="23.1308212"/>
+        <Variable table="households" var="sparent" coeff="-71.7042354"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="558" upper_threshold="1080" seed="2">
-      	<!-- TODO: Model Needs to be Updated-->
+      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" lower_threshold="416" upper_threshold="815" seed="2">
+      	<!-- Model Updated-->
         <DependentVariable var="endtime"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilConditionSet type="and"/>
         <RunUntilCondition table="runtime" var="duration" condition="less than equals" value="1"/>
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than" value="10"/>
-        <Variance value="0.0116"/>
-        <Variable table="standard" var="one" coeff="6.812"/>
-        <Variable table="households" var="numwrkr" coeff=".0893"/>
-        <Variable table="households" var="drvrcnt" coeff="-.0621"/>
-        <Variable table="households" var="nwrkcnt" coeff="-.029"/>
-        <Variable table="persons" var="white" coeff="-.03"/>
+        <Variance value="90854.8"/>
+        <Variable table="standard" var="one" coeff="150.399449"/>
+        <Variable table="households" var="incge75k" coeff="120.533716"/>
+        <Variable table="households" var="noc" coeff="-65.0519389"/>
+        <Variable table="households" var="sparent" coeff="448.826139"/>
+        <Variable table="households_vehicles_count_r" var="vehdefi" coeff="153.931515"/>
+        <Variable table="households" var="hhsize" coeff="45.7196204"/>
       </Model>
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="starttime"/>
@@ -742,7 +746,7 @@
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="standard" var="one" coeff="180"/>
+        <Variable table="standard" var="one" coeff="185"/>
       </Model>
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="endtime"/>
@@ -754,7 +758,7 @@
         <RunUntilCondition table="persons" var="presch" condition="equals" value="1"/>
         <RunUntilCondition table="runtime" var="iterations" condition="less than equals" value="10"/>
         <Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1080"/>
+        <Variable table="standard" var="one" coeff="815"/>
       </Model>
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="duration"/>
