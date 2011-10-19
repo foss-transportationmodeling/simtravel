@@ -11,6 +11,7 @@ import re
 from lxml import etree
 from numpy import array
 
+import openamos
 from openamos.core.models.linear_regression_model import LinearRegressionModel
 from openamos.core.models.log_linear_regression_model import LogLinearRegressionModel
 from openamos.core.models.approx_log_linear_regression_model import ApproxLogRegressionModel
@@ -419,6 +420,16 @@ class ConfigParser(object):
             dynamicSpatialConst_list.append(dynamicSpatialConst)
 
             
+	preProcessData_element = component_element.find('PreProcessData')
+        if preProcessData_element is not None:
+            pre_run_filter = self.return_filter_condition_list(preProcessData_element)
+	    #print pre_run_filter
+	    #raw_input()
+        else:
+            pre_run_filter = None
+
+
+
         consistencyChecks_element = component_element.find("ConsistencyChecks")
         if consistencyChecks_element is not None:
             post_run_filter = self.return_filter_condition_list(consistencyChecks_element)
@@ -463,6 +474,27 @@ class ConfigParser(object):
 	delete_dict = self.parse_delete_dict(component_element)
 
         self.component_variable_list = list(set(self.component_variable_list))
+
+	model_list_noInteractionReplicates = []
+	modelNames_interaction = []
+	for model in self.model_list:
+	    #print model.dep_varname, type(model.model), isinstance(model.model, openamos.core.models.interaction_model.InteractionModel)
+	    if isinstance(model.model, openamos.core.models.interaction_model.InteractionModel):
+		if model.data_filter is not None:
+		    raise Exception, "the interaction model has a filter ... is this possible?"
+		if model.dep_varname in modelNames_interaction:
+		    continue
+		else:
+		    modelNames_interaction.append(model.dep_varname)
+	    model_list_noInteractionReplicates.append(model)
+
+	#print 'len of original model list - ', len(self.model_list)		    
+	self.model_list = model_list_noInteractionReplicates
+	#print 'len of original model list - ', len(self.model_list)
+	#print 'len of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
+	#raw_input()
+
+
         component = AbstractComponent(comp_name, self.model_list, 
                                       self.component_variable_list, 
                                       comp_read_table,
@@ -481,7 +513,8 @@ class ConfigParser(object):
 				      aggregate_variable_dict = agg_vars_dict,
 				      delete_dict = delete_dict,
 				      writeToTable2=comp_write_to_table2,
-				      key2 = key2)
+				      key2 = key2,
+				      pre_run_filter = pre_run_filter)
         return component
 
 
