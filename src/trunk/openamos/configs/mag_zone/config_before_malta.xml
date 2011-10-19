@@ -1761,6 +1761,9 @@
 	</ExtractLocationInformation>
       </SpatialConstraints>
 
+      <PreProcessData name="PreProcessData">
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+      </PreProcessData>
 	
       <ConsistencyChecks name="AfterSchoolActivityChecks">
 	<Filter table="runtime" var="locationid" condition="greater than" value="0"/>
@@ -3071,7 +3074,7 @@
         <Table table="schedule_skeleton_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
