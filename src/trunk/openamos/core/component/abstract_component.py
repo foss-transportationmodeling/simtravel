@@ -317,7 +317,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            #print '\t    Running Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\nRunning Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -345,7 +345,7 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                #print 'RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:,0]
+                #print '    RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:5,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -370,7 +370,7 @@ class AbstractComponent(object):
 		    data_subset_filter = array([True]*self.data.rows)
 	      
 		#print result.varnames
-                #print 'RESULT', result.data
+                #print '    RESULT', result.data[:5]
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()

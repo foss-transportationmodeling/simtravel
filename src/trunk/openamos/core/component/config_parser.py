@@ -492,7 +492,7 @@ class ConfigParser(object):
 	#print '\tlen of original model list - ', len(self.model_list)
 	#print '\tlen of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
 	#if comp_name == 'AfterSchoolActivities':
-	#    raw_input()
+	#raw_input()
 
 
         component = AbstractComponent(comp_name, self.model_list, 
@@ -2468,9 +2468,10 @@ class ConfigParser(object):
         variableIterator = element.getiterator('Variable')
         vars_list = []
         coeff_ret = []
+	inverse_list = []
 
         for i in variableIterator:
-            dep_var = self.check_for_interaction_terms(i, alternativeSet)
+            dep_var, inverse_dict = self.check_for_interaction_terms(i, alternativeSet)
             if dep_var is not None:
                 #print '\t\tINTERACTION TERM', dep_var
                 for j in dep_var:
@@ -2483,7 +2484,9 @@ class ConfigParser(object):
                         coeff_ret.append(coeff_dict)
                     else:
                         coeff_ret[dep_var.index(j)][j] = float(coeff)
+
                 #print coeff_ret, 'new repeated INTERACTION TERMSSSSSSSSSSSSSSSSSSSSSSSSS'
+		#print 'inverse dict', inverse_dict
             else:
                 #print 'NOT AN INTERACTION TERM'
                 coeff_dict = {}
@@ -2497,9 +2500,100 @@ class ConfigParser(object):
                     coeff_ret[0][varname] = float(coeff)
                 #print coeff_ret
         #print vars_list, 'sent back', coeff_ret
+	#print 'coeff_re', coeff_ret
         return coeff_ret, vars_list
 
     def check_for_interaction_terms(self, var_element, alternativeSet):
+        variable_list = []
+        coeff_dict = {}
+	inverse_dict = {}
+        dep_varname = ''
+
+        #print 'alternativeSet', alternativeSet
+	#print var_element.get('var'), var_element.get('table')
+
+	interaction_element = var_element.get('interaction')
+	rep_var = var_element.get('repeat')
+
+        if var_element.get('interaction') is None and rep_var is None:
+	    return None, None	
+	else:
+            rep_var = var_element.get('repeat')
+            if rep_var is not None:
+                rep_var_list = re.split('[,]', rep_var)
+            else:
+                rep_var_list = []
+        
+            #print '\tREPEAT VARIABLE LIST -->', rep_var_list
+                
+            #var_element.get('interaction')
+            varnames = re.split('[,]', var_element.get('var'))
+            #print 'varnames', varnames
+            tablenames = re.split('[,]', var_element.get('table'))
+            #print 'tablenames', tablenames
+            
+	    inverseElement = var_element.get('inverse')
+	    if inverseElement is not None:
+		inverseFlag = re.split('[,]', var_element.get('inverse'))
+	    else:
+		inverseFlag = []
+
+            rep_var_table_list = []
+            for i in rep_var_list:
+                #find and remove the repeate variable from varnames
+                var_ind = varnames.index(i)
+                varnames.pop(var_ind)
+
+                #find the tablenames for the ones that are to be repeated
+                rep_var_table_list.append(tablenames.pop(var_ind))
+            #print '\tREPEAT TABLE LIST', rep_var_table_list
+
+            for i in range(len(varnames)):
+                variable_list.append((tablenames[i], varnames[i]))
+
+	    varNamesNew = []
+	    if len(inverseFlag) > 0:
+		for var in varnames:
+		    ind = varnames.index(var)
+		    if inverseFlag[ind] == 'True':
+			varNamesNew.append('inv_%s' %var)
+		    else:
+			varNamesNew.append(var)
+	
+		varnames = varNamesNew		
+		#raw_input('inverse ... should it happen here ... ')	
+		
+
+
+            if alternativeSet is None:
+            	dep_var = [tuple(varnames)]
+	    	inverse_dict[tuple(varnames)] = inverseFlag
+
+                self.component_variable_list = self.component_variable_list + variable_list            
+            else:
+		dep_var = []
+                for j in range(alternativeSet):
+                    for k in range(len(rep_var_list)):
+                        variable_list.append(('temp', rep_var_list[k]+str(j+1)))
+			varnamesCp = copy.deepcopy(varnames)
+			varnamesCp.append(rep_var_list[k]+str(j+1))
+			
+			if len(varnamesCp) == 1:
+			    dep_var.append(varnamesCp[0])
+			else:
+			    dep_var.append(tuple(varnamesCp))			
+			
+                    self.component_variable_list = self.component_variable_list + variable_list            
+
+            return dep_var, inverse_dict
+
+
+
+
+
+
+
+    def check_for_interaction_terms1(self, var_element, alternativeSet):
         variable_list = []
         coeff_dict = {}
 	inverse_dict = {}
