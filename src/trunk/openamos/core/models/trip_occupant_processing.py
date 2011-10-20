@@ -62,7 +62,7 @@ class TripOccupantProcessing(Model):
 	    if tripPurposeFrom == 600 or tripPurposeFrom == 601:
 		if stActDep > 100:
 		    #print '\ta.2. The occupancy of the trip changed and processing occupancy now ... stActDep - %s' %stActDep
-		    tripDepPers = self.parse_trip_dependentpersonid(lastTripDep, stActDep, tripPurposeFrom)
+		    tripDepPers = self.parse_trip_dependentpersonid(hid, pid, lastTripDep, stActDep, tripPurposeFrom)
 		    #print '\t-->New dependentperson - %s<--' %tripDepPers, type(tripDepPers)
 
 		else:
@@ -78,7 +78,7 @@ class TripOccupantProcessing(Model):
 	#raw_input()
         return data
 
-    def parse_trip_dependentpersonid(self, lastTripDep, stActDep, tripPurposeFrom):
+    def parse_trip_dependentpersonid(self, hid, pid, lastTripDep, stActDep, tripPurposeFrom):
 	#print '\t\tStart Activity Dep - %s' %(stActDep)
 	#print '\t\tLast trip Dependency is - ', lastTripDep
 
@@ -103,6 +103,7 @@ class TripOccupantProcessing(Model):
 		try:
 		    lastTripPersons.remove(person)
 		except ValueError, e:
+		    print 'hid - %s and pid - %s' %(hid, pid)
 		    raise Exception, 'The person - %s should be on the trip check again error occurred and last trip persons - %s' %(person, lastTripPersons)
 	
 	lastTripPersonsNum = 1
