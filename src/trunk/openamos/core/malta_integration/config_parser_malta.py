@@ -2468,9 +2468,10 @@ class ConfigParser(object):
         variableIterator = element.getiterator('Variable')
         vars_list = []
         coeff_ret = []
+	inverse_list = []
 
         for i in variableIterator:
-            dep_var = self.check_for_interaction_terms(i, alternativeSet)
+            dep_var, inverse_dict = self.check_for_interaction_terms(i, alternativeSet)
             if dep_var is not None:
                 #print '\t\tINTERACTION TERM', dep_var
                 for j in dep_var:
@@ -2483,7 +2484,9 @@ class ConfigParser(object):
                         coeff_ret.append(coeff_dict)
                     else:
                         coeff_ret[dep_var.index(j)][j] = float(coeff)
+
                 #print coeff_ret, 'new repeated INTERACTION TERMSSSSSSSSSSSSSSSSSSSSSSSSS'
+		#print 'inverse dict', inverse_dict
             else:
                 #print 'NOT AN INTERACTION TERM'
                 coeff_dict = {}
@@ -2497,8 +2500,8 @@ class ConfigParser(object):
                     coeff_ret[0][varname] = float(coeff)
                 #print coeff_ret
         #print vars_list, 'sent back', coeff_ret
+	#print 'coeff_re', coeff_ret
         return coeff_ret, vars_list
-
 
     def check_for_interaction_terms(self, var_element, alternativeSet):
         variable_list = []
@@ -2513,7 +2516,7 @@ class ConfigParser(object):
 	rep_var = var_element.get('repeat')
 
         if var_element.get('interaction') is None and rep_var is None:
-	    return None	
+	    return None, None	
 	else:
             rep_var = var_element.get('repeat')
             if rep_var is not None:
@@ -2532,6 +2535,8 @@ class ConfigParser(object):
 	    inverseElement = var_element.get('inverse')
 	    if inverseElement is not None:
 		inverseFlag = re.split('[,]', var_element.get('inverse'))
+	    else:
+		inverseFlag = []
 
             rep_var_table_list = []
             for i in rep_var_list:
@@ -2545,60 +2550,43 @@ class ConfigParser(object):
 
             for i in range(len(varnames)):
                 variable_list.append((tablenames[i], varnames[i]))
-                dep_varname = dep_varname + varnames[i].title()
-                coeff_dict[varnames[i]] = 1
-		if inverseElement is not None:
-		    if inverseFlag[i] == 'True':
-			inverse_dict[varnames[i]] = True
-		    else:
-			inverse_dict[varnames[i]] = False
-	
 
-            #print '\tVARIABLE LIST', variable_list
-            dep_var = []
+	    varNamesNew = []
+	    if len(inverseFlag) > 0:
+		for var in varnames:
+		    ind = varnames.index(var)
+		    if inverseFlag[ind] == 'True':
+			varNamesNew.append('inv_%s' %var)
+		    else:
+			varNamesNew.append(var)
+	
+		varnames = varNamesNew		
+		#raw_input('inverse ... should it happen here ... ')	
+		
+
+
             if alternativeSet is None:
-		if interaction_element is not None:
-                    choice = [dep_varname]
-                    coefficients_list = [coeff_dict]
-		    inverse_list = [inverse_dict]
-                    # specification object
-                    specification = Specification(choice, coefficients_list, inverse_list)
-                
-                    model = InteractionModel(specification) 
-                    model_type = 'regression'                   #Type of Model 
-                    model_object = SubModel(model, model_type, dep_varname) #Model Object
-                    dep_var.append(dep_varname)
-                    self.model_list.append(model_object)
+            	dep_var = [tuple(varnames)]
+	    	inverse_dict[tuple(varnames)] = inverseFlag
+
                 self.component_variable_list = self.component_variable_list + variable_list            
             else:
-                dep_rep_varname = copy.deepcopy(dep_varname)
+		dep_var = []
                 for j in range(alternativeSet):
-                    dep_varname = dep_rep_varname
-                    coeffs_rep = copy.deepcopy(coeff_dict)
-
                     for k in range(len(rep_var_list)):
-                        #variable_list.append((rep_var_table_list[k], rep_var_list[k]+str(j+1)))
                         variable_list.append(('temp', rep_var_list[k]+str(j+1)))
-                        dep_varname = dep_varname + rep_var_list[k]
-                        coeffs_rep[rep_var_list[k]+str(j+1)] = 1
+			varnamesCp = copy.deepcopy(varnames)
+			varnamesCp.append(rep_var_list[k]+str(j+1))
 			
-		    if interaction_element is not None:
-                        dep_varname = dep_varname + str(j+1)
-                    	choice = [dep_varname]
-                    	coefficients_list = [coeffs_rep]
-                    	specification = Specification(choice, coefficients_list)
-                    
-                    	model = InteractionModel(specification)
-                    	model_type = 'regression'
-                    	model_object = SubModel(model, model_type, dep_varname)
-                    
-                    	dep_var.append(dep_varname)
-		    
-                    	self.model_list.append(model_object)
-                    #print 'VARIABLE LIST with REPEATS', variable_list
+			if len(varnamesCp) == 1:
+			    dep_var.append(varnamesCp[0])
+			else:
+			    dep_var.append(tuple(varnamesCp))			
+			
                     self.component_variable_list = self.component_variable_list + variable_list            
 
-            return dep_var
+            return dep_var, inverse_dict
+
 
 
 
