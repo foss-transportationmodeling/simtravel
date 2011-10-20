@@ -1368,18 +1368,18 @@
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-        <Variable table="standard,travel_skims" var="one,tt_to" coeff="-.16188774" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,retail_employment" coeff=".00068035" interaction="True" repeat="retail_employment"/>
-        <Variable table="standard,locations" var="one,office_employment" coeff=".00013751" interaction="True" repeat="office_employment"/>
-        <Variable table="standard,locations" var="one,institutional_population" coeff=".00187395" interaction="True" repeat="institutional_population"/>
+        <Variable table="travel_skims" var="tt_to" coeff="-.16188774" repeat="tt_to"/>
+        <Variable table="locations" var="retail_employment" coeff=".00068035" repeat="retail_employment"/>
+        <Variable table="locations" var="office_employment" coeff=".00013751" repeat="office_employment"/>
+        <Variable table="locations" var="institutional_population" coeff=".00187395" repeat="institutional_population"/>
         <Variable table="households,travel_skims" var="withchild,tt_to" coeff="-.02202905" interaction="True" repeat="tt_to"/>
         <Variable table="persons,travel_skims" var="white,tt_to" coeff="-.02686166" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,lowest_income" coeff="-.00115045" interaction="True" repeat="lowest_income"/>
-        <Variable table="standard,locations" var="one,high_income" coeff=".00209443" interaction="True" repeat="high_income"/>
-        <Variable table="standard,locations" var="one,groupquarter_households" coeff=".00400169" interaction="True" repeat="groupquarter_households"/>
+        <Variable table="locations" var="lowest_income" coeff="-.00115045" repeat="lowest_income"/>
+        <Variable table="locations" var="high_income" coeff=".00209443" repeat="high_income"/>
+        <Variable table="locations" var="groupquarter_households" coeff=".00400169" repeat="groupquarter_households"/>
         <Variable table="households,travel_skims" var="twnhouse,tt_to" coeff="-.04698083" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,runtime" var="one,retail_employment_density" coeff="-.00011531" interaction="True" repeat="retail_employment_density"/>
-        <Variable table="standard,runtime" var="one,office_employment_density" coeff=".00001326" interaction="True" repeat="office_employment_density"/>
+        <Variable table="locations" var="retail_employment_density" coeff="-.00011531" repeat="retail_employment_density"/>
+        <Variable table="locations" var="office_employment_density" coeff=".00001326" repeat="office_employment_density"/>
         <Variable table="runtime,travel_skims" var="int9t11a,tt_to" coeff="-.04264572" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="int11t1p,tt_to" coeff="-.10841376" interaction="True" repeat="tt_to"/>
       </Model>
@@ -1393,24 +1393,24 @@
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
         <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-        <Variable table="standard,travel_skims" var="one,tt_to" coeff="-.17307478" interaction="True" repeat="tt_to"/>
+        <Variable table="travel_skims" var="tt_to" coeff="-.17307478" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_411,tt_to" coeff="-.02426673" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.10329537" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_514,tt_to" coeff="-.07553901" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_415,tt_to" coeff="-.05903244" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,retail_employment" coeff=".00063703" interaction="True" repeat="retail_employment"/>
-        <Variable table="standard,locations" var="one,total_area" coeff=".03955772" interaction="True" repeat="total_area"/>
+        <Variable table="locations" var="retail_employment" coeff=".00063703" repeat="retail_employment"/>
+        <Variable table="locations" var="total_area" coeff=".03955772" repeat="total_area"/>
         <Variable table="households,travel_skims" var="inclt35k,tt_to" coeff="-.02909125" interaction="True" repeat="tt_to"/>
         <Variable table="households_vehicles_count_r,travel_skims" var="vehcount,tt_to" coeff=".01277594" interaction="True" repeat="tt_to"/>
         <Variable table="persons,travel_skims" var="female,tt_to" coeff="-.02839005" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,high_income" coeff=".0003308" interaction="True" repeat="high_income"/>
-        <Variable table="standard,locations" var="one,institutional_population" coeff=".00176955" interaction="True" repeat="institutional_population"/>
+        <Variable table="locations" var="high_income" coeff=".0003308" repeat="high_income"/>
+        <Variable table="locations" var="institutional_population" coeff=".00176955" repeat="institutional_population"/>
         <Variable table="persons,travel_skims" var="ag18t24,tt_to" coeff="-.03597208" interaction="True" repeat="tt_to"/>
         <Variable table="persons,travel_skims" var="ag25t34,tt_to" coeff=".03025569" interaction="True" repeat="tt_to"/>
         <Variable table="persons,travel_skims" var="agge65,tt_to" coeff="-.01976454" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,residential_households" coeff=".00017351" interaction="True" repeat="residential_households"/>
-        <Variable table="standard,runtime" var="one,public_employment_density" coeff=".0000411" interaction="True" repeat="public_employment_density"/>
-        <Variable table="standard,runtime" var="one,retail_employment_density" coeff="-.00004" interaction="True" repeat="retail_employment_density"/>
+        <Variable table="locations" var="residential_households" coeff=".00017351" repeat="residential_households"/>
+        <Variable table="locations" var="public_employment_density" coeff=".0000411" repeat="public_employment_density"/>
+        <Variable table="locations" var="retail_employment_density" coeff="-.00004" repeat="retail_employment_density"/>
         <Variable table="runtime,travel_skims" var="int9t11a,tt_to" coeff=".02221426" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="int11t1p,tt_to" coeff=".01909242" interaction="True" repeat="tt_to"/>
 
@@ -1425,19 +1425,19 @@
 	<Filter table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Variable table="standard,travel_skims" var="one,tt_to" coeff="-.13787556" interaction="True" repeat="tt_to"/>
+        <Variable table="travel_skims" var="tt_to" coeff="-.13787556" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.03717037" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_514,tt_to" coeff="-.0420764" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_415,tt_to" coeff="-.18287555" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,retail_employment" coeff=".00045979" interaction="True" repeat="retail_employment"/>
-        <Variable table="standard,locations" var="one,total_area" coeff=".05192972" interaction="True" repeat="total_area"/>
+        <Variable table="locations" var="retail_employment" coeff=".00045979" repeat="retail_employment"/>
+        <Variable table="locations" var="total_area" coeff=".05192972" repeat="total_area"/>
         <Variable table="households,travel_skims" var="inclt35k,tt_to" coeff="-.06092847" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,locations" var="one,low_income" coeff="-.00093146" interaction="True" repeat="low_income"/>
-        <Variable table="standard,locations" var="one,high_income" coeff=".00165003" interaction="True" repeat="high_income"/>
+        <Variable table="locations" var="low_income" coeff="-.00093146" repeat="low_income"/>
+        <Variable table="locations" var="high_income" coeff=".00165003" repeat="high_income"/>
         <Variable table="households,travel_skims" var="rur,tt_to" coeff="-.09980193" interaction="True" repeat="tt_to"/>
-        <Variable table="standard,runtime" var="one,other_employment_density" coeff=".00008159" interaction="True" repeat="other_employment_density"/>
-        <Variable table="standard,runtime" var="one,retail_employment_density" coeff=" -.00016987" interaction="True" repeat="retail_employment_density"/>
-        <Variable table="standard,runtime" var="one,office_employment_density" coeff="-.00002314" interaction="True" repeat="office_employment_density"/>
+        <Variable table="locations" var="other_employment_density" coeff=".00008159" repeat="other_employment_density"/>
+        <Variable table="locations" var="retail_employment_density" coeff=" -.00016987" repeat="retail_employment_density"/>
+        <Variable table="locations" var="office_employment_density" coeff="-.00002314" repeat="office_employment_density"/>
         <Variable table="persons,travel_skims" var="agge15,tt_to" coeff="-.06024264" interaction="True" repeat="tt_to"/>
         <Variable table="households,travel_skims" var="noc,tt_to" coeff=".00012078" interaction="True" repeat="tt_to"/>
       </Model>
