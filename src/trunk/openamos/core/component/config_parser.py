@@ -423,8 +423,8 @@ class ConfigParser(object):
 	preProcessData_element = component_element.find('PreProcessData')
         if preProcessData_element is not None:
             pre_run_filter = self.return_filter_condition_list(preProcessData_element)
-	    print pre_run_filter
-	    raw_input()
+	    #print pre_run_filter
+	    #raw_input()
         else:
             pre_run_filter = None
 
@@ -477,7 +477,7 @@ class ConfigParser(object):
 	model_list_noInteractionReplicates = []
 	modelNames_interaction = []
 	for model in self.model_list:
-	    #print model.dep_varname, type(model.model), isinstance(model.model, openamos.core.models.interaction_model.InteractionModel)
+	    #print model.dep_varname, 'Interaction model - ', isinstance(model.model, openamos.core.models.interaction_model.InteractionModel)
 	    if isinstance(model.model, openamos.core.models.interaction_model.InteractionModel):
 		if model.data_filter is not None:
 		    raise Exception, "the interaction model has a filter ... is this possible?"
@@ -487,11 +487,12 @@ class ConfigParser(object):
 		    modelNames_interaction.append(model.dep_varname)
 	    model_list_noInteractionReplicates.append(model)
 
-	print '\tlen of original model list - ', len(self.model_list)		    
+	#print '\tlen of original model list - ', len(self.model_list)		    
 	self.model_list = model_list_noInteractionReplicates
-	print '\tlen of original model list - ', len(self.model_list)
-	print '\tlen of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
-	#raw_input()
+	#print '\tlen of original model list - ', len(self.model_list)
+	#print '\tlen of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
+	#if comp_name == 'AfterSchoolActivities':
+	#    raw_input()
 
 
         component = AbstractComponent(comp_name, self.model_list, 
@@ -2507,14 +2508,19 @@ class ConfigParser(object):
         #print 'alternativeSet', alternativeSet
 	#print var_element.get('var'), var_element.get('table')
 
-        if var_element.get('interaction') is not None:
+	interaction_element = var_element.get('interaction')
+	rep_var = var_element.get('repeat')
+
+        if var_element.get('interaction') is None and rep_var is None:
+	    return None	
+	else:
             rep_var = var_element.get('repeat')
             if rep_var is not None:
                 rep_var_list = re.split('[,]', rep_var)
             else:
                 rep_var_list = []
         
-            #print 'REPEAT VARIABLE LIST -->', rep_var_list
+            #print '\tREPEAT VARIABLE LIST -->', rep_var_list
                 
             #var_element.get('interaction')
             varnames = re.split('[,]', var_element.get('var'))
@@ -2534,7 +2540,7 @@ class ConfigParser(object):
 
                 #find the tablenames for the ones that are to be repeated
                 rep_var_table_list.append(tablenames.pop(var_ind))
-            #print 'REPEAT TABLE LIST', rep_var_table_list
+            #print '\tREPEAT TABLE LIST', rep_var_table_list
 
             for i in range(len(varnames)):
                 variable_list.append((tablenames[i], varnames[i]))
@@ -2547,27 +2553,26 @@ class ConfigParser(object):
 			inverse_dict[varnames[i]] = False
 	
 
-            #print 'VARIABLE LIST', variable_list
-
+            #print '\tVARIABLE LIST', variable_list
+            dep_var = []
             if alternativeSet is None:
-                choice = [dep_varname]
-                coefficients_list = [coeff_dict]
-		inverse_list = [inverse_dict]
-                # specification object
-                specification = Specification(choice, coefficients_list, inverse_list)
+		if interaction_element is not None:
+                    choice = [dep_varname]
+                    coefficients_list = [coeff_dict]
+		    inverse_list = [inverse_dict]
+                    # specification object
+                    specification = Specification(choice, coefficients_list, inverse_list)
                 
-                model = InteractionModel(specification) 
-                model_type = 'regression'                   #Type of Model 
-                model_object = SubModel(model, model_type, dep_varname) #Model Object
-                dep_var = [dep_varname]
-                self.model_list.append(model_object)
+                    model = InteractionModel(specification) 
+                    model_type = 'regression'                   #Type of Model 
+                    model_object = SubModel(model, model_type, dep_varname) #Model Object
+                    dep_var.append(dep_varname)
+                    self.model_list.append(model_object)
                 self.component_variable_list = self.component_variable_list + variable_list            
             else:
-                dep_var = []
                 dep_rep_varname = copy.deepcopy(dep_varname)
                 for j in range(alternativeSet):
                     dep_varname = dep_rep_varname
-                    
                     coeffs_rep = copy.deepcopy(coeff_dict)
 
                     for k in range(len(rep_var_list)):
@@ -2575,28 +2580,25 @@ class ConfigParser(object):
                         variable_list.append(('temp', rep_var_list[k]+str(j+1)))
                         dep_varname = dep_varname + rep_var_list[k]
                         coeffs_rep[rep_var_list[k]+str(j+1)] = 1
-                        
-                    dep_varname = dep_varname + str(j+1)
-                    choice = [dep_varname]
-                    coefficients_list = [coeffs_rep]
-                    specification = Specification(choice, coefficients_list)
+			
+		    if interaction_element is not None:
+                        dep_varname = dep_varname + str(j+1)
+                    	choice = [dep_varname]
+                    	coefficients_list = [coeffs_rep]
+                    	specification = Specification(choice, coefficients_list)
                     
-                    model = InteractionModel(specification)
-                    model_type = 'regression'
-                    model_object = SubModel(model, model_type, dep_varname)
+                    	model = InteractionModel(specification)
+                    	model_type = 'regression'
+                    	model_object = SubModel(model, model_type, dep_varname)
                     
-                    dep_var.append(dep_varname)
-            #print dep_var
-            #return model_object, variable_list
-                    #print '\t\t\t\tFOR THE INTERACTION TERM', variable_list
-
-                    self.model_list.append(model_object)
+                    	dep_var.append(dep_varname)
+		    
+                    	self.model_list.append(model_object)
+                    #print 'VARIABLE LIST with REPEATS', variable_list
                     self.component_variable_list = self.component_variable_list + variable_list            
 
             return dep_var
 
-        else:
-            return None
 
     def return_spatial_query(self, spatial_query_element):
         
