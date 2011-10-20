@@ -389,7 +389,7 @@
     	<Table table="persons" key="houseid,personid"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
       </DBTables>
-      <AnalysisIntervalFilter table="schedule_final_r" var="starttime"/>
+      <AnalysisIntervalFilter table="schedule_final_r" var="endtime"/>
       <DeleteBasedOn table="persons_history_r" var="personuniqueid"/>
 
       <Model name="PersonUniqueIdDumy" formulation="Regression" type="Linear" seed="1">
@@ -1335,8 +1335,7 @@
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="activitytype" condition="less than" value="200"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="100"/>
+	<Filter table="runtime" var="activitytype" condition="greater than" value="101"/>
 	<Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
@@ -1345,10 +1344,18 @@
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="activitytype" condition="less than" value="400"/>
-	<Filter table="runtime" var="activitytype" condition="greater than equals" value="300"/>
+	<Filter table="runtime" var="activitytype" condition="equals" value="301"/>
 	<Variance value="0"/>
         <Variable table="persons" var="schtaz" coeff="1"/>
+      </Model>
+
+      <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="locationid"/>
+	<FilterSet type="and"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="runtime" var="activitytype" condition="equals" value="201"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
 
 

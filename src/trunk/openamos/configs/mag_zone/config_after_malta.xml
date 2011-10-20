@@ -33,20 +33,21 @@
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
     <LocationVariable var="retail_employment"/>
-    <LocationVariable var="public_employment"/>
-    <LocationVariable var="office_employment"/>
-    <LocationVariable var="industrial_employment"/>
-    <LocationVariable var="other_employment"/>
-    <LocationVariable var="residential_population"/>
+
+    <LocationVariable var="retail_employment_density"/>
+    <LocationVariable var="other_employment_density"/>
+    <LocationVariable var="office_employment_density"/>
+
     <LocationVariable var="total_area"/>
-    <LocationVariable var="multi_family_dwelling"/>
-    <LocationVariable var="single_family_dwelling"/>
-    <LocationVariable var="institutional_population"/>
+
+    <LocationVariable var="low_income"/>
+    <LocationVariable var="high_income"/>
+
   </Locations>
 
   <ModelConfig>
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		
@@ -82,7 +83,7 @@
       </Model>
     </Component>	
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
     	<Table table="daily_school_status_r" key="houseid,personid"/>		

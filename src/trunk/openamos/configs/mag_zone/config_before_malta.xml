@@ -1661,7 +1661,7 @@
     	<Table table="persons" key="houseid,personid"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
       </DBTables>
-      <AnalysisIntervalFilter table="schedule_allocterm_r" var="starttime"/>
+      <AnalysisIntervalFilter table="schedule_allocterm_r" var="endtime"/>
       <DeleteBasedOn table="persons_history_r" var="personuniqueid"/>
 
       <Model name="PersonUniqueIdDumy" formulation="Regression" type="Linear" seed="1">
@@ -2108,26 +2108,75 @@
         <Variable table="households,travel_skims" var="noc,tt_to" coeff=".00012078" interaction="True" repeat="tt_to"/>
       </Model>
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_from_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
-	<Start table="households" location_var="htaz"/>
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to_loc" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_to_loc">
+	<Start table="households" location_var="st_locationid"/>
+	<End table="runtime" location_var="locationid"/>
+      </DynamicSpatialConstraints>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_from_loc" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_to_loc">
+	<Start table="households" location_var="locationid"/>
 	<End table="runtime" location_var="en_locationid"/>
       </DynamicSpatialConstraints>
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
+      <DynamicSpatialConstraints1 table="travel_skims" skim_var="tt" as_var="tt_from_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
+	<Start table="households" location_var="htaz"/>
+	<End table="runtime" location_var="en_locationid"/>
+      </DynamicSpatialConstraints1>
+
+      <DynamicSpatialConstraints1 table="travel_skims" skim_var="tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
 	<Start table="runtime" location_var="st_locationid"/>
 	<End table="households" location_var="htaz"/>
-      </DynamicSpatialConstraints>
+      </DynamicSpatialConstraints1>
 
-      <Model name="TT From" formulation="Regression" type="Linear" seed="1">
+      <DynamicSpatialConstraints1 table="travel_skims" skim_var="tt" as_var="tt_work" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
+	<Start table="runtime" location_var="st_locationid"/>
+	<End table="persons" location_var="wtaz"/>
+      </DynamicSpatialConstraints1>
+
+      <Model name="TT To IH Episodes Recode" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="tt_to_loc"/>
+	<FilterSet type="and"/>
+ 	<Filter table="persons" var="age" condition="less than" value="18"/>
+ 	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="100"/>
+ 	<Filter table="runtime" var="st_activitytype" condition="less than equals" value="101"/>
+ 	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
+ 	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="TT From IH To IH Episodes Recode" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="tt_from_loc"/>
+	<FilterSet type="and"/>
+ 	<Filter table="persons" var="age" condition="less than" value="18"/>
+ 	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
+ 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="100"/>
+ 	<Filter table="runtime" var="en_activitytype" condition="less than equals" value="101"/>
+ 	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+
+
+      <Model name="StartTime" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="starttime"/>
+	<FilterSet type="and"/>
+ 	<Filter table="persons" var="age" condition="less than" value="18"/>
+ 	<Variance value="0"/>
+        <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime" var="tt_to_loc" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+
+
+      <Model1 name="TT From" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="tt_from"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="tt_from_home" coeff="1"/>
-      </Model>
+      </Model1>
 
-      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2136,10 +2185,10 @@
  	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
-      </Model>
+      </Model1>
 
 
-      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2150,10 +2199,10 @@
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="runtime" var="tt_to" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
-      </Model>
+      </Model1>
 
 
-      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2163,10 +2212,10 @@
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="travel_skims" var="tt_to" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
-      </Model>
+      </Model1>
 
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2176,9 +2225,9 @@
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="travel_skims" var="tt_to" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
-      </Model>
+      </Model1>
 
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
  	<Filter table="persons" var="age" condition="less than" value="18"/>
@@ -2188,11 +2237,7 @@
         <Variable table="runtime" var="st_endtime" coeff="1"/>
         <Variable table="travel_skims" var="tt_home" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
-      </Model>
-
-
-
-
+      </Model1>
 
 
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
@@ -2229,7 +2274,7 @@
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
-        <Variable table="runtime" var="tt_from" coeff="1"/>
+        <Variable table="runtime" var="tt_from_loc" coeff="1"/>
         <Variable table="standard" var="one" coeff="-1"/>
       </Model>
 
@@ -2237,7 +2282,7 @@
     </ComponentList>
 
 
-    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2303,7 +2348,7 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="en_tripcount" coeff="1"/>
       </Model>
-      <Model name="ScheduleId" formulation="Regression" type="Linear" seed="1">
+      <Model name="FirstScheduleId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="scheduleid"/>
 	<Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
 	<Variance value="0"/>
@@ -2372,11 +2417,28 @@
       </Model>
 
       <Model name="Adjustment" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode the adjustment calculated in previous model to avoid adjusting dependent person activities ... -->
+	<!-- Filter Description: Only adjust the last prism/last activity of dependent children -->
 	<DependentVariable var="adjustment"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
-	<Filter table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/>
+	<Filter1 table="runtime" var="prismdur" condition="less than" valuetable="runtime" valuevar="tt_to"/> 
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+	<Variance value="0"/>
+        <Variable1 table="runtime" var="prismdur" coeff="-1"/>
+        <Variable1 table="runtime" var="tt_to" coeff="1"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+
+      <Model name="Adjustment" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; calculate adjustment to fill the last unfilled prism of dependent children... -->
+	<!-- Filter Description: Only adjust the last prism/last activity of dependent children  when the size of the prism is greater than the travel time to next episode-->
+	<DependentVariable var="adjustment"/>
+	<FilterSet type="and"/>
+	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
+	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="runtime" var="prismdur" condition="greater than" valuetable="runtime" valuevar="tt_to"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="prismdur" coeff="-1"/>
@@ -2385,10 +2447,15 @@
       </Model>
 
       <Model name="Adjustment" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; calculate adjustment to fill the last unfilled prism of dependent children... -->
+	<!-- Filter Description: Only adjust the last prism/last activity of dependent children  when the size of the prism is greater than the travel time to next episode-->
 	<DependentVariable var="adjustment"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="runtime" var="prismdur" condition="less than equals" valuetable="runtime" valuevar="tt_to"/>
+	<Filter table="runtime" var="st_activitytype" condition="equals" value="300"/>
+	<Filter table="runtime" var="en_activitytype" condition="equals" value="100"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="prismdur" coeff="-1"/>
@@ -2396,7 +2463,9 @@
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
-      <Model name="RecStartTime" formulation="Regression" type="Linear" seed="1">
+
+
+      <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2405,7 +2474,7 @@
         <Variable table="runtime" var="st_endtime" coeff="1"/>
       </Model>
 
-      <Model name="RecStartTime" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="RecEndTime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2416,10 +2485,12 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="adjustment" coeff="-1"/>
-      </Model>
+      </Model1>
 
 
-      <Model name="RecStartTime" formulation="Regression" type="Linear" seed="1">
+      <Model name="RecEndTime" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode endtime and add the adjustment ... -->
+	<!-- Filter Description: Only adjust the last prism/last activity of dependent children-->
 	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -2433,7 +2504,7 @@
 
 
 
-      <Model name="SecondEndtime" formulation="Regression" type="Linear" seed="1">
+      <Model name="Startime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2465,7 +2536,7 @@
 	<Variance value="0"/>
         <Variable table="runtime" var="st_tripcount" coeff="1"/>
       </Model>
-      <Model name="FirstDependentPersonId" formulation="Regression" type="Linear" seed="1">
+      <Model name="DependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
@@ -2490,7 +2561,7 @@
     </Component>	
 
 
-    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2841,7 +2912,7 @@
    </Component>	
 
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
@@ -2970,6 +3041,8 @@
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode the adjustment calculated in previous model to avoid adjusting dependent person activities ... -->
+	<!-- Filter Description: When travel time to next activity is less than the size of the prism then do not adjust the start time of subsequent activity -->
         <DependentVariable var="adjustment"/>
         <FilterSet type="and"/>
         <Filter table="runtime" var="tt_to" condition="less than equals" valuetable="runtime" valuevar="prismdur"/>
@@ -2978,6 +3051,8 @@
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode the adjustment calculated in previous model to avoid adjusting dependent person activities ... -->
+	<!-- Filter Description: When the activity downstream is a dependent person serve passenger type activity do not adjust the start time of end activity -->
         <DependentVariable var="adjustment"/>
         <FilterSet type="and"/>
         <Filter table="runtime" var="en_activitytype" condition="greater than equals" value="600"/>
@@ -2986,6 +3061,8 @@
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode the adjustment calculated in previous model to avoid adjusting dependent person activities ... -->
+	<!-- Filter Description: When the start activity is pickup and the location of the end activity is same as that of first then do not adjust the start time of end activity -->
         <DependentVariable var="adjustment"/>
         <FilterSet type="and"/>
         <Filter table="runtime" var="st_activitytype" condition="greater than equals" value="600"/>
@@ -2995,10 +3072,11 @@
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
       <Model name="AdjustmentRecode" formulation="Regression" type="Linear" seed="1">
+	<!-- Model Description: Array based implementation; recode the adjustment calculated in previous model to avoid adjusting dependent person activities ... -->
+	<!-- Filter Description: When the end activity is a dependent activity then do not move the start of the activity -->
         <DependentVariable var="adjustment"/>
         <FilterSet type="and"/>
-        <Filter table="runtime" var="en_endtime" condition="equals" value="1439"/>
-        <Filter table="runtime" var="en_dependentpersonid" condition="equals" value="99"/>
+        <Filter table="runtime" var="en_dependentpersonid" condition="greater than" value="0"/>
         <Filter table="runtime" var="adjustment" condition="greater than" value="0"/>
         <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
         <Variance value="0"/>
@@ -3068,7 +3146,7 @@
         <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
     </Component>
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="daily_work_status_r" key="houseid,personid"/>
