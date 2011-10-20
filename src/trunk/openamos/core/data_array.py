@@ -89,13 +89,22 @@ class DataArray(object):
         """
 
     def calculate_equation(self, coefficients, rows=None):
+	inverseDict = {}
         if not isinstance(coefficients, dict):
             raise DataError, """coefficient input is invalid - should be of """\
                 """dictionary type"""
 
         for i in coefficients.keys():
-            if i.lower() not in self._colnames.keys():
-                raise DataError, 'coefficient refers to a column - %s not in the dataset' %(i.lower())
+	    if type(i) is str:
+            	if i.lower() not in self._colnames.keys():
+                    raise DataError, 'coefficient refers to a column - %s not in the dataset' %(i.lower())
+	    if type(i) is tuple:
+		for k in i:
+		    if k[:4].lower() == 'inv_':
+			k = k[4:]
+			inverseDict[k.lower()] = True
+		    if k.lower() not in self._colnames.keys():
+                    	raise DataError, 'coefficient refers to a column - %s not in the dataset' %(i.lower())			
 
         for i in coefficients.values():
             try:
@@ -113,9 +122,23 @@ class DataArray(object):
         """
         ti = time.time()
         result = zeros((self.rows,))
+	#print '\tCoefficients vector', coefficients
         for i in coefficients.keys():
-            colnum = self._colnames[i.lower()]
-            temp = self.data[:,colnum]
+	    if type(i) is tuple:
+		#print 'the interaction var expressed as tuple', i
+		prodCoeffDict = {}
+		for k in i:
+		    if k[:4].lower() == 'inv_':
+			k = k[4:]
+		    prodCoeffDict[k] = 1.
+		#print 'the interaction product coeff', prodCoeffDict
+		#print 'inverse dict', inverseDict
+	        temp = self.calculate_product(prodCoeffDict, inverse=inverseDict)
+		#print '\tproduct', temp[:5], coefficients[i]
+	    elif type(i) is str:
+            	colnum = self._colnames[i.lower()]
+            	temp = self.data[:,colnum]
+		#print '\tno-product', temp[:5], coefficients[i]
             exprStr = "%s*temp + result" %coefficients[i]
             result = ne.evaluate(exprStr)
 	    #print '\tvar - %s and coeff - %.4f' %(i, coefficients[i])
@@ -125,7 +148,7 @@ class DataArray(object):
         if rows is not None:
             return result[rows]
 
-	#print '---->final result - ', result[:5]
+	#print '\t---->final result - ', result[:5]
         return result
     
     def calculate_product(self, coefficients, rows=None, inverse={}):
@@ -156,6 +179,7 @@ class DataArray(object):
         for i in coefficients.keys():
             colnum = self._colnames[i.lower()]
             temp = self.data[:,colnum]
+	    #print '\tfirst five rows of product for var %s-'%i, temp[:5]
 	    if i.lower() in inverse:
 	    	inverseFlag = inverse[i]
 
