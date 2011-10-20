@@ -1,5 +1,5 @@
 import re
-from openamos.core.errors import SpecificationError, ChoicesError
+from openamos.core.errors import SpecificationError, ChoicesError, CoefficientsError
 
 class Specification(object):
     """
@@ -42,7 +42,13 @@ class Specification(object):
             new_dict = {}
             variables = j.keys()
             for k in variables:
-                new_dict[k.lower()] = j[k]
+		if type(k) is str:
+                    new_dict[k.lower()] = j[k]
+		elif type(k) is tuple:
+		    varList = []
+		    for kvar in k:
+			varList.append(kvar.lower())
+		    new_dict[tuple(varList)] = j[k]
             coefficients_new.append(new_dict)
         self.coefficients = coefficients_new
 
@@ -75,6 +81,10 @@ class Specification(object):
 
             if type(i) is str:
                 pass
+	    elif type(i) is tuple:		
+		for k in i:
+		    if type(k) is not str:
+			return 0, 'not a valid string'
             else:
                 return 0, 'not a valid string'
 
