@@ -60,7 +60,7 @@ class Export_Outputs(QDialog):
         selectlayout1.addWidget(tablenamelabel)
         
         self.pptype = QComboBox()
-        self.pptype.addItems([QString("Adult Worker"),QString("Adult Non-worker"),QString("Non-adult")])
+        self.pptype.addItems([QString("Adult Worker"),QString("Adult Non-worker"),QString("Non-adult (5-17)"),QString("Preschooler (0-4)")])
         selectlayout1.addWidget(self.pptype)
         
         
@@ -79,19 +79,22 @@ class Export_Outputs(QDialog):
         selectlayout2.addWidget(self.resultchoice)
         
 
-        self.export_nhts = QCheckBox("Check if you would export NHTS instead of OpenAmos")
-        if not (self.new_obj.check_if_table_exists("schedule_nhts") and self.new_obj.check_if_table_exists("trips_nhts") \
+        #self.export_nhts = QCheckBox("Check if you would export NHTS instead of OpenAmos")
+        self.isNHTS = False
+        if (self.new_obj.check_if_table_exists("schedule_nhts") and self.new_obj.check_if_table_exists("trips_nhts") \
             and self.new_obj.check_if_table_exists("households_nhts") and self.new_obj.check_if_table_exists("persons_nhts") \
             and self.new_obj.check_if_table_exists("daily_work_status_nhts")):
-            self.export_nhts.setDisabled(True)
+            
+            self.isNHTS = True
+        #    self.export_nhts.setDisabled(True)
             
         self.check_all = QCheckBox("Check to select all")
 
         
         excellayout.addWidget(selectwidget1,0,0)
         excellayout.addWidget(selectwidget2,0,1)
-        excellayout.addWidget(self.export_nhts,1,0)
-        excellayout.addWidget(self.check_all,1,1)
+        #excellayout.addWidget(self.export_nhts,1,0)
+        excellayout.addWidget(self.check_all,1,0)
     
 
         self.dialogButtonBox = QDialogButtonBox(QDialogButtonBox.Cancel| QDialogButtonBox.Ok)
@@ -122,15 +125,31 @@ class Export_Outputs(QDialog):
             for i in range(self.resultchoice.count()):
                 item = self.resultchoice.item(i)
                 if item.isSelected() and i < 4:
-                    self.sql_quary1(wb,columns[i])
+                    wsheet = wb.add_sheet(columns[i])
+                    self.sql_quary1(wsheet,columns[i],False)
+                    if self.isNHTS:
+                        self.sql_quary1(wsheet,columns[i],True)
                 elif item.isSelected() and i >= 4 and i < 7:
-                    self.sql_quary2(wb,columns[i])
+                    wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
+                    self.sql_quary2(wsheet,columns[i],False)
+                    if self.isNHTS:
+                        self.sql_quary2(wsheet,columns[i],True)
                 elif item.isSelected() and i == 7:
-                    self.sql_quary3(wb)
+                    wsheet = wb.add_sheet("TripRate")
+                    self.sql_quary3(wsheet,False)
+                    if self.isNHTS:
+                        self.sql_quary3(wsheet,True)
                 elif item.isSelected() and i == 8:
-                    self.sql_quary1(wb,columns[i])
+                    wsheet = wb.add_sheet(columns[i])
+                    self.sql_quary1(wsheet,columns[i],False)
+                    if self.isNHTS:
+                        self.sql_quary1(wsheet,columns[i],True)
                 elif item.isSelected() and i > 8:
-                    self.sql_quary2(wb,columns[i])
+                    wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
+                    self.sql_quary2(wsheet,columns[i],False)
+                    if self.isNHTS:
+                        self.sql_quary2(wsheet,columns[i],True)
+                        
             wb.save(filename)
             QMessageBox.information(self, "",
                 QString("""Outputs exporting is successful!"""), 
@@ -147,52 +166,18 @@ class Export_Outputs(QDialog):
         t2 = time.time()
         print 'time taken --> %s'%(t2-t1)
 
-
-#    def accept(self):
-#        t1 = time.time()
-#        
-#        filename = str(self.xlsname.text())
-#        sitems = self.resultchoice.selectedItems()
-#        if filename <> "" and len(sitems) > 0:
-#            
-#            ofile = open(filename, 'wb')
-#            writer = csv.writer(ofile, dialect='excel')            
-#            columns = ["starttime","endtime","duration","trippurpose","starttime","endtime","duration","","dweltime","dweltime"]
-#            for i in range(self.resultchoice.count()):
-#                item = self.resultchoice.item(i)
-#                if item.isSelected() and i < 4:
-#                    self.sql_quary1(writer,columns[i],i)
-#                elif item.isSelected() and i >= 4 and i < 7:
-#                    self.sql_quary2(writer,columns[i],i)
-#                elif item.isSelected() and i == 7:
-#                    self.sql_quary3(writer,i)
-#                elif item.isSelected() and i == 8:
-#                    self.sql_quary1(writer,columns[i],i)
-#                elif item.isSelected() and i > 8:
-#                    self.sql_quary2(writer,columns[i],i)
-#            ofile.close()
-#            
-#        else:
-#            QMessageBox.warning(self, "Save Outputs...",
-#                                QString("""Select at least one on the list."""), 
-#                                QMessageBox.Ok)            
-#        
-#        t2 = time.time()
-#        print 'time taken --> %s'%(t2-t1)
-        
-        
+                
     def save_folder(self):
         dialog = QFileDialog()
         filename = dialog.getSaveFileName(self,"Save File","","Comma Delimit (*.xls)")
         if filename <> "":
             self.xlsname.setText(filename)
 
-    def sql_quary1(self,wb,column):
-            
-        wsheet = wb.add_sheet(column)
+
+    def sql_quary1(self,wsheet,column,nhts):
         
         nhts_var = ""
-        if self.export_nhts.isChecked() and column <> "dweltime":
+        if nhts and column <> "dweltime":
             count = "sum(a.wttrdfin)"
             nhts_var = ", wttrdfin"
         else:
@@ -203,6 +188,12 @@ class Export_Outputs(QDialog):
             tnames = self.tables(False)
         else:
             tnames = self.tables(True)
+                
+        if nhts:
+            self.table_name(tnames)
+#            for i in range(len(tnames)):
+#                tnames[i] = tnames[i].replace("_r","") + "_nhts"
+
         
         cond = self.time_categroy(column)
         labels = self.trip_labels(column)
@@ -222,7 +213,7 @@ class Export_Outputs(QDialog):
             else:
                 sql = "%s(select houseid, personid%s from %s where %s = %d) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0])
                 
-            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond())
+            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond(nhts))
             wrk = self.wrk_cond()
             if wrk != "":
                 sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
@@ -242,25 +233,29 @@ class Export_Outputs(QDialog):
                     err2.append(long(j[0]))
                     total = total + long(j[0])
         
-        self.cnames(wsheet)
+        #self.cnames(wsheet)
+        j = 0
+        if nhts:
+            self.cnames(wsheet,5)
+            j = 4
+        else:
+            self.cnames(wsheet,1)
+            
         for i in range(len(err1)):
 
             if total > 0.0:
                 percent = round(100*float(err2[i])/total,2)
             else:
                 percent = 0.0
-            wsheet.write(i+1,0,str(err1[i]))
-            wsheet.write(i+1,1,long(err2[i]))
-            wsheet.write(i+1,2,percent)
+            wsheet.write(i+2,j,str(err1[i]))
+            wsheet.write(i+2,j+1,long(err2[i]))
+            wsheet.write(i+2,j+2,percent)
 
 
-
-    def sql_quary2(self,wb,column):
-
-        wsheet = wb.add_sheet("%sbyPurpose"%(column))
+    def sql_quary2(self,wsheet,column,nhts):
 
         nhts_var = ""
-        if self.export_nhts.isChecked() and column <> "dweltime":
+        if nhts and column <> "dweltime":
             count = "sum(a.wttrdfin)"
             nhts_var = ", wttrdfin"
         else:
@@ -273,6 +268,11 @@ class Export_Outputs(QDialog):
         else:
             tnames = self.tables(True)
             acttype = "trippurpose"
+        
+            
+        if nhts:
+            self.table_name(tnames)
+        
         
         cond = self.time_categroy(column)
         ylabels = self.trip_labels(column)
@@ -300,7 +300,7 @@ class Export_Outputs(QDialog):
                 sql = "%s(select houseid, personid, %s%s from %s where %s >= %d and %s < %d order by houseid, personid) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1])
             else:
                 sql = "%s(select houseid, personid, %s%s from %s where %s = %d) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0])
-            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond())
+            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond(nhts))
             
             wrk = self.wrk_cond()
             if wrk != "":
@@ -323,45 +323,48 @@ class Export_Outputs(QDialog):
             
             yvalue.append(xvalue)
             
-#        i = 1
-#        for ykey in ykeys:
-#            wsheet.write(i,0,str(ylabels[ykey]))
-#            i += 1
-#        j = 1
-#        for xkey in xkeys:
-#            wsheet.write(0,j,str(xlabels[xkey]))
-#            j += 1
-#            
-#        i = 1
-#        for y in yvalue:
-#            j = 1
-#            for x in y:
-#                wsheet.write(i,j,x)
-#                j += 1
-#            i += 1
 
         j = 1
+        if nhts:
+            j = len(xkeys)+4
+            wsheet.write(0,len(xkeys)+3,"NHTS")            
+        else:
+            wsheet.write(0,0,"OpenAmos")
+            
         for xkey in xkeys:
-            wsheet.write(0,j,str(xlabels[xkey]))
+            wsheet.write(1,j,str(xlabels[xkey]))
             j += 1
         
-        i = 1
+        i = 2
         for y in yvalue:
 
-            wsheet.write(i,0,str(ylabels[ykeys[i-1]]))
+            if nhts:
+                wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
+            else:
+                wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
+                
             for j in range(len(y)):
                 if cumulate[j] > 0.0:
                     percent = round(100*float(y[j])/cumulate[j],2)
                 else:
                     percent = 0.0
-                wsheet.write(i,j+1,percent)
+
+                if nhts:
+                    wsheet.write(i,j+len(xkeys)+4,percent)
+                else:
+                    wsheet.write(i,j+1,percent)
+                
             i += 1
 
 
-    def sql_quary3(self,wb):
-
-        wsheet = wb.add_sheet("TripRate")   
+    def sql_quary3(self,wsheet,nhts):
+   
         tnames = self.tables(True)
+        if nhts:
+            self.table_name(tnames)
+#            for i in range(len(tnames)):
+#                tnames[i] = tnames[i].replace("_r","") + "_nhts"
+                
         wrk = self.wrk_cond()
         if wrk == "":
             table = "%s as p"%(tnames[1])
@@ -371,14 +374,14 @@ class Export_Outputs(QDialog):
             condition = "p.houseid = w.houseid and p.personid = w.personid and w.wrkdailystatus = %s and "%(wrk)
         
         nhts_var = ""
-        if self.export_nhts.isChecked():
+        if nhts:
             count = "sum(wtperfin)"
             nhts_var = ", p.wtperfin"
         else:
             count = "count(*)"
             
         sql = "select b.freq, %s from (select p.houseid, p.personid%s from %s"%(count,nhts_var,table)
-        sql = "%s where %sp.%s) as a left join "%(sql,condition,self.age_cond())
+        sql = "%s where %sp.%s) as a left join "%(sql,condition,self.age_cond(nhts))
         sql = "%s (select houseid, personid, count(*) as freq from %s group by houseid, personid) as b "%(sql,tnames[0])
         sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
 
@@ -397,16 +400,24 @@ class Export_Outputs(QDialog):
                 err2.append(long(j[1]))
                 total += long(j[1])
         
-        self.cnames(wsheet)   
+        
+        
+        j = 0
+        if nhts:
+            self.cnames(wsheet,5)
+            j = 4 
+        else:
+            self.cnames(wsheet,1)
+            
         for i in range(len(err1)):
             if total > 0.0:
                 percent = round(100*float(err2[i])/total,2)
             else:
                 percent = 0.0
                 
-            wsheet.write(i+1,0,str(err1[i]))
-            wsheet.write(i+1,1,long(err2[i]))
-            wsheet.write(i+1,2,percent)
+            wsheet.write(i+2,j,str(err1[i]))
+            wsheet.write(i+2,j+1,long(err2[i]))
+            wsheet.write(i+2,j+2,percent)
 
             
 
@@ -437,14 +448,16 @@ class Export_Outputs(QDialog):
             
         return index                
 
-    def age_cond(self):
-        if self.pptype.currentIndex() > 1:
-            age = "age < 18"
-        else:
+    def age_cond(self,nhts):
+        if self.pptype.currentIndex() <= 1:
             age = "age >= 18"
+        elif self.pptype.currentIndex() == 2:
+            age = "age < 18 and age >= 5"
+        else:
+            age = "age < 5"
             
-        if self.export_nhts.isChecked():
-            age = "r_%s"%(age)
+        if nhts:
+            age = age.replace("age", "r_age")
         return age
 
     def wrk_cond(self):
@@ -457,17 +470,20 @@ class Export_Outputs(QDialog):
         
     def tables(self,istrip):
         if istrip:
-            if not self.export_nhts.isChecked():
-                table_names = ["trips_r","persons","daily_work_status_r"]
-            else:
-                table_names = ["trips_nhts","persons_nhts","daily_work_status_nhts"]
+            table_names = ["trips_r","persons","daily_work_status_r"]
             return table_names
         else:
-            if not self.export_nhts.isChecked():
-                table_names = ["schedule_final_r","persons","daily_work_status_r"]
+            table_names = ["schedule_final_r","persons","daily_work_status_r"]
+            return table_names 
+    
+    def table_name(self,names):
+        for i in range(len(names)):
+            if names[i].find("_final_r") > -1:
+                names[i] = names[i].replace("_final_r","") + "_nhts"
+            elif names[i].find("_r") > -1:
+                names[i] = names[i].replace("_r","") + "_nhts"  
             else:
-                table_names = ["schedule_nhts","persons_nhts","daily_work_status_nhts"]
-            return table_names  
+                names[i] = names[i] + "_nhts"      
 
     def time_categroy(self,column):
         time = {1:[0,60],2:[60,120],3:[120,180],4:[180,240],5:[240,300],6:[300,360],
@@ -546,9 +562,14 @@ class Export_Outputs(QDialog):
         names = self.items()
         wsheet.write(0,0,names[ind])
 
-    def cnames(self,wsheet):
-        wsheet.write(0,1,"Frequency")
-        wsheet.write(0,2,"Percent(%)")
+    def cnames(self,wsheet,i):
+        if i == 1:
+            wsheet.write(0,i-1,"OpenAmos")
+        else:
+            wsheet.write(0,i-1,"NHTS")
+            
+        wsheet.write(1,i,"Frequency")
+        wsheet.write(1,i+1,"Percent(%)")
             
     def connects(self,configobject):
         

@@ -47,7 +47,7 @@ class Import_NHTS(QDialog):
         
         self.nhtstable = QComboBox()
         self.nhtstable.addItems([QString("NHTS Persons"),QString("NHTS Households"),
-                                 QString("NHTS Trips"),QString("NHTS Schedules")])
+                                 QString("NHTS Trips")])
         nhtslayout.addWidget(self.nhtstable)
         
         
@@ -72,6 +72,7 @@ class Import_NHTS(QDialog):
         self.connect(self.openfilebutton, SIGNAL("clicked(bool)"), self.open_folder)
         self.connect(self.dialogButtonBox, SIGNAL("accepted()"), self, SLOT("accept()"))
         self.connect(self.dialogButtonBox, SIGNAL("rejected()"), self, SLOT("reject()"))
+        self.connect(self.nhtstable, SIGNAL("currentIndexChanged(int)"), self.clear_line)
 
         
     def reject(self):
@@ -90,13 +91,15 @@ class Import_NHTS(QDialog):
                 self.import_house(filename)
             elif self.nhtstable.currentIndex() == 2:
                 if self.new_obj.check_if_table_exists(str("persons_nhts")):
-                    self.import_trip(filename)
+                    isNext = self.import_trip(filename)
+                    if isNext:
+                        self.import_schedule(filename)
                 else:
                     QMessageBox.warning(self, "Import NHTS dataset...",
                                         QString("""After importing NHTS Person, you can import it."""), 
                                         QMessageBox.Ok)
-            else:
-                self.import_schedule(filename)
+#            else:
+#                self.import_schedule(filename)
         
         self.dialogButtonBox.setEnabled(True)
 
@@ -115,7 +118,7 @@ class Import_NHTS(QDialog):
                 return False
             
         return True
-                        
+                      
 
     def import_person(self, filename):
         
@@ -293,42 +296,46 @@ class Import_NHTS(QDialog):
                 pid1 = "-1"
                 hid2 = "-1"
                 pid2 = "-1"
+                prow = []  # Store previous row of the csv file
                 for row in csvReader:
-                    
+                                            
                     hid2 = str(row[index[1]])
                     pid2 = str(row[index[2]])
                     if hid1 != hid2 or pid1 != pid2:
                         hid1 = hid2
                         pid1 = pid2
                         isworker = True
+                        ith = 1  #0: middle of trips (101), 1:last trip (100)
+                    
+                                        
+                    if len(prow) > 0: 
+                        self.import_trip2(prow,ith,index)
+                    
+                    prow = row
+                    if ith == 1:
+                        ith = 0
                     
                     
-                    etime = self.change_time(row[index[4]])
-                    stime = self.change_time(row[index[3]])
-                    if stime >= 0 and etime >= 0:
-                        duration = etime - stime
-                    else:
-                        duration = -99
-                    
-                    wto = self.activity_type(row[index[5]])
-                    ssql = "INSERT INTO %s VALUES(%s,%s,%s,%d,%d,%d,%d,%s)"%(table,row[index[0]],hid2,pid2,stime,etime,duration,wto,row[index[6]])
-                    self.new_obj.cursor.execute(ssql)
-                    
-                    if wto == 200 and isworker:                    
+                    wto = int(row[index[5]])
+                    if wto >= 10 and wto <= 12 and isworker:                    
                         ssql = "UPDATE daily_work_status_nhts SET wrkdailystatus=1 WHERE houseid = %s and personid = %s"%(hid2,pid2)
                         self.new_obj.cursor.execute(ssql)
                         isworker = False
 
+
+                ith = 1 # last trip
+                self.import_trip2(prow,ith,index)
                 self.new_obj.connection.commit()
                 
-                QMessageBox.information(self, "",
-                            QString("""Data importing is successful!"""), 
-                            QMessageBox.Yes)
+#                QMessageBox.information(self, "",
+#                            QString("""Data importing is successful!"""), 
+#                            QMessageBox.Yes)
             
             else:
                 QMessageBox.warning(self, "Import NHTS dataset...",
                                     QString("""You select an incorrect file."""), 
                                     QMessageBox.Yes)
+                return False
                 
                     
             input.close()
@@ -339,16 +346,36 @@ class Import_NHTS(QDialog):
                         QMessageBox.Yes)
             input.close()
             print e
+            return False
             
         t2 = time.time()
         print 'time taken is ---> %s'%(t2-t1)
+        return True
 
+    def import_trip2(self,row,ith,index):
+
+        hid2 = str(row[index[1]])
+        pid2 = str(row[index[2]])
+        etime = self.change_time(row[index[4]])
+        stime = self.change_time(row[index[3]])
+        if stime >= 0 and etime >= 0:
+            duration = etime - stime
+        else:
+            duration = -99
+        
+        wto = self.activity_type(row[index[5]])  
+        if wto == 100 and ith == 0:
+            wto = 101
+                                  
+        trip_sql = "INSERT INTO trips_nhts VALUES(%s,%s,%s,%d,%d,%d,%d,%s)"%(row[index[0]],hid2,pid2,stime,etime,duration,wto,row[index[6]])
+        self.new_obj.cursor.execute(trip_sql)     
+        
 
     def import_schedule(self,filename):
 
         t1 = time.time()
         try:
-            table = self.table_name_db()
+            table = "schedule_nhts"
             input = open(filename,'rb')
             csvReader = csv.reader(input)
             headers = csvReader.next()
@@ -363,8 +390,13 @@ class Import_NHTS(QDialog):
 #            header = "SCHEDULEID,HOUSEID,PERSONID,activitytype,starttime,endtime,duration\n"
 #            o.write(header)
 
-            if self.checkTable(table) and self.isvalid(headers):
-            
+            if self.isvalid(headers):
+                
+                if self.new_obj.check_if_table_exists(str(table)):
+                    ssql = "DROP TABLE %s"%(table)
+                    self.new_obj.cursor.execute(ssql)
+                    self.new_obj.connection.commit()
+                    
                 i = self.index_schedule(headers)
                 if not self.new_obj.check_if_table_exists("schedule_nhts"):
                     ssql = "CREATE TABLE schedule_nhts (scheduleid bigint NOT NULL, \
@@ -421,7 +453,7 @@ class Import_NHTS(QDialog):
                             wfrom = 101
                         stime = self.change_time(prow[i[4]])
                         etime = self.change_time(row[i[3]])
-                        if stime >= 0 and etime >= 0:
+                        if stime >= 0 and etime >= 0 and etime >= stime:
                             duration = etime - stime
                         else:
                             duration = -99
@@ -438,7 +470,7 @@ class Import_NHTS(QDialog):
                 wto = self.activity_type(prow[i[6]])
                 stime = self.change_time(prow[i[4]])
                 etime = 1439
-                if stime >= 0:
+                if stime >= 0 and etime >= stime:
                     duration = etime - stime
                 else:
                     duration = -99
@@ -448,7 +480,7 @@ class Import_NHTS(QDialog):
                 self.new_obj.connection.commit()
                 
                 QMessageBox.information(self, "",
-                    QString("""Inserting NHTS as a schedule table is successful"""), 
+                    QString("""Inserting NHTS data is successful"""), 
                     QMessageBox.Yes)
             
             else:
@@ -503,7 +535,7 @@ class Import_NHTS(QDialog):
         elif self.nhtstable.currentIndex() == 1:
             columns = ["houseid"]
         elif self.nhtstable.currentIndex() == 2:
-            columns = ['tdcaseid','houseid','personid','strttime','endtime','whyto','wttrdfin']
+            columns = ['tdcaseid','houseid','personid','strttime','endtime','whyfrom','whyto','wttrdfin']
         else:
             columns = ['houseid','personid','tdcaseid','strttime','endtime','whyfrom','whyto']
 
@@ -614,6 +646,9 @@ class Import_NHTS(QDialog):
                 tim = tim + 1200
             return tim
         return int(value)
+    
+    def clear_line(self):
+        self.csvname.setText("")
 
 
     def connects(self,configobject):
