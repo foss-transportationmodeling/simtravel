@@ -13,41 +13,6 @@ class ReconcileSchedules(Model):
         self.specification = specification
         self.activityAttribs = self.specification.activityAttribs
 
-    def create_indices1(self, data):
-        houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
-                                                 return_inverse=True)
-
-        countOfHid = 0
-
-        self.indices = []
-        self.index = 0
-        for hid in houseIdsUnique:
-            hIdIndices = hId_reverse_indices == countOfHid
-            #hIdIndices.shape = (hIdIndices.sum(), )
-            schedulesForHid = data.rowsof(hIdIndices)
-            #print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
-            #print schedulesForHid.data.astype(int)
-            
-            pIdsUnique, pId_reverse_indices = unique(schedulesForHid.columns([self.activityAttribs.pidName]).data,
-                                                  return_inverse=True)
-            #print '\tperson Ids - ', pIdsUnique
-            countOfPid = 0
-            for pid in pIdsUnique:
-                pIdIndices = pId_reverse_indices == countOfPid
-                #print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
-                #       ' start-', self.index, ' end-', (self.index + pIdIndices.sum()))
-                #print data.data[self.index:(self.index + pIdIndices.sum()), :].astype(int)
-                
-                self.indices.append([hid, pid, self.index, self.index + pIdIndices.sum()])
-
-                self.index += pIdIndices.sum()
-                countOfPid += 1
-
-            countOfHid += 1
-
-
-        self.indices = array(self.indices)
-    
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName, 
                                self.activityAttribs.pidName]).data

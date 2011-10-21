@@ -47,58 +47,6 @@ class CleanAggregateActivitySchedule(Model):
 
         self.childDependencyCol = colnamesDict[self.dependencyAttribs.childDependencyName]
 
-
-        
-
-
-    def create_indices1(self, data):
-        houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
-                                                 return_inverse=True)
-
-
-        countOfHid = 0
-
-        hhldIndicesOfPersons = []
-        personIndicesOfActs = []
-        self.actIndex = 0
-        self.persIndex = 0
-        for hid in houseIdsUnique:
-            hIdIndices = hId_reverse_indices == countOfHid
-            #hIdIndices.shape = (hIdIndices.sum(), )
-            schedulesForHid = data.rowsof(hIdIndices)
-            #print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
-            #print schedulesForHid.data.astype(int)
-            
-            pIdsUnique, pId_reverse_indices = unique(schedulesForHid.columns([self.activityAttribs.pidName]).data,
-                                                  return_inverse=True)
-            #print '\tperson Ids - ', pIdsUnique
-            countOfPid = 0
-            for pid in pIdsUnique:
-                pIdIndices = pId_reverse_indices == countOfPid
-                #print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
-                #       ' start-', self.actIndex, ' end-', (self.actIndex + pIdIndices.sum()))
-                #print data.data[self.actIndex:(self.actIndex + pIdIndices.sum()), :].astype(int)
-                
-                personIndicesOfActs.append([hid, pid, self.actIndex, self.actIndex + pIdIndices.sum()])
-
-                self.actIndex += pIdIndices.sum()
-                countOfPid += 1
-
-            hhldIndicesOfPersons.append([hid, self.persIndex, self.persIndex + pIdsUnique.shape[0]])
-            #print 'HID - %s, pers index start - %s, pers index end - %s ' %(hid, self.persIndex,
-            #                                                                self.persIndex + pIdsUnique.shape[0])
-            self.persIndex += pIdsUnique.shape[0]
-            countOfHid += 1
-
-        self.personIndicesOfActs = array(personIndicesOfActs, dtype=int)
-        self.hhldIndicesOfPersons = array(hhldIndicesOfPersons, dtype=int)
-                   
-
-        #print self.personIndicesOfActs
-        #print self.hhldIndicesOfPersons
-
-        #raw_input()
-
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName,
                                self.activityAttribs.pidName]).data
