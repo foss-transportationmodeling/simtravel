@@ -1535,6 +1535,7 @@
 
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+        <FilterSet type="and"/>
 	<Filter table="households" var="houseid" condition="greater than" value="0"/>
 	<Filter table="runtime" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
