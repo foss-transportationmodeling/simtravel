@@ -1419,7 +1419,9 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
+        <FilterSet type="and"/>
 	<Filter table="households" var="houseid" condition="greater than" value="0"/>
+	<Filter table="runtime" var="schdailystatus" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -1479,7 +1481,9 @@
       </Model>
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
-	<Filter table="households" var="houseid" condition="greater than" value="0"/>
+        <FilterSet type="and"/>
+	<Filter table="persons" var="houseid" condition="greater than" value="0"/>
+	<Filter table="runtime" var="wrkdailystatus" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -1532,6 +1536,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
 	<Filter table="households" var="houseid" condition="greater than" value="0"/>
+	<Filter table="runtime" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -2292,7 +2297,7 @@
     	<Table table="schedule_childrenlastprismadj_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_allocterm_r" location_var="locationid" time_var="endtime"/>
@@ -2571,7 +2576,7 @@
     	<Table table="schedule_childreninctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_childrenlastprismadj_r" location_var="locationid" time_var="endtime"/>
@@ -2922,7 +2927,7 @@
         <Table table="schedule_inctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_dailyallocrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_dailyallocrec_r" location_var="locationid" time_var="starttime"/>
@@ -3156,7 +3161,7 @@
         <Table table="schedule_skeleton_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
