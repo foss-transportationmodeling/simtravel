@@ -5,6 +5,8 @@ from openamos.core.models.abstract_model import Model
 
 from numpy import array, logical_and, histogram, zeros
 
+import time
+
 class CleanFixedActivitySchedule(Model):
     def __init__(self, specification):
         Model.__init__(self, specification)
@@ -47,57 +49,6 @@ class CleanFixedActivitySchedule(Model):
 
         self.childDependencyCol = colnamesDict[self.dependencyAttribs.childDependencyName]
 
-
-        
-
-
-    def create_indices1(self, data):
-        houseIdsUnique, hId_reverse_indices = unique(data.columns([self.activityAttribs.hidName]).data,
-                                                 return_inverse=True)
-
-
-        countOfHid = 0
-
-        hhldIndicesOfPersons = []
-        personIndicesOfActs = []
-        self.actIndex = 0
-        self.persIndex = 0
-        for hid in houseIdsUnique:
-            hIdIndices = hId_reverse_indices == countOfHid
-            #hIdIndices.shape = (hIdIndices.sum(), )
-            schedulesForHid = data.rowsof(hIdIndices)
-            #print 'houseID, number of household records - ',hid, hIdIndices.sum(), schedulesForHid.rows
-            #print schedulesForHid.data.astype(int)
-            
-            pIdsUnique, pId_reverse_indices = unique(schedulesForHid.columns([self.activityAttribs.pidName]).data,
-                                                  return_inverse=True)
-            #print '\tperson Ids - ', pIdsUnique
-            countOfPid = 0
-            for pid in pIdsUnique:
-                pIdIndices = pId_reverse_indices == countOfPid
-                #print ('\tperson id', pid, ' number of person records-', pIdIndices.sum(), 
-                #       ' start-', self.actIndex, ' end-', (self.actIndex + pIdIndices.sum()))
-                #print data.data[self.actIndex:(self.actIndex + pIdIndices.sum()), :].astype(int)
-                
-                personIndicesOfActs.append([hid, pid, self.actIndex, self.actIndex + pIdIndices.sum()])
-
-                self.actIndex += pIdIndices.sum()
-                countOfPid += 1
-
-            hhldIndicesOfPersons.append([hid, self.persIndex, self.persIndex + pIdsUnique.shape[0]])
-            #print 'HID - %s, pers index start - %s, pers index end - %s ' %(hid, self.persIndex,
-            #                                                                self.persIndex + pIdsUnique.shape[0])
-            self.persIndex += pIdsUnique.shape[0]
-            countOfHid += 1
-
-        self.personIndicesOfActs = array(personIndicesOfActs, dtype=int)
-        self.hhldIndicesOfPersons = array(hhldIndicesOfPersons, dtype=int)
-                   
-
-        #print self.personIndicesOfActs
-        #print self.hhldIndicesOfPersons
-
-        #raw_input()
 
     def create_indices(self, data):
         idCols = data.columns([self.activityAttribs.hidName,
@@ -153,11 +104,6 @@ class CleanFixedActivitySchedule(Model):
         #raw_input('new implementation of indices')
 
 
-
-
-
-
-
     def resolve_consistency(self, data, seed):
 
         actList = []
@@ -166,73 +112,42 @@ class CleanFixedActivitySchedule(Model):
                    self.activityAttribs.scheduleidName])
 
         # Create Index Matrix
+	ti = time.time()
         self.create_indices(data)
+	print 'indices created in %.4f' %(time.time()-ti)
         self.create_col_numbers(data._colnames)
 
         for hhldIndex in self.hhldIndicesOfPersons:
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
 
-            firstPersonFirstAct = self.personIndicesOfActs[firstPersonRec,2]
-            lastPersonLastAct = self.personIndicesOfActs[lastPersonRec-1,3]
-
-            schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
-                                                       lastPersonLastAct,:], data.varnames)
             #print 'hID - ', hhldIndex[0]
-            #print schedulesForHhld.data.astype(int)
-            #print data.varnames
-
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
-
-
-
-
             householdObject = Household(hhldIndex[0])
 
             for perIndex in persIndicesForActsForHhld:
                 personObject = Person(perIndex[0], perIndex[1])
-                schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
+		schedulesForPerson = data.data[perIndex[2]:perIndex[3],:]
                 activityList = self.return_activity_list_for_person(schedulesForPerson)
                 personObject.add_episodes(activityList)
                 workStatus, schoolStatus, childDependency = self.return_status_dependency(schedulesForPerson)
                 personObject.add_status_dependency(workStatus, schoolStatus, 
                                                    childDependency)
-
                 householdObject.add_person(personObject)
-
-                #print '\thID - %s, pID - %s' %(perIndex[0], perIndex[1])
-                #print schedulesForPerson.data.astype(int)
+		#print personObject.print_activity_list()
 
             reconciledSchedules = householdObject.clean_schedules(seed)
-            #print reconciledSchedules
             
             actList += reconciledSchedules
 
-
-
-            #for i in reconciledSchedules:
-            #    print i
-            
-	    #if hhldIndex[0] == 322 or hhldIndex[0] == 352 or hhldIndex[0] == 386 or hhldIndex[0] == 604 or hhldIndex[0] == 605:
-	    #	raw_input()	   
-
-
-            #raw_input()
-
-            # TODO: CHECK THE DATA UPDATING PART
-            #i = 0
-            #for colN in colNames:
-            #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-            #    i += 1
-                
         return DataArray(actList, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
         activityList = []
-        for sched in schedulesForPerson.data:
+        for sched in schedulesForPerson:
 	    hid = sched[self.hidCol]
 	    pid = sched[self.pidCol]
 
@@ -268,6 +183,7 @@ class CleanFixedActivitySchedule(Model):
         # this can be replaced with a simple extraction as opposed 
         # to identifying unique values, checking for single value 
         # and then updating the status variables
+	"""
         workStatusUnique = unique(schedulesForPerson.data[:, self.workStatusCol])
         if workStatusUnique.shape[0] > 1:
             print 'Work Status', workStatusUnique
@@ -292,6 +208,7 @@ class CleanFixedActivitySchedule(Model):
         
         #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
         #                                           childDependency)
+	"""
         return workStatus, schoolStatus, childDependency
 
         

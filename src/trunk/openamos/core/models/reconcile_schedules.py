@@ -136,13 +136,10 @@ class ReconcileSchedules(Model):
         row = 0
         
         for perIndex in self.indices:
-            schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
-	    #print data.varnames
-            #print schedulesForPerson.data.astype(int)
-            #raw_input()
+            schedulesForPerson = data.data[perIndex[2]:perIndex[3],:]
 
             activityList = []
-            for sched in schedulesForPerson.data:
+            for sched in schedulesForPerson:
 		hid = sched[hidCol]
 		pid = sched[pidCol]
 
@@ -161,31 +158,11 @@ class ReconcileSchedules(Model):
             personObject.add_episodes(activityList)
             personObject.reconcile_activity_schedules(seed)
 	    reconciledSchedules = personObject._collate_results_aslist()
-	    #print 'RECONCILED SCHEDULE'
-            #print reconciledSchedules		
+
 	    if not personObject._check_for_conflicts():
                 raise Exception, "THE SCHEDULES ARE STILL MESSED UP"    
 
-
-            #reconciledSchedules = personObject.add_and_reconcile_episodes(activityList)
-
 	    actList += reconciledSchedules
-             
-	    """   
-            i = 0
-            for colN in colNames:
-                data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-                i += 1
-	    
-	    if (perIndex[0] == 44144 and perIndex[1] == 3): # or (perIndex[0] == 107 and perIndex[1] == 2) or (perIndex[0] == 100708 and perIndex[1] == 2):
-		raw_input()
-            """                      
-            #print 'MODIFIED DATA'
-            #print data.rowsof(recsInd).data.astype(int)
-            #print reconciledSchedules.astype(int)
-            #print data.data.shape
-            #raw_input()
-                
         return DataArray(actList, colNames)
 
 import unittest

@@ -173,59 +173,31 @@ class CleanAggregateActivitySchedule(Model):
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
 
-            firstPersonFirstAct = self.personIndicesOfActs[firstPersonRec,2]
-            lastPersonLastAct = self.personIndicesOfActs[lastPersonRec-1,3]
-
-            schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
-                                                       lastPersonLastAct,:], data.varnames)
-            #print 'hID - ', hhldIndex[0]
-            #print schedulesForHhld.data.astype(int)
-            #print data.varnames
-
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
-
-
-
-
 
             householdObject = Household(hhldIndex[0])
 
             for perIndex in persIndicesForActsForHhld:
                 personObject = Person(perIndex[0], perIndex[1])
-                schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
+                schedulesForPerson = data.data[perIndex[2]:perIndex[3],:]
                 activityList = self.return_activity_list_for_person(schedulesForPerson)
                 personObject.add_episodes(activityList)
                 workStatus, schoolStatus, childDependency = self.return_status_dependency(schedulesForPerson)
                 personObject.add_status_dependency(workStatus, schoolStatus, 
                                                    childDependency)
-
                 householdObject.add_person(personObject)
-
-                #print '\thID - %s, pID - %s' %(perIndex[0], perIndex[1])
-                #print schedulesForPerson.data.astype(int)
-
             reconciledSchedules = householdObject.clean_schedules_for_in_home_episodes(seed)
-            #print reconciledSchedules
             
             actList += reconciledSchedules
 
-            
-            #raw_input()
-
-            # TODO: CHECK THE DATA UPDATING PART
-            #i = 0
-            #for colN in colNames:
-            #    data.setcolumn(colN, reconciledSchedules[:,i], start=perIndex[2], end=perIndex[3])
-            #    i += 1
-                
         return DataArray(actList, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
         activityList = []
-        for sched in schedulesForPerson.data:
+        for sched in schedulesForPerson:
 	    hid = sched[self.hidCol]
 	    pid = sched[self.pidCol]
 
@@ -261,6 +233,7 @@ class CleanAggregateActivitySchedule(Model):
         # this can be replaced with a simple extraction as opposed 
         # to identifying unique values, checking for single value 
         # and then updating the status variables
+	"""
         workStatusUnique = unique(schedulesForPerson.data[:, self.workStatusCol])
         if workStatusUnique.shape[0] > 1:
             print 'Work Status', workStatusUnique
@@ -285,6 +258,7 @@ class CleanAggregateActivitySchedule(Model):
         
         #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
         #                                           childDependency)
+	"""
         return workStatus, schoolStatus, childDependency
 
         

@@ -134,6 +134,7 @@ class AdjustSchedules(Model):
         # this can be replaced with a simple extraction as opposed 
         # to identifying unique values, checking for single value 
         # and then updating the status variables
+	"""
         workStatusUnique = unique(schedulesForPerson.data[:, self.workStatusCol])
         if workStatusUnique.shape[0] > 1:
             print 'Work Status', workStatusUnique
@@ -158,6 +159,7 @@ class AdjustSchedules(Model):
         
         #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
         #                                           childDependency)
+	"""
         return workStatus, schoolStatus, childDependency
 
 
@@ -177,7 +179,7 @@ class AdjustSchedules(Model):
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
         activityList = []
-        for sched in schedulesForPerson.data:
+        for sched in schedulesForPerson:
 	    hid = sched[self.hidCol]
 	    pid = sched[self.pidCol]
 
@@ -211,43 +213,21 @@ class AdjustSchedules(Model):
 
 	#print data._colnames, data.varnames
 
-        #print 'Indices created in %.4f' %(time.time()-ti)
+        print 'Indices created in %.4f' %(time.time()-ti)
 
         for hhldIndex in self.hhldIndicesOfPersons:
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
 
-            firstPersonFirstAct = self.personIndicesOfActs[firstPersonRec,2]
-            lastPersonLastAct = self.personIndicesOfActs[lastPersonRec-1,3]
-
-            schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
-                                                       lastPersonLastAct,:], data.varnames)
-            #print schedulesForHhld.data.astype(int)
-            #print data.varnames
-
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
             householdObject = Household(hhldIndex[0])
-	    #personarrivedId = schedulesForHhld.data[0, self.personArrivedCol]
-
-            #print 'hID - ', hhldIndex[0]
-	    #print '--Person Arrived Id - ', personarrivedId
-
 
             for perIndex in persIndicesForActsForHhld:
-		#print '\tPerson Id processing is - ', perIndex[1]
-	
-		"""
-		if perIndex[1] <> personarrivedId:
-		    print '\t--This is not the person who engaged on the trip'
-		    
-		else:
-		    print '\t--This is the person that engaged in the trip.Hence we need to process the arrival info and adjust the schedule and the associated dependent persons'
-		"""
 
                 personObject = Person(perIndex[0], perIndex[1])
-                schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
+                schedulesForPerson = data.data[perIndex[2]:perIndex[3],:]
                 activityList = self.return_activity_list_for_person(schedulesForPerson)
                 personObject.add_episodes(activityList)
 
@@ -256,11 +236,6 @@ class AdjustSchedules(Model):
                                                    childDependency)
 
             	householdObject.add_person(personObject)
-		#print 'BEFORE -'
-	    	#personObject.print_activity_list()
-
-
-
 		
 		if self.schedAdjType == "Arrival Adjustment":
 	    	    actualArrival, expectedArrival, tripDependentPerson = self.return_arrival_info(schedulesForPerson)
@@ -284,10 +259,6 @@ class AdjustSchedules(Model):
 	    #raw_input()
 	    reconciledSchedules = householdObject._collate_results()
 
-	    #print 'AFTER -'
-	    #personObject.print_activity_list()
-
-
 	    if not personObject._check_for_conflicts():
 		personObject.print_activity_list()
 		print "THE SCHEDULES ARE STILL MESSED UP"    
@@ -295,6 +266,7 @@ class AdjustSchedules(Model):
 
 	    actList += reconciledSchedules
 
+	print 'Finished running the component including index creation in %.4f' %(time.time()-ti)
         return DataArray(actList, self.colNames)
 
 

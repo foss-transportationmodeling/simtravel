@@ -359,7 +359,7 @@ class SimulationManager(object):
 		    # 	raw_input()
                 configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
-            
+            	comp.data = None
                 print '-- Finished simulating component - %s; time taken %.4f --' %(comp.component_name,
                                                                                     time.time()-t)
         except Exception, e:

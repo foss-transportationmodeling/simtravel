@@ -5,6 +5,8 @@ from openamos.core.models.abstract_model import Model
 
 from numpy import array, logical_and, histogram, zeros
 
+import time
+
 class ChildDependencyProcessing(Model):
     def __init__(self, specification):
         Model.__init__(self, specification)
@@ -109,28 +111,18 @@ class ChildDependencyProcessing(Model):
 	    return data
 
         for hhldIndex in self.hhldIndicesOfPersons:
+	    ti = time.time()
             firstPersonRec = hhldIndex[1]
             lastPersonRec = hhldIndex[2]
-
-            firstPersonFirstAct = self.personIndicesOfActs[firstPersonRec,2]
-            lastPersonLastAct = self.personIndicesOfActs[lastPersonRec-1,3]
-
-            schedulesForHhld = DataArray(data.data[firstPersonFirstAct:
-                                                       lastPersonLastAct,:], data.varnames)
 
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
-	    #
-	    if hhldIndex[0] not in [2871, 6027, 8861]:
-	    	#continue
-	      	pass
-
             householdObject = Household(hhldIndex[0])
 
             for perIndex in persIndicesForActsForHhld:
                 personObject = Person(perIndex[0], perIndex[1])
-                schedulesForPerson = DataArray(data.data[perIndex[2]:perIndex[3],:], data.varnames)
+                schedulesForPerson = data.data[perIndex[2]:perIndex[3],:]
                 activityList = self.return_activity_list_for_person(schedulesForPerson)
                 personObject.add_episodes(activityList)
                 workStatus, schoolStatus, childDependency = self.return_status_dependency(schedulesForPerson)
@@ -139,7 +131,7 @@ class ChildDependencyProcessing(Model):
                 householdObject.add_person(personObject)
 
 		
-           
+            #print 'household object created in - %.4f' %(time.time()-ti)
 	    if self.specification.terminalEpisodesAllocation:
 		householdObject.allocate_terminal_dependent_activities(seed)
 	    elif self.childDepProcessingType == 'Allocation':
@@ -148,25 +140,15 @@ class ChildDependencyProcessing(Model):
 		householdObject.lineup_activities(seed)
 		pass
 
-	    #elif self.childDepProcessingType == 'Dummy':
-	    #	pass
-
-
 	    reconciledSchedules = householdObject._collate_results()
-	    #reconciledSchedulesJoint = householdObject._collate_results_without_dependentActs()
-
             actList += reconciledSchedules
-            #actListJoint += reconciledSchedulesJoint
-
-
-	    #raw_input('allocation done for hhld - %s' %hhldIndex[0])	
-        #return DataArray(actList, self.colNames), DataArray(actListJoint, self.colNames)
+            #print 'created and reconciled in - %.4f' %(time.time()-ti)
 	return DataArray(actList, self.colNames)
 
     def return_activity_list_for_person(self, schedulesForPerson):
         # Updating activity list
         activityList = []
-        for sched in schedulesForPerson.data:	
+        for sched in schedulesForPerson:	
 	    hid = sched[self.hidCol]
 	    pid = sched[self.pidCol]
             scheduleid = sched[self.schidCol]
@@ -204,6 +186,7 @@ class ChildDependencyProcessing(Model):
         # this can be replaced with a simple extraction as opposed 
         # to identifying unique values, checking for single value 
         # and then updating the status variables
+	"""
         workStatusUnique = unique(schedulesForPerson.data[:, self.workStatusCol])
         if workStatusUnique.shape[0] > 1:
             print 'Work Status', workStatusUnique
@@ -228,6 +211,7 @@ class ChildDependencyProcessing(Model):
         
         #print 'wrkst - %s, schst - %s, dep - %s' %(workStatus, schoolStatus, 
         #                                           childDependency)
+	"""
         return workStatus, schoolStatus, childDependency
 
         
