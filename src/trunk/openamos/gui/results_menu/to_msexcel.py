@@ -27,8 +27,8 @@ class Export_Outputs(QDialog):
         '''
         
         self.connects(configobject)
-        self.setWindowTitle("Create basic OpenAmos outputs as .csv")
-        self.setMinimumSize(QSize(300,200))
+        self.setWindowTitle("Create basic OpenAmos outputs as MS Excel (.xls")
+        self.setMinimumSize(QSize(350,300))
         alllayout = QVBoxLayout()
         self.setLayout(alllayout)
         
@@ -50,6 +50,7 @@ class Export_Outputs(QDialog):
         filewidget.setLayout(filelayout)
         filelayout.setContentsMargins(0,0,0,0)
         self.xlsname = QLineEdit()
+        self.xlsname.setMinimumWidth(200)
         filelayout.addWidget(self.xlsname)
         self.openfilebutton = QPushButton('...')
         self.openfilebutton.setMaximumWidth(30)
@@ -60,6 +61,7 @@ class Export_Outputs(QDialog):
         selectlayout1.addWidget(tablenamelabel)
         
         self.pptype = QComboBox()
+        self.pptype.setMinimumWidth(200)
         self.pptype.addItems([QString("Adult Worker"),QString("Adult Non-worker"),QString("Non-adult (5-17)"),QString("Preschooler (0-4)")])
         selectlayout1.addWidget(self.pptype)
         
@@ -71,7 +73,7 @@ class Export_Outputs(QDialog):
         resultlabel = QLabel("Choose result(s)")
         self.resultchoice = QListWidget()
         self.resultchoice.setSelectionMode(QAbstractItemView.MultiSelection)
-        self.resultchoice.setFixedWidth(170)
+        #self.resultchoice.setFixedWidth(170)
         self.resultchoice.setMinimumHeight(150)
         vars = self.items()
         self.resultchoice.addItems(vars)
@@ -169,17 +171,24 @@ class Export_Outputs(QDialog):
                 
     def save_folder(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self,"Save File","","Comma Delimit (*.xls)")
+        filename = dialog.getSaveFileName(self,"Save File","","MS Excel 2000-2003 (*.xls)")
         if filename <> "":
+            if str(filename).rfind(".xls") < 0:
+                filename = filename + ".xls"
             self.xlsname.setText(filename)
 
 
     def sql_quary1(self,wsheet,column,nhts):
         
         nhts_var = ""
-        if nhts and column <> "dweltime":
-            count = "sum(a.wttrdfin)"
-            nhts_var = ", wttrdfin"
+        per_wt = ""
+        if nhts:# and column <> "dweltime":
+            if column <> "dweltime":
+                count = "sum(a.wttrdfin)"
+                nhts_var = ", wttrdfin"
+            else:
+                count = "sum(b.wtperfin)"
+                per_wt = ", wtperfin"
         else:
             count = "count(*)"
             
@@ -213,7 +222,7 @@ class Export_Outputs(QDialog):
             else:
                 sql = "%s(select houseid, personid%s from %s where %s = %d) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0])
                 
-            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond(nhts))
+            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
             wrk = self.wrk_cond()
             if wrk != "":
                 sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
@@ -255,9 +264,14 @@ class Export_Outputs(QDialog):
     def sql_quary2(self,wsheet,column,nhts):
 
         nhts_var = ""
-        if nhts and column <> "dweltime":
-            count = "sum(a.wttrdfin)"
-            nhts_var = ", wttrdfin"
+        per_wt = ""
+        if nhts: # and column <> "dweltime":
+            if column <> "dweltime":
+                count = "sum(a.wttrdfin)"
+                nhts_var = ", wttrdfin"
+            else:
+                count = "sum(b.wtperfin)"
+                per_wt = ", wtperfin"                
         else:
             count = "count(*)"
             
@@ -300,7 +314,7 @@ class Export_Outputs(QDialog):
                 sql = "%s(select houseid, personid, %s%s from %s where %s >= %d and %s < %d order by houseid, personid) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1])
             else:
                 sql = "%s(select houseid, personid, %s%s from %s where %s = %d) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0])
-            sql = "%s, (select houseid, personid from %s where %s order by houseid, personid) as b"%(sql,tnames[1],self.age_cond(nhts))
+            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
             
             wrk = self.wrk_cond()
             if wrk != "":
