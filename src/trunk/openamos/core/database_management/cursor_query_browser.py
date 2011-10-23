@@ -17,7 +17,7 @@ from sqlalchemy.types import Integer, SmallInteger, \
 			     Numeric, Float, \
 			     VARCHAR, String, CLOB, Text,\
 			     Boolean, DateTime
-from numpy import array, ma
+from numpy import array, ma, savetxt
 from database_configuration import DataBaseConfiguration
 from openamos.core.data_array import DataArray
 
@@ -736,7 +736,7 @@ class QueryBrowser(object):
             result = self.dbcon_obj.cursor.fetchall()
 	    #print '\t Retrieved from the database in %.4f' %(time.time()-ti)
             data = self.createResultArray(result, cols_list)
-	    #print '\t Retrieved from the database and processed to remove "None" values in %.4f' %(time.time()-ti)	   
+	    print '\tRetrieved from the database and processed to remove "None" values in %.4f' %(time.time()-ti)	   
             #print cols_list
             #print primCols
             # Sort with respect to primary columns
@@ -769,6 +769,7 @@ class QueryBrowser(object):
 		ti = time.time()
 		self.dbcon_obj.cursor.execute(delete_sql_string)
                 self.dbcon_obj.connection.commit()
+		print '\tTime taken to delete data - %.4f'  %(time.time()-ti)
 	    except Exception, e:
 		print 'Error deleting records. Query failed - ', e
 
@@ -800,7 +801,7 @@ class QueryBrowser(object):
         
         # Convert it back to a regular array to enable all the other processing
         print '\tSize of the data set that was retrieved - ', data.shape
-        print '\t - Records were processed after query in %.4f' %(time.time()-t)
+        print '\tRecords were processed after query in %.4f' %(time.time()-t)
 
 	if data.shape[0] == 0:
 	    return None
@@ -1146,22 +1147,32 @@ class QueryBrowser(object):
         Output:
         File created with all data written in it.
         """
+	"""
         #open the file
         ti = time.time()
         myfile = open('%s/tempData_%s.csv' %(loc, partId), 'w')
         
-        #enter the columns in the file
-        #myfile.write(str(cols_list)[1:-1])
-        #myfile.write('\n')
-        
-        #data_arr = na.zeros(7).reshape(1,7)
         #loop through the array and write to file
         for each in data_arr:
             each = list(each)
             myfile.write(str(each)[1:-1])
             myfile.write('\n')
         myfile.close()
-        #print '\t\tTime to write to file - %.4f' %(time.time()-ti)
+        print '\t\tTime to write to file - %.4f' %(time.time()-ti)
+	"""
+	fmt = ''
+	for col in range(len(data_arr[0])):
+	    colType = data_arr[0][col].dtype
+	    if str(colType)[0] == 'f':
+		#print 'atleast one float store as float'
+		fmt += '%.4f,'
+	    else:
+		fmt += '%u,'
+	fmt = fmt[:-1]
+	print '\t\tThis is the final format-', fmt
+        ti = time.time()
+	savetxt('%s/tempData_%s.csv'%(loc, partId), data_arr, delimiter=',', fmt=fmt)
+        print '\t\tTime to write to file new implementation - %.4f' %(time.time()-ti)
     ########### file function ends ############
     
     ###########################################
