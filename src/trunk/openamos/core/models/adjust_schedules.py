@@ -119,9 +119,9 @@ class AdjustSchedules(Model):
 
 
     def return_status_dependency(self, schedulesForPerson):
-        workStatus = schedulesForPerson.data[0,self.workStatusCol]
-        schoolStatus = schedulesForPerson.data[0,self.schoolStatusCol]
-        childDependency = schedulesForPerson.data[0,self.childDependencyCol]
+        workStatus = schedulesForPerson[0,self.workStatusCol]
+        schoolStatus = schedulesForPerson[0,self.schoolStatusCol]
+        childDependency = schedulesForPerson[0,self.childDependencyCol]
 
         #print 'wrkcol - %s, schcol - %s, depcol - %s' %(self.workStatusCol, 
         #                                                self.schoolStatusCol,
@@ -164,14 +164,14 @@ class AdjustSchedules(Model):
 
 
     def return_trip_occupancy_info(self, schedulesForPerson):
-	tripIndicator = schedulesForPerson.data[0, self.tripIndicatorCol]
-	tripStTime = schedulesForPerson.data[0, self.tripStTimeCol]
+	tripIndicator = schedulesForPerson[0, self.tripIndicatorCol]
+	tripStTime = schedulesForPerson[0, self.tripStTimeCol]
 	return tripIndicator, tripStTime
 
     def return_arrival_info(self, schedulesForPerson):
-	actualArrival = schedulesForPerson.data[0,self.actualArrivalCol]
-	expectedArrival = schedulesForPerson.data[0,self.expectedArrivalCol]
-	tripDependentPerson = schedulesForPerson.data[0,self.tripDependentPersonCol]	
+	actualArrival = schedulesForPerson[0,self.actualArrivalCol]
+	expectedArrival = schedulesForPerson[0,self.expectedArrivalCol]
+	tripDependentPerson = schedulesForPerson[0,self.tripDependentPersonCol]	
 
 	#print 'Actual Arrival - %s and Expected Arrival - %s ' %(actualArrival, expectedArrival)
 	return actualArrival, expectedArrival, tripDependentPerson

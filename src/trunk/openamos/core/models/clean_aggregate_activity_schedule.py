@@ -166,9 +166,9 @@ class CleanAggregateActivitySchedule(Model):
         return activityList
 
     def return_status_dependency(self, schedulesForPerson):
-        workStatus = schedulesForPerson.data[0,self.workStatusCol]
-        schoolStatus = schedulesForPerson.data[0,self.schoolStatusCol]
-        childDependency = schedulesForPerson.data[0,self.childDependencyCol]
+        workStatus = schedulesForPerson[0,self.workStatusCol]
+        schoolStatus = schedulesForPerson[0,self.schoolStatusCol]
+        childDependency = schedulesForPerson[0,self.childDependencyCol]
 
         #print 'wrkcol - %s, schcol - %s, depcol - %s' %(self.workStatusCol, 
         #                                                self.schoolStatusCol,
