@@ -297,10 +297,7 @@
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_id_r" key="houseid,personid"/>
     	<Table table="households_arrived_id_r" key="houseid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
-	
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
       </DBTables>
 
       <AnalysisIntervalFilter table="households_arrived_id_r" var="actualarrivaltime"/>
@@ -325,12 +322,12 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
 	</Dependency>
 	
 	<ArrivalTime>
@@ -379,25 +376,20 @@
 
    </Component>
 
-
-
-
-
     <Component name="PersonsHistory" read_from_table="schedule_final_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="persons" key="houseid,personid"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
       </DBTables>
       <AnalysisIntervalFilter table="schedule_final_r" var="endtime"/>
       <DeleteBasedOn table="persons_history_r" var="personuniqueid"/>
 
-      <Model name="PersonUniqueIdDumy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personuniqueiddummy"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="personuniqueid" coeff="1"/>
+      <PreProcessData name="PreProcessData">
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
+      </PreProcessData>
 
-      </Model>
+
       <Model name="IHHistory" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="ih_history"/>
         <FilterSet type="and"/>
@@ -428,7 +420,6 @@
         <Variable table="persons_history_r" var="discretionary_history" coeff="1"/>
       </Model>
 
-
       <Model name="FixedHistory" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="fixed_history"/>
         <FilterSet type="and"/>
@@ -438,10 +429,11 @@
         <Variable table="schedule_final_r" var="duration" coeff="1"/>
         <Variable table="persons_history_r" var="fixed_history" coeff="1"/>
       </Model>
+
       <Model name="PersonUniqueIdDumy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="personuniqueiddummy"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="personuniqueid" coeff="1"/>
+        <Variable table="persons_history_r" var="personuniqueid" coeff="1"/>
 
       </Model>
 
@@ -458,10 +450,8 @@
     	<Table table="households_vehicles_count_r" key="houseid"/>
     	<Table table="workers_r" key="houseid,personid"/>		
     	<Table table="schedule_final_r" key="houseid,personid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
       </DBTables>
 
@@ -501,7 +491,7 @@
       </SpatialConstraints>
 
       <PreProcessData name="PreProcessData">
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="1"/>
       </PreProcessData>
 
@@ -640,10 +630,9 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+        <Filter table="persons_daily_status_r" var="schdailystatus" condition="equals" value="0"/>
 
         <Alternative id="inhome" value="101">
           <Variable table="standard" var="one" coeff="2.81281519"/>
@@ -726,9 +715,9 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
-        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+        <Filter table="persons_daily_status_r" var="schdailystatus" condition="equals" value="1"/>
 
         <Alternative id="inhome" value="101">
           <Variable table="standard" var="one" coeff="2.81281519"/>
@@ -823,9 +812,9 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="schdailystatus" condition="equals" value="0"/>
 
         <Alternative id="inhome" value="101">
           <Variable table="standard" var="one" coeff="2.74279288"/>
@@ -920,9 +909,9 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
-        <Filter table="daily_school_status_r" var="schdailystatus" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="schdailystatus" condition="equals" value="1"/>
 
 
         <Alternative id="inhome" value="101">
@@ -1020,8 +1009,8 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="1"/>
 
         <Alternative id="inhome" value="101">
           <Variable table="standard" var="one" coeff="2.314935"/>
@@ -1100,8 +1089,8 @@
         <DependentVariable var="activitytype"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="0"/>
 
         <Alternative id="inhome" value="101">
           <Variable table="standard" var="one" coeff="2.314935"/>
@@ -1229,8 +1218,8 @@
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Variance value="5369.81"/>
         <Variable table="standard" var="one" coeff="131.625487"/>
         <Variable table="runtime" var="activitytype_101" coeff="-41.6038946"/>
@@ -1265,8 +1254,8 @@
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="0"/>
         <Variance value="8178.49"/>
         <Variable table="standard" var="one" coeff="108.01977"/>
         <Variable table="runtime" var="activitytype_101" coeff="73.3042178"/>
@@ -1305,7 +1294,7 @@
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="less than" value="18"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
         <Variance value="7161.37"/>
         <Variable table="standard" var="one" coeff="102.647821"/>
         <Variable table="runtime" var="activitytype_101" coeff="47.4244126"/>
@@ -1334,7 +1323,7 @@
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="101"/>
 	<Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
@@ -1343,7 +1332,7 @@
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="301"/>
 	<Variance value="0"/>
         <Variable table="persons" var="schtaz" coeff="1"/>
@@ -1352,7 +1341,7 @@
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="201"/>
 	<Variance value="0"/>
         <Variable table="persons" var="wtaz" coeff="1"/>
@@ -1366,8 +1355,8 @@
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="1"/>
         <Variable table="travel_skims" var="tt_to" coeff="-.16188774" repeat="tt_to"/>
         <Variable table="locations" var="retail_employment" coeff=".00068035" repeat="retail_employment"/>
         <Variable table="locations" var="office_employment" coeff=".00013751" repeat="office_employment"/>
@@ -1391,8 +1380,8 @@
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="greater than equals" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
-        <Filter table="daily_work_status_r" var="wrkdailystatus" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+        <Filter table="persons_daily_status_r" var="wrkdailystatus" condition="equals" value="0"/>
         <Variable table="travel_skims" var="tt_to" coeff="-.17307478" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_411,tt_to" coeff="-.02426673" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.10329537" interaction="True" repeat="tt_to"/>
@@ -1424,7 +1413,7 @@
 	<FilterSet type="and"/>
 	<Filter table="persons" var="age" condition="less than" value="18"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
         <Variable table="travel_skims" var="tt_to" coeff="-.13787556" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_412,tt_to" coeff="-.03717037" interaction="True" repeat="tt_to"/>
         <Variable table="runtime,travel_skims" var="activitytype_514,tt_to" coeff="-.0420764" interaction="True" repeat="tt_to"/>
@@ -1455,7 +1444,7 @@
       <Model name="TTFrom" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="tt_from"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="tt_from_home" coeff="1"/>
@@ -1464,7 +1453,7 @@
       <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -1475,7 +1464,7 @@
       <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
@@ -1489,7 +1478,7 @@
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -1501,7 +1490,7 @@
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -1514,7 +1503,7 @@
       <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
 	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
@@ -1526,7 +1515,7 @@
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="endtime"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="starttime" coeff="1"/>
         <Variable table="runtime" var="duration" coeff="1"/>
@@ -1535,7 +1524,7 @@
       <Model name="TempPrismDurationVar" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="prismduration"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="en_starttime" coeff="1"/>
         <Variable table="runtime" var="st_endtime" coeff="-1"/>
@@ -1544,7 +1533,7 @@
 
       <Model name="DependentPersonId" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dependentpersonid"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
@@ -1552,7 +1541,7 @@
       <Model name="TempActivityTravelEnd" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytravelend"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="tt_from" coeff="1"/>
@@ -1581,7 +1570,7 @@
       <Model name="DummyModelforCaching" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="dummy"/>
 	<FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="0"/>
 	<Filter table="runtime" var="adjustactivitytravelind" condition="equals" value="-1"/>
 	<Variance value="0"/>
@@ -1598,7 +1587,7 @@
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_prism_activities_r" key="houseid,personid"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_final_r" key="houseid,personid"/>
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
@@ -1629,7 +1618,7 @@
 	<DependentVariable var="invalidprismflag"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="100"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -1639,7 +1628,7 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="1"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="less than" value="99"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
         <Variable table="persons" var="age" coeff="0"/> <!-- Dummy variable to call the persons table ... -->
@@ -1689,7 +1678,7 @@
     <Component name="AdjustPrismEndsForInsufficientPrisms" read_from_table="schedule_final_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_final_r" key="houseid,personid"/>
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
@@ -1711,7 +1700,7 @@
 	<DependentVariable var="invalidprismflag"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="100"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -1721,7 +1710,7 @@
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="greater than equals" value="1"/>
 	<Filter table="runtime" var="en_dependentpersonid" condition="less than" value="99"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
@@ -2228,7 +2217,7 @@
         <DBTables>
     	  <Table table="persons" key="houseid,personid" order="1"/>
     	  <Table table="trips_r" key="houseid,personid"/>
-    	  <Table table="child_dependency_r" key="houseid,personid"/>
+    	  <Table table="persons_daily_status_r" key="houseid,personid"/>
     	  <Table table="schedule_final_r" key="houseid,personid"/>
     	  <Table table="current_occupancy_r" key="houseid,personid"/>
     	  <Table table="trips_to_malta_r" key="houseid,personid"/>
@@ -2590,7 +2579,7 @@
 	<!-- Model Description: Recode the trip with hh member indicator -->
 	  <DependentVariable var="tripwithhhmember"/>
           <FilterSet type="and"/>
-	  <Filter table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	  <Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	  <Variance value="0"/>
           <Variable table="standard" var="one" coeff="1"/>
         </Model>
@@ -2625,7 +2614,7 @@
 	<!-- Filter Description: when the start activity is dropoff -->
 	  <DependentVariable var="tripwithhhmember"/>
           <FilterSet type="and"/>
-	  <Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	  <Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
 	  <Filter table="runtime" var="st_activitytype" condition="equals" value="600"/>
 	  <Filter table="runtime" var="en_activitytype" condition="equals" value="601"/>
 	  <Filter table="runtime" var="st_dependentpersonid" condition="equals" value="99"/>
@@ -2648,7 +2637,7 @@
         <Model name="CurrOccTripID" formulation="Regression" type="Linear" seed="1">
 	  <DependentVariable var="currocctripid"/>
           <FilterSet type="and"/>
-	  <Filter1 table="child_dependency_r" var="dependency" condition="equals" value="0"/>
+	  <Filter1 table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
 	  <Filter table="runtime" var="tripwithhhmember" condition="greater than equals" value="1"/>
 	  <Variance value="0"/>
           <Variable table="current_occupancy_r" var="tripid" coeff="1"/>
@@ -2726,7 +2715,7 @@
     	<Table table="persons_location_r" key="houseid,personid"/>
     	<Table table="persons" key="houseid,personid"/>
     	<Table table="trips_occupant_origin_invalid_r" key="houseid,personid"/>
-	<Table table="child_dependency_r" key="houseid,personid"/>
+	<Table table="persons_daily_status_r" key="houseid,personid"/>
       </DBTables>
 
       <AnalysisIntervalFilter table="persons_leaving_id_r" var="starttime"/>
@@ -2758,7 +2747,7 @@
 	<DependentVariable var="tripvalid"/>
 	<Variance value="0"/>
         <FilterSet type="and"/>
-	<Filter table="child_dependency_r" var="dependency" condition="equals" value="1"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="persons_location_r" var="lasttripcount" condition="not equals" value="-99"/>
 	<Filter table="runtime" var="tripcountdiff" condition="greater than equals" value="2"/>
         <Variable table="standard" var="one" coeff="-1"/>
@@ -2833,9 +2822,7 @@
     <Component name="OccupantProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="child_dependency_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="person_trips_occupant_origin_invalid_r" key="houseid,personid"/>
       </DBTables>
 
@@ -2859,12 +2846,12 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
 	</Dependency>
 	
 	<OccupancyInvalid>
