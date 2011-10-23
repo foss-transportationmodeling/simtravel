@@ -909,9 +909,6 @@ class Person(object):
         self.schoolstatus = schoolstatus
         self.child_dependency = child_dependency
 
-        self.extract_work_episodes()
-        self.extract_school_episodes()
-        
     def add_arrival_status(self, actualArrival, expectedArrival, tripDependentPerson=None):
 	self.actualArrival = actualArrival
 	self.expectedArrival = expectedArrival

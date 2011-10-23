@@ -748,8 +748,6 @@ class Household(object):
                 self.print_activity_list(person)
                 raise Exception, 'The person still has conflicts - %s, %s' %(self.hid, pid)
 
-
-
 	return self._collate_results()
 
 
@@ -776,17 +774,11 @@ class Household(object):
         return self._collate_results()
 
     def remove_work_episodes(self, person):
-        #for wrkEpisode in person.workEpisodes:
-        #print '\tActually REMOVING WORK ACTIVITY; WORK STATUS FOR DAY IS ZERO for pid - ', person.pid
-        #print '\t', person.workEpisodes, '-----------------<<<<<<<<<<<<<<<<'
-        
+ 	person.extract_work_episodes()       
         person.remove_episodes(person.workEpisodes)
 
     def remove_school_episodes(self, person):
-        #for schEpisode in person.schoolEpisodes:
-        #print '\tActually REMOVING SCHOOL ACTIVITY; SCHOOL STATUS FOR DAY IS ZERO for pid - ', person.pid
-        #print '\t', person.schoolEpisodes, '-----------------<<<<<<<<<<<<<<<<'
-
+  	person.extract_school_episodes()       
         person.remove_episodes(person.schoolEpisodes)
 
 
@@ -1195,6 +1187,10 @@ class Household(object):
         print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
 	
+        if len(self.dependencyPersonIds) == 0:
+            #print 'DEPENDENCIES DO NOT EXIST; ACTIVITIES NEED NOT BE ALLOCATED TO INDEPENDENT PERSONS'
+	    return
+
 	depAct = {}
 	depIHAct = {}
 
@@ -2334,10 +2330,10 @@ class Household(object):
         #print '\tPerson Ids with fixed activities - ', self.dailyFixedActPersonIds
         #print '\tPerson Ids with no fixed activities - ', self.noDailyFixedActPersonIds
 
-        if len(self.dependencyPersonIds) > 0:
-            #print 'DEPENDENCIES EXIST; ACTIVITIES NEED TO BE ALLOCATED TO INDEPENDENT PERSONS'
-	    pass
-
+        if len(self.dependencyPersonIds) == 0:
+            #print 'DEPENDENCIES DO NOT EXIST; ACTIVITIES NEED NOT BE ALLOCATED TO INDEPENDENT PERSONS'
+	    return
+	else:
         # For each person identify an adult that has open 
         # periods and then allocate to him
             for pid in self.dependencyPersonIds:
@@ -2378,14 +2374,15 @@ class Household(object):
         self.seed = seed
         self.rndGen = RandomDistribution(int(self.hid + self.seed))
 
-	#print 'Household ID - ', self.hid
-        #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
+	print 'Household ID - ', self.hid
+        print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         #print '\tPerson Ids with fixed activities - ', self.dailyFixedActPersonIds
         #print '\tPerson Ids with no fixed activities - ', self.noDailyFixedActPersonIds
 
-        if len(self.dependencyPersonIds) > 0:
-            #print 'DEPENDENCIES EXIST; ACTIVITIES NEED TO BE ALLOCATED TO INDEPENDENT PERSONS'
-	    pass
+        if len(self.dependencyPersonIds) == 0:
+            #print 'DEPENDENCIES DO NOT EXIST; ACTIVITIES NEED NOT BE ALLOCATED TO INDEPENDENT PERSONS'
+	    return
+	else:
 
         # For each person identify an adult that has open 
         # periods and then allocate to him
