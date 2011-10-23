@@ -478,7 +478,7 @@ class ConfigParser(object):
 	model_list_noInteractionReplicates = []
 	modelNames_interaction = []
 	for model in self.model_list:
-	    print model.dep_varname, 'Interaction model - ', isinstance(model.model, openamos.core.models.interaction_model.InteractionModel)
+	    #print model.dep_varname, 'Interaction model - ', isinstance(model.model, openamos.core.models.interaction_model.InteractionModel)
 	    if isinstance(model.model, openamos.core.models.interaction_model.InteractionModel):
 		if model.data_filter is not None:
 		    raise Exception, "the interaction model has a filter ... is this possible?"
@@ -488,11 +488,11 @@ class ConfigParser(object):
 		    modelNames_interaction.append(model.dep_varname)
 	    model_list_noInteractionReplicates.append(model)
 
-	print 'len of original model list - ', len(self.model_list)		    
+	#print 'len of original model list - ', len(self.model_list)		    
 	self.model_list = model_list_noInteractionReplicates
-	print 'len of original model list - ', len(self.model_list)
-	print 'len of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
-	raw_input()
+	#print 'len of original model list - ', len(self.model_list)
+	#print 'len of new modet list no replicates of interaction models', len(model_list_noInteractionReplicates)
+	#raw_input()
 
 
         component = AbstractComponent(comp_name, self.model_list, 
