@@ -110,6 +110,14 @@ class Persons_Fixed_Activity_Vertices_R(t.IsDescription):
     endtime = t.Int32Col()
 
 
+class Persons_Daily_Status_R(t.IsDescription):
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    schdailystatus = t.Int32Col()
+    wrkdailystatus = t.Int32Col()
+    dependency = t.Int32Col()
+
+
 class Child_Dependency_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
