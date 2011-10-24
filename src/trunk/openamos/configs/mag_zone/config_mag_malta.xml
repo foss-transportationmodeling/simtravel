@@ -1594,6 +1594,11 @@
 	
       <DeleteRecords value="False"/>	
 
+      <PreProcessData name="PreProcessData">
+	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="1"/>
+      </PreProcessData>
+
+
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_final_r" location_var="locationid" time_var="endtime"/>
 	<End table="schedule_final_r" location_var="locationid" time_var="starttime"/>
@@ -1683,6 +1688,9 @@
 	<Table table="trips_to_malta_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
+      <PreProcessData name="PreProcessData">
+	<Filter table="trips_to_malta_r" var="persononnetworkflag" condition="equals" value="1"/>
+      </PreProcessData>
 
       <DeleteBasedOn1 table="schedule_final_r" var="scheduleid"/>
 
@@ -2658,8 +2666,6 @@
       <DBTables>
 	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="persons_leaving_id_r" key="houseid,personid"/>
-    	<Table table="persons" key="houseid,personid"/>
-
       </DBTables>
 
       <AnalysisIntervalFilter table="trips_r" var="starttime"/>
@@ -2670,11 +2676,11 @@
         <Variable table="trips_r" var="tripid" coeff="1"/>
       </Model>
 
-      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
+      <Model1 name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="personuniqueiddummy"/>
 	<Variance value="0"/>
         <Variable table="persons" var="personuniqueid" coeff="1"/>
-      </Model>
+      </Model1>
 
 
       <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
@@ -3289,8 +3295,8 @@
       <Model name="location" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="location"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="houseid" coeff="10000"/>
-        <Variable table="persons" var="personid" coeff="100"/>
+        <Variable table="persons_location_r" var="houseid" coeff="10000"/>
+        <Variable table="persons_location_r" var="personid" coeff="100"/>
       </Model>
 
       <Model name="lastrripcount" formulation="Regression" type="Linear" seed="1">
@@ -3303,7 +3309,7 @@
       <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="personuniqueiddummy"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="personuniqueid" coeff="1"/>
+        <Variable table="persons_location_r" var="personuniqueid" coeff="1"/>
       </Model>
 
    </Component>
@@ -3327,7 +3333,7 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
@@ -3351,12 +3357,14 @@
 
       <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="fromzone"/>
+	<Filter table="background_trips" var="origin_taz" condition="less than" value="2900"/>
 	<Variance value="0"/>
         <Variable table="background_trips" var="origin_taz" coeff="1"/>
       </Model>
 
       <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tozone"/>
+	<Filter table="background_trips" var="destination_taz" condition="less than" value="2900"/>
 	<Variance value="0"/>
         <Variable table="background_trips" var="destination_taz" coeff="1"/>
       </Model>
@@ -3373,10 +3381,16 @@
         <Variable table="background_trips" var="start_min_indexedat4am" coeff="1"/>
       </Model>
 
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination" after_model="starttime" before_model="endtime">
+	<Start table="runtime" location_var="fromzone"/>
+	<End table="runtime" location_var="tozone"/>
+      </DynamicSpatialConstraints>
+
       <Model name="endtime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="endtime"/>
 	<Variance value="0"/>
-        <Variable table="background_trips" var="arrive_min_indexedat4am" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="1"/>
+        <Variable table="runtime" var="tt_to" coeff="1"/>
       </Model>
 
       <Model name="trippurposefrom" formulation="Regression" type="Linear" seed="1">
@@ -3411,6 +3425,31 @@
       </Model>
       <Model name="tripind" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripind"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+      <Model name="starttripcount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="starttripcount"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+      <Model name="endtripcount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="endtripcount"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+      <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripwithhhmember"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+      <Model name="startdependentpersonid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="startdependentpersonid"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+      <Model name="enddependentpersonid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="enddependentpersonid"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="0"/>
       </Model>

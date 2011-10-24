@@ -49,9 +49,7 @@
 
     <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>		
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid"/>
       </DBTables>
@@ -73,21 +71,19 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
 	</Dependency>
       </Model>
     </Component>	
 
     <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
-    	<Table table="daily_work_status_r" key="houseid,personid"/>
-    	<Table table="daily_school_status_r" key="houseid,personid"/>		
-    	<Table table="child_dependency_r" key="houseid,personid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid" order="1"/>
     	<Table table="schedule_full_r" key="houseid,personid"/>
       </DBTables>
@@ -109,12 +105,12 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="daily_school_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="daily_work_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="child_dependency_r" var="dependency"/>
+	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
 	</Dependency>
       </Model>
    </Component>	
