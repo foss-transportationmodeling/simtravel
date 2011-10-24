@@ -960,8 +960,6 @@ class Household(object):
 	self.affectedActs = {}
 	#raw_input('adjusting and pushing subsequent activities')
 
-	#print 'start act -', person.stAct
-
 	#print 'Expected Activities'
 	#for act in person.expectedActivities:
 	#    print '\t', act
@@ -978,6 +976,9 @@ class Household(object):
 	actEnd = person.tripStTime + 1
 
 	nextAct = person.expectedActivities[0]
+	#print '\tstart act -', person.stAct
+	#print '\tnext act - ', nextAct
+
 	if (person.stAct.actType == 600 and person.stAct.dependentPersonId == 99 and 
 	    nextAct.actType == 601 and nextAct.dependentPersonId == 99):
 	    person.move_start_end(nextAct, 0)
@@ -988,7 +989,25 @@ class Household(object):
 	else:
 	    index = 0
 	
+	i = 0
+	while i < len(person.expectedActivities[index:]):	
+	    act = person.expectedActivities[index:][i]
+	    i += 1
+	    if actEnd-act.startTime > 0:
+		moveByValue = copy.deepcopy(actEnd-act.startTime)
+		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
+		person.move_start_end(act, moveByValue)
+	    	actEnd = copy.deepcopy(act.endTime)
 
+		if act.actType == 600 and act.dependentPersonId == 99:
+		     nextAct = person.expectedActivities[index:][i]
+		     i += 1
+		     person.move_start_end(nextAct, moveByValue)
+		     actEnd = copy.deepcopy(nextAct.endTime)
+
+	    else:
+		break
+	"""
 	for act in person.expectedActivities[index:]:
 	    if actEnd-act.startTime > 0:
 		#print '-->This ', act, ' is being moved by ', actEnd-act.startTime
@@ -998,9 +1017,10 @@ class Household(object):
 
 
 	    actEnd = copy.deepcopy(act.endTime)
-
+	"""
 	#print 'Moving the end of the starting episode'
 	#print 'activity list after ----', person.print_activity_list()
+	#raw_input('occupancy processing')
 
     def adjust_push_subsequent_activities(self, person, refArrivalTime=None):
 	#raw_input('adjusting and pushing subsequent activities')
@@ -1115,7 +1135,8 @@ class Household(object):
 		moveByValue = copy.deepcopy(actEnd-act.startTime-1)
 		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
 		person.move_start_end(act, moveByValue)
-
+	    else:
+		break
 
 	    actEnd = copy.deepcopy(act.endTime)
 	
