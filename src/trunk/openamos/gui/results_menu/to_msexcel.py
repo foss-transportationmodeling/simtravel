@@ -91,7 +91,7 @@ class Export_Outputs(QDialog):
         self.isNHTS = False
         if (self.new_obj.check_if_table_exists("schedule_nhts") and self.new_obj.check_if_table_exists("trips_nhts") \
             and self.new_obj.check_if_table_exists("households_nhts") and self.new_obj.check_if_table_exists("persons_nhts") \
-            and self.new_obj.check_if_table_exists("daily_work_status_nhts")):
+            and self.new_obj.check_if_table_exists("persons_daily_status_nhts")):
             
             self.isNHTS = True
         #    self.export_nhts.setDisabled(True)
@@ -676,10 +676,10 @@ class Export_Outputs(QDialog):
         
     def tables(self,istrip):
         if istrip:
-            table_names = ["trips_r","persons","daily_work_status_r"]
+            table_names = ["trips_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
             return table_names
         else:
-            table_names = ["schedule_final_r","persons","daily_work_status_r"]
+            table_names = ["schedule_final_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
             return table_names 
     
     def table_name(self,names):

@@ -155,12 +155,12 @@ class Import_NHTS(QDialog):
                     ssql = "%s)"%(ssql[0:len(ssql)-1])
                     self.new_obj.cursor.execute(ssql)
                     
-                    if self.new_obj.check_if_table_exists("daily_work_status_nhts"):
-                        ssql = "DROP TABLE daily_work_status_nhts"
+                    if self.new_obj.check_if_table_exists("persons_daily_status_nhts"):
+                        ssql = "DROP TABLE persons_daily_status_nhts"
                         self.new_obj.cursor.execute(ssql)
                         self.new_obj.connection.commit()
                         
-                    ssql = "CREATE TABLE daily_work_status_nhts (houseid bigint NOT NULL, personid integer NOT NULL, wrkdailystatus integer)"
+                    ssql = "CREATE TABLE persons_daily_status_nhts (houseid bigint NOT NULL, personid integer NOT NULL, wrkdailystatus integer)"
                     self.new_obj.cursor.execute(ssql)
                     
                     input.seek(0)
@@ -174,7 +174,7 @@ class Import_NHTS(QDialog):
                         
                         hid = row[index[0]]
                         pid = row[index[1]]
-                        ssql = "INSERT INTO daily_work_status_nhts VALUES(%s,%s,%d)" %(hid,pid,0)
+                        ssql = "INSERT INTO persons_daily_status_nhts VALUES(%s,%s,%d)" %(hid,pid,0)
                         self.new_obj.cursor.execute(ssql)
     
                     self.new_obj.connection.commit()
@@ -318,7 +318,7 @@ class Import_NHTS(QDialog):
                     
                     wto = int(row[index[5]])
                     if wto >= 10 and wto <= 12 and isworker:                    
-                        ssql = "UPDATE daily_work_status_nhts SET wrkdailystatus=1 WHERE houseid = %s and personid = %s"%(hid2,pid2)
+                        ssql = "UPDATE persons_daily_status_nhts SET wrkdailystatus=1 WHERE houseid = %s and personid = %s"%(hid2,pid2)
                         self.new_obj.cursor.execute(ssql)
                         isworker = False
 
