@@ -10,9 +10,15 @@ from openamos.gui.env import *
 from openamos.core.database_management.cursor_database_connection import *
 from openamos.core.database_management.database_configuration import *
 
-import time
-from xlwt import *
-
+import time, random
+#from xlwt import *
+#import win32com.client
+#from win32com.client import Dispatch, constants
+from openpyxl.workbook import Workbook
+from openpyxl.writer.excel import save_workbook
+from openpyxl.drawing import Shape
+from openpyxl.style import Color
+from openpyxl.chart import LineChart, BarChart, Serie, ErrorBar, Reference
 
 
 class Export_Outputs(QDialog):
@@ -121,38 +127,113 @@ class Export_Outputs(QDialog):
         filename = str(self.xlsname.text())
         sitems = self.resultchoice.selectedItems()
         if filename <> "" and len(sitems) > 0:
+            
+            
+#        excel = win32com.client.Dispatch("Excel.Application")
+#        book = excel.Workbooks.Add()
+#        sheet = book.Worksheets(1)
+#        sheet.Range("A1").Value = "Hello World!"
+#        sheet.Range("A2").Value = str(Application.SIFilter(None, c.siObjectFilter))
+#        book.SaveAs("c:\myBook.xls")
+#         
+#        sheet = None
+#        book = None
+#        excel.Quit()
+#        excel = None 
+
+                    #wsheet = wb.add_sheet(columns[i])  #xlwt code
+#                    win32com code
+#                    wsheet = wb.Worksheets.Add()
+#                    wsheet.Name = str(columns[i])                        
+#                    wb.Charts.Add()
+#                    wb.ActiveChart.ChartType = 0x33
+#                    wb.ActiveChart.SetSourceData(Source=wb.Sheets(str(columns[i])).Range(range("C3:C20"),range("G3:G20")))
+#                    wb.ActiveChart.Location(Where = 0x2, Name=str(columns[i]))
+
+#            win32com code
+#            wsheet.Cells(i+3,j).Value = str(err1[i])
+#            wsheet.Cells(i+3,j+1).Value = long(err2[i])
+#            wsheet.Cells(i+3,j+2).Value = percent
+
+#            xlwt code
+#            wsheet.write(i+2,j,str(err1[i]))
+#            wsheet.write(i+2,j+1,long(err2[i]))
+#            wsheet.write(i+2,j+2,percent)
+
+        
             wb = Workbook()
             
             columns = ["starttime","endtime","duration","trippurpose","starttime","endtime","duration","","dweltime","dweltime"]
             for i in range(self.resultchoice.count()):
                 item = self.resultchoice.item(i)
                 if item.isSelected() and i < 4:
-                    wsheet = wb.add_sheet(columns[i])
-                    self.sql_quary1(wsheet,columns[i],False)
+
+                    wsheet = wb.create_sheet()
+                    wsheet.title = columns[i]
+                    
+                    seri= []
+                    seri.append(self.sql_quary1(wsheet,columns[i],False))
                     if self.isNHTS:
-                        self.sql_quary1(wsheet,columns[i],True)
+                        seri.append(self.sql_quary1(wsheet,columns[i],True))
+
+                    self.call_chart(wsheet,seri)
+
                 elif item.isSelected() and i >= 4 and i < 7:
-                    wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
-                    self.sql_quary2(wsheet,columns[i],False)
+                    
+                    #xlwt code
+                    #wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
+                    
+                    wsheet = wb.create_sheet()
+                    wsheet.title = "%sbyPurpose"%(columns[i])
+                                        
+                    seri = []
+                    seri.append(self.sql_quary2(wsheet,columns[i],False))
                     if self.isNHTS:
-                        self.sql_quary2(wsheet,columns[i],True)
-                elif item.isSelected() and i == 7:
-                    wsheet = wb.add_sheet("TripRate")
-                    self.sql_quary3(wsheet,False)
-                    if self.isNHTS:
-                        self.sql_quary3(wsheet,True)
-                elif item.isSelected() and i == 8:
-                    wsheet = wb.add_sheet(columns[i])
-                    self.sql_quary1(wsheet,columns[i],False)
-                    if self.isNHTS:
-                        self.sql_quary1(wsheet,columns[i],True)
-                elif item.isSelected() and i > 8:
-                    wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
-                    self.sql_quary2(wsheet,columns[i],False)
-                    if self.isNHTS:
-                        self.sql_quary2(wsheet,columns[i],True)
+                        seri.append(self.sql_quary2(wsheet,columns[i],True))
                         
-            wb.save(filename)
+                    self.call_chart(wsheet,seri)
+                    
+                elif item.isSelected() and i == 7:
+                    #wsheet = wb.add_sheet("TripRate")
+                    wsheet = wb.create_sheet()
+                    wsheet.title = "TripRate"                    
+                    
+                    seri = []
+                    seri.append(self.sql_quary3(wsheet,False))
+                    if self.isNHTS:
+                        seri.append(self.sql_quary3(wsheet,True))
+                        
+                    self.call_chart(wsheet,seri)
+                    
+                elif item.isSelected() and i == 8:
+                    
+                    #wsheet = wb.add_sheet(columns[i])
+                    wsheet = wb.create_sheet()
+                    wsheet.title = columns[i]
+                    
+                    seri = []
+                    seri.append(self.sql_quary1(wsheet,columns[i],False))
+                    if self.isNHTS:
+                        seri.append(self.sql_quary1(wsheet,columns[i],True))
+                        
+                    self.call_chart(wsheet,seri)
+                    
+                elif item.isSelected() and i > 8:
+                    #wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
+                    wsheet = wb.create_sheet()
+                    wsheet.title = "%sbyPurpose"%(columns[i])
+                    
+                    seri = []
+                    seri.append(self.sql_quary2(wsheet,columns[i],False))
+                    if self.isNHTS:
+                        seri.append(self.sql_quary2(wsheet,columns[i],True))
+                        
+                    self.call_chart(wsheet,seri)
+
+            
+            wb.save(filename.replace('/','\\'))
+            #xlwt code            
+            #wb.save(filename)
             QMessageBox.information(self, "",
                 QString("""Outputs exporting is successful!"""), 
                 QMessageBox.Yes)
@@ -171,12 +252,67 @@ class Export_Outputs(QDialog):
                 
     def save_folder(self):
         dialog = QFileDialog()
-        filename = dialog.getSaveFileName(self,"Save File","","MS Excel 2000-2003 (*.xls)")
+        filename = dialog.getSaveFileName(self,"Save File","","MS Excel 2007 (*.xlsx)")
         if filename <> "":
-            if str(filename).rfind(".xls") < 0:
-                filename = filename + ".xls"
+            if str(filename).rfind(".xlsx") < 0:
+                filename = filename + ".xlsx"
             self.xlsname.setText(filename)
 
+    def call_chart(self,wsheet,series):
+        temp = series[0]
+        if type(temp[0]).__name__ == 'list':
+            seri1 = series[0]
+            seri2 = series[1]
+            chart_title = self.trip_labels("activitytype")
+            for i in range(len(seri1)):
+                if len(seri1[i]) == 4 or len(seri2[i]) == 4:
+                    seri = [seri1[i],seri2[i]]
+                    print seri
+                    self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
+        else:
+            if len(series[0]) == 4 or len(series[1]) == 4:
+                print series
+                self.draw_chart(wsheet,series)
+
+    def draw_chart(self,wsheet,series,left=0,title=""):
+        chart = BarChart()
+        chart.title = title
+        chart.drawing.left = 500+left
+        chart.drawing.top = 250+left
+        chart.drawing.height = 200
+        chart.drawing.width = 500
+
+        i = 0
+        for serie in series:
+            if len(serie) == 4:
+                
+                x1 = int(serie[0])
+                y1 = int(serie[1])
+                x2 = int(serie[2])
+                y2 = int(serie[3])
+                
+                if x2 > 3:
+                
+                    if i == 0:
+                        legend = Reference(wsheet,(0,0))
+                        labels = Reference(wsheet,(x1,0),(x2,0))
+                    else:
+                        if y1 < 13:
+                            legend = Reference(wsheet,(0,4))
+                        if y1 >= 13:
+                            legend = Reference(wsheet,(0,13))
+                        
+                    value = wsheet.cell(row=4,column=0).value
+                    if i == 0 and type(value).__name__ <> 'int':
+                        seri = Serie(Reference(wsheet,(x1,y1),(x2,y2)),labels=labels,legend=legend)
+                    else:
+                        seri = Serie(Reference(wsheet,(x1,y1),(x2,y2)),legend=legend)
+                        
+                    chart.add_serie(seri)
+                
+            i += 1
+
+        wsheet.add_chart(chart)        
 
     def sql_quary1(self,wsheet,column,nhts):
         
@@ -235,19 +371,20 @@ class Export_Outputs(QDialog):
             data = self.new_obj.cursor.fetchall()
             
             for j in data:
+                i += 1
                 if j[0] > 0:
-                    i += 1
-                    
                     err1.append(labels[key])
                     err2.append(long(j[0]))
                     total = total + long(j[0])
+                else:
+                    err1.append(labels[key])
+                    err2.append(0)
         
-        #self.cnames(wsheet)
-        j = 0
         if nhts:
-            self.cnames(wsheet,5)
             j = 4
+            self.cnames(wsheet,5)
         else:
+            j = 0
             self.cnames(wsheet,1)
             
         for i in range(len(err1)):
@@ -256,9 +393,16 @@ class Export_Outputs(QDialog):
                 percent = round(100*float(err2[i])/total,2)
             else:
                 percent = 0.0
-            wsheet.write(i+2,j,str(err1[i]))
-            wsheet.write(i+2,j+1,long(err2[i]))
-            wsheet.write(i+2,j+2,percent)
+            
+            wsheet.cell(row=i+2,column=j).value = str(err1[i])
+            wsheet.cell(row=i+2,column=j+1).value = long(err2[i])
+            wsheet.cell(row=i+2,column=j+2).value = percent
+        
+        if total > 0:    
+            location = [2,j+2,i+2,j+2]
+        else:
+            location = [-1]        
+        return location
 
 
     def sql_quary2(self,wsheet,column,nhts):
@@ -338,24 +482,27 @@ class Export_Outputs(QDialog):
             yvalue.append(xvalue)
             
 
-        j = 1
         if nhts:
             j = len(xkeys)+4
-            wsheet.write(0,len(xkeys)+3,"NHTS")            
+            wsheet.cell(row=0,column=len(xkeys)+3).value = "NHTS"            
         else:
-            wsheet.write(0,0,"OpenAmos")
+            j = 1
+            wsheet.cell(row=0,column=0).value = "OpenAmos"
             
         for xkey in xkeys:
-            wsheet.write(1,j,str(xlabels[xkey]))
+            #wsheet.write(1,j,str(xlabels[xkey]))
+            wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
             j += 1
         
         i = 2
         for y in yvalue:
-
+            
             if nhts:
-                wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
+                #wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
+                wsheet.cell(row=i,column=len(xkeys)+3).value = str(ylabels[ykeys[i-2]])
             else:
-                wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
+                #wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
+                wsheet.cell(row=i,column=0).value = str(ylabels[ykeys[i-2]])
                 
             for j in range(len(y)):
                 if cumulate[j] > 0.0:
@@ -364,11 +511,27 @@ class Export_Outputs(QDialog):
                     percent = 0.0
 
                 if nhts:
-                    wsheet.write(i,j+len(xkeys)+4,percent)
+                    #wsheet.write(i,j+len(xkeys)+4,percent)
+                    wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
                 else:
-                    wsheet.write(i,j+1,percent)
+                    #wsheet.write(i,j+1,percent)
+                    wsheet.cell(row=i,column=j+1).value = percent
                 
             i += 1
+            
+        locations = []
+        for k in range(len(y)):
+            if nhts:
+                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
+            else:
+                location = [i-len(yvalue),k+1,i-1,k+1]
+                
+            if cumulate[k] > 0.0:
+                locations.append(location)
+            else:
+                locations.append([])
+            
+        return locations
 
 
     def sql_quary3(self,wsheet,nhts):
@@ -415,23 +578,52 @@ class Export_Outputs(QDialog):
                 total += long(j[1])
         
         
-        
-        j = 0
         if nhts:
             self.cnames(wsheet,5)
             j = 4 
         else:
             self.cnames(wsheet,1)
-            
-        for i in range(len(err1)):
-            if total > 0.0:
-                percent = round(100*float(err2[i])/total,2)
-            else:
-                percent = 0.0
+            j = 0
+           
+        i=1 
+        k=0
+        if len(err1) > 0:
+            while i <= int(err1[len(err1)-1]):
                 
-            wsheet.write(i+2,j,str(err1[i]))
-            wsheet.write(i+2,j+1,long(err2[i]))
-            wsheet.write(i+2,j+2,percent)
+                if i == err1[k]:
+                    
+                    if total > 0.0:
+                        percent = round(100*float(err2[k])/total,2)
+                    else:
+                        percent = 0.0
+                    
+                    wsheet.cell(row=i+1,column=j).value = str(err1[k])
+                    wsheet.cell(row=i+1,column=j+1).value = long(err2[k])
+                    wsheet.cell(row=i+1,column=j+2).value = percent
+                    k += 1
+                else:
+                    wsheet.cell(row=i+1,column=j).value = i
+                    wsheet.cell(row=i+1,column=j+1).value = 0
+                    wsheet.cell(row=i+1,column=j+2).value = 0
+                
+                i += 1
+        
+        if total > 0:
+            location = [2,j+2,i,j+2]
+        else:
+            location = [-1]
+            
+        return location               
+                        
+#        for i in range(len(err1)):
+#            if total > 0.0:
+#                percent = round(100*float(err2[i])/total,2)
+#            else:
+#                percent = 0.0
+#                
+#            wsheet.write(i+2,j,str(err1[i]))
+#            wsheet.write(i+2,j+1,long(err2[i]))
+#            wsheet.write(i+2,j+2,percent)
 
             
 
@@ -578,13 +770,15 @@ class Export_Outputs(QDialog):
 
     def cnames(self,wsheet,i):
         if i == 1:
-            wsheet.write(0,i-1,"OpenAmos")
+#            wsheet.write(0,i-1,"OpenAmos")
+            wsheet.cell(row=0,column=i-1).value = "OpenAmos"
         else:
-            wsheet.write(0,i-1,"NHTS")
+#            wsheet.write(0,i-1,"NHTS")
+            wsheet.cell(row=0,column=i-1).value = "NHTS"
             
-        wsheet.write(1,i,"Frequency")
-        wsheet.write(1,i+1,"Percent(%)")
-            
+        wsheet.cell(row=1,column=i).value = "Frequency"
+        wsheet.cell(row=1,column=i+1).value = "Percent(%)"
+        
     def connects(self,configobject):
         
         protocol = configobject.getConfigElement(DB_CONFIG,DB_PROTOCOL)        
