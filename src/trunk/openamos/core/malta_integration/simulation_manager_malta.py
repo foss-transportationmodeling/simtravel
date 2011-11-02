@@ -33,7 +33,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta_sequential.xml'
 	configObject = None
 
 
@@ -227,11 +227,18 @@ class SimulationManager(object):
                 data = comp.pre_process(self.queryBrowser, 
                                         self.skimsMatrix, self.uniqueIds, self.db, fileLoc)
 
+
             if data is not None:
                 #print 'inside here for component - ', comp.component_name
-		tripInfo = comp.run(data, self.queryBrowser, 
+		if comp.component_name == "ExtractAllTravelEpisodes":
+		    tripInfo = comp.run(data, self.queryBrowser, 
 			    self.skimsMatrix, self.uniqueIds, fileLoc)
-            else:
+		else:
+		    comp.run(data, self.queryBrowser, 
+			    self.skimsMatrix, self.uniqueIds, fileLoc)
+		    
+
+            elif data is None and comp.component_name == "ExtractAllTravelEpisodes":
                 tripInfo = zeros((1,11))
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
@@ -239,6 +246,8 @@ class SimulationManager(object):
 	tripInfo = tripInfo.astype(int)
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
 	print '\t Time taken to retrieve trips for the simulation interval - %.4f' %(time.time()-ti)
+
+	#raw_input()
 
 	return tripInfo
 
