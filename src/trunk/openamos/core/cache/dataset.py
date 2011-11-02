@@ -66,23 +66,26 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_ltrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_allocterm_r", Schedule_Allocation_R)
-        self.fileh.createTable(output_grp, "schedule_joint_allocterm_r", Schedule_Allocation_R)
+        #self.fileh.createTable(output_grp, "schedule_joint_allocterm_r", Schedule_Allocation_R)
 	self.fileh.createTable(output_grp, "persons_fixed_activity_vertices_r", Persons_Fixed_Activity_Vertices_R)
+
         self.fileh.createTable(output_grp, "schedule_cleanfixedactivityschedule_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_childrenlastprismadj_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_childreninctravelrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_cleanaggregateactivityschedule_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_dailyallocrec_r", Schedule_Allocation_R)
-        self.fileh.createTable(output_grp, "schedule_joint_dailyallocrec_r", Schedule_Allocation_R)
+        #self.fileh.createTable(output_grp, "schedule_joint_dailyallocrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_skeleton_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_inctravelrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_final_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_full_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_aggregatefinal_r", Schedule_Allocation_R)
-        self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
+
         self.fileh.createTable(output_grp, "persons_daily_status_r", Persons_Daily_Status_R)
-        self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
-        self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
+        #self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
+        #self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
+        #self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)
+
         self.fileh.createTable(output_grp, "persons_prism_activities_r", Persons_Prism_Activities_R)
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_invalid_r", Trips_Invalid_R)
@@ -94,7 +97,22 @@ class DB(object):
         self.fileh.createTable(output_grp, "persons_history_r", Persons_History_R)
         self.fileh.createTable(output_grp, "gap_function_r", Gap_Function_R)
         self.fileh.createTable(output_grp, "od_r", OD_R)
-        self.fileh.createTable(output_grp, "odt_r", ODT_R)
+
+
+        self.fileh.createTable(output_grp, "person_trips_occupant_origin_invalid_r", Person_Trips_Occupant_Origin_Invalid_R)
+        self.fileh.createTable(output_grp, "persons_arrived_from_openamos_r", Persons_Arrived_R)
+        self.fileh.createTable(output_grp, "persons_arrived_r", Persons_Arrived_R)
+        self.fileh.createTable(output_grp, "persons_arrived_id_r", Persons_Arrived_Id_R)
+        self.fileh.createTable(output_grp, "persons_leaving_id_r", Persons_Leaving_Id_R)
+        self.fileh.createTable(output_grp, "persons_leaving_valid_trips_id_r", Persons_Leaving_Valid_Trips_Id_R)
+        self.fileh.createTable(output_grp, "trips_arrival_from_malta_r", Trips_Arrival_R)
+        self.fileh.createTable(output_grp, "trips_arrival_from_openamos_r", Trips_Arrival_R)
+        self.fileh.createTable(output_grp, "trips_occupant_origin_invalid_r", Trips_Occupant_Origin_Invalid_R)
+
+
+        #self.fileh.createTable(output_grp, "odt_r", ODT_R)
+
+	"""
         self.fileh.createTable(output_grp, "mortality_r", Mortality_R)
         self.fileh.createTable(output_grp, "birth_r", Birth_R)
         self.fileh.createTable(output_grp, "aging_r", Aging_R)
@@ -119,7 +137,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "hht_dist_r", Hht_Dist_R)
         self.fileh.createTable(output_grp, "noc_dist_r", Noc_Dist_R)
         self.fileh.createTable(output_grp, "wif_dist_r", Wif_Dist_R)
-
+	"""
 
 
     def create(self, tableName=None):

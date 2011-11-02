@@ -201,6 +201,74 @@ class Persons_History_R(t.IsDescription):
     fixed_history = t.Int32Col()
 
 
+class Person_Trips_Occupant_Origin_Invalid_R(t.IsDescription):
+    tripid = t.Int32Col()
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    tripvalid = t.Int32Col()
+    tripstarttime = t.Int32Col()
+
+class Persons_Arrived_R(t.IsDescription):
+    houseid = t.Int64Col() 
+    personid = t.Int32Col() 
+    tripid = t.Int32Col() 
+    expectedstarttime = t.Int32Col() 
+    expectedarrivaltime = t.Int32Col() 
+    actualarrivaltime = t.Int32Col() 
+    tripdependentpersonid = t.Int64Col() 
+    fromzone = t.Int32Col() 
+    tozone = t.Int32Col() 
+    tripcount = t.Int64Col() 
+
+class Persons_Arrived_Id_R(t.IsDescription):
+    houseid = t.Int64Col() 
+    personid = t.Int32Col() 
+    actualarrivaltime = t.Int32Col() 
+    expectedarrivaltime = t.Int32Col() 
+    tripdependentpersonid = t.Int64Col() 
+    tozone = t.Int32Col() 
+    personuniqueid = t.Int64Col()
+    tripcount = t.Int64Col() 
+
+class Persons_Leaving_Id_R(t.IsDescription):
+    tripid = t.Int32Col() 
+    houseid = t.Int64Col() 
+    personid = t.Int32Col() 
+    starttime = t.Int32Col() 
+    fromzone = t.Int32Col() 
+    tripcount = t.Int64Col() 
+    
+class Persons_Leaving_Valid_Trips_Id_R(t.IsDescription):
+    tripid = t.Int32Col() 
+    houseid = t.Int64Col() 
+    personid = t.Int32Col() 
+    starttime = t.Int32Col() 
+    tripcount = t.Int64Col() 
+
+class Trips_Arrival_R(t.IsDescription):
+    tripid = t.Int32Col()
+    arrivaltime = t.Int32Col()
+
+
+class Trips_Occupant_Origin_Invalid_R(t.IsDescription):
+    tripid = t.Int32Col()
+    tripvalid = t.Int32Col()
+    tripstarttime = t.Int32Col()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()
     houseid = t.Int32Col()

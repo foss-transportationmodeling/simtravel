@@ -441,6 +441,7 @@ class SimulationManager(object):
 
 
     def reflectFromDatabaseToCache(self, queryBrowser, tableName, partId=None):
+	print 'Backing table - ', tableName
 	fileLoc = self.projectConfigObject.location
 	tableRef = self.db.returnTableReference(tableName, partId)
 
@@ -458,7 +459,7 @@ class SimulationManager(object):
         ti = time.time()
         tableRef.append(data_to_write.data)
         tableRef.flush()
-        print '\tData backed up for table %s in - %.4f' %(tableName, time.time()-ti) 
+        print '\t\tData backed up for table %s in - %.4f' %(tableName, time.time()-ti) 
 
 	
 	
