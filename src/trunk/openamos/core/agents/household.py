@@ -1788,7 +1788,7 @@ class Household(object):
 
 	    depPerson.listOfActivityEpisodes = depPersonActs
 
-	    depPerson.print_activity_list()
+	    #depPerson.print_activity_list()
 	    #raw_input('FINALFINAL')
 
 
