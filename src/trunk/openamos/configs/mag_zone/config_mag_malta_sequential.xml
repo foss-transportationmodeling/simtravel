@@ -187,8 +187,8 @@
       <DBTables>
 	<Table table="trips_to_malta_r" key="tripid"/>
 	<Table table="trips_r" key="tripid" order="1"/>
-    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
-    	<Table table="persons_arrived_r" key="tripid"/>
+    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
+    	<Table table="persons_arrived_from_openamos_r" key="tripid"/>
     	<Table table="persons" key="houseid,personid"/>
 
 
@@ -200,7 +200,7 @@
 	<Filter table="trips_r" var="houseid" condition="equals" value="0"/>
       </PreProcessData>
 
-      <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
+      <AnalysisIntervalFilter table="trips_arrival_from_openamos_r" var="arrivaltime"/>
 
       <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="houseid"/>
@@ -274,7 +274,7 @@
 	<DependentVariable var="actualarrivaltime"/>
 	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
-        <Variable table="trips_arrival_from_malta_r" var="arrivaltime" coeff="1"/>
+        <Variable table="trips_arrival_from_openamos_r" var="arrivaltime" coeff="1"/>
       </Model>
 
 
@@ -282,48 +282,48 @@
 
     <Component name="PersonsArrivedId" read_from_table="persons_arrived_from_openamos_r" write_to_table="persons_arrived_id_r" skip="False" completed="True">
       <DBTables>
-    	<Table table="persons_arrived_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_arrived_from_openamos_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_id_r" key="houseid,personid"/>
     	<Table table="persons" key="houseid,personid"/>
       </DBTables>
 
-      <AnalysisIntervalFilter table="persons_arrived_r" var="actualarrivaltime"/>
+      <AnalysisIntervalFilter table="persons_arrived_from_openamos_r" var="actualarrivaltime"/>
 
       <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="houseid"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="houseid" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="houseid" coeff="1"/>
       </Model>
 
       <Model name="Personid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="personid"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="personid" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="personid" coeff="1"/>
       </Model>
 
       <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="expectedarrivaltime"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="expectedarrivaltime" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="expectedarrivaltime" coeff="1"/>
       </Model>
 
 
       <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="actualarrivaltime"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="actualarrivaltime" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="actualarrivaltime" coeff="1"/>
       </Model>
 
       <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tozonedummy"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="tozone" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tozone" coeff="1"/>
       </Model>
 
       <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripcount"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="tripcount" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tripcount" coeff="1"/>
       </Model>
 
       <Model name="PersonUniqueId" formulation="Regression" type="Linear" seed="1">
@@ -336,7 +336,7 @@
 	<DependentVariable var="tripdependentpersonid"/>
 	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
 	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="tripdependentpersonid" coeff="1"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tripdependentpersonid" coeff="1"/>
       </Model>
 
 
@@ -3397,10 +3397,10 @@
       </Component>
 
 
-    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_malta_r" skip="False" completed="True">
+    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_openamos_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="tripid" order="1"/>
-    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
+    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
       </DBTables>
 
       <AnalysisIntervalFilter table="trips_r" var="starttime"/>
@@ -3508,7 +3508,7 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
@@ -3623,11 +3623,6 @@
 	<DependentVariable var="endtripcount"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="0"/>
-      </Model>
-      <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripwithhhmember"/>
-	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="startdependentpersonid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="startdependentpersonid"/>

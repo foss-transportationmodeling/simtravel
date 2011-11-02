@@ -3397,7 +3397,7 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
@@ -3512,11 +3512,6 @@
 	<DependentVariable var="endtripcount"/>
 	<Variance value="0"/>
         <Variable table="standard" var="one" coeff="0"/>
-      </Model>
-      <Model name="tripwithhhmember" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripwithhhmember"/>
-	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1"/>
       </Model>
       <Model name="startdependentpersonid" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="startdependentpersonid"/>
