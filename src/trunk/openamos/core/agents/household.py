@@ -823,7 +823,7 @@ class Household(object):
 	    #print '\t    --Dependentpersonid for next act- ', personarrived.destAct.dependentPersonId
 
 
-	    self.traverse_through_dependency_chain(personarrived.actualArrival)
+	    #self.traverse_through_dependency_chain(personarrived.actualArrival)
 	
 
 
@@ -951,13 +951,13 @@ class Household(object):
 	else:
 	    #moveByValue = person.actualArrival - person.destAct.startTime
 	    moveByValue = person.actualArrival - person.destAct.startTime -1
-	    self.affectedActs[copy.deepcopy(person.destAct)] = [-9999, -9999, moveByValue]
+	    #self.affectedActs[copy.deepcopy(person.destAct)] = [-9999, -9999, moveByValue]
 	    person.move_start_end(person.destAct, moveByValue)
 	    #self.add_anchor_activity(person, person.destAct, person.actualArrival)
 
 	
     def wait_push_subsequent_activities(self, person):
-	self.affectedActs = {}
+	#self.affectedActs = {}
 	#raw_input('adjusting and pushing subsequent activities')
 
 	#print 'Expected Activities'
@@ -995,7 +995,7 @@ class Household(object):
 	    i += 1
 	    if actEnd-act.startTime > 0:
 		moveByValue = copy.deepcopy(actEnd-act.startTime)
-		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
+		#self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
 		person.move_start_end(act, moveByValue)
 	    	actEnd = copy.deepcopy(act.endTime)
 
@@ -1047,12 +1047,12 @@ class Household(object):
 	    
 	    if firstExpActAfterArrival.endTime == actualArrival + 1:
 		person.move_start(firstExpActAfterArrival, actualArrival)
-		self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival, -9999, -9999]
+		#self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival, -9999, -9999]
 		#print ('Only first activity needs to be adjusted; however move start to actual arrival and then move the whole episode to avoid prism extraction errors')
 	    else:
 		person.move_start(firstExpActAfterArrival, actualArrival + 1)
 	    	#print ('Only first activity needs to be adjusted')f
-		self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival+1, -9999, -9999]
+		#self.affectedActs[copy.deepcopy(firstExpActAfterArrival)] = [actualArrival+1, -9999, -9999]
 	    	return
 	    
 	# Add an anchor only when the first activity is not the only one affected ... because individual's subsequent activity engagement is getting messed up ... 	
@@ -1133,7 +1133,7 @@ class Household(object):
 	    if actEnd-act.startTime >= 0:
 		#print '-->This ', act, ' is being moved by ', actEnd-act.startTime
 		moveByValue = copy.deepcopy(actEnd-act.startTime-1)
-		self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
+		#self.affectedActs[copy.deepcopy(act)] = [-9999, -9999, moveByValue]
 		person.move_start_end(act, moveByValue)
 	    else:
 		break
@@ -1767,6 +1767,14 @@ class Household(object):
 		    depPerson.move_start_end(act, moveByValue, removeAdd=False)
 		    #print '\tafter last trip modified- ', act
 		    lastTripEn = act.endTime
+
+		if act.startTime >= lastTripEn:
+		   #print act
+		   #print 'moving first act after last trip ... '
+		   depPerson.move_start(act, lastTripEn + 1, removeAdd=False)
+		   #print act
+		   break
+
 	    #raw_input ('after adjusting acts after last trip')
 
 
@@ -1779,7 +1787,8 @@ class Household(object):
 		hp.heappush(depPersonActs, (act.startTime, act))
 
 	    depPerson.listOfActivityEpisodes = depPersonActs
-	    #depPerson.print_activity_list()
+
+	    depPerson.print_activity_list()
 	    #raw_input('FINALFINAL')
 
 
