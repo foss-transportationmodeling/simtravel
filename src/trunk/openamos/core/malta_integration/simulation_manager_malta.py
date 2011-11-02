@@ -147,7 +147,9 @@ class SimulationManager(object):
             # clean the run time tables
             tableName = comp.writeToTable
             if tableName not in tableNamesDelete:
-		if comp.writeToTable == 'schedule_final_r' or comp.writeToTable == 'persons_location_r':
+		if (comp.writeToTable == 'schedule_final_r' 
+		    or comp.writeToTable == 'persons_location_r'
+		    or comp.writeToTable == 'persons_history_r'):
 		    continue
                 tableNamesDelete.append(tableName)
                 print "\tDeleting records in the output table - %s before simulating choices again" %(tableName)
