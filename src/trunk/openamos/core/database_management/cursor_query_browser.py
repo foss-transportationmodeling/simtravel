@@ -80,7 +80,7 @@ class QueryBrowser(object):
                 print '\tError while retreiving the data from the table'
                 print e
         else:
-            print 'Table %s does not exist.'%table_name
+            print '\tTable %s does not exist.'%table_name
     
   
     #select rows based on a selection criteria

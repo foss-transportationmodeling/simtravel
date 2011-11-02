@@ -87,8 +87,8 @@ class DB(object):
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_invalid_r", Trips_Invalid_R)
         self.fileh.createTable(output_grp, "current_occupancy_r", Occupancy_R)
-        self.fileh.createTable(output_grp, "current_occupancy_dup_r", Occupancy_R)
-        self.fileh.createTable(output_grp, "trips_inc_expected_to_malta_r", Trips_R)
+        #self.fileh.createTable(output_grp, "current_occupancy_dup_r", Occupancy_R)
+        #self.fileh.createTable(output_grp, "trips_inc_expected_to_malta_r", Trips_R)
         self.fileh.createTable(output_grp, "trips_to_malta_r", Trips_Final_R)
         self.fileh.createTable(output_grp, "persons_location_r", Persons_Location_R)
         self.fileh.createTable(output_grp, "persons_history_r", Persons_History_R)
@@ -224,7 +224,17 @@ class DB(object):
                 return convType
         return convType
 
-        
+    def list_of_outputtables(self):
+	tableList = []
+
+	for group in self.fileh.walkGroups():
+	    for table in self.fileh.listNodes(group, classname='Table'):
+		if self.returnGroup(table.name) == 'output':
+		    tableList.append(table.name)
+	
+
+	return tableList
+
 
     def createSkimsCache(self, tableName, data):
         t = time.time()

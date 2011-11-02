@@ -100,23 +100,38 @@ class SimulationManager(object):
 
 	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "iteration_%d" %self.iteration)
 
+        queryBrowser = self.setup_databaseConnection()
+
 	try:
 	    os.mkdir(backupDirectoryLoc)
 	except OSError, e:
 	    print 'Directory already exists'
+
+
+	# create cache again - 
+        self.setup_cacheDatabase()
+	self.setup_inputCacheTables()
+	self.setup_outputCacheTables()
+
+	# create populate cache - 
+	tableList = self.db.list_of_outputtables()
+
+	for tableName in tableList:
+	    #print 'Backing up results for table - ', tableName
+	    self.reflectFromDatabaseToCache(queryBrowser, tableName)
 
 	# Copying the hdf 5 file
 	print 'Copying the hdf 5 file to the iteration folder'
 	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
 	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
 	shutil.copyfile(fileLoc, backupFileLoc)
-
+	
 	# Copying the skims ... 
 	print 'Copying the skim files to the iteration folder'
 	for skimsTable in self.projectSkimsObject.table_locationLookup.values():
 	    shutil.copy(skimsTable, backupDirectoryLoc)
 
-
+        self.close_database_connection(queryBrowser)
 
     def read_cacheDatabase(self):
         fileLoc = self.projectConfigObject.location
@@ -425,6 +440,28 @@ class SimulationManager(object):
         configFile.close()
 
 
+    def reflectFromDatabaseToCache(self, queryBrowser, tableName, partId=None):
+	fileLoc = self.projectConfigObject.location
+	tableRef = self.db.returnTableReference(tableName, partId)
+
+	colsToWrite = tableRef.colnames
+
+	data = queryBrowser.select_all_from_table(tableName, cols=colsToWrite)
+	if data is None:
+	    #print '\tNo result returned for the table ... '
+	    return
+
+        convType = self.db.returnTypeConversion(tableName, partId)
+        dtypesInput = tableRef.coldtypes
+        data_to_write = data.columnsOfType(colsToWrite, colTypes=dtypesInput)
+
+        ti = time.time()
+        tableRef.append(data_to_write.data)
+        tableRef.flush()
+        print '\tData backed up for table %s in - %.4f' %(tableName, time.time()-ti) 
+
+	
+	
 
     def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None, createIndex=True, deleteIndex=True):
         """

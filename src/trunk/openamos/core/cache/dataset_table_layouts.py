@@ -41,7 +41,7 @@ class Locations(t.IsDescription):
     sfhh = t.Int32Col()
     mfhh = t.Int32Col()
     popcorr = t.Int32Col()
-    popinst = t.Int32Col()
+    institutional_population = t.Int32Col()
     popminst = t.Int32Col()
     wahemp = t.Int32Col()
     constemp = t.Int32Col()

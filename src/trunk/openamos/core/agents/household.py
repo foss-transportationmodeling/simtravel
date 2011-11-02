@@ -2404,8 +2404,8 @@ class Household(object):
         self.seed = seed
         self.rndGen = RandomDistribution(int(self.hid + self.seed))
 
-	print 'Household ID - ', self.hid
-        print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
+	#print 'Household ID - ', self.hid
+        #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         #print '\tPerson Ids with fixed activities - ', self.dailyFixedActPersonIds
         #print '\tPerson Ids with no fixed activities - ', self.noDailyFixedActPersonIds
 

@@ -1,8 +1,29 @@
 import sys
 import multiprocessing
+import argparse
 
 from openamos.core.run.simulation_manager_cursor import SimulationManager
 from openamos.core.errors import ArgumentsError
+
+parser = argparse.ArgumentParser(description="OpenAMOS Run Module")
+parser.add_argument('-file', help='specifies the location of the configuration file', 
+			default='../configs/mag_zone/config_before_malta.xml', type=str)
+parser.add_argument('-it', help='this attribute specifies the iteration count; a integer value', 
+			default=1, type=int)
+parser.add_argument('-crca', help="""this attribute specifies whether cache needs to be """\
+				     """created; default is 1 to create a cache """\
+				     """and any other integer value does not create a new cache""", 
+			default=1, type=int)
+parser.add_argument('-bkup', help="""this attribute specifies whether the cache and the skim tables as """\
+				     """specified in the config file need to be backed up """\
+				     """; default is 0 to not backup """\
+				     """and a value of 1 creates a backup""", 
+			default=0, type=int)
+
+
+argsG = vars(parser.parse_args(sys.argv[1:]))
+print argsG
+
 
 def run(fileLoc=None):
     """
@@ -14,35 +35,17 @@ def run(fileLoc=None):
     """
     print 'File location is %s'%fileLoc, sys.argv
     
-    if fileLoc is not None:
-	args = [fileLoc]
-    else:
-	args = sys.argv[1:]
-
-    
-    if len(args) < 1 or len(args) > 4:
-        raise ArgumentsError, """The module accepts """\
-            """only four arguments which are the location of the configuration """\
-            """ file . e.g. /home/config.xml (linux machine) """\
-            """or c:/testproject/config.xml (windows machine) and """\
-            """iteration count, create cache database, backup results """\
-
-    fileLoc = args[0]
-
-    if len(args) >= 2:
-	iteration = int(args[1])
-    else:
-	iteration = 1	
-
-    if len(args) >= 3:
-	create_cache = int(args[2])
-    else:
-	create_cache = 1
+    if fileLoc is None:
+	fileLoc = argsG['file']	
 	
-    if len(args) == 4:
-	backup_results = int(args[3])
-    else:
-	backup_results = 0
+
+    iteration = argsG['it']
+    create_cache = argsG['crca']
+    backup_results = argsG['bkup']
+
+    print ("""Project attributes:\n\tFile location - %s \n\tIteration count - %s """\
+		"""\n\tCreate cache - %s \n\tBackup results - %s""" 
+		%(fileLoc, iteration, create_cache, backup_results))
 
     simulationManagerObject = SimulationManager(fileLoc = fileLoc, iteration=iteration)
 
