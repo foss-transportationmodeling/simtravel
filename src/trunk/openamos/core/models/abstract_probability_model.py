@@ -66,6 +66,11 @@ class AbstractProbabilityModel(object):
         #print self.probabilities
         #print diff_from_unity
         #print diff_from_unity
+	#rowsId = diff_from_unity < 1e-6
+	#a = array(range(self.probabilities.shape[0]))+1
+
+	#print self.probabilities[~rowsId], a[~rowsId]
+
         if not ma.all(diff_from_unity < 1e-6):
             raise ProbabilityError, """probability values do not add up """ \
                 """to one across rows"""    

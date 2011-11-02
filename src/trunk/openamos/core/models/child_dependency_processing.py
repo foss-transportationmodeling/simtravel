@@ -119,6 +119,9 @@ class ChildDependencyProcessing(Model):
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
+	    #if hhldIndex[0] not in [138659, 78626, 149205, 163458, 87803, 57421, 51500, 164686, 15767, 
+	    #			    22365, 127012, 10859, 107433, 133988, 66482, 107433, 9277]:
+	    #	continue
             householdObject = Household(hhldIndex[0])
 
             for perIndex in persIndicesForActsForHhld:

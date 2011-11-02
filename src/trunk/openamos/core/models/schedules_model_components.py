@@ -95,9 +95,10 @@ class PersonsArrivedSpecification(object):
 
 
 class PersonsArrivedAttributes(object):
-    def __init__(self, tripDepName, tripCountName=None, actDepName=None):
+    def __init__(self, tripDepName, tripCountName=None, endTripCountName=None, actDepName=None):
 	self.tripDepName = tripDepName
 	self.tripCountName = tripCountName
+	self.endTripCountName = endTripCountName
 	self.actDepName = actDepName
 
 class TripDependentPersonAttributes(object):
@@ -107,13 +108,21 @@ class TripDependentPersonAttributes(object):
 		 lastTripDepName,
 		 stActDepName,
 		 enActDepName,
-		 personOnNetworkName=None):
+		 personOnNetworkName, 
+		 tripCountName,
+		 lastTripCountName,
+		 stActTripCountName,
+	   	 enActTripCountName):
 	self.tripPpurposeFromName = tripPurposeFromName
 	self.tripDepName = tripDepName
 	self.lastTripDepName = lastTripDepName
 	self.stActDepName = stActDepName
 	self.enActDepName = enActDepName
 	self.personOnNetworkName = personOnNetworkName
+	self.tripCountName = tripCountName
+	self.stActTripCountName = stActTripCountName
+	self.enActTripCountName = enActTripCountName
+	self.lastTripCountName = lastTripCountName
 
 class UniqueRecordsSpecification(object):
     def __init__(self, uniqueRecordsColName):
