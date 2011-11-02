@@ -298,6 +298,9 @@ class AbstractComponent(object):
 
     def iterate_through_the_model_list(self, model_list_duringrun, 
                                        iteration, skimsMatrix, uniqueIds, fileLoc):
+
+	#print self.data.varnames
+	#print self.data.data.astype(int)
         ti = time.time()
         model_list_forlooping = []
 

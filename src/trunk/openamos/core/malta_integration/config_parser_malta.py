@@ -2021,6 +2021,14 @@ class ConfigParser(object):
         tripCountNameParsed = self.return_table_var(tripCountName_element)
         variable_list.append(tripCountNameParsed)
 
+        endTripCountName_element = trip_arrived_pers_attribs_element.find('EndTripCountName')	
+	if endTripCountName_element is not None:
+       	    endTripCountNameParsed = self.return_table_var(endTripCountName_element)
+            variable_list.append(endTripCountNameParsed)
+	else:
+	    endTripCountNameParsed = (None, None)
+
+
         actDepPersIdName_element = trip_arrived_pers_attribs_element.find('ActDependentPersonIdName')
         actDepPersIdNameParsed = self.return_table_var(actDepPersIdName_element)
         variable_list.append(actDepPersIdNameParsed)
@@ -2028,6 +2036,7 @@ class ConfigParser(object):
 
 	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1],
 						      tripCountNameParsed[1],
+						      endTripCountNameParsed[1],
 						      actDepPersIdNameParsed[1])
 
         self.component_variable_list = self.component_variable_list + variable_list
@@ -2061,6 +2070,23 @@ class ConfigParser(object):
         enActDepPersIdNameParsed = self.return_table_var(enActDepPersIdName_element)
         variable_list.append(enActDepPersIdNameParsed)
 
+        stActTripCountName_element = trip_dep_pers_attribs_element.find('StActTripCountName')
+        stActTripCountNameParsed = self.return_table_var(stActTripCountName_element)
+        variable_list.append(stActTripCountNameParsed)
+
+
+        enActTripCountName_element = trip_dep_pers_attribs_element.find('EnActTripCountName')
+        enActTripCountNameParsed = self.return_table_var(enActTripCountName_element)
+        variable_list.append(enActTripCountNameParsed)
+
+        tripCountName_element = trip_dep_pers_attribs_element.find('TripCountName')
+        tripCountNameParsed = self.return_table_var(tripCountName_element)
+        variable_list.append(tripCountNameParsed)
+
+        lastTripCountName_element = trip_dep_pers_attribs_element.find('LastTripCountName')
+        lastTripCountNameParsed = self.return_table_var(lastTripCountName_element)
+        variable_list.append(lastTripCountNameParsed)
+
 
 	persOnNetworkName_element = trip_dep_pers_attribs_element.find('PersonOnNetwork')
 	if persOnNetworkName_element is not None:
@@ -2074,7 +2100,11 @@ class ConfigParser(object):
 							  lastTrpActDepPersIdNameParsed[1],
 							  stActDepPersIdNameParsed[1],
 							  enActDepPersIdNameParsed[1],
-							  persOnNetworkNameParsed[1])
+							  persOnNetworkNameParsed[1],
+							  tripCountNameParsed[1],
+							  lastTripCountNameParsed[1],
+							  stActTripCountNameParsed[1],
+							  enActTripCountNameParsed[1])
 
 	
         self.component_variable_list = self.component_variable_list + variable_list

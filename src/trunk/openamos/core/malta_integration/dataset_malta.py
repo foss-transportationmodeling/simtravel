@@ -42,7 +42,7 @@ class DB(object):
 			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
 				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid', 'tripwithhhmember', 
 				     'lasttripdependentpersonid', 'lastoccupancy', 'starttripcount', 'endtripcount',
-				     'startdependentpersonid', 'enddependentpersonid'],
+				     'startdependentpersonid', 'enddependentpersonid', 'tripcount', 'lasttripcount'],
 
 			  'trips_with_nonhh_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
 				     'trippurpose', 'duration', 'occupancy', 'dependentpersonid'],
@@ -50,7 +50,7 @@ class DB(object):
 			  'trips_to_malta_r':['tripid', 'houseid', 'personid', 'vehid', 'tripmode', 
 					      'fromzone', 'tozone', 'starttime', 'endtime', 'trippurpose', 'duration', 
 					      'dependentpersonid', 'persononnetworkflag'],
-			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid'],
+			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid', 'tripcount'],
 			  'trips_invalid_r':['tripid', 'tripind'],
 			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
 			  'trips_arrival_from_openamos_r':['tripid', 'arrivaltime'],
@@ -105,7 +105,7 @@ class DB(object):
 			'dependentpersonid':int64, 'ih_history':int32, 'discretionary_history':int32, 
 			'maintenance_history':int32, 'fixed_history':int32, 
 			'tripcount':int64, 'lasttripcount':int64, 'starttripcount':int64, 'endtripcount':int64,
-			'startdependentpersonid':int64, 'enddependentpersonid':int64}
+			'startdependentpersonid':int64, 'enddependentpersonid':int64, 'tripcount':int64, 'lasttripcount':int64}
 
 	
 
