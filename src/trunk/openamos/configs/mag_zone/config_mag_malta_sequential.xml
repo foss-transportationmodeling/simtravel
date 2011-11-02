@@ -166,333 +166,6 @@
 
    </Component>
 
-    <Component name="ArrivalTimeInformationOpenAMOS" read_from_table="trips_arrival_from_openamos_r" key="tripid" skip="False" completed="True">
-      <DBTables>
-    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
-    	<Table table="trips_to_malta_r" key="tripid" order="1"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="trips_to_malta_r" var="endtime"/>
-
-      <Model name="ArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="arrivaltime"/>
-	<Variance value="0"/>
-        <Variable table="trips_to_malta_r" var="endtime" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-    <Component name="PersonsArrivedFromOpenAMOS" read_from_table="trips_arrival_from_openamos_r" write_to_table="persons_arrived_from_openamos_r" key="tripid" skip="False" completed="True">
-      <DBTables>
-	<Table table="trips_to_malta_r" key="tripid"/>
-	<Table table="trips_r" key="tripid" order="1"/>
-    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
-    	<Table table="persons_arrived_from_openamos_r" key="tripid"/>
-    	<Table table="persons" key="houseid,personid"/>
-
-
-      </DBTables>
-
-      <DeleteBasedOn table="trips_to_malta_r" var="tripid"/>
-
-      <PreProcessData name="PreProcessData">
-	<Filter table="trips_r" var="houseid" condition="equals" value="0"/>
-      </PreProcessData>
-
-      <AnalysisIntervalFilter table="trips_arrival_from_openamos_r" var="arrivaltime"/>
-
-      <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="houseid"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="houseid" coeff="1"/>
-      </Model>
-
-      <Model name="Personid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personid"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="personid" coeff="1"/>
-      </Model>
-
-      <Model name="ActualStartTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="expectedstarttime"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="starttime" coeff="1"/>
-      </Model>
-
-      <Model name="ExpectedArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="expectedarrivaltime"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="endtime" coeff="1"/>
-      </Model>
-
-      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="fromzonedummy"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="fromzone" coeff="1"/>
-      </Model>
-      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tozonedummy"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="tozone" coeff="1"/>
-      </Model>
-
-      <Model name="triptype" formulation="Persons On Trip Arrival Processing" seed="1">
-	<DependentVariable var="triptype"/>
-
-	<Id>
-	  <HouseId table="trips_r" var="houseid"/>
-	  <PersonId table="trips_r" var="personid"/>
-	</Id>
-
-	<PersonsArrivedAttributes>
-	  <TripDependentPersonIdName table="trips_r" var="dependentpersonid"/>
-	  <EndTripCountName table="trips_r" var="endtripcount"/>
-	  <TripCountName table="trips_r" var="tripcount"/>
-	  <ActDependentPersonIdName table="trips_r" var="enddependentpersonid"/>
-	</PersonsArrivedAttributes>
-
-      </Model>
-
-      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripcount"/>
-	<Variance value="0"/>
-        <Variable1 table="trips_r" var="endtripcount" coeff="1"/>
-        <Variable table="trips_r" var="tripcount" coeff="1"/>
-      </Model>
-
-
-      <Model name="TripDependentPersonId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripdependentpersonid"/>
-	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
-	<Variance value="0"/>
-        <Variable table="trips_r" var="dependentpersonid" coeff="1"/>
-      </Model>
-
-
-      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="actualarrivaltime"/>
-	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
-	<Variance value="0"/>
-        <Variable table="trips_arrival_from_openamos_r" var="arrivaltime" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-    <Component name="PersonsArrivedId" read_from_table="persons_arrived_from_openamos_r" write_to_table="persons_arrived_id_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_arrived_from_openamos_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_arrived_id_r" key="houseid,personid"/>
-    	<Table table="persons" key="houseid,personid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="persons_arrived_from_openamos_r" var="actualarrivaltime"/>
-
-      <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="houseid"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="houseid" coeff="1"/>
-      </Model>
-
-      <Model name="Personid" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personid"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="personid" coeff="1"/>
-      </Model>
-
-      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="expectedarrivaltime"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="expectedarrivaltime" coeff="1"/>
-      </Model>
-
-
-      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="actualarrivaltime"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="actualarrivaltime" coeff="1"/>
-      </Model>
-
-      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tozonedummy"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="tozone" coeff="1"/>
-      </Model>
-
-      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripcount"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="tripcount" coeff="1"/>
-      </Model>
-
-      <Model name="PersonUniqueId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personuniqueiddummy"/>
-	<Variance value="0"/>
-        <Variable table="persons" var="personuniqueid" coeff="1"/>
-      </Model>
-
-      <Model name="TripDependentPersonId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="tripdependentpersonid"/>
-	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_from_openamos_r" var="tripdependentpersonid" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-    <Component name="PersonsLocation" read_from_table="persons_location_r" write_to_table="persons_location_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_location_r" key="houseid,personid"/>
-    	<Table table="persons_arrived_id_r" key="houseid,personid" order="1"/>
-      </DBTables>
-
-      <DeleteBasedOn table="persons_location_r" var="personuniqueid"/>
-
-      <Model name="location" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="location"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_id_r" var="tozone" coeff="1"/>
-      </Model>
-
-      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personuniqueiddummy"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_id_r" var="personuniqueid" coeff="1"/>
-      </Model>
-
-      <Model name="lastrripcountdummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="lasttripcountdummy"/>
-	<Variance value="0"/>
-        <Variable table="persons_location_r" var="lasttripcount" coeff="1"/>
-      </Model>
-
-      <Model name="lastrripcount" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="lasttripcount"/>
-	<Filter table="persons_arrived_id_r" var="tripcount" condition="greater than equals" value="0"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_id_r" var="tripcount" coeff="1"/>
-      </Model>
-
-      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="personuniqueiddummy"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_id_r" var="personuniqueid" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-
-    <Component1 name="HouseholdIdsForPersonsArrived" read_from_table="persons_arrived_r" write_to_table="households_arrived_id_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_arrived_r" key="houseid,personid" order="1"/>
-    	<Table table="households_arrived_id_r" key="houseid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="persons_arrived_r" var="actualarrivaltime"/>
-
-      <Model name="Houseid" formulation="Identify Unique" seed="1">
-	<DependentVariable var="houseid"/>
-        <Variable table="persons_arrived_r" var="houseid" coeff="1"/>
-      </Model>
-
-      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="actualarrivaltime"/>
-	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_r" var="actualarrivaltime" coeff="1"/>
-      </Model>
-
-
-   </Component1>
-
-
-
-    <Component name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
-      <DBTables>
-    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_arrived_id_r" key="houseid,personid"/>
-    	<Table table="households_arrived_id_r" key="houseid"/>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
-      </DBTables>
-
-      <AnalysisIntervalFilter table="persons_arrived_id_r" var="actualarrivaltime"/>
-	
-      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
-
-
-      <Model name="ArrivalInformationProcessing" formulation="Schedule Adjustment" seed="1">
-	<DependentVariable var="childdependencyallocation"/>
-
-	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
-	  <PersonIdName table="schedule_final_r" var="personid"/>
-	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
-	  <LocationIdName table="schedule_final_r" var="locationid"/>
-	  <StartTimeName table="schedule_final_r" var="starttime"/>
-	  <EndTimeName table="schedule_final_r" var="endtime"/>
-	  <DurationName table="schedule_final_r" var="duration"/>
-	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
-	  <TripCountName table="schedule_final_r" var="tripcount"/>
-	</ActivityAttributes>
-
-	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
-	</DailyStatus>
-	
-	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
-	</Dependency>
-	
-	<ArrivalTime>
-	  <DependentPersonId table="persons_arrived_id_r" var="tripdependentpersonid"/>
-	  <Actual table="persons_arrived_id_r" var="actualarrivaltime"/>
-	  <Expected table="persons_arrived_id_r" var="expectedarrivaltime"/>
-	</ArrivalTime>
-
-
-      </Model>
-
-    </Component>
-
-    <Component name="DeletePersonIdsForPersonsArrived" read_from_table="persons_arrived_id_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_arrived_id_r" key="houseid" order="1"/>
-      </DBTables>
-
-      <DeleteBasedOn table="persons_arrived_id_r" var="houseid"/>
-
-      <Model name="DummyHouseholdId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dummy"/>
-	<Filter table="persons_arrived_id_r" var="houseid" condition="equals" value="-1"/>
-	<Variance value="0"/>
-        <Variable table="persons_arrived_id_r" var="houseid" coeff="1"/>
-      </Model>
-
-
-   </Component>
-
-
-    <Component1 name="DeleteHouseholdIdsForPersonsArrived" read_from_table="households_arrived_id_r" skip="False" completed="True">
-      <DBTables>
-    	<Table table="households_arrived_id_r" key="houseid" order="1"/>
-      </DBTables>
-
-      <DeleteBasedOn table="households_arrived_id_r" var="houseid"/>
-
-      <Model name="DummyHouseholdId" formulation="Regression" type="Linear" seed="1">
-	<DependentVariable var="dummy"/>
-	<Filter table="households_arrived_id_r" var="houseid" condition="equals" value="-1"/>
-	<Variance value="0"/>
-        <Variable table="households_arrived_id_r" var="houseid" coeff="1"/>
-      </Model>
-
-
-   </Component1>
 
     <Component name="PersonsHistory" read_from_table="schedule_final_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
@@ -2401,6 +2074,15 @@
 	  <Variance value="0"/>
           <Variable table="runtime" var="en_starttime" coeff="1"/>
         </Model>
+
+        <Model1 name="endtime" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="endtime"/>
+	  <Filter table="runtime" var="starttime" condition="equals" valuetable="runtime" valuevar="endtime"/>
+	  <Variance value="0"/>
+          <Variable table="runtime" var="endtime" coeff="1"/>
+          <Variable table="standard" var="one" coeff="1"/>
+        </Model1>
+
         <Model name="duration" formulation="Regression" type="Linear" seed="1">
 	  <DependentVariable var="duration"/>
 	  <Variance value="0"/>
@@ -3187,10 +2869,10 @@
 
       </Component>
 
-    <Component name="ProcessingArrivalForIHTOIHTrips" read_from_table="trips_r" write_to_table="persons_arrived_r" skip="False" completed="True">
+    <Component name="ProcessingArrivalForIHTOIHTrips" read_from_table="trips_r" write_to_table="persons_arrived_from_openamos_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_arrived_r" key="houseid,personid"/>
+    	<Table table="persons_arrived_from_openamos_r" key="houseid,personid"/>
     	<Table table="households" key="houseid"/>
     	<Table table="persons" key="houseid,personid"/>
       </DBTables>
@@ -3747,6 +3429,284 @@
     </Component>
 
 
+    <Component name="ArrivalTimeInformationOpenAMOS" read_from_table="trips_arrival_from_openamos_r" key="tripid" skip="False" completed="True">
+      <DBTables>
+    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
+    	<Table table="trips_to_malta_r" key="tripid" order="1"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="trips_to_malta_r" var="endtime"/>
+
+      <Model name="ArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="arrivaltime"/>
+	<Variance value="0"/>
+        <Variable table="trips_to_malta_r" var="endtime" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
+    <Component name="PersonsArrivedFromOpenAMOS" read_from_table="trips_arrival_from_openamos_r" write_to_table="persons_arrived_from_openamos_r" key="tripid" skip="False" completed="True">
+      <DBTables>
+	<Table table="trips_to_malta_r" key="tripid"/>
+	<Table table="trips_r" key="tripid" order="1"/>
+    	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
+    	<Table table="persons_arrived_from_openamos_r" key="tripid"/>
+    	<Table table="persons" key="houseid,personid"/>
+
+
+      </DBTables>
+
+      <DeleteBasedOn table="trips_to_malta_r" var="tripid"/>
+
+      <PreProcessData name="PreProcessData">
+	<Filter table="trips_r" var="houseid" condition="equals" value="0"/>
+      </PreProcessData>
+
+      <AnalysisIntervalFilter table="trips_arrival_from_openamos_r" var="arrivaltime"/>
+
+      <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="houseid" coeff="1"/>
+      </Model>
+
+      <Model name="Personid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="personid" coeff="1"/>
+      </Model>
+
+      <Model name="ActualStartTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="expectedstarttime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="starttime" coeff="1"/>
+      </Model>
+
+      <Model name="ExpectedArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="expectedarrivaltime"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="endtime" coeff="1"/>
+      </Model>
+
+      <Model name="FromZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="fromzonedummy"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="fromzone" coeff="1"/>
+      </Model>
+      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tozonedummy"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="tozone" coeff="1"/>
+      </Model>
+
+      <Model name="triptype" formulation="Persons On Trip Arrival Processing" seed="1">
+	<DependentVariable var="triptype"/>
+
+	<Id>
+	  <HouseId table="trips_r" var="houseid"/>
+	  <PersonId table="trips_r" var="personid"/>
+	</Id>
+
+	<PersonsArrivedAttributes>
+	  <TripDependentPersonIdName table="trips_r" var="dependentpersonid"/>
+	  <EndTripCountName table="trips_r" var="endtripcount"/>
+	  <TripCountName table="trips_r" var="tripcount"/>
+	  <ActDependentPersonIdName table="trips_r" var="enddependentpersonid"/>
+	</PersonsArrivedAttributes>
+
+      </Model>
+
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Variance value="0"/>
+        <Variable1 table="trips_r" var="endtripcount" coeff="1"/>
+        <Variable table="trips_r" var="tripcount" coeff="1"/>
+      </Model>
+
+
+      <Model name="TripDependentPersonId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripdependentpersonid"/>
+	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="dependentpersonid" coeff="1"/>
+      </Model>
+
+
+      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="actualarrivaltime"/>
+	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
+	<Variance value="0"/>
+        <Variable table="trips_arrival_from_openamos_r" var="arrivaltime" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
+    <Component name="PersonsArrivedId" read_from_table="persons_arrived_from_openamos_r" write_to_table="persons_arrived_id_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_arrived_from_openamos_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_arrived_id_r" key="houseid,personid"/>
+    	<Table table="persons" key="houseid,personid"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="persons_arrived_from_openamos_r" var="actualarrivaltime"/>
+
+      <Model name="Houseid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="houseid"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="houseid" coeff="1"/>
+      </Model>
+
+      <Model name="Personid" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personid"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="personid" coeff="1"/>
+      </Model>
+
+      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="expectedarrivaltime"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="expectedarrivaltime" coeff="1"/>
+      </Model>
+
+
+      <Model name="ActualArrivalTime" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="actualarrivaltime"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="actualarrivaltime" coeff="1"/>
+      </Model>
+
+      <Model name="ToZone" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tozonedummy"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tozone" coeff="1"/>
+      </Model>
+
+      <Model name="TripCount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripcount"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tripcount" coeff="1"/>
+      </Model>
+
+      <Model name="PersonUniqueId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personuniqueiddummy"/>
+	<Variance value="0"/>
+        <Variable table="persons" var="personuniqueid" coeff="1"/>
+      </Model>
+
+      <Model name="TripDependentPersonId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="tripdependentpersonid"/>
+	<Filter table="runtime" var="houseid" condition="greater than" value="0"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_from_openamos_r" var="tripdependentpersonid" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
+    <Component name="PersonsLocation" read_from_table="persons_location_r" write_to_table="persons_location_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_location_r" key="houseid,personid"/>
+    	<Table table="persons_arrived_id_r" key="houseid,personid" order="1"/>
+      </DBTables>
+
+      <DeleteBasedOn table="persons_location_r" var="personuniqueid"/>
+
+      <Model name="location" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="location"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_id_r" var="tozone" coeff="1"/>
+      </Model>
+
+      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personuniqueiddummy"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_id_r" var="personuniqueid" coeff="1"/>
+      </Model>
+
+      <Model name="lastrripcountdummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="lasttripcountdummy"/>
+	<Variance value="0"/>
+        <Variable table="persons_location_r" var="lasttripcount" coeff="1"/>
+      </Model>
+
+      <Model name="lastrripcount" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="lasttripcount"/>
+	<Filter table="persons_arrived_id_r" var="tripcount" condition="greater than equals" value="0"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_id_r" var="tripcount" coeff="1"/>
+      </Model>
+
+      <Model name="PersonUniqueIdDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="personuniqueiddummy"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_id_r" var="personuniqueid" coeff="1"/>
+      </Model>
+
+
+   </Component>
+
+
+    <Component1 name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
+      <DBTables>
+    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_arrived_id_r" key="houseid,personid"/>
+    	<Table table="households_arrived_id_r" key="houseid"/>
+    	<Table table="persons_daily_status_r" key="houseid,personid"/>
+      </DBTables>
+
+      <AnalysisIntervalFilter table="persons_arrived_id_r" var="actualarrivaltime"/>
+	
+      <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
+
+      <Model name="ArrivalInformationProcessing" formulation="Schedule Adjustment" seed="1">
+	<DependentVariable var="childdependencyallocation"/>
+
+	<ActivityAttributes>
+	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
+	  <PersonIdName table="schedule_final_r" var="personid"/>
+	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
+	  <LocationIdName table="schedule_final_r" var="locationid"/>
+	  <StartTimeName table="schedule_final_r" var="starttime"/>
+	  <EndTimeName table="schedule_final_r" var="endtime"/>
+	  <DurationName table="schedule_final_r" var="duration"/>
+	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_final_r" var="tripcount"/>
+	</ActivityAttributes>
+
+	<DailyStatus>
+	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
+	</DailyStatus>
+	
+	<Dependency>
+	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
+	</Dependency>
+	
+	<ArrivalTime>
+	  <DependentPersonId table="persons_arrived_id_r" var="tripdependentpersonid"/>
+	  <Actual table="persons_arrived_id_r" var="actualarrivaltime"/>
+	  <Expected table="persons_arrived_id_r" var="expectedarrivaltime"/>
+	</ArrivalTime>
+      </Model>
+    </Component1>
+
+    <Component name="DeletePersonIdsForPersonsArrived" read_from_table="persons_arrived_id_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="persons_arrived_id_r" key="houseid" order="1"/>
+      </DBTables>
+
+      <DeleteBasedOn table="persons_arrived_id_r" var="houseid"/>
+
+      <Model name="DummyHouseholdId" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Filter table="persons_arrived_id_r" var="houseid" condition="equals" value="-1"/>
+	<Variance value="0"/>
+        <Variable table="persons_arrived_id_r" var="houseid" coeff="1"/>
+      </Model>
+   </Component>
 
 
 
