@@ -100,6 +100,8 @@ class TripOccupantProcessing(Model):
 					   lastTripCount, stActTripCount, 		
 					   tripPurposeFrom):
 	#print 'Parsing trip dependentpersonid and tripcount --'
+	#print '\t\tTrip Purpose From - ', tripPurposeFrom
+
 	#print '\t\tStart Activity Dep - %s' %(stActDep)
 	#print '\t\tLast trip Dependency is - ', lastTripDep
 
@@ -136,7 +138,7 @@ class TripOccupantProcessing(Model):
 		    lastTripCount.pop(index)
 		except ValueError, e:
 		    #print 'hid - %s and pid - %s' %(hid, pid)
-		    raise Exception, 'The person - %s should be on the trip check again error occurred and last trip persons - %s' %(person, lastTripPersons)
+		    raise Exception, 'The hid - %s person - %s should be on the trip check again error occurred and last trip persons - %s' %(hid, person, lastTripPersons)
 	
 	lastTripPersonsNum = 1
 	lastTripCountNum = 1
