@@ -1018,6 +1018,22 @@ class Person(object):
 	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
 	    if act.startTime >= refExpTime:
 		self.expectedActivities.append(act)
+
+	    if act.startTime >= refActTime:
+		self.actualActivities.append(act)
+
+	    hp.heappush(tempActList, (startTime, act))
+
+	self.listOfActivityEpisodes = tempActList
+
+
+	"""
+
+	tempActList = []
+	for actIndex in range(len(self.listOfActivityEpisodes)):
+	    startTime, act = hp.heappop(self.listOfActivityEpisodes)
+	    if act.startTime >= refExpTime:
+		self.expectedActivities.append(act)
 		#print '\t', act
 	    hp.heappush(tempActList, (startTime, act))
 
@@ -1033,7 +1049,7 @@ class Person(object):
 	    hp.heappush(tempActList, (startTime, act))
 	self.listOfActivityEpisodes = tempActList
 	#self.destAct = copy.deepcopy(destAct)
-	
+	"""
 
     def extract_work_episodes(self):
         for startTime, act in self.listOfActivityEpisodes:
