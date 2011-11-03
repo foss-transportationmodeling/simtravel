@@ -877,9 +877,9 @@ class MakeResultPlot(QDialog):
 
     def work_sql(self):
         if self.show_nhts.isChecked():
-            table = "daily_work_status_nhts"
+            table = "persons_daily_status_nhts"
         else:
-            table = "daily_work_status_r"
+            table = "persons_daily_status_r"
         
         if self.cmbworkstatus.currentIndex() == 1:
             state = "(select * from %s where wrkdailystatus = 1 order by houseid, personid) as c" %(table)
@@ -1604,9 +1604,9 @@ class MakeResultPlot(QDialog):
         base = ""
         if self.cmbworkstatus.currentIndex() > 0:
             if self.show_nhts.isChecked():
-                table1 = "%s, daily_work_status_nhts as w"%(table1)
+                table1 = "%s, persons_daily_status_nhts as w"%(table1)
             else:
-                table1 = "%s, daily_work_status_r as w"%(table1)
+                table1 = "%s, persons_daily_status_r as w"%(table1)
             
             if self.cmbworkstatus.currentIndex() == 1:
                 base = " AND p.houseid = w.houseid AND p.personid = w.personid AND w.wrkdailystatus = 1"
