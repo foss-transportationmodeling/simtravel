@@ -1,6 +1,6 @@
 from numpy import array, zeros
 from numpy.random import randint, seed
-
+import time
 
 from openamos.core.malta_integration.simulation_manager_malta import SimulationManager
 
@@ -63,5 +63,7 @@ class DummyMALTA(object):
 
 if __name__ == '__main__':
     d = DummyMALTA()
-
+    ti = time.time()
     d.request_trips()
+    print 'Total time taken to simulate - ', time.time()-ti
+	
