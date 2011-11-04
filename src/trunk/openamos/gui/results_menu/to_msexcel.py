@@ -10,16 +10,19 @@ from openamos.gui.env import *
 from openamos.core.database_management.cursor_database_connection import *
 from openamos.core.database_management.database_configuration import *
 
-import time, random
-#from xlwt import *
-#import win32com.client
-#from win32com.client import Dispatch, constants
+import time
+import numpy as np
+from copy import deepcopy
+
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import save_workbook
 from openpyxl.drawing import Shape
 from openpyxl.style import Color
 from openpyxl.chart import LineChart, BarChart, Serie, ErrorBar, Reference
 
+#from xlwt import *
+#import win32com.client
+#from win32com.client import Dispatch, constants
 
 class Export_Outputs(QDialog):
     '''
@@ -193,21 +196,25 @@ class Export_Outputs(QDialog):
                         
                     self.call_chart(wsheet,seri)
                     
-                elif item.isSelected() and i == 7:
-                    #wsheet = wb.add_sheet("TripRate")
+                elif item.isSelected() and (i == 7 or i == 11):
+
                     wsheet = wb.create_sheet()
-                    wsheet.title = "TripRate"                    
+                    if i == 7:
+                        isTrip = True
+                        wsheet.title = "TripRate"
+                    else:
+                        isTrip = False
+                        wsheet.title = "ActivityRate"                    
                     
                     seri = []
-                    seri.append(self.sql_quary3(wsheet,False))
+                    seri.append(self.sql_quary3(wsheet,False,isTrip))
                     if self.isNHTS:
-                        seri.append(self.sql_quary3(wsheet,True))
+                        seri.append(self.sql_quary3(wsheet,True,isTrip))
                         
                     self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and i == 8:
                     
-                    #wsheet = wb.add_sheet(columns[i])
                     wsheet = wb.create_sheet()
                     wsheet.title = columns[i]
                     
@@ -218,7 +225,7 @@ class Export_Outputs(QDialog):
                         
                     self.call_chart(wsheet,seri)
                     
-                elif item.isSelected() and i > 8:
+                elif item.isSelected() and i == 9:
                     #wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
                     wsheet = wb.create_sheet()
                     wsheet.title = "%sbyPurpose"%(columns[i])
@@ -229,8 +236,22 @@ class Export_Outputs(QDialog):
                         seri.append(self.sql_quary2(wsheet,columns[i],True))
                         
                     self.call_chart(wsheet,seri)
+                    
+                elif item.isSelected() and i == 10:
+                    wsheet = wb.create_sheet()
+                    wsheet.title = "TripRatebyPurpose"
+                    seri = self.count_by_purpose(True,wsheet)
+                    
+                    self.call_chart(wsheet,seri)
+                
+                elif item.isSelected() and i == 12:
+                    wsheet = wb.create_sheet()
+                    wsheet.title = "ActivityRatebyPurpose"
+                    seri = self.count_by_purpose(False,wsheet)
+                    
+                    self.call_chart(wsheet,seri)
 
-            
+
             wb.save(filename.replace('/','\\'))
             #xlwt code            
             #wb.save(filename)
@@ -259,20 +280,20 @@ class Export_Outputs(QDialog):
             self.xlsname.setText(filename)
 
     def call_chart(self,wsheet,series):
-        temp = series[0]
-        if type(temp[0]).__name__ == 'list':
-            seri1 = series[0]
-            seri2 = series[1]
-            chart_title = self.trip_labels("activitytype")
-            for i in range(len(seri1)):
-                if len(seri1[i]) == 4 or len(seri2[i]) == 4:
-                    seri = [seri1[i],seri2[i]]
-                    print seri
-                    self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
-        else:
-            if len(series[0]) == 4 or len(series[1]) == 4:
-                print series
-                self.draw_chart(wsheet,series)
+        if self.isNHTS:
+            temp = series[0]
+            if type(temp[0]).__name__ == 'list':
+                seri1 = series[0]
+                seri2 = series[1]
+                chart_title = self.trip_labels("activitytype")
+                for i in range(len(seri1)):
+                    if len(seri1[i]) == 4 or len(seri2[i]) == 4:
+                        seri = [seri1[i],seri2[i]]
+                        print seri
+                        self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
+            else:
+                if len(series[0]) == 4 or len(series[1]) == 4:
+                    self.draw_chart(wsheet,series)
 
     def draw_chart(self,wsheet,series,left=0,title=""):
         chart = BarChart()
@@ -302,8 +323,17 @@ class Export_Outputs(QDialog):
                         if y1 >= 13:
                             legend = Reference(wsheet,(0,13))
                         
-                    value = wsheet.cell(row=4,column=0).value
-                    if i == 0 and type(value).__name__ <> 'int':
+                    #value = wsheet.cell(row=4,column=0).value
+                    title = wsheet.title
+                    if title.find("Rate") < 0:
+                        isLabel = True
+                    else:
+                        if len(title) > 12:
+                            isLabel = True
+                        else:
+                            isLabel = False
+                        
+                    if i == 0 and isLabel: #type(value).__name__ <> 'int':
                         seri = Serie(Reference(wsheet,(x1,y1),(x2,y2)),labels=labels,legend=legend)
                     else:
                         seri = Serie(Reference(wsheet,(x1,y1),(x2,y2)),legend=legend)
@@ -404,6 +434,183 @@ class Export_Outputs(QDialog):
             location = [-1]        
         return location
 
+    def count_by_purpose(self,istrip,wsheet):
+
+        if istrip:
+            tnames = self.tables(True)
+            purpose = "trippurpose"
+        else:
+            tnames = self.tables(False)
+            purpose = "activitytype"
+        
+        
+        sql = "select b.freq, b.%s, count(*) from (select p.houseid, p.personid from %s as p where %s) as a"%(purpose,tnames[1],self.age_cond(False)) 
+        sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
+        sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
+        print sql
+         
+        self.new_obj.cursor.execute(sql)
+        data = self.new_obj.cursor.fetchall()
+
+        xlabels = self.trip_labels("trippurpose")
+        xkeys = xlabels.keys()
+        xkeys.sort()
+        
+        yvalue = {}
+        cumulate = np.zeros(len(xkeys))
+        cumulate = list(cumulate)
+        xvalue = np.zeros(len(xkeys))
+        xvalue = list(xvalue)
+
+        self.retrieve_twodimension(data, yvalue, cumulate, xkeys)
+        # prate: previous rate
+#        prate = 1 
+#        for t in data:
+#            if t[0] != None and t[1] != None:
+#                
+#                rate = int(t[0])
+#                if prate <> rate:
+#                    yvalue[rate] = deepcopy(xvalue)
+#                    
+#                    prate = rate
+#                    xvalue = np.zeros(len(xkeys))
+#                    xvalue = list(xvalue)
+#                
+#                temp = self.purpose_index(int(t[1]))
+#                if temp > 0:
+#                    index = xkeys.index(temp)
+#                    xvalue[index] = xvalue[index] + long(t[2])
+#                    cumulate[index] = cumulate[index] + long(t[2])
+#                    
+#        yvalue[rate] = deepcopy(xvalue)
+
+
+        if self.isNHTS:
+            self.table_name(tnames)
+            sql = "select b.freq, b.%s, sum(wtperfin) from (select p.houseid, p.personid, p.wtperfin from %s as p where %s) as a"%(purpose,tnames[1],self.age_cond(True)) 
+            sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
+            sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
+            print sql
+             
+            self.new_obj.cursor.execute(sql)
+            data = self.new_obj.cursor.fetchall()
+    
+            yvalue_nhts = {}
+            cumulate_nhts = np.zeros(len(xkeys))
+            cumulate_nhts = list(cumulate_nhts)
+
+            self.retrieve_twodimension(data, yvalue_nhts, cumulate_nhts, xkeys)
+            
+            key1 = yvalue.keys()
+            key1.sort()
+            key2 = yvalue_nhts.keys()
+            key2.sort()
+            
+            xvalue = np.zeros(len(xkeys))
+            xvalue = list(xvalue)
+            
+            for i in range(len(key1)):
+                fre = key1[i]
+                if fre not in key2:
+                    yvalue_nhts[fre] = deepcopy(xvalue)
+                    
+            for i in range(len(key2)):
+                fre = key2[i]
+                if fre not in key1:
+                    yvalue[fre] = deepcopy(xvalue)
+                
+        print yvalue
+        print yvalue_nhts
+        print cumulate
+        print cumulate_nhts
+        
+        seri = []
+        seri.append(self.outputs_twodimension(wsheet,False,yvalue,cumulate))
+        if self.isNHTS:
+            seri.append(self.outputs_twodimension(wsheet,True,yvalue_nhts,cumulate_nhts))
+        
+        return seri
+    
+    def retrieve_twodimension(self,data,yvalue,cumulate,xkeys):    
+        xvalue = np.zeros(len(xkeys))
+        xvalue = list(xvalue)
+        
+        prate = 1 
+        for t in data:
+            if t[0] != None and t[1] != None:
+                
+                rate = int(t[0])
+                if prate <> rate:
+                    yvalue[rate] = deepcopy(xvalue)
+                    
+                    prate = rate
+                    xvalue = np.zeros(len(xkeys))
+                    xvalue = list(xvalue)
+                
+                temp = self.purpose_index(int(t[1]))
+                if temp > 0:
+                    index = xkeys.index(temp)
+                    xvalue[index] = xvalue[index] + long(t[2])
+                    cumulate[index] = cumulate[index] + long(t[2])
+                    
+        yvalue[rate] = deepcopy(xvalue)
+        
+    def outputs_twodimension(self,wsheet,nhts,yvalue,cumulate):
+
+        xlabels = self.trip_labels("trippurpose")
+        xkeys = xlabels.keys()
+        xkeys.sort()
+        
+        if nhts:
+            j = len(xkeys)+4
+            wsheet.cell(row=0,column=len(xkeys)+3).value = "NHTS"            
+        else:
+            j = 1
+            wsheet.cell(row=0,column=0).value = "OpenAmos"
+            
+        for xkey in xkeys:
+            wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
+            j += 1
+        
+        
+        keys = yvalue.keys()
+        keys.sort()
+        i = 2
+        for index in range(len(keys)):
+            
+            if nhts:
+                wsheet.cell(row=i,column=len(xkeys)+3).value = str(keys[index])
+            else:
+                wsheet.cell(row=i,column=0).value = str(keys[index])
+                
+            y = yvalue[keys[index]]
+            for j in range(len(y)):
+                if cumulate[j] > 0.0:
+                    percent = round(100*float(y[j])/cumulate[j],2)
+                else:
+                    percent = 0.0
+
+                if nhts:
+                    wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
+                else:
+                    wsheet.cell(row=i,column=j+1).value = percent
+                
+            i += 1
+            
+        locations = []
+        for k in range(len(y)):
+            if nhts:
+                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
+            else:
+                location = [i-len(yvalue),k+1,i-1,k+1]
+                
+            if cumulate[k] > 0.0:
+                locations.append(location)
+            else:
+                locations.append([])
+            
+        return locations
+    
 
     def sql_quary2(self,wsheet,column,nhts):
 
@@ -441,7 +648,7 @@ class Export_Outputs(QDialog):
         xkeys = xlabels.keys()
         xkeys.sort()
         
-        yvalue = []
+        yvalue = {}
         cumulate = []
         for j in range(len(xkeys)):
             cumulate.append(0)
@@ -479,64 +686,66 @@ class Export_Outputs(QDialog):
                     xvalue[index] = xvalue[index] + long(t[0])
                     cumulate[index] = cumulate[index] + long(t[0])
             
-            yvalue.append(xvalue)
+            yvalue[ylabels[key]] = xvalue
+            #yvalue.append(xvalue)
             
+        return self.outputs_twodimension(wsheet,nhts,yvalue,cumulate)
+    
+#        if nhts:
+#            j = len(xkeys)+4
+#            wsheet.cell(row=0,column=len(xkeys)+3).value = "NHTS"            
+#        else:
+#            j = 1
+#            wsheet.cell(row=0,column=0).value = "OpenAmos"
+#            
+#        for xkey in xkeys:
+#            #wsheet.write(1,j,str(xlabels[xkey]))
+#            wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
+#            j += 1
+#        
+#        i = 2
+#        for y in yvalue:
+#            
+#            if nhts:
+#                #wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
+#                wsheet.cell(row=i,column=len(xkeys)+3).value = str(ylabels[ykeys[i-2]])
+#            else:
+#                #wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
+#                wsheet.cell(row=i,column=0).value = str(ylabels[ykeys[i-2]])
+#                
+#            for j in range(len(y)):
+#                if cumulate[j] > 0.0:
+#                    percent = round(100*float(y[j])/cumulate[j],2)
+#                else:
+#                    percent = 0.0
+#
+#                if nhts:
+#                    #wsheet.write(i,j+len(xkeys)+4,percent)
+#                    wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
+#                else:
+#                    #wsheet.write(i,j+1,percent)
+#                    wsheet.cell(row=i,column=j+1).value = percent
+#                
+#            i += 1
+#            
+#        locations = []
+#        for k in range(len(y)):
+#            if nhts:
+#                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
+#            else:
+#                location = [i-len(yvalue),k+1,i-1,k+1]
+#                
+#            if cumulate[k] > 0.0:
+#                locations.append(location)
+#            else:
+#                locations.append([])
+#            
+#        return locations
 
-        if nhts:
-            j = len(xkeys)+4
-            wsheet.cell(row=0,column=len(xkeys)+3).value = "NHTS"            
-        else:
-            j = 1
-            wsheet.cell(row=0,column=0).value = "OpenAmos"
-            
-        for xkey in xkeys:
-            #wsheet.write(1,j,str(xlabels[xkey]))
-            wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
-            j += 1
-        
-        i = 2
-        for y in yvalue:
-            
-            if nhts:
-                #wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
-                wsheet.cell(row=i,column=len(xkeys)+3).value = str(ylabels[ykeys[i-2]])
-            else:
-                #wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
-                wsheet.cell(row=i,column=0).value = str(ylabels[ykeys[i-2]])
-                
-            for j in range(len(y)):
-                if cumulate[j] > 0.0:
-                    percent = round(100*float(y[j])/cumulate[j],2)
-                else:
-                    percent = 0.0
 
-                if nhts:
-                    #wsheet.write(i,j+len(xkeys)+4,percent)
-                    wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
-                else:
-                    #wsheet.write(i,j+1,percent)
-                    wsheet.cell(row=i,column=j+1).value = percent
-                
-            i += 1
-            
-        locations = []
-        for k in range(len(y)):
-            if nhts:
-                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
-            else:
-                location = [i-len(yvalue),k+1,i-1,k+1]
-                
-            if cumulate[k] > 0.0:
-                locations.append(location)
-            else:
-                locations.append([])
-            
-        return locations
-
-
-    def sql_quary3(self,wsheet,nhts):
+    def sql_quary3(self,wsheet,nhts,istrip):
    
-        tnames = self.tables(True)
+        tnames = self.tables(istrip)
         if nhts:
             self.table_name(tnames)
 #            for i in range(len(tnames)):
@@ -761,7 +970,8 @@ class Export_Outputs(QDialog):
             
     def items(self):
         vars = ["trip starttime","trip endtime","trip duration","trip purpose","trip starttime by purpose",
-                "trip endtime by purpose","trip duration by purpose","trip episode rate","dwell time","dwell time by activity"]
+                "trip endtime by purpose","trip duration by purpose","trip episode rate","dwell time","dwell time by activity",
+                "trip rate by purpose","activity rate","activity rate by activity"]
         return vars
     
     def tnames(self,wsheet,ind):
