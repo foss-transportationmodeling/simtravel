@@ -101,7 +101,7 @@ class Schedule_Allocation_R(t.IsDescription):
     endtime = t.Int32Col()
     duration = t.Int32Col()
     dependentpersonid = t.Int64Col()
-    tripcount = t.Int32Col()
+    tripcount = t.Int64Col()
 
 class Persons_Fixed_Activity_Vertices_R(t.IsDescription):
     houseid = t.Int32Col()
@@ -189,7 +189,7 @@ class Persons_Location_R(t.IsDescription):
     personuniqueid = t.Int32Col()
     time = t.Int32Col()
     location = t.Int32Col()
-    lasttripcount = t.Int32Col()
+    lasttripcount = t.Int64Col()
 	
 class Persons_History_R(t.IsDescription):
     houseid = t.Int64Col()
