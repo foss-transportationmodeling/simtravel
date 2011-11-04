@@ -147,12 +147,23 @@ class Trips_R(t.IsDescription):
     tozone = t.Int32Col()
     starttime = t.Int32Col()
     endtime = t.Int32Col()
-    trippurposefrom = t.Int32Col()
-    trippurpose = t.Int32Col()
+    trippurpose = t.Int32Col()    
     duration = t.Int32Col()
+    trippurposefrom = t.Int32Col()
     occupancy = t.Int32Col()
     tripind = t.Int32Col()
     dependentpersonid = t.Int64Col()
+    tripwithhhmember = t.Int32Col()
+    lasttripdependentpersonid = t.Int64Col()
+    lastoccupancy = t.Int32Col()
+    starttripcount = t.Int64Col()
+    endtripcount = t.Int64Col()
+    startdependentpersonid = t.Int64Col()
+    enddependentpersonid = t.Int64Col()  		  		
+    tripcount = t.Int64Col()
+    lasttripcount = t.Int64Col()  			  			
+
+
 
 class Trips_Invalid_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -165,6 +176,7 @@ class Occupancy_R(t.IsDescription):
     tripid = t.Int32Col()
     occupancy = t.Int32Col()
     dependentpersonid = t.Int64Col()
+    tripcount = t.Int64Col()
 
 class Trips_Final_R(t.IsDescription):
     tripid = t.Int64Col()
