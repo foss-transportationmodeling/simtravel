@@ -233,9 +233,18 @@ class SimulationManager(object):
 		if comp.component_name == "ExtractAllTravelEpisodes":
 		    tripInfo = comp.run(data, self.queryBrowser, 
 			    self.skimsMatrix, self.uniqueIds, fileLoc)
+		    print 'Origin Zone Ids Before - ', tripInfo[:5,5]
+		    print 'Destination Zone Ids Before - ', tripInfo[:5,6]
+		    tripInfo[:,5] += 11
+		    tripInfo[:,6] += 11
+		    print 'Origin Zone Ids After Mod - ', tripInfo[:5,5]
+		    print 'Destination Zone Ids After Mod - ', tripInfo[:5,6]
+		    #raw_input()
 		else:
 		    comp.run(data, self.queryBrowser, 
 			    self.skimsMatrix, self.uniqueIds, fileLoc)
+
+		
 		    
 
             elif data is None and comp.component_name == "ExtractAllTravelEpisodes":
@@ -244,6 +253,9 @@ class SimulationManager(object):
 
 
 	tripInfo = tripInfo.astype(int)
+
+
+
 	print '-- Number of trip records that are being passed from OpenAMOS is - %s --' %(tripInfo.shape[0])
 	print '\t Time taken to retrieve trips for the simulation interval - %.4f' %(time.time()-ti)
 
