@@ -133,6 +133,37 @@ class SimulationManager(object):
 
         self.close_database_connection(queryBrowser)
 
+
+    def restore_from_resultsBackup(self):
+	print "-- Creating a hdf5 backup of all results --"
+	fileLoc = self.projectConfigObject.location
+
+	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "iteration_%d" %self.iteration)
+
+	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
+	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
+	shutil.copyfile(backupFileLoc, fileLoc)
+	print 'file copied back ... '
+	
+
+	self.read_cacheDatabase()
+	
+
+        queryBrowser = self.setup_databaseConnection()
+
+
+	# create populate cache - 
+	tableList = self.db.list_of_outputtables()
+
+	for tableName in tableList:
+	    print 'Restoring results for table - ', tableName
+            queryBrowser.delete_all(tableName)                            	
+	    self.reflectToDatabase(queryBrowser, tableName, createIndex=False, deleteIndex=False, restore=True)
+
+    	self.close_cache_connection()
+        self.close_database_connection(queryBrowser)
+
+
     def read_cacheDatabase(self):
         fileLoc = self.projectConfigObject.location
         self.db = DB(fileLoc, mode='a')
@@ -464,7 +495,7 @@ class SimulationManager(object):
 	
 	
 
-    def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None, createIndex=True, deleteIndex=True):
+    def reflectToDatabase(self, queryBrowser, tableName, keyCols=[], nRowsProcessed=0, partId=None, createIndex=True, deleteIndex=True, restore=False):
         """
         This will reflect changes for the particular component to the database
         So that future queries can fetch appropriate run-time columns as well
@@ -481,11 +512,16 @@ class SimulationManager(object):
 	#print 'Create index - %s and Delete Index - %s' %(createIndex, deleteIndex)
 
         #print '\tNumber of rows processed for this component - ', nRowsProcessed
-        if nRowsProcessed == 0:
+        if nRowsProcessed == 0 and restore == False:
             return
+
         resArr = table[-nRowsProcessed:]
         #print """\t    creating the array object to insert into table - %s took - %.4f""" %(tableName,
         #                                                                                    time.time()-t)
+
+	if resArr.shape[0] == 0:
+	    print '\tNo rows to write ...'
+	    return 
         colsToWrite = table.colnames
 
         #self.queryBrowser.insert_into_table(resArr, colsToWrite, tableName, keyCols, chunkSize=100000)
