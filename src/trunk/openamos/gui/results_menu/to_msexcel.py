@@ -178,13 +178,9 @@ class Export_Outputs(QDialog):
                     seri.append(self.sql_quary1(wsheet,columns[i],False))
                     if self.isNHTS:
                         seri.append(self.sql_quary1(wsheet,columns[i],True))
-
-                    self.call_chart(wsheet,seri)
+                        self.call_chart(wsheet,seri)
 
                 elif item.isSelected() and i >= 4 and i < 7:
-                    
-                    #xlwt code
-                    #wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
                     
                     wsheet = wb.create_sheet()
                     wsheet.title = "%sbyPurpose"%(columns[i])
@@ -193,8 +189,7 @@ class Export_Outputs(QDialog):
                     seri.append(self.sql_quary2(wsheet,columns[i],False))
                     if self.isNHTS:
                         seri.append(self.sql_quary2(wsheet,columns[i],True))
-                        
-                    self.call_chart(wsheet,seri)
+                        self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and (i == 7 or i == 11):
 
@@ -210,8 +205,7 @@ class Export_Outputs(QDialog):
                     seri.append(self.sql_quary3(wsheet,False,isTrip))
                     if self.isNHTS:
                         seri.append(self.sql_quary3(wsheet,True,isTrip))
-                        
-                    self.call_chart(wsheet,seri)
+                        self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and i == 8:
                     
@@ -222,39 +216,34 @@ class Export_Outputs(QDialog):
                     seri.append(self.sql_quary1(wsheet,columns[i],False))
                     if self.isNHTS:
                         seri.append(self.sql_quary1(wsheet,columns[i],True))
-                        
-                    self.call_chart(wsheet,seri)
+                        self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and i == 9:
-                    #wsheet = wb.add_sheet("%sbyPurpose"%(columns[i]))
+                    
                     wsheet = wb.create_sheet()
                     wsheet.title = "%sbyPurpose"%(columns[i])
                     
                     seri = []
                     seri.append(self.sql_quary2(wsheet,columns[i],False))
                     if self.isNHTS:
-                        seri.append(self.sql_quary2(wsheet,columns[i],True))
-                        
-                    self.call_chart(wsheet,seri)
+                        seri.append(self.sql_quary2(wsheet,columns[i],True))    
+                        self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and i == 10:
                     wsheet = wb.create_sheet()
                     wsheet.title = "TripRatebyPurpose"
                     seri = self.count_by_purpose(True,wsheet)
-                    
                     self.call_chart(wsheet,seri)
                 
                 elif item.isSelected() and i == 12:
                     wsheet = wb.create_sheet()
                     wsheet.title = "ActivityRatebyPurpose"
                     seri = self.count_by_purpose(False,wsheet)
-                    
                     self.call_chart(wsheet,seri)
 
 
             wb.save(filename.replace('/','\\'))
-            #xlwt code            
-            #wb.save(filename)
+
             QMessageBox.information(self, "",
                 QString("""Outputs exporting is successful!"""), 
                 QMessageBox.Yes)
@@ -282,18 +271,19 @@ class Export_Outputs(QDialog):
     def call_chart(self,wsheet,series):
         if self.isNHTS:
             temp = series[0]
-            if type(temp[0]).__name__ == 'list':
-                seri1 = series[0]
-                seri2 = series[1]
-                chart_title = self.trip_labels("activitytype")
-                for i in range(len(seri1)):
-                    if len(seri1[i]) == 4 or len(seri2[i]) == 4:
-                        seri = [seri1[i],seri2[i]]
-                        print seri
-                        self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
-            else:
-                if len(series[0]) == 4 or len(series[1]) == 4:
-                    self.draw_chart(wsheet,series)
+            if len(temp) > 0:
+                if type(temp[0]).__name__ == 'list':
+                    seri1 = series[0]
+                    seri2 = series[1]
+                    chart_title = self.trip_labels("activitytype")
+                    for i in range(len(seri1)):
+                        if len(seri1[i]) == 4 or len(seri2[i]) == 4:
+                            seri = [seri1[i],seri2[i]]
+                            print seri
+                            self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
+                else:
+                    if len(series[0]) == 4 or len(series[1]) == 4:
+                        self.draw_chart(wsheet,series)
 
     def draw_chart(self,wsheet,series,left=0,title=""):
         chart = BarChart()
@@ -518,11 +508,6 @@ class Export_Outputs(QDialog):
                 fre = key2[i]
                 if fre not in key1:
                     yvalue[fre] = deepcopy(xvalue)
-                
-        print yvalue
-        print yvalue_nhts
-        print cumulate
-        print cumulate_nhts
         
         seri = []
         seri.append(self.outputs_twodimension(wsheet,False,yvalue,cumulate))
@@ -535,7 +520,8 @@ class Export_Outputs(QDialog):
         xvalue = np.zeros(len(xkeys))
         xvalue = list(xvalue)
         
-        prate = 1 
+        prate = 1
+        rate = None
         for t in data:
             if t[0] != None and t[1] != None:
                 
@@ -552,8 +538,10 @@ class Export_Outputs(QDialog):
                     index = xkeys.index(temp)
                     xvalue[index] = xvalue[index] + long(t[2])
                     cumulate[index] = cumulate[index] + long(t[2])
-                    
-        yvalue[rate] = deepcopy(xvalue)
+        
+        if rate <> None: 
+            yvalue[rate] = deepcopy(xvalue)
+        
         
     def outputs_twodimension(self,wsheet,nhts,yvalue,cumulate):
 
@@ -572,7 +560,7 @@ class Export_Outputs(QDialog):
             wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
             j += 1
         
-        
+        y = []
         keys = yvalue.keys()
         keys.sort()
         i = 2
