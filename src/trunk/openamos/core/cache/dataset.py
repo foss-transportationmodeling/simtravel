@@ -112,7 +112,7 @@ class DB(object):
 
         #self.fileh.createTable(output_grp, "odt_r", ODT_R)
 
-	"""
+
         self.fileh.createTable(output_grp, "mortality_r", Mortality_R)
         self.fileh.createTable(output_grp, "birth_r", Birth_R)
         self.fileh.createTable(output_grp, "aging_r", Aging_R)
@@ -137,7 +137,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "hht_dist_r", Hht_Dist_R)
         self.fileh.createTable(output_grp, "noc_dist_r", Noc_Dist_R)
         self.fileh.createTable(output_grp, "wif_dist_r", Wif_Dist_R)
-	"""
+
 
 
     def create(self, tableName=None):
