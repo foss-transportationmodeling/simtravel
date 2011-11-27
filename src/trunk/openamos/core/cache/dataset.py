@@ -97,6 +97,8 @@ class DB(object):
         self.fileh.createTable(output_grp, "persons_history_r", Persons_History_R)
         self.fileh.createTable(output_grp, "gap_function_r", Gap_Function_R)
         self.fileh.createTable(output_grp, "od_r", OD_R)
+        self.fileh.createTable(output_grp, "gap_before_r", Gap_Before_R)
+        self.fileh.createTable(output_grp, "gap_after_r", Gap_After_R)
 
 
         self.fileh.createTable(output_grp, "person_trips_occupant_origin_invalid_r", Person_Trips_Occupant_Origin_Invalid_R)

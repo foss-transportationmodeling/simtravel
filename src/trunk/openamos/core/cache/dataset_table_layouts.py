@@ -288,6 +288,14 @@ class Gap_Function_R(t.IsDescription):
     gap_before = t.Int32Col()
     gap_after = t.Int32Col()
 
+class Gap_Before_R(t.IsDescription):
+    gap_before = t.Int32Col()
+    count = t.Int32Col()
+
+class Gap_After_R(t.IsDescription):
+    gap_after = t.Int32Col()
+    count = t.Int32Col()
+
 class OD_R(t.IsDescription):
     origin = t.Int32Col()
     destination = t.Int32Col()
