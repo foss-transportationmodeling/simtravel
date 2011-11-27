@@ -129,14 +129,41 @@ class PlotHeatMap(object):
 
 	return arr
 
+    def calculate_deviation(self):
+	dev = []
+	for timeInt in self.timeIntervalList:
+	    t_old = self.load_file(self.locOld + 'skim%d.dat'%timeInt)
+
+	    t_new = self.load_file(self.locNew + 'skim%d.dat'%timeInt)
+		
+            dev.append((np.abs(t_old[:,-1] - t_new[:,-1])).sum())
+
+	    print dev
+
+	print dev
+
 
 if __name__ == "__main__":
-    obj = PlotHeatMap(timeIntervalList=[0])
-    obj.createHeatMapForSkims()
+    #obj = PlotHeatMap(timeIntervalList=[0])
+    #obj.createHeatMapForSkims()
 
     # Dist (X) Vs New Skims(Y)
-    obj.createHeatMapForXY('peak dist', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/skims4Step.csv',
-			   'new_skim_int-0', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim0.dat')
+    #obj.createHeatMapForXY('iter1', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/skim3.dat',
+    #			   'iter2', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/skim3.dat')
+    #obj.createHeatMapForXY('iter2', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/skim3.dat',
+    # 			   'iter3', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_3/skim3.dat')
+    #obj.createHeatMapForXY('iter3', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_3/skim3.dat',
+    #			   'iter4', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_4/skim3.dat')
+
+
+    obj12 = PlotHeatMap(locNew='/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/',
+		       locOld='/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/startSkims/')
+	
+    obj12.calculate_deviation()
+	
+
+    #obj.createHeatMapForXY('start', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/startSkims/skim3.dat',
+    #			   'iter1', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/skim3.dat')
 
 
     """

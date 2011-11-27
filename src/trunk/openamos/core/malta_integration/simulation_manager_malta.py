@@ -216,7 +216,8 @@ class SimulationManager(object):
 		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
                 
-                if tableName <> self.lastTableName and len(comp.spatialConst_list) > 0:
+                if tableName <> self.lastTableName and (len(comp.spatialConst_list) > 0 or 
+							len(comp.dynamicspatialConst_list) > 0):
                     self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
                     self.lastTableName = tableName
 
@@ -265,7 +266,7 @@ class SimulationManager(object):
 
     def identify_skims_matrix(self, comp):
         ti = time.time()
-        if len(comp.spatialConst_list) == 0:
+        if len(comp.spatialConst_list) == 0 and len(comp.dynamicspatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
             tableLocation = None
@@ -280,7 +281,7 @@ class SimulationManager(object):
                 # currently fixed can be varied as need be
                 tableLocation = self.projectSkimsObject.lookup_tableLocation(240)
 
-        print '\tSkims Matrix Identified in - %.4f' %(time.time()-ti)
+        print '\tSkims Matrix Identified in - %.4f and it is %s' %(time.time()-ti, tableLocation)
         return tableLocation
 
 
