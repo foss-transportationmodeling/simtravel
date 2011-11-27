@@ -236,5 +236,40 @@
 
     </Component>
 
+    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="gap_function_r" key="tripid" order="1"/>
+    	<Table table="gap_before_r" key="gap_before"/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="gap_function_r" var="gap_before"/>
+      </Aggregate>
+
+      <Model name="count" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="count"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="frequency" coeff="1"/>
+      </Model>
+
+    </Component>
+
+    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="True">
+      <DBTables>
+    	<Table table="gap_function_r" key="tripid" order="1"/>
+    	<Table table="gap_after_r" key="gap_after"/>
+      </DBTables>
+      <Aggregate>	
+	<Variable table="gap_function_r" var="gap_after"/>
+      </Aggregate>
+      <Model name="count" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="count"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="frequency" coeff="1"/>
+      </Model>
+
+    </Component>
+
+
+
   </ModelConfig>
 </ProjectConfig>

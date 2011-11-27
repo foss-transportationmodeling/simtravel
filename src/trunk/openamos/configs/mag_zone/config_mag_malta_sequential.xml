@@ -72,7 +72,7 @@
 
    </Component>
 
-    <Component name="PersonsArrived" read_from_table="trips_arrival_from_malta_r" write_to_table="persons_arrived_r" key="tripid" skip="False" completed="True">
+    <Component name="PersonsArrived" read_from_table="trips_arrival_from_malta_r" write_to_table="persons_arrived_r" key="tripid" skip="True" completed="True">
       <DBTables>
 	<Table table="trips_r" key="tripid" order="1"/>
     	<Table table="trips_arrival_from_malta_r" key="tripid"/>
@@ -167,7 +167,7 @@
    </Component>
 
 
-    <Component name="PersonsHistory" read_from_table="schedule_final_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="PersonsHistory" read_from_table="schedule_final_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
@@ -234,7 +234,7 @@
 
 
 
-    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="DynamicNonMandatoryActivities" read_from_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -1376,7 +1376,7 @@
 	
 
 
-    <Component name="PersonPrismActivityInformation" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="PersonPrismActivityInformation" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_prism_activities_r" key="houseid,personid"/>
@@ -1473,7 +1473,7 @@
 
     </Component>
 
-    <Component name="AdjustPrismEndsForInsufficientPrisms" read_from_table="schedule_final_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="AdjustPrismEndsForInsufficientPrisms" read_from_table="schedule_final_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
@@ -1956,7 +1956,7 @@
 
     </Component>
 
-    <Component name="PersonPrismActivitiesOrigDelete" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="scheduleid" skip="False" completed="True">
+    <Component name="PersonPrismActivitiesOrigDelete" read_from_table="schedule_final_r" write_to_table="persons_prism_activities_r" key="scheduleid" skip="True" completed="True">
       <DBTables>
 	<Table table="schedule_final_r" key="scheduleid"/>
     	<Table table="persons_prism_activities_r" key="scheduleid" order="1"/>
@@ -1986,7 +1986,7 @@
     </Component>
 
 
-    <Component name="DeleteScheduleIdsFromPersonsPrism" read_from_table="persons_prism_activities_r" key="scheduleid" skip="False" completed="True">
+    <Component name="DeleteScheduleIdsFromPersonsPrism" read_from_table="persons_prism_activities_r" key="scheduleid" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_prism_activities_r" key="scheduleid" order="1"/>
       </DBTables>
@@ -2014,7 +2014,7 @@
 
     </Component>
 
-      <Component name="ExtractTravelEpisodesWithHouseholdMembers" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+      <Component name="ExtractTravelEpisodesWithHouseholdMembers" read_from_table="schedule_final_r" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
         <DBTables>
     	  <Table table="persons" key="houseid,personid" order="1"/>
     	  <Table table="trips_r" key="houseid,personid"/>
@@ -2495,7 +2495,7 @@
 
 
 
-    <Component name="PersonsLeaving" read_from_table="trips_r" write_to_table="persons_leaving_id_r" skip="False" completed="True">
+    <Component name="PersonsLeaving" read_from_table="trips_r" write_to_table="persons_leaving_id_r" skip="True" completed="True">
       <DBTables>
 	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="persons_leaving_id_r" key="houseid,personid"/>
@@ -2550,7 +2550,7 @@
    </Component>
 
 
-    <Component name="CheckPersonsAtSameOrigin" read_from_table="persons_leaving_id_r" write_to_table="trips_occupant_origin_invalid_r" skip="False" completed="True">
+    <Component name="CheckPersonsAtSameOrigin" read_from_table="persons_leaving_id_r" write_to_table="trips_occupant_origin_invalid_r" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_leaving_id_r" key="houseid,personid" order="1"/>
     	<Table table="persons_location_r" key="houseid,personid"/>
@@ -2617,7 +2617,7 @@
 
 
 
-    <Component name="TripsPersonIDWhereOccupantsNotAtTheOrigin" read_from_table="trips_occupant_origin_invalid_r" write_to_table="person_trips_occupant_origin_invalid_r" skip="False" completed="True">
+    <Component name="TripsPersonIDWhereOccupantsNotAtTheOrigin" read_from_table="trips_occupant_origin_invalid_r" write_to_table="person_trips_occupant_origin_invalid_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_occupant_origin_invalid_r" key="tripid" order="1"/>
     	<Table table="trips_r" key="tripid"/>
@@ -2659,7 +2659,7 @@
 
 
 
-    <Component name="OccupantProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
+    <Component name="OccupantProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
@@ -2705,7 +2705,7 @@
     </Component>
 
 
-      <Component name="DeleteInvalidTripsPersonIDsWithOccupancyIssues" read_from_table="person_trips_occupant_origin_invalid_r" skip="False" completed="True">
+      <Component name="DeleteInvalidTripsPersonIDsWithOccupancyIssues" read_from_table="person_trips_occupant_origin_invalid_r" skip="True" completed="True">
         <DBTables>
     	<Table table="person_trips_occupant_origin_invalid_r" key="tripid" order="1"/>
         </DBTables>
@@ -2723,7 +2723,7 @@
 
 
 
-      <Component name="RevertOccupancyForInvalidOccupantTrip" read_from_table="trips_r" write_to_table="current_occupancy_r" skip="False" completed="True">
+      <Component name="RevertOccupancyForInvalidOccupantTrip" read_from_table="trips_r" write_to_table="current_occupancy_r" skip="True" completed="True">
         <DBTables>
     	<Table table="trips_r" key="tripid" order="1"/>
     	<Table table="trips_occupant_origin_invalid_r" key="tripid"/>
@@ -2772,7 +2772,7 @@
       </Component>
 
 
-      <Component name="DeleteInvalidOccupantTrip" read_from_table="trips_r" skip="False" completed="True">
+      <Component name="DeleteInvalidOccupantTrip" read_from_table="trips_r" skip="True" completed="True">
         <DBTables>
     	<Table table="trips_r" key="tripid" order="1"/>
     	<Table table="trips_occupant_origin_invalid_r" key="tripid"/>
@@ -2800,7 +2800,7 @@
 
 
 
-      <Component name="OccupancyValidTrip" read_from_table="trips_r" write_to_table="current_occupancy_r" key="tripid" skip="False" completed="True">
+      <Component name="OccupancyValidTrip" read_from_table="trips_r" write_to_table="current_occupancy_r" key="tripid" skip="True" completed="True">
         <DBTables>
     	  <Table table="persons" key="houseid,personid"/>
     	  <Table table="trips_r" key="houseid,personid" order="1"/>
@@ -2851,7 +2851,7 @@
 
       </Component>
 
-      <Component name="InvalidTrip" read_from_table="trips_r" write_to_table="trips_invalid_r" key="tripid" skip="False" completed="True">
+      <Component name="InvalidTrip" read_from_table="trips_r" write_to_table="trips_invalid_r" key="tripid" skip="True" completed="True">
         <DBTables>
     	  <Table table="trips_r" key="tripid" order="1"/>
     	  <Table table="trips_invalid_r" key="tripid"/>
@@ -2869,7 +2869,7 @@
 
       </Component>
 
-    <Component name="ProcessingArrivalForIHTOIHTrips" read_from_table="trips_r" write_to_table="persons_arrived_from_openamos_r" skip="False" completed="True">
+    <Component name="ProcessingArrivalForIHTOIHTrips" read_from_table="trips_r" write_to_table="persons_arrived_from_openamos_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_from_openamos_r" key="houseid,personid"/>
@@ -3015,7 +3015,7 @@
 
     </Component>
 
-    <Component name="ProcessingDeleteForIHTOIHTrips" read_from_table="trips_r" write_to_table="trips_invalid_r" skip="False" completed="True">
+    <Component name="ProcessingDeleteForIHTOIHTrips" read_from_table="trips_r" write_to_table="trips_invalid_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="trips_invalid_r" key="tripid"/>
@@ -3043,7 +3043,7 @@
       </Model>
     </Component>
 
-      <Component name="DeleteInvalidTrip" read_from_table="trips_r" write_to_table="trips_invalid_r" key="tripid" skip="False" completed="True">
+      <Component name="DeleteInvalidTrip" read_from_table="trips_r" write_to_table="trips_invalid_r" key="tripid" skip="True" completed="True">
         <DBTables>
     	  <Table table="trips_r" key="tripid"/>
     	  <Table table="trips_invalid_r" key="tripid" order="1"/>
@@ -3063,7 +3063,7 @@
 
 
 
-      <Component name="ResetInvalidTrip" read_from_table="trips_invalid_r" key="tripid" skip="False" completed="True">
+      <Component name="ResetInvalidTrip" read_from_table="trips_invalid_r" key="tripid" skip="True" completed="True">
         <DBTables>
     	  <Table table="trips_invalid_r" key="tripid" order="1"/>
         </DBTables>
@@ -3079,7 +3079,7 @@
       </Component>
 
 
-    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_openamos_r" skip="False" completed="True">
+    <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_openamos_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="tripid" order="1"/>
     	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
@@ -3099,7 +3099,7 @@
 
 
 
-    <Component name="PersonsLeavingForValidTrips" read_from_table="trips_r" write_to_table="persons_leaving_valid_trips_id_r" skip="False" completed="True">
+    <Component name="PersonsLeavingForValidTrips" read_from_table="trips_r" write_to_table="persons_leaving_valid_trips_id_r" skip="True" completed="True">
       <DBTables>
 	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="persons_leaving_valid_trips_id_r" key="houseid,personid"/>
@@ -3140,7 +3140,7 @@
 
    </Component>
 
-    <Component name="PersonsLocationUpdateForValidTrips" read_from_table="persons_leaving_valid_trips_id_r" write_to_table="persons_location_r" skip="False" completed="True">
+    <Component name="PersonsLocationUpdateForValidTrips" read_from_table="persons_leaving_valid_trips_id_r" write_to_table="persons_location_r" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_location_r" key="houseid,personid"/>
     	<Table table="persons_leaving_valid_trips_id_r" key="houseid,personid" order="1"/>
@@ -3172,7 +3172,7 @@
    </Component>
 
 
-      <Component name="ResetPersonsLeavingValidTrip" read_from_table="persons_leaving_valid_trips_id_r" key="tripid" skip="False" completed="True">
+      <Component name="ResetPersonsLeavingValidTrip" read_from_table="persons_leaving_valid_trips_id_r" key="tripid" skip="True" completed="True">
         <DBTables>
     	  <Table table="persons_leaving_valid_trips_id_r" key="tripid" order="1"/>
         </DBTables>
@@ -3320,8 +3320,8 @@
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="duration"/>
         <FilterSet type="and"/>
-	<Filter table="background_trips" var="origin_region" condition="not equals" value="1"/>
-	<Filter table="background_trips" var="destination_region" condition="not equals" value="1"/>
+	<Filter1 table="background_trips" var="origin_region" condition="not equals" value="1"/>
+	<Filter1 table="background_trips" var="destination_region" condition="not equals" value="1"/>
 	<Filter table="background_trips" var="origin_taz" condition="less than" value="2900"/>
 	<Filter table="background_trips" var="destination_taz" condition="less than" value="2900"/>
 	<Variance value="0"/>
@@ -3429,7 +3429,7 @@
     </Component>
 
 
-    <Component name="ArrivalTimeInformationOpenAMOS" read_from_table="trips_arrival_from_openamos_r" key="tripid" skip="False" completed="True">
+    <Component name="ArrivalTimeInformationOpenAMOS" read_from_table="trips_arrival_from_openamos_r" key="tripid" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_openamos_r" key="tripid"/>
     	<Table table="trips_to_malta_r" key="tripid" order="1"/>
@@ -3446,7 +3446,7 @@
 
    </Component>
 
-    <Component name="PersonsArrivedFromOpenAMOS" read_from_table="trips_arrival_from_openamos_r" write_to_table="persons_arrived_from_openamos_r" key="tripid" skip="False" completed="True">
+    <Component name="PersonsArrivedFromOpenAMOS" read_from_table="trips_arrival_from_openamos_r" write_to_table="persons_arrived_from_openamos_r" key="tripid" skip="True" completed="True">
       <DBTables>
 	<Table table="trips_to_malta_r" key="tripid"/>
 	<Table table="trips_r" key="tripid" order="1"/>
@@ -3543,7 +3543,7 @@
 
    </Component>
 
-    <Component name="PersonsArrivedId" read_from_table="persons_arrived_from_openamos_r" write_to_table="persons_arrived_id_r" skip="False" completed="True">
+    <Component name="PersonsArrivedId" read_from_table="persons_arrived_from_openamos_r" write_to_table="persons_arrived_id_r" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_arrived_from_openamos_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_id_r" key="houseid,personid"/>
@@ -3605,7 +3605,7 @@
 
    </Component>
 
-    <Component name="PersonsLocation" read_from_table="persons_location_r" write_to_table="persons_location_r" skip="False" completed="True">
+    <Component name="PersonsLocation" read_from_table="persons_location_r" write_to_table="persons_location_r" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_location_r" key="houseid,personid"/>
     	<Table table="persons_arrived_id_r" key="houseid,personid" order="1"/>
@@ -3648,7 +3648,7 @@
    </Component>
 
 
-    <Component1 name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="False" completed="True">
+    <Component1 name="ArrivalTimeProcessing" read_from_table="schedule_final_r" key="houseid,personid" location="True" delete_and_append="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="persons_arrived_id_r" key="houseid,personid"/>
@@ -3693,7 +3693,7 @@
       </Model>
     </Component1>
 
-    <Component name="DeletePersonIdsForPersonsArrived" read_from_table="persons_arrived_id_r" skip="False" completed="True">
+    <Component name="DeletePersonIdsForPersonsArrived" read_from_table="persons_arrived_id_r" skip="True" completed="True">
       <DBTables>
     	<Table table="persons_arrived_id_r" key="houseid" order="1"/>
       </DBTables>
