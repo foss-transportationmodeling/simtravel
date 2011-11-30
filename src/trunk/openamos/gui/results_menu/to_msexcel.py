@@ -175,9 +175,9 @@ class Export_Outputs(QDialog):
                     wsheet.title = columns[i]
                     
                     seri= []
-                    seri.append(self.sql_quary1(wsheet,columns[i],False))
+                    seri.append(self.sql_quary1(wsheet,columns[i],False,i))
                     if self.isNHTS:
-                        seri.append(self.sql_quary1(wsheet,columns[i],True))
+                        seri.append(self.sql_quary1(wsheet,columns[i],True,i))
                         self.call_chart(wsheet,seri)
 
                 elif item.isSelected() and i >= 4 and i < 7:
@@ -213,9 +213,9 @@ class Export_Outputs(QDialog):
                     wsheet.title = columns[i]
                     
                     seri = []
-                    seri.append(self.sql_quary1(wsheet,columns[i],False))
+                    seri.append(self.sql_quary1(wsheet,columns[i],False,i))
                     if self.isNHTS:
-                        seri.append(self.sql_quary1(wsheet,columns[i],True))
+                        seri.append(self.sql_quary1(wsheet,columns[i],True,i))
                         self.call_chart(wsheet,seri)
                     
                 elif item.isSelected() and i == 9:
@@ -240,7 +240,22 @@ class Export_Outputs(QDialog):
                     wsheet.title = "ActivityRatebyPurpose"
                     seri = self.count_by_purpose(False,wsheet)
                     self.call_chart(wsheet,seri)
-
+                    
+                elif item.isSelected() and i >= 13:
+                    
+                    wsheet = wb.create_sheet()
+                    if i == 13:
+                        column = "starttime"
+                        wsheet.title = "EarliestStartDay"
+                    else:
+                        column = "endtime"
+                        wsheet.title = "LatestEndDay"
+                    
+                    seri= []
+                    seri.append(self.sql_quary1(wsheet,column,False,i))
+                    if self.isNHTS:
+                        seri.append(self.sql_quary1(wsheet,column,True,i))
+                        self.call_chart(wsheet,seri)
 
             wb.save(filename.replace('/','\\'))
 
@@ -279,7 +294,6 @@ class Export_Outputs(QDialog):
                     for i in range(len(seri1)):
                         if len(seri1[i]) == 4 or len(seri2[i]) == 4:
                             seri = [seri1[i],seri2[i]]
-                            print seri
                             self.draw_chart(wsheet,seri,i*20,chart_title[i+1])
                 else:
                     if len(series[0]) == 4 or len(series[1]) == 4:
@@ -334,7 +348,22 @@ class Export_Outputs(QDialog):
 
         wsheet.add_chart(chart)        
 
-    def sql_quary1(self,wsheet,column,nhts):
+
+    def quary1(self,column,nhts):
+        
+        if nhts and column == "starttime":
+            temp = "(select houseid, personid, min(%s) as %s, min(wttrdfin) as wttrdfin from trips_nhts group by houseid, personid) as d"%(column,column)
+        elif nhts and column == "endtime":
+            temp = "(select houseid, personid, max(%s) as %s, min(wttrdfin) as wttrdfin from trips_nhts group by houseid, personid) as d"%(column,column)
+        elif not nhts and column == "starttime":
+            temp = "(select houseid, personid, min(%s) as %s from schedule_final_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
+        else:
+            temp = "(select houseid, personid, max(%s) as %s from schedule_final_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
+               
+        return temp
+
+
+    def sql_quary1(self,wsheet,column,nhts,cindex):
         
         nhts_var = ""
         per_wt = ""
@@ -356,6 +385,10 @@ class Export_Outputs(QDialog):
                 
         if nhts:
             self.table_name(tnames)
+            
+        if cindex >= 13:
+            tnames[0] = self.quary1(column,nhts)
+        
 #            for i in range(len(tnames)):
 #                tnames[i] = tnames[i].replace("_r","") + "_nhts"
 
@@ -433,8 +466,12 @@ class Export_Outputs(QDialog):
             tnames = self.tables(False)
             purpose = "activitytype"
         
-        
-        sql = "select b.freq, b.%s, count(*) from (select p.houseid, p.personid from %s as p where %s) as a"%(purpose,tnames[1],self.age_cond(False)) 
+        #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2],self.wrk_cond())
+        sql = "select b.freq, b.%s, count(*) from"%(purpose)
+        if self.wrk_cond() <> "":
+            sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),self.wrk_cond())
+        else:
+            sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
         sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
         sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
         print sql
@@ -477,7 +514,12 @@ class Export_Outputs(QDialog):
 
         if self.isNHTS:
             self.table_name(tnames)
-            sql = "select b.freq, b.%s, sum(wtperfin) from (select p.houseid, p.personid, p.wtperfin from %s as p where %s) as a"%(purpose,tnames[1],self.age_cond(True)) 
+            #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2])
+            sql = "select b.freq, b.%s, sum(wtperfin) from"%(purpose)
+            if self.wrk_cond() <> "":
+                sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True),self.wrk_cond())
+            else:
+                sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True))
             sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
             sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
             print sql
@@ -527,7 +569,7 @@ class Export_Outputs(QDialog):
                 
                 rate = int(t[0])
                 if prate <> rate:
-                    yvalue[rate] = deepcopy(xvalue)
+                    yvalue[prate] = deepcopy(xvalue)
                     
                     prate = rate
                     xvalue = np.zeros(len(xkeys))
@@ -538,12 +580,20 @@ class Export_Outputs(QDialog):
                     index = xkeys.index(temp)
                     xvalue[index] = xvalue[index] + long(t[2])
                     cumulate[index] = cumulate[index] + long(t[2])
+            else:
+                ztrip = long(t[2])
+                ztrips =[]
+                for i in range(len(xkeys)): 
+                    ztrips.append(ztrip)
+                    cumulate[i] = cumulate[i] + ztrip
+                yvalue[0] = ztrips
+                
         
         if rate <> None: 
             yvalue[rate] = deepcopy(xvalue)
         
         
-    def outputs_twodimension(self,wsheet,nhts,yvalue,cumulate):
+    def outputs_twodimension(self,wsheet,nhts,yvalue,cumulate,column=""):
 
         xlabels = self.trip_labels("trippurpose")
         xkeys = xlabels.keys()
@@ -560,16 +610,25 @@ class Export_Outputs(QDialog):
             wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
             j += 1
         
+        if column <> "":
+            ylabels = self.trip_labels(column)
+            
         y = []
         keys = yvalue.keys()
         keys.sort()
+        
         i = 2
         for index in range(len(keys)):
             
-            if nhts:
-                wsheet.cell(row=i,column=len(xkeys)+3).value = str(keys[index])
+            if column <> "":
+                ylabel = str(ylabels[keys[index]])
             else:
-                wsheet.cell(row=i,column=0).value = str(keys[index])
+                ylabel = str(keys[index])
+                
+            if nhts:
+                wsheet.cell(row=i,column=len(xkeys)+3).value = ylabel
+            else:
+                wsheet.cell(row=i,column=0).value = ylabel
                 
             y = yvalue[keys[index]]
             for j in range(len(y)):
@@ -587,10 +646,13 @@ class Export_Outputs(QDialog):
             
         locations = []
         for k in range(len(y)):
-            if nhts:
-                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
+            if i-1 > 2:
+                if nhts:
+                    location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
+                else:
+                    location = [i-len(yvalue),k+1,i-1,k+1]
             else:
-                location = [i-len(yvalue),k+1,i-1,k+1]
+                location = []
                 
             if cumulate[k] > 0.0:
                 locations.append(location)
@@ -674,61 +736,11 @@ class Export_Outputs(QDialog):
                     xvalue[index] = xvalue[index] + long(t[0])
                     cumulate[index] = cumulate[index] + long(t[0])
             
-            yvalue[ylabels[key]] = xvalue
-            #yvalue.append(xvalue)
             
-        return self.outputs_twodimension(wsheet,nhts,yvalue,cumulate)
-    
-#        if nhts:
-#            j = len(xkeys)+4
-#            wsheet.cell(row=0,column=len(xkeys)+3).value = "NHTS"            
-#        else:
-#            j = 1
-#            wsheet.cell(row=0,column=0).value = "OpenAmos"
-#            
-#        for xkey in xkeys:
-#            #wsheet.write(1,j,str(xlabels[xkey]))
-#            wsheet.cell(row=1,column=j).value = str(xlabels[xkey])
-#            j += 1
-#        
-#        i = 2
-#        for y in yvalue:
-#            
-#            if nhts:
-#                #wsheet.write(i,len(xkeys)+3,str(ylabels[ykeys[i-2]]))
-#                wsheet.cell(row=i,column=len(xkeys)+3).value = str(ylabels[ykeys[i-2]])
-#            else:
-#                #wsheet.write(i,0,str(ylabels[ykeys[i-2]]))
-#                wsheet.cell(row=i,column=0).value = str(ylabels[ykeys[i-2]])
-#                
-#            for j in range(len(y)):
-#                if cumulate[j] > 0.0:
-#                    percent = round(100*float(y[j])/cumulate[j],2)
-#                else:
-#                    percent = 0.0
-#
-#                if nhts:
-#                    #wsheet.write(i,j+len(xkeys)+4,percent)
-#                    wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
-#                else:
-#                    #wsheet.write(i,j+1,percent)
-#                    wsheet.cell(row=i,column=j+1).value = percent
-#                
-#            i += 1
-#            
-#        locations = []
-#        for k in range(len(y)):
-#            if nhts:
-#                location = [i-len(yvalue),k+len(xkeys)+4,i-1,k+len(xkeys)+4]
-#            else:
-#                location = [i-len(yvalue),k+1,i-1,k+1]
-#                
-#            if cumulate[k] > 0.0:
-#                locations.append(location)
-#            else:
-#                locations.append([])
-#            
-#        return locations
+            yvalue[key] = xvalue
+            #yvalue[ylabels[key]] = xvalue
+               
+        return self.outputs_twodimension(wsheet,nhts,yvalue,cumulate,column)
 
 
     def sql_quary3(self,wsheet,nhts,istrip):
@@ -770,10 +782,16 @@ class Export_Outputs(QDialog):
         for j in data:
             if j[0] != None:
 
-                err1.append(j[0])
+                err1.append(int(j[0]))
                 err2.append(long(j[1]))
                 total += long(j[1])
-        
+            else:
+
+                err1.insert(0,0)
+                err2.insert(0,long(j[1]))
+                total += long(j[1])
+
+                
         
         if nhts:
             self.cnames(wsheet,5)
@@ -782,7 +800,7 @@ class Export_Outputs(QDialog):
             self.cnames(wsheet,1)
             j = 0
            
-        i=1 
+        i=0 
         k=0
         if len(err1) > 0:
             while i <= int(err1[len(err1)-1]):
@@ -794,19 +812,19 @@ class Export_Outputs(QDialog):
                     else:
                         percent = 0.0
                     
-                    wsheet.cell(row=i+1,column=j).value = str(err1[k])
-                    wsheet.cell(row=i+1,column=j+1).value = long(err2[k])
-                    wsheet.cell(row=i+1,column=j+2).value = percent
+                    wsheet.cell(row=i+2,column=j).value = str(err1[k])
+                    wsheet.cell(row=i+2,column=j+1).value = long(err2[k])
+                    wsheet.cell(row=i+2,column=j+2).value = percent
                     k += 1
                 else:
-                    wsheet.cell(row=i+1,column=j).value = i
-                    wsheet.cell(row=i+1,column=j+1).value = 0
-                    wsheet.cell(row=i+1,column=j+2).value = 0
+                    wsheet.cell(row=i+2,column=j).value = i
+                    wsheet.cell(row=i+2,column=j+1).value = 0
+                    wsheet.cell(row=i+2,column=j+2).value = 0
                 
                 i += 1
         
-        if total > 0:
-            location = [2,j+2,i,j+2]
+        if total > 0 and i+1 > 2:
+            location = [2,j+2,i+1,j+2]
         else:
             location = [-1]
             
@@ -959,7 +977,7 @@ class Export_Outputs(QDialog):
     def items(self):
         vars = ["trip starttime","trip endtime","trip duration","trip purpose","trip starttime by purpose",
                 "trip endtime by purpose","trip duration by purpose","trip episode rate","dwell time","dwell time by activity",
-                "trip rate by purpose","activity rate","activity rate by activity"]
+                "trip rate by purpose","activity rate","activity rate by activity","earliest start of day","latest end of day"]
         return vars
     
     def tnames(self,wsheet,ind):
