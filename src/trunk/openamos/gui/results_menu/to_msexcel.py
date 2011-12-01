@@ -357,9 +357,9 @@ class Export_Outputs(QDialog):
         elif nhts and column == "endtime":
             temp = "(select houseid, personid, max(%s) as %s, min(wttrdfin) as wttrdfin from trips_nhts group by houseid, personid) as d"%(column,column)
         elif not nhts and column == "starttime":
-            temp = "(select houseid, personid, min(%s) as %s from schedule_final_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, min(%s) as %s from trips_purpose_r group by houseid, personid) as d"%(column,column)
         else:
-            temp = "(select houseid, personid, max(%s) as %s from schedule_final_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, max(%s) as %s from trips_purpose_r group by houseid, personid) as d"%(column,column)
                
         return temp
 
