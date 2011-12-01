@@ -12,6 +12,7 @@ from openamos.core.database_management.database_configuration import *
 
 import time
 import numpy as np
+import os
 from copy import deepcopy
 
 from openpyxl.workbook import Workbook
@@ -257,11 +258,11 @@ class Export_Outputs(QDialog):
                         seri.append(self.sql_quary1(wsheet,column,True,i))
                         self.call_chart(wsheet,seri)
 
-            wb.save(filename.replace('/','\\'))
+            wb.save(os.path.realpath(filename))
 
-            QMessageBox.information(self, "",
-                QString("""Outputs exporting is successful!"""), 
-                QMessageBox.Yes)
+            #QMessageBox.information(self, "",
+            #    QString("""Outputs exporting is successful!"""), 
+            #    QMessageBox.Yes)
             
             self.reject()
             
@@ -891,16 +892,18 @@ class Export_Outputs(QDialog):
         
     def tables(self,istrip):
         if istrip:
-            table_names = ["trips_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
+            table_names = ["trips_purpose_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
             return table_names
         else:
-            table_names = ["schedule_final_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
+            table_names = ["schedule_full_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
             return table_names 
     
     def table_name(self,names):
         for i in range(len(names)):
-            if names[i].find("_final_r") > -1:
-                names[i] = names[i].replace("_final_r","") + "_nhts"
+            if names[i].find("_full_r") > -1:
+                names[i] = names[i].replace("_full_r","") + "_nhts"
+            elif names[i].find("_purpose_r") > -1:
+                names[i] = names[i].replace("_purpose_r","") + "_nhts"  
             elif names[i].find("_r") > -1:
                 names[i] = names[i].replace("_r","") + "_nhts"  
             else:
