@@ -1137,7 +1137,7 @@ class QueryBrowser(object):
     ########## methods for creating and deleting index##########
 
     ########### file function #################
-    def file_write(self, data_arr, loc, partId):
+    def file_write(self, data_arr, loc, partId, fileName=None):
         """
         This method write the resultset to a file.
         
@@ -1171,7 +1171,10 @@ class QueryBrowser(object):
 	fmt = fmt[:-1]
 	print '\t\tThis is the final format-', fmt
         ti = time.time()
-	savetxt('%s/tempData_%s.csv'%(loc, partId), data_arr, delimiter=',', fmt=fmt)
+	if fileName is None:
+	    savetxt('%s/tempData_%s.csv'%(loc, partId), data_arr, delimiter=',', fmt=fmt)
+	else:
+	    savetxt('%s/%s_%s.csv'%(loc, fileName, partId), data_arr, delimiter=',', fmt=fmt)		
         print '\t\tTime to write to file new implementation - %.4f' %(time.time()-ti)
     ########### file function ends ############
     

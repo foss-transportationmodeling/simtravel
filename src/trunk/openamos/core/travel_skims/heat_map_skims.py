@@ -34,7 +34,7 @@ import shutil
 import time
 import csv
 import os
-from numpy import array, average, zeros
+from numpy import array, average, zeros, logical_or
 
 
 class PlotHeatMap(object):
@@ -85,7 +85,7 @@ class PlotHeatMap(object):
 
 	plt.show()
 
-    def createHeatMapForXY(self, xName, xLoc, yName, yLoc):
+    def createHeatMapForXY(self, xName, xLoc, yName, yLoc, fName=None, fLoc=None):
 	plt.subplots_adjust(hspace=0.1)
 
 	subPlotNum = 111
@@ -102,8 +102,8 @@ class PlotHeatMap(object):
 	y_min = y[:,-1].min()
 	y_max = y[:,-1].max()
 
-	print 'First 5 x values - ', x[:5,-1]
-	print 'First 5 y values - ', y[:5,-1]
+	#print 'First 5 x values - ', x[:5,-1]
+	#print 'First 5 y values - ', y[:5,-1]
 
 	plt.hexbin(x[:,-1],y[:,-1], cmap=cm.jet, bins=100)
 	plt.axis([x_min, x_max, y_min, y_max])
@@ -113,7 +113,60 @@ class PlotHeatMap(object):
 	cb = plt.colorbar()
 	cb.set_label('Count')
 
-	plt.show()
+	#plt.show()
+	plt.savefig('%s%s%s' %(fLoc, os.path.sep, fName), format='png')
+
+        return (np.abs(x[:,-1] - y[:,-1])).sum()
+
+
+    def createHeatMapForIncompleteXY(self, xName, xLoc, yName, yLoc, fName=None, fLoc=None):
+	plt.subplots_adjust(hspace=0.1)
+
+	subPlotNum = 111
+		
+	plt.subplot(subPlotNum)
+
+	x = self.load_file(xLoc)
+	y = self.load_file(yLoc)
+
+	x_mat = zeros((self.nodes+1, self.nodes+1))
+	y_mat = zeros((self.nodes+1, self.nodes+1))
+
+	x_mat[x[:,1].astype(int), x[:,2].astype(int)] = x[:,0]
+	y_mat[y[:,1].astype(int), y[:,2].astype(int)] = y[:,0]
+
+	x = x_mat.ravel()
+	y = y_mat.ravel()
+
+	x_min = x.min()
+	x_max = x.max()
+
+	y_min = y.min()
+	y_max = y.max()
+
+	nonZero = logical_or(x <> 0, y <> 0)
+
+	x = x[nonZero]
+	y = y[nonZero]
+
+	print 'First 5 x values - ', x[:105], x_min, x_max
+	print 'First 5 y values - ', y[:105], y_min, y_max
+
+	plt.hexbin(x,y, cmap=cm.jet)
+	plt.axis([x_min, x_max, y_min, y_max])
+
+	plt.title("%s(Y) Vs %s(X)" %(yName, xName))
+
+	
+	cb = plt.colorbar()
+	cb.set_label('Count')
+
+	
+	plt.savefig('%s%s%s' %(fLoc, os.path.sep, fName), format='png')
+
+        return (np.abs(x - y)).sum()
+
+
 
     def load_file(self, filePath, delimiterChar=","):
 	f = csv.reader(open(filePath, 'r'), delimiter=delimiterChar)
@@ -123,8 +176,8 @@ class PlotHeatMap(object):
 	for i in f:
 	    arr.append(i)
 	    k+= 1
-	    #if k > 100000:
-	    #	break
+	    #if k > 1000:
+	    # 	break
 	arr = array(arr, float)
 
 	return arr
@@ -144,50 +197,14 @@ class PlotHeatMap(object):
 
 
 if __name__ == "__main__":
-    #obj = PlotHeatMap(timeIntervalList=[0])
-    #obj.createHeatMapForSkims()
-
-    # Dist (X) Vs New Skims(Y)
-    #obj.createHeatMapForXY('iter1', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/skim3.dat',
-    #			   'iter2', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/skim3.dat')
-    #obj.createHeatMapForXY('iter2', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/skim3.dat',
-    # 			   'iter3', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_3/skim3.dat')
-    #obj.createHeatMapForXY('iter3', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_3/skim3.dat',
-    #			   'iter4', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_4/skim3.dat')
-
-
     obj12 = PlotHeatMap(locNew='/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/',
 		       locOld='/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/startSkims/')
 	
-    obj12.calculate_deviation()
-	
-
-    #obj.createHeatMapForXY('start', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/startSkims/skim3.dat',
-    #			   'iter1', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/skim3.dat')
-
-
-    """
-    # Seq Vs Dynamic
-    obj.createHeatMapForXY('new_seq_int-4', '/home/karthik/simtravel/test/mag_zone_dynamic/iter1_5per_sequential/skim4.dat',
-			   'new_dyn_int-4', '/home/karthik/simtravel/test/mag_zone_dynamic/iter1_5per_dynamic/skim4.dat')
+    #obj12.calculate_deviation()
+    dev = obj12.createHeatMapForXY('iter1', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_1/skim3.dat',
+    			     'iter2', '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/skim3.dat',
+			     fLoc = '/home/karthik/simtravel/test/mag_zone_dynamic/iteration_2/',
+			     fName = 'skim3_iter2_vs_iter1.dat')
+    print dev	
 
 
-
-    # Peak Skims (Int 0) New (X) Vs Off Peak (Int4) Skims New(Y)
-    obj.createHeatMapForXY('new_skim_int-0', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim0.dat',
-			   'new_skim_int-4', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim4.dat')
-
-    # Peak Skims (Int 0) Old (X) Vs Off Peak (Int4) Skims OLd(Y)
-    obj.createHeatMapForXY('old_skim_int-0', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skims_first_iter/skim0.dat',
-			   'old_skim_int-4', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skims_first_iter/skim4.dat')
-
-
-
-    # Dist (X) Vs New Skims(Y)
-    obj.createHeatMapForXY('peak dist', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/skims4Step.csv',
-			   'new_skim_int-0', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim0.dat')
-
-    # Dist (X) Vs Old Skims(Y)
-    obj.createHeatMapForXY('peak dist', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/skims4Step.csv',
-    			   '4step_skim_int-0', '/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skims_first_iter/skim0.dat')
-    """

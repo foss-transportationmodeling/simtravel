@@ -495,6 +495,16 @@ class ConfigParser(object):
 	#raw_input()
 
 
+	writeToLocFlag = component_element.get('write_to_loc')
+	if writeToLocFlag is not None:
+	    if writeToLocFlag == "True":
+		writeToLocFlag = True
+	    else:
+		writeToLocFlag = False
+	else:
+	    writeToLocFlag = False
+
+
         component = AbstractComponent(comp_name, self.model_list, 
                                       self.component_variable_list, 
                                       comp_read_table,
@@ -514,7 +524,8 @@ class ConfigParser(object):
 				      delete_dict = delete_dict,
 				      writeToTable2 = comp_write_to_table2,
 				      key2 = key2,
-				      pre_run_filter = pre_run_filter)
+				      pre_run_filter = pre_run_filter,	
+				      writeToLocFlag = writeToLocFlag)
         return component
 
 
@@ -1598,10 +1609,10 @@ class ConfigParser(object):
 
         model_type = model_element.get('type')
 
-	if model_type == None:
-	    model_type == "Allocation"
-	else:
-	    model_type == 'Processing'
+	#if model_type == None:
+	#    model_type == "Allocation"
+	#else:
+	#    model_type == 'Processing'
         
         seed = self.process_seed(model_element) + projectSeed
 

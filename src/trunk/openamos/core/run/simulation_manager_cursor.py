@@ -20,6 +20,13 @@ from openamos.core.travel_skims.successive_avg_processor import SuccessiveAverag
 
 from multiprocessing import Process
 
+
+from openamos.core.travel_skims.heat_map_skims import PlotHeatMap
+from openamos.core.config import ConfigObject
+from openamos.gui.results_menu.to_msexcel import Export_Outputs
+from PyQt4.QtGui import QApplication
+import sys
+
 class SimulationManager(object):
     """os.copy python
     The class reads the configuration file, creates the component and model objects,
@@ -113,6 +120,19 @@ class SimulationManager(object):
 	self.setup_inputCacheTables()
 	self.setup_outputCacheTables()
 
+	
+	# Copying results for components that generate runtime outputs
+	for component in self.componentList:
+	    if component.writeToLocFlag == True:
+		tableName = component.writeToTable
+		self.reflectFromDatabaseToLoc(queryBrowser, tableName, backupDirectoryLoc)
+		print 'backing up results for individual component'
+
+
+	# Creating and copying tabulations
+	self.backup_result_tabulations(backupDirectoryLoc)	
+
+
 	# create populate cache - 
 	tableList = self.db.list_of_outputtables()
 
@@ -125,13 +145,76 @@ class SimulationManager(object):
 	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
 	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
 	shutil.copyfile(fileLoc, backupFileLoc)
-	
+
 	# Copying the skims ... 
 	print 'Copying the skim files to the iteration folder'
-	for skimsTable in self.projectSkimsObject.table_locationLookup.values():
-	    shutil.copy(skimsTable, backupDirectoryLoc)
+	
+	oldFileFolder = os.path.join(self.projectConfigObject.location, "iteration_%d" %(int(self.iteration)-1))
 
-        self.close_database_connection(queryBrowser)
+	
+	# Skims
+	fSkimsConv = open(backupDirectoryLoc + os.path.sep + 'skimsConv.txt', 'w')
+	for skimsTable in self.projectSkimsObject.table_locationLookup.keys():
+	    skimsTableLoc = self.projectSkimsObject.table_locationLookup[skimsTable]
+	    skimsTableName = self.projectSkimsObject.table_lookup[skimsTable]
+   
+	    shutil.copy(skimsTableLoc, backupDirectoryLoc)
+	    oldFile = os.path.join(oldFileFolder, "%s.dat" %skimsTableName)
+	    dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
+	    print 'deviation - ', dev
+	    fSkimsConv.write('%.4f\n' %dev)
+	fSkimsConv.close()
+	
+	# OD
+	fODConv = open(backupDirectoryLoc + os.path.sep + 'odConv.txt', 'w')
+		
+	oldFile = os.path.join(oldFileFolder, 'od_r_None.csv')
+	newFile = os.path.join(backupDirectoryLoc, 'od_r_None.csv')
+	dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
+	fODConv.write('%.4f\n' %dev)
+	fODConv.close()
+	
+
+	self.close_database_connection(queryBrowser)
+
+
+    def backup_result_tabulations(self, fileLoc):
+    	app = QApplication(sys.argv)
+
+	# 4 represents the socio-demographic groups ... 
+
+	for i in range(4):
+    	    confObj = ConfigObject(configtree = self.configObject)
+    	    exportObj = Export_Outputs(confObj)
+
+	    # select all tables to download
+    	    exportObj.check_all.setCheckState(True)
+    	    exportObj.select_all()
+
+    	    # sociodemographic group
+    	    exportObj.pptype.setCurrentIndex(i)
+	    socioDemText = exportObj.pptype.currentText()
+	
+    	    # set file path
+    	    fileName = fileLoc + os.path.sep + "results_%s.xlsx" %socioDemText
+    	    exportObj.xlsname.setText(fileName)
+
+
+    	    # create file
+    	    exportObj.accept()
+	
+
+    def calculate_skims_convergence_criterion(self, oldFileLoc, newFileLoc, skimsTableName, backupDirectory):
+	heatMapObj = PlotHeatMap()
+	return heatMapObj.createHeatMapForXY('old_%s'%skimsTableName, oldFileLoc, 
+					      'new_%s'%skimsTableName, newFileLoc, 
+					      skimsTableName, backupDirectory)
+
+
+    def calculate_od_convergence_criterion(self, oldFileLoc, newFileLoc, backupDirectory):
+	heatMapObj = PlotHeatMap()
+	return heatMapObj.createHeatMapForIncompleteXY('old_od', oldFileLoc, 
+					      		'new_od', newFileLoc, 'od', backupDirectory)
 
 
     def restore_from_resultsBackup(self):
@@ -492,6 +575,26 @@ class SimulationManager(object):
         tableRef.flush()
         print '\t\tData backed up for table %s in - %.4f' %(tableName, time.time()-ti) 
 
+
+    def reflectFromDatabaseToLoc(self, queryBrowser, tableName, fileLoc, partId=None):
+	ti = time.time()
+	print 'Backing component table separately to location - ', tableName
+
+	tableRef = self.db.returnTableReference(tableName, partId)
+	colsToWrite = tableRef.colnames
+	data = queryBrowser.select_all_from_table(tableName, cols=colsToWrite)
+
+	if data is None:
+	    #print '\tNo result returned for the table ... '
+	    return
+
+        convType = self.db.returnTypeConversion(tableName, partId)
+        dtypesInput = tableRef.coldtypes
+        data_to_write = data.columnsOfType(colsToWrite, colTypes=dtypesInput)
+
+	queryBrowser.file_write(data_to_write.data, fileLoc, partId, fileName=tableName)
+
+        print '\t\tData backed up for table %s in - %.4f' %(tableName, time.time()-ti) 
 	
 	
 

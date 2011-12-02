@@ -1791,245 +1791,97 @@ class Household(object):
 	    #depPerson.print_activity_list()
 	    #raw_input('FINALFINAL')
 
-
-	    
-	    """
-
-
-
-	    depPersonTempList = []
-	
-	    # Adjusting the morning sojourn ... TODO:One things that needs to be checked is if a pickup is late is there a indep person still available ...?
-	    stTime, stAct = hp.heappop(depPerson.listOfActivityEpisodes)
-	    hp.heappush(depPersonTempList, (stTime, stAct))
-	    for i in range(len(depPerson.listOfActivityEpisodes)):
-	    	enTime, enAct = hp.heappop(depPerson.listOfActivityEpisodes)
-
-	        # Adjust the first episode of the day i.e. the sojourn if the pickup is late ... 
-		if stAct.actType == 100 and stAct.startTime == 0 and enAct.actType == 600 and stAct.endTime <> enAct.startTime - 1:
-		    #print 'stAct is sojourn - ', stAct
-		    #print 'enAct is pickup - ', enAct
-		    depPerson.move_end(stAct, enAct.startTime - 1, removeAdd=False)
-		    #print 'stAct adjusted because pickup is moved -', stAct
-		    #raw_input('stAct adjusted because pickup is moved')
-
-		stAct = enAct	
-		hp.heappush(depPersonTempList, (enAct.startTime, enAct))
-
-	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
-	    print 'After adjusting morning sojourn ... '
-	    print depPerson.print_activity_list()
-	    raw_input()
-
-
-
-
-
-	    # Identifying the trip vertices after adjustment
-	    depPersonTempList = []
-	    depPersonTripStAnchorsList = []
-	    depPersonTripEnAnchorsList = []
-
 		
 
-
-	    for i in range(len(depPerson.listOfActivityEpisodes)):
-	    	stTime, act = hp.heappop(depPerson.listOfActivityEpisodes)
-
-
-		if act.actType == 600 and act.dependentPersonId <> 99:
-		    hp.heappush(depPersonTripStAnchorsList, (act.startTime, act))
-			
-
-		if act.actType == 601 and act.dependentPersonId <> 99:
-		    hp.heappush(depPersonTripEnAnchorsList, (act.startTime, act))
-
-		hp.heappush(depPersonTempList, (act.startTime, act))
-
-	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
-
-	    # checking to see if there are any missed activities because of the trips ... 
-	    depPersonTempList = []
-	    for i in range(len(depPersonTripEnAnchorsList)):
-	    	tripStTime, tripSt = hp.heappop(depPersonTripStAnchorsList)
-	    	tripEnTime, tripEn = hp.heappop(depPersonTripEnAnchorsList)
-
-		hp.heappush(depPersonTempList, (tripSt.startTime, tripSt))
-		hp.heappush(depPersonTempList, (tripEn.startTime, tripEn))
-	    		
-		missedActList = depPerson._identify_activities_between_time_boundaries(tripSt.endTime, tripEn.startTime)
-	
-		for ac in missedActList:
-		    print 'Missed acts - ', ac
-
-		if len(missedActList) > 0:
-		    print 'trip start - ', tripSt
-		    print 'trip end - ', tripEn
-		    actsToRemove = []
-		    moveTo = tripEnTime
-		    for act in missedActList:
-			#print '\tMissed act by dependent person - ', act
-			if act.actType == 600:
-			    #print act
-			    depPerson.move_end(act, moveTo + 2)
-			    depPerson.move_start(act, moveTo + 1)
-			    moveTo += 1
-			    #print '\t     pickup activity moved - ', act
-			    if act.dependentPersonId <> 99:
-			    	tripStTime, tripSt = hp.heappop(depPersonTripStAnchorsList)
-			    	hp.heappush(depPersonTripStAnchorsList, (act.startTime, act))
-			    #raw_input()
-
-			if act.actType == 601:
-			    #print act
-			    depPerson.move_end(act, moveTo + 2)
-			    depPerson.move_start(act, moveTo + 1)
-			    moveTo += 1
-			    #print '\t     dropoff activity moved - ', act
-			    if act.dependentPersonId <> 99:
-			    	tripEnTime, tripEn = hp.heappop(depPersonTripEnAnchorsList)
-			    	hp.heappush(depPersonTripEnAnchorsList, (act.startTime, act))
-			    #raw_input()
-
-
-			else:
-			    actsToRemove.append(act)
-
-		    print 'Before removing episodes and moving pickups for potentially missed episodes... '
-		    print depPerson.print_activity_list()
-			
-		    actsToActuallyRemove = []
-		    for ac in actsToRemove:
-                    	print 'removing act - ', ac
-			if ac.actType >= 600 and ac.dependentPersonId == 99:
-			    depPerson.move_start_end(ac, tripEn.endTime - ac.startTime)
-			else:
-			    actsToActuallyRemove.append(ac)
-
-		    for ac in actsToActuallyRemove:
-                    	print 'actually removing act - ', ac
-
-
-		    #depPerson.remove_episodes(actsToRemove)
-		    depPerson.remove_episodes(actsToActuallyRemove)
-		    print 'After removing episodes and moving pickups for potentially missed episodes... '
-		    print depPerson.print_activity_list()
-		    raw_input('actrs removed because missed -- ')
-
-
-	    # identifying trip anchors to adjust the activities between these subsequent dropoff-pickup anchors ... 
-	    depPersonTempList = []
-	    depPersonTripAnchorsList = []
-	    for i in range(len(depPerson.listOfActivityEpisodes)):
-	    	stTime, act = hp.heappop(depPerson.listOfActivityEpisodes)
-
-
-		if act.actType == 600:
-		    hp.heappush(depPersonTripAnchorsList, (act.startTime, act))
-			
-
-		if act.actType == 601:
-		    hp.heappush(depPersonTripAnchorsList, (act.startTime, act))
-
-		hp.heappush(depPersonTempList, (act.startTime, act))
-
-	    depPerson.listOfActivityEpisodes = copy.deepcopy(depPersonTempList)
-
-
-
-
-	    #depPersonTripAnchorsList = depPersonTempList
-
-	    hp.heappop(depPersonTripAnchorsList) # Removing the first trips start anchor
-    
-	    #print 'OH Act List - ', len(ohActList)
-	    #for a in ohActList:
-	    #	print 'OH ACTS - ', a
-
-	    #print 'Trip List - ', len(depPersonTripAnchorsList)/2
-
-	    for i in range(len(depPersonTripAnchorsList)/2):
-		ohStAncStTime, ohStAnc = hp.heappop(depPersonTripAnchorsList)
-		ohEnAncStTime, ohEnAnc = hp.heappop(depPersonTripAnchorsList)
-
-		ohActStTime, ohAct = ohActList[i]
-		#print 'OH Vertices'
-		#print 'oh ST Anc - ', ohStAnc
-		#print 'oh EN Anc - ', ohEnAnc
-		#print 'oh Act - ', ohAct
-
-
-
-		if ohAct.startTime <> ohStAnc.endTime + 1 or ohAct.endTime <> ohEnAnc.startTime - 1:
-			
-		    actualOHAct = depPerson._identify_match_activity(ohAct)
-		    if actualOHAct is None:
-			#print 'THe activity must have been removed in the previous heuristic ... '
-			continue 
-
-                    if (ohEnAnc.startTime - ohStAnc.endTime) <= 1:
-			#print 'the OH Act will now be eliminated because of activity scheduling adjustments ... '
-			depPerson.remove_episodes(actualOHAct)
-		    else:
-		    	depPerson.move_start_end_by_diff_values(actualOHAct[0], ohStAnc.endTime + 1, ohEnAnc.startTime - 1)
-		    	#print 'oh Act Modified - ', actualOHAct[0]	
-		    print depPerson.print_activity_list()
-		
-
-		raw_input('OH act adjusted ... ')
-				
-         
-	    depPerson.reset_schedule_conflict_indicator()
-
-
-	    if not depPerson._check_for_conflicts():
-		#raise Exception, 'Conflicts exist still ... '
-		depPerson.print_activity_list()		
-		print 'last trip end - ', tripEn
-		#raw_input()
-
-
-		conflictActs = depPerson._identify_conflict_activities([tripEn])
-
-		for act in conflictActs:	
-		    if act.actType <> 601:
-			conflictAct = act
-			break
-	
-		#print 'conflict - ', conflictAct
-
-		afterActs = depPerson._identify_next_activity(conflictAct, len(depPerson.listOfActivityEpisodes))
-		
-		#for act in afterActs:
-		#    print 'after acts -', act
-
-		refTime = copy.deepcopy(tripEn.endTime)
-		for act in [conflictAct] + afterActs:
-		#    print 'Act before adjustment - ', act
-		    depPerson.move_start_end(act, refTime - act.startTime, removeAdd=False)
-		    refTime = copy.deepcopy(act.endTime)
-		#    print 'Act after adjustment - ', act
-
-	    else:
-		#depPerson.print_activity_list()		
-	    	#print 'last anchor - ', tripEn
-	    	actAfter = depPerson._identify_next_activity(tripEn)[0]
-	    	#print 'act after - ', actAfter
-	
-		if (actAfter.startTime > tripEn.endTime + 1) and (actAfter.location == tripEn.location):
-		    depPerson.move_start(actAfter, tripEn.endTime + 1, removeAdd=False)
-	    	#print 'act after with start time adjustment - ', actAfter
-		#depPerson.print_activity_list()		
-		#print ('does the last at need to be adjusted ... ?')
-
-	    depPerson.reset_schedule_conflict_indicator()
-	    """   	
 	    if not depPerson._check_for_conflicts():
 		depPerson.print_activity_list()		
 		raise Exception, 'Conflicts exist still ... and this should not happen'		
 		#raw_input('conflicts exist still for person')
 
 	    depPerson._check_for_acts_between_trip_vertices()
+
+
+    def fix_trippurpose(self, seed):
+	#print 'Post processing schedules for hid - ', self.hid
+        #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
+        #print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
+
+
+	if len(self.dependencyPersonIds)  == 0:
+	    self.fix_trippurpose_nodependents()
+	else:
+	    self.fix_trippurpose_withdependents()
+
+
+    def fix_trippurpose_nodependents(self):
+	for pid in self.indepPersonIds:
+	    person = self.persons[pid]
+	    #print 'Before fixing trip purpose - '
+	    #person.print_activity_list()
+
+	    tempList = []
+	    stActTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	    for i in range(len(person.listOfActivityEpisodes)):
+		enActTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+		if stAct.actType == -99:
+		    stAct.actType = copy.deepcopy(enAct.actType)
+	    	tempList.append((stAct.startTime, stAct))
+		stAct = enAct
+	    tempList.append((enAct.startTime, enAct))	
+	    hp.heapify(tempList)
+	    person.listOfActivityEpisodes = tempList
+	    #print 'After fixing trip purpose - '
+	    #person.print_activity_list()
+
+    def fix_trippurpose_withdependents(self):
+	for pid in self.indepPersonIds:
+	    person = self.persons[pid]
+	    #print 'Before fixing trip purpose with dependents - '
+	    #person.print_activity_list()
+
+	
+	    # Change unnecessary anchors
+
+	    tempList = []
+	    stActTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	    tempList.append((stAct.startTime, stAct))
+	    for i in range(len(person.listOfActivityEpisodes)):
+		enActTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+		if stAct.actType <> -99 and enAct.actType == 600:
+		    enAct.actType = 650
+		    #print '\tPickup altered - ', enAct
+		
+		if stAct.actType == 601 and (enAct.actType >= 450 and enAct.actType <= 500):
+		    stAct.actType = 651
+		    #print '\tDropoff altered - ', enAct
+
+		tempList.append((enAct.startTime, enAct))			    
+		stAct = enAct
+
+	    hp.heapify(tempList)
+	    person.listOfActivityEpisodes = tempList
+
+	    tempList = []
+	    stActTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	    tempList.append((stAct.startTime, stAct))
+	    for i in range(len(person.listOfActivityEpisodes)):
+		enActTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+
+		if enAct.actType >= 650:
+		    #print '\tAltered pickup/dropoff removed - ', enAct
+		    continue
+		if stAct.actType == -99:
+		    stAct.actType = copy.deepcopy(enAct.actType)
+		tempList.append((enAct.startTime, enAct))			    
+		stAct = enAct
+
+	    hp.heapify(tempList)
+	    person.listOfActivityEpisodes = tempList
+
+	    #print 'After fixing trip purpose with dependents- '
+	    #person.print_activity_list()
+
+
 
 
     def fill_gaps_in_dependent_person_schedule(self, person):

@@ -164,6 +164,15 @@ class Trips_R(t.IsDescription):
     lasttripcount = t.Int64Col()  			  			
 
 
+class Trips_Purpose_R(t.IsDescription):
+    houseid = t.Int32Col()
+    personid = t.Int32Col()
+    starttime = t.Int32Col()
+    endtime = t.Int32Col()
+    duration = t.Int32Col()
+    trippurpose = t.Int32Col()
+    dependentpersonid = t.Int64Col()
+    tripcount = t.Int64Col()
 
 class Trips_Invalid_R(t.IsDescription):
     tripid = t.Int64Col()

@@ -142,6 +142,10 @@ class ChildDependencyProcessing(Model):
 		householdObject.allocate_dependent_activities(seed)
 	    elif self.childDepProcessingType == 'Resolution':
 		householdObject.lineup_activities(seed)
+	    elif self.childDepProcessingType == 'Fix Trip Purpose':
+		householdObject.fix_trippurpose(seed)
+		#raw_input('fixing trip purpose')
+	
 		pass
 
 	    reconciledSchedules = householdObject._collate_results()

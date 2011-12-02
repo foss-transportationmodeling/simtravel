@@ -38,7 +38,8 @@ class AbstractComponent(object):
 		 delete_dict={},
 		 writeToTable2 = None,
 		 key2=None,
-		 pre_run_filter=None):
+		 pre_run_filter=None,
+		 writeToLocFlag=False):
 
         # TODO: HOW TO DEAL WITH CONSTRAINTS?
         # TODO: CHOICESET GENERATION?
@@ -69,7 +70,7 @@ class AbstractComponent(object):
 	self.writeToTable2 = writeToTable2
 	self.key2 = key2
 	self.pre_run_filter = pre_run_filter
-
+	self.writeToLocFlag = writeToLocFlag
         self.keyColsList()
 
 
