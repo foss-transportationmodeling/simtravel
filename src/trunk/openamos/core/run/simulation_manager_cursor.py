@@ -120,7 +120,7 @@ class SimulationManager(object):
 	self.setup_inputCacheTables()
 	self.setup_outputCacheTables()
 
-	
+
 	# Copying results for components that generate runtime outputs
 	for component in self.componentList:
 	    if component.writeToLocFlag == True:
@@ -148,10 +148,10 @@ class SimulationManager(object):
 
 	# Copying the skims ... 
 	print 'Copying the skim files to the iteration folder'
-	
+
 	oldFileFolder = os.path.join(self.projectConfigObject.location, "iteration_%d" %(int(self.iteration)-1))
 
-	
+
 	# Skims
 	fSkimsConv = open(backupDirectoryLoc + os.path.sep + 'skimsConv.txt', 'w')
 	for skimsTable in self.projectSkimsObject.table_locationLookup.keys():
@@ -165,14 +165,17 @@ class SimulationManager(object):
 	    fSkimsConv.write('%.4f\n' %dev)
 	fSkimsConv.close()
 	
-	# OD
-	fODConv = open(backupDirectoryLoc + os.path.sep + 'odConv.txt', 'w')
-		
-	oldFile = os.path.join(oldFileFolder, 'od_r_None.csv')
-	newFile = os.path.join(backupDirectoryLoc, 'od_r_None.csv')
-	dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
-	fODConv.write('%.4f\n' %dev)
-	fODConv.close()
+
+
+	if self.iteration > 1:	
+	    # OD
+	    fODConv = open(backupDirectoryLoc + os.path.sep + 'odConv.txt', 'w')
+
+	    oldFile = os.path.join(oldFileFolder, 'od_r_None.csv')
+	    newFile = os.path.join(backupDirectoryLoc, 'od_r_None.csv')
+	    dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
+	    fODConv.write('%.4f\n' %dev)
+	    fODConv.close()
 	
 
 	self.close_database_connection(queryBrowser)
