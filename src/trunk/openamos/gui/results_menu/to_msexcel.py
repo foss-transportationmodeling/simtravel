@@ -466,80 +466,136 @@ class Export_Outputs(QDialog):
         else:
             tnames = self.tables(False)
             purpose = "activitytype"
+            
         
-        #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2],self.wrk_cond())
-        sql = "select b.freq, b.%s, count(*) from"%(purpose)
-        if self.wrk_cond() <> "":
-            sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),self.wrk_cond())
-        else:
-            sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
-        sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
-        sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
-        print sql
-         
-        self.new_obj.cursor.execute(sql)
-        data = self.new_obj.cursor.fetchall()
-
-        xlabels = self.trip_labels("trippurpose")
-        xkeys = xlabels.keys()
-        xkeys.sort()
+        cond = self.time_categroy(purpose)
+        #ylabels = self.trip_labels(column)
+        ykeys = cond.keys()
+        ykeys.sort()
         
         yvalue = {}
-        cumulate = np.zeros(len(xkeys))
-        cumulate = list(cumulate)
-        xvalue = np.zeros(len(xkeys))
-        xvalue = list(xvalue)
-
-        self.retrieve_twodimension(data, yvalue, cumulate, xkeys)
-        # prate: previous rate
-#        prate = 1 
-#        for t in data:
-#            if t[0] != None and t[1] != None:
-#                
-#                rate = int(t[0])
-#                if prate <> rate:
-#                    yvalue[rate] = deepcopy(xvalue)
-#                    
-#                    prate = rate
-#                    xvalue = np.zeros(len(xkeys))
-#                    xvalue = list(xvalue)
-#                
-#                temp = self.purpose_index(int(t[1]))
-#                if temp > 0:
-#                    index = xkeys.index(temp)
-#                    xvalue[index] = xvalue[index] + long(t[2])
-#                    cumulate[index] = cumulate[index] + long(t[2])
-#                    
-#        yvalue[rate] = deepcopy(xvalue)
-
-
-        if self.isNHTS:
-            self.table_name(tnames)
-            #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2])
-            sql = "select b.freq, b.%s, sum(wtperfin) from"%(purpose)
+        yvalue[0] = list(np.zeros(len(ykeys)))
+        keyfreq = [0]
+        cumulate = list(np.zeros(len(ykeys)))
+        
+        for key in ykeys:
+            #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2],self.wrk_cond())
+            sql = "select b.freq, count(*) from"
             if self.wrk_cond() <> "":
-                sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True),self.wrk_cond())
+                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),self.wrk_cond())
             else:
-                sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True))
-            sql = "%s left join (select houseid, personid, count(*) as freq, %s from %s group by houseid, personid, %s) as b"%(sql,purpose,tnames[0],purpose)  
-            sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq, b.%s order by b.freq, b.%s"%(sql,purpose,purpose)
+                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
+                
+            catecode = cond[key]
+            if len(catecode) == 2:   
+                where = "where %s >= %d and %s < %d"%(purpose,catecode[0],purpose,catecode[1])
+            else:
+                where = "where %s = %d"%(purpose,catecode[0])
+                
+            sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as b"%(sql,tnames[0],where)  
+            sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
             print sql
              
             self.new_obj.cursor.execute(sql)
-            data = self.new_obj.cursor.fetchall()
-    
-            yvalue_nhts = {}
-            cumulate_nhts = np.zeros(len(xkeys))
-            cumulate_nhts = list(cumulate_nhts)
+            rows = self.new_obj.cursor.fetchall()
+            
+            
+            
+            for row in rows:
+                
+                if row[0] <> None:
+                    if int(row[0]) in keyfreq:
+                        temp = yvalue[int(row[0])]
+                        temp[key-1] = long(row[1])
+                        cumulate[key-1] += long(row[1])
+                    else:
+                        temp = list(np.zeros(len(ykeys)))
+                        temp[key-1] = long(row[1])
+                        yvalue[int(row[0])] = temp
+                        keyfreq.append(int(row[0]))
+                        cumulate[key-1] += long(row[1])                       
+                else:
+                    temp = yvalue[0]
+                    temp[key-1] = long(row[1])
+                    cumulate[key-1] += long(row[1])
+        
+          
+        print yvalue
+        print cumulate
+            
 
-            self.retrieve_twodimension(data, yvalue_nhts, cumulate_nhts, xkeys)
+#        xlabels = self.trip_labels("trippurpose")
+#        xkeys = xlabels.keys()
+#        xkeys.sort()
+#        
+#        yvalue = {}
+#        cumulate = np.zeros(len(xkeys))
+#        cumulate = list(cumulate)
+#        xvalue = np.zeros(len(xkeys))
+#        xvalue = list(xvalue)
+#        self.retrieve_twodimension(data, yvalue, cumulate, xkeys)
+
+
+        if self.isNHTS:
+
+            yvalue_nhts = {}
+            yvalue_nhts[0] = list(np.zeros(len(ykeys)))
+            keyfreq = [0]
+            cumulate_nhts = list(np.zeros(len(ykeys)))
+                    
+            self.table_name(tnames)
+            
+            for key in ykeys:
+                #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2])
+                sql = "select b.freq, sum(wtperfin) from"
+                if self.wrk_cond() <> "":
+                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True),self.wrk_cond())
+                else:
+                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True))
+                    
+                catecode = cond[key]
+                if len(catecode) == 2:   
+                    where = "where %s >= %d and %s < %d"%(purpose,catecode[0],purpose,catecode[1])
+                else:
+                    where = "where %s = %d"%(purpose,catecode[0])
+                
+                sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as b"%(sql,tnames[0],where)  
+                sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
+                print sql
+                 
+                self.new_obj.cursor.execute(sql)
+                rows = self.new_obj.cursor.fetchall()
+
+                for row in rows:
+                    
+                    if row[0] <> None:
+                        if int(row[0]) in keyfreq:
+                            temp = yvalue_nhts[int(row[0])]
+                            temp[key-1] = long(row[1])
+                            cumulate_nhts[key-1] += long(row[1])
+                        else:
+                            temp = list(np.zeros(len(ykeys)))
+                            temp[key-1] = long(row[1])
+                            yvalue_nhts[int(row[0])] = temp
+                            keyfreq.append(int(row[0]))
+                            cumulate_nhts[key-1] += long(row[1])                       
+                    else:
+                        temp = yvalue_nhts[0]
+                        temp[key-1] = long(row[1])
+                        cumulate_nhts[key-1] += long(row[1])
+
+            print yvalue_nhts
+            print cumulate_nhts    
+
+
+#            self.retrieve_twodimension(data, yvalue_nhts, cumulate_nhts, xkeys)
             
             key1 = yvalue.keys()
             key1.sort()
             key2 = yvalue_nhts.keys()
             key2.sort()
             
-            xvalue = np.zeros(len(xkeys))
+            xvalue = np.zeros(len(ykeys))
             xvalue = list(xvalue)
             
             for i in range(len(key1)):
@@ -558,40 +614,41 @@ class Export_Outputs(QDialog):
             seri.append(self.outputs_twodimension(wsheet,True,yvalue_nhts,cumulate_nhts))
         
         return seri
+
     
-    def retrieve_twodimension(self,data,yvalue,cumulate,xkeys):    
-        xvalue = np.zeros(len(xkeys))
-        xvalue = list(xvalue)
-        
-        prate = 1
-        rate = None
-        for t in data:
-            if t[0] != None and t[1] != None:
-                
-                rate = int(t[0])
-                if prate <> rate:
-                    yvalue[prate] = deepcopy(xvalue)
-                    
-                    prate = rate
-                    xvalue = np.zeros(len(xkeys))
-                    xvalue = list(xvalue)
-                
-                temp = self.purpose_index(int(t[1]))
-                if temp > 0:
-                    index = xkeys.index(temp)
-                    xvalue[index] = xvalue[index] + long(t[2])
-                    cumulate[index] = cumulate[index] + long(t[2])
-            else:
-                ztrip = long(t[2])
-                ztrips =[]
-                for i in range(len(xkeys)): 
-                    ztrips.append(ztrip)
-                    cumulate[i] = cumulate[i] + ztrip
-                yvalue[0] = ztrips
-                
-        
-        if rate <> None: 
-            yvalue[rate] = deepcopy(xvalue)
+#    def retrieve_twodimension(self,data,yvalue,cumulate,xkeys):    
+#        xvalue = np.zeros(len(xkeys))
+#        xvalue = list(xvalue)
+#        
+#        prate = 1
+#        rate = None
+#        for t in data:
+#            if t[0] != None and t[1] != None:
+#                
+#                rate = int(t[0])
+#                if prate <> rate:
+#                    yvalue[prate] = deepcopy(xvalue)
+#                    
+#                    prate = rate
+#                    xvalue = np.zeros(len(xkeys))
+#                    xvalue = list(xvalue)
+#                
+#                temp = self.purpose_index(int(t[1]))
+#                if temp > 0:
+#                    index = xkeys.index(temp)
+#                    xvalue[index] = xvalue[index] + long(t[2])
+#                    cumulate[index] = cumulate[index] + long(t[2])
+#            else:
+#                ztrip = long(t[2])
+#                ztrips =[]
+#                for i in range(len(xkeys)): 
+#                    ztrips.append(ztrip)
+#                    cumulate[i] = cumulate[i] + ztrip
+#                yvalue[0] = ztrips
+#                
+#        
+#        if rate <> None: 
+#            yvalue[rate] = deepcopy(xvalue)
         
         
     def outputs_twodimension(self,wsheet,nhts,yvalue,cumulate,column=""):
@@ -628,8 +685,10 @@ class Export_Outputs(QDialog):
                 
             if nhts:
                 wsheet.cell(row=i,column=len(xkeys)+3).value = ylabel
+                wsheet.cell(row=i+len(keys)+2,column=len(xkeys)+3).value = ylabel
             else:
                 wsheet.cell(row=i,column=0).value = ylabel
+                wsheet.cell(row=i+len(keys)+2,column=0).value = ylabel
                 
             y = yvalue[keys[index]]
             for j in range(len(y)):
@@ -640,8 +699,11 @@ class Export_Outputs(QDialog):
 
                 if nhts:
                     wsheet.cell(row=i,column=j+len(xkeys)+4).value = percent
+                    wsheet.cell(row=i+len(keys)+2,column=j+len(xkeys)+4).value = y[j]
                 else:
                     wsheet.cell(row=i,column=j+1).value = percent
+                    wsheet.cell(row=i+len(keys)+2,column=j+1).value = y[j]
+                    
                 
             i += 1
             
