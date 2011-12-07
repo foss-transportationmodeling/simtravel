@@ -46,7 +46,7 @@
 
   <ModelConfig>
 
-    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" skip="True" completed="True">
+    <Component name="VehicleOwnershipModel" read_from_table="households_vehicles_count_r" skip="False" completed="True">
       <DBTables>
         <Table table="households" key="houseid" order="1"/>
         <Table table="households_vehicles_count_r" key="houseid"/>
@@ -84,7 +84,7 @@
 
     </Component>
 
-    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" skip="True" completed="True">
+    <Component name="VehicleAttributeModels" read_from_table="vehicles_r" skip="False" completed="True">
       <DBTables>
         <Table table="households" key="houseid" order="1"/>
         <Table table="households_vehicles_count_r" key="houseid"/>
@@ -135,7 +135,7 @@
       </Model>
     </Component>
 
-    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="WorkEpisodes" read_from_table="workers_r" key="houseid,personid" skip="False" completed="True">
       <!-- TODO:Model Not Updated-->
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
@@ -157,7 +157,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivityEpisodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivityEpisodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -328,7 +328,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivity2Episodes1PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -499,7 +499,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivity2Episodes2PrismsWorkers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -671,7 +671,7 @@
       </Model>
     </Component>
 
-    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivityEpisodePrismsPreschoolers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -792,7 +792,7 @@
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
     </Component>
-    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="FixedActivityEpisodePrismsSchoolers" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="households" key="houseid" order="2"/>
@@ -935,7 +935,7 @@
       </Model>
     </Component>
 
-    <Component name="IdentifyFixedActivityVertices" read_from_table="schedule_r" write_to_table="persons_fixed_activity_vertices_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="IdentifyFixedActivityVertices" read_from_table="schedule_r" write_to_table="persons_fixed_activity_vertices_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_r" key="houseid,personid" order="1"/>
     	<Table table="persons_fixed_activity_vertices_r" key="houseid,personid"/>
@@ -962,7 +962,7 @@
      
     </Component>	
 
-    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="MorningVertex" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
 
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
@@ -1128,7 +1128,7 @@
         <Variable table="standard" var="one" coeff="0"/>
       </Model>
     </Component>
-    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="EveningVertex" read_from_table="schedule_r" key="houseid,personid" skip="False" completed="True">
 
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
@@ -1315,7 +1315,7 @@
     </Component>
 
 
-    <Component name="DailyPersonsStatus" read_from_table="persons" write_to_table="persons_daily_status_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="DailyPersonsStatus" read_from_table="persons" write_to_table="persons_daily_status_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -1509,7 +1509,7 @@
     </Component>	
 
 
-    <Component name="CleanDailyFixedActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="CleanDailyFixedActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_r" key="houseid,personid" order="1"/>
@@ -1549,7 +1549,7 @@
     </Component>	
 
 
-    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_cleanfixedactivityschedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ReconcileLongerTermSchedules" read_from_table="schedule_cleanfixedactivityschedule_r" write_to_table="schedule_ltrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_ltrec_r" key="houseid,personid"/>
     	<Table table="schedule_cleanfixedactivityschedule_r" key="houseid,personid" order="1"/>
@@ -1578,7 +1578,7 @@
      
     </Component>
 
-    <Component name="ChildDependencyTerminalAllocation" read_from_table="schedule_ltrec_r" write_to_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyTerminalAllocation" read_from_table="schedule_ltrec_r" write_to_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_ltrec_r" key="houseid,personid" order="1"/>
@@ -1620,7 +1620,7 @@
      
    </Component>	
 
-    <Component name="PersonsHistoryStartingValuesDependents" read_from_table="persons_history_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="PersonsHistoryStartingValuesDependents" read_from_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
@@ -1669,9 +1669,9 @@
 
 
     <ComponentList>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
-    <SubComponent name="PersonsHistory" read_from_table="schedule_allocterm_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <SubComponent name="PersonsHistory" read_from_table="schedule_allocterm_r" write_to_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_allocterm_r" key="houseid,personid" order="1"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
@@ -1734,7 +1734,7 @@
 
 
 
-    <SubComponent name="AfterSchoolActivities" read_from_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <SubComponent name="AfterSchoolActivities" read_from_table="schedule_allocterm_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid" order="2"/>
@@ -2291,7 +2291,7 @@
     </ComponentList>
 
 
-    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="AdjustPenultimateEpisode" read_from_table="schedule_allocterm_r" write_to_table="schedule_childrenlastprismadj_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
@@ -2299,7 +2299,7 @@
     	<Table table="schedule_childrenlastprismadj_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_allocterm_r" location_var="locationid" time_var="endtime"/>
@@ -2568,7 +2568,7 @@
     </Component>	
 
 
-    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="InsertAppropriateTravelEpisodes" read_from_table="schedule_childrenlastprismadj_r" write_to_table="schedule_childreninctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
@@ -2576,7 +2576,7 @@
     	<Table table="schedule_childreninctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>	
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
 	<Start table="schedule_childrenlastprismadj_r" location_var="locationid" time_var="endtime"/>
@@ -2829,7 +2829,7 @@
     </Component>	
 
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_cleanaggregateactivityschedule_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_childreninctravelrec_r" write_to_table="schedule_cleanaggregateactivityschedule_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_childreninctravelrec_r" key="houseid,personid" order="1"/>
@@ -2870,7 +2870,7 @@
 
 
 
-    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyAllocation" read_from_table="schedule_cleanaggregateactivityschedule_r" write_to_table="schedule_dailyallocrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_cleanaggregateactivityschedule_r" key="houseid,personid" order="1"/>
@@ -2910,14 +2910,14 @@
    </Component>	
 
 
-    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelStartAdj" read_from_table="schedule_dailyallocrec_r" write_to_table="schedule_inctravelrec_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="schedule_dailyallocrec_r" key="houseid,personid"/>
         <Table table="schedule_inctravelrec_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_dailyallocrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_dailyallocrec_r" location_var="locationid" time_var="starttime"/>
@@ -3141,14 +3141,14 @@
         <Variable table="persons" var="age" coeff="0"/>  	<!-- Dummy variable to call the persons table ... -->
       </Model>
     </Component>
-    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="FinalReconciliationOfActivityTravelEndAdj" read_from_table="schedule_inctravelrec_r" write_to_table="schedule_skeleton_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
         <Table table="persons" key="houseid,personid" order="1"/>
         <Table table="schedule_inctravelrec_r" key="houseid,personid"/>
         <Table table="schedule_skeleton_r" key="houseid,personid"/>
       </DBTables>
       <DeleteRecords value="False"/>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" origin_var="origin" destination_var="destination">
         <Start table="schedule_inctravelrec_r" location_var="locationid" time_var="endtime"/>
         <End table="schedule_inctravelrec_r" location_var="locationid" time_var="starttime"/>
@@ -3403,7 +3403,7 @@
       </Model>
     </Component>
 
-    <Component name="PersonsLocation" read_from_table="persons" write_to_table="persons_location_r" skip="True" completed="True">
+    <Component name="PersonsLocation" read_from_table="persons" write_to_table="persons_location_r" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="households" key="houseid"/>
@@ -3438,7 +3438,7 @@
       </Model>
    </Component>
 
-    <Component name="PersonsHistoryStartingValuesIndependent" read_from_table="persons_history_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="PersonsHistoryStartingValuesIndependent" read_from_table="persons_history_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons" key="houseid,personid" order="1"/>
     	<Table table="persons_history_r" key="houseid,personid"/>
@@ -3485,7 +3485,7 @@
    </Component>
 
 
-    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>

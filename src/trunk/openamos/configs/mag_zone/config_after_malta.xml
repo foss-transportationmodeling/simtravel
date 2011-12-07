@@ -124,7 +124,7 @@
     	<Table table="schedule_allocatedependent_r" key="houseid,personid"/>
 
       </DBTables>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -147,7 +147,7 @@
       <Model name="activitytype" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="activitytype"/>
 	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="-99"/>
+        <Variable table="trips_r" var="trippurpose" coeff="1"/>
       </Model>
       <Model name="starttime" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="starttime"/>
@@ -179,7 +179,7 @@
 
     </Component>
 
-    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
     	<Table table="schedule_allocatedependent_r" key="houseid,personid" order="1"/>
@@ -214,7 +214,7 @@
    </Component>	
 
 
-    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="True" completed="True">
+    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_purpose_r" key="tripid"/>
     	<Table table="schedule_full_r" key="houseid,personid" order="1"/>
@@ -320,7 +320,7 @@
     	<Table table="trips_r" key="tripid"/>
     	<Table table="gap_function_r" key="tripid"/>
       </DBTables>
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -403,7 +403,7 @@
 
     </Component>
 
-    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="True" write_to_loc="True">
+    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="True" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_before_r" key="gap_before"/>
@@ -420,7 +420,7 @@
 
     </Component>
 
-    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="True" write_to_loc="True">
+    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="True" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_after_r" key="gap_after"/>

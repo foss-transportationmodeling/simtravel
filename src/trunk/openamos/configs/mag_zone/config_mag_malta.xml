@@ -1331,7 +1331,7 @@
 	<DependentVariable var="locationid"/>
 	<FilterSet type="and"/>
 	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="101"/>
+	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
 	<Variance value="0"/>
         <Variable table="households" var="htaz" coeff="1"/>
       </Model>
@@ -1438,86 +1438,51 @@
         <Variable table="households,travel_skims" var="noc,tt_to" coeff=".00012078" interaction="True" repeat="tt_to"/>
       </Model>
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_from_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
-	<Start table="households" location_var="htaz"/>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to_loc" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_to_loc">
+	<Start table="households" location_var="st_locationid"/>
+	<End table="runtime" location_var="locationid"/>
+      </DynamicSpatialConstraints>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_from_loc" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_to_loc">
+	<Start table="households" location_var="locationid"/>
 	<End table="runtime" location_var="en_locationid"/>
       </DynamicSpatialConstraints>
 
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_home" origin_var="origin" destination_var="destination" after_model="locationid" before_model="tt_from">
-	<Start table="runtime" location_var="st_locationid"/>
-	<End table="households" location_var="htaz"/>
-      </DynamicSpatialConstraints>
 
-      <Model name="TTFrom" formulation="Regression" type="Linear" seed="1">
- 	<DependentVariable var="tt_from"/>
+      <Model name="TT To IH Episodes Recode" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="tt_to_loc"/>
 	<FilterSet type="and"/>
 	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
+ 	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="100"/>
+ 	<Filter table="runtime" var="st_activitytype" condition="less than equals" value="101"/>
+ 	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
  	<Variance value="0"/>
-        <Variable table="runtime" var="tt_from_home" coeff="1"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
-      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
+      <Model name="TT From IH To IH Episodes Recode" formulation="Regression" type="Linear" seed="1">
+ 	<DependentVariable var="tt_from_loc"/>
+	<FilterSet type="and"/>
+	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
+ 	<Filter table="runtime" var="activitytype" condition="equals" value="101"/>
+ 	<Filter table="runtime" var="en_activitytype" condition="greater than equals" value="100"/>
+ 	<Filter table="runtime" var="en_activitytype" condition="less than equals" value="101"/>
+ 	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
+      </Model>
+
+
+      <Model name="StartTime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="starttime"/>
 	<FilterSet type="and"/>
 	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
  	<Variance value="0"/>
         <Variable table="runtime" var="st_endtime" coeff="1"/>
+        <Variable table="runtime" var="tt_to_loc" coeff="1"/>
         <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
-      <Model name="StartTimeIHActs" formulation="Regression" type="Linear" seed="1">
- 	<DependentVariable var="starttime"/>
-	<FilterSet type="and"/>
-	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="activitytype" condition="greater than" value="400"/>
- 	<Variance value="0"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="runtime" var="tt_to" coeff="1"/>
-        <Variable table="standard" var="one" coeff="1"/>
-      </Model>
-
-
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
- 	<DependentVariable var="starttime"/>
-	<FilterSet type="and"/>
-	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_locationid" condition="equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
- 	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="travel_skims" var="tt_to" coeff="1"/>
-      </Model>
-
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
- 	<DependentVariable var="starttime"/>
-	<FilterSet type="and"/>
-	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
- 	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="travel_skims" var="tt_to" coeff="1"/>
-      </Model>
-
-
-      <Model name="StartTimeOHActs" formulation="Regression" type="Linear" seed="1">
- 	<DependentVariable var="starttime"/>
-	<FilterSet type="and"/>
-	<Filter table="persons_daily_status_r" var="dependency" condition="equals" value="0"/>
-	<Filter table="runtime" var="st_locationid" condition="not equals" valuetable="households" valuevar="htaz"/>
-	<Filter table="runtime" var="locationid" condition="equals" valuetable="households" valuevar="htaz"/>
- 	<Variance value="0"/>
-        <Variable table="standard" var="one" coeff="1"/>
-        <Variable table="runtime" var="st_endtime" coeff="1"/>
-        <Variable table="runtime" var="tt_home" coeff="1"/>
-      </Model>
 
       <Model name="EndTime" formulation="Regression" type="Linear" seed="1">
  	<DependentVariable var="endtime"/>
@@ -1562,7 +1527,7 @@
 	<DependentVariable var="adjustactivitytravelind"/>
 	<FilterSet type="and"/>
 	<Filter table="runtime" var="locationid" condition="not equals" value="0"/>
-	<Filter table="runtime" var="prismduration" condition="greater than" value="30"/>
+	<Filter table="runtime" var="prismduration" condition="greater than" value="15"/>
 	<Filter table="runtime" var="endtime" condition="less than" valuetable="runtime" valuevar="en_starttime" percentage_threshold="" absolute_threshold=""/>
 	<Filter table="runtime" var="activitytravelend" condition="less than" valuetable="runtime" valuevar="en_starttime"/>
 	<Variance value="0"/>
@@ -3397,7 +3362,7 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
