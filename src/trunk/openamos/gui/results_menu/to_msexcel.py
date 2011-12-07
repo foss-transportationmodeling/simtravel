@@ -363,6 +363,27 @@ class Export_Outputs(QDialog):
                
         return temp
 
+    def per_quary(self,nhts):
+        wrk = self.wrk_cond()
+        if wrk == "0":
+            wrk = "and (p.wrkdailystatus = 0 or p.wrkdailystatus is null)"
+        elif wrk == "1":
+            wrk = "and p.wrkdailystatus = 1"
+        else:
+            wrk = ""
+        if not nhts:
+            quary = "(select p.houseid, p.personid, p.age, p.wrkdailystatus from"
+            quary = "%s (select ps.houseid, ps.personid, ps.age, w.wrkdailystatus from persons as ps"%(quary)
+            quary = "%s left join persons_daily_status_r as w on ps.houseid = w.houseid and ps.personid = w.personid)"%(quary)
+            quary = "%s as p where %s %s) as b"%(quary,self.age_cond(False),wrk)
+        else:
+            quary = "(select p.houseid, p.personid, p.r_age, p.wrkdailystatus, p.wtperfin from"
+            quary = "%s (select ps.houseid, ps.personid, ps.r_age, ps.wtperfin, w.wrkdailystatus from persons_nhts as ps"%(quary)
+            quary = "%s left join persons_daily_status_nhts as w on ps.houseid = w.houseid and ps.personid = w.personid)"%(quary)
+            quary = "%s as p where %s %s) as b"%(quary,self.age_cond(True),wrk)
+
+        return quary
+
 
     def sql_quary1(self,wsheet,column,nhts,cindex):
         
@@ -411,14 +432,17 @@ class Export_Outputs(QDialog):
                 sql = "%s(select houseid, personid%s from %s where %s >= %d and %s < %d order by houseid, personid) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1])
             else:
                 sql = "%s(select houseid, personid%s from %s where %s = %d) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0])
-                
-            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
-            wrk = self.wrk_cond()
-            if wrk != "":
-                sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
-                sql = "%s where a.houseid = b.houseid and a.personid = b.personid and a.houseid = c.houseid and a.personid = c.personid"%(sql)
-            else:
-                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
+
+            sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))               
+#            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
+#            wrk = self.wrk_cond()
+#            if wrk != "":
+#                if wrk == "0":
+#                    wrk = "0 or wrkdailystatus is null"
+#                sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
+#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid and a.houseid = c.houseid and a.personid = c.personid"%(sql)
+#            else:
+#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
             
             print sql
             self.new_obj.cursor.execute(sql)
@@ -480,11 +504,16 @@ class Export_Outputs(QDialog):
         
         for key in ykeys:
             #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2],self.wrk_cond())
-            sql = "select b.freq, count(*) from"
-            if self.wrk_cond() <> "":
-                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),self.wrk_cond())
-            else:
-                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
+            sql = "select a.freq, count(*) from %s"%(self.per_quary(False))
+#            wk = self.wrk_cond()
+#            if wk <> "":
+#                if wk == "0":
+#                    wk = "(d.wrkdailystatus = 0 or d.wrkdailystatus is null)"
+#                else:
+#                    wk = "d.wrkdailystatus = 1"
+#                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),wk)
+#            else:
+#                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
                 
             catecode = cond[key]
             if len(catecode) == 2:   
@@ -492,8 +521,8 @@ class Export_Outputs(QDialog):
             else:
                 where = "where %s = %d"%(purpose,catecode[0])
                 
-            sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as b"%(sql,tnames[0],where)  
-            sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
+            sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
+            sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
             print sql
              
             self.new_obj.cursor.execute(sql)
@@ -547,11 +576,16 @@ class Export_Outputs(QDialog):
             
             for key in ykeys:
                 #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2])
-                sql = "select b.freq, sum(wtperfin) from"
-                if self.wrk_cond() <> "":
-                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and d.wrkdailystatus = %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True),self.wrk_cond())
-                else:
-                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True))
+                sql = "select a.freq, sum(wtperfin) from %s"%(self.per_quary(True))
+#                wk = self.wrk_cond()
+#                if wk <> "":
+#                    if wk == "0":
+#                        wk = "(d.wrkdailystatus = 0 or d.wrkdailystatus is null)"
+#                    else:
+#                        wk = "d.wrkdailystatus = 1"
+#                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True),wk)
+#                else:
+#                    sql = "%s (select p.houseid, p.personid, p.wtperfin from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(True))
                     
                 catecode = cond[key]
                 if len(catecode) == 2:   
@@ -559,8 +593,8 @@ class Export_Outputs(QDialog):
                 else:
                     where = "where %s = %d"%(purpose,catecode[0])
                 
-                sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as b"%(sql,tnames[0],where)  
-                sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
+                sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
+                sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
                 print sql
                  
                 self.new_obj.cursor.execute(sql)
@@ -778,14 +812,17 @@ class Export_Outputs(QDialog):
                 sql = "%s(select houseid, personid, %s%s from %s where %s >= %d and %s < %d order by houseid, personid) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1])
             else:
                 sql = "%s(select houseid, personid, %s%s from %s where %s = %d) as a" %(sql,acttype,nhts_var,tnames[0],column,lowhigh[0])
-            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
-            
-            wrk = self.wrk_cond()
-            if wrk != "":
-                sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
-                sql = "%s where a.houseid = b.houseid and a.personid = b.personid and a.houseid = c.houseid and a.personid = c.personid"%(sql)
-            else:
-                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
+            sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))
+#            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
+#            
+#            wrk = self.wrk_cond()
+#            if wrk != "":
+#                if wrk == "0":
+#                    wrk = "0 or wrkdailystatus is null"
+#                sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
+#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid and a.houseid = c.houseid and a.personid = c.personid"%(sql)
+#            else:
+#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
             sql = "%s group by a.%s order by a.%s"%(sql,acttype,acttype)
             
             print sql
@@ -814,13 +851,17 @@ class Export_Outputs(QDialog):
 #            for i in range(len(tnames)):
 #                tnames[i] = tnames[i].replace("_r","") + "_nhts"
                 
-        wrk = self.wrk_cond()
-        if wrk == "":
-            table = "%s as p"%(tnames[1])
-            condition = ""
-        else:
-            table = "%s as p, %s as w"%(tnames[1],tnames[2])
-            condition = "p.houseid = w.houseid and p.personid = w.personid and w.wrkdailystatus = %s and "%(wrk)
+#        wrk = self.wrk_cond()
+#        if wrk == "":
+#            table = "%s as p"%(tnames[1])
+#            condition = ""
+#        else:
+#            if wrk == "0":
+#                wrk = "(w.wrkdailystatus = 0 or w.wrkdailystatus is null)"
+#            else:
+#                wrk = "w.wrkdailystatus = 1"
+#            table = "%s as p, %s as w"%(tnames[1],tnames[2])
+#            condition = "p.houseid = w.houseid and p.personid = w.personid and %s and "%(wrk)
         
         nhts_var = ""
         if nhts:
@@ -829,10 +870,11 @@ class Export_Outputs(QDialog):
         else:
             count = "count(*)"
             
-        sql = "select b.freq, %s from (select p.houseid, p.personid%s from %s"%(count,nhts_var,table)
-        sql = "%s where %sp.%s) as a left join "%(sql,condition,self.age_cond(nhts))
-        sql = "%s (select houseid, personid, count(*) as freq from %s group by houseid, personid) as b "%(sql,tnames[0])
-        sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by b.freq order by b.freq"%(sql)
+#        sql = "select a.freq, %s from (select p.houseid, p.personid%s from %s"%(count,nhts_var,table)
+#        sql = "%s where %sp.%s) as b left join "%(sql,condition,self.age_cond(nhts))
+        sql = "select a.freq, %s from %s left join"%(count,self.per_quary(nhts))
+        sql = "%s (select houseid, personid, count(*) as freq from %s group by houseid, personid) as a "%(sql,tnames[0])
+        sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
 
         
         print sql
@@ -934,11 +976,11 @@ class Export_Outputs(QDialog):
 
     def age_cond(self,nhts):
         if self.pptype.currentIndex() <= 1:
-            age = "age >= 18"
+            age = "p.age >= 18"
         elif self.pptype.currentIndex() == 2:
-            age = "age < 18 and age >= 5"
+            age = "p.age < 18 and p.age >= 5"
         else:
-            age = "age < 5"
+            age = "p.age < 5"
             
         if nhts:
             age = age.replace("age", "r_age")
