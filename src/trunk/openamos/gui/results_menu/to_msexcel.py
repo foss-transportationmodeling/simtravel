@@ -246,10 +246,10 @@ class Export_Outputs(QDialog):
                     
                     wsheet = wb.create_sheet()
                     if i == 13:
-                        column = "starttime"
+                        column = "endtime"
                         wsheet.title = "EarliestStartDay"
                     else:
-                        column = "endtime"
+                        column = "starttime"
                         wsheet.title = "LatestEndDay"
                     
                     seri= []
@@ -352,14 +352,14 @@ class Export_Outputs(QDialog):
 
     def quary1(self,column,nhts):
         
-        if nhts and column == "starttime":
-            temp = "(select houseid, personid, min(%s) as %s, min(wttrdfin) as wttrdfin from trips_nhts group by houseid, personid) as d"%(column,column)
-        elif nhts and column == "endtime":
-            temp = "(select houseid, personid, max(%s) as %s, min(wttrdfin) as wttrdfin from trips_nhts group by houseid, personid) as d"%(column,column)
-        elif not nhts and column == "starttime":
-            temp = "(select houseid, personid, min(%s) as %s from trips_purpose_r group by houseid, personid) as d"%(column,column)
+        if nhts and column == "endtime":
+            temp = "(select houseid, personid, min(%s) as %s from schedule_nhts where activitytype = 100 group by houseid, personid) as d"%(column,column)
+        elif nhts and column == "starttime":
+            temp = "(select houseid, personid, max(%s) as %s from schedule_nhts where activitytype = 100 group by houseid, personid) as d"%(column,column)
+        elif not nhts and column == "endtime":
+            temp = "(select houseid, personid, min(%s) as %s from schedule_full_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
         else:
-            temp = "(select houseid, personid, max(%s) as %s from trips_purpose_r group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, max(%s) as %s from schedule_full_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
                
         return temp
 
@@ -390,12 +390,12 @@ class Export_Outputs(QDialog):
         nhts_var = ""
         per_wt = ""
         if nhts:# and column <> "dweltime":
-            if column <> "dweltime":
-                count = "sum(a.wttrdfin)"
-                nhts_var = ", wttrdfin"
-            else:
+            if column == "dweltime" or cindex >= 13:
                 count = "sum(b.wtperfin)"
                 per_wt = ", wtperfin"
+            else:
+                count = "sum(a.wttrdfin)"
+                nhts_var = ", wttrdfin" 
         else:
             count = "count(*)"
             
