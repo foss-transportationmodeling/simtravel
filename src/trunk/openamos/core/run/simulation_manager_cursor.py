@@ -162,7 +162,7 @@ class SimulationManager(object):
 	    oldFile = os.path.join(oldFileFolder, "%s.dat" %skimsTableName)
 	    dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
 	    print 'deviation - ', dev
-	    fSkimsConv.write('%.4f\n' %dev)
+	    fSkimsConv.write('%s,%.4f\n' %(skimsTable,dev))
 	fSkimsConv.close()
 	
 
