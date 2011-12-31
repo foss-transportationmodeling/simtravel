@@ -25,7 +25,8 @@ class ConfigObject(object):
             
         # Approach to the default configuration file
         parser = etree.XMLParser(remove_blank_text=True)
-        self.default = etree.parse('../configs/config_mag_full.xml',parser)        
+	pathDef = os.path.realpath('/home/karthik/simtravel/openamos/configs/config_mag_full.xml')
+        self.default = etree.parse(pathDef,parser)        
 
 
     def getConfigElement(self, elt, prop='text' ):
