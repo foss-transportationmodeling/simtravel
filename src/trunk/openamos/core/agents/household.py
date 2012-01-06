@@ -1800,12 +1800,162 @@ class Household(object):
 
 	    depPerson._check_for_acts_between_trip_vertices()
 
+    def extract_tripattributes(self, seed):
+	for pid in self.indepPersonIds:
+	    person = self.persons[pid]
+	    person.print_activity_list()
+
+	    self.extract_tours(person)
+
+ 
+    def extract_tours(self, person):
+	hbAnchors = []
+	wbAnchors = []
+
+
+	print 'Number of acts before - ', len(person.listOfActivityEpisodes)
+	tempList = []
+
+	hbtStopsList = []
+	hbtOccuList = []
+	tTypeList = []
+	start = False
+	tType = 0
+	maxDurAct = 0
+
+	stStartTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	tempList.append((stAct.startTime, stAct))
+	for i in range(len(person.listOfActivityEpisodes)):
+	    enStartTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+	    tempList.append((enAct.startTime, enAct))
+		
+	    if enAct.actType == 598:
+		continue
+
+	    # Firt home Anchor
+	    if ((stAct.actType >= 100 and stAct.actType <= 199) and 
+		 (stAct.startTime == 0) and
+		 (enAct.actType == 600) and
+		 (stAct.location == enAct.location)):
+		print 'St Anchor', stAct
+		hbAnchors.append(stAct)
+		stops = -1
+		occuList = []
+		tType = 0
+		maxDurAct = 0
+		start = True	    
+	    # Start Anchor
+	    elif ((stAct.actType >= 100 and stAct.actType <= 199) and 
+		(enAct.location == -99 and stAct.location <> -99)):
+		print 'St Anchor', stAct
+		hbAnchors.append(stAct)
+		stops = -1
+		occuList = []
+		start = True	    
+	
+	    if enAct.location == -99:
+	    	stops += 1
+		parsedIds = self.parse_personids(enAct.dependentPersonId)
+		occuList.append(len(parsedIds) + 1)
+	    	#print 'act - ', enAct, 'stopCount-', stops, 'occuList-', occuList, 'Mean occupancy - ', (array(occuList).sum())/float(array(occuList).size)
+
+	    if enAct.location <> -99 and enAct.actType >= 200:
+		print '    Acts on tour - ', enAct.actType, enAct.duration
+		if enAct.duration > maxDurAct:
+		    tType = copy.deepcopy(enAct.actType)
+		    maxDurAct = copy.deepcopy(enAct.duration)
+		elif enAct.duration == 0:
+		    tType = copy.deepcopy(stAct.actType)
+		    maxDurAct = copy.deepcopy(stAct.duration)
+		    
+
+	    if ((enAct.actType >= 100 and enAct.actType <= 199) and enAct.location <> -99 and start):
+		print 'En Anchor', enAct
+		hbAnchors.append(enAct)
+		hbtStopsList.append(stops)
+		hbtOccuList.append((array(occuList).sum())/float(array(occuList).size))
+		tTypeList.append(tType)
+		start = False
+		tType = 0
+		maxDurAct = 0
+
+	    stAct = enAct
+
+	print 'Number of hb tours - %d' %(len(hbAnchors) / 2)
+	print '    Number of stops for each of the tours - ', hbtStopsList
+	print '    Occupancy for each of the tours - ', hbtOccuList
+	print '    Tour type of the tours -', tTypeList
+
+	if len(hbAnchors) % 2 == 1:
+	    raw_input('Odd number of anchors for HB tours')
+
+	hp.heapify(tempList)
+	person.listOfActivityEpisodes = tempList
+
+	tempList = []
+	wrkstart = False
+	stStartTime, stAct = hp.heappop(person.listOfActivityEpisodes)
+	tempList.append((stAct.startTime, stAct))
+	for i in range(len(person.listOfActivityEpisodes)):
+	    enStartTime, enAct = hp.heappop(person.listOfActivityEpisodes)
+	    tempList.append((enAct.startTime, enAct))
+		
+	    if enAct.actType == 598:
+		continue
+
+	    # Firt home Anchor
+	    if ((stAct.actType >= 200 and stAct.actType <= 299) and 
+		(enAct.location == -99 and stAct.location <> -99)):
+		print 'St Work Anchor', stAct
+		wbAnchors.append(stAct)
+		stops = -1
+		occuList = []
+		wrkstart = True	    
+
+	    if enAct.location == -99:
+	    	stops += 1
+
+	    if ((enAct.actType >= 200 and enAct.actType <= 299) and enAct.location <> -99 and wrkstart):
+		print 'En Work Anchor', enAct
+		wbAnchors.append(enAct)
+		wrkstart = False
+
+	print '\nNumber of wb tours - %d' %(len(wbAnchors) / 2)
+	if len(wbAnchors) >= 1:
+	    raw_input('Wb tours - ')
+
+	#if len(wbAnchors) % 2 == 1:
+	#    raw_input('Odd number of anchors for WB tours')
+
+	
+
+    def extract_hbtours(self, person):
+	hbTours = []
+
+	stops = -1
+	occupancy = 0
+	startTime = person.firstEpisode.endTime
+    	stTime, act = hp.heappop(person.listOfActivityEpisodes)
+	for i in range(len(person.listOfActivityEpisodes)):
+	    stTime, act = hp.heappop(person.listOfActivityEpisodes)
+	
+	   
+	    if act.location == -99:
+	    	stops = stops + 1
+		print 'TRIP -', act
+	    else:
+		print 'ACTVITY - ', act
+	    if (act.actType == 100 or act.actType == 101) and (act.location <> -99):
+		raw_input ('HB Tour Identified, stops - %s'%stops)
+		stops = -1
+		occupancy = 0
+
+		
 
     def fix_trippurpose(self, seed):
 	#print 'Post processing schedules for hid - ', self.hid
         #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         #print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
-
 
 	if len(self.dependencyPersonIds)  == 0:
 	    self.fix_trippurpose_nodependents()
@@ -1814,6 +1964,7 @@ class Household(object):
 
 
     def fix_trippurpose_nodependents(self):
+	return
 	for pid in self.indepPersonIds:
 	    person = self.persons[pid]
 	    #print 'Before fixing trip purpose - '
@@ -1834,12 +1985,26 @@ class Household(object):
 	    #person.print_activity_list()
 
     def fix_trippurpose_withdependents(self):
-	for pid in self.indepPersonIds:
+	for pid in self.persons.keys():
 	    person = self.persons[pid]
 	    #print 'Before fixing trip purpose with dependents - '
 	    #person.print_activity_list()
 
-	
+	    tempAnchorsList = []
+	    tempList = []
+	    for i in range(len(person.listOfActivityEpisodes)):
+		actTime, act = hp.heappop(person.listOfActivityEpisodes)		
+		if act.actType == 598:
+		    tempAnchorsList.append(act)
+		else:
+		    if act.actType == 600 and act.location <> -99:
+			person.move_start_end(act, -2, removeAdd=False)
+		    tempList.append((act.startTime, act))
+		
+
+	    hp.heapify(tempList)
+	    person.listOfActivityEpisodes = tempList
+
 	    # Change unnecessary anchors
 
 	    tempList = []
@@ -1847,11 +2012,18 @@ class Household(object):
 	    tempList.append((stAct.startTime, stAct))
 	    for i in range(len(person.listOfActivityEpisodes)):
 		enActTime, enAct = hp.heappop(person.listOfActivityEpisodes)
-		if stAct.actType <> -99 and enAct.actType == 600:
+		if stAct.location <> -99 and (enAct.actType == 600 and enAct.location <> -99):
 		    enAct.actType = 650
 		    #print '\tPickup altered - ', enAct
 		
-		if stAct.actType == 601 and (enAct.actType >= 450 and enAct.actType <= 500):
+		if (stAct.actType == 601 and 
+		    ((enAct.actType >= 450 and enAct.actType <= 500) or 
+		     (enAct.actType == 151 or enAct.actType == 100) or
+		     (stAct.location == enAct.location and enAct.actType == 101) or
+		     (person.child_dependency == 1 and enAct.actType >= 400 and enAct.actType <= 450) or
+		     (person.child_dependency == 1 and enAct.actType <= 101 )
+		    )
+		   ):
 		    stAct.actType = 651
 		    #print '\tDropoff altered - ', enAct
 
@@ -1860,6 +2032,10 @@ class Household(object):
 
 	    hp.heapify(tempList)
 	    person.listOfActivityEpisodes = tempList
+
+	    #print 'Intermediate with dependents- '
+	    #person.print_activity_list()
+
 
 	    tempList = []
 	    stActTime, stAct = hp.heappop(person.listOfActivityEpisodes)
@@ -1870,17 +2046,20 @@ class Household(object):
 		if enAct.actType >= 650:
 		    #print '\tAltered pickup/dropoff removed - ', enAct
 		    continue
-		if stAct.actType == -99:
+		if stAct.location == -99:
 		    stAct.actType = copy.deepcopy(enAct.actType)
+
 		tempList.append((enAct.startTime, enAct))			    
 		stAct = enAct
 
 	    hp.heapify(tempList)
 	    person.listOfActivityEpisodes = tempList
 
+	    person.add_episodes(tempAnchorsList)
+	
 	    #print 'After fixing trip purpose with dependents- '
 	    #person.print_activity_list()
-
+	    #raw_input()
 
 
 
@@ -2544,6 +2723,7 @@ class Household(object):
 											   # acts with least
 											   # conflict
 
+	pid = None
         if pid is None:
 	    self.update_depPersonId_for_terminal_episode(start, depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
@@ -2765,7 +2945,7 @@ class Household(object):
                                                 self.indepPersonIds)
 
 
-
+	pid = None
         if pid is None:
             self.update_depPersonId(act, depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
@@ -2901,7 +3081,7 @@ class Household(object):
         pid = self.personId_with_least_conflict(depPersonId, 
                                                 [dummyActPickUp, dummyActDropOff], 
                                                 self.indepPersonIds)
-
+	pid = None
         if pid is None:
 	    self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, 99)
             #print "Exception, --There are no independent adults in the household for hid - %s--" %(self.hid)
@@ -3148,7 +3328,7 @@ class Household(object):
         pid = self.personId_with_least_conflict(depPersonId, 
                                                 actIncChauffering, 
                                                 self.indepPersonIds)
-
+	pid = None
         if pid is None:
             self.add_activity_update_depPersonId(chaufferingEpisodes, depPersonId, 99)
 	    self.update_depPersonId(actIncChauffering, depPersonId, 99)
@@ -3283,7 +3463,7 @@ class Household(object):
         pid = self.personId_with_least_conflict(depPersonId, 
                                                 [dummyActPickUp, dummyActDropOff, endActToNonDependent], 
                                                 self.indepPersonIds)
-
+	pid = None
         if pid is None:
   	    self.add_activity_update_depPersonId([dummyActPickUp, dummyActDropOff], depPersonId, 99)
 	    self.update_depPersonId([dummyActPickUp, dummyActDropOff, 
