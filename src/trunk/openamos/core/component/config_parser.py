@@ -601,6 +601,8 @@ class ConfigParser(object):
         model_formulation = model_element.attrib['formulation']
 	#print "\tParsing model - %s, formulation - %s " %(model_element.get('name'), model_element.get('formulation'))
         #print model_formulation
+	#raw_input()
+
         
         if model_formulation == 'Regression':
             self.create_regression_object(model_element, projectSeed)
@@ -657,7 +659,7 @@ class ConfigParser(object):
 	if model_formulation == 'Trip Occupant Processing':
             self.create_trip_occupant_processing_object(model_element, projectSeed)	    
 
-	if model_formulation == 'Persons on Trip Arrival Processing':
+	if model_formulation == 'Persons On Trip Arrival Processing':
 	    self.create_persons_arrived_processing_object(model_element, projectSeed)
 
 	if model_formulation == 'Arrival Time Schedule Adjustment':
@@ -1898,7 +1900,6 @@ class ConfigParser(object):
 
 
 
-
     def create_trip_occupant_processing_object(self, model_element, projectSeed):
         variable_list = []
         
@@ -2060,7 +2061,28 @@ class ConfigParser(object):
         trpDepPersIdNameParsed = self.return_table_var(trpDepPersIdName_element)
         variable_list.append(trpDepPersIdNameParsed)
 
-	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1])
+
+        tripCountName_element = trip_arrived_pers_attribs_element.find('TripCountName')
+        tripCountNameParsed = self.return_table_var(tripCountName_element)
+        variable_list.append(tripCountNameParsed)
+
+        endTripCountName_element = trip_arrived_pers_attribs_element.find('EndTripCountName')	
+	if endTripCountName_element is not None:
+       	    endTripCountNameParsed = self.return_table_var(endTripCountName_element)
+            variable_list.append(endTripCountNameParsed)
+	else:
+	    endTripCountNameParsed = (None, None)
+
+
+        actDepPersIdName_element = trip_arrived_pers_attribs_element.find('ActDependentPersonIdName')
+        actDepPersIdNameParsed = self.return_table_var(actDepPersIdName_element)
+        variable_list.append(actDepPersIdNameParsed)
+
+
+	personsArrivedSpec = PersonsArrivedAttributes(trpDepPersIdNameParsed[1],
+						      tripCountNameParsed[1],
+						      endTripCountNameParsed[1],
+						      actDepPersIdNameParsed[1])
 
         self.component_variable_list = self.component_variable_list + variable_list
 
