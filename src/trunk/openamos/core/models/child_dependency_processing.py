@@ -108,8 +108,8 @@ class ChildDependencyProcessing(Model):
         self.create_indices(data)
         self.create_col_numbers(data._colnames)
 
-	if self.childDepProcessingType == 'Dummy':
-	    return data
+	#if self.childDepProcessingType == 'Dummy':
+	#    return data
 
         for hhldIndex in self.hhldIndicesOfPersons:
 	    ti = time.time()
@@ -119,8 +119,8 @@ class ChildDependencyProcessing(Model):
             persIndicesForActsForHhld = self.personIndicesOfActs[firstPersonRec:
                                                                      lastPersonRec,
                                                                  :]
-	    #if hhldIndex[0] not in [138659, 78626, 149205, 163458, 87803, 57421, 51500, 164686, 15767, 
-	    #			    22365, 127012, 10859, 107433, 133988, 66482, 107433, 9277]:
+	    #if hhldIndex[0] not in [8843,20008,20440,30985,48365,54850,60085,64006,68037,73093,77192,84903,84963]:
+		# 1047
 	    #	continue
             householdObject = Household(hhldIndex[0])
 
@@ -144,7 +144,10 @@ class ChildDependencyProcessing(Model):
 		householdObject.lineup_activities(seed)
 	    elif self.childDepProcessingType == 'Fix Trip Purpose':
 		householdObject.fix_trippurpose(seed)
-		#raw_input('fixing trip purpose')
+	    elif self.childDepProcessingType == 'Extract Tour Attributes':
+		householdObject.extract_tripattributes(seed)
+
+		#raw_input('extract tour attributes')
 	
 		pass
 
