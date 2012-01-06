@@ -131,42 +131,8 @@ class Export_Outputs(QDialog):
         filename = str(self.xlsname.text())
         sitems = self.resultchoice.selectedItems()
         if filename <> "" and len(sitems) > 0:
-            
-            
-#        excel = win32com.client.Dispatch("Excel.Application")
-#        book = excel.Workbooks.Add()
-#        sheet = book.Worksheets(1)
-#        sheet.Range("A1").Value = "Hello World!"
-#        sheet.Range("A2").Value = str(Application.SIFilter(None, c.siObjectFilter))
-#        book.SaveAs("c:\myBook.xls")
-#         
-#        sheet = None
-#        book = None
-#        excel.Quit()
-#        excel = None 
-
-                    #wsheet = wb.add_sheet(columns[i])  #xlwt code
-#                    win32com code
-#                    wsheet = wb.Worksheets.Add()
-#                    wsheet.Name = str(columns[i])                        
-#                    wb.Charts.Add()
-#                    wb.ActiveChart.ChartType = 0x33
-#                    wb.ActiveChart.SetSourceData(Source=wb.Sheets(str(columns[i])).Range(range("C3:C20"),range("G3:G20")))
-#                    wb.ActiveChart.Location(Where = 0x2, Name=str(columns[i]))
-
-#            win32com code
-#            wsheet.Cells(i+3,j).Value = str(err1[i])
-#            wsheet.Cells(i+3,j+1).Value = long(err2[i])
-#            wsheet.Cells(i+3,j+2).Value = percent
-
-#            xlwt code
-#            wsheet.write(i+2,j,str(err1[i]))
-#            wsheet.write(i+2,j+1,long(err2[i]))
-#            wsheet.write(i+2,j+2,percent)
-
         
             wb = Workbook()
-            
             columns = ["starttime","endtime","duration","trippurpose","starttime","endtime","duration","","dweltime","dweltime"]
             for i in range(self.resultchoice.count()):
                 item = self.resultchoice.item(i)
@@ -242,7 +208,7 @@ class Export_Outputs(QDialog):
                     seri = self.count_by_purpose(False,wsheet)
                     self.call_chart(wsheet,seri)
                     
-                elif item.isSelected() and i >= 13:
+                elif item.isSelected() and (i >= 13 and i < 15):
                     
                     wsheet = wb.create_sheet()
                     if i == 13:
@@ -257,6 +223,21 @@ class Export_Outputs(QDialog):
                     if self.isNHTS:
                         seri.append(self.sql_quary1(wsheet,column,True,i))
                         self.call_chart(wsheet,seri)
+
+                elif item.isSelected() and i >= 15:
+ 
+                    wsheet = wb.create_sheet()
+                    if i == 15:
+                        isTrip = True
+                        wsheet.title = "TotalTimebyPurpose"
+                    else:
+                        isTrip = False
+                        wsheet.title = "TotalTimebyActivity"
+                    self.sql_query4(wsheet,False,isTrip)
+                    if self.isNHTS:
+                        self.sql_query4(wsheet,True,isTrip)
+
+                    
 
             wb.save(os.path.realpath(filename))
 
@@ -934,18 +915,69 @@ class Export_Outputs(QDialog):
             location = [-1]
             
         return location               
-                        
-#        for i in range(len(err1)):
-#            if total > 0.0:
-#                percent = round(100*float(err2[i])/total,2)
-#            else:
-#                percent = 0.0
-#                
-#            wsheet.write(i+2,j,str(err1[i]))
-#            wsheet.write(i+2,j+1,long(err2[i]))
-#            wsheet.write(i+2,j+2,percent)
+    
 
+    def sql_query4(self,wsheet,nhts,istrip):
+
+        if istrip:
+            acttype = "trippurpose"
+        else:
+            acttype = "activitytype"
+
+        tnames = self.tables(istrip)            
+        if nhts:
+            count = "sum(wtperfin)"
+            self.table_name(tnames)
+            columni = 6
+            titleLabel = "NHTS"
+        else:
+            count = "count(*)"
+            columni = 2
+            titleLabel = "OpenAmos"
+
+        labels = self.trip_labels("trippurpose")
+        cond = self.time_categroy("trippurpose")
+        keys = cond.keys()
+        keys.sort()
+        keys.pop(0)
+
+        for key in keys:        
+            lowhigh = cond[key]
+            if lowhigh[0] == 101:
+                lowhigh[0] = 100
+                labels[key] = "Home"
+        
+            sql = "select a.duration, %s, a.duration * %s from" %(count,count)
+            sql = "%s %s left join (select houseid, personid, sum(duration) as duration from %s" %(sql,self.per_quary(nhts), tnames[0])
+            if len(lowhigh) > 1:
+                sql = "%s where %s >= %d and %s < %d and duration >= 0 group by houseid, personid)" %(sql,acttype,lowhigh[0],acttype,lowhigh[1])
+            else:
+                sql = "%s where %s = %d and duration >= 0 group by houseid, personid)" %(sql,acttype,lowhigh[0])
+            sql = "%s as a on a.houseid = b.houseid and a.personid = b.personid group by a.duration order by a.duration" %(sql)
+
+            print sql
+
+            wsheet.cell(row=1,column=columni).value = titleLabel
+            wsheet.cell(row=2,column=columni).value = str(labels[key])
+            wsheet.cell(row=3,column=columni).value = "Time(min)"
+            wsheet.cell(row=3,column=columni+1).value = "#Persons"
+            wsheet.cell(row=3,column=columni+2).value = "Total(min)"
             
+            rowi= 4
+            self.new_obj.cursor.execute(sql)
+            rows = self.new_obj.cursor.fetchall()
+            for row in rows:
+                if row[0] != None:
+                    wsheet.cell(row=rowi,column=columni).value = int(row[0])
+                    wsheet.cell(row=rowi,column=columni+1).value = long(row[1])
+                    wsheet.cell(row=rowi,column=columni+2).value = long(row[2])
+                else:
+                    wsheet.cell(row=rowi,column=columni).value = 0
+                    wsheet.cell(row=rowi,column=columni+1).value = long(row[1])
+                    wsheet.cell(row=rowi,column=columni+2).value = 0
+                rowi += 1
+
+            columni += 8
 
 
     def purpose_index(self, key):
@@ -1084,7 +1116,8 @@ class Export_Outputs(QDialog):
     def items(self):
         vars = ["trip starttime","trip endtime","trip duration","trip purpose","trip starttime by purpose",
                 "trip endtime by purpose","trip duration by purpose","trip episode rate","dwell time","dwell time by activity",
-                "trip rate by purpose","activity rate","activity rate by activity","earliest start of day","latest end of day"]
+                "trip rate by purpose","activity rate","activity rate by activity","earliest start of day","latest end of day",
+                "average trip duration","average dwell time"]
         return vars
     
     def tnames(self,wsheet,ind):
