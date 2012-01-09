@@ -383,8 +383,10 @@ class Export_Outputs(QDialog):
         if column == "dweltime":
             column = "duration"
             tnames = self.tables(False)
+            remove598 = "and not activitytype = 598 "
         else:
             tnames = self.tables(True)
+            remove598 = ""
                 
         if nhts:
             self.table_name(tnames)
@@ -410,20 +412,12 @@ class Export_Outputs(QDialog):
             lowhigh = cond[key]
             sql = "select %s from "%(count)
             if len(lowhigh) > 1:
-                sql = "%s(select houseid, personid%s from %s where %s >= %d and %s < %d order by houseid, personid) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1])
+                sql = "%s(select houseid, personid%s from %s where %s >= %d and %s < %d %sorder by houseid, personid) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0],column,lowhigh[1],remove598)
             else:
-                sql = "%s(select houseid, personid%s from %s where %s = %d) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0])
+                sql = "%s(select houseid, personid%s from %s where %s = %d %sorder by houseid, personid) as a" %(sql,nhts_var,tnames[0],column,lowhigh[0],remove598)
 
             sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))               
-#            sql = "%s, (select houseid, personid%s from %s where %s order by houseid, personid) as b"%(sql,per_wt,tnames[1],self.age_cond(nhts))
-#            wrk = self.wrk_cond()
-#            if wrk != "":
-#                if wrk == "0":
-#                    wrk = "0 or wrkdailystatus is null"
-#                sql = "%s, (select * from %s where wrkdailystatus = %s order by houseid, personid) as c"%(sql,tnames[2],wrk)
-#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid and a.houseid = c.houseid and a.personid = c.personid"%(sql)
-#            else:
-#                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
+
             
             print sql
             self.new_obj.cursor.execute(sql)
@@ -484,18 +478,8 @@ class Export_Outputs(QDialog):
         cumulate = list(np.zeros(len(ykeys)))
         
         for key in ykeys:
-            #wk = "(select * from %s order by houseid, personid) as d"%(tnames[2],self.wrk_cond())
-            sql = "select a.freq, count(*) from %s"%(self.per_quary(False))
-#            wk = self.wrk_cond()
-#            if wk <> "":
-#                if wk == "0":
-#                    wk = "(d.wrkdailystatus = 0 or d.wrkdailystatus is null)"
-#                else:
-#                    wk = "d.wrkdailystatus = 1"
-#                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False),wk)
-#            else:
-#                sql = "%s (select p.houseid, p.personid from %s as p, %s as d where p.houseid = d.houseid and p.personid = d.personid and %s) as a"%(sql,tnames[1],tnames[2],self.age_cond(False))
-                
+
+            sql = "select a.freq, count(*) from %s"%(self.per_quary(False))               
             catecode = cond[key]
             if len(catecode) == 2:   
                 where = "where %s >= %d and %s < %d"%(purpose,catecode[0],purpose,catecode[1])
