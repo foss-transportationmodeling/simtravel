@@ -419,7 +419,7 @@ class Export_Outputs(QDialog):
             sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))               
 
             
-            print sql
+            #print sql
             self.new_obj.cursor.execute(sql)
             data = self.new_obj.cursor.fetchall()
             
@@ -488,7 +488,7 @@ class Export_Outputs(QDialog):
                 
             sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
             sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
-            print sql
+            #print sql
              
             self.new_obj.cursor.execute(sql)
             rows = self.new_obj.cursor.fetchall()
@@ -512,10 +512,6 @@ class Export_Outputs(QDialog):
                     temp = yvalue[0]
                     temp[key-1] = long(row[1])
                     cumulate[key-1] += long(row[1])
-        
-          
-        print yvalue
-        print cumulate
             
 
 #        xlabels = self.trip_labels("trippurpose")
@@ -560,7 +556,7 @@ class Export_Outputs(QDialog):
                 
                 sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
                 sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
-                print sql
+                #print sql
                  
                 self.new_obj.cursor.execute(sql)
                 rows = self.new_obj.cursor.fetchall()
@@ -581,10 +577,7 @@ class Export_Outputs(QDialog):
                     else:
                         temp = yvalue_nhts[0]
                         temp[key-1] = long(row[1])
-                        cumulate_nhts[key-1] += long(row[1])
-
-            print yvalue_nhts
-            print cumulate_nhts    
+                        cumulate_nhts[key-1] += long(row[1])    
 
 
 #            self.retrieve_twodimension(data, yvalue_nhts, cumulate_nhts, xkeys)
@@ -790,7 +783,7 @@ class Export_Outputs(QDialog):
 #                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
             sql = "%s group by a.%s order by a.%s"%(sql,acttype,acttype)
             
-            print sql
+            #print sql
             self.new_obj.cursor.execute(sql)
             data = self.new_obj.cursor.fetchall()
 
@@ -842,7 +835,7 @@ class Export_Outputs(QDialog):
         sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
 
         
-        print sql
+        #print sql
         self.new_obj.cursor.execute(sql)
         data = self.new_obj.cursor.fetchall()
         
@@ -939,7 +932,7 @@ class Export_Outputs(QDialog):
                 sql = "%s where %s = %d and duration >= 0 group by houseid, personid)" %(sql,acttype,lowhigh[0])
             sql = "%s as a on a.houseid = b.houseid and a.personid = b.personid group by a.duration order by a.duration" %(sql)
 
-            print sql
+            #print sql
 
             wsheet.cell(row=1,column=columni).value = titleLabel
             wsheet.cell(row=2,column=columni).value = str(labels[key])
