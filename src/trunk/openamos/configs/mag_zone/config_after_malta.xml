@@ -47,6 +47,31 @@
 
   <ModelConfig>
 
+      <Component name="MoveEpisodesElapsedBackToFinal" read_from_table="schedule_elapsed_r" write_to_table="schedule_final_r" skip="False" completed="True">
+        <DBTables>
+    	  <Table table="schedule_elapsed_r" key="houseid,personid" order="1"/>
+    	  <Table table="schedule_final_r" key="scheduleid" />
+        </DBTables>
+        <DeleteBasedOn table="schedule_elapsed_r" var="scheduleid"/>
+
+        <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummy"/>
+	  <Variance value="0"/>
+          <Variable table="schedule_elapsed_r" var="scheduleid" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="houseid" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="personid" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="activitytype" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="locationid" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="starttime" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="endtime" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="duration" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="dependentpersonid" coeff="1"/>
+          <Variable table="schedule_elapsed_r" var="tripcount" coeff="1"/>
+        </Model>
+
+      </Component>
+
+
     <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>

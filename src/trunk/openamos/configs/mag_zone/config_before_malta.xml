@@ -3510,45 +3510,29 @@
    </Component>
 
 
-    <Component name="DummyCreator" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" key="houseid,personid" location="True" skip="False" completed="True">
-      <DBTables>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
-    	<Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>
-    	<Table table="schedule_final_r" key="houseid,personid"/>
-      </DBTables>
 
-      <Model name="ChildDependencyAllocation" formulation="Child Dependency" type="Dummy" seed="1">
-	<DependentVariable var="childdependencyallocation"/>
+      <Component name="MoveSkeletonToFInalTable" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" skip="False" completed="True">
+        <DBTables>
+    	  <Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>
+    	  <Table table="schedule_final_r" key="scheduleid"/>
+        </DBTables>
 
-	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_skeleton_r" var="houseid"/>
-	  <PersonIdName table="schedule_skeleton_r" var="personid"/>
-	  <ScheduleIdName table="schedule_skeleton_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_skeleton_r" var="activitytype"/>
-	  <LocationIdName table="schedule_skeleton_r" var="locationid"/>
-	  <StartTimeName table="schedule_skeleton_r" var="starttime"/>
-	  <EndTimeName table="schedule_skeleton_r" var="endtime"/>
-	  <DurationName table="schedule_skeleton_r" var="duration"/>
-	  <DependentPersonName table="schedule_skeleton_r" var="dependentpersonid"/>
-	  <TripCountName table="schedule_skeleton_r" var="tripcount"/>
-	</ActivityAttributes>
+        <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummy"/>
+	  <Variance value="0"/>
+          <Variable table="schedule_skeleton_r" var="scheduleid" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="houseid" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="personid" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="activitytype" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="locationid" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="starttime" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="endtime" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="duration" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="dependentpersonid" coeff="1"/>
+          <Variable table="schedule_skeleton_r" var="tripcount" coeff="1"/>
+        </Model>
 
-	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
-	</DailyStatus>
-	
-	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
-	</Dependency>
-
-      </Model>
-
-     
-   </Component>	
-
-
-
+      </Component>
 
 
 

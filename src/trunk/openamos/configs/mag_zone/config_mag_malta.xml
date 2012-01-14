@@ -348,6 +348,35 @@
 
     </Component>
 
+      <Component name="MoveEpisodesElapsed" read_from_table="schedule_final_r" write_to_table="schedule_elapsed_r" skip="False" completed="True">
+        <DBTables>
+    	  <Table table="persons_arrived_id_r" key="houseid,personid" order="1"/>
+    	  <Table table="schedule_final_r" key="houseid,personid" />
+    	  <Table table="schedule_elapsed_r" key="scheduleid" />
+        </DBTables>
+        <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
+
+        <AnalysisIntervalFilter table="schedule_final_r" var="endtime" condition="less than"/>
+
+        <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummy"/>
+	  <Filter table="persons_arrived_id_r" var="houseid" condition="greater than equals" value="1"/>
+	  <Variance value="0"/>
+          <Variable table="schedule_final_r" var="scheduleid" coeff="1"/>
+          <Variable table="schedule_final_r" var="houseid" coeff="1"/>
+          <Variable table="schedule_final_r" var="personid" coeff="1"/>
+          <Variable table="schedule_final_r" var="activitytype" coeff="1"/>
+          <Variable table="schedule_final_r" var="locationid" coeff="1"/>
+          <Variable table="schedule_final_r" var="starttime" coeff="1"/>
+          <Variable table="schedule_final_r" var="endtime" coeff="1"/>
+          <Variable table="schedule_final_r" var="duration" coeff="1"/>
+          <Variable table="schedule_final_r" var="dependentpersonid" coeff="1"/>
+          <Variable table="schedule_final_r" var="tripcount" coeff="1"/>
+        </Model>
+
+      </Component>
+
+
     <Component name="DeletePersonIdsForPersonsArrived" read_from_table="persons_arrived_id_r" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_arrived_id_r" key="houseid" order="1"/>
@@ -3490,8 +3519,6 @@
         </Model>
 
       </Component>
-
-
 
 
     <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
