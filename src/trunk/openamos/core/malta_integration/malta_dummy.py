@@ -46,10 +46,10 @@ class DummyMALTA(object):
 			self.trips[trip[8]] += [trip[0]]
 
 			
-		    #actArrival = randint(trip[7]+2, trip[8]+15)
+		    actArrival = randint(trip[7]+2, trip[8]+15)
 		    #actArrival = randint(trip[7]+15, trip[8]+45)
 
-		    actArrival = trip[8]
+		    #actArrival = trip[8]
 
 		    if actArrival not in self.tripsAct.keys():
 			self.tripsAct[actArrival]  = [trip[0]]

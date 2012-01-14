@@ -33,7 +33,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta_sequential.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta.xml'
 	configObject = None
 
 
@@ -74,7 +74,7 @@ class SimulationManager(object):
         self.lastTableName = None
 	self.skimsMatrix = None
         self.uniqueIds = None
-
+	self.trips = 0
 
 
     def setup_databaseConnection(self):
@@ -167,8 +167,10 @@ class SimulationManager(object):
 	return tripInfo
 	
     def run_components(self, analysisInterval, tripInfoArrivals):
+
         print '-- INSIDE OpenAMOS generating activity-trvel records -- '
 	print 'These are trips that arrived - '
+	#return zeros((1,11))
 	ti = time.time()
 
 	print tripInfoArrivals
@@ -250,6 +252,24 @@ class SimulationManager(object):
 
             elif data is None and comp.component_name == "ExtractAllTravelEpisodes":
                 tripInfo = zeros((1,11))
+		"""
+                tripInfo = zeros((3,11))
+
+		self.trips += 1
+		tripInfo[0,0] = self.trips
+		tripInfo[0,5] = 1850 + 11
+		tripInfo[0,6] = 1075 + 11 
+
+		self.trips += 1
+		tripInfo[1,0] = self.trips
+		tripInfo[1,5] = 1488 + 11
+		tripInfo[1,6] = 1074 + 11 
+
+		self.trips += 1
+		tripInfo[2,0] = self.trips
+		tripInfo[2,5] = 28 + 11
+		tripInfo[2,6] = 1995 + 11 
+		"""
             print '\t-- Finished simulating component; time taken %.4f --' %(time.time()-t)
 
 
@@ -312,7 +332,7 @@ if __name__ == '__main__':
     simulationObject = SimulationManager()
 
     for i in range(2):
-    	simulationObject.run_selected_components_for_malta(26 + i)
+    	simulationObject.run_selected_components_for_malta(1430 + i)
     #raw_input()
     #simulationObject.run_selected_components_for_malta(191)
     #raw_input()

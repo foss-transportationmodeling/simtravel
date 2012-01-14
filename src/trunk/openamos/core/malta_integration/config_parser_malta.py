@@ -384,8 +384,14 @@ class ConfigParser(object):
 	analysisIntervalFilter_element = component_element.find('AnalysisIntervalFilter')
 	if analysisIntervalFilter_element is not None:
 	    analysisIntervalFilter = self.return_table_var(analysisIntervalFilter_element)
+	    analysisIntervalCondition = analysisIntervalFilter_element.get("condition")
+	    if analysisIntervalCondition == None or analysisIntervalCondition == "equals":
+		analysisIntervalCondition = "="
+	    if analysisIntervalCondition == "less than":
+		analysisIntervalCondition = "<"
 	else:
 	    analysisIntervalFilter = None
+	    analysisIntervalCondition = None
 	
 
         comp_name, comp_read_table, comp_write_table, comp_write_to_table2 = self.return_component_attribs(component_element)
@@ -505,6 +511,7 @@ class ConfigParser(object):
                                       spatialConst_list,
                                       dynamicSpatialConst_list,
 				      analysisIntervalFilter = analysisIntervalFilter,
+				      analysisIntervalCondition = analysisIntervalCondition,
                                       history_info = historyInfoObject,
                                       post_run_filter=post_run_filter,
                                       delete_criterion=deleteCriterion,

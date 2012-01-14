@@ -38,6 +38,8 @@ class DB(object):
 					'endtime', 'duration', 'dependentpersonid'],
 			  'schedule_final_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
 					'endtime', 'duration', 'dependentpersonid', 'tripcount'],
+			  'schedule_elapsed_r':['houseid', 'personid', 'activitytype', 'locationid', 'starttime',
+					'endtime', 'duration', 'dependentpersonid', 'tripcount'],
 
 			  'trips_r':['houseid', 'personid', 'vehid', 'tripmode', 'fromzone', 'tozone', 'starttime', 'endtime', 'trippurposefrom', 
 				     'trippurpose', 'duration', 'occupancy', 'tripind', 'dependentpersonid', 'tripwithhhmember', 
