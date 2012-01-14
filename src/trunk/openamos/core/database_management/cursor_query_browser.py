@@ -132,7 +132,7 @@ class QueryBrowser(object):
 
     def select_join(self, db_dict, column_names, table_names, max_dict=None, 
                     spatialConst_list=None, analysisInterval=None, 
-		    analysisIntervalFilter=None,
+		    analysisIntervalFilter=None, analysisIntervalCondition=None,
                     history_info=None,
 		    aggregate_variable_dict={},
 		    delete_dict={}):
@@ -684,8 +684,9 @@ class QueryBrowser(object):
 	    cols_list.append('%s_%s' %(analysisIntervalFilter[0], analysisIntervalFilter[1]))
 	
 	    if len(spatialConst_list) < 1:
-		joinStrList.append(' where %s.%s = %s' %(analysisIntervalFilter[0], 
+		joinStrList.append(' where %s.%s %s %s' %(analysisIntervalFilter[0], 
 							 analysisIntervalFilter[1],
+							 analysisIntervalCondition,
 							 analysisInterval))
                                          
 	# Creating the select command with aggregates for OUTPUT tables
