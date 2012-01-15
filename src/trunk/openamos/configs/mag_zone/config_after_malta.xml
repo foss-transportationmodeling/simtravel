@@ -47,12 +47,11 @@
 
   <ModelConfig>
 
-      <Component name="MoveEpisodesElapsedBackToFinal" read_from_table="schedule_elapsed_r" write_to_table="schedule_final_r" skip="False" completed="True">
+      <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_elapsed_r" key="houseid,personid" order="1"/>
-    	  <Table table="schedule_final_r" key="scheduleid" />
+    	  <Table table="schedule_r" key="houseid,personid" />
         </DBTables>
-        <DeleteBasedOn table="schedule_elapsed_r" var="scheduleid"/>
 
         <Model name="dummy" formulation="Regression" type="Linear" seed="1">
 	  <DependentVariable var="dummy"/>
@@ -71,11 +70,34 @@
 
       </Component>
 
+      <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="False" completed="True">
+        <DBTables>
+    	  <Table table="schedule_final_r" key="houseid,personid" order="1"/>
+    	  <Table table="schedule_r" key="houseid,personid" />
+        </DBTables>
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_final_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
+        <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	  <DependentVariable var="dummy"/>
+	  <Variance value="0"/>
+          <Variable table="schedule_final_r" var="scheduleid" coeff="1"/>
+          <Variable table="schedule_final_r" var="houseid" coeff="1"/>
+          <Variable table="schedule_final_r" var="personid" coeff="1"/>
+          <Variable table="schedule_final_r" var="activitytype" coeff="1"/>
+          <Variable table="schedule_final_r" var="locationid" coeff="1"/>
+          <Variable table="schedule_final_r" var="starttime" coeff="1"/>
+          <Variable table="schedule_final_r" var="endtime" coeff="1"/>
+          <Variable table="schedule_final_r" var="duration" coeff="1"/>
+          <Variable table="schedule_final_r" var="dependentpersonid" coeff="1"/>
+          <Variable table="schedule_final_r" var="tripcount" coeff="1"/>
+        </Model>
+
+      </Component>
+
+
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
+    	<Table table="schedule_r" key="houseid,personid" order="1"/>
     	<Table table="persons_daily_status_r" key="houseid,personid"/>
-    	<Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid"/>
       </DBTables>
 
@@ -83,16 +105,16 @@
 	<DependentVariable var="cleanfixedactivityschedulesofchildren"/>
 
 	<ActivityAttributes>
-	  <HouseholdIdName table="schedule_final_r" var="houseid"/>
-	  <PersonIdName table="schedule_final_r" var="personid"/>
-	  <ScheduleIdName table="schedule_final_r" var="scheduleid"/>
-	  <ActivityTypeName table="schedule_final_r" var="activitytype"/>
-	  <LocationIdName table="schedule_final_r" var="locationid"/>
-	  <StartTimeName table="schedule_final_r" var="starttime"/>
-	  <EndTimeName table="schedule_final_r" var="endtime"/>
-	  <DurationName table="schedule_final_r" var="duration"/>
-	  <DependentPersonName table="schedule_final_r" var="dependentpersonid"/>
-	  <TripCountName table="schedule_final_r" var="tripcount"/>
+	  <HouseholdIdName table="schedule_r" var="houseid"/>
+	  <PersonIdName table="schedule_r" var="personid"/>
+	  <ScheduleIdName table="schedule_r" var="scheduleid"/>
+	  <ActivityTypeName table="schedule_r" var="activitytype"/>
+	  <LocationIdName table="schedule_r" var="locationid"/>
+	  <StartTimeName table="schedule_r" var="starttime"/>
+	  <EndTimeName table="schedule_r" var="endtime"/>
+	  <DurationName table="schedule_r" var="duration"/>
+	  <DependentPersonName table="schedule_r" var="dependentpersonid"/>
+	  <TripCountName table="schedule_r" var="tripcount"/>
 	</ActivityAttributes>
 
 	<DailyStatus>
@@ -445,7 +467,7 @@
 
     </Component>
 
-    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="True" write_to_loc="True">
+    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="False" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_before_r" key="gap_before"/>
@@ -462,7 +484,7 @@
 
     </Component>
 
-    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="True" write_to_loc="True">
+    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="False" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_after_r" key="gap_after"/>
