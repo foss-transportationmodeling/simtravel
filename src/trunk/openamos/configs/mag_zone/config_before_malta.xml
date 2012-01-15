@@ -3514,7 +3514,7 @@
       <Component name="MoveSkeletonToFInalTable" read_from_table="schedule_skeleton_r" write_to_table="schedule_final_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_skeleton_r" key="houseid,personid" order="1"/>
-    	  <Table table="schedule_final_r" key="scheduleid"/>
+    	  <Table table="schedule_final_r" key="houseid,personid"/>
         </DBTables>
 
         <Model name="dummy" formulation="Regression" type="Linear" seed="1">
