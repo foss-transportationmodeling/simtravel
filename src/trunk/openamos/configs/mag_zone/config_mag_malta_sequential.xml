@@ -169,7 +169,7 @@
       <Component name="MoveEpisodesElapsed" read_from_table="schedule_final_r" write_to_table="schedule_elapsed_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	  <Table table="schedule_elapsed_r" key="scheduleid" />
+    	  <Table table="schedule_elapsed_r" key="houseid,personid" />
         </DBTables>
         <DeleteBasedOn table="schedule_final_r" var="scheduleid"/>
 
@@ -3305,7 +3305,7 @@
 
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
