@@ -1371,6 +1371,9 @@ class Household(object):
         #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
         #print '\tPerson Ids with NO dependencies - ', self.indepPersonIds
 
+	if len(self.dependencyPersonIds) == 0:
+	    return
+
 	depTrips = {}
 	depTripsSt = {}
 	depTripsEn = {}
