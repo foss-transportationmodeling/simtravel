@@ -50,7 +50,7 @@
       <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_elapsed_r" key="houseid,personid" order="1"/>
-    	  <Table table="schedule_r" key="houseid,personid" />
+    	  <Table table="schedule_r" key="houseid,personid"/>
         </DBTables>
 
         <Model name="dummy" formulation="Regression" type="Linear" seed="1">
@@ -73,7 +73,7 @@
       <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_final_r" key="houseid,personid" order="1"/>
-    	  <Table table="schedule_r" key="houseid,personid" />
+    	  <Table table="schedule_r" key="houseid,personid"/>
         </DBTables>
 
         <Model name="dummy" formulation="Regression" type="Linear" seed="1">
@@ -234,6 +234,7 @@
       </Model>
       <Model name="tripcountDummy" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="tripcountdummy"/>
+	<Filter table="trips_r" var="houseid" condition="greater than equals" value="1"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="tripcount" coeff="1"/>
       </Model>
