@@ -171,6 +171,11 @@
     	<Table table="schedule_allocatedependent_r" key="houseid,personid"/>
 
       </DBTables>
+      <PreProcessData name="PreProcessData">
+	<Filter table="trips_r" var="houseid" condition="equals" value="0"/>
+      </PreProcessData>
+
+
       <AnalysisInterval start="0" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
