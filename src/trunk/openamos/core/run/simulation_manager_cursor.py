@@ -23,7 +23,7 @@ from multiprocessing import Process
 
 from openamos.core.travel_skims.heat_map_skims import PlotHeatMap
 from openamos.core.config import ConfigObject
-from openamos.gui.results_menu.to_msexcel import Export_Outputs
+from openamos.gui.results_menu.to_msexcel_nogui import Export_Outputs
 from PyQt4.QtGui import QApplication
 import sys
 
@@ -136,6 +136,10 @@ class SimulationManager(object):
 	# create populate cache - 
 	tableList = self.db.list_of_outputtables()
 
+	tableList = ['schedule_skeleton_r', 'schedule_final_r', 'schedule_elapsed_r', 
+		     'trips_r', 'trips_to_malta_r', 'trips_arrival_from_malta_r',
+		     'households_vehicles_count_r', 'persons_daily_status_r']
+
 	for tableName in tableList:
 	    #print 'Backing up results for table - ', tableName
 	    self.reflectFromDatabaseToCache(queryBrowser, tableName)
@@ -188,23 +192,21 @@ class SimulationManager(object):
 
 	for i in range(4):
     	    confObj = ConfigObject(configtree = self.configObject)
-    	    exportObj = Export_Outputs(confObj)
+    	    exportObj = Export_Outputs(confObj, index=i)
 
 	    # select all tables to download
-    	    exportObj.check_all.setCheckState(True)
-    	    exportObj.select_all()
+    	    #exportObj.check_all.setCheckState(True)
+    	    #exportObj.select_all()
 
     	    # sociodemographic group
-    	    exportObj.pptype.setCurrentIndex(i)
-	    socioDemText = exportObj.pptype.currentText()
+    	    #exportObj.pptype.setCurrentIndex(i)
+	    socioDemText = exportObj.pptypeText[i]
 	
     	    # set file path
     	    fileName = fileLoc + os.path.sep + "results_%s.xlsx" %socioDemText
-    	    exportObj.xlsname.setText(fileName)
-
 
     	    # create file
-    	    exportObj.accept()
+    	    exportObj.accept(fileName)
 	
 
     def calculate_skims_convergence_criterion(self, oldFileLoc, newFileLoc, skimsTableName, backupDirectory):

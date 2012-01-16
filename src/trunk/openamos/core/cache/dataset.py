@@ -78,6 +78,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_skeleton_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_inctravelrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_final_r", Schedule_Allocation_R)
+        self.fileh.createTable(output_grp, "schedule_elapsed_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_full_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_aggregatefinal_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_allocatedependent_r", Schedule_Allocation_R)
