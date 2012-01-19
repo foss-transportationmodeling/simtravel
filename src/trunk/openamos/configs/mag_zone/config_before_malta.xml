@@ -2332,7 +2332,8 @@
       </SpatialConstraints>
 
       <ConsistencyChecks name="DynamicNonMandatoryChecks">
-	<Filter table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+	<Filter1 table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+        <Filter table="runtime" var="duration" condition="greater than equals" value="1"/>
       </ConsistencyChecks>
 
 
@@ -2609,7 +2610,8 @@
       </SpatialConstraints>
 
       <ConsistencyChecks name="DynamicNonMandatoryChecks">
-	<Filter table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+	<Filter1 table="runtime" var="starttime" condition="less than equals" valuetable="runtime" valuevar="endtime"/>
+        <Filter table="runtime" var="duration" condition="greater than equals" value="1"/>
       </ConsistencyChecks>
 
 
