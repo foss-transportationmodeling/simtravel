@@ -121,10 +121,11 @@ class LinearRegressionModel(AbstractRegressionModel):
 		
             pred_value[predValue_moreThresholdInd] = threshold
 	    #print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
-	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, upperLimit, seed, size)
-	    #print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
-	    pred_value[predValue_moreThresholdInd] += smoothingErr
+	    if numRows > 0:
+	    	size = (numRows, 1)
+	    	smoothingErr = self.calc_halfnormal_error(threshold, upperLimit, seed, size)
+	    	#print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
+	    	pred_value[predValue_moreThresholdInd] += smoothingErr[:,0]
 	    #print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
         return DataArray(pred_value, self.specification.choices)
 
