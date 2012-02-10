@@ -89,6 +89,8 @@ class SubModel(object):
 
 	if ('houseid' in data._colnames) and ('personid' in data._colnames):
 	    seed = ((data.columns(['houseid']).data*100 + data.columns(['personid']).data + seed)[:,0].astype(int))
+	elif ('houseid' in data._colnames):
+	    seed = ((data.columns(['houseid']).data*100 + seed)[:,0].astype(int))
 	else:
 	    seed = self.seed + iteration
 
