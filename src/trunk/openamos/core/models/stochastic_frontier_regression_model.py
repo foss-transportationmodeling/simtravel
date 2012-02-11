@@ -118,32 +118,27 @@ class StocFronRegressionModel(AbstractRegressionModel):
 	    threshold = self.error_specification.lower_threshold
 	    predValue_lessThresholdInd = pred_value < threshold
 	    numRows = predValue_lessThresholdInd.sum()
-            #print '\t\tPred value is less than START threshold for - %d cases ' \
-            #    % numRows
 	    
             pred_value[predValue_lessThresholdInd] = threshold
-	    #print 'Lower; Before', pred_value[predValue_lessThresholdInd]
-	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, lowerLimit, seed, size)
-	    #print smoothingErr.shape, pred_value[predValue_lessThresholdInd].shape
-	    pred_value[predValue_lessThresholdInd] -= smoothingErr
-	    #print 'Lower; After', pred_value[predValue_lessThresholdInd]
+
+	    if numRows > 0:
+	    	size = (numRows, 1)
+	    	smoothingErr = self.calc_halfnormal_error(threshold, lowerLimit, seed, size)
+	    	pred_value[predValue_lessThresholdInd] -= smoothingErr[:,0]
 
 
 	if self.error_specification.upper_threshold >0:
 	    threshold = self.error_specification.upper_threshold
 	    predValue_moreThresholdInd = pred_value > threshold
 	    numRows = predValue_moreThresholdInd.sum()
-            #print '\t\tPred value is greater than END threshold for - %d cases ' \
-            #    % numRows
 		
             pred_value[predValue_moreThresholdInd] = threshold
-	    #print 'Upper; Before - ', pred_value[predValue_moreThresholdInd]
-	    size = (numRows, )
-	    smoothingErr = self.calc_halfnormal_error(threshold, upperLimit, seed, size)
-	    #print smoothingErr.shape, pred_value[predValue_moreThresholdInd].shape
-	    pred_value[predValue_moreThresholdInd] += smoothingErr
-	    #print 'Upper; After - ', pred_value[predValue_moreThresholdInd]
+
+	    if numRows > 0:
+	    	size = (numRows, 1)
+	    	smoothingErr = self.calc_halfnormal_error(threshold, upperLimit, seed, size)
+	    	pred_value[predValue_moreThresholdInd] += smoothingErr[:,0]
+
         return DataArray(pred_value, self.specification.choices)
 
     
