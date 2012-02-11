@@ -72,7 +72,7 @@ class SimulationManager(object):
         self.idCount = 0
         self.idList = []
         self.lastTableName = None
-	self.skimsMatrix = None
+	self.skimsMatrix = SkimsProcessor(1, 1995)
         self.uniqueIds = None
 	self.trips = 0
 
@@ -194,6 +194,10 @@ class SimulationManager(object):
 
         fileLoc = self.projectConfigObject.location
 	print ('Starting to process...')
+	if analysisInterval > 180 and analysisInterval <= 359:
+	    #self.lastTableName = None
+	    pass
+
 	for comp in self.componentList:
             t = time.time()
             comp.analysisInterval = analysisInterval - 1
@@ -217,12 +221,15 @@ class SimulationManager(object):
 		
 		t_sk = time.time()
                 tableName = self.identify_skims_matrix(comp)
-                
+
                 if tableName <> self.lastTableName and (len(comp.spatialConst_list) > 0 or 
 							len(comp.dynamicspatialConst_list) > 0):
-                    self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
-                    self.lastTableName = tableName
+		    #raw_input("check size before ...") 
 
+                    #self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
+		    self.load_skims_matrix(comp, tableName)
+                    self.lastTableName = tableName
+		    #raw_input("check size after ...") 
                 elif tableName == self.lastTableName:
 		    pass
 
@@ -310,18 +317,18 @@ class SimulationManager(object):
 	# the first argument is an offset and the second one is the count of nodes
 	# note that the taz id's should be indexed at the offset and be in increments
 	# of 1 for every subsequent taz id
-	skimsMatrix = SkimsProcessor(1, 1995)
+
 
 	# Not sure what the flag does?SkimsProcessor
 	print 'tableLocation - ', tableLocation
-	skimsMatrix.set_string(tableLocation, 0)
+	self.skimsMatrix.set_string(tableLocation, 0)
 
 	# Creating graph and passing the skimsMatrix
-	n, e = skimsMatrix.create_graph()
+	self.skimsMatrix.create_graph()
 	
-	uniqueIds = None
+	self.uniqueIds = None
 	#return origin, origin
-        return skimsMatrix, uniqueIds
+        #return self.skimsMatrix, self.uniqueIds
 
 
     def close_connections(self):
@@ -331,8 +338,8 @@ class SimulationManager(object):
 if __name__ == '__main__':
     simulationObject = SimulationManager()
 
-    for i in range(2):
-    	simulationObject.run_selected_components_for_malta(1430 + i)
+    for i in range(1400):
+    	simulationObject.run_selected_components_for_malta(0 + i)
     #raw_input()
     #simulationObject.run_selected_components_for_malta(191)
     #raw_input()
