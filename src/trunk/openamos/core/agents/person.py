@@ -138,7 +138,7 @@ class Person(object):
         self.reconciledActivityEpisodes = []
         self.seed = seed
         #print self.hid * self.pid + self.seed
-        self.rndGen = RandomDistribution(int(self.hid * self.pid + self.seed))
+        self.rndGen = RandomDistribution(int(self.hid * self.pid))
         #self.add_episodes(activityEpisodes)
         self._reconcile_schedule()
         self.scheduleConflictIndicator = zeros((2880, 1))
@@ -1313,7 +1313,7 @@ class Person(object):
     def adjust_activity_schedules(self, seed=1):
 	self.reconciledActivityEpisodes = []
 	self.seed = seed
-	self.rndGen = RandomDistribution(int(self.hid * self.pid + self.seed))
+	self.rndGen = RandomDistribution(int(self.hid * self.pid))
 	self._adjust_schedule()
 	self.listOfActivityEpisodes = copy.deepcopy(self.reconciledActivityEpisodes)
 

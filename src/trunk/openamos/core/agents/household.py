@@ -2387,7 +2387,7 @@ class Household(object):
 	self.unallocatedActs = {}
 	self.lenUnallocatedActs = 0
         self.seed = seed
-        self.rndGen = RandomDistribution(int(self.hid + self.seed))
+        self.rndGen = RandomDistribution(int(self.hid))
 
 	#print 'Household ID - ', self.hid
         #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
@@ -2436,7 +2436,7 @@ class Household(object):
 	self.unallocatedActs = {}
 	self.lenUnallocatedActs = 0
         self.seed = seed
-        self.rndGen = RandomDistribution(int(self.hid + self.seed))
+        self.rndGen = RandomDistribution(int(self.hid))
 
 	#print 'Household ID - ', self.hid
         #print '\tPerson Ids with dependencies - ', self.dependencyPersonIds
