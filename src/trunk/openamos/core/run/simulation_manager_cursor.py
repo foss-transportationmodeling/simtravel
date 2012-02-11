@@ -427,7 +427,7 @@ class SimulationManager(object):
 
         try:
             lastTableName = None
-            skimsMatrix = None
+            self.skimsMatrix = SkimsProcessor(1, 1995)
             uniqueIds = None
             for comp in self.componentList:
                 t = time.time()
@@ -450,7 +450,7 @@ class SimulationManager(object):
                         """as current component. """\
                         """Therefore the skims matrix should be reloaded."""
 
-                    skimsMatrix, uniqueIds = self.load_skims_matrix(comp, tableName)
+                    self.load_skims_matrix(comp, tableName)
                     lastTableName = tableName
 
                 elif tableName == lastTableName:
@@ -461,14 +461,14 @@ class SimulationManager(object):
 		#raw_input('\tPress any key to continue')
 
 	        data = comp.pre_process(queryBrowser,  
-                                        skimsMatrix, uniqueIds,
+                                        self.skimsMatrix, uniqueIds,
                                         self.db, self.projectConfigObject.seed)
 		
                 if data is not None:
                     # Call the run function to simulate the chocies(models)
                     # as per the specification in the configuration file
                     # data is written to the hdf5 cache because of the faster I/O
-                    nRowsProcessed, nRowsProcessed2 = comp.run(data, skimsMatrix, partId)
+                    nRowsProcessed, nRowsProcessed2 = comp.run(data, self.skimsMatrix, partId)
             
                     # Write the data to the database from the hdf5 results cache
                     # after running each component because the subsequent components
@@ -532,18 +532,18 @@ class SimulationManager(object):
 	# note that the taz id's should be indexed at the offset and be in increments
 	# of 1 for every subsequent taz id
 
-	skimsMatrix = SkimsProcessor(1, 1995)
+	#skimsMatrix = SkimsProcessor(1, 1995)
 
 	# Not sure what the flag does?SkimsProcessor
 	print 'table Location - ', tableLocation
-	skimsMatrix.set_string(tableLocation, 0)
+	self.skimsMatrix.set_string(tableLocation, 0)
 
 	# Creating graph and passing the skimsMatrix
-	n, e = skimsMatrix.create_graph()
+	self.skimsMatrix.create_graph()
 	
 	uniqueIds = None
 	#return origin, origin
-        return skimsMatrix, uniqueIds
+        #return skimsMatrix, uniqueIds
 
 
 
