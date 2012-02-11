@@ -21,6 +21,17 @@ class SkimsProcessor(object):
         #print self.offset, self.nodes
         #print 'Testing extension'
 
+        #Starting graph creation
+        if self.nodes == 0:
+            #get the nodes and edges
+            nodes, edges = self.get_graph_nodes()
+        else:
+            nodes = self.nodes
+            edges = self.nodes * self.nodes
+        
+        #initialize the graph
+        skimsquery.initialize_array(nodes)
+
 
     def create_carray(self, num):
         """
@@ -47,21 +58,10 @@ class SkimsProcessor(object):
         Output:
         Entire network Graph is created
         """
-        #Starting graph creation
-        if self.nodes == 0:
-            #get the nodes and edges
-            nodes, edges = self.get_graph_nodes()
-        else:
-            nodes = self.nodes
-            edges = self.nodes * self.nodes
-        
-        #initialize the graph
-        skimsquery.initialize_array(nodes)
         
         #assign all values to the graph
         skimsquery.set_array(self.offset)
         
-        return nodes, edges
 
         
     def get_graph_nodes(self):
