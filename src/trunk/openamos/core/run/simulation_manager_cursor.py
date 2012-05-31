@@ -16,7 +16,8 @@ from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
-from openamos.core.travel_skims.successive_avg_processor import SuccessiveAverageProcessor
+from openamos.core.travel_skims.distprocessor import DistProcessor
+#from openamos.core.travel_skims.successive_avg_processor import SuccessiveAverageProcessor
 
 from multiprocessing import Process
 
@@ -37,7 +38,7 @@ class SimulationManager(object):
     be passed.
     """
 
-    def __init__(self, configObject=None, fileLoc=None, component=None, iteration=1):
+    def __init__(self, configObject=None, fileLoc=None, component=None, iteration=1, year=2012):
         if configObject is None and fileLoc is None:
             raise ConfigurationError, """The configuration input is not valid; a """\
                 """location of the XML configuration file or a valid etree """\
@@ -59,11 +60,14 @@ class SimulationManager(object):
                 """invalid or the file is not a valid configuration file."""
 
 	self.iteration = iteration
+	self.year = year
         self.fileLoc = fileLoc
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
         self.projectConfigObject = self.configParser.parse_projectAttributes()
-        self.projectSkimsObject = self.configParser.parse_skims_tables()
+        self.projectSkimsObject = self.configParser.parse_network_tables()
+	print "Network Skims -- ", self.projectSkimsObject
+
         self.projectLocationsObject = self.configParser.parse_locations_table()
 
 
@@ -105,15 +109,21 @@ class SimulationManager(object):
 	print "-- Creating a hdf5 backup of all results --"
 	fileLoc = self.projectConfigObject.location
 
-	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "iteration_%d" %self.iteration)
-
-        queryBrowser = self.setup_databaseConnection()
+	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "year_%d" %self.year)
 
 	try:
 	    os.mkdir(backupDirectoryLoc)
 	except OSError, e:
-	    print 'Directory already exists'
+	    print 'Error creating directory for year - %s:' %self.year, e
 
+	backupDirectoryLoc = os.path.join(backupDirectoryLoc, "iteration_%d" %self.iteration)
+
+	try:
+	    os.mkdir(backupDirectoryLoc)
+	except OSError, e:
+	    print 'Error creating directory for iteration - %s within year - %s:' %(self.iteration, self.year), e
+
+        queryBrowser = self.setup_databaseConnection()
 
 	# create cache again - 
         self.setup_cacheDatabase()
@@ -138,7 +148,7 @@ class SimulationManager(object):
 
 	tableList = ['schedule_skeleton_r', 'schedule_final_r', 'schedule_elapsed_r', 
 		     'trips_r', 'trips_to_malta_r', 'trips_arrival_from_malta_r',
-		     'households_vehicles_count_r', 'persons_daily_status_r']
+		     'households_vehicles_count_r', 'persons_r']
 
 	for tableName in tableList:
 	    #print 'Backing up results for table - ', tableName
@@ -152,21 +162,21 @@ class SimulationManager(object):
 
 	# Copying the skims ... 
 	print 'Copying the skim files to the iteration folder'
-
-	oldFileFolder = os.path.join(self.projectConfigObject.location, "iteration_%d" %(int(self.iteration)-1))
+	oldFileFolder = os.path.join(self.projectConfigObject.location, "year_%d"%self.year, "iteration_%d" %(int(self.iteration)-1))
 
 
 	# Skims
 	fSkimsConv = open(backupDirectoryLoc + os.path.sep + 'skimsConv.txt', 'w')
-	for skimsTable in self.projectSkimsObject.table_locationLookup.keys():
-	    skimsTableLoc = self.projectSkimsObject.table_locationLookup[skimsTable]
+	for skimsTable in self.projectSkimsObject.table_ttLocationLookup.keys():
+	    skimsTableLoc = self.projectSkimsObject.table_ttLocationLookup[skimsTable]
 	    skimsTableName = self.projectSkimsObject.table_lookup[skimsTable]
    
 	    shutil.copy(skimsTableLoc, backupDirectoryLoc)
 	    oldFile = os.path.join(oldFileFolder, "%s.dat" %skimsTableName)
-	    dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
-	    print 'deviation - ', dev
-	    fSkimsConv.write('%s,%.4f\n' %(skimsTable,dev))
+	    if self.iteration > 1:
+	    	dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
+	    	print 'deviation - ', dev
+	    	fSkimsConv.write('%s,%.4f\n' %(skimsTable,dev))
 	fSkimsConv.close()
 	
 
@@ -290,7 +300,7 @@ class SimulationManager(object):
 
     def successive_average_skims(self, iteration=1):
 	print 'Processing skims for iteration - %s' %iteration
-	uniqueTableList = list(set(self.projectSkimsObject.table_locationLookup.values()))
+	uniqueTableList = list(set(self.projectSkimsObject.table_ttLocationLookup.values()))
 
 	t_sa = time.time()
 	for table in uniqueTableList:
@@ -323,13 +333,13 @@ class SimulationManager(object):
 		raise Exception, "the iteration number is invalid"
 
 	# Updating the location of skim tables which are averaged across iterations to be used in OpenAMOS
-	skimTables = self.projectSkimsObject.table_locationLookup.keys()
+	skimTables = self.projectSkimsObject.table_ttLocationLookup.keys()
 	for skimTable in skimTables:
-	    oldPath = self.projectSkimsObject.table_locationLookup[skimTable]
+	    oldPath = self.projectSkimsObject.table_ttLocationLookup[skimTable]
   	    sa_filePath = '%s/skimOutput/successive_average/SA_%s' %(self.projectConfigObject.location, os.path.basename(oldPath))
 	    print '\tOld Path - ', oldPath
 	    print '\tNew Path - ', sa_filePath
-            self.projectSkimsObject.table_locationLookup[skimTable] = sa_filePath
+            self.projectSkimsObject.table_ttLocationLookup[skimTable] = sa_filePath
 
 	print 'Time taken to calculate successive average - %.4f'  %(time.time()-t_sa)
 
@@ -423,16 +433,27 @@ class SimulationManager(object):
         queryBrowser = self.setup_databaseConnection(partId)
         t_c = time.time()
         
-	#tableOrderDict, tableNamesKeyDict = self.configParser.parse_tableHierarchy()
 
         try:
-            lastTableName = None
+            lastTtTableLoc = None
+
+	    # the first argument is an offset and the second one is the count of nodes
+	    # note that the taz id's should be indexed at the offset and be in increments
+	    # of 1 for every subsequent taz id
+
             self.skimsMatrix = SkimsProcessor(1, 1995)
-            uniqueIds = None
+
             for comp in self.componentList:
                 t = time.time()
                 print '\nRunning Component - %s; Analysis Interval - %s' %(comp.component_name,
                                                                            comp.analysisInterval)
+		
+		#if comp.component_name not in ["AfterSchoolActivities", "PersonAttributesRuntime"]:
+		#    continue
+		#for model in comp.model_list:
+		#    print "\tModel name - %s and formulation - %s" %(model.dep_varname, model.model_type), model.data_filter
+		#raw_input()
+
 
                 if comp.skipFlag:
                     print '\tSkipping the run for this component'
@@ -442,18 +463,20 @@ class SimulationManager(object):
                 # of tod skims then loading happens only so many times
 		
 		t_sk = time.time()
-                tableName = self.identify_skims_matrix(comp)
+                ttTableLoc, distTableLoc = self.identify_skims_matrix(comp)
                 
-                if tableName <> lastTableName and (len(comp.spatialConst_list) > 0 or len(comp.dynamicspatialConst_list) > 0):
+                if ttTableLoc <> lastTtTableLoc and (len(comp.spatialConst_list) > 0 or len(comp.dynamicspatialConst_list) > 0):
                     # Load the skims matrix
                     print """\tThe tod interval for the the previous component is not same """\
                         """as current component. """\
                         """Therefore the skims matrix should be reloaded."""
 
-                    self.load_skims_matrix(comp, tableName)
-                    lastTableName = tableName
+                    self.load_skims_matrix(comp, ttTableLoc, distTableLoc)
 
-                elif tableName == lastTableName:
+
+                    lastTtTableLoc = ttTableLoc
+
+                elif ttTableLoc == lastTtTableLoc:
                     print """\tThe tod interval for the the previous component is same """\
                         """as current component. """\
                         """Therefore the skims matrix need not be reloaded."""
@@ -461,7 +484,7 @@ class SimulationManager(object):
 		#raw_input('\tPress any key to continue')
 
 	        data = comp.pre_process(queryBrowser,  
-                                        self.skimsMatrix, uniqueIds,
+                                        self.skimsMatrix, 
                                         self.db, self.projectConfigObject.seed)
 		
                 if data is not None:
@@ -496,6 +519,7 @@ class SimulationManager(object):
             	comp.data = None
                 print '-- Finished simulating component - %s; time taken %.4f --' %(comp.component_name,
                                                                                     time.time()-t)
+		#raw_input()
         except Exception, e:
             print 'Exception occurred - %s' %e
             traceback.print_exc(file=sys.stdout)
@@ -510,44 +534,41 @@ class SimulationManager(object):
         if len(comp.spatialConst_list) == 0 and len(comp.dynamicspatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
-            tableLocation = None
+            ttTableLocation = None
+	    distTableLocation = None
             pass
         else:
             analysisInterval = comp.analysisInterval
         
             if comp.analysisInterval is not None:
-                tableLocation = self.projectSkimsObject.lookup_tableLocation(analysisInterval)
+                ttTableLocation = self.projectSkimsObject.lookup_ttTableLocation(analysisInterval)
+		distTableLocation = self.projectSkimsObject.lookup_distTableLocation(analysisInterval)
             else:
                 # Corresponding to the morning peak
                 # currently fixed can be varied as need be
-                tableLocation = self.projectSkimsObject.lookup_tableLocation(240)
+                ttTableLocation = self.projectSkimsObject.lookup_ttTableLocation(240)
+		distTableLocation = self.projectSkimsObject.lookup_distTableLocation(240)
 
         print '\tSkims Matrix Identified in - %.4f' %(time.time()-ti)
-        return tableLocation
+        return ttTableLocation, distTableLocation
 
 
-    def load_skims_matrix(self, comp, tableLocation, iteration=1):
+    def load_skims_matrix(self, comp, ttTableLocation, distTableLocation):
 
-	# the first argument is an offset and the second one is the count of nodes
-	# note that the taz id's should be indexed at the offset and be in increments
-	# of 1 for every subsequent taz id
+	print 'tt Table Location - ', ttTableLocation
+	print 'dist Table Location - ', distTableLocation
 
-	#skimsMatrix = SkimsProcessor(1, 1995)
-
-	# Not sure what the flag does?SkimsProcessor
-	print 'table Location - ', tableLocation
-	self.skimsMatrix.set_string(tableLocation, 0)
-
-	# Creating graph and passing the skimsMatrix
+	#raw_input("check memory before creating travel skims -- ")
+	self.skimsMatrix.set_tt_fileString(ttTableLocation)
+	self.skimsMatrix.set_dist_fileString(distTableLocation)
 	self.skimsMatrix.create_graph()
 	
-	uniqueIds = None
-	#return origin, origin
-        #return skimsMatrix, uniqueIds
-
-
-
-
+	print 'TRAVEL Skims object created --'
+	#raw_input("check memory after distance skims -- ")
+	print 'Check travel times -- ', self.skimsMatrix.get_travel_times(array([1,2,3,4]), array([1,2,3,4]))
+	print 'Check distances -- ', self.skimsMatrix.get_travel_distances(array([1,2,3,4]), array([1,2,3,4]))
+	print 'Check generalized cost tt + dist*2 -- ', self.skimsMatrix.get_generalized_time(array([1,2,3,4]), array([1,2,3,4]))
+	#raw_input("Check values -- ")
 
     def save_configFile(self, configParser, partId):
         if partId is not None:
