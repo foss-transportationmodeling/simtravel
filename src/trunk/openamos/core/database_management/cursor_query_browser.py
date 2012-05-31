@@ -200,6 +200,7 @@ class QueryBrowser(object):
 		table_names.remove(each_tab)
 		#print 'after', db_dict, column_names, table_names
 		continue
+	    #print "Checking if table - ", each_tab, " exists" 
             table_flag = self.dbcon_obj.check_if_table_exists(each_tab)
             if table_flag:
                 pass
@@ -986,7 +987,7 @@ class QueryBrowser(object):
                                """ delimiters '%s'""" %(table_name, cols_listStr, loc, 
 						       partId, delimiter))
                                                                        
-                #print '\t\t', insert_stmt
+                print '\t\t', insert_stmt
                 result = self.dbcon_obj.cursor.execute(insert_stmt)
                 self.dbcon_obj.connection.commit()
                 #print '\t\tTime after insert query - %.4f' %(time.time() - ti)
