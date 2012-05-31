@@ -234,42 +234,52 @@ class ConfigParser(object):
         return tableOrderDict, tableNamesKeyDict
 
 
-    def parse_skims_tables(self):
+    def parse_network_tables(self):
         print "-- Parse skims tables' Time of Day information --"
-        skims_element = self.configObject.find("TravelSkims")
-        referenceTablename = skims_element.get("reference_tablename")
-        indb_flag = skims_element.get("indb")
+        skims_element = self.configObject.find("NetworkSkims")
 
         periodIterator = skims_element.getiterator("Period")
 
-        travelSkimsLookup = TravelSkimsInfo(referenceTablename, indb_flag)
+        travelSkimsLookup = TravelSkimsInfo()
         
-        travelSkimsPeriodDBInfoList = []
         for period_element in periodIterator:
+	    # Skim properties
             tablename = period_element.get("tablename")
-            target_tablename = period_element.get("target_tablename")
             origin_var = period_element.get("origin_var")
             destination_var = period_element.get("destination_var")
-            skim_var = period_element.get("skim_var")
             interval_start = int(period_element.get("intervalStart"))
             interval_end = int(period_element.get("intervalEnd"))
-	    #importFlag = period_element.get("import")
-	    #if importFlag is not None:	
-	    fileLocation = period_element.get('fileLocation')
-	    delimiter = period_element.get('delimiter')
-	    #else:
-	    #	fileLocation = None
-	    # 	delimiter = None
 
+	    # Network condition properties
+	    tt_period_element = period_element.find("Time")
+	    dist_period_element = period_element.find("Distance")
+
+            tt_skim_var = tt_period_element.get("skim_var")
+	    tt_fileLocation = tt_period_element.get('fileLocation')
+	    tt_delimiter = tt_period_element.get('delimiter')
+
+	    if dist_period_element == None:
+		dist_skim_var = None
+		dist_fileLocation = None
+		dist_delimiter = None
+	    else:
+		dist_skim_var = dist_period_element.get("skim_var")
+	    	dist_fileLocation = dist_period_element.get('fileLocation')
+	    	dist_delimiter = dist_period_element.get('delimiter')
+
+	    
             travelSkimsLookup.add_tableInfoToList(tablename, origin_var,
                                                   destination_var,
-                                                  skim_var,
                                                   interval_start,
                                                   interval_end,
-                                                  target_tablename, 
-						  #import_flag=importFlag,
-						  file_location=fileLocation,
-						  delimiter=delimiter)
+
+						  tt_skim_var,
+						  tt_fileLocation,
+						  tt_delimiter,
+
+						  dist_skim_var,
+						  dist_fileLocation,
+						  dist_delimiter)
                                                   
         return travelSkimsLookup
 
@@ -1074,7 +1084,7 @@ class ConfigParser(object):
                    
                     # additional data filter
                     dataFilterLoc = DataFilter(dep_varname, 'equals', i+1)
-
+		    """
                     #Models to populate the travel time to destination variable
                     var = const.asField
                     coefficients = [{'%s%s'%(var, i+1):1}]
@@ -1096,7 +1106,7 @@ class ConfigParser(object):
                                             runUntilFilter, seed=seed, filter_type=filter_type,
                                             run_filter_type=run_filter_type)
                     self.model_list.append(model_object)
-
+		    """
                     #Models to populate the location id variable
                     coefficients = [{'%s%s'%(destinationField, i+1):1}]
                     specification = Specification(choice, coefficients)                
@@ -2740,6 +2750,7 @@ class ConfigParser(object):
         table = spatial_query_element.get('table')
         skimField = spatial_query_element.get('skim_var')
         asField = spatial_query_element.get('as_var')
+        distField = spatial_query_element.get('dist_var')
         originField = spatial_query_element.get('origin_var')
         destinationField = spatial_query_element.get('destination_var')
         sampleField = spatial_query_element.get('sample_var')
@@ -2766,10 +2777,20 @@ class ConfigParser(object):
 
         startConstraint_element = spatial_query_element.find('Start')
         startConstraint = self.return_spatio_temporal_constraint(startConstraint_element)
+	startTableVar = self.return_table_var(startConstraint_element)
 
         endConstraint_element = spatial_query_element.find('End')
         endConstraint = self.return_spatio_temporal_constraint(endConstraint_element)
+	endTableVar = self.return_table_var(endConstraint_element)
 
+	votdConstraint_element = spatial_query_element.find('ValueofTimePerDistance')
+	votdTableVar = self.return_table_var(votdConstraint_element)
+	votdField = votdTableVar[1]
+	
+	self.component_variable_list = self.component_variable_list + [votdTableVar]
+
+	#if sampleField is None:
+	#    self.component_variable_list = self.component_variable_list + [startTableVar, endTableVar]
 
         locationVariables = []
         locationInfoTable = None
@@ -2803,6 +2824,8 @@ class ConfigParser(object):
                                            originField, destinationField, 
                                            startConstraint, endConstraint, 
                                            asField,
+					   distField,
+					   votdField,
                                            sampleField, countChoices, activityTypeFilter, 
                                            thresholdTimeConstraint, seed,
                                            afterModel, beforeModel,
@@ -2818,7 +2841,7 @@ class ConfigParser(object):
 
     def return_spatio_temporal_constraint(self, constraint_element):
         table = constraint_element.get('table')
-        location_field = constraint_element.get('location_var')
+        location_field = constraint_element.get('var')
         time_field = constraint_element.get('time_var')
 
         constraint = SpatioTemporalConstraint(table, location_field, time_field)
