@@ -14,7 +14,7 @@ class DummyMALTA(object):
 
     def request_trips(self):
 	#self.tripsActDum = {117:[4], 155:[8], 133:[2], 147:[11], 167:[16]}
-	for i in range(1440):
+	for i in range(75):
 	    seed(i)
 	    time = i+1
 	
@@ -46,10 +46,13 @@ class DummyMALTA(object):
 			self.trips[trip[8]] += [trip[0]]
 
 			
-		    actArrival = randint(trip[7]+2, trip[8]+15)
+		    #actArrival = randint(trip[7]+2, trip[8]+15)
 		    #actArrival = randint(trip[7]+15, trip[8]+45)
 
-		    #actArrival = trip[8]
+		    if trip[8] > trip[7] + 1:
+			actArrival = trip[8]			
+		    else:
+			actArrival = trip[8] + 1
 
 		    if actArrival not in self.tripsAct.keys():
 			self.tripsAct[actArrival]  = [trip[0]]

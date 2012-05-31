@@ -61,7 +61,7 @@ class SimulationManager(object):
         self.configObject = configObject
         self.configParser = ConfigParser(configObject) #creates the model configuration parser
         self.projectConfigObject = self.configParser.parse_projectAttributes()
-        self.projectSkimsObject = self.configParser.parse_skims_tables()
+        self.projectSkimsObject = self.configParser.parse_network_tables()
         self.projectLocationsObject = self.configParser.parse_locations_table()
 
 	self.setup_databaseConnection()
@@ -71,7 +71,7 @@ class SimulationManager(object):
 	self.clean_database_tables()
         self.idCount = 0
         self.idList = []
-        self.lastTableName = None
+	self.lastTtTableLoc = None
 	self.skimsMatrix = SkimsProcessor(1, 1995)
         self.uniqueIds = None
 	self.trips = 0
@@ -220,22 +220,23 @@ class SimulationManager(object):
                 # of tod skims then loading happens only so many times
 		
 		t_sk = time.time()
-                tableName = self.identify_skims_matrix(comp)
+                ttTableLoc, distTableLoc = self.identify_skims_matrix(comp)
 
-                if tableName <> self.lastTableName and (len(comp.spatialConst_list) > 0 or 
+
+                if ttTableLoc <> self.lastTtTableLoc and (len(comp.spatialConst_list) > 0 or 
 							len(comp.dynamicspatialConst_list) > 0):
 		    #raw_input("check size before ...") 
 
                     #self.skimsMatrix, self.uniqueIds = self.load_skims_matrix(comp, tableName)
-		    self.load_skims_matrix(comp, tableName)
-                    self.lastTableName = tableName
+		    self.load_skims_matrix(comp, ttTableLoc, distTableLoc)
+                    self.lastTtTableLoc = ttTableLoc
 		    #raw_input("check size after ...") 
-                elif tableName == self.lastTableName:
+                elif ttTableLoc == self.lastTtTableLoc:
 		    pass
 
 		print '\tTime taken to process skims %.4f' %(time.time()-t_sk)
                 data = comp.pre_process(self.queryBrowser, 
-                                        self.skimsMatrix, self.uniqueIds, self.db, fileLoc)
+                                        self.skimsMatrix, self.db, fileLoc)
 
 
             if data is not None:
@@ -296,39 +297,40 @@ class SimulationManager(object):
         if len(comp.spatialConst_list) == 0 and len(comp.dynamicspatialConst_list) == 0:
             # When there are no spatial constraints to be processed
             # return an empty skims object
-            tableLocation = None
+            ttTableLocation = None
+	    distTableLocation = None
             pass
         else:
             analysisInterval = comp.analysisInterval
         
             if comp.analysisInterval is not None:
-                tableLocation = self.projectSkimsObject.lookup_tableLocation(analysisInterval)
+                ttTableLocation = self.projectSkimsObject.lookup_ttTableLocation(analysisInterval)
+		distTableLocation = self.projectSkimsObject.lookup_distTableLocation(analysisInterval)
             else:
                 # Corresponding to the morning peak
                 # currently fixed can be varied as need be
-                tableLocation = self.projectSkimsObject.lookup_tableLocation(240)
+                ttTableLocation = self.projectSkimsObject.lookup_ttTableLocation(240)
+		distTableLocation = self.projectSkimsObject.lookup_distTableLocation(240)
 
-        print '\tSkims Matrix Identified in - %.4f and it is %s' %(time.time()-ti, tableLocation)
-        return tableLocation
-
-
-    def load_skims_matrix(self, comp, tableLocation):
-
-	# the first argument is an offset and the second one is the count of nodes
-	# note that the taz id's should be indexed at the offset and be in increments
-	# of 1 for every subsequent taz id
+        print '\tSkims Matrix Identified in - %.4f' %(time.time()-ti)
+        return ttTableLocation, distTableLocation
 
 
-	# Not sure what the flag does?SkimsProcessor
-	print 'tableLocation - ', tableLocation
-	self.skimsMatrix.set_string(tableLocation, 0)
+    def load_skims_matrix(self, comp, ttTableLocation, distTableLocation):
 
-	# Creating graph and passing the skimsMatrix
+	print 'tt Table Location - ', ttTableLocation
+	print 'dist Table Location - ', distTableLocation
+
+	#raw_input("check memory before creating travel skims -- ")
+	self.skimsMatrix.set_tt_fileString(ttTableLocation)
+	self.skimsMatrix.set_dist_fileString(distTableLocation)
 	self.skimsMatrix.create_graph()
 	
-	self.uniqueIds = None
-	#return origin, origin
-        #return self.skimsMatrix, self.uniqueIds
+	print 'TRAVEL Skims object created --'
+	#raw_input("check memory after distance skims -- ")
+	print 'Check travel times -- ', self.skimsMatrix.get_travel_times(array([1,2,3,4]), array([1,2,3,4]))
+	print 'Check distances -- ', self.skimsMatrix.get_travel_distances(array([1,2,3,4]), array([1,2,3,4]))
+	print 'Check generalized cost tt + dist*2 -- ', self.skimsMatrix.get_generalized_time(array([1,2,3,4]), array([1,2,3,4]))
 
 
     def close_connections(self):

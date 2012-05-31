@@ -80,7 +80,7 @@ class AbstractComponent(object):
             self.keyCols = self.key[0]
 
     def pre_process(self, queryBrowser, 
-                    skimsMatrix, uniqueIds, db, fileLoc):
+                    skimsMatrix, db, fileLoc):
 
         tableOrderDict = self.tableOrder
 	tableNamesKeyDict = self.tableKeys
@@ -129,7 +129,7 @@ class AbstractComponent(object):
         # Process and include spatial query information
         data = self.process_data_for_locs(data, self.spatialConst_list, 
                                           self.analysisInterval, 
-					  skimsMatrix, uniqueIds, fileLoc)
+					  skimsMatrix, fileLoc)
 
         if data == None or data.rows == 0:
             return None
@@ -375,7 +375,7 @@ class AbstractComponent(object):
                     #print 'FOUND DYNAMICS SPATIAL QUERY'
                     #raw_input()
                     self.process_data_for_locs(self.data, [const], self.analysisInterval,
-                                               skimsMatrix, uniqueIds, fileLoc)
+                                               skimsMatrix, fileLoc)
                 
                 
     
@@ -669,7 +669,7 @@ class AbstractComponent(object):
         return data
 
     def process_data_for_locs(self, data, spatialConst_list, 
-                              analysisInterval, skimsMatrix, uniqueIds, fileLoc):
+                              analysisInterval, skimsMatrix, fileLoc):
         """
         This method is called whenever there are location type queries involved as part
         of the model run. Eg. In a Destination Choice Model, if there are N number of 
@@ -689,7 +689,7 @@ class AbstractComponent(object):
                 if i.countChoices is not None: 
                     #print ("""\t\tNeed to sample location choices for the following""" \
                     #           """model with also location info extracted """)
-                    data = self.sample_location_choices(data, skimsMatrix, uniqueIds, i, fileLoc)
+                    data = self.sample_location_choices(data, skimsMatrix, i, fileLoc)
                 else:
                     #print '\tNeed to extract skims'
                     data = self.extract_skims(data, skimsMatrix, i)
@@ -719,7 +719,7 @@ class AbstractComponent(object):
 
 
                                         
-    def sample_location_choices(self, data, skimsMatrix2, uniqueIDs, spatialconst, fileLoc):
+    def sample_location_choices(self, data, skimsMatrix2, spatialconst, fileLoc):
         # extract destinations subject to the spatio-temporal
         # constraints
 
@@ -734,6 +734,10 @@ class AbstractComponent(object):
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
 
 
+	votdColName = spatialconst.votdField        
+	votdColVals = array(data.columns([votdColName]).data)
+
+
         originTimeColVals = array(data.columns([originTimeColName]).data, dtype=int)
         destinationTimeColVals = array(data.columns([destinationTimeColName]).data, dtype=int)
 
@@ -741,7 +745,7 @@ class AbstractComponent(object):
         timeAvailable = destinationTimeColVals - originTimeColVals
 
 
-        sampleVarDict = {'temp':[]}
+        sampleVarDict = {'temp':['count']}
         sampleVarName = spatialconst.sampleField
 
         for i in range(spatialconst.countChoices):
@@ -792,17 +796,20 @@ class AbstractComponent(object):
 	#print spatialconst.countChoices, data.rows
 	skimsMatrix2.create_location_array(data.rows)
 	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
-					  		    timeAvailable[:,0], spatialconst.countChoices,
+					  		    timeAvailable[:,0], votdColVals[:,0], spatialconst.countChoices,
 							    uniqueIds)
 
-	#print locationChoices.sum(-1)
+	#print 'count of valid locations - ', (locationChoices <> 0).sum(-1)
+	locValidCount = (locationChoices <> 0).sum(-1)
+	data.setcolumn('count', locValidCount)
+
 	#print locationChoices
 	
 	for i in range(spatialconst.countChoices):
 	    sampleLocColVals = locationChoices[:,i].astype(int)
 
-	    tt_to = skimsMatrix2.get_travel_times(originLocColVals[:,0], sampleLocColVals)
-	    tt_from = skimsMatrix2.get_travel_times(sampleLocColVals, destinationLocColVals[:,0])
+	    tt_to = skimsMatrix2.get_generalized_time(originLocColVals[:,0], sampleLocColVals, votdColVals[:,0])
+	    tt_from = skimsMatrix2.get_generalized_time(sampleLocColVals, destinationLocColVals[:,0], votdColVals[:,0])
 	
 	    #print 'Sampled locations - ', sampleLocColVals
 	    #print 'Travel time to - ', tt_to
@@ -840,16 +847,39 @@ class AbstractComponent(object):
 
         return data
             
-    def extract_skims(self, data, skimsMatrix2, spatialconst):
+    def extract_skims(self, data, skimsMatrix, spatialconst):
         # hstack a column for the skims that need to be extracted for the
         # location pair
         originLocColName = spatialconst.startConstraint.locationField
         destinationLocColName = spatialconst.endConstraint.locationField
-        
+	votdColName = spatialconst.votdField        
+
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
+	votdColVals = array(data.columns([votdColName]).data)
 
-	tt = skimsMatrix2.get_travel_times(originLocColVals[:,0], destinationLocColVals[:,0])
+	#print '\tVOTD ColName - ', votdColName
+	#print data.columns([votdColName]).data[:5,:]
+
+	#print '\tIDS - '
+	#print data.columns(['houseid','personid']).data[:5,:].astype(int)
+
+
+	#tt = skimsMatrix.get_travel_times(originLocColVals[:,0], destinationLocColVals[:,0])
+	dist = skimsMatrix.get_travel_distances(originLocColVals[:,0], destinationLocColVals[:,0])
+	tt = skimsMatrix.get_generalized_time(originLocColVals[:,0], destinationLocColVals[:,0], votdColVals[:,0])
+
+	#if (tt < 3).any():
+	#    print 'TTS', tt[tt<3]
+	#    print 'IDS', data.columns(['houseid','personid']).data.astype(int)[tt<3]
+	#    print 'Origin', originLocColVals[tt<3]
+	#   print 'Destination', destinationLocColVals[tt<3]
+	    #raw_input('Travel time less 3')
+
+
+	#print 'gen tt', tt
+	#print 'distance', dist
+
         if spatialconst.asField:
             colName = spatialconst.asField
         else:
@@ -858,6 +888,15 @@ class AbstractComponent(object):
         sampleVarDict = {'temp':[colName]}
         self.append_cols_for_dependent_variables(data, sampleVarDict)
         data.setcolumn(colName, tt)	
+
+
+
+	distColName = spatialconst.distField
+        sampleVarDict = {'temp':['%s' %(distColName)]}
+        self.append_cols_for_dependent_variables(data, sampleVarDict)
+        data.setcolumn(distColName, dist)	
+
+	#raw_input("column name - %s and dist Column name - %s" %(colName,distColName))
 
 	#print originLocColVals[:,0]
 	#print destinationLocColVals[:,0]
