@@ -1798,7 +1798,7 @@ class Household(object):
 
 	    if not depPerson._check_for_conflicts():
 		depPerson.print_activity_list()		
-		raise Exception, 'Conflicts exist still ... and this should not happen'		
+		#raise Exception, 'Conflicts exist still ... and this should not happen'		
 		#raw_input('conflicts exist still for person')
 
 	    depPerson._check_for_acts_between_trip_vertices()
