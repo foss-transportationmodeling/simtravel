@@ -355,7 +355,7 @@ class Export_Outputs(QDialog):
         if not nhts:
             quary = "(select p.houseid, p.personid, p.age, p.wrkdailystatus from"
             quary = "%s (select ps.houseid, ps.personid, ps.age, w.wrkdailystatus from persons as ps"%(quary)
-            quary = "%s left join persons_daily_status_r as w on ps.houseid = w.houseid and ps.personid = w.personid)"%(quary)
+            quary = "%s left join persons_r as w on ps.houseid = w.houseid and ps.personid = w.personid)"%(quary)
             quary = "%s as p where %s %s) as b"%(quary,self.age_cond(False),wrk)
         else:
             quary = "(select p.houseid, p.personid, p.r_age, p.wrkdailystatus, p.wtperfin from"
@@ -1005,10 +1005,10 @@ class Export_Outputs(QDialog):
         
     def tables(self,istrip):
         if istrip:
-            table_names = ["trips_purpose_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
+            table_names = ["trips_purpose_r","persons","persons_r"] #"daily_work_status_r"]
             return table_names
         else:
-            table_names = ["schedule_full_r","persons","persons_daily_status_r"] #"daily_work_status_r"]
+            table_names = ["schedule_full_r","persons","persons_r"] #"daily_work_status_r"]
             return table_names 
     
     def table_name(self,names):
