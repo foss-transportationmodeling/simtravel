@@ -30,6 +30,8 @@ class PrismConstraints(object):
                  originField, destinationField, 
                  startConstraint, endConstraint,
                  asField, 
+		 distField,
+		 votdField=None,
                  sampleField = None,
                  countChoices=None, activityTypeFilter=None, threshold=None, 
                  seed=1, afterModel=None, beforeModel=None, locationInfoTable=None, 
@@ -66,9 +68,20 @@ class PrismConstraints(object):
         self.endConstraint = endConstraint
         
         if asField is not None and not isinstance(asField, str):
-            raise PrismConstraintError, """The sample field is """\
+            raise PrismConstraintError, """The as field is """\
                 """not valid; should be a str object"""
         self.asField = asField
+
+        if distField is not None and not isinstance(distField, str):
+            raise PrismConstraintError, """The dist field is """\
+                """not valid; should be a str object"""
+        self.distField = distField
+
+        if votdField is not None and not isinstance(votdField, str):
+            raise PrismConstraintError, """The votd field is """\
+                """not valid; should be a str object"""
+        self.votdField = votdField
+
 
         if sampleField is not None and not isinstance(sampleField, str):
             raise PrismConstraintError, """The sample field is """\
