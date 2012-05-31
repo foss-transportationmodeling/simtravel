@@ -3,33 +3,105 @@
   <DTAConnection value="True"/>
   <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
 
-  <TravelSkims reference_tablename="travel_skims" indb="True">
-    <Period tablename="skim0" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="0" intervalEnd="60" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim0.dat" delimiter=","/>
-    <Period tablename="skim1" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="61" intervalEnd="120" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim1.dat" delimiter=","/>
-    <Period tablename="skim2" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="121" intervalEnd="180" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim2.dat" delimiter=","/>
-    <Period tablename="skim3" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="181" intervalEnd="240" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim3.dat" delimiter=","/>
-    <Period tablename="skim4" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="241" intervalEnd="300" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim4.dat" delimiter=","/>
-    <Period tablename="skim5" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="301" intervalEnd="360" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim5.dat" delimiter=","/>
-    <Period tablename="skim6" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="361" intervalEnd="420" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim6.dat" delimiter=","/>
-    <Period tablename="skim7" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="421" intervalEnd="480" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim7.dat" delimiter=","/>
-    <Period tablename="skim8" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="481" intervalEnd="540" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim8.dat" delimiter=","/>
-    <Period tablename="skim9" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="541" intervalEnd="600" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim9.dat" delimiter=","/>
-    <Period tablename="skim10" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="601" intervalEnd="660" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim10.dat" delimiter=","/>
-    <Period tablename="skim11" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="661" intervalEnd="720" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim11.dat" delimiter=","/>
-    <Period tablename="skim12" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="721" intervalEnd="780" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim12.dat" delimiter=","/>
-    <Period tablename="skim13" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="781" intervalEnd="840" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim13.dat" delimiter=","/>
-    <Period tablename="skim14" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="841" intervalEnd="900" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim14.dat" delimiter=","/>
-    <Period tablename="skim15" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="901" intervalEnd="960" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim15.dat" delimiter=","/>
-    <Period tablename="skim16" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="961" intervalEnd="1020" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim16.dat" delimiter=","/>
-    <Period tablename="skim17" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1021" intervalEnd="1080" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim17.dat" delimiter=","/>
-    <Period tablename="skim18" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1081" intervalEnd="1140" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim18.dat" delimiter=","/>
-    <Period tablename="skim19" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1141" intervalEnd="1200" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim19.dat" delimiter=","/>
-    <Period tablename="skim20" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1201" intervalEnd="1260" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim20.dat" delimiter=","/>
-    <Period tablename="skim21" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1261" intervalEnd="1320" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim21.dat" delimiter=","/>
-    <Period tablename="skim22" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1321" intervalEnd="1380" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim22.dat" delimiter=","/>
-    <Period tablename="skim23" origin_var="origin" destination_var="destination" skim_var="tt" intervalStart="1381" intervalEnd="1440" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim23.dat" delimiter=","/>
+  <NetworkSkims>
+    <Period tablename="skim0" origin_var="origin" destination_var="destination" intervalStart="0" intervalEnd="60">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim0.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim1" origin_var="origin" destination_var="destination" intervalStart="61" intervalEnd="120">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim1.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim2" origin_var="origin" destination_var="destination" intervalStart="121" intervalEnd="180">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim2.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim3" origin_var="origin" destination_var="destination" intervalStart="181" intervalEnd="240">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim3.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim4" origin_var="origin" destination_var="destination" intervalStart="241" intervalEnd="300">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim4.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim5" origin_var="origin" destination_var="destination" intervalStart="301" intervalEnd="360">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim5.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim6" origin_var="origin" destination_var="destination" intervalStart="361" intervalEnd="420">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim6.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim7" origin_var="origin" destination_var="destination" intervalStart="421" intervalEnd="480">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim7.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim8" origin_var="origin" destination_var="destination" intervalStart="481" intervalEnd="540">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim8.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim9" origin_var="origin" destination_var="destination" intervalStart="541" intervalEnd="600">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim9.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim10" origin_var="origin" destination_var="destination" intervalStart="601" intervalEnd="660">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim10.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim11" origin_var="origin" destination_var="destination" intervalStart="661" intervalEnd="720">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim11.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim12" origin_var="origin" destination_var="destination" intervalStart="721" intervalEnd="780">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim12.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim13" origin_var="origin" destination_var="destination" intervalStart="781" intervalEnd="840">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim13.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim14" origin_var="origin" destination_var="destination" intervalStart="841" intervalEnd="900">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim14.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim15" origin_var="origin" destination_var="destination" intervalStart="901" intervalEnd="960">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim15.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim16" origin_var="origin" destination_var="destination" intervalStart="961" intervalEnd="1020">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim16.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim17" origin_var="origin" destination_var="destination" intervalStart="1021" intervalEnd="1080">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim17.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim18" origin_var="origin" destination_var="destination" intervalStart="1081" intervalEnd="1140">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim18.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim19" origin_var="origin" destination_var="destination" intervalStart="1141" intervalEnd="1200">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim19.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim20" origin_var="origin" destination_var="destination" intervalStart="1201" intervalEnd="1260">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim20.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim21" origin_var="origin" destination_var="destination" intervalStart="1261" intervalEnd="1320">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim21.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim22" origin_var="origin" destination_var="destination" intervalStart="1321" intervalEnd="1380">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim22.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+    <Period tablename="skim23" origin_var="origin" destination_var="destination" intervalStart="1381" intervalEnd="1500">
+      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/skim23.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/test/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+    </Period>
+  </NetworkSkims>
 
-  </TravelSkims>
 
   <Locations reference_tablename="locations" tablename="locations" location_var="locationid" indb="True">
     <LocationVariable var="retail_employment"/>
@@ -47,7 +119,7 @@
 
   <ModelConfig>
 
-      <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="False" completed="True">
+      <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="True" completed="True">
         <DBTables>
     	  <Table table="schedule_elapsed_r" key="houseid,personid" order="1"/>
     	  <Table table="schedule_r" key="houseid,personid"/>
@@ -70,7 +142,7 @@
 
       </Component>
 
-      <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="False" completed="True">
+      <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="True" completed="True">
         <DBTables>
     	  <Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	  <Table table="schedule_r" key="houseid,personid"/>
@@ -94,10 +166,10 @@
       </Component>
 
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
     	<Table table="schedule_r" key="houseid,personid" order="1"/>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
+    	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid"/>
       </DBTables>
 
@@ -118,19 +190,19 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
+	  <ChildDependency table="persons_r" var="dependency"/>
 	</Dependency>
       </Model>
     </Component>	
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_allocatedependent_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_allocatedependent_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
+    	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid" order="1"/>
     	<Table table="schedule_allocatedependent_r" key="houseid,personid"/>
       </DBTables>
@@ -152,19 +224,19 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
+	  <ChildDependency table="persons_r" var="dependency"/>
 	</Dependency>
       </Model>
    </Component>	
 
 
 
-    <Component name="AddTripRecordsToScheduleTableForFixingTripPurposeNotation" read_from_table="trips_arrival_from_malta_r" write_to_table="schedule_allocatedependent_r" skip="False" completed="True">
+    <Component name="AddTripRecordsToScheduleTableForFixingTripPurposeNotation" read_from_table="trips_arrival_from_malta_r" write_to_table="schedule_allocatedependent_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
     	<Table table="trips_r" key="tripid"/>
@@ -176,7 +248,7 @@
       </PreProcessData>
 
 
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -247,9 +319,9 @@
 
     </Component>
 
-    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
+    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
       <DBTables>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
+    	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="schedule_allocatedependent_r" key="houseid,personid" order="1"/>
     	<Table table="schedule_full_r" key="houseid,personid"/>
       </DBTables>
@@ -271,12 +343,12 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
+	  <ChildDependency table="persons_r" var="dependency"/>
 	</Dependency>
       </Model>
    </Component>	
@@ -286,7 +358,7 @@
       <DBTables>
     	<Table table="schedule_full_r" key="houseid,personid" order="1"/>
     	<Table table="tours_r" key="houseid,personid"/>
-    	<Table table="persons_daily_status_r" key="houseid,personid"/>
+    	<Table table="persons_r" key="houseid,personid"/>
       </DBTables>
 
       <Model name="TourAttribute" formulation="Child Dependency" type="Extract Tour Attributes" seed="1">
@@ -306,18 +378,18 @@
 	</ActivityAttributes>
 
 	<DailyStatus>
-	  <DailySchoolStatus table="persons_daily_status_r" var="schdailystatus"/>
-	  <DailyWorkStatus table="persons_daily_status_r" var="wrkdailystatus"/>
+	  <DailySchoolStatus table="persons_r" var="schdailystatus"/>
+	  <DailyWorkStatus table="persons_r" var="wrkdailystatus"/>
 	</DailyStatus>
 	
 	<Dependency>
-	  <ChildDependency table="persons_daily_status_r" var="dependency"/>
+	  <ChildDependency table="persons_r" var="dependency"/>
 	</Dependency>
       </Model>
     </Component>	
 
 
-    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="False" completed="True">
+    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_purpose_r" key="tripid"/>
     	<Table table="schedule_full_r" key="houseid,personid" order="1"/>
@@ -384,13 +456,13 @@
 
 
 
-    <Component name="CalculateGapFunction" read_from_table="trips_arrival_from_malta_r" write_to_table="gap_function_r" skip="False" completed="True">
+    <Component name="CalculateGapFunction" read_from_table="trips_arrival_from_malta_r" write_to_table="gap_function_r" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
     	<Table table="trips_r" key="tripid"/>
     	<Table table="gap_function_r" key="tripid"/>
       </DBTables>
-      <AnalysisInterval start="0" end="1440" step="1"/>
+      <AnalysisInterval start="1440" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -427,9 +499,9 @@
         <Variable table="trips_r" var="endtime" coeff="1"/>
         <Variable table="trips_r" var="starttime" coeff="-1"/>
       </Model>
-      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="sp_tt" origin_var="origin" destination_var="destination" after_model="tt_expected" before_model="gap_after">
-	<Start table="runtime" location_var="from"/>
-	<End table="runtime" location_var="tozone"/>
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="sp_tt" dist_var="dist" origin_var="origin" destination_var="destination" after_model="tt_expected" before_model="gap_after">
+	<Start table="runtime" var="from"/>
+	<End table="runtime" var="tozone"/>
       </DynamicSpatialConstraints>
       <Model name="gap_after" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="gap_after"/>
@@ -446,7 +518,7 @@
 
     </Component>
 
-    <Component name="OD_OutputTable" read_from_table="trips_r" write_to_table="od_r" skip="False" completed="False" write_to_loc="True">
+    <Component name="OD_OutputTable" read_from_table="trips_r" write_to_table="od_r" skip="True" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="od_r" key="origin,destination"/>
@@ -473,7 +545,7 @@
 
     </Component>
 
-    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="False" write_to_loc="True">
+    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="True" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_before_r" key="gap_before"/>
@@ -490,7 +562,7 @@
 
     </Component>
 
-    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="False" write_to_loc="True">
+    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="True" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_after_r" key="gap_after"/>
