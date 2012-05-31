@@ -16,7 +16,7 @@ from openamos.core.cache.dataset import DB
 from openamos.core.models.abstract_probability_model import AbstractProbabilityModel
 from openamos.core.models.interaction_model import InteractionModel
 from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
-from openamos.core.travel_skims.distprocessor import DistProcessor
+#from openamos.core.travel_skims.distprocessor import DistProcessor
 #from openamos.core.travel_skims.successive_avg_processor import SuccessiveAverageProcessor
 
 from multiprocessing import Process
