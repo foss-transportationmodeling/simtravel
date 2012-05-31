@@ -83,7 +83,7 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_aggregatefinal_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_allocatedependent_r", Schedule_Allocation_R)
 
-        self.fileh.createTable(output_grp, "persons_daily_status_r", Persons_Daily_Status_R)
+        self.fileh.createTable(output_grp, "persons_r", Persons_R)
         #self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
         #self.fileh.createTable(output_grp, "daily_school_status_r", Daily_School_Status_R)
         #self.fileh.createTable(output_grp, "daily_work_status_r", Daily_Work_Status_R)

@@ -59,12 +59,6 @@ class Locations(t.IsDescription):
     industrial_employment_density = t.Float32Col()
 
 
-class Persons_R(t.IsDescription):
-    houseid = t.Int64Col()
-    personid = t.Int32Col()
-    wtt = t.Float32Col()
-
-
 class Households_Vehicles_Count_R(t.IsDescription):
     houseid = t.Int64Col()
     vehcount = t.Int32Col()
@@ -110,12 +104,16 @@ class Persons_Fixed_Activity_Vertices_R(t.IsDescription):
     endtime = t.Int32Col()
 
 
-class Persons_Daily_Status_R(t.IsDescription):
+class Persons_R(t.IsDescription):
     houseid = t.Int64Col()
     personid = t.Int32Col()
     schdailystatus = t.Int32Col()
     wrkdailystatus = t.Int32Col()
     dependency = t.Int32Col()
+    valueoftimeperdist = t.Float32Col()
+    episodes = t.Int32Col()
+    hhwagerate = t.Float32Col()
+    valueoftime = t.Float32Col()
 
 
 class Child_Dependency_R(t.IsDescription):
