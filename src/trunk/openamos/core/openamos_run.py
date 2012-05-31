@@ -28,6 +28,9 @@ parser.add_argument('-restore', help="""this attribute specifies whether the dat
 		        """ restored from the iteration's backup folder""", 
 			default=0, type=int)
 
+parser.add_argument('-year', help="""this attribute specifies the year for which travel model is being run """, 
+			default=2012, type=int)
+
 
 argsG = vars(parser.parse_args(sys.argv[1:]))
 print argsG
@@ -52,18 +55,20 @@ def run(fileLoc=None):
     backup_results = argsG['bkup']
     numParts = argsG['nproc']
     restore = argsG['restore']
+    year = argsG['year']
 
     print iteration, create_cache, backup_results, numParts
 
     print ("""Project attributes:\n\tFile location - %s \n\tIteration count - %s """\
 		"""\n\tCreate cache - %s \n\tBackup results - %s """\
-		"""\n\tRun multiple processes - %s""" 
-		%(fileLoc, iteration, create_cache, backup_results, numParts))
+		"""\n\tRun multiple processes - %s"""\
+		"""\n\tSimulation year - %s""" 
+		%(fileLoc, iteration, create_cache, backup_results, numParts, year))
 
     #raw_input()
 
     if numParts == 0:
-    	simulationManagerObject = SimulationManager(fileLoc = fileLoc, iteration=iteration)
+    	simulationManagerObject = SimulationManager(fileLoc = fileLoc, iteration=iteration, year=year)
 	
 	if restore == 1:
 	    simulationManagerObject.restore_from_resultsBackup()
