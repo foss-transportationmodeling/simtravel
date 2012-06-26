@@ -22,7 +22,7 @@ from openamos.core.travel_skims.skimsprocessor import SkimsProcessor
 from multiprocessing import Process
 
 
-#from openamos.core.travel_skims.heat_map_skims import PlotHeatMap
+from openamos.core.travel_skims.heat_map_skims import PlotHeatMap
 from openamos.core.config import ConfigObject
 from openamos.gui.results_menu.to_msexcel_nogui import Export_Outputs
 from PyQt4.QtGui import QApplication
@@ -140,7 +140,7 @@ class SimulationManager(object):
 
 
 	# Creating and copying tabulations
-	self.backup_result_tabulations(backupDirectoryLoc)	
+	#self.backup_result_tabulations(backupDirectoryLoc)	
 
 
 	# create populate cache - 
@@ -173,23 +173,23 @@ class SimulationManager(object):
    
 	    shutil.copy(skimsTableLoc, backupDirectoryLoc)
 	    oldFile = os.path.join(oldFileFolder, "%s.dat" %skimsTableName)
-	    #if self.iteration > 1:
-	    #	dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
-	    #	print 'deviation - ', dev
-	    #	fSkimsConv.write('%s,%.4f\n' %(skimsTable,dev))
+	    if self.iteration > 1:
+	    	dev = self.calculate_skims_convergence_criterion(oldFile, skimsTableLoc, skimsTableName, backupDirectoryLoc)
+	    	print 'deviation - ', dev
+	    	fSkimsConv.write('%s,%.4f\n' %(skimsTable,dev))
 	fSkimsConv.close()
 	
 
 
-	#if self.iteration > 1:	
+	if self.iteration > 1:	
 	    # OD
-	#    fODConv = open(backupDirectoryLoc + os.path.sep + 'odConv.txt', 'w')
+	    fODConv = open(backupDirectoryLoc + os.path.sep + 'odConv.txt', 'w')
 
-	#    oldFile = os.path.join(oldFileFolder, 'od_r_None.csv')
-	#    newFile = os.path.join(backupDirectoryLoc, 'od_r_None.csv')
-	#    dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
-	#    fODConv.write('%.4f\n' %dev)
-	#    fODConv.close()
+	    oldFile = os.path.join(oldFileFolder, 'od_r_None.csv')
+	    newFile = os.path.join(backupDirectoryLoc, 'od_r_None.csv')
+	    dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
+	    fODConv.write('%.4f\n' %dev)
+	    fODConv.close()
 	
 
 	self.close_database_connection(queryBrowser)
@@ -218,7 +218,7 @@ class SimulationManager(object):
     	    # create file
     	    exportObj.accept(fileName)
 	
-    """
+    
     def calculate_skims_convergence_criterion(self, oldFileLoc, newFileLoc, skimsTableName, backupDirectory):
 	heatMapObj = PlotHeatMap()
 	return heatMapObj.createHeatMapForXY('old_%s'%skimsTableName, oldFileLoc, 
@@ -230,7 +230,7 @@ class SimulationManager(object):
 	heatMapObj = PlotHeatMap()
 	return heatMapObj.createHeatMapForIncompleteXY('old_od', oldFileLoc, 
 					      		'new_od', newFileLoc, 'od', backupDirectory)
-    """
+    
 
     def restore_from_resultsBackup(self):
 	print "-- Creating a hdf5 backup of all results --"
