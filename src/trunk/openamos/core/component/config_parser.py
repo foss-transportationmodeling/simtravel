@@ -2784,10 +2784,13 @@ class ConfigParser(object):
 	endTableVar = self.return_table_var(endConstraint_element)
 
 	votdConstraint_element = spatial_query_element.find('ValueofTimePerDistance')
-	votdTableVar = self.return_table_var(votdConstraint_element)
-	votdField = votdTableVar[1]
+	if votdConstraint_element is not None:
+	    votdTableVar = self.return_table_var(votdConstraint_element)
+	    votdField = votdTableVar[1]
 	
-	self.component_variable_list = self.component_variable_list + [votdTableVar]
+	    self.component_variable_list = self.component_variable_list + [votdTableVar]
+	else:
+	    votdField = None
 
 	#if sampleField is None:
 	#    self.component_variable_list = self.component_variable_list + [startTableVar, endTableVar]
