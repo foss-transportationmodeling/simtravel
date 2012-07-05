@@ -773,8 +773,11 @@ class AbstractComponent(object):
         originTimeColVals = array(data.columns([originTimeColName]).data, dtype=int)
         destinationTimeColVals = array(data.columns([destinationTimeColName]).data, dtype=int)
 
-	votdColName = spatialconst.votdField        
-	votdColVals = array(data.columns([votdColName]).data)
+	votdColName = spatialconst.votdField
+	if votdColName is not None:
+	    votdColVals = array(data.columns([votdColName]).data)
+	else:
+	    votdColVals = zeros((data.rows, 1))
 
 
 
@@ -886,14 +889,20 @@ class AbstractComponent(object):
         # location pair
         originLocColName = spatialconst.startConstraint.locationField
         destinationLocColName = spatialconst.endConstraint.locationField
-	votdColName = spatialconst.votdField        
 
         originLocColVals = array(data.columns([originLocColName]).data, dtype=int)
         destinationLocColVals = array(data.columns([destinationLocColName]).data, dtype=int)
-	votdColVals = array(data.columns([votdColName]).data)
+
+	votdColName = spatialconst.votdField        
+	if votdColName is not None:
+	    votdColVals = array(data.columns([votdColName]).data)
+	else:
+	    votdColVals = zeros((data.rows, 1))
+
+	#votdColVals = array(data.columns([votdColName]).data)
 
 	print '\tVOTD ColName - ', votdColName
-	print data.columns([votdColName]).data[:5,:]
+	print votdColVals
 
 	print '\tIDS - '
 	print data.columns(['houseid','personid']).data[:5,:].astype(int)
