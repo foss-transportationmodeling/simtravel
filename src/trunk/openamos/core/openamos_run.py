@@ -32,11 +32,7 @@ parser.add_argument('-year', help="""this attribute specifies the year for which
 			default=2012, type=int)
 
 
-argsG = vars(parser.parse_args(sys.argv[1:]))
-print argsG
-
-
-def run(fileLoc=None):
+def run(argsGFromFuncCall=None):
     """
     Runs the OpenAMOS program to simulate the activity-travel choices as 
     indicated by the models and their specifications in the config file.
@@ -44,12 +40,16 @@ def run(fileLoc=None):
     Please refer to OpenAMOS documentation on www.simtravel.wikispaces.asu.edu
     for guidance on setting up the configuration file.
     """
-    print 'File location is %s'%fileLoc, sys.argv
-    
-    if fileLoc is None:
-	fileLoc = argsG['file']	
+    print 'sys.argv - ', sys.argv
+    if argsGFromFuncCall <> None:
+	argsG = argsGFromFuncCall
+    else:
+	argsG = vars(parser.parse_args(sys.argv[1:]))
 	
+    print 'Parsed argsG - ', argsG
+    #raw_input('Press any key to continue ... ')
 
+    fileLoc = argsG['file']	
     iteration = argsG['it']
     create_cache = argsG['crca']
     backup_results = argsG['bkup']
