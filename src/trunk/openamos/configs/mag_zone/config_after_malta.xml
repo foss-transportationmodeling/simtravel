@@ -119,7 +119,7 @@
 
   <ModelConfig>
 
-      <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="True" completed="True">
+      <Component name="MoveEpisodesElapsed" read_from_table="schedule_elapsed_r" write_to_table="schedule_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_elapsed_r" key="houseid,personid" order="1"/>
     	  <Table table="schedule_r" key="houseid,personid"/>
@@ -142,7 +142,7 @@
 
       </Component>
 
-      <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="True" completed="True">
+      <Component name="MoveEpisodesFinal" read_from_table="schedule_final_r" write_to_table="schedule_r" skip="False" completed="True">
         <DBTables>
     	  <Table table="schedule_final_r" key="houseid,personid" order="1"/>
     	  <Table table="schedule_r" key="houseid,personid"/>
@@ -166,7 +166,7 @@
       </Component>
 
 
-    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="CleanAggregateActivitySchedule" read_from_table="schedule_r" write_to_table="schedule_aggregatefinal_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="schedule_r" key="houseid,personid" order="1"/>
     	<Table table="persons_r" key="houseid,personid"/>
@@ -200,7 +200,7 @@
       </Model>
     </Component>	
 
-    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_allocatedependent_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="ChildDependencyResolution" read_from_table="schedule_aggregatefinal_r" write_to_table="schedule_allocatedependent_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="schedule_aggregatefinal_r" key="houseid,personid" order="1"/>
@@ -236,7 +236,7 @@
 
 
 
-    <Component name="AddTripRecordsToScheduleTableForFixingTripPurposeNotation" read_from_table="trips_arrival_from_malta_r" write_to_table="schedule_allocatedependent_r" skip="True" completed="True">
+    <Component name="AddTripRecordsToScheduleTableForFixingTripPurposeNotation" read_from_table="trips_arrival_from_malta_r" write_to_table="schedule_allocatedependent_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
     	<Table table="trips_r" key="tripid"/>
@@ -248,7 +248,7 @@
       </PreProcessData>
 
 
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -319,7 +319,7 @@
 
     </Component>
 
-    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="True" completed="True">
+    <Component name="Fixing Trip Purpose" read_from_table="schedule_allocatedependent_r" write_to_table="schedule_full_r" key="houseid,personid" location="True" skip="False" completed="True">
       <DBTables>
     	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="schedule_allocatedependent_r" key="houseid,personid" order="1"/>
@@ -389,7 +389,7 @@
     </Component>	
 
 
-    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="True" completed="True">
+    <Component name="ActualTripPurposeDist" read_from_table="schedule_full_r" write_to_table="trips_purpose_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_purpose_r" key="tripid"/>
     	<Table table="schedule_full_r" key="houseid,personid" order="1"/>
@@ -456,13 +456,13 @@
 
 
 
-    <Component name="CalculateGapFunction" read_from_table="trips_arrival_from_malta_r" write_to_table="gap_function_r" skip="True" completed="True">
+    <Component name="CalculateGapFunction" read_from_table="trips_arrival_from_malta_r" write_to_table="gap_function_r" skip="False" completed="True">
       <DBTables>
     	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
     	<Table table="trips_r" key="tripid"/>
     	<Table table="gap_function_r" key="tripid"/>
       </DBTables>
-      <AnalysisInterval start="1440" end="1440" step="1"/>
+      <AnalysisInterval start="0" end="1440" step="1"/>
 
       <AnalysisIntervalFilter table="trips_arrival_from_malta_r" var="arrivaltime"/>
 
@@ -475,6 +475,11 @@
 	<DependentVariable var="personid"/>
 	<Variance value="0"/>
         <Variable table="trips_r" var="personid" coeff="1"/>
+      </Model>
+      <Model name="valueOfTimePerDistDummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="valueoftimeperdist"/>
+	<Variance value="0"/>
+        <Variable table="standard" var="one" coeff="0"/>
       </Model>
 
       <Model name="from" formulation="Regression" type="Linear" seed="1">
@@ -502,6 +507,7 @@
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="sp_tt" dist_var="dist" origin_var="origin" destination_var="destination" after_model="tt_expected" before_model="gap_after">
 	<Start table="runtime" var="from"/>
 	<End table="runtime" var="tozone"/>
+	<ValueofTimePerDistance table="runtime" var="valueoftimeperdist"/>
       </DynamicSpatialConstraints>
       <Model name="gap_after" formulation="Regression" type="Linear" seed="1">
 	<DependentVariable var="gap_after"/>
@@ -518,7 +524,7 @@
 
     </Component>
 
-    <Component name="OD_OutputTable" read_from_table="trips_r" write_to_table="od_r" skip="True" completed="True" write_to_loc="True">
+    <Component name="OD_OutputTable" read_from_table="trips_r" write_to_table="od_r" skip="False" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid" order="1"/>
     	<Table table="od_r" key="origin,destination"/>
@@ -545,7 +551,7 @@
 
     </Component>
 
-    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="True" completed="True" write_to_loc="True">
+    <Component name="Gap_Before_R" read_from_table="gap_function_r" write_to_table="gap_before_r" skip="False" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_before_r" key="gap_before"/>
@@ -562,7 +568,7 @@
 
     </Component>
 
-    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="True" completed="True" write_to_loc="True">
+    <Component name="Gap_After_R" read_from_table="gap_function_r" write_to_table="gap_after_r" skip="False" completed="True" write_to_loc="True">
       <DBTables>
     	<Table table="gap_function_r" key="tripid" order="1"/>
     	<Table table="gap_after_r" key="gap_after"/>
