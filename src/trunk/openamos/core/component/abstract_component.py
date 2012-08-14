@@ -321,7 +321,7 @@ class AbstractComponent(object):
         
         for j in range(len(model_list_duringrun)):
             i = model_list_duringrun[j]
-            print '\nRunning Model - %s; Seed - %s' %(i.dep_varname, i.seed)
+            #print '\nRunning Model - %s; Seed - %s' %(i.dep_varname, i.seed)
             #print '\t\tChecking for dynamic spatial queries'
             if j >=1:
                 prev_model_name = model_list_duringrun[j-1].dep_varname
@@ -349,7 +349,7 @@ class AbstractComponent(object):
                 #choicenames = i.model.specification.choices
                 choiceset = None
                     
-                print '    RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:5,0]
+                #print '    RESULT BEFORE', self.data.columns([i.dep_varname], data_subset_filter).data[:5,0]
 
                 if i.model_type <> 'consistency':
                     result = i.simulate_choice(data_subset, choiceset, iteration)
@@ -374,7 +374,7 @@ class AbstractComponent(object):
 		    data_subset_filter = array([True]*self.data.rows)
 	      
 		#print result.varnames
-                print '    RESULT', result.data[:5]
+                #print '    RESULT', result.data[:5]
 	    """
 	    if i.dep_varname == 'tt_from1':
 		raw_input()
@@ -819,15 +819,15 @@ class AbstractComponent(object):
 								     spatialconst.locationFilterType, 
 								     locationsTable)
 		#print 'Only so many possible locations - ', location_subset_filter.sum()
-		#print 'shape of filter', location_subset_filter.shape
-		uniqueIds = uniqueIds[location_subset_filter]
-	
+		#print 'shape of filter', location_subset_filter.shape, uniqueIds.shape, locationsTable.rows
+		uniqueIds = uniqueIds[location_subset_filter[1:]]
+                
 
 
-	print 'Origin - ', originLocColVals[:,0]
-	print 'Destination - ', destinationLocColVals[:,0]
+	#print 'Origin - ', originLocColVals[:,0]
+	#print 'Destination - ', destinationLocColVals[:,0]
 	timeAvailable = timeAvailable.astype(float)
-	print 'Time Available - ', timeAvailable[:,0].astype(int)	
+	#print 'Time Available - ', timeAvailable[:,0].astype(int)	
 	
 
 	#print spatialconst.countChoices, data.rows
@@ -836,11 +836,11 @@ class AbstractComponent(object):
 					  		    timeAvailable[:,0], votdColVals[:,0], spatialconst.countChoices,
 							    uniqueIds)
 
-	print 'count of valid locations - ', (locationChoices <> 0).sum(-1)
+	#print 'count of valid locations - ', (locationChoices <> 0).sum(-1)
 	locValidCount = (locationChoices <> 0).sum(-1)
 	data.setcolumn('count', locValidCount)
 
-	print locationChoices
+	#print locationChoices
 	
 	for i in range(spatialconst.countChoices):
 	    sampleLocColVals = locationChoices[:,i].astype(int)
@@ -901,27 +901,27 @@ class AbstractComponent(object):
 
 	#votdColVals = array(data.columns([votdColName]).data)
 
-	print '\tVOTD ColName - ', votdColName
-	print votdColVals
+	#print '\tVOTD ColName - ', votdColName
+	#print votdColVals
 
-	print '\tIDS - '
-	print data.columns(['houseid','personid']).data[:5,:].astype(int)
+	#print '\tIDS - '
+	#print data.columns(['houseid','personid']).data[:5,:].astype(int)
 
 
 	#tt = skimsMatrix.get_travel_times(originLocColVals[:,0], destinationLocColVals[:,0])
 	dist = skimsMatrix.get_travel_distances(originLocColVals[:,0], destinationLocColVals[:,0])
 	tt = skimsMatrix.get_generalized_time(originLocColVals[:,0], destinationLocColVals[:,0], votdColVals[:,0])
 
-	if (tt < 3).any():
-	    print 'TTS', tt[tt<3]
-	    print 'IDS', data.columns(['houseid','personid']).data.astype(int)[tt<3]
-	    print 'Origin', originLocColVals[tt<3]
-	    print 'Destination', destinationLocColVals[tt<3]
+	#if (tt < 3).any():
+	    #print 'TTS', tt[tt<3]
+	    #print 'IDS', data.columns(['houseid','personid']).data.astype(int)[tt<3]
+	    #print 'Origin', originLocColVals[tt<3]
+	    #print 'Destination', destinationLocColVals[tt<3]
 	    #raw_input('Travel time less 3')
 
 
-	print 'gen tt', tt
-	print 'distance', dist
+	#print 'gen tt', tt
+	#print 'distance', dist
 
         if spatialconst.asField:
             colName = spatialconst.asField
