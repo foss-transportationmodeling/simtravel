@@ -783,7 +783,7 @@ class AbstractComponent(object):
 								     locationsTable)
 		#print 'Only so many possible locations - ', location_subset_filter.sum()
 		#print 'shape of filter', location_subset_filter.shape
-		uniqueIds = uniqueIds[location_subset_filter]
+                uniqueIds = uniqueIds[location_subset_filter[1:]]
 	
 
 
