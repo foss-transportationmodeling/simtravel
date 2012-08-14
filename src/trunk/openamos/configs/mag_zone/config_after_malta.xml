@@ -1,104 +1,104 @@
 <ProjectConfig>
-  <Project name="mag_zone_dynamic" location="/home/karthik/simtravel/projects/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="1234"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="openamos" dbpassword="Wel!come"/>
 
   <NetworkSkims>
     <Period tablename="skim0" origin_var="origin" destination_var="destination" intervalStart="0" intervalEnd="60">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim0.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim0.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim1" origin_var="origin" destination_var="destination" intervalStart="61" intervalEnd="120">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim1.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim1.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim2" origin_var="origin" destination_var="destination" intervalStart="121" intervalEnd="180">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim2.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim2.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim3" origin_var="origin" destination_var="destination" intervalStart="181" intervalEnd="240">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim3.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim3.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim4" origin_var="origin" destination_var="destination" intervalStart="241" intervalEnd="300">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim4.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim4.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim5" origin_var="origin" destination_var="destination" intervalStart="301" intervalEnd="360">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim5.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim5.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim6" origin_var="origin" destination_var="destination" intervalStart="361" intervalEnd="420">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim6.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim6.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim7" origin_var="origin" destination_var="destination" intervalStart="421" intervalEnd="480">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim7.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim7.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim8" origin_var="origin" destination_var="destination" intervalStart="481" intervalEnd="540">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim8.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim8.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim9" origin_var="origin" destination_var="destination" intervalStart="541" intervalEnd="600">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim9.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim9.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim10" origin_var="origin" destination_var="destination" intervalStart="601" intervalEnd="660">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim10.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim10.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim11" origin_var="origin" destination_var="destination" intervalStart="661" intervalEnd="720">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim11.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim11.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim12" origin_var="origin" destination_var="destination" intervalStart="721" intervalEnd="780">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim12.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim12.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim13" origin_var="origin" destination_var="destination" intervalStart="781" intervalEnd="840">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim13.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim13.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim14" origin_var="origin" destination_var="destination" intervalStart="841" intervalEnd="900">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim14.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim14.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim15" origin_var="origin" destination_var="destination" intervalStart="901" intervalEnd="960">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim15.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim15.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim16" origin_var="origin" destination_var="destination" intervalStart="961" intervalEnd="1020">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim16.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim16.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim17" origin_var="origin" destination_var="destination" intervalStart="1021" intervalEnd="1080">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim17.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim17.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim18" origin_var="origin" destination_var="destination" intervalStart="1081" intervalEnd="1140">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim18.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim18.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim19" origin_var="origin" destination_var="destination" intervalStart="1141" intervalEnd="1200">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim19.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim19.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim20" origin_var="origin" destination_var="destination" intervalStart="1201" intervalEnd="1260">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim20.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim20.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim21" origin_var="origin" destination_var="destination" intervalStart="1261" intervalEnd="1320">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim21.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim21.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim22" origin_var="origin" destination_var="destination" intervalStart="1321" intervalEnd="1380">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim22.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim22.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
     <Period tablename="skim23" origin_var="origin" destination_var="destination" intervalStart="1381" intervalEnd="1500">
-      <Time skim_var="tt" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/skim23.dat" delimiter=","/>
-      <Distance skim_var="dist" fileLocation="/home/karthik/simtravel/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
+      <Time skim_var="tt" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/skim23.dat" delimiter=","/>
+      <Distance skim_var="dist" fileLocation="/workspace/projects/mag_zone_dynamic/skimOutput/dynamic/distance0.dat" delimiter=","/>
     </Period>
   </NetworkSkims>
 
