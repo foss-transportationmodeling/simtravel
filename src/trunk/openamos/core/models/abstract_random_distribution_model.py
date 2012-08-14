@@ -37,6 +37,9 @@ class RandomDistribution(object):
     def return_random_variables(self, size=None):
 	#print 'this is size in random variables - ', size
 	#print 'this is seed - ', self.seed
+        if size == None:
+	    randStObj = RandomState(self.seed)
+            return randStObj.random_sample()
     	rand_vars = []
 	for count in range(size):
 	    i = self.seed[count]
