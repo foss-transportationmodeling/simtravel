@@ -139,9 +139,6 @@ class SimulationManager(object):
 		print 'backing up results for individual component'
 
 
-	# Creating and copying tabulations
-	#self.backup_result_tabulations(backupDirectoryLoc)	
-
 
 	# create populate cache - 
 	tableList = self.db.list_of_outputtables()
@@ -190,7 +187,9 @@ class SimulationManager(object):
 	    dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
 	    fODConv.write('%.4f\n' %dev)
 	    fODConv.close()
-	
+
+	# Creating and copying tabulations
+	self.backup_result_tabulations(backupDirectoryLoc)	
 
 	self.close_database_connection(queryBrowser)
 
