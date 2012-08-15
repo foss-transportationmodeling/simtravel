@@ -3156,6 +3156,7 @@
         <Variable table="runtime" var="starttime" coeff="1"/>
         <Variable table="runtime" var="adjustment" coeff="1"/>
       </Model>
+
       <Model name="SecondEndtime" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="endtime"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -3163,6 +3164,8 @@
         <Variance value="0"/>
         <Variable table="runtime" var="en_endtime" coeff="1"/>
       </Model>
+
+
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="duration"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -3171,6 +3174,28 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
+
+      <Model name="RecStartTime" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="starttime"/>
+        <FilterSet type="and"/>
+        <Filter table="runtime" var="duration" condition="less than" value="1"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="standard" var="one" coeff="-1"/>
+      </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="duration"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
+
       <Model name="ScheduleId" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="scheduleid"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
@@ -3435,6 +3460,27 @@
         <Variable table="runtime" var="endtime" coeff="1"/>
         <Variable table="runtime" var="starttime" coeff="-1"/>
       </Model>
+
+      <Model name="RecEndTime" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="endtime"/>
+        <FilterSet type="and"/>
+        <Filter table="runtime" var="duration" condition="less than" value="1"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="starttime" coeff="1"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+
+      <Model name="Duration" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="duration"/>
+        <Filter table="runtime" var="repeat" condition="equals" value="2"/>
+        <RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
+        <Variance value="0"/>
+        <Variable table="runtime" var="endtime" coeff="1"/>
+        <Variable table="runtime" var="starttime" coeff="-1"/>
+      </Model>
+
+
       <Model name="ScheduleId" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="scheduleid"/>
         <Filter table="runtime" var="repeat" condition="equals" value="2"/>
