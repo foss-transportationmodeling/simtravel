@@ -512,7 +512,7 @@ class SimulationManager(object):
 					       nRowsProcessed2, partId, createIndex, deleteIndex)
 			
                     #if nRowsProcessed > 0:
-		    # 	raw_input()
+		    # 	raw_input('Check outputs for this component --- ')
                 configParser.update_completedFlag(comp.component_name, comp.analysisInterval)
         
             	comp.data = None
@@ -562,11 +562,11 @@ class SimulationManager(object):
 	self.skimsMatrix.set_dist_fileString(distTableLocation)
 	self.skimsMatrix.create_graph()
 	
-	print 'TRAVEL Skims object created --'
+	#print 'TRAVEL Skims object created --'
 	#raw_input("check memory after distance skims -- ")
-	print 'Check travel times -- ', self.skimsMatrix.get_travel_times(array([1,2,3,4]), array([1,2,3,4]))
-	print 'Check distances -- ', self.skimsMatrix.get_travel_distances(array([1,2,3,4]), array([1,2,3,4]))
-	print 'Check generalized cost tt + dist*2 -- ', self.skimsMatrix.get_generalized_time(array([1,2,3,4]), array([1,2,3,4]))
+	#print 'Check travel times -- ', self.skimsMatrix.get_travel_times(array([1,2,3,4]), array([1,2,3,4]))
+	#print 'Check distances -- ', self.skimsMatrix.get_travel_distances(array([1,2,3,4]), array([1,2,3,4]))
+	#print 'Check generalized cost tt + dist*2 -- ', self.skimsMatrix.get_generalized_time(array([1,2,3,4]), array([1,2,3,4]))
 	#raw_input("Check values -- ")
 
     def save_configFile(self, configParser, partId):
