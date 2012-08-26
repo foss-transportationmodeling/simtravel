@@ -235,7 +235,7 @@
         <DependentVariable var="dummy"/>
         <Variance value="0"/>
         <Variable table="households" var="htaz" coeff="0"/>
-        <Variable table="persons" var="schtaz" coeff="0"/>
+        <Variable table="persons" var="schtaz1" coeff="0"/>
       </Model>
 
       <Model name="HHWageRate" formulation="Regression" type="Linear" seed="1">
@@ -269,7 +269,7 @@
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination" after_model="valueoftimeperdist" before_model="schdailystatus">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz"/>
+        <End table="persons" var="schtaz1"/>
 	<ValueofTimePerDistance table="runtime" var="valueoftimeperdist"/>
       </DynamicSpatialConstraints>
 
@@ -1003,7 +1003,7 @@
         <DependentVariable var="locationid"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="schtaz" coeff="1"/>
+        <Variable table="persons" var="schtaz1" coeff="1"/>
       </Model>
       <Model name="StartTime" formulation="Regression" type="Linear" vertex="start" lower_threshold="185" upper_threshold="510" seed="1">
       	<!-- Model Updated-->
@@ -1129,7 +1129,7 @@
         <Filter table="persons" var="schstat" condition="equals" value="1"/>
         <Filter table="persons" var="nadlt" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="schtaz" coeff="1"/>
+        <Variable table="persons" var="schtaz1" coeff="1"/>
       </Model>
       <Model name="StartTime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="179" upper_threshold="284" seed="1">
 	<!-- Model Updated-->
@@ -1278,7 +1278,7 @@
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz"/>
+        <End table="persons" var="schtaz1"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
 
@@ -1415,6 +1415,14 @@
         <Variable table="households" var="hhsize" coeff="-22.5521934"/>
       </Model>
 
+      <Model name="endtime" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="endtime"/>
+        <Filter table="runtime" var="endtime" condition="less than" value="1"/>
+        <Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
+      </Model>
+
+
       <Model name="Duration" formulation="Regression" type="Linear" seed="1">
         <DependentVariable var="duration"/>
         <Variance value="0"/>
@@ -1447,7 +1455,7 @@
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz"/>
+        <End table="persons" var="schtaz1"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetowk" dist_var="dist" origin_var="origin" destination_var="destination">
@@ -1596,6 +1604,13 @@
         <Variable table="households" var="own" coeff="-9.77480601"/>
         <Variable table="households" var="inc75t100" coeff="-11.7398684"/>
         <Variable table="runtime" var="age2" coeff="10.5771594"/>
+      </Model>
+
+      <Model name="starttime" formulation="Regression" type="Linear" seed="1">
+        <DependentVariable var="starttime"/>
+        <Filter table="runtime" var="starttime" condition="less than" value="1"/>
+        <Variance value="0"/>
+        <Variable table="standard" var="one" coeff="1"/>
       </Model>
 
       <Model name="endtime" formulation="Regression" type="Linear" seed="1">
@@ -2517,7 +2532,8 @@
 	<Filter table="runtime" var="repeat" condition="equals" value="2"/>
 	<Filter table="persons_r" var="dependency" condition="equals" value="1"/>
 	<Filter table="runtime" var="prismdur" condition="less than equals" valuetable="runtime" valuevar="tt_to"/>
-	<Filter table="runtime" var="st_activitytype" condition="equals" value="300"/>
+	<Filter table="runtime" var="st_activitytype" condition="greater than equals" value="200"/>
+	<Filter table="runtime" var="st_activitytype" condition="less than equals" value="300"/>
 	<Filter table="runtime" var="en_activitytype" condition="equals" value="100"/>
 	<RunUntilCondition table="runtime" var="repeat" condition="less than equals" value="2"/>
 	<Variance value="0"/>
