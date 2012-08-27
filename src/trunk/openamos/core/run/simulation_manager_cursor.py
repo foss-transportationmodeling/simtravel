@@ -145,7 +145,7 @@ class SimulationManager(object):
 
 	tableList = ['schedule_skeleton_r', 'schedule_final_r', 'schedule_elapsed_r', 
 		     'trips_r', 'trips_to_malta_r', 'trips_arrival_from_malta_r',
-		     'households_vehicles_count_r', 'persons_r']
+		     'households_vehicles_count_r', 'persons_r', 'schedule_full_r', 'trips_purpose_r']
 
 	for tableName in tableList:
 	    #print 'Backing up results for table - ', tableName
