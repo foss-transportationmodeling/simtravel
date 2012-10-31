@@ -235,7 +235,7 @@ class SimulationManager(object):
 	print "-- Creating a hdf5 backup of all results --"
 	fileLoc = self.projectConfigObject.location
 
-	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "iteration_%d" %self.iteration)
+	backupDirectoryLoc = os.path.join(self.projectConfigObject.location, "year_%d"%self.year, "iteration_%d" %self.iteration)
 
 	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
 	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
@@ -663,5 +663,8 @@ class SimulationManager(object):
         self.db.close()
 
 if __name__ == '__main__':
-    pass
+
+    simMan = SimulationManager(fileLoc="/workspace/openamos/configs/mag_zone/config_after_malta.xml", iteration=2, year=2019)
+    simMan.backup_result_tabulations("/workspace/projects/mag_zone_dynamic/year_2019/")	
+
 
