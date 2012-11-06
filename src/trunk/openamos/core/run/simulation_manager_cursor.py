@@ -4,6 +4,7 @@ import os
 import shutil
 import traceback, sys
 import csv
+import subprocess
 from lxml import etree
 from numpy import array, ma, ones, zeros, vstack, where
 
@@ -130,16 +131,15 @@ class SimulationManager(object):
 	self.setup_inputCacheTables()
 	self.setup_outputCacheTables()
 
-
-	# Copying results for components that generate runtime outputs
+	# Copying results for components that generate runtime outputs e.g. od_r, gap_before_r, gap_after_r etc.
 	for component in self.componentList:
 	    if component.writeToLocFlag == True:
 		tableName = component.writeToTable
 		self.reflectFromDatabaseToLoc(queryBrowser, tableName, backupDirectoryLoc)
-		print 'backing up results for individual component'
+		print 'Backing up results for table - %s' %tableName
 
 
-
+	"""
 	# create populate cache - 
 	tableList = self.db.list_of_outputtables()
 
@@ -156,10 +156,32 @@ class SimulationManager(object):
 	fileLoc = os.path.join(self.projectConfigObject.location, 'amosdb.h5')
 	backupFileLoc = os.path.join(backupDirectoryLoc, 'amosdb.h5')
 	shutil.copyfile(fileLoc, backupFileLoc)
-
+	"""
+		
 	# Copying the skims ... 
 	print 'Copying the skim files to the iteration folder'
 	oldFileFolder = os.path.join(self.projectConfigObject.location, "year_%d"%self.year, "iteration_%d" %(int(self.iteration)-1))
+
+	# dumping the postgres database
+	print 'Starting the postgres database dump - '
+	dbConfigObject = self.configParser.parse_databaseAttributes()
+	host = dbConfigObject.host_name
+	username = dbConfigObject.user_name
+	dbname = dbConfigObject.database_name
+	backupFileLoc = os.path.join(backupDirectoryLoc, 'db.backup')
+ 	
+	cmd = '/usr/bin/pg_dump --host %s --port 5432 --username "%s" --no-password  --verbose --file "%s" "%s"' %(host, username, backupFileLoc, dbname)
+	
+	try:
+	    stdout, stderr= subprocess.Popen(cmd,
+                                         shell = True
+                                      ).communicate()
+	except Exception, e:
+	    print cmd
+            print "Error occured when backing up the database", e
+	    
+	print "\tDumping the postgres database completed"
+
 
 
 	# Skims
