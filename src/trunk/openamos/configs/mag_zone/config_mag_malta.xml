@@ -146,11 +146,10 @@
     <Component name="PersonsArrived" read_from_table="trips_arrival_from_malta_r" write_to_table="persons_arrived_r" key="tripid" skip="False" completed="True">
       <DBTables>
 	<Table table="trips_to_malta_r" key="tripid"/>
-	<Table table="trips_r" key="tripid" order="1"/>
-    	<Table table="trips_arrival_from_malta_r" key="tripid"/>
+	<Table table="trips_r" key="tripid"/>
+    	<Table table="trips_arrival_from_malta_r" key="tripid" order="1"/>
     	<Table table="persons_arrived_r" key="tripid"/>
     	<Table table="persons" key="houseid,personid"/>
-
 
       </DBTables>
 
@@ -3492,11 +3491,21 @@
 
     <Component name="ProcessingArrivalForEpisodesWithNonHHMembers" read_from_table="trips_r" write_to_table="trips_arrival_from_malta_r" skip="False" completed="True">
       <DBTables>
-    	<Table table="trips_r" key="tripid" order="1"/>
+    	<Table table="trips_r" key="houseid,personid" order="1"/>
+    	<Table table="persons_r" key="houseid,personid"/>
     	<Table table="trips_arrival_from_malta_r" key="tripid"/>
       </DBTables>
 
       <AnalysisIntervalFilter table="trips_r" var="starttime"/>
+
+      <Model name="dummy" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="dummy"/>
+	<Filter table="trips_r" var="tripwithhhmember" condition="equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="trips_r" var="fromzone" coeff="0"/>
+        <Variable table="trips_r" var="tozone" coeff="0"/>
+        <Variable table="trips_r" var="tripid" coeff="0"/>
+      </Model>
 
 
       <Model name="arrivaltime" formulation="Regression" type="Linear" seed="1">
@@ -3505,6 +3514,21 @@
 	<Variance value="0"/>
         <Variable table="trips_r" var="endtime" coeff="1"/>
       </Model>
+
+      <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="tt_to" dist_var="dist" origin_var="origin" destination_var="destination" after_model="arrivaltime" before_model="distance">
+	  <Start table="trips_r" var="fromzone"/>
+	  <End table="trips_r" var="tozone"/>
+	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
+      </DynamicSpatialConstraints>
+
+
+      <Model name="distance" formulation="Regression" type="Linear" seed="1">
+	<DependentVariable var="distance"/>
+	<Filter table="trips_r" var="tripwithhhmember" condition="equals" value="2"/>
+	<Variance value="0"/>
+        <Variable table="runtime" var="dist" coeff="1"/>
+      </Model>
+
 
     </Component>
 
