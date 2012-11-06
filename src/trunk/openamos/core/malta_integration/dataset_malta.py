@@ -54,7 +54,7 @@ class DB(object):
 					      'dependentpersonid', 'persononnetworkflag'],
 			  'current_occupancy_r':['houseid', 'personid', 'tripid', 'occupancy', 'dependentpersonid', 'tripcount'],
 			  'trips_invalid_r':['tripid', 'tripind'],
-			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime'],
+			  'trips_arrival_from_malta_r':['tripid', 'arrivaltime', 'distance'],
 			  'trips_arrival_from_openamos_r':['tripid', 'arrivaltime'],
 			  'persons_arrived_r':['houseid', 'personid', 'tripid', 'expectedstarttime', 
 					       'expectedarrivaltime', 'actualarrivaltime', 'tripdependentpersonid', 'fromzone', 'tozone', 'tripcount'],
@@ -107,7 +107,7 @@ class DB(object):
 			'dependentpersonid':int64, 'ih_history':int32, 'discretionary_history':int32, 
 			'maintenance_history':int32, 'fixed_history':int32, 
 			'tripcount':int64, 'lasttripcount':int64, 'starttripcount':int64, 'endtripcount':int64,
-			'startdependentpersonid':int64, 'enddependentpersonid':int64, 'tripcount':int64, 'lasttripcount':int64}
+			'startdependentpersonid':int64, 'enddependentpersonid':int64, 'tripcount':int64, 'lasttripcount':int64, 'distance':float64}
 
 	
 
