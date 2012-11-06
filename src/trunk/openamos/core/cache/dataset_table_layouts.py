@@ -97,6 +97,19 @@ class Schedule_Allocation_R(t.IsDescription):
     dependentpersonid = t.Int64Col()
     tripcount = t.Int64Col()
 
+class Schedule_Allocation_R1(t.IsDescription):
+    scheduleid = t.Int64Col()
+    houseid = t.Int64Col()
+    personid = t.Int32Col()
+    activitytype = t.Int32Col()
+    locationid = t.Int32Col()
+    starttime = t.Int32Col()
+    endtime = t.Int32Col()
+    duration = t.Int32Col()
+    dependentpersonid = t.Int64Col()
+    tripcount = t.Int64Col()
+
+
 class Persons_Fixed_Activity_Vertices_R(t.IsDescription):
     houseid = t.Int32Col()
     personid = t.Int32Col()
@@ -163,14 +176,27 @@ class Trips_R(t.IsDescription):
 
 
 class Trips_Purpose_R(t.IsDescription):
+    tripid = t.Int32Col()
     houseid = t.Int32Col()
     personid = t.Int32Col()
+    trippurpose = t.Int32Col()
+    endtime = t.Int32Col()
+    duration = t.Int32Col()
+
+class Trips_Full_R(t.IsDescription):
+    tripid = t.Int32Col()
+    houseid = t.Int32Col()
+    personid = t.Int32Col() 
+    fromzone = t.Int32Col()
+    tozone = t.Int32Col()
     starttime = t.Int32Col()
     endtime = t.Int32Col()
     duration = t.Int32Col()
     trippurpose = t.Int32Col()
     dependentpersonid = t.Int64Col()
     tripcount = t.Int64Col()
+    occupancy = t.Int32Col()
+    distance = t.Float64Col()
 
 class Trips_Invalid_R(t.IsDescription):
     tripid = t.Int64Col()
@@ -267,26 +293,13 @@ class Persons_Leaving_Valid_Trips_Id_R(t.IsDescription):
 class Trips_Arrival_R(t.IsDescription):
     tripid = t.Int32Col()
     arrivaltime = t.Int32Col()
+    distance = t.Float64Col()
 
 
 class Trips_Occupant_Origin_Invalid_R(t.IsDescription):
     tripid = t.Int32Col()
     tripvalid = t.Int32Col()
     tripstarttime = t.Int32Col()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class Gap_Function_R(t.IsDescription):
     tripid = t.Int64Col()

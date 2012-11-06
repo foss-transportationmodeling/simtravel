@@ -79,9 +79,10 @@ class DB(object):
         self.fileh.createTable(output_grp, "schedule_inctravelrec_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_final_r", Schedule_Allocation_R)
         self.fileh.createTable(output_grp, "schedule_elapsed_r", Schedule_Allocation_R)
-        self.fileh.createTable(output_grp, "schedule_full_r", Schedule_Allocation_R)
+        self.fileh.createTable(output_grp, "schedule_inctrips_r", Schedule_Allocation_R1)
+        self.fileh.createTable(output_grp, "schedule_full_r", Schedule_Allocation_R1)
         self.fileh.createTable(output_grp, "schedule_aggregatefinal_r", Schedule_Allocation_R)
-        self.fileh.createTable(output_grp, "schedule_allocatedependent_r", Schedule_Allocation_R)
+        self.fileh.createTable(output_grp, "schedule_allocatedependent_r", Schedule_Allocation_R1)
 
         self.fileh.createTable(output_grp, "persons_r", Persons_R)
         #self.fileh.createTable(output_grp, "child_dependency_r", Child_Dependency_R)
@@ -90,6 +91,7 @@ class DB(object):
 
         self.fileh.createTable(output_grp, "persons_prism_activities_r", Persons_Prism_Activities_R)
         self.fileh.createTable(output_grp, "trips_r", Trips_R)
+        self.fileh.createTable(output_grp, "trips_full_r", Trips_Full_R)
         self.fileh.createTable(output_grp, "trips_purpose_r", Trips_Purpose_R)
         self.fileh.createTable(output_grp, "trips_invalid_r", Trips_Invalid_R)
         self.fileh.createTable(output_grp, "current_occupancy_r", Occupancy_R)
