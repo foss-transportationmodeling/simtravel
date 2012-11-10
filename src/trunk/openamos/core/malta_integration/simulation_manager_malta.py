@@ -33,7 +33,7 @@ class SimulationManager(object):
     def __init__(self):
 	#, configObject=None, fileLoc=None, component=None):
 	#TODO: REMOVE PLACEHOLDER 
-	fileLoc = '/workspace/openamos/configs/mag_zone/config_mag_malta.xml'
+	fileLoc = '/home/karthik/simtravel/openamos/configs/mag_zone/config_mag_malta.xml'
 	configObject = None
 
 
@@ -178,11 +178,13 @@ class SimulationManager(object):
         # To test python simulation_manager_cursor.py use dummy arrival info
 
 	if tripInfoArrivals.shape[0] > 1 or (tripInfoArrivals.shape[0] == 1 and tripInfoArrivals[0] <> -1):
-            dataVals = zeros((tripInfoArrivals.shape[0], 2))
-            dataVals[:,0] = tripInfoArrivals
+	    arrSize = tripInfoArrivals.shape[0]
+            dataVals = zeros((arrSize/2, 3))
+            dataVals[:,0] = tripInfoArrivals[:arrSize/2]
             dataVals[:,1] = analysisInterval - 1
+	    dataVals[:,2] = tripInfoArrivals[arrSize/2:]
 
-            data = DataArray(dataVals, ['tripid', 'arrivaltime'])
+            data = DataArray(dataVals, ['tripid', 'arrivaltime', 'distance'])
         else:
             data = None
 
