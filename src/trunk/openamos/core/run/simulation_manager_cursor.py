@@ -170,7 +170,7 @@ class SimulationManager(object):
 	dbname = dbConfigObject.database_name
 	backupFileLoc = os.path.join(backupDirectoryLoc, 'db.backup')
  	
-	cmd = '/usr/bin/pg_dump --host %s --port 5432 --username "%s" --no-password  --verbose --file "%s" "%s"' %(host, username, backupFileLoc, dbname)
+	cmd = '/usr/bin/pg_dump --host %s --port 5432 --username "%s" --role "postgres" --no-password  --format tar --blobs --encoding SQL_ASCII --verbose --file "%s" "%s"' %(host, username, backupFileLoc, dbname)
 	
 	try:
 	    stdout, stderr= subprocess.Popen(cmd,
