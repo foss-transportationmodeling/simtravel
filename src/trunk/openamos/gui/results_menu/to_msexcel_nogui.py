@@ -269,9 +269,9 @@ class Export_Outputs(object):
         elif nhts and column == "starttime":
             temp = "(select houseid, personid, max(%s) as %s from trips_nhts group by houseid, personid) as d"%('endtime', 'starttime')
         elif not nhts and column == "endtime":
-            temp = "(select houseid, personid, min(%s) as %s from trips_purpose_r group by houseid, personid) as d"%('starttime', 'endtime')
+            temp = "(select houseid, personid, min(%s) as %s from trips_full_r group by houseid, personid) as d"%('starttime', 'endtime')
         else:
-            temp = "(select houseid, personid, max(%s) as %s from trips_purpose_r group by houseid, personid) as d"%('endtime', 'starttime')
+            temp = "(select houseid, personid, max(%s) as %s from trips_full_r group by houseid, personid) as d"%('endtime', 'starttime')
 
                
         return temp
@@ -351,7 +351,7 @@ class Export_Outputs(object):
             sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))               
 
             
-            #print sql
+            print sql
             self.new_obj.cursor.execute(sql)
             data = self.new_obj.cursor.fetchall()
             
@@ -937,7 +937,7 @@ class Export_Outputs(object):
         
     def tables(self,istrip):
         if istrip:
-            table_names = ["trips_purpose_r","persons","persons_r"] #"daily_work_status_r"]
+            table_names = ["trips_full_r","persons","persons_r"] #"daily_work_status_r"]
             return table_names
         else:
             table_names = ["schedule_full_r","persons","persons_r"] #"daily_work_status_r"]
@@ -947,8 +947,8 @@ class Export_Outputs(object):
         for i in range(len(names)):
             if names[i].find("_full_r") > -1:
                 names[i] = names[i].replace("_full_r","") + "_nhts"
-            elif names[i].find("_purpose_r") > -1:
-                names[i] = names[i].replace("_purpose_r","") + "_nhts"  
+            elif names[i].find("_full_r") > -1:
+                names[i] = names[i].replace("_full_r","") + "_nhts"  
             elif names[i].find("_r") > -1:
                 names[i] = names[i].replace("_r","") + "_nhts"  
             else:
