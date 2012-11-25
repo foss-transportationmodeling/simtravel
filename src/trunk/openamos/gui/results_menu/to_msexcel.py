@@ -334,14 +334,14 @@ class Export_Outputs(QDialog):
     def quary1(self,column,nhts):
         
         if nhts and column == "endtime":
-            temp = "(select houseid, personid, min(%s) as %s from schedule_nhts where activitytype = 100 group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, min(%s) as %s from trips_nhts group by houseid, personid) as d"%('starttime','endtime')
         elif nhts and column == "starttime":
-            temp = "(select houseid, personid, max(%s) as %s from schedule_nhts where activitytype = 100 group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, max(%s) as %s from trips_nhts group by houseid, personid) as d"%('endtime','starttime')
         elif not nhts and column == "endtime":
-            temp = "(select houseid, personid, min(%s) as %s from schedule_full_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
+            temp = "(select houseid, personid, min(%s) as %s from trips_full_r group by houseid, personid) as d"%('starttime','endtime')
         else:
-            temp = "(select houseid, personid, max(%s) as %s from schedule_full_r where activitytype = 100 group by houseid, personid) as d"%(column,column)
-               
+            temp = "(select houseid, personid, max(%s) as %s from trips_full_r group by houseid, personid) as d"%('endtime','starttime')
+            
         return temp
 
     def per_quary(self,nhts):
@@ -419,7 +419,7 @@ class Export_Outputs(QDialog):
             sql = "%s, %s where a.houseid = b.houseid and a.personid = b.personid"%(sql,self.per_quary(nhts))               
 
             
-            #print sql
+            print sql
             self.new_obj.cursor.execute(sql)
             data = self.new_obj.cursor.fetchall()
             
@@ -488,7 +488,7 @@ class Export_Outputs(QDialog):
                 
             sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
             sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
-            #print sql
+            print sql
              
             self.new_obj.cursor.execute(sql)
             rows = self.new_obj.cursor.fetchall()
@@ -556,7 +556,7 @@ class Export_Outputs(QDialog):
                 
                 sql = "%s left join (select houseid, personid, count(*) as freq from %s %s group by houseid, personid) as a"%(sql,tnames[0],where)  
                 sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
-                #print sql
+                print sql
                  
                 self.new_obj.cursor.execute(sql)
                 rows = self.new_obj.cursor.fetchall()
@@ -783,7 +783,7 @@ class Export_Outputs(QDialog):
 #                sql = "%s where a.houseid = b.houseid and a.personid = b.personid"%(sql)
             sql = "%s group by a.%s order by a.%s"%(sql,acttype,acttype)
             
-            #print sql
+            print sql
             self.new_obj.cursor.execute(sql)
             data = self.new_obj.cursor.fetchall()
 
@@ -835,7 +835,7 @@ class Export_Outputs(QDialog):
         sql = "%s on a.houseid = b.houseid and a.personid = b.personid group by a.freq order by a.freq"%(sql)
 
         
-        #print sql
+        print sql
         self.new_obj.cursor.execute(sql)
         data = self.new_obj.cursor.fetchall()
         
@@ -932,7 +932,7 @@ class Export_Outputs(QDialog):
                 sql = "%s where %s = %d and duration >= 0 group by houseid, personid)" %(sql,acttype,lowhigh[0])
             sql = "%s as a on a.houseid = b.houseid and a.personid = b.personid group by a.duration order by a.duration" %(sql)
 
-            #print sql
+            print sql
 
             wsheet.cell(row=1,column=columni).value = titleLabel
             wsheet.cell(row=2,column=columni).value = str(labels[key])
@@ -1005,7 +1005,7 @@ class Export_Outputs(QDialog):
         
     def tables(self,istrip):
         if istrip:
-            table_names = ["trips_purpose_r","persons","persons_r"] #"daily_work_status_r"]
+            table_names = ["trips_full_r","persons","persons_r"] #"daily_work_status_r"]
             return table_names
         else:
             table_names = ["schedule_full_r","persons","persons_r"] #"daily_work_status_r"]
