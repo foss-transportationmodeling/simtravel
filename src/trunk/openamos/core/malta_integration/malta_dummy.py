@@ -14,7 +14,7 @@ class DummyMALTA(object):
 
     def request_trips(self):
 	#self.tripsActDum = {117:[4], 155:[8], 133:[2], 147:[11], 167:[16]}
-	for i in range(75):
+	for i in range(1440):
 	    seed(i)
 	    time = i+1
 	
@@ -28,8 +28,9 @@ class DummyMALTA(object):
 		print 'Following trips have reached the destination in time - %s' %time, self.tripsAct[time]
 		#print 'Following trips have reached the destination in time - %s' %time, self.tripsActDum[time]
 		tripIdsArrived = self.tripsAct.pop(time)
+                tripArrivedDist = [0]*len(tripIdsArrived)
 		#tripIdsArrived = self.tripsActDum.pop(time)
-		tripInfoArrivals = array(tripIdsArrived)
+		tripInfoArrivals = array(tripIdsArrived+tripArrivedDist)
 	    else:
 		tripInfoArrivals = array([-1])
 		
