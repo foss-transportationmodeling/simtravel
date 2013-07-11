@@ -832,9 +832,10 @@ class AbstractComponent(object):
 
 	#print spatialconst.countChoices, data.rows
 	skimsMatrix2.create_location_array(data.rows)
+	seed = self.analysisInterval
 	locationChoices = skimsMatrix2.get_location_choices(originLocColVals[:,0], destinationLocColVals[:,0], 
 					  		    timeAvailable[:,0], votdColVals[:,0], spatialconst.countChoices,
-							    uniqueIds)
+							    uniqueIds, seed)
 
 	#print 'count of valid locations - ', (locationChoices <> 0).sum(-1)
 	locValidCount = (locationChoices <> 0).sum(-1)
