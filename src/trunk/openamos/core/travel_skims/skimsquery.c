@@ -538,7 +538,7 @@ void generate_random_locations(int loc_length, int no_of_loc, int index)
 This function is used to get the location choices for set of 
 origin destination pairs
 */
-void get_location_choices(int origin[], int destination[], float travel_time[], float votd[], int locations[], int arr_len, int offset, int no_of_locations, int land_use_array[], int land_use_length)
+void get_location_choices(int origin[], int destination[], float travel_time[], float votd[], int locations[], int arr_len, int offset, int no_of_locations, int land_use_array[], int land_use_length, int seed)
 {
     int i, j, k;
     int org, dest;
@@ -552,6 +552,8 @@ void get_location_choices(int origin[], int destination[], float travel_time[], 
     loop_counter = 0;
     printf("C--> inside location choices\n");
     
+    srand(seed);
+
     //check if land use data is present
     if(land_use_length == nodes)
     {

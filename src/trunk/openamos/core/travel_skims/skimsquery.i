@@ -37,6 +37,6 @@ void set_location_array_to_zero(int arr_len);
 void set_temp_location_array();
 void print_location_array(int arr_len);
 void generate_random_locations(int loc_length, int no_of_loc, int index);
-void get_location_choices(int origin[], int destination[], float travel_time[], float votd[], int locations[], int arr_len, int offset, int no_of_locations, int land_use_array[], int land_use_length);
+void get_location_choices(int origin[], int destination[], float travel_time[], float votd[], int locations[], int arr_len, int offset, int no_of_locations, int land_use_array[], int land_use_length, int seed);
 void delete_location_array(int arr_len);
 

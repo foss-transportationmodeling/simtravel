@@ -256,7 +256,7 @@ class SkimsProcessor(object):
         skimsquery.set_temp_location_array()
     
     
-    def get_location_choices(self, origin, destination, tt, votd, num_of_locations, land_use):
+    def get_location_choices(self, origin, destination, tt, votd, num_of_locations, land_use, seed):
         """
         This method gets the locations choices. it internally calls 
         the generate random locations method.
@@ -292,7 +292,7 @@ class SkimsProcessor(object):
         land_use_arr = self.numpy_to_carray(land_use, land_use_len, 0)
                
         #Starting location choices computation
-        skimsquery.get_location_choices(org_arr, dest_arr, tt_arr, votd_arr, loc_arr, arr_len, self.offset, num_of_locations, land_use_arr, land_use_len)
+        skimsquery.get_location_choices(org_arr, dest_arr, tt_arr, votd_arr, loc_arr, arr_len, self.offset, num_of_locations, land_use_arr, land_use_len, seed)
         
         #Conversion from carray to numpy
         new_loc = self.carray_to_numpy(loc_arr, loc_len, 0)
