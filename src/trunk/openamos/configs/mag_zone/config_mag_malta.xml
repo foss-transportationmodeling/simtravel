@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="1" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="openamos" dbpassword="Wel!come"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="openamos"/>
 
   <NetworkSkims>
     <Period tablename="network_skims_0" origin_var="origin" destination_var="destination" intervalStart="0" intervalEnd="59">
@@ -1536,7 +1536,7 @@
 	<Filter table="persons_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="301"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="schtaz1" coeff="1"/>
+        <Variable table="persons" var="schtaz" coeff="1"/>
       </Model>
 
       <Model name="DynamicLocationIDIHActs" formulation="Regression" type="Linear" seed="1">
@@ -1545,7 +1545,7 @@
 	<Filter table="persons_r" var="dependency" condition="equals" value="0"/>
 	<Filter table="runtime" var="activitytype" condition="equals" value="201"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="wtaz1" coeff="1"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
 
 
@@ -3623,7 +3623,7 @@
       </Component>
 
 
-    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="False" completed="True">
+    <Component name="ExtractBackgroundTravelEpisodes" read_from_table="background_trips" write_to_table="trips_r" key="houseid,personid" skip="True" completed="True">
       <DBTables>
     	<Table table="trips_r" key="houseid,personid"/>
    	<Table table="persons" key="houseid,personid"/>
