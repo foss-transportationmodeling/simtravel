@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="0" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="openamos" dbpassword="Wel!come"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="openamos"/>
 
   <NetworkSkims>
     <Period tablename="network_skims_0" origin_var="origin" destination_var="destination" intervalStart="0" intervalEnd="59">
@@ -235,7 +235,7 @@
         <DependentVariable var="dummy"/>
         <Variance value="0"/>
         <Variable table="households" var="htaz" coeff="0"/>
-        <Variable table="persons" var="schtaz1" coeff="0"/>
+        <Variable table="persons" var="schtaz" coeff="0"/>
       </Model>
 
       <Model name="HHWageRate" formulation="Regression" type="Linear" seed="1">
@@ -269,7 +269,7 @@
 
       <DynamicSpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination" after_model="valueoftimeperdist" before_model="schdailystatus">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz1"/>
+        <End table="persons" var="schtaz"/>
 	<ValueofTimePerDistance table="runtime" var="valueoftimeperdist"/>
       </DynamicSpatialConstraints>
 
@@ -466,7 +466,7 @@
       <DeleteRecords value="True"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetowk" dist_var="disttowk" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="wtaz1"/>
+        <End table="persons" var="wtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
       <Model name="Iteration" formulation="Regression" type="Linear" seed="1">
@@ -497,7 +497,7 @@
         <Filter table="persons" var="age" condition="greater than equals" value="18"/>
         <Filter table="persons" var="wrkr" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="wtaz1" coeff="1"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
       <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="44" upper_threshold="734" seed="1">
 	<!-- Model Updated-->
@@ -638,7 +638,7 @@
       <DeleteRecords value="True"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetowk" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="wtaz1"/>
+        <End table="persons" var="wtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
       <Model name="Iteration" formulation="Regression" type="Linear" seed="1">
@@ -669,7 +669,7 @@
         <Filter table="persons" var="age" condition="greater than equals" value="18"/>
         <Filter table="persons" var="wrkr" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="wtaz1" coeff="1"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
       <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="120" upper_threshold="403" seed="1">
 	<!-- Model Updated-->
@@ -810,7 +810,7 @@
       <DeleteRecords value="True"/>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetowk" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="wtaz1"/>
+        <End table="persons" var="wtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
       <Model name="Iteration" formulation="Regression" type="Linear" seed="1">
@@ -841,7 +841,7 @@
         <Filter table="persons" var="age" condition="greater than equals" value="18"/>
         <Filter table="persons" var="wrkr" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="wtaz1" coeff="1"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
 
       <Model name="starttime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="394" upper_threshold="930" seed="1">
@@ -1003,7 +1003,7 @@
         <DependentVariable var="locationid"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="schtaz1" coeff="1"/>
+        <Variable table="persons" var="schtaz" coeff="1"/>
       </Model>
       <Model name="StartTime" formulation="Regression" type="Linear" vertex="start" lower_threshold="185" upper_threshold="510" seed="1">
       	<!-- Model Updated-->
@@ -1022,7 +1022,7 @@
         <Variable table="households" var="incge50k" coeff="23.1308212"/>
         <Variable table="households" var="sparent" coeff="-71.7042354"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" lower_threshold="416" upper_threshold="815" seed="2">
+      <Model name="EndTime" formulation="Regression" type="Linear" vertex="end" lower_threshold="416" upper_threshold="815" seed="1">
       	<!-- Model Updated-->
         <DependentVariable var="endtime"/>
         <Filter table="persons" var="presch" condition="equals" value="1"/>
@@ -1129,7 +1129,7 @@
         <Filter table="persons" var="schstat" condition="equals" value="1"/>
         <Filter table="persons" var="nadlt" condition="equals" value="1"/>
         <Variance value="0"/>
-        <Variable table="persons" var="schtaz1" coeff="1"/>
+        <Variable table="persons" var="schtaz" coeff="1"/>
       </Model>
       <Model name="StartTime" formulation="Regression" type="Stochastic Frontier" vertex="start" lower_threshold="179" upper_threshold="284" seed="1">
 	<!-- Model Updated-->
@@ -1149,7 +1149,7 @@
         <Variable table="households" var="incge50k" coeff="7.19384852"/>
         <Variable table="persons" var="age" coeff="-1.08537452"/>
       </Model>
-      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="542" upper_threshold="809" seed="2">
+      <Model name="EndTime" formulation="Regression" type="Log Linear" vertex="end" lower_threshold="542" upper_threshold="809" seed="1">
 	<!-- Model Updated-->
         <DependentVariable var="endtime"/>
         <FilterSet type="and"/>
@@ -1278,7 +1278,7 @@
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz1"/>
+        <End table="persons" var="schtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
 
@@ -1455,12 +1455,12 @@
 
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetosch" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="schtaz1"/>
+        <End table="persons" var="schtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
       <SpatialConstraints table="travel_skims" skim_var="tt" as_var="timetowk" dist_var="dist" origin_var="origin" destination_var="destination">
         <Start table="households" var="htaz"/>
-        <End table="persons" var="wtaz1"/>
+        <End table="persons" var="wtaz"/>
 	<ValueofTimePerDistance table="persons_r" var="valueoftimeperdist"/>
       </SpatialConstraints>
 
@@ -2243,7 +2243,7 @@
 	<Filter table="runtime" var="activitytype" condition="greater than equals" value="200"/>
 	<Filter table="runtime" var="activitytype" condition="less than" value="300"/>
 	<Variance value="0"/>
-        <Variable table="persons" var="wtaz1" coeff="1"/>
+        <Variable table="persons" var="wtaz" coeff="1"/>
       </Model>
 
       <Model name="locationIDOHActs" formulation="Multinomial Logit" seed="1">
