@@ -49,11 +49,21 @@ class DummyMALTA(object):
 			
 		    #actArrival = randint(trip[7]+2, trip[8]+15)
 		    #actArrival = randint(trip[7]+15, trip[8]+45)
+		
+		    actArrival = trip[8] + 1
+		    """
+		    if trip[8] - trip[7] == 1:
+			actArrival = trip[8] + 1
+		    else:
+			actArrival = trip[8]		    
+
 
 		    if trip[8] > trip[7] + 1:
 			actArrival = trip[8]			
 		    else:
 			actArrival = trip[8] + 1
+
+		    """
 
 		    if actArrival not in self.tripsAct.keys():
 			self.tripsAct[actArrival]  = [trip[0]]
