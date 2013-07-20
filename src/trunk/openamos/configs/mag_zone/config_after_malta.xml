@@ -1,7 +1,7 @@
 <ProjectConfig>
-  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="10" iteration="3" subsample="40000"/>
+  <Project name="mag_zone_dynamic" location="/workspace/projects/mag_zone_dynamic/" seed="0" iteration="3" subsample="40000"/>
   <DTAConnection value="True"/>
-  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="openamos" dbpassword="Wel!come"/>
+  <DBConfig dbprotocol="postgres" dbhost="localhost" dbname="mag_zone_dynamic" dbusername="postgres" dbpassword="openamos"/>
 
   <NetworkSkims>
     <Period tablename="skim0" origin_var="origin" destination_var="destination" intervalStart="0" intervalEnd="60">
