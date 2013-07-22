@@ -130,7 +130,7 @@ class SimulationManager(object):
         self.setup_cacheDatabase()
 	self.setup_inputCacheTables()
 	self.setup_outputCacheTables()
-
+        """
 	# Copying results for components that generate runtime outputs e.g. od_r, gap_before_r, gap_after_r etc.
 	for component in self.componentList:
 	    if component.writeToLocFlag == True:
@@ -139,7 +139,7 @@ class SimulationManager(object):
 		print 'Backing up results for table - %s' %tableName
 
 
-	"""
+
 	# create populate cache - 
 	tableList = self.db.list_of_outputtables()
 
@@ -182,8 +182,8 @@ class SimulationManager(object):
 	    
 	print "\tDumping the postgres database completed"
 
-
-
+        """
+        
 	# Skims
 	fSkimsConv = open(backupDirectoryLoc + os.path.sep + 'skimsConv.txt', 'w')
 	for skimsTable in self.projectSkimsObject.table_ttLocationLookup.keys():
@@ -209,7 +209,7 @@ class SimulationManager(object):
 	    dev = self.calculate_od_convergence_criterion(oldFile, newFile, backupDirectoryLoc)
 	    fODConv.write('%.4f\n' %dev)
 	    fODConv.close()
-
+        """
 	# Creating and copying tabulations
 	self.backup_result_tabulations(backupDirectoryLoc)	
 
