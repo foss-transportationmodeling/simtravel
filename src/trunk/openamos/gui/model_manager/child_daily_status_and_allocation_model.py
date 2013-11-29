@@ -46,8 +46,8 @@ class Child_Model(QWidget):
         
         self.activity_type_button = QPushButton('After-school activity type choice', self)
         self.activity_type_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 90, 200, 50)
-        self.activity_type_button.setStyleSheet(self.color.isUserModel(MODELKEY_AFTSCHACTTYPE))
-        self.connect(self.activity_type_button, SIGNAL('clicked()'), self.activity_type)
+        self.activity_type_button.setStyleSheet(self.color.isUserModel(MODELKEY_AFTSCHACTTYPEWRKR))
+        self.connect(self.activity_type_button, SIGNAL('clicked()'), self.activity_type_nonwrkr)
         
         self.destination_button = QPushButton('After-school activity\ndestination choice', self)
         self.destination_button.setGeometry((size.width()) / 2 - 140, size.height() / 2 + 170, 200, 50)
@@ -164,9 +164,18 @@ class Child_Model(QWidget):
         self.independent_from_school_button.setStyleSheet(self.color.isUserModel(modelkey))
         
     
-    def activity_type(self):
+    def activity_type_nonwrkr(self):
         diagtitle = COMPMODEL_AFTSCHACTTYPE
-        modelkey = MODELKEY_AFTSCHACTTYPE
+        modelkey = MODELKEY_AFTSCHACTTYPENONWRKR
+        
+        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        diag.exec_()
+        
+        self.activity_type_button.setStyleSheet(self.color.isUserModel(modelkey))
+        
+    def activity_type_with_work(self):
+        diagtitle = COMPMODEL_AFTSCHACTTYPE
+        modelkey = MODELKEY_AFTSCHACTTYPEWRKR
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()

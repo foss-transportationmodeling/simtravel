@@ -319,6 +319,10 @@ class Model_Manager_Treewidget(QTreeWidget):
 #        time_use_utility_calculator = QTreeWidgetItem(self)
 #        time_use_utility_calculator.setText(0, COMP_TIMEUSEUTILITY)
 
+        self.hide_components = [COMPMODEL_IDENFIXEDVERTICES, COMPMODEL_CLEANDAILY, COMPMODEL_RECONLONGTERM, COMPMODEL_CHILDTERMALLOCATE, COMPMODEL_CLEANAGGREGATE, COMPMODEL_CHILDALLOCATE, \
+                                COMPMODEL_ARRTIMEPPROCESS, COMPMODEL_OCCUPPROCESS, COMPKEY_EXTRACTEPISODEHH, \
+                                AGGACT_SCHEDULE, 'ChildDependencyResolution', 'Fixing Trip Purpose', 'TourAttributeProcessing']
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self, SIGNAL('customContextMenuRequested(const QPoint&)'),self.on_context_menu)
         
@@ -336,47 +340,73 @@ class Model_Manager_Treewidget(QTreeWidget):
 
     def setTreeWidget(self):
         if self.configobject != None:
-            root_term = QTreeWidgetItem(self)
-            root_term.setText(0, "Component")
-            compelts = self.configobject.getComponents()
-            for comp in compelts:
-                #compname = comp.get(NAME)
-                comtitle = str(comp.get(NAME))
-                if comtitle in COMPONENTMAP.keys():
-                    compname = COMPONENTMAP[comp.get(NAME)][0]
-                else:
-                    compname = comtitle
-                component_term = QTreeWidgetItem(root_term)
-                component_term.setText(0, compname)
-                component_term.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
-                
-                for key in comp.keys():
-                    if key == "skip" or key == "completed":
-                        attr = "%s"%(comp.get(key))
-                        if key == "skip":
-                            if attr == "True":
-                                component_term.setCheckState(2, Qt.Checked)
+            #root_term1 = QTreeWidgetItem(self)
+            #root_term1.setText(0, "Component")
+            #compelts = self.configobject.getComponents()
+            #self.components(root_term1, compelts)
+            
+            compelts = self.configobject.getModelConfigChildren()
+            if compelts is not None:
+                root_term = QTreeWidgetItem(self)
+                root_term.setText(0, "Component")
+                 
+                for comp in compelts:
+                    if comp.tag == "Component" or comp.tag == "Component1":
+                        self.components(root_term, comp)
+                    elif comp.tag == "ComponentList":
+                        subcompelts = comp.getchildren()
+                        component_term = QTreeWidgetItem(root_term)
+                        component_term.setText(0, "Component List")
+                        for subcomp in subcompelts:
+                            print subcomp.tag
+                            if subcomp.tag.lower() == "subcomponent":
+                                self.components(component_term, subcomp)
                             else:
-                                component_term.setCheckState(2, Qt.Unchecked)                     
-                        else:
-                            component_term.setIcon(1, QIcon("./images/%s" %(attr)))
+                                element = QTreeWidgetItem(component_term)
+                                element.setText(0, subcomp.tag)
+                            
+                        
+                  
+    def components(self, root_term, comp):
 
-
-                for elt in comp.getchildren():
-                    title = str(elt.tag)
-                    if title.lower() != 'model':
-                        element_term = QTreeWidgetItem(component_term)
-                        element_term.setText(0, title)
+        comtitle = str(comp.get(NAME))
+        if comtitle in COMPONENTMAP.keys():
+            compname = COMPONENTMAP[comp.get(NAME)][0]
+        else:
+            compname = comtitle
+        component_term = QTreeWidgetItem(root_term)
+        if compname in self.hide_components:
+            component_term.setHidden(True)
+        component_term.setText(0, compname)
+        component_term.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+        
+        for key in comp.keys():
+            if key == "skip" or key == "completed":
+                attr = "%s"%(comp.get(key))
+                if key == "skip":
+                    if attr == "True":
+                        component_term.setCheckState(2, Qt.Checked)
                     else:
-                        name = str(elt.get("name")).lower()
-                        if name in MODELSMAP.keys():
-                            name = title + ": " + MODELSMAP[name][0] 
-                            element_term = QTreeWidgetItem(component_term)
-                            element_term.setText(0, name)
-                        else:
-                            name = title + ": " + name
-                            element_term = QTreeWidgetItem(component_term)
-                            element_term.setText(0, name)                            
+                        component_term.setCheckState(2, Qt.Unchecked)                     
+                else:
+                    component_term.setIcon(1, QIcon("./images/%s" %(attr)))
+
+
+        for elt in comp.getchildren():
+            title = str(elt.tag)
+            if title.lower() != 'model':
+                element_term = QTreeWidgetItem(component_term)
+                element_term.setText(0, title)
+            else:
+                name = str(elt.get("name")).lower()
+                if name in MODELSMAP.keys():
+                    name = title + ": " + MODELSMAP[name][0] 
+                    element_term = QTreeWidgetItem(component_term)
+                    element_term.setText(0, name)
+                else:
+                    name = title + ": " + name
+                    element_term = QTreeWidgetItem(component_term)
+                    element_term.setText(0, name)                            
 
 
 #    def setTreeWidgetEle(self,elt,tree_term):
@@ -403,9 +433,17 @@ class Model_Manager_Treewidget(QTreeWidget):
                 self.connect(one,SIGNAL("triggered()"),self.openProject)
             else:
                 one = menubar.addAction("Add Component")
+                two = menubar.addAction("Add ComponentList")
                 self.connect(one,SIGNAL("triggered()"),self.addComponent)
+                self.connect(two,SIGNAL("triggered()"),self.addComponentList)
+                
+        elif item.text(0) == "Component List":
+            one = menubar.addAction("Add Analysis Interval")
+            two = menubar.addAction("Add Sub-Component")
+            self.connect(one,SIGNAL("triggered()"),self.analy_inter)
+            self.connect(two,SIGNAL("triggered()"),self.addSubComponent)            
             
-        elif father.text(0) == "Component":
+        elif father.text(0) == "Component" or father.text(0) == "Component List":
             open_com = menubar.addAction("Open Component")
             menubar.addSeparator()
             one = menubar.addAction("Add Model")
@@ -417,6 +455,9 @@ class Model_Manager_Treewidget(QTreeWidget):
             seven = menubar.addAction("Add Analysis Interval")
             eight = menubar.addAction("Add History Information")
             nine = menubar.addAction("Add Aggregate")
+            ten = menubar.addAction("Add Analysis Interval Filter")
+            eleven = menubar.addAction("Add PreProcess Data")
+            twelve = menubar.addAction("Add Delete Based On")
             menubar.addSeparator()
             remove = menubar.addAction("Delete Component")
             
@@ -429,7 +470,10 @@ class Model_Manager_Treewidget(QTreeWidget):
             self.connect(six,SIGNAL("triggered()"),self.dele_reco)
             self.connect(seven,SIGNAL("triggered()"),self.analy_inter)
             self.connect(eight,SIGNAL("triggered()"),self.hist_info)
-            self.connect(nine,SIGNAL("triggered()"),self.aggregate) 
+            self.connect(nine,SIGNAL("triggered()"),self.aggregate)
+            self.connect(ten,SIGNAL("triggered()"),self.analysis_filter)
+            self.connect(eleven,SIGNAL("triggered()"),self.preprocess) 
+            self.connect(twelve,SIGNAL("triggered()"),self.delete_basedon)
             self.connect(remove,SIGNAL("triggered()"),self.remove_element)
             
         else:
@@ -589,6 +633,21 @@ class Model_Manager_Treewidget(QTreeWidget):
         if model != None:
             self.subcomponent = "Component"
             diag = AbtractMixedDialog(self.configobject,model,4,self)
+            diag.exec_()
+            
+    def addComponentList(self):
+        model = self.configobject.protree.find(MODELCONFIG)
+        if model != None:
+            element = etree.Element("ComponentList")
+            model.append(element)
+            component_term = QTreeWidgetItem(self.currentItem())
+            component_term.setText(0, "Component List") 
+            
+    def addSubComponent(self):
+        model = self.configobject.getElements("ComponentList")
+        if model[0] != None:
+            self.subcomponent = "SubComponent"
+            diag = AbtractMixedDialog(self.configobject,model[0],4,self)
             diag.exec_() 
 
     def openElementSelected(self):
@@ -664,6 +723,27 @@ class Model_Manager_Treewidget(QTreeWidget):
         model = self.find_model()        
         if model != None:
             self.subcomponent = "Aggregate"
+            diag = AbtractMixedDialog(self.configobject,model,2,self)
+            diag.exec_()
+            
+    def analysis_filter(self):
+        model = self.find_model()        
+        if model != None:
+            self.subcomponent = "AnalysisIntervalFilter"
+            diag = AbtractMixedDialog(self.configobject,model,2,self)
+            diag.exec_()
+            
+    def preprocess(self):
+        model = self.find_model()        
+        if model != None:
+            self.subcomponent = "PreProcessData"
+            diag = AbtractMixedDialog(self.configobject,model,2,self)
+            diag.exec_()
+            
+    def delete_basedon(self):
+        model = self.find_model()        
+        if model != None:
+            self.subcomponent = "DeleteBasedOn"
             diag = AbtractMixedDialog(self.configobject,model,2,self)
             diag.exec_()
             

@@ -31,6 +31,12 @@ class AbtractSpecDialog(QDialog):
         
         self.configobject = configobject
         self.modelkey = key
+        
+        if model == None:
+            model = self.configobject.modelSpecInConfig(self.modelkey)
+    
+            
+        
         self.themodel = model
         self.populateFromDatabase()
         
@@ -51,7 +57,12 @@ class AbtractSpecDialog(QDialog):
                                    QString(GC_MNL_MODEL), QString(MNL_MODEL),
                                    QString(ORD_MODEL),QString(NL_MODEL), QString(LOGSF_MODEL),
                                    QString(RECON_SCHEDULE),QString(FIXEDACT_SCHEDULE),
-                                   QString(AGGACT_SCHEDULE),QString(CHILD_ALLOCAT)])
+                                   QString(AGGACT_SCHEDULE),QString(CHILD_ALLOCAT),QString(CHILD_ALLOCAT_TERM),QString(CHILD_DEPEND),QString(PERS_TRIP_ARRIVAL),
+                                   QString(SCH_ADJUST),QString(IDEN_UNIQUE),QString(IDEN_INDIVIDUAL)])
+        
+        self.specialmodel = [IDEN_INDIVIDUAL, RECON_SCHEDULE, FIXEDACT_SCHEDULE, AGGACT_SCHEDULE, CHILD_ALLOCAT, \
+                             CHILD_ALLOCAT_TERM, CHILD_DEPEND, PERS_TRIP_ARRIVAL, IDEN_UNIQUE, SCH_ADJUST,]
+        
         dependentlb = QLabel("Dependent Variable: ")
         self.dependentcb = QComboBox()
         self.dependentcb.addItems(self.dependents())
@@ -60,15 +71,7 @@ class AbtractSpecDialog(QDialog):
         modeltypegblayout.addWidget(dependentlb,0,1)
         modeltypegblayout.addWidget(self.dependentcb,1,1)
         
-#        self.glayout.addWidget(self.modeltypegb,0,0)
-        
 
-        
-#        tool1 = QToolBar()
-#        tool1.setMaximumHeight(30)
-#        show_action1 = self.createaction("",self.showgb1,"arrow","")
-#        tool1.addAction(show_action1)
-#        self.glayout.addWidget(tool1,1,0)
         
         self.attributegb = QGroupBox("")
         attributegblayout = QGridLayout() #QHBoxLayout()
@@ -219,41 +222,7 @@ class AbtractSpecDialog(QDialog):
             if "upper_threshold" in model.keys():
                 self.uppertxt.setText(str(model.get("upper_threshold")))
 
-
-#    def fill_attribute(self,model):
-#        elements = self.configobject.getElements("Model")
-#        names = []
-#        values = []
-#        names.append("name")
-#        values.append("")
-#        for elt in elements:
-#            for key in elt.keys():
-#                if key != "name":
-#                    value = str(elt.get(key))
-#                    if key not in names:
-#                        names.append(key)
-#                    if value not in values:
-#                        values.append(value)
-#        
-#        names.sort()
-#        values.sort()
-#        self.attrinamecb.addItems(names)
-#        self.attrivaluecb.addItems(values)
-#        
-#        if model.tag != COMP:
-#            for key in model.keys():
-#                value = str(model.get(key))
-#                
-#                self.attritable.insertRow(self.attritable.rowCount())
-#                attritem = QTableWidgetItem()
-#                attritem.setText(str(key))
-#                attritem.setFlags(attritem.flags() & ~Qt.ItemIsEditable)
-#                self.attritable.setItem(self.attritable.rowCount()-1, 0, attritem)
-#                
-#                varitem = QTableWidgetItem()
-#                varitem.setText(value)
-#                varitem.setFlags(varitem.flags() & ~Qt.ItemIsEditable)
-#                self.attritable.setItem(self.attritable.rowCount()-1, 1, varitem)  
+  
 
     def addDependent(self):
         current = str(self.dependentcb.currentText())
@@ -315,7 +284,7 @@ class AbtractSpecDialog(QDialog):
 
     def loadFromConfigObject1(self):
         modelspecified = self.configobject.modelSpecInConfig(self.modelkey)
-        self.loadFromConfigObject2(modelspecified)
+        #self.loadFromConfigObject2(modelspecified)
     
     def loadFromConfigObject2(self, modelspecified):
         
@@ -355,10 +324,25 @@ class AbtractSpecDialog(QDialog):
                 modtxt = AGGACT_SCHEDULE
             elif form == CHILD_ALLOCAT:
                 modtxt = CHILD_ALLOCAT
+            elif form == CHILD_ALLOCAT_TERM:
+                modtxt = CHILD_ALLOCAT_TERM
+            elif form == CHILD_DEPEND:
+                modtxt = CHILD_DEPEND
+            elif form == SCH_ADJUST:
+                modtxt = SCH_ADJUST
+            elif form == PERS_TRIP_ARRIVAL:
+                modtxt = PERS_TRIP_ARRIVAL
+            elif form == IDEN_UNIQUE:
+                modtxt = IDEN_UNIQUE
+            elif form == IDEN_INDIVIDUAL:
+                modtxt = IDEN_INDIVIDUAL
 
-
+            
             ind = self.modeltypecb.findText(modtxt)
             self.modeltypecb.setCurrentIndex(ind)
+            
+            print "%s - %s" %(modtxt,ind)
+            
 
         self.changeModelWidget()
 #        self.populateColumns()
@@ -388,7 +372,7 @@ class AbtractSpecDialog(QDialog):
                         self.modwidget.varianceuline.setText(varianceelt.get(VALUE))
                     else:
                         self.modwidget.variancevline.setText(varianceelt.get(VALUE))
-            if formtext == LOGREG_MODEL or self.modeltypecb.currentText() == LINEAR_MODEL:
+            if formtext == LOGREG_MODEL or self.modeltypecb.currentText() == LINEAR_MODEL or formtext == IDEN_UNIQUE:
                 self.populateVarsWidget(modelspecified)
                 for varianceelt in modelspecified.getiterator(VARIANCE):
                     self.modwidget.variancevline.setText(varianceelt.get(VALUE))
@@ -451,7 +435,8 @@ class AbtractSpecDialog(QDialog):
                     nescoeff = QTableWidgetItem()
                     nescoeff.setText(neselt.get(COEFF))
                     nestable.setItem(nestable.rowCount()-1, 1, nescoeff)
-            if formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT:
+            if formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT or \
+            formtext == SCH_ADJUST or formtext == PERS_TRIP_ARRIVAL or formtext == IDEN_INDIVIDUAL or formtext == CHILD_ALLOCAT_TERM or formtext == CHILD_DEPEND:
                 i = 0
                 for altelt in modelspecified.getchildren():
                     if altelt.tag != "DependentVariable":
@@ -464,6 +449,7 @@ class AbtractSpecDialog(QDialog):
                             
                         altspecs = []
                         for varelt in altelt.getchildren():
+                            print "%s - %s" %(key, varelt.tag)
                             varspec = []
                             varspec.append(str(varelt.tag))
                             varspec.append(varelt.get(TABLE))
@@ -472,17 +458,6 @@ class AbtractSpecDialog(QDialog):
                         self.modwidget.specs[key] = altspecs
                         i = i+1
                         
-#                if "Activity Attributes" not in self.modwidget.specs.keys():
-#                    varspec = [["HouseholdIdName","",""],["PersonIdName","",""],["ScheduleIdName","",""],["ActivityTypeName","",""],
-#                               ["LocationIdName","",""],["StartTimeName","",""],["EndTimeName","",""],["DurationName","",""],
-#                               ["DependentPersonName","",""]]
-#                    self.modwidget.specs["Activity Attributes"] = varspec                
-#                if "Daily Status" not in self.modwidget.specs.keys():
-#                    varspec = [["DailySchoolStatus","",""],["DailyWorkStatus","",""]]
-#                    self.modwidget.specs["Daily Status"] = varspec
-#                if "Dependency" not in self.modwidget.specs.keys():
-#                    varspec = [["ChildDependency","",""]]
-#                    self.modwidget.specs["Dependency"] = varspec
                     
 
     def populateDependent(self,modelelt):
@@ -695,13 +670,14 @@ class AbtractSpecDialog(QDialog):
             self.modwidget = SFModWidget(self)
         elif formtext == LOGSF_MODEL:
             self.modwidget = SFModWidget(self)
-        elif formtext == LOGREG_MODEL or formtext == LINEAR_MODEL:
+        elif formtext == LOGREG_MODEL or formtext == LINEAR_MODEL or formtext == IDEN_UNIQUE:
             self.modwidget = LogRegModWidget(self)
         elif formtext == ORD_MODEL:
             self.modwidget = OrderedModWidget(self)
         elif formtext == NL_MODEL:
             self.modwidget = NLogitModWidget(self)
-        elif formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT:
+        elif formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT or \
+        formtext == PERS_TRIP_ARRIVAL or formtext == SCH_ADJUST or formtext == IDEN_INDIVIDUAL or formtext == CHILD_ALLOCAT_TERM or formtext == CHILD_DEPEND:
             self.modwidget = SchduleModWidget(self)
         
 #        self.glayout.addWidget(self.modwidget,8,0)
@@ -836,39 +812,6 @@ class AbtractSpecDialog(QDialog):
                     neselt.set(NAME,nestname)
                     neselt.set(COEFF,nestiv)
                     model.append(neselt)
-                    
-#                modelform = MODELFORM_NL
-#                modelelt = self.setModelAttribute(modelkey,modelform,'')
-#                
-#                numrows = self.modwidget.choicetable.rowCount()
-#                specs = self.modwidget.specs
-#                for i in range(numrows):
-#                    altname = str((self.modwidget.choicetable.item(i,0)).text())
-#                    altdet = altname.rsplit('/',1)
-#                    l = len(altdet)
-#                    if l==1:
-#                        altid = altdet[0]
-#                        altbr = 'root'
-#                    if l>1:
-#                        altid = altdet[1]
-#                        altbr = 'root/' + altdet[0]
-#                    altelt = etree.SubElement(modelelt,ALTERNATIVE)
-#                    altelt.set(ID,altid)
-#                    altelt.set(BRANCH,altbr)
-#                    altspecs = specs[altname]
-#                    numvars = len(altspecs)
-#                    for i in range(numvars):
-#                        specrow = altspecs[i]
-#                        self.addVariabletoElt(altelt,specrow[0],specrow[1],specrow[2])
-#                    modelelt.append(altelt)  
-#                numnests = self.modwidget.nesttable.rowCount()
-#                for i in range(numnests):
-#                    nestname = str((self.modwidget.nesttable.item(i,0)).text())
-#                    nestiv = str((self.modwidget.nesttable.item(i,1)).text())
-#                    neselt = etree.SubElement(modelelt,BRANCH)
-#                    neselt.set(NAME,nestname)
-#                    neselt.set(COEFF,nestiv)
-#                    modelelt.append(neselt)
                                       
             elif formtext == LOGREG_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,LOGREG_MODEL)
@@ -877,6 +820,11 @@ class AbtractSpecDialog(QDialog):
 
             elif formtext == LINEAR_MODEL:
                 self.setModeltoElt(model,MODELFORM_REG,LINEAR_MODEL)
+                self.setVariance(model)
+                self.saveVariables(model)
+                
+            elif formtext == IDEN_UNIQUE:
+                self.setModeltoElt(model,IDEN_UNIQUE)
                 self.setVariance(model)
                 self.saveVariables(model)
                         
@@ -899,7 +847,8 @@ class AbtractSpecDialog(QDialog):
                     self.addVariabletoElt(altelt,valtable,valname,valcoff)
                     model.append(altelt)
                     
-            elif formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT:
+            elif formtext == RECON_SCHEDULE or formtext == FIXEDACT_SCHEDULE or formtext == AGGACT_SCHEDULE or formtext == CHILD_ALLOCAT \
+            or formtext == PERS_TRIP_ARRIVAL or formtext == SCH_ADJUST or formtext == IDEN_INDIVIDUAL or formtext == CHILD_ALLOCAT_TERM or formtext == CHILD_DEPEND:
                 if formtext == RECON_SCHEDULE:
                     self.setModeltoElt(model,RECON_SCHEDULE)
                 elif formtext == FIXEDACT_SCHEDULE:
@@ -908,15 +857,21 @@ class AbtractSpecDialog(QDialog):
                     self.setModeltoElt(model,AGGACT_SCHEDULE)
                 elif formtext == CHILD_ALLOCAT:
                     self.setModeltoElt(model,CHILD_ALLOCAT)
+                elif formtext == PERS_TRIP_ARRIVAL:
+                    self.setModeltoElt(model,PERS_TRIP_ARRIVAL)
+                elif formtext == SCH_ADJUST:
+                    self.setModeltoElt(model,SCH_ADJUST)
                     
                 for elt in model.getchildren():
-                    if elt.tag == "ActivityAttributes" or elt.tag == "DailyStatus" or elt.tag == "Dependency":
+                    if elt.tag == "ActivityAttributes" or elt.tag == "DailyStatus" or elt.tag == "Dependency" or \
+                    elt.tag == "OccupancyInvalid" or elt.tag == "ArrivalTime" or elt.tag == "PersonsArrivedAttributes" or elt.tag == "Id":
                         model.remove(elt)
                 
                 self.modwidget.storeVarsTable(self.modwidget.choicelist.currentItem())
                 numrows = self.modwidget.choicelist.count()
                 specs = self.modwidget.specs
-                keys = ["Activity Attributes","Daily Status","Dependency"]
+                print specs
+                keys = ["Activity Attributes","Daily Status","Dependency","OccupancyInvalid","ArrivalTime","PersonsArrivedAttributes","Id"]
                 for key in keys:
                     alter = str(key)
                     if key == "Activity Attributes":

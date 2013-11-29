@@ -116,14 +116,16 @@ class Adult_Model(QWidget):
     
     def assign_children_1(self):
         diagtitle = COMPMODEL_ASDEPENDWORKER
-        modelkey = MODELKEY_ASDEPENDWORKER
+        #modelkey = MODELKEY_ASDEPENDWORKER
+        modelkey = MODELKEY_WRKEPISODES
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     def assign_children_2(self):
         diagtitle = COMPMODEL_ASDEPENDNONWORK
-        modelkey = MODELKEY_ASDEPENDNONWORK
+        #modelkey = MODELKEY_ASDEPENDNONWORK
+        modelkey = MODELKEY_WRKSTATUSNON
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
@@ -132,14 +134,15 @@ class Adult_Model(QWidget):
     
     def check_adult(self):
         diagtitle = COMPMODEL_ASISWORKER
-        modelkey = MODELKEY_ASISWORKER
+        #modelkey = MODELKEY_ASISWORKER
+        modelkey = MODELKEY_WRKSTATUSADL1
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()
         
     def work_today(self):
         diagtitle = COMPMODEL_WRKDAILYSTATUS
-        modelkey = MODELKEY_WRKDAILYSTATUS
+        modelkey = MODELKEY_WRKSTATUSADL2
         
         diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
         diag.exec_()

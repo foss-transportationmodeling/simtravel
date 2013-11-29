@@ -747,6 +747,10 @@ class SchduleModWidget(AbstractModWidget):
         self.choicelist.addItem("Activity Attributes")
         self.choicelist.addItem("Daily Status")
         self.choicelist.addItem("Dependency")
+        self.choicelist.addItem("ArrivalTime")
+        self.choicelist.addItem("OccupancyInvalid")
+        self.choicelist.addItem("Id")
+        self.choicelist.addItem("PersonsArrivedAttributes")
         
         varspec1 = [["HouseholdIdName","",""],["PersonIdName","",""],["ScheduleIdName","",""],["ActivityTypeName","",""],
                    ["LocationIdName","",""],["StartTimeName","",""],["EndTimeName","",""],["DurationName","",""],
@@ -758,6 +762,18 @@ class SchduleModWidget(AbstractModWidget):
 
         varspec3 = [["ChildDependency","",""]]
         self.specs["Dependency"] = varspec3
+        
+        varspec4 = [["DependentPersonId","",""],["Actual","",""],["Expected","",""]]
+        self.specs["ArrivalTime"] = varspec4
+        
+        varspec5 = [["TripInd","",""],["StartTime","",""]]
+        self.specs["OccupancyInvalid"] = varspec5
+        
+        varspec6 = [["HouseId","",""],["PersonId","",""]]
+        self.specs["Id"] = varspec6
+        
+        varspec7 = [["TripDependentPersonIdName","",""],["TripCountName1","",""],["TripCountName","",""],["ActDependentPersonIdName","",""]]
+        self.specs["PersonsArrivedAttributes"] = varspec7
                     
         self.connect(self.choicelist, SIGNAL("currentItemChanged (QListWidgetItem *,QListWidgetItem *)"), self.showVarsTable)
 

@@ -174,8 +174,19 @@ class AbtractMixedDialog(QDialog):
     def attributes(self,eltname):
         temp = eltname.split('-')
         name = temp[0]
+        
+        if name.find("Filter") > -1 or name.find("Delete") > -1:
+            name = "Filter"
+            
+        if name.find("Component") > -1:
+            name = "Component"
+            
         elements = self.configobject.getDElements(name)
         items = []
+        
+        if name.find("PreProcessData") > -1:
+            items.append("name")
+        
         for elt in elements:
             for key in elt.keys():
                 if key not in items:
@@ -205,6 +216,9 @@ class AbtractMixedDialog(QDialog):
         elements = self.configobject.getDElements(eltname)
         items = []
         items.append(str(eltname))
+        if str(eltname).find("PreProcessData") > -1:
+            items.append("Filter")
+            
         for elt in elements:
             for child in elt.getchildren():
                 cname = str(child.tag)
@@ -408,9 +422,15 @@ class AbtractMixedDialog(QDialog):
                 
         else:
             length = self.genwidgets.attritable.rowCount()
-            if str(self.father.tag) == "ModelConfig":
+            item = self.treewidget.currentItem()
+            if (str(self.father.tag) == "ModelConfig" or str(self.father.tag) == "ComponentList") and str(item.text(0)) != "AnalysisInterval":
                 if length > 0:
-                    element = etree.Element(COMP)
+                    element = None
+                    if str(self.father.tag) == "ModelConfig":
+                        element = etree.Element(COMP)
+                    elif str(self.father.tag) == "ComponentList":
+                        element = etree.Element(SUBCOMP)
+                        
                     element.set(NAME,str(self.titleline2.text()))
                     for i in range(length):
                         name = str((self.genwidgets.attritable.item(i,0)).text())
@@ -436,7 +456,7 @@ class AbtractMixedDialog(QDialog):
                                         msg,
                                         QMessageBox.Ok)             
             else:
-                item = self.treewidget.currentItem()
+                
                 if str(self.titleline1.currentText()) == str(item.text(0)):
                     if length > 0 or str(item.text(0)) == "DBTables" or str(item.text(0)) == "Aggregate":
                         element = etree.Element(str(item.text(0)))

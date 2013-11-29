@@ -42,7 +42,8 @@ class VehicleOwnershipModels(QWidget):
         diagtitle = COMPMODEL_NUMVEHS
         modelkey = MODELKEY_NUMVEHS
         
-        diag = AbtractSpecDialog(self.configob,modelkey,diagtitle)
+        print "%s - %s" %(diagtitle, modelkey)
+        diag = AbtractSpecDialog(self.configob, modelkey, diagtitle)
         diag.exec_()
         
         self.num_vehs_button.setStyleSheet(self.color.isUserModel(modelkey))
