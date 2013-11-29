@@ -138,7 +138,7 @@ class Read_Shape(QDialog):
             self.select_state(f,sf)
             self.insert_state(f,sf)
 
-            f.write(u'CREATE INDEX "%s_the_geom_gist" ON "%s" using gist ("the_geom" gist_geometry_ops);\n' %(self.tablename,self.tablename))
+            f.write(u'CREATE INDEX "%s_the_geom_gist" ON "%s" using gist ("the_geom");\n' %(self.tablename,self.tablename))
             f.write(u'COMMIT;\n')
             f.close()
             
@@ -217,7 +217,7 @@ class Read_Shape(QDialog):
         elif stype == 25:
             shapetype = 'MULTIPOLYGON'
         
-        f.write(u"SELECT AddGeometryColumn('','%s','the_geom','%s','%s',2);\n" %(self.tablename,sid,shapetype))
+        f.write(u"SELECT addgeometrycolumn('','%s','the_geom',%s,'%s',2,true);\n" %(self.tablename,sid,shapetype))
 
 
     def insert_state(self,f,sf):
@@ -269,7 +269,7 @@ class Read_Shape(QDialog):
     def point_state(self,shapes,i,sid):
         x = shapes[i].points[0][0]
         y = shapes[i].points[0][1]
-        geom = "GeometryFromText('POINT(%s %s)',%s));\n" %(x,y,sid)
+        geom = "st_geometryfromtext('POINT(%s %s)',%s));\n" %(x,y,sid)
         return geom
 
     def line_state(self,shapes,i,sid):
@@ -282,7 +282,7 @@ class Read_Shape(QDialog):
             points = points + '%s %s,' %(x,y)
     
         points = points[0:len(points)-1]
-        geom = "GeometryFromText('LINESTRING(%s)',%s));\n" %(points,sid)
+        geom = "st_geometryfromtext('LINESTRING(%s)',%s));\n" %(points,sid)
         return geom
 
     def polygon_state(self,shapes,i,sid):
@@ -295,7 +295,7 @@ class Read_Shape(QDialog):
             polys = polys + '%s %s,' %(x,y)
     
         polys = polys[0:len(polys)-1]
-        geom = "GeometryFromText('POLYGON((%s))',%s));\n" %(polys,sid)
+        geom = "st_geometryfromtext('POLYGON((%s))',%s));\n" %(polys,sid)
         return geom
 
 
@@ -314,7 +314,7 @@ class Read_Shape(QDialog):
                 poly = poly + '%s %s,' %(x,y)
             polys = polys + poly[0:len(poly)-1] + ')'
 
-        geom = "GeometryFromText('MULTIPOLYGON((%s))',%s));\n" %(polys,sid)
+        geom = "st_geometryfromtext('MULTIPOLYGON((%s))',%s));\n" %(polys,sid)
         return geom
         
         

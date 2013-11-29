@@ -37,7 +37,7 @@ class Absreldiff(Matplot):
             QMessageBox.warning(self, "Results", "A table with name - performance_statistics does not exist.", QMessageBox.Ok)
 
     def isValid(self):
-        return self.checkIfTableExists("schedule_r")
+        return self.checkIfTableExists("schedule_full_r")
 
     def on_draw(self):
         """ Redraws the figure
@@ -66,7 +66,7 @@ class Absreldiff(Matplot):
     
         cursor = self.new_obj.cursor
         vars = "activitytype, avg(duration)"
-        tablename = "schedule_r"
+        tablename = "schedule_full_r"
         filter = ""
         group = "activitytype"
         

@@ -213,7 +213,7 @@ class kml_trips(QDialog):
                     else:
                         self.zoneid = "tozone"
                 else:
-                    self.table = "schedule_final_r"
+                    self.table = "schedule_full_r"
                     self.zoneid = "locationid"
                     
                 for i in range(48):
@@ -361,7 +361,7 @@ class kml_trips(QDialog):
         condition = condition[0:len(condition)-4] + ") "
         end1 = start + 1
         #SQL = "SELECT A.*, AsKML(ST_Centroid(B.the_geom)), B.* FROM (SELECT count(*), %s FROM %s WHERE ((starttime >= %d AND starttime < %d) OR (endtime >= %d AND endtime < %d) OR (starttime <= %d AND endtime >= %d))%sGROUP BY %s) AS A, shape_zone AS B WHERE A.%s = B.locationid" %(self.zoneid,self.table,start,end1,start,end1,start,end1,condition,self.zoneid,self.zoneid)
-        SQL = "SELECT A.*, AsKML(ST_Centroid(B.the_geom)), B.* FROM (SELECT count(*), %s FROM %s WHERE (starttime <= %d AND endtime >= %d)%sGROUP BY %s) AS A, shape_zone AS B WHERE A.%s = B.locationid" %(self.zoneid,self.table,start,end1,condition,self.zoneid,self.zoneid)
+        SQL = "SELECT A.*, st_AsKML(ST_Centroid(B.the_geom)), B.* FROM (SELECT count(*), %s FROM %s WHERE (starttime <= %d AND endtime >= %d)%sGROUP BY %s) AS A, shape_zone AS B WHERE A.%s = B.locationid" %(self.zoneid,self.table,start,end1,condition,self.zoneid,self.zoneid)
         #print SQL
         self.cursor.execute(SQL)
         tazdata = self.cursor.fetchall()
@@ -511,7 +511,7 @@ class kml_trips(QDialog):
 
 
     def place_boundary(self,folder):
-        SQL = "SELECT AsKML(A.the_geom), A.* FROM shape_zone AS A"
+        SQL = "SELECT st_AsKML(A.the_geom), A.* FROM shape_zone AS A"
         self.cursor.execute(SQL)
         tazdata = self.cursor.fetchall()
 

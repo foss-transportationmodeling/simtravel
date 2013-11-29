@@ -26,7 +26,7 @@ class MakePlot(Matplot):
             
         if self.isValid():
             self.valid = True
-            if table.lower() == 'trips_r':
+            if table.lower() == 'trips_full_r':
                 self.setWindowTitle("Trip Characteristics")
             else:
                 self.setWindowTitle("Activity Characteristics")
@@ -48,7 +48,7 @@ class MakePlot(Matplot):
             self.vbox.setStretch(1,1)
             self.setLayout(self.vbox)
             
-            if self.table == "trips_r":
+            if self.table == "trips_full_r":
                 self.xtitle = self.trip_labels(0)
                 self.labelsdict = {}
                 self.labelsdict['purpose_rec'] = self.trip_labels(1)
@@ -140,7 +140,7 @@ class MakePlot(Matplot):
         #self.cursor = self.new_obj.cursor
         vars = self.choicevar1.currentText() + ", count(*)"
         tablename = ""
-        if self.table == "trips_r":
+        if self.table == "trips_full_r":
             tablename = "temptrips"
         else:
             tablename = "tempschedule"
@@ -196,7 +196,7 @@ class MakePlot(Matplot):
                 
                 vars = "%s, count(*)" %(self.choicevar2.currentText())
                 tablename = ""
-                if self.table == "trips_r":
+                if self.table == "trips_full_r":
                     tablename = "temptrips"
                 else:
                     tablename = "tempschedule"
@@ -273,7 +273,7 @@ class MakePlot(Matplot):
 
         vars = self.choicevar1.currentText()
         tablename = ""
-        if self.table == "trips_r":
+        if self.table == "trips_full_r":
             tablename = "temptrips"
         else:
             tablename = "tempschedule"
@@ -300,7 +300,7 @@ class MakePlot(Matplot):
         if str(self.choicevar1.currentIndex())>0 and str(self.choicevar2.currentIndex())>0:
             vars = "%s, count(*)" %(self.choicevar2.currentText())
             tablename = ""
-            if self.table == "trips_r":
+            if self.table == "trips_full_r":
                 tablename = "temptrips"
             else:
                 tablename = "tempschedule"

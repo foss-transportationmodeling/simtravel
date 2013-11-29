@@ -14,11 +14,10 @@ from openamos.gui.env import *
 from openamos.core.database_management.cursor_database_connection import *
 from openamos.core.database_management.database_configuration import *
 
-from pylab import *
-#from core_plot import *
-
 import matplotlib
 matplotlib.use('Agg')
+from pylab import *
+
 import matplotlib.font_manager as plot
 from matplotlib.patches import Patch, Rectangle
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -268,7 +267,7 @@ class MakeSchedPlot(QDialog):
             tables.append("Schedules: Daily Pattern after Child Allocation with only Joint Activities")
         if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
             tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
-        if self.new_obj.check_if_table_exists("schedule_final_r"):
+        if self.new_obj.check_if_table_exists("schedule_full_r"):
         #if self.new_obj.check_if_table_exists("schedule_full_r"):
             tables.append("Schedules: Final Schedules")
         if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
@@ -640,7 +639,7 @@ class MakeSchedPlot(QDialog):
 
 
 	if trip_type == 'Expected':
-            tablename = 'trips_r AS A'
+            tablename = 'trips_full_r AS A'
         #tablename = 'schedule_joint_dailyallocrec_r AS A'
             vars = 'A.houseid, A.personid, A.starttime, (A.endtime - A.starttime), A.endtime'
             order = 'A.houseid, A.personid, A.starttime'
@@ -858,7 +857,7 @@ class MakeSchedPlot(QDialog):
 #        elif cur_text == "Schedules: NHTS":
 #            return "schedule_nhts"
         else:
-            return "schedule_final_r"
+            return "schedule_full_r"
 	    #return "schedule_full_r"
     
 
@@ -869,7 +868,7 @@ class MakeSchedPlot(QDialog):
         #sdata = self.selectedResults()
 	tableName = self.schedule_table()
         #pid = self.retrieve_sched(tableName)
-        pid = self.retrieve_sched('schedule_final_r')
+        pid = self.retrieve_sched('schedule_full_r')
         if len(self.data) > 0 : #len(sdata) > 0:
             Sketch = self.createCanvas()
             Canvas = Sketch[0]

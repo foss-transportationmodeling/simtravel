@@ -358,7 +358,7 @@ class MakeResultPlot(QDialog):
             tables.append("Schedules: Daily Pattern with Child Allocation")
         if self.new_obj.check_if_table_exists("schedule_inctravelrec_r"):
             tables.append("Schedules: Reconciled Daily Pattern Skeleton with Child Allocation")
-        if self.new_obj.check_if_table_exists("schedule_final_r"):
+        if self.new_obj.check_if_table_exists("schedule_full_r"):
             tables.append("Schedules: Final Schedules")
         if self.new_obj.check_if_table_exists("schedule_aggregatefinal_r"):
             tables.append("Schedules: Aggregated in Home Final Schedules")
@@ -384,7 +384,7 @@ class MakeResultPlot(QDialog):
         elif cur_text == "Schedules: Aggregated in Home Final Schedules":
             self.out_table = "schedule_aggregatefinal_r"
         else:
-            self.out_table = "schedule_final_r"
+            self.out_table = "schedule_full_r"
             
 
     def createaction(self, text, slot=None, icon=None,
@@ -616,7 +616,7 @@ class MakeResultPlot(QDialog):
             self.selecttable.setVisible(False)
             
             for i in self.trips_r_temp:
-                if self.checkColumnExists("trips_r",i):# or i == "duration":
+                if self.checkColumnExists("trips_full_r",i):# or i == "duration":
                     vars.append(i)
             
             vars.append("trip episode rates")
@@ -680,12 +680,12 @@ class MakeResultPlot(QDialog):
             if text == "trippurpose":
                 temp = ["tripmode","starttime","endtime","miles","occupancy","duration"]
                 for i in temp:
-                    if self.checkColumnExists("trips_r",i): # or i == "duration":
+                    if self.checkColumnExists("trips_full_r",i): # or i == "duration":
                         vars.append(i)
             elif text != "trippurpose" and text != "" and text != "trip episode rates":
                 temp = ["trippurpose"]
                 for i in temp:
-                    if self.checkColumnExists("trips_r",i):
+                    if self.checkColumnExists("trips_full_r",i):
                         vars.append(i)
         else:
             text = self.choicevar1.currentText()
@@ -1675,7 +1675,7 @@ class MakeResultPlot(QDialog):
         table = ""
         if not self.show_nhts.isChecked():
             if self.tripradio.isChecked():
-                table = "trips_r"
+                table = "trips_full_r"
             else:
                 table = self.out_table
         else:
